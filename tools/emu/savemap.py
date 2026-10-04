@@ -139,7 +139,7 @@ LABELS = [
     ('char', 0x509B, 0x8, 'supply drop sets NEW (S+0x3648)', 'DERIVED'),
     ('char', 0x50A3, 0x8, 'Cross coin trades unlocked (S+0x3650) + runtime NEW copy', 'DERIVED'),
     ('char', 0x50AB, 0x8, 'Cross coin trades NEW (S+0x3660)', 'DERIVED'),
-    ('char', 0x50B3, 0x4, "deviants: bit i = deviant i's last Special Permit quest (level 16) cleared (S+0xd18)", 'DERIVED'),
+    ('char', 0x50B3, 0x4, "deviants: bit i = deviant i's EX Special Permit quest (level 16) cleared (S+0xd18)", 'DERIVED'),
     ('char', 0x50B7, 0x4, 'deviant last level cleared, NEW (S+0xd20)', 'DERIVED'),
     ('char', 0x50BB, 0x3, 'u8 + u16 (S+0x3680, S+0x3682); the u16 is recomputed at load (0x6b1e6c)', 'DERIVED'),
     ('char', 0x50BE, 0xD74, 'S+0x3684: zero in the analysed save, cleared with S+0x3682 at init, no reader found', 'UNRESOLVED'),

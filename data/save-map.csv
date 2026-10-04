@@ -145,7 +145,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x191D37,0,8,char1,0x509B,sUserInfo,1,,8B,0x51e540,obj17+0x3648,supply drop sets NEW (S+0x3648),DERIVED
 0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,Cross coin trades unlocked (S+0x3650) + runtime NEW copy,DERIVED
 0x191D47,0,8,char1,0x50AB,sUserInfo,1,,8B,0x51e568,obj17+0x3660,Cross coin trades NEW (S+0x3660),DERIVED
-0x191D4F,0,4,char1,0x50B3,sUserInfo,1,,4B,0x51e57c,obj17+0xd18,deviants: bit i = deviant i's last Special Permit quest (level 16) cleared (S+0xd18),DERIVED
+0x191D4F,0,4,char1,0x50B3,sUserInfo,1,,4B,0x51e57c,obj17+0xd18,deviants: bit i = deviant i's EX Special Permit quest (level 16) cleared (S+0xd18),DERIVED
 0x191D53,0,4,char1,0x50B7,sUserInfo,1,,4B,0x51e58c,obj17+0xd20,"deviant last level cleared, NEW (S+0xd20)",DERIVED
 0x191D57,0,1,char1,0x50BB,sUserInfo,1,,1B,0x51e59c,obj17+0x3680,"u8 + u16 (S+0x3680, S+0x3682); the u16 is recomputed at load (0x6b1e6c)",DERIVED
 0x191D58,0,2,char1,0x50BC,sUserInfo,1,,2B,0x51e5b0,obj17+0x3682,"u8 + u16 (S+0x3680, S+0x3682); the u16 is recomputed at load (0x6b1e6c)",DERIVED

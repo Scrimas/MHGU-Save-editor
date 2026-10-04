@@ -181,7 +181,28 @@ level. **DERIVED.**
   gate is locked in the analysed save. The predicate kinds the gate uses (`cleared`,
   `atleast`) are confirmed by a controlled write on other quests, see
   [05](05-quests.md#evidence).
-- **UNRESOLVED — deviant tally indices.** Only Rustrazor Ceanataur (121) and Soulseer
-  Mizutsune (122) are placed in the monster tally array. The Gen deviants sit below
-  index 105 adjacent to their base monsters — Redhelm at 49 next to Arzuros at 48,
-  Deadeye at 17 next to Yian Garuga at 16 — but several remain unmapped.
+- **RESOLVED — deviant tally indices.** The executable maps each tally index to a
+  monster code (table `0x1597ea4`, 137 × (u32 code, u32 index), read by `0x50bdc`). A
+  code is the base monster in the low byte and a variant in the high byte; the 18
+  deviants are exactly the variant-4 codes, each next to its base monster's code:
+
+  | Tally index | Deviant | Code | | Tally index | Deviant | Code |
+  |---|---|---|---|---|---|---|
+  | 3 | Dreadqueen Rathian | `0x401` | | 51 | Snowbaron Lagombi | `0x43D` |
+  | 6 | Dreadking Rathalos | `0x402` | | 56 | Drilltusk Tetsucabra | `0x442` |
+  | 17 | Deadeye Yian Garuga | `0x412` | | 66 | Hellblade Glavenus | `0x450` |
+  | 19 | Stonefist Hermitaur | `0x413` | | 116 | Bloodbath Diablos | `0x407` |
+  | 29 | Grimclaw Tigrex | `0x420` | | 121 | Rustrazor Ceanataur | `0x414` |
+  | 33 | Silverwind Nargacuga | `0x425` | | 129 | Nightcloak Malfestio | `0x44F` |
+  | 38 | Crystalbeard Uragaan | `0x42D` | | 130 | Boltreaver Astalos | `0x451` |
+  | 46 | Thunderlord Zinogre | `0x439` | | 131 | Soulseer Mizutsune | `0x452` |
+  | 49 | Redhelm Arzuros | `0x43C` | | 132 | Elderfrost Gammoth | `0x453` |
+
+  The names follow from the base monster (the low byte), whose tally index is known;
+  each base monster has one deviant. Earlier revisions put Soulseer at 122, which
+  [02](02-monster-records.md) had already corrected to 131. Variant 5 is the four
+  special forms: Furious Rajang (23), Savage Deviljho (36), Raging Brachydios (126),
+  Chaotic Gore Magala (128). The history records' highlight values `0x402`, `0x412`,
+  `0x42d`, `0x425` ([05](05-quests.md#quest-history-log--0x254771)) are these codes:
+  Dreadking, Deadeye, Crystalbeard and Silverwind, matching the four EX quests 40916,
+  40816, 40716, 40616 they belong to. **DERIVED.**

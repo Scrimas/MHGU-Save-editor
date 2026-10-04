@@ -455,7 +455,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x507B`, `0x5087` | `+0x3614`, `+0x362c` | **Lab upgrades installed** (Soaratorium Lab, `researchReinforce`): bit = upgrade − 1. Bits 0–2 are the three Item Box expansions; `0x525878` counts them for the box size (202 callers) |
 | `0x5093`, `0x509B` | `+0x3638`, `+0x3648` | supply drop sets of the Provision Division |
 | `0x50A3`, `0x50AB` | `+0x3650`, `+0x3660` | Cross coin trades |
-| `0x50B3`, `0x50B7` | `+0xd18`, `+0xd20` | deviants, 18 bits: bit i is set when quest 40000 + 100 (i + 1) + 16 is cleared, the deviant's last level (`0x3f18b8`) |
+| `0x50B3`, `0x50B7` | `+0xd18`, `+0xd20` | deviants, 18 bits: bit i is set when quest 40000 + 100 (i + 1) + 16 is cleared, the deviant's EX level (`0x3f18b8`; deviant order of [03](03-deviants.md)) |
 
 ### Counters and other fields
 

@@ -252,9 +252,17 @@ sound; only the hand transcription was lossy.
 
 ## Open questions
 
-- **UNRESOLVED — index 134.** The editor has no name for it either.
+- **UNRESOLVED — index 134.** The editor has no name for it either. The game's
+  index-to-monster-code table (`0x1597ea4`, see [03](03-deviants.md#open-questions))
+  gives it code `0x57`, between Valstrax (`0x56`, index 133) and Ahtal-Ka (`0x58`,
+  index 135).
 - **DERIVED — [E] names.** Taken from the editor's list, not read back from the game.
-  A marker pass over 105–137 would confirm them.
+  The code table agrees with them wherever a code can be checked: Fatalis, Crimson and
+  White Fatalis are `0x0D`, `0x10D`, `0x20D` (118–120), every deviant is the variant-4
+  code of its base monster ([03](03-deviants.md#open-questions)), and the confirmed
+  rows (48, 121, 122, 131) fit. Indices 106–112 are codes `0x1064`–`0x106A`, small
+  monster codes with no entry in the editor. A marker pass over 105–137 would still
+  confirm the names one by one.
 - **RESOLVED — captures vs kills.** The `M` of `N(M)` lives in the capture array at
   `0x192C52`, directly after the tallies; `N` = tally + capture, and a capture
   increments only the capture array.
