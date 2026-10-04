@@ -478,7 +478,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x2C5B` | `+0xd6c` | 31-bit map. `0x524580` ORs in `S+0xd74` when a quest ends, monster code (`uEm014`, `uEm022`, `uEm085` through `0x524534`, table `0x162c124`) sets `S+0xd74`. Alchemy counts it over a range (`0x5244c8`) |
 | `0x2C5F` | `+0xd70`, `+0xd74` | u32 map tested by `0x5245d4`, then the pending map above |
 | `0x2F77`, `0x2F7F` | `+0x958`, `+0x968` | the progress map is 64 bits (U `+0x958`, N1 `+0x960` unsaved, N2 `+0x968`). The progress word of [10](10-npc-talk.md) is its first half |
-| `0x2F87`, `0x2F8B` | `+0x970` … `+0x978` | 32-bit map with copies. Bits 3–8 are set by the quest flow (`0x14d53c`) from the values 601, 504, 510, 508, 1005 of a 12-byte table, bit 2 when the quest with ID 601 is cleared (`0x524064`). Meaning UNRESOLVED |
+| `0x2F87`, `0x2F8B` | `+0x970` … `+0x978` | 32-bit map with copies: story events of the flagship monsters. The quest flow (`0x14d53c`) looks the current quest up in a 12-byte table (`0x15a06fc`: code, 1, quest ID) and sets bit 3 for 601 *The Scorching Blade* (Glavenus), 4 for 504 *The Thunderclaw Wyvern* (Astalos), 5 for 510 *The Entrancing Water Dancer* (Mizutsune), 6 for 508 *The Unwavering Colossus* (Gammoth), 8 for 1005 *Beware the Comet of Disaster* (Valstrax); bit 2 when quest 601 is cleared (`0x524064`). The village (`0x11e10`) reads it with its copies. Bits 0–13 set in the analysed save. Other bits UNRESOLVED |
 | `0x2F97` | `+0x98c` | N2 of the Canteen ingredients |
 | `0x2F9F`, `0x2FA7` | `+0x994`, `+0x9a4` | Poogie costumes, 64 bits. The award check sets award bit 68 (`GC_Medal` entry 68 is *Poogie Ball*, "collected some of the Poogie costumes") once 10 of bits 6–39 are set, bits 28, 35, 36 and 39 not counted (`0x524190`). The Trader's list builder also tests it |
 | `0x2FAF`, `0x2FB3` | `+0x9ac` … `+0x9b4` | deviants, 18 bits: bit i is set when the first Special Permit quest of deviant i becomes available (`0x3eb1f4`, table `0x162a5f4` = 40101, 40201 … 41811); also raises event flags 185 and 962 |
@@ -515,10 +515,10 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 
 | `base +` | S field | Content |
 |---|---|---|
-| `0x4FEF` | `+0xd8c` | 12 bytes read by NPCs, the Footbath and Alchemy. UNRESOLVED |
+| `0x4FEF` | `+0xd8c` | 96-bit milestone map that award checks read. Bits 20–23: an unusual Moofy / Poogie moment seen in Bherna, Kokoto, Pokke, Yukumo (awards 48, 69, 84, 99, `0x3f31b8`); bit 34: every Footbath visitor talked to (set by `0x70eb98`; award 88); bits 35–41: a Palico of each support bias hired (award 51, `0x3eed68`); bits 57–64: support biases at their top level (award 128, `0x3f1da4`). Set in the analysed save: 0–4, 19, 24–35, 41, 56. The other bits UNRESOLVED |
 | `0x5053` | `+0x3670` | u32, cleared by the quest result flow (`0x38b948`). UNRESOLVED |
-| `0x50BB` | `+0x3680`, `+0x3682` | u8, then a u16 the game recomputes at load (`0x6b1e6c`: a sum over a 112-entry table, capped at 9999). The common script and the Start Menu test it (> 199) |
-| `0x50BE` | `+0x3684` | 3444 bytes, cleared together with `+0x3682` at init (`0x51cb08`). Zero in the analysed save; no reader found |
+| `0x50BB` | `+0x3680`, `+0x3682` | u8, then u16: the large monsters hunted in a transferred save. Character creation (`0x6aa5ec`, the same routine that runs the transfer converter `0x51e6d8` and grants award 100 or 101) sums hunts + captures of the old save's monster list (`0x6b1e6c`, 159 entries, each capped at 9999). The common script and the Start Menu test it (> 199). 0 in the analysed save |
+| `0x50BE` | `+0x3684` | 3444 bytes. Only the initialiser (`0x51cb08`), the saver and the loader touch them; zero in the analysed save. Reserved |
 | `0x5057` | — | not S: the u32 `+0x2838` of the chat-phrase object, loaded inside the S stream (`0x55d450` → `0x1cab58`). A value ≥ 0 is replaced by `0xF8FC7E3F` at load |
 | `0x5E32` | `+0x43f8` | 3 bytes, no reader found |
 | `0x5E35` | `+0x43fb` | control option byte: set by the Game options window, read by the player and the target camera. Cleared together with `+0x446c` (`0x3f7e1c`) |

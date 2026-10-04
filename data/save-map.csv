@@ -44,7 +44,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FB13,0,256,char1,0x2E77,sUserInfo,1,,256B,0x51dd3c,obj17+0x62c,quests failed bitmap,DERIVED
 0x18FC13,0,8,char1,0x2F77,sUserInfo,1,,8B,0x51dd50,obj17+0x958,contains: progress word,DERIVED
 0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,progress map NEW (S+0x968),DERIVED
-0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"unlock map set by the quest flow, bits 2-8 (S+0x970) + runtime NEW copy",UNRESOLVED
+0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"flagship monster story events, bits 2-8 set by the quest flow (S+0x970) + runtime NEW copy",DERIVED
 0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,unlock map NEW (S+0x978),UNRESOLVED
 0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,"contains: Canteen ingredients (bit = kitchenListMenu ingredient, data/canteen.csv)",CONFIRMED
 0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,Canteen ingredients NEW (S+0x98c),DERIVED
@@ -129,7 +129,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1918FB,0,128,char1,0x4C5F,sUserInfo,1,,128B,0x51e408,obj17+0x30f8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
 0x19197B,0,128,char1,0x4CDF,sUserInfo,1,,128B,0x51e41c,obj17+0x3178,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
 0x1919FB,0,656,char1,0x4D5F,sUserInfo,1,,656B,0x51e430,obj17+0x31f8,Smithy armor map by armor ID: 5248 bits (set by the list builder 0x6ffd40),DERIVED
-0x191C8B,0,12,char1,0x4FEF,sUserInfo,1,,12B,0x51e444,obj17+0xd8c,"S+0xd8c: 12 bytes read by NPCs, the Footbath and Alchemy",UNRESOLVED
+0x191C8B,0,12,char1,0x4FEF,sUserInfo,1,,12B,0x51e444,obj17+0xd8c,"S+0xd8c: 96-bit milestone map read by award checks (Moofy/Poogie moments, Footbath, Palico biases)",DERIVED
 0x191C97,0,40,char1,0x4FFB,sUserInfo,1,,40B,0x51e454,obj17+0xca0,Arena: bit 5 x quest + set = cleared with that equipment set (S+0xca0),DERIVED
 0x191CBF,0,40,char1,0x5023,sUserInfo,1,,40B,0x51e464,obj17+0xcf0,Arena equipment sets NEW (S+0xcf0),DERIVED
 0x191CE7,0,8,char1,0x504B,sUserInfo,1,,8B,0x51e478,obj17+0x35d4,rotating quests bitmap,CONFIRMED
