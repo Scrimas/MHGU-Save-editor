@@ -70,9 +70,10 @@ largest.
 
 ## Open questions
 
-- **UNRESOLVED — venue array count.** Three venues are confirmed. Whether a fourth
-  array follows `0x25474F` (Special Permit quests, for instance) was not checked.
-  The four bytes after the Arena array (`0x25476D`) are the Guild Card copy of the
-  play time, see [05 — Quests](05-quests.md#counters), not a fourth venue.
+- **RESOLVED — venue array count: three.** The arrays are card fields `+0x8BA`
+  (3 × 15 × u16) of the own Guild Card at `base + 0xC71BD`
+  ([11](11-save-map.md#card-layout-6328-b)), and the next card field, `+0x914`, is the
+  play time (`0x25476D`, see [05 — Quests](05-quests.md#counters)). There is no room
+  for a fourth venue.
 - **UNRESOLVED — Prowler.** Index 14 is included by position and was zero throughout,
   so its meaning is inferred from the on-screen bar rather than observed changing.
