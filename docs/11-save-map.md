@@ -66,12 +66,12 @@ structure is `base + offset`, with base from the pointer table at `0x34`.
 |---|---|---|---|---|
 | `0x00` | 36 | Switch header | — | nonce at `0x14` ([01](01-container.md)) |
 | `0x24` | 28 | body header | — | u32 `0xC6`, u32 1, block A offset, block B offset, 3 slot offsets (all relative to `0x24`) |
-| `0x40` | 14 | A | sUserInfo (`0x52163c`) | 4 + 6 + 4 × 1 bytes, UNRESOLVED |
+| `0x40` | 14 | A | sUserInfo (`0x52163c`) | shared settings: bonus packs, TV brightness, rumble ([below](#block-a-header-and-shared-settings)) |
 | `0x4E` | 16200 | A | sOtomo (`0x263298`) | shared Palico pool, 50 × 324 B (DLC Palicoes, owner "Capcom") |
 | `0x3F96` | 9600 | A | sBlackList (`0x2257e4`) | 100 × (64 + 32) B, all zero here |
 | `0x6516` | 19852 | A | sGuildCard (`0x16424c`) | 3 × 6616 B card copies, 1 B, 3 B unused; all zero here |
-| `0xB2A2` | 3 | A | sGameControl (`0x3f8ef8`) | 3 × u8 |
-| `0xB2A5` | 108 | B | sPrivilege (`0x36bdc`) | 9 fields at object `+0xf34 .. +0xf9c`, mostly bitmaps (DLC / event state), UNRESOLVED |
+| `0xB2A2` | 3 | A | sGameControl (`0x3f8ef8`) | 3 × u8, the last is the text language |
+| `0xB2A5` | 108 | B | sPrivilege (`0x36bdc`) | which downloads the save holds: 8 bitmaps and a stamp ([below](#downloads-held--block-b-header)) |
 | `0xB311` | 5200 | B | sPrivilege | DLC item pack list, 50 × 104 B (pack names) |
 | `0xC761` | 12600 | B | sPrivilege | DLC Palico info (names, greetings, owner "Capcom") |
 | `0xF899` | 1146880 | B | sPrivilege | event quests, 160 × `0x1C00` ([below](#downloaded-quests--block-b)) |
@@ -368,6 +368,52 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x5E3E` | `+0x4408` | u32 pair get/set by the title menu (`0x5279b4` / `0x5279cc`). UNRESOLVED |
 | `0x5E46` | `+0x4410` | u32. UNRESOLVED |
 | `0x5E4A` | `+0x4414` | Courier flags (`0x6d1e4c` and the Courier's talk code) |
+
+## Block A header and shared settings
+
+**DERIVED.** Block A starts with a second small serializer of S (`0x5215b8` writes,
+`0x52163c` reads). Its fields are shared by all characters, so they sit in block A
+and not in a slot. The title menu's *Game Settings* (TV brightness, rumble, language)
+read and write them (`0x3e7f90`, `0x3e8254`).
+
+| File | Size | S field | Content | Analysed save |
+|---|---|---|---|---|
+| `0x40` | u32 | `+0x420` | bonus packs loaded, bit N = privilege pack N (1–4). See the grant flags at `base + 0x2C0F` | `0x1E`: all four |
+| `0x44` | 6 | `+0x3676` | UNRESOLVED | 0 |
+| `0x4A` | 2 × u8 | `+0x367c`, `+0x367d` | UNRESOLVED; `+0x367d` is read by the title menu (`0x680714`) | 1, 0 |
+| `0x4C` | u8 | `+0x367e` | TV brightness: the game sets a scale of 0.4 + 0.025 × value (`0x5216c8`) | 24 (scale 1.0) |
+| `0x4D` | u8 | `+0x367f` | rumble on (1) / off (0), copied to the pad object (`0x4e0ec8`) | 1 |
+
+The three bytes at `0xB2A2` belong to `sGameControl` (`0x3f8ef8`): `+0x5c`, `+0x5d` and
+`+0xa5`. `+0xa5` is the text language. When it is 0 the loader takes it from the system
+language, and nearly every UI class reads it. `+0x5d` is copied to the runtime byte `+0x72` by the
+loader and by the Game options window (`0x5e6f98`). `+0x5c` has no reader found. The per-character options are
+the 29 bytes at `base + 0x2246E` (`sGameControl +0x5e`, written by the Game, Chat and
+Network option windows and read by the quest camera).
+
+## Downloads held — block B header
+
+**DERIVED** from the download dispatcher `0x39394`, which sets one bit per stored
+download by content type (the low nibble of the type, minus 2, indexes a jump table),
+and from the "new content" checks at `0x3b72c` onwards, which compare each map with
+the server catalog at `+0xed0` (runtime).
+
+| File | Size | sPrivilege | Content | Analysed save |
+|---|---|---|---|---|
+| `0xB2A5` | 8 | `+0xf34` | DLC item packs received, 50 bits (catalog entries 11–60). The packs themselves are the list at `0xB311` | 3 |
+| `0xB2AD` | 8 | `+0xf3c` | DLC Palicoes received, 50 bits (catalog 507–556), the info at `0xC761` | 17 |
+| `0xB2B5` | 4 | `+0xf44` | extras of download type 4, 9 entries (catalog 71–79). The Guild Card builder `0x161ac8` turns bits 0–3 into Guild Card poses 17, 20, 21 and 18 | 4 |
+| `0xB2B9` | 12 | `+0xf48` | extras of download type 5, 80 entries (catalog 80–159) | 57 |
+| `0xB2C5` | 4 | `+0xf54` | extras of download type 6, 10 entries (catalog 160–169) | 5 |
+| `0xB2C9` | 40 | `+0xf58` | extras of download type 7, 300 entries (catalog 170–469) | 215 |
+| `0xB2F1` | 8 | `+0xf80` | challenge quests stored, bit = slot of the 45 at `0x127899` | 40 |
+| `0xB2F9` | 20 | `+0xf88` | event quests stored, bit = slot of the 160 at `0xF899` | 125 |
+| `0xB30D` | u32 | `+0xf9c` | stamp compared with the catalog's `+0xe5c` (`0x3b714`); this is the u32 the writer round trip rewrites | |
+
+The counts match block B: 40 challenge and 125 event quests are stored. The download
+menu's extras are titles, Wycademy points, Trader wares, Guild Card backgrounds, pet
+costumes and poses (`DLC_eng.gmd`). Which of types 5–7 is which is UNRESOLVED; by size,
+type 7 (300) fits the downloadable title words.
 | `0x5E4E` | `+0x4418` | quest counter ([05](05-quests.md#counters)). `0x526f70` adds 1 per quest, except when the quest state is 6 |
 | `0x5E52` | `+0x441c` | counter reference. `0x5279e0` stores it and, at 210 or more, folds both into 210 … 419 |
 | `0x5E56` | `+0x4420` | Courier points: `0x526f70` adds a per-quest amount from a table |
@@ -431,4 +477,5 @@ in place, where this map says it lives, writes what the game would write.
   list 2 holds.
 - The 224 + 12 + 4 bytes of the slot header taken from sPlayer. Their source fields are
   known (table above), but not their meaning.
-- Block A's first 14 bytes and the sPrivilege header bitmaps.
+- Block A: `S+0x3676` (6 bytes), `S+0x367c`, `S+0x367d` and `sGameControl +0x5c`,
+  `+0x5d`. Block B header: which download category types 5, 6 and 7 are.

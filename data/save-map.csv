@@ -1,25 +1,25 @@
 offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_field,label,confidence
-0x40,0,4,A,0x0,sUserInfo (common),1,,4B,0x521658,obj17+0x420,sUserInfo common header,UNRESOLVED
-0x44,0,6,A,0x4,sUserInfo (common),1,,6B,0x52166c,obj17+0x3676,sUserInfo common header,UNRESOLVED
-0x4A,0,1,A,0xA,sUserInfo (common),1,,1B,0x521684,obj17+0x367c,sUserInfo common header,UNRESOLVED
-0x4B,0,1,A,0xB,sUserInfo (common),1,,1B,0x521698,obj17+0x367d,sUserInfo common header,UNRESOLVED
-0x4C,0,1,A,0xC,sUserInfo (common),1,,1B,0x5216ac,obj17+0x367e,sUserInfo common header,UNRESOLVED
-0x4D,0,1,A,0xD,sUserInfo (common),1,,1B,0x5216c0,obj17+0x367f,sUserInfo common header,UNRESOLVED
+0x40,0,4,A,0x0,sUserInfo (common),1,,4B,0x521658,obj17+0x420,"bonus packs loaded: bit N = privilege pack N (S+0x420, shared)",DERIVED
+0x44,0,6,A,0x4,sUserInfo (common),1,,6B,0x52166c,obj17+0x3676,"shared setting bytes (S+0x3676), zero in the analysed save",UNRESOLVED
+0x4A,0,1,A,0xA,sUserInfo (common),1,,1B,0x521684,obj17+0x367c,"shared u8 settings (S+0x367c, S+0x367d)",UNRESOLVED
+0x4B,0,1,A,0xB,sUserInfo (common),1,,1B,0x521698,obj17+0x367d,"shared u8 settings (S+0x367c, S+0x367d)",UNRESOLVED
+0x4C,0,1,A,0xC,sUserInfo (common),1,,1B,0x5216ac,obj17+0x367e,TV brightness: scale 0.4 + 0.025 x value (S+0x367e),DERIVED
+0x4D,0,1,A,0xD,sUserInfo (common),1,,1B,0x5216c0,obj17+0x367f,rumble on/off (S+0x367f),DERIVED
 0x4E,0,16200,A,0xE,sOtomo (common),50,2592,32B 224B 14B 12B 36B 4B 2B,0x2632d4,obj20+0x309c,"Palicoes, common pool: 50 x 324 B (DLC Palicoes, owner ""Capcom"")",DERIVED
 0x3F96,0,9600,A,0x3F56,sBlackList,100,768,64B 32B,0x1e63a8,,blacklist: 100 x 96 B (64 + 32),DERIVED
 0x6516,0,19852,A,0x64D6,sGuildCard (common),1,,19852B,0x1642b4,obj100+0x150900,sGuildCard common: 3 x 6616 B + 1 B,DERIVED
-0xB2A2,0,1,A,0xB262,sGameControl (common),1,,1B,0x3f8f18,obj100+0x5c,,
-0xB2A3,0,1,A,0xB263,sGameControl (common),1,,1B,0x3f8f28,obj100+0x5d,,
-0xB2A4,0,1,A,0xB264,sGameControl (common),1,,1B,0x3f8f38,obj100+0xa5,,
-0xB2A5,0,8,B,0x0,sPrivilege,1,,8B,0x36bfc,obj59+0xf34,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB2AD,0,8,B,0x8,sPrivilege,1,,8B,0x36c10,obj59+0xf3c,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB2B5,0,4,B,0x10,sPrivilege,1,,4B,0x36c24,obj59+0xf44,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB2B9,0,12,B,0x14,sPrivilege,1,,12B,0x36c38,obj59+0xf48,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB2C5,0,4,B,0x20,sPrivilege,1,,4B,0x36c4c,obj59+0xf54,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB2C9,0,40,B,0x24,sPrivilege,1,,40B,0x36c60,obj59+0xf58,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB2F1,0,8,B,0x4C,sPrivilege,1,,8B,0x36c70,obj59+0xf80,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB2F9,0,20,B,0x54,sPrivilege,1,,20B,0x36c84,obj59+0xf88,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
-0xB30D,0,4,B,0x68,sPrivilege,1,,4B,0x36c98,obj59+0xf9c,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2A2,0,1,A,0xB262,sGameControl (common),1,,1B,0x3f8f18,obj100+0x5c,"shared u8 settings (sGameControl +0x5c, +0x5d)",UNRESOLVED
+0xB2A3,0,1,A,0xB263,sGameControl (common),1,,1B,0x3f8f28,obj100+0x5d,"shared u8 settings (sGameControl +0x5c, +0x5d)",UNRESOLVED
+0xB2A4,0,1,A,0xB264,sGameControl (common),1,,1B,0x3f8f38,obj100+0xa5,"text language, 0 = from the system language (sGameControl +0xa5)",DERIVED
+0xB2A5,0,8,B,0x0,sPrivilege,1,,8B,0x36bfc,obj59+0xf34,"DLC item packs received, 50 bits (sPrivilege +0xf34)",DERIVED
+0xB2AD,0,8,B,0x8,sPrivilege,1,,8B,0x36c10,obj59+0xf3c,"DLC Palicoes received, 50 bits (sPrivilege +0xf3c)",DERIVED
+0xB2B5,0,4,B,0x10,sPrivilege,1,,4B,0x36c24,obj59+0xf44,"DLC extras received, download type 4: 9 entries; bits 0-3 unlock Guild Card poses (sPrivilege +0xf44)",DERIVED
+0xB2B9,0,12,B,0x14,sPrivilege,1,,12B,0x36c38,obj59+0xf48,"DLC extras received, download type 5: 80 entries (sPrivilege +0xf48)",DERIVED
+0xB2C5,0,4,B,0x20,sPrivilege,1,,4B,0x36c4c,obj59+0xf54,"DLC extras received, download type 6: 10 entries (sPrivilege +0xf54)",DERIVED
+0xB2C9,0,40,B,0x24,sPrivilege,1,,40B,0x36c60,obj59+0xf58,"DLC extras received, download type 7: 300 entries (sPrivilege +0xf58)",DERIVED
+0xB2F1,0,8,B,0x4C,sPrivilege,1,,8B,0x36c70,obj59+0xf80,"challenge quests stored, 45 bits = block B slots (sPrivilege +0xf80)",DERIVED
+0xB2F9,0,20,B,0x54,sPrivilege,1,,20B,0x36c84,obj59+0xf88,"event quests stored, 160 bits = block B slots (sPrivilege +0xf88)",DERIVED
+0xB30D,0,4,B,0x68,sPrivilege,1,,4B,0x36c98,obj59+0xf9c,u32 compared with the download catalog stamp +0xe5c (sPrivilege +0xf9c),DERIVED
 0xB311,0,5200,B,0x6C,sPrivilege,1,,5200B,0x36cb0,obj94+0x0,DLC item pack list: 50 x 104 B,DERIVED
 0xC761,0,12600,B,0x14BC,sPrivilege,1,,12600B,0x36ce0,obj95+0x0,"DLC Palico info, 12600 B",DERIVED
 0xF899,0,1146880,B,0x45F4,sPrivilege,1,,1146880B,0x36d10,obj96+0x0,"event quests: 160 x 0x1C00 (u32 ID, u32 size, ARC)",CONFIRMED
