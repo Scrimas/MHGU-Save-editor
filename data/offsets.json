@@ -169,9 +169,9 @@
                       "id_table": "data/hunter-arts.csv (order DERIVED)" },
     "art_slots":    { "rel": "0x2C", "type": "u16[3]", "confidence": "DERIVED", "note": "save-screen summary" },
     "canteen_ingredients": { "rel": "0x2F8F", "slot1_abs": "0x18FC2B", "size": 6, "bits": 45, "confidence": "CONFIRMED",
-                             "note": "setting ingredients does not add dishes" },
+                             "note": "setting ingredients does not add dishes. Bit i = ingredient i of table/kitchenListMenu.kcm (meat 0-8, grain 9-18, vegetables 19-28, fish 29-38, drinks 39-44), names in data/canteen.csv. DERIVED" },
     "canteen_dishes":      { "rel": "0x2C67D", "slot1_abs": "0x1B9319", "size": 13, "bits": 99, "confidence": "CONFIRMED",
-                             "note": "includes the 2 starter meals" },
+                             "note": "includes the 2 starter meals (bits 0, 1). Bit j = record j of table/kitchenListMenu.kcm, names in data/canteen.csv. DERIVED" },
     "canteen_dishes_copy": { "rel": "0x2C68D", "size": 13, "confidence": "UNRESOLVED",
                              "note": "subset of dishes, probably seen/new marker; safe to leave untouched" }
   },

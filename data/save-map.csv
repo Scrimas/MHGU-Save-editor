@@ -46,7 +46,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,progress map NEW (S+0x968),DERIVED
 0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"unlock map set by the quest flow, bits 2-8 (S+0x970) + runtime NEW copy",UNRESOLVED
 0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,unlock map NEW (S+0x978),UNRESOLVED
-0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,contains: Canteen ingredients,CONFIRMED
+0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,"contains: Canteen ingredients (bit = kitchenListMenu ingredient, data/canteen.csv)",CONFIRMED
 0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,Canteen ingredients NEW (S+0x98c),DERIVED
 0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,"Poogie costumes owned, 64 bits (S+0x994)",DERIVED
 0x18FC43,0,8,char1,0x2FA7,sUserInfo,1,,8B,0x51ddd8,obj17+0x9a4,Poogie costumes NEW (S+0x9a4),DERIVED
@@ -428,7 +428,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B92F9,0,24,char1,0x2C65D,sNpcTalk,1,,24B,0x240db0,obj100+0x647f0,per-NPC talk hold bits,CONFIRMED
 0x1B9311,0,4,char1,0x2C675,sNpcTalk,1,,4B,0x240dc4,obj100+0x64808,random word (talk conditions),DERIVED
 0x1B9315,0,4,char1,0x2C679,sNpcTalk,1,,4B,0x3e787c,obj100+0x6480c,"second random word, copied with the first (0x240e4c) and used the same way (0x24217c)",DERIVED
-0x1B9319,0,40,char1,0x2C67D,sKitchen,1,,40B,0x3e7890,obj100+0x81608,contains: Canteen dishes; Canteen dishes copy,UNRESOLVED
+0x1B9319,0,40,char1,0x2C67D,sKitchen,1,,40B,0x3e7890,obj100+0x81608,"contains: Canteen dishes (sKitchen +0x108; bit = kitchenListMenu record, data/canteen.csv); Canteen dishes copy",UNRESOLVED
 0x1B9341,0,4,char1,0x2C6A5,sFlagChecker,1,,4B,0x3e78a4,obj100+0x64920,"flags latched from another object (sFlagChecker +0x20, 0x3f43e8)",DERIVED
 0x1B9345,0,4,char1,0x2C6A9,sMakeAmulet,1,,4B,0x14c584,obj100+0x66064,"talisman making (sMakeAmulet): 96-bit map over a 107-entry table, tested and set at quest end (0x14c688)",DERIVED
 0x1B9349,0,4,char1,0x2C6AD,sMakeAmulet,1,,4B,0x14c594,obj100+0x66068,"talisman making (sMakeAmulet): 96-bit map over a 107-entry table, tested and set at quest end (0x14c688)",DERIVED

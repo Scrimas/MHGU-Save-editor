@@ -72,7 +72,14 @@ How it was found:
 - The recipe table uses 45 distinct ingredients, which matches the bit range 0–44.
 - Setting the six clear bits in 0–44 made the game show 45 ingredients.
 
-The bit → ingredient order is **UNRESOLVED**.
+**DERIVED — bit order.** Bit *i* is ingredient *i* of the recipe table
+(`table/kitchenListMenu.kcm`), grouped by kind with the GU additions at the end of
+each group: meat 0–8, grain 9–18, vegetables 19–28, fish 29–38, drinks 39–44. The
+code confirms the groups: `0x1a6598` counts the bits 0–8, 19–28, 29–38 and 39–44 of
+`S+0x97c` one group at a time. Names come from `Kitchen_eng.gmd` (entries 103–133, then
+251–264 for the GU ones), and every recipe's two ingredients agree with its dish
+name. The full list is [`data/canteen.csv`](../data/canteen.csv). The bit 44 seen
+being set between two snapshots is *Chat-eau de Nya*.
 
 **Setting ingredients does not add dishes.** The dish list was unchanged after the
 write. The dishes had to be made in-game by combining ingredients at the Canteen.
@@ -88,15 +95,23 @@ How it was found:
 - This field went from 81 bits set to 98, matching the in-game count of 98 dishes.
 - The one clear bit (76) was set by hand. The game then showed 99 dishes.
 
-Kiranico's meal list has 99 entries. Whether its order matches the bit order is
-**UNRESOLVED**. If it does, bit 76 is Jumbo Fried Dragon.
+**DERIVED — bit order.** The field is `sKitchen +0x108` (the loader `0x1a4e64` reads
+40 bytes to `+0x108`). Bit *j* is record *j* of `kitchenListMenu.kcm` (99 records of
+35 bytes: u32 ingredient A, u32 ingredient B, …): the Bherna seller's "concoct" step
+looks the two chosen ingredients up in that table and sets the record's bit
+(`0x1a7288`, at most 98), and the initialiser sets bits 0 and 1, the two starter
+meals (`0x1a5068`). Five records have no ingredients (14, 27, 40, 55, 98: Ardent
+Crockpot, Spirited Chowder, Affectionate Soup, Exquisite Rice, Ultimate Rice). Names
+are `Kitchen_eng.gmd` 134–210, then 265–286, and bit 76 is indeed *Jumbo Fried
+Dragon* (Jumbo Fish + Wyvern Amber Ale). List: [`data/canteen.csv`](../data/canteen.csv).
 
 ### Second copy — `base + 0x2C68D`
 
-**UNRESOLVED.** Same size, directly after the dish field (`0x2C67D + 16`), and a subset
-of it. It gained bits when dishes were made in-game, but not for the dish written by
-hand, and that dish still appeared. Most likely a "seen/not new" marker. It is safe
-to leave it untouched.
+**UNRESOLVED.** `sKitchen +0x118`, same size, directly after the dish field, and a
+subset of it. It gained bits when dishes were made in-game, but not for the dish
+written by hand, and that dish still appeared. Apart from the initialiser
+(`0x1a49ec`), no code that loads the sKitchen global touches it. Most likely a
+"seen/not new" marker. It is safe to leave it untouched.
 
 ## Editing checklist
 
