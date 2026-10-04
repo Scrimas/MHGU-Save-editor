@@ -174,211 +174,211 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1AF127,0,4,char1,0x2248B,sGameControl,1,,4B,0x3f8e1c,obj100+0x34,,
 0x1AF12B,0,4,char1,0x2248F,sGameControl,1,,4B,0x3f8e2c,obj100+0x38,,
 0x1AF12F,0,4,char1,0x22493,sGameControl,1,,4B,0x3e7818,obj100+0x3c,,
-0x1AF133,0,376,char1,0x22497,sItem? (activity),94,32,32b,0x1979d8,obj100+0x1679c,,
-0x1AF2AB,0,136,char1,0x2260F,sItem? (activity),1,,136B,0x1979fc,,,
-0x1AF333,0,136,char1,0x22697,sItem? (activity),1,,136B,0x197a28,,,
-0x1AF3BB,0,136,char1,0x2271F,sItem? (activity),1,,136B,0x197a4c,,,
-0x1AF443,0,1,char1,0x227A7,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AF444,0,1,char1,0x227A8,sItem? (activity),1,,1B,0x197be4,,,
-0x1AF445,0,2,char1,0x227A9,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AF447,0,2,char1,0x227AB,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AF449,0,2,char1,0x227AD,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AF44B,0,2,char1,0x227AF,sItem? (activity),1,,2B,0x197c40,,,
-0x1AF44D,0,6,char1,0x227B1,sItem? (activity),1,,6B,0x197c50,,,
-0x1AF453,0,24,char1,0x227B7,sItem? (activity),1,,24B,0x197c68,,,
-0x1AF46B,0,2,char1,0x227CF,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AF46D,0,2,char1,0x227D1,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AF46F,0,2,char1,0x227D3,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AF471,0,6,char1,0x227D5,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AF477,0,24,char1,0x227DB,sItem? (activity),1,,24B,0x197cd0,,,
-0x1AF48F,0,2,char1,0x227F3,sItem? (activity),1,,2B,0x197cf4,,,
-0x1AF491,0,2,char1,0x227F5,sItem? (activity),1,,2B,0x197d04,,,
-0x1AF493,0,2,char1,0x227F7,sItem? (activity),1,,2B,0x197d14,,,
-0x1AF495,0,6,char1,0x227F9,sItem? (activity),1,,6B,0x197d24,,,
-0x1AF49B,0,24,char1,0x227FF,sItem? (activity),1,,24B,0x197d34,,,
-0x1AF4B3,0,308,char1,0x22817,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1AF5E7,0,1,char1,0x2294B,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AF5E8,0,1,char1,0x2294C,sItem? (activity),1,,1B,0x197be4,,,
-0x1AF5E9,0,2,char1,0x2294D,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AF5EB,0,2,char1,0x2294F,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AF5ED,0,2,char1,0x22951,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AF5EF,0,2,char1,0x22953,sItem? (activity),1,,2B,0x197c40,,,
-0x1AF5F1,0,6,char1,0x22955,sItem? (activity),1,,6B,0x197c50,,,
-0x1AF5F7,0,24,char1,0x2295B,sItem? (activity),1,,24B,0x197c68,,,
-0x1AF60F,0,2,char1,0x22973,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AF611,0,2,char1,0x22975,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AF613,0,2,char1,0x22977,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AF615,0,6,char1,0x22979,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AF61B,0,24,char1,0x2297F,sItem? (activity),1,,24B,0x197cd0,,,
-0x1AF633,0,2,char1,0x22997,sItem? (activity),1,,2B,0x197cf4,,,
-0x1AF635,0,2,char1,0x22999,sItem? (activity),1,,2B,0x197d04,,,
-0x1AF637,0,2,char1,0x2299B,sItem? (activity),1,,2B,0x197d14,,,
-0x1AF639,0,6,char1,0x2299D,sItem? (activity),1,,6B,0x197d24,,,
-0x1AF63F,0,24,char1,0x229A3,sItem? (activity),1,,24B,0x197d34,,,
-0x1AF657,0,308,char1,0x229BB,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1AF78B,0,1,char1,0x22AEF,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AF78C,0,1,char1,0x22AF0,sItem? (activity),1,,1B,0x197be4,,,
-0x1AF78D,0,2,char1,0x22AF1,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AF78F,0,2,char1,0x22AF3,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AF791,0,2,char1,0x22AF5,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AF793,0,2,char1,0x22AF7,sItem? (activity),1,,2B,0x197c40,,,
-0x1AF795,0,6,char1,0x22AF9,sItem? (activity),1,,6B,0x197c50,,,
-0x1AF79B,0,24,char1,0x22AFF,sItem? (activity),1,,24B,0x197c68,,,
-0x1AF7B3,0,2,char1,0x22B17,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AF7B5,0,2,char1,0x22B19,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AF7B7,0,2,char1,0x22B1B,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AF7B9,0,6,char1,0x22B1D,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AF7BF,0,24,char1,0x22B23,sItem? (activity),1,,24B,0x197cd0,,,
-0x1AF7D7,0,2,char1,0x22B3B,sItem? (activity),1,,2B,0x197cf4,,,
-0x1AF7D9,0,2,char1,0x22B3D,sItem? (activity),1,,2B,0x197d04,,,
-0x1AF7DB,0,2,char1,0x22B3F,sItem? (activity),1,,2B,0x197d14,,,
-0x1AF7DD,0,6,char1,0x22B41,sItem? (activity),1,,6B,0x197d24,,,
-0x1AF7E3,0,24,char1,0x22B47,sItem? (activity),1,,24B,0x197d34,,,
-0x1AF7FB,0,308,char1,0x22B5F,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1AF92F,0,1,char1,0x22C93,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AF930,0,1,char1,0x22C94,sItem? (activity),1,,1B,0x197be4,,,
-0x1AF931,0,2,char1,0x22C95,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AF933,0,2,char1,0x22C97,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AF935,0,2,char1,0x22C99,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AF937,0,2,char1,0x22C9B,sItem? (activity),1,,2B,0x197c40,,,
-0x1AF939,0,6,char1,0x22C9D,sItem? (activity),1,,6B,0x197c50,,,
-0x1AF93F,0,24,char1,0x22CA3,sItem? (activity),1,,24B,0x197c68,,,
-0x1AF957,0,2,char1,0x22CBB,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AF959,0,2,char1,0x22CBD,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AF95B,0,2,char1,0x22CBF,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AF95D,0,6,char1,0x22CC1,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AF963,0,24,char1,0x22CC7,sItem? (activity),1,,24B,0x197cd0,,,
-0x1AF97B,0,2,char1,0x22CDF,sItem? (activity),1,,2B,0x197cf4,,,
-0x1AF97D,0,2,char1,0x22CE1,sItem? (activity),1,,2B,0x197d04,,,
-0x1AF97F,0,2,char1,0x22CE3,sItem? (activity),1,,2B,0x197d14,,,
-0x1AF981,0,6,char1,0x22CE5,sItem? (activity),1,,6B,0x197d24,,,
-0x1AF987,0,24,char1,0x22CEB,sItem? (activity),1,,24B,0x197d34,,,
-0x1AF99F,0,308,char1,0x22D03,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1AFAD3,0,1,char1,0x22E37,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AFAD4,0,1,char1,0x22E38,sItem? (activity),1,,1B,0x197be4,,,
-0x1AFAD5,0,2,char1,0x22E39,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AFAD7,0,2,char1,0x22E3B,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AFAD9,0,2,char1,0x22E3D,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AFADB,0,2,char1,0x22E3F,sItem? (activity),1,,2B,0x197c40,,,
-0x1AFADD,0,6,char1,0x22E41,sItem? (activity),1,,6B,0x197c50,,,
-0x1AFAE3,0,24,char1,0x22E47,sItem? (activity),1,,24B,0x197c68,,,
-0x1AFAFB,0,2,char1,0x22E5F,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AFAFD,0,2,char1,0x22E61,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AFAFF,0,2,char1,0x22E63,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AFB01,0,6,char1,0x22E65,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AFB07,0,24,char1,0x22E6B,sItem? (activity),1,,24B,0x197cd0,,,
-0x1AFB1F,0,2,char1,0x22E83,sItem? (activity),1,,2B,0x197cf4,,,
-0x1AFB21,0,2,char1,0x22E85,sItem? (activity),1,,2B,0x197d04,,,
-0x1AFB23,0,2,char1,0x22E87,sItem? (activity),1,,2B,0x197d14,,,
-0x1AFB25,0,6,char1,0x22E89,sItem? (activity),1,,6B,0x197d24,,,
-0x1AFB2B,0,24,char1,0x22E8F,sItem? (activity),1,,24B,0x197d34,,,
-0x1AFB43,0,308,char1,0x22EA7,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1AFC77,0,1,char1,0x22FDB,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AFC78,0,1,char1,0x22FDC,sItem? (activity),1,,1B,0x197be4,,,
-0x1AFC79,0,2,char1,0x22FDD,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AFC7B,0,2,char1,0x22FDF,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AFC7D,0,2,char1,0x22FE1,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AFC7F,0,2,char1,0x22FE3,sItem? (activity),1,,2B,0x197c40,,,
-0x1AFC81,0,6,char1,0x22FE5,sItem? (activity),1,,6B,0x197c50,,,
-0x1AFC87,0,24,char1,0x22FEB,sItem? (activity),1,,24B,0x197c68,,,
-0x1AFC9F,0,2,char1,0x23003,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AFCA1,0,2,char1,0x23005,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AFCA3,0,2,char1,0x23007,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AFCA5,0,6,char1,0x23009,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AFCAB,0,24,char1,0x2300F,sItem? (activity),1,,24B,0x197cd0,,,
-0x1AFCC3,0,2,char1,0x23027,sItem? (activity),1,,2B,0x197cf4,,,
-0x1AFCC5,0,2,char1,0x23029,sItem? (activity),1,,2B,0x197d04,,,
-0x1AFCC7,0,2,char1,0x2302B,sItem? (activity),1,,2B,0x197d14,,,
-0x1AFCC9,0,6,char1,0x2302D,sItem? (activity),1,,6B,0x197d24,,,
-0x1AFCCF,0,24,char1,0x23033,sItem? (activity),1,,24B,0x197d34,,,
-0x1AFCE7,0,308,char1,0x2304B,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1AFE1B,0,1,char1,0x2317F,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AFE1C,0,1,char1,0x23180,sItem? (activity),1,,1B,0x197be4,,,
-0x1AFE1D,0,2,char1,0x23181,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AFE1F,0,2,char1,0x23183,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AFE21,0,2,char1,0x23185,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AFE23,0,2,char1,0x23187,sItem? (activity),1,,2B,0x197c40,,,
-0x1AFE25,0,6,char1,0x23189,sItem? (activity),1,,6B,0x197c50,,,
-0x1AFE2B,0,24,char1,0x2318F,sItem? (activity),1,,24B,0x197c68,,,
-0x1AFE43,0,2,char1,0x231A7,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AFE45,0,2,char1,0x231A9,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AFE47,0,2,char1,0x231AB,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AFE49,0,6,char1,0x231AD,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AFE4F,0,24,char1,0x231B3,sItem? (activity),1,,24B,0x197cd0,,,
-0x1AFE67,0,2,char1,0x231CB,sItem? (activity),1,,2B,0x197cf4,,,
-0x1AFE69,0,2,char1,0x231CD,sItem? (activity),1,,2B,0x197d04,,,
-0x1AFE6B,0,2,char1,0x231CF,sItem? (activity),1,,2B,0x197d14,,,
-0x1AFE6D,0,6,char1,0x231D1,sItem? (activity),1,,6B,0x197d24,,,
-0x1AFE73,0,24,char1,0x231D7,sItem? (activity),1,,24B,0x197d34,,,
-0x1AFE8B,0,308,char1,0x231EF,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1AFFBF,0,1,char1,0x23323,sItem? (activity),1,,1B,0x197bd4,,,
-0x1AFFC0,0,1,char1,0x23324,sItem? (activity),1,,1B,0x197be4,,,
-0x1AFFC1,0,2,char1,0x23325,sItem? (activity),1,,2B,0x197bf4,,,
-0x1AFFC3,0,2,char1,0x23327,sItem? (activity),1,,2B,0x197c1c,,,
-0x1AFFC5,0,2,char1,0x23329,sItem? (activity),1,,2B,0x197c2c,,,
-0x1AFFC7,0,2,char1,0x2332B,sItem? (activity),1,,2B,0x197c40,,,
-0x1AFFC9,0,6,char1,0x2332D,sItem? (activity),1,,6B,0x197c50,,,
-0x1AFFCF,0,24,char1,0x23333,sItem? (activity),1,,24B,0x197c68,,,
-0x1AFFE7,0,2,char1,0x2334B,sItem? (activity),1,,2B,0x197c8c,,,
-0x1AFFE9,0,2,char1,0x2334D,sItem? (activity),1,,2B,0x197c9c,,,
-0x1AFFEB,0,2,char1,0x2334F,sItem? (activity),1,,2B,0x197cb0,,,
-0x1AFFED,0,6,char1,0x23351,sItem? (activity),1,,6B,0x197cc0,,,
-0x1AFFF3,0,24,char1,0x23357,sItem? (activity),1,,24B,0x197cd0,,,
-0x1B000B,0,2,char1,0x2336F,sItem? (activity),1,,2B,0x197cf4,,,
-0x1B000D,0,2,char1,0x23371,sItem? (activity),1,,2B,0x197d04,,,
-0x1B000F,0,2,char1,0x23373,sItem? (activity),1,,2B,0x197d14,,,
-0x1B0011,0,6,char1,0x23375,sItem? (activity),1,,6B,0x197d24,,,
-0x1B0017,0,24,char1,0x2337B,sItem? (activity),1,,24B,0x197d34,,,
-0x1B002F,0,308,char1,0x23393,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1B0163,0,1,char1,0x234C7,sItem? (activity),1,,1B,0x197bd4,,,
-0x1B0164,0,1,char1,0x234C8,sItem? (activity),1,,1B,0x197be4,,,
-0x1B0165,0,2,char1,0x234C9,sItem? (activity),1,,2B,0x197bf4,,,
-0x1B0167,0,2,char1,0x234CB,sItem? (activity),1,,2B,0x197c1c,,,
-0x1B0169,0,2,char1,0x234CD,sItem? (activity),1,,2B,0x197c2c,,,
-0x1B016B,0,2,char1,0x234CF,sItem? (activity),1,,2B,0x197c40,,,
-0x1B016D,0,6,char1,0x234D1,sItem? (activity),1,,6B,0x197c50,,,
-0x1B0173,0,24,char1,0x234D7,sItem? (activity),1,,24B,0x197c68,,,
-0x1B018B,0,2,char1,0x234EF,sItem? (activity),1,,2B,0x197c8c,,,
-0x1B018D,0,2,char1,0x234F1,sItem? (activity),1,,2B,0x197c9c,,,
-0x1B018F,0,2,char1,0x234F3,sItem? (activity),1,,2B,0x197cb0,,,
-0x1B0191,0,6,char1,0x234F5,sItem? (activity),1,,6B,0x197cc0,,,
-0x1B0197,0,24,char1,0x234FB,sItem? (activity),1,,24B,0x197cd0,,,
-0x1B01AF,0,2,char1,0x23513,sItem? (activity),1,,2B,0x197cf4,,,
-0x1B01B1,0,2,char1,0x23515,sItem? (activity),1,,2B,0x197d04,,,
-0x1B01B3,0,2,char1,0x23517,sItem? (activity),1,,2B,0x197d14,,,
-0x1B01B5,0,6,char1,0x23519,sItem? (activity),1,,6B,0x197d24,,,
-0x1B01BB,0,24,char1,0x2351F,sItem? (activity),1,,24B,0x197d34,,,
-0x1B01D3,0,308,char1,0x23537,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1B0307,0,1,char1,0x2366B,sItem? (activity),1,,1B,0x197bd4,,,
-0x1B0308,0,1,char1,0x2366C,sItem? (activity),1,,1B,0x197be4,,,
-0x1B0309,0,2,char1,0x2366D,sItem? (activity),1,,2B,0x197bf4,,,
-0x1B030B,0,2,char1,0x2366F,sItem? (activity),1,,2B,0x197c1c,,,
-0x1B030D,0,2,char1,0x23671,sItem? (activity),1,,2B,0x197c2c,,,
-0x1B030F,0,2,char1,0x23673,sItem? (activity),1,,2B,0x197c40,,,
-0x1B0311,0,6,char1,0x23675,sItem? (activity),1,,6B,0x197c50,,,
-0x1B0317,0,24,char1,0x2367B,sItem? (activity),1,,24B,0x197c68,,,
-0x1B032F,0,2,char1,0x23693,sItem? (activity),1,,2B,0x197c8c,,,
-0x1B0331,0,2,char1,0x23695,sItem? (activity),1,,2B,0x197c9c,,,
-0x1B0333,0,2,char1,0x23697,sItem? (activity),1,,2B,0x197cb0,,,
-0x1B0335,0,6,char1,0x23699,sItem? (activity),1,,6B,0x197cc0,,,
-0x1B033B,0,24,char1,0x2369F,sItem? (activity),1,,24B,0x197cd0,,,
-0x1B0353,0,2,char1,0x236B7,sItem? (activity),1,,2B,0x197cf4,,,
-0x1B0355,0,2,char1,0x236B9,sItem? (activity),1,,2B,0x197d04,,,
-0x1B0357,0,2,char1,0x236BB,sItem? (activity),1,,2B,0x197d14,,,
-0x1B0359,0,6,char1,0x236BD,sItem? (activity),1,,6B,0x197d24,,,
-0x1B035F,0,24,char1,0x236C3,sItem? (activity),1,,24B,0x197d34,,,
-0x1B0377,0,308,char1,0x236DB,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
-0x1B04AB,0,10,char1,0x2380F,sItem? (activity),1,,10B,0x198060,obj100+0x1678c,,
-0x1B04B5,0,1,char1,0x23819,sItem? (activity),1,,1B,0x198070,obj100+0x1676a,,
-0x1B04B6,0,1,char1,0x2381A,sItem? (activity),1,,1B,0x198080,obj100+0x1676b,,
-0x1B04B7,0,2,char1,0x2381B,sItem? (activity),1,,2B,0x198090,obj100+0x1676c,,
-0x1B04B9,0,1,char1,0x2381D,sItem? (activity),1,,1B,0x1980a0,obj100+0x1676e,,
-0x1B04BA,0,23,char1,0x2381E,sItem? (activity),1,,23B,0x1980b0,obj100+0x1676f,activity: pending village rewards,DERIVED
-0x1B04D1,0,6,char1,0x23835,sItem? (activity),1,,6B,0x1980c0,obj100+0x16786,,
-0x1B04D7,0,25,char1,0x2383B,sItem? (activity),1,,25B,0x1980d0,obj100+0x16750,,
-0x1B04F0,0,256,char1,0x23854,sItem? (activity),1,,256B,0x1980e0,obj100+0x16914,,
-0x1B05F0,0,256,char1,0x23954,sItem? (activity),1,,256B,0x1980f0,obj100+0x16a14,,
-0x1B06F0,0,4,char1,0x23A54,sItem? (activity),1,,4B,0x198100,obj100+0x16798,,
+0x1AF133,0,376,char1,0x22497,sItem,94,32,32b,0x1979d8,obj100+0x1679c,"items obtained: bit = item ID, 94 x u32 (sItem +0x9c)",DERIVED
+0x1AF2AB,0,136,char1,0x2260F,sItem,1,,136B,0x1979fc,,"Trader cargo 1, 136 B (sItem +0xea4)",DERIVED
+0x1AF333,0,136,char1,0x22697,sItem,1,,136B,0x197a28,,"Trader cargo 2, 136 B (sItem +0xf2c)",DERIVED
+0x1AF3BB,0,136,char1,0x2271F,sItem,1,,136B,0x197a4c,,"Trader cargo 3, 136 B (sItem +0xfb4)",DERIVED
+0x1AF443,0,1,char1,0x227A7,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF444,0,1,char1,0x227A8,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF445,0,2,char1,0x227A9,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF447,0,2,char1,0x227AB,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF449,0,2,char1,0x227AD,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF44B,0,2,char1,0x227AF,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF44D,0,6,char1,0x227B1,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF453,0,24,char1,0x227B7,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF46B,0,2,char1,0x227CF,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF46D,0,2,char1,0x227D1,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF46F,0,2,char1,0x227D3,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF471,0,6,char1,0x227D5,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF477,0,24,char1,0x227DB,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF48F,0,2,char1,0x227F3,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF491,0,2,char1,0x227F5,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF493,0,2,char1,0x227F7,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF495,0,6,char1,0x227F9,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF49B,0,24,char1,0x227FF,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF4B3,0,308,char1,0x22817,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5E7,0,1,char1,0x2294B,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5E8,0,1,char1,0x2294C,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5E9,0,2,char1,0x2294D,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5EB,0,2,char1,0x2294F,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5ED,0,2,char1,0x22951,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5EF,0,2,char1,0x22953,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5F1,0,6,char1,0x22955,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF5F7,0,24,char1,0x2295B,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF60F,0,2,char1,0x22973,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF611,0,2,char1,0x22975,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF613,0,2,char1,0x22977,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF615,0,6,char1,0x22979,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF61B,0,24,char1,0x2297F,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF633,0,2,char1,0x22997,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF635,0,2,char1,0x22999,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF637,0,2,char1,0x2299B,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF639,0,6,char1,0x2299D,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF63F,0,24,char1,0x229A3,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF657,0,308,char1,0x229BB,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF78B,0,1,char1,0x22AEF,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF78C,0,1,char1,0x22AF0,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF78D,0,2,char1,0x22AF1,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF78F,0,2,char1,0x22AF3,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF791,0,2,char1,0x22AF5,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF793,0,2,char1,0x22AF7,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF795,0,6,char1,0x22AF9,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF79B,0,24,char1,0x22AFF,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7B3,0,2,char1,0x22B17,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7B5,0,2,char1,0x22B19,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7B7,0,2,char1,0x22B1B,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7B9,0,6,char1,0x22B1D,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7BF,0,24,char1,0x22B23,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7D7,0,2,char1,0x22B3B,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7D9,0,2,char1,0x22B3D,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7DB,0,2,char1,0x22B3F,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7DD,0,6,char1,0x22B41,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7E3,0,24,char1,0x22B47,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF7FB,0,308,char1,0x22B5F,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF92F,0,1,char1,0x22C93,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF930,0,1,char1,0x22C94,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF931,0,2,char1,0x22C95,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF933,0,2,char1,0x22C97,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF935,0,2,char1,0x22C99,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF937,0,2,char1,0x22C9B,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF939,0,6,char1,0x22C9D,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF93F,0,24,char1,0x22CA3,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF957,0,2,char1,0x22CBB,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF959,0,2,char1,0x22CBD,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF95B,0,2,char1,0x22CBF,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF95D,0,6,char1,0x22CC1,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF963,0,24,char1,0x22CC7,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF97B,0,2,char1,0x22CDF,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF97D,0,2,char1,0x22CE1,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF97F,0,2,char1,0x22CE3,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF981,0,6,char1,0x22CE5,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF987,0,24,char1,0x22CEB,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AF99F,0,308,char1,0x22D03,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAD3,0,1,char1,0x22E37,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAD4,0,1,char1,0x22E38,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAD5,0,2,char1,0x22E39,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAD7,0,2,char1,0x22E3B,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAD9,0,2,char1,0x22E3D,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFADB,0,2,char1,0x22E3F,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFADD,0,6,char1,0x22E41,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAE3,0,24,char1,0x22E47,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAFB,0,2,char1,0x22E5F,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAFD,0,2,char1,0x22E61,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFAFF,0,2,char1,0x22E63,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB01,0,6,char1,0x22E65,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB07,0,24,char1,0x22E6B,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB1F,0,2,char1,0x22E83,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB21,0,2,char1,0x22E85,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB23,0,2,char1,0x22E87,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB25,0,6,char1,0x22E89,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB2B,0,24,char1,0x22E8F,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFB43,0,308,char1,0x22EA7,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC77,0,1,char1,0x22FDB,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC78,0,1,char1,0x22FDC,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC79,0,2,char1,0x22FDD,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC7B,0,2,char1,0x22FDF,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC7D,0,2,char1,0x22FE1,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC7F,0,2,char1,0x22FE3,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC81,0,6,char1,0x22FE5,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC87,0,24,char1,0x22FEB,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFC9F,0,2,char1,0x23003,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCA1,0,2,char1,0x23005,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCA3,0,2,char1,0x23007,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCA5,0,6,char1,0x23009,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCAB,0,24,char1,0x2300F,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCC3,0,2,char1,0x23027,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCC5,0,2,char1,0x23029,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCC7,0,2,char1,0x2302B,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCC9,0,6,char1,0x2302D,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCCF,0,24,char1,0x23033,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFCE7,0,308,char1,0x2304B,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE1B,0,1,char1,0x2317F,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE1C,0,1,char1,0x23180,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE1D,0,2,char1,0x23181,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE1F,0,2,char1,0x23183,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE21,0,2,char1,0x23185,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE23,0,2,char1,0x23187,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE25,0,6,char1,0x23189,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE2B,0,24,char1,0x2318F,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE43,0,2,char1,0x231A7,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE45,0,2,char1,0x231A9,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE47,0,2,char1,0x231AB,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE49,0,6,char1,0x231AD,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE4F,0,24,char1,0x231B3,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE67,0,2,char1,0x231CB,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE69,0,2,char1,0x231CD,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE6B,0,2,char1,0x231CF,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE6D,0,6,char1,0x231D1,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE73,0,24,char1,0x231D7,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFE8B,0,308,char1,0x231EF,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFBF,0,1,char1,0x23323,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFC0,0,1,char1,0x23324,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFC1,0,2,char1,0x23325,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFC3,0,2,char1,0x23327,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFC5,0,2,char1,0x23329,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFC7,0,2,char1,0x2332B,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFC9,0,6,char1,0x2332D,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFCF,0,24,char1,0x23333,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFE7,0,2,char1,0x2334B,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFE9,0,2,char1,0x2334D,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFEB,0,2,char1,0x2334F,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFED,0,6,char1,0x23351,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1AFFF3,0,24,char1,0x23357,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B000B,0,2,char1,0x2336F,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B000D,0,2,char1,0x23371,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B000F,0,2,char1,0x23373,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0011,0,6,char1,0x23375,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0017,0,24,char1,0x2337B,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B002F,0,308,char1,0x23393,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0163,0,1,char1,0x234C7,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0164,0,1,char1,0x234C8,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0165,0,2,char1,0x234C9,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0167,0,2,char1,0x234CB,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0169,0,2,char1,0x234CD,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B016B,0,2,char1,0x234CF,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B016D,0,6,char1,0x234D1,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0173,0,24,char1,0x234D7,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B018B,0,2,char1,0x234EF,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B018D,0,2,char1,0x234F1,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B018F,0,2,char1,0x234F3,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0191,0,6,char1,0x234F5,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0197,0,24,char1,0x234FB,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B01AF,0,2,char1,0x23513,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B01B1,0,2,char1,0x23515,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B01B3,0,2,char1,0x23517,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B01B5,0,6,char1,0x23519,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B01BB,0,24,char1,0x2351F,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B01D3,0,308,char1,0x23537,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0307,0,1,char1,0x2366B,sItem,1,,1B,0x197bd4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0308,0,1,char1,0x2366C,sItem,1,,1B,0x197be4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0309,0,2,char1,0x2366D,sItem,1,,2B,0x197bf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B030B,0,2,char1,0x2366F,sItem,1,,2B,0x197c1c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B030D,0,2,char1,0x23671,sItem,1,,2B,0x197c2c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B030F,0,2,char1,0x23673,sItem,1,,2B,0x197c40,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0311,0,6,char1,0x23675,sItem,1,,6B,0x197c50,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0317,0,24,char1,0x2367B,sItem,1,,24B,0x197c68,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B032F,0,2,char1,0x23693,sItem,1,,2B,0x197c8c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0331,0,2,char1,0x23695,sItem,1,,2B,0x197c9c,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0333,0,2,char1,0x23697,sItem,1,,2B,0x197cb0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0335,0,6,char1,0x23699,sItem,1,,6B,0x197cc0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B033B,0,24,char1,0x2369F,sItem,1,,24B,0x197cd0,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0353,0,2,char1,0x236B7,sItem,1,,2B,0x197cf4,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0355,0,2,char1,0x236B9,sItem,1,,2B,0x197d04,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0357,0,2,char1,0x236BB,sItem,1,,2B,0x197d14,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0359,0,6,char1,0x236BD,sItem,1,,6B,0x197d24,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B035F,0,24,char1,0x236C3,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B0377,0,308,char1,0x236DB,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
+0x1B04AB,0,10,char1,0x2380F,sItem,1,,10B,0x198060,obj100+0x1678c,village tier bytes (4) and 6 bytes (sItem +0x8c),DERIVED
+0x1B04B5,0,1,char1,0x23819,sItem,1,,1B,0x198070,obj100+0x1676a,,
+0x1B04B6,0,1,char1,0x2381A,sItem,1,,1B,0x198080,obj100+0x1676b,,
+0x1B04B7,0,2,char1,0x2381B,sItem,1,,2B,0x198090,obj100+0x1676c,,
+0x1B04B9,0,1,char1,0x2381D,sItem,1,,1B,0x1980a0,obj100+0x1676e,,
+0x1B04BA,0,23,char1,0x2381E,sItem,1,,23B,0x1980b0,obj100+0x1676f,activity: pending village rewards,DERIVED
+0x1B04D1,0,6,char1,0x23835,sItem,1,,6B,0x1980c0,obj100+0x16786,,
+0x1B04D7,0,25,char1,0x2383B,sItem,1,,25B,0x1980d0,obj100+0x16750,,
+0x1B04F0,0,256,char1,0x23854,sItem,1,,256B,0x1980e0,obj100+0x16914,"item box table 1, 256 B, default 0, 0, 1, 2, ... (sItem +0x214)",UNRESOLVED
+0x1B05F0,0,256,char1,0x23954,sItem,1,,256B,0x1980f0,obj100+0x16a14,"item box table 2, same form (sItem +0x314)",UNRESOLVED
+0x1B06F0,0,4,char1,0x23A54,sItem,1,,4B,0x198100,obj100+0x16798,u32 read by Alchemy and the quest result (sItem +0x98),UNRESOLVED
 0x1B06F4,0,1,char1,0x23A58,sPlayer,1,,1B,0x275614,obj100+0x9d5c,player record (loaded copy of the slot header fields),DERIVED
 0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,player record (loaded copy of the slot header fields),DERIVED
 0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,player record (loaded copy of the slot header fields),DERIVED

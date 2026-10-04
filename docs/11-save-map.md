@@ -97,7 +97,7 @@ Blocks A and B are shared by all characters. Each block starts 4-aligned relativ
 | `0x208CE` | 5440 | sEquipBox | My Sets, 40 × 136 B |
 | `0x21E0E` | 1632 | sEquipBox | Palico equipment sets, 24 × 68 B |
 | `0x2246E` | 41 | sGameControl (`0x3f8de0`) | 29 + 3 × 4 B; holds a copy of the play time (`base + 0x20`) |
-| `0x22497` | 5569 | sItem? (`0x1979b0`) | activity manager: tickets, pending village rewards ([10](10-npc-talk.md)) |
+| `0x22497` | 5569 | sItem (`0x1979b0`) | items obtained, Trader cargo, Alchemy requests, pending village rewards ([below](#the-item-manager-sitem)) |
 | `0x23A58` | 325 | sPlayer (`0x2755f0`) | player record: the loaded copy of the header's appearance, pigment and name ([below](#player-record--base--0x23a58)) |
 | `0x23B9D` | 35131 | sOtomo (`0x2639ac`) | Palicoes: 25 B of bit fields, 84 + 24 records of 324 B, 114 B tail |
 | `0x2C4D8` | 149 | sVillage (`0x507d44`) | star levels at +2 / +4 ([05](05-quests.md#star-levels--base--0x2c4da)) |
@@ -171,6 +171,27 @@ loadout 1 equal to the pouch).
 
 Item names: string 2·ID of `table/itemData_<lang>.gmd` (romfs). Writer `0x19a55c` caps the
 ID at `0xBAF`. Count is 7 bits, so 99 fits and 127 is the hard ceiling.
+
+## The item manager sItem
+
+`base + 0x22497`, 5569 bytes, loader `0x1979b0`. Earlier documents call it the
+activity manager. Its methods are in the `sItem` unit (`0x193000 … 0x199000`);
+**DERIVED** from the loader and the MT classes of the methods' callers.
+
+| `base +` | sItem | Size | Content |
+|---|---|---|---|
+| `0x22497` | `+0x9c` | 94 × u32 | items obtained: bit = item ID. 1173 of the 1177 item IDs in the analysed item box have their bit set |
+| `0x2260F` | `+0xea4` | 3 × 136 | the Trader's three cargo orders (`cUIOTradeCenterCargo`, `cUIOTradeCenterBox`) |
+| `0x227A7` | `+0x103c` | 10 × 420 | Alchemy requests (`uUIAlchemy`, `cUIOAlchemyRequest`): u8, u8 (255 = empty), u16, three 36-byte equipment entries, then seven of (u32, u32, 36-byte equipment entry). All ten are empty in the analysed save. Stride in memory 500 |
+| `0x2380F` | `+0x8c` | 10 | village tier bytes ([10](10-npc-talk.md)) |
+| `0x23819` … `0x2381D` | `+0x6a` … `+0x6e` | 5 | u8, u8, u16, u8. UNRESOLVED |
+| `0x2381E` | `+0x6f` | 23 | pending village rewards ([10](10-npc-talk.md)) |
+| `0x23835`, `0x2383B` | `+0x86`, `+0x50` | 6, 25 | UNRESOLVED |
+| `0x23854`, `0x23954` | `+0x214`, `+0x314` | 256 each | two byte tables of the item box screen, `0, 0, 1, 2 …` in the analysed save; `0x194d6c` tests bit 1 of an entry. UNRESOLVED |
+| `0x23A54` | `+0x98` | u32 | read by Alchemy and the quest result (`0x3f2810`). UNRESOLVED |
+
+The equipment entries use the 36-byte box format of [07](07-equipment.md); the
+helpers `0xdaba4` / `0xdac14` / `0xdadf0` construct, clear and copy them.
 
 ## Equipment manager additions
 
