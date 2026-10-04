@@ -45,7 +45,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FC13,0,8,char1,0x2F77,sUserInfo,1,,8B,0x51dd50,obj17+0x958,contains: progress word,DERIVED
 0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,progress map NEW (S+0x968),DERIVED
 0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"flagship monster story events, bits 2-8 set by the quest flow (S+0x970) + runtime NEW copy",DERIVED
-0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,unlock map NEW (S+0x978),UNRESOLVED
+0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,flagship monster story events NEW (S+0x978),DERIVED
 0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,"contains: Canteen ingredients (bit = kitchenListMenu ingredient, data/canteen.csv)",CONFIRMED
 0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,Canteen ingredients NEW (S+0x98c),DERIVED
 0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,"Poogie costumes owned, 64 bits (S+0x994)",DERIVED
@@ -376,21 +376,21 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B04BA,0,23,char1,0x2381E,sItem,1,,23B,0x1980b0,obj100+0x1676f,activity: pending village rewards,DERIVED
 0x1B04D1,0,6,char1,0x23835,sItem,1,,6B,0x1980c0,obj100+0x16786,,
 0x1B04D7,0,25,char1,0x2383B,sItem,1,,25B,0x1980d0,obj100+0x16750,,
-0x1B04F0,0,256,char1,0x23854,sItem,1,,256B,0x1980e0,obj100+0x16914,"item box table 1, 256 B, default 0, 0, 1, 2, ... (sItem +0x214)",UNRESOLVED
-0x1B05F0,0,256,char1,0x23954,sItem,1,,256B,0x1980f0,obj100+0x16a14,"item box table 2, same form (sItem +0x314)",UNRESOLVED
-0x1B06F0,0,4,char1,0x23A54,sItem,1,,4B,0x198100,obj100+0x16798,u32 read by Alchemy and the quest result (sItem +0x98),UNRESOLVED
+0x1B04F0,0,256,char1,0x23854,sItem,1,,256B,0x1980e0,obj100+0x16914,"Combination List order, pouch list: flags byte (bit 1 custom order, bit 0 filter), then itemPreData recipe index per position (sItem +0x214)",DERIVED
+0x1B05F0,0,256,char1,0x23954,sItem,1,,256B,0x1980f0,obj100+0x16a14,"Combination List order, item box list, same form (sItem +0x314)",DERIVED
+0x1B06F0,0,4,char1,0x23A54,sItem,1,,4B,0x198100,obj100+0x16798,Horns Coins traded in total; award 104 at 2000 (sItem +0x98),DERIVED
 0x1B06F4,0,1,char1,0x23A58,sPlayer,1,,1B,0x275614,obj100+0x9d5c,player record (loaded copy of the slot header fields),DERIVED
 0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,"player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 SP Art bits per art slot; bytes 8-223 unused by a hunter (Palico parameters); first 4 u16 copied to the Guild Card +0x4C",DERIVED
 0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,"equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none",DERIVED
 0x1B07E3,0,12,char1,0x23B47,sPlayer,1,,12B,0x275740,obj100+0x650,weapon class (+0; 15 = Prowler) and character creation choices (+4 = gender),DERIVED
 0x1B07EF,0,36,char1,0x23B53,sPlayer,1,,36B,0x275754,obj100+0x65c,"current pigment, 5 x RGBA + 16 B",DERIVED
-0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,"u32: five 5-bit values, one per pigment slot, set by the appearance menu; meaning open (header +0x274, Guild Card +0x48)",UNRESOLVED
+0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,"u32: five 5-bit colour modes, one per pigment slot (0 RGBA, 2+ preset v-2; header +0x274, Guild Card +0x48)",DERIVED
 0x1B0817,0,2,char1,0x23B7B,sPlayer,1,,2B,0x27577c,obj100+0x682,current pigment default-colour flags,DERIVED
 0x1B0819,0,32,char1,0x23B7D,sPlayer,1,,32B,0x27578c,obj100+0x690,hunter name,DERIVED
-0x1B0839,0,1,char1,0x23B9D,sOtomo,1,,1B,0x2639d0,obj20+0x13848,"Palico manager: u8, u16, u8, u8 (sOtomo +0x13848)",UNRESOLVED
-0x1B083A,0,2,char1,0x23B9E,sOtomo,1,,2B,0x2639e4,obj20+0x13849,"Palico manager: u8, u16, u8, u8 (sOtomo +0x13848)",UNRESOLVED
-0x1B083C,0,1,char1,0x23BA0,sOtomo,1,,1B,0x2639f8,obj20+0x1384c,"Palico manager: u8, u16, u8, u8 (sOtomo +0x13848)",UNRESOLVED
-0x1B083D,0,1,char1,0x23BA1,sOtomo,1,,1B,0x263a0c,obj20+0x1384b,"Palico manager: u8, u16, u8, u8 (sOtomo +0x13848)",UNRESOLVED
+0x1B0839,0,1,char1,0x23B9D,sOtomo,1,,1B,0x2639d0,obj20+0x13848,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
+0x1B083A,0,2,char1,0x23B9E,sOtomo,1,,2B,0x2639e4,obj20+0x13849,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
+0x1B083C,0,1,char1,0x23BA0,sOtomo,1,,1B,0x2639f8,obj20+0x1384c,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
+0x1B083D,0,1,char1,0x23BA1,sOtomo,1,,1B,0x263a0c,obj20+0x1384b,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
 0x1B083E,0,1,char1,0x23BA2,sOtomo,1,,2b,0x263a24,obj20+0x138f6,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
 0x1B083E,2,1,char1,0x23BA2,sOtomo,1,,4b,0x263a48,obj20+0x138f7,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
 0x1B083E,6,2,char1,0x23BA2,sOtomo,1,,3b,0x263a6c,obj20+0x138f8,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
@@ -405,36 +405,36 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B084D,5,5,char1,0x23BB1,sOtomo,1,,32b,0x263b80,obj20+0x1390c,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
 0x1B0852,0,27216,char1,0x23BB6,sOtomo,84,2592,32B 224B 14B 12B 36B 4B 2B,0x263390,obj20+0x13e4c,"Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level u8 +0x24, greeting +0x60, owner +0x9C)",DERIVED
 0x1B72A2,0,7776,char1,0x2A606,sOtomo,24,2592,32B 224B 14B 12B 36B 4B 2B,0x263bf0,obj20+0x301cc,"Palicoes, second list: 24 x 324 B, same record",DERIVED
-0x1B9102,0,40,char1,0x2C466,sOtomo,1,,40B,0x263c70,obj20+0x13910,"Palico manager tail: 40 B, 16 B, 48 B, u8, 5 B, u32 (sOtomo +0x13910, +0x48a78 ...)",UNRESOLVED
-0x1B912A,0,16,char1,0x2C48E,sOtomo,1,,16B,0x263c88,obj20+0x48a78,"Palico manager tail: 40 B, 16 B, 48 B, u8, 5 B, u32 (sOtomo +0x13910, +0x48a78 ...)",UNRESOLVED
-0x1B913A,0,48,char1,0x2C49E,sOtomo,1,,48B,0x263ca0,obj20+0x48a88,"Palico manager tail: 40 B, 16 B, 48 B, u8, 5 B, u32 (sOtomo +0x13910, +0x48a78 ...)",UNRESOLVED
-0x1B916A,0,1,char1,0x2C4CE,sOtomo,1,,1B,0x263cb8,obj20+0x48ab8,"Palico manager tail: 40 B, 16 B, 48 B, u8, 5 B, u32 (sOtomo +0x13910, +0x48a78 ...)",UNRESOLVED
-0x1B916B,0,5,char1,0x2C4CF,sOtomo,1,,5B,0x263cd0,obj20+0x48ab9,"Palico manager tail: 40 B, 16 B, 48 B, u8, 5 B, u32 (sOtomo +0x13910, +0x48a78 ...)",UNRESOLVED
-0x1B9170,0,4,char1,0x2C4D4,sOtomo,1,,4B,0x263cec,obj20+0x4a5a0,"Palico manager tail: 40 B, 16 B, 48 B, u8, 5 B, u32 (sOtomo +0x13910, +0x48a78 ...)",UNRESOLVED
-0x1B9174,0,1,char1,0x2C4D8,sVillage,1,,1B,0x507d64,obj100+0x64e72,"village u8 pair (sVillage +0x472, +0x473)",UNRESOLVED
-0x1B9175,0,1,char1,0x2C4D9,sVillage,1,,1B,0x507d78,obj100+0x64e73,"village u8 pair (sVillage +0x472, +0x473)",UNRESOLVED
+0x1B9102,0,40,char1,0x2C466,sOtomo,1,,40B,0x263c70,obj20+0x13910,Palicoes that reached level 50: 5 x 8 B ID; award 50 (sOtomo +0x13910),DERIVED
+0x1B912A,0,16,char1,0x2C48E,sOtomo,1,,16B,0x263c88,obj20+0x48a78,"Palico Dojo teaching session: 4 indices, kind, skill/move, u16 in progress, two u32 (sOtomo +0x48a78)",DERIVED
+0x1B913A,0,48,char1,0x2C49E,sOtomo,1,,48B,0x263ca0,obj20+0x48a88,"Palico Dojo training slots: 3 x 16 B (index, type, sessions left; sOtomo +0x48a88)",DERIVED
+0x1B916A,0,1,char1,0x2C4CE,sOtomo,1,,1B,0x263cb8,obj20+0x48ab8,"Palico team of up to 5 (Meownster Hunters?): u8 count, 5 x u8 index (sOtomo +0x48ab8)",DERIVED
+0x1B916B,0,5,char1,0x2C4CF,sOtomo,1,,5B,0x263cd0,obj20+0x48ab9,"Palico team of up to 5 (Meownster Hunters?): u8 count, 5 x u8 index (sOtomo +0x48ab8)",DERIVED
+0x1B9170,0,4,char1,0x2C4D4,sOtomo,1,,4B,0x263cec,obj20+0x4a5a0,"Palico level milestones: bit 0 level 20, bit 1 level 25 (sOtomo +0x4a5a0)",DERIVED
+0x1B9174,0,1,char1,0x2C4D8,sVillage,1,,1B,0x507d64,obj100+0x64e72,"Dark Piece / Dark Stone counts of the cut Cave feature (sVillage +0x472, +0x473)",DERIVED
+0x1B9175,0,1,char1,0x2C4D9,sVillage,1,,1B,0x507d78,obj100+0x64e73,"Dark Piece / Dark Stone counts of the cut Cave feature (sVillage +0x472, +0x473)",DERIVED
 0x1B9176,0,2,char1,0x2C4DA,sVillage,1,,2B,0x507d88,obj100+0x64de0,Village star level,CONFIRMED
 0x1B9178,0,2,char1,0x2C4DC,sVillage,1,,2B,0x507d9c,obj100+0x64de2,Hub star level,CONFIRMED
 0x1B917A,0,4,char1,0x2C4DE,sVillage,1,,4B,0x507dac,obj100+0x64de4,"village pet affection, u8 per village, at most 10; 6 unlocks a title word (sVillage +0x3e4)",DERIVED
-0x1B917E,0,1,char1,0x2C4E2,sVillage,1,,1B,0x507dc0,obj100+0x64e71,u8 (sVillage +0x471),UNRESOLVED
+0x1B917E,0,1,char1,0x2C4E2,sVillage,1,,1B,0x507dc0,obj100+0x64e71,"Moofah gifts received, at most 10; award 49 (sVillage +0x471)",DERIVED
 0x1B917F,0,128,char1,0x2C4E3,sVillage,1,,128B,0x507dd0,obj100+0x64de8,"village pet names, 4 x char[32] (Moofy, Poogie x 3; sVillage +0x3e8)",DERIVED
 0x1B91FF,0,4,char1,0x2C563,sVillage,1,,4B,0x507de4,obj100+0x64e68,"village pet costumes, u8 per pet, below 40 (sVillage +0x468, pet menu)",DERIVED
-0x1B9203,0,4,char1,0x2C567,sVillage,1,,4B,0x507df8,obj100+0x64e6c,"u32, u8, u8 (sVillage +0x46c, +0x470, +0x474)",UNRESOLVED
-0x1B9207,0,1,char1,0x2C56B,sVillage,1,,1B,0x507e08,obj100+0x64e70,"u32, u8, u8 (sVillage +0x46c, +0x470, +0x474)",UNRESOLVED
-0x1B9208,0,1,char1,0x2C56C,sVillage,1,,1B,0x3e7868,obj100+0x64e74,"u32, u8, u8 (sVillage +0x46c, +0x470, +0x474)",UNRESOLVED
+0x1B9203,0,4,char1,0x2C567,sVillage,1,,4B,0x507df8,obj100+0x64e6c,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
+0x1B9207,0,1,char1,0x2C56B,sVillage,1,,1B,0x507e08,obj100+0x64e70,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
+0x1B9208,0,1,char1,0x2C56C,sVillage,1,,1B,0x3e7868,obj100+0x64e74,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
 0x1B9209,0,192,char1,0x2C56D,sNpcTalk,1,,192B,0x240d7c,obj100+0x64700,event flags (villager requests),CONFIRMED
 0x1B92C9,0,24,char1,0x2C62D,sNpcTalk,1,,24B,0x240d8c,obj100+0x647c0,per-NPC talk hold bits,CONFIRMED
 0x1B92E1,0,24,char1,0x2C645,sNpcTalk,1,,24B,0x240da0,obj100+0x647d8,per-NPC talk hold bits,CONFIRMED
 0x1B92F9,0,24,char1,0x2C65D,sNpcTalk,1,,24B,0x240db0,obj100+0x647f0,per-NPC talk hold bits,CONFIRMED
 0x1B9311,0,4,char1,0x2C675,sNpcTalk,1,,4B,0x240dc4,obj100+0x64808,random word (talk conditions),DERIVED
 0x1B9315,0,4,char1,0x2C679,sNpcTalk,1,,4B,0x3e787c,obj100+0x6480c,"second random word, copied with the first (0x240e4c) and used the same way (0x24217c)",DERIVED
-0x1B9319,0,40,char1,0x2C67D,sKitchen,1,,40B,0x3e7890,obj100+0x81608,"contains: Canteen dishes (sKitchen +0x108; bit = kitchenListMenu record, data/canteen.csv); Canteen dishes copy",UNRESOLVED
+0x1B9319,0,40,char1,0x2C67D,sKitchen,1,,40B,0x3e7890,obj100+0x81608,"contains: Canteen dishes (sKitchen +0x108; bit = kitchenListMenu record, data/canteen.csv); Canteen dishes viewed (NEW mark cleared), same bits (sKitchen +0x118)",DERIVED
 0x1B9341,0,4,char1,0x2C6A5,sFlagChecker,1,,4B,0x3e78a4,obj100+0x64920,"flags latched from another object (sFlagChecker +0x20, 0x3f43e8)",DERIVED
-0x1B9345,0,4,char1,0x2C6A9,sMakeAmulet,1,,4B,0x14c584,obj100+0x66064,"talisman making (sMakeAmulet): 96-bit map over a 107-entry table, tested and set at quest end (0x14c688)",DERIVED
-0x1B9349,0,4,char1,0x2C6AD,sMakeAmulet,1,,4B,0x14c594,obj100+0x66068,"talisman making (sMakeAmulet): 96-bit map over a 107-entry table, tested and set at quest end (0x14c688)",DERIVED
-0x1B934D,0,4,char1,0x2C6B1,sMakeAmulet,1,,4B,0x14c5a4,obj100+0x6606c,"talisman making (sMakeAmulet): 96-bit map over a 107-entry table, tested and set at quest end (0x14c688)",DERIVED
-0x1B9351,0,4,char1,0x2C6B5,sMakeAmulet,1,,4B,0x14c5b4,obj100+0x66070,"talisman making: two u32 (sMakeAmulet +0x70, +0x74)",UNRESOLVED
-0x1B9355,0,4,char1,0x2C6B9,sMakeAmulet,1,,4B,0x3e78b8,obj100+0x66074,"talisman making: two u32 (sMakeAmulet +0x70, +0x74)",UNRESOLVED
+0x1B9345,0,4,char1,0x2C6A9,sMakeAmulet,1,,4B,0x14c584,obj100+0x66064,"sMakeAmulet: 128-bit map over a 107-entry table, tested and set at quest end (0x14c688), read by the quest rotation",DERIVED
+0x1B9349,0,4,char1,0x2C6AD,sMakeAmulet,1,,4B,0x14c594,obj100+0x66068,"sMakeAmulet: 128-bit map over a 107-entry table, tested and set at quest end (0x14c688), read by the quest rotation",DERIVED
+0x1B934D,0,4,char1,0x2C6B1,sMakeAmulet,1,,4B,0x14c5a4,obj100+0x6606c,"sMakeAmulet: 128-bit map over a 107-entry table, tested and set at quest end (0x14c688), read by the quest rotation",DERIVED
+0x1B9351,0,4,char1,0x2C6B5,sMakeAmulet,1,,4B,0x14c5b4,obj100+0x66070,"sMakeAmulet: 128-bit map over a 107-entry table, tested and set at quest end (0x14c688), read by the quest rotation",DERIVED
+0x1B9355,0,4,char1,0x2C6B9,sMakeAmulet,1,,4B,0x3e78b8,obj100+0x66074,"one-time event scenes played, 24 bits (sMakeAmulet +0x74, table 0x15a0c78)",DERIVED
 0x1B9359,0,4,char1,0x2C6BD,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73208,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
 0x1B935D,0,1233,char1,0x2C6C1,sGuildCard,1,,1233B,0x3cf810,obj100+0x1ccd00,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
 0x1B982E,0,4,char1,0x2CB92,sGuildCard,1,,4B,0x3cf820,obj100+0x7320c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED

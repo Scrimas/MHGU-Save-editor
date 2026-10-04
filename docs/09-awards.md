@@ -100,8 +100,15 @@ The first thirteen awards, **DERIVED** from the code:
 | 0–5 | pairs and triples of the Village and Hub level sets 13–25 (0 = sets 13 and 14, 1 = 15 and 16, …) |
 | 6 | awards 0–5 all earned (the check reads its own map: `& 0x7f == 0x3f`) |
 | 7, 8 | *Miniature Crown* / *Large Crown*: `0x3f3624` / `0x3f3824` count the monsters of the 87-entry monster list whose size record carries the gold crown mark (`0x67310` returns 3), skipping a few codes; the award needs 66 |
-| 9 | *Bionomical Report*, "captured" monsters: `0x3f1b1c`, a loop over monster codes, not read in detail |
+| 9 | *Bionomical Report*: at least 59 different large monsters captured (`0x3f1b1c`). The loop runs over the same 87-entry monster list, skips codes 10, 23–25, 29, 33, 41, 46, 60, 69, 116, 117, 132, 134 (73 left) and reads each one's capture count (`0x560238`, the capture table at `base + 0x5FB8`), summing a few variants into their base monster. The analysed save has 13, so not earned |
 | 10, 11, 12 | sets 45, 46, 47: every Arena quest cleared, all with rank A, all with rank S |
+
+Other conditions found with the save fields they read ([11](11-save-map.md#smaller-managers)):
+49 *Ball of Moofah Wool*, 10 Moofah gifts (`base + 0x2C4E2`); 50 *To the Best Hunter
+Ever*, five Palicoes at level 50 (`base + 0x2C466`); 53 *Dojo Grandmeowster's Letter*,
+50 Palico Dojo sessions (`base + 0x23BA0`); 104 *Felicity's Picture Book*, 2000 Horns
+Coins traded (`base + 0x23A54`). The milestone map awards (48, 51, 69, 84, 88, 99, 128)
+are listed with `S+0xd8c`.
 
 The check runs after every quest and needs no "last clear": on the first quest after
 the [bulk completion write](05-quests.md#what-all-quests-completed-takes), a Harvest

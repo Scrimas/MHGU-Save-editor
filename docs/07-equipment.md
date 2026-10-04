@@ -73,7 +73,11 @@ at level 1, which fits every transmogged entry of the analysed save. The MHXX no
 name, "transmog level", is right.
 
 **UNRESOLVED — bit 15.** The equipped cache copy of one transmogged helm had it set
-when its box source did not; no reader was found. Leaving it at zero is safe.
+when its box source did not. It is a declared one-bit field: the entry clear and
+construct helpers (`0xdab04`, `0xdaba4`, `0xdac14`) and the builder `0x159b18` keep it
+(`and #0x8000`), so it is metadata that survives a clear. A whole-binary scan for a
+tester (`tst #0x8000`, `lsr #15`, a byte test of `+0x01` bit 7) found none. Leaving it
+at zero is safe.
 
 ### Talisman fields
 
@@ -139,7 +143,7 @@ within the game's record.
 | `+0x30` | 7 × u16 | box index for weapon, head, chest, arms, waist, legs, talisman; `0xFFFF` = empty |
 | `+0x3E` | 7 × 3 × u16 | copy of each piece's decorations (**DERIVED**) |
 | `+0x6A` | 5 × RGBA | pigment per body part |
-| `+0x7E` | 5 × u8 | per part, handed to the dye call with the colour and the flag (`0x26f958`); zero in every set. UNRESOLVED |
+| `+0x7E` | 5 × u8 | per part, a colour mode handed to the dye call with the colour and the flag (`0x26f958`): 0 = the RGBA, 2 and up = preset colour *v* − 2, 1 = a third path ([11](11-save-map.md#slot-header--base--0x0-632-b), header `+0x274`). Zero in every set of all three slots |
 | `+0x83` | 5 × u8 | per-part default flag: 1 = default colour, 0 = custom RGBA |
 | `+0x88` | u8 | hunting style: 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor (same order as the style counters of [11](11-save-map.md#the-block-s0x20--0x41f--base--0x280b)) |
 | `+0x89` | 3 × u8 | the three Hunter Arts (IDs of [`hunter-arts.csv`](../data/hunter-arts.csv)) |

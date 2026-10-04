@@ -107,7 +107,7 @@ Blocks A and B are shared by all characters. Each block starts 4-aligned relativ
 | `0x2C56D` | 272 | sNpcTalk (`0x240d60`) | event flags, NPC hold bits, random word ([10](10-npc-talk.md)) |
 | `0x2C67D` | 40 | sKitchen (`0x1a4e64`) | Canteen dishes and copy ([08](08-progression.md)) |
 | `0x2C6A5` | 4 | sFlagChecker (`0x3f43d4`) | u32 flags ([below](#smaller-managers)) |
-| `0x2C6A9` | 20 | sMakeAmulet (`0x14c568`) | talisman making: 96-bit map, two u32 ([below](#smaller-managers)) |
+| `0x2C6A9` | 20 | sMakeAmulet (`0x14c568`) | 128-bit quest map, event scenes played ([below](#smaller-managers)) |
 | `0x2C6BD` | 978804 | sGuildCard (`0x163e0c`) | Guild Cards ([below](#guild-card-manager)) |
 | `0x11B631` | 6248 | sGuestHunter (`0x15bd3c`) | hunters met online: UTF-16 name, greeting, records of 308 B, "Hired …" copies |
 | `0x11CE99` | 160 | sTutorial (`0x539120`) | 8 + 152 B |
@@ -136,7 +136,7 @@ character, and the next save overwrites it (not tested in game).
 | `0x24C` | 36 | sPlayer `+0x4E0` | current pigment, 5 × RGBA + 16 B ([07](07-equipment.md)) |
 | `0x270` | u16 | sPlayer `+0x506` | default-colour flags |
 | `0x272` | 2 | — | struct padding (stale bytes) |
-| `0x274` | u32 | sPlayer `+0x508` | five 5-bit values, bits 5*i* … 5*i*+4 for pigment slot *i* (getter `0x26f194`, read with the colour by the pigment screen `0x5f1760`). Cleared when a slot gets an explicit or the default colour (`0x26f5b0`, `0x26f440`), set to 1 by the appearance menu (`0x26f0dc`). What the value selects is UNRESOLVED. The Guild Card copies it to card `+0x48`. 0 in all three slots |
+| `0x274` | u32 | sPlayer `+0x508` | five 5-bit values, bits 5*i* … 5*i*+4 for pigment slot *i* (getter `0x26f194`, read with the colour by the pigment screen `0x5f1760`). Cleared when a slot gets an explicit or the default colour (`0x26f5b0`, `0x26f440`), set to 1 by the appearance menu (`0x26f0dc`). It is a colour mode: the swatch code (`0x56f714`) draws the plain RGBA for 0, takes a separate path for 1 (`0x54700c`), and uses preset *v* − 2 of a runtime colour-pair table (`0x560900`, shared with `cUIOAppearanceColor` and character creation) for 2 and up. My Sets keep the same five values (game record `+0x78`, [07](07-equipment.md#my-sets-saved-equipment-sets)). The Guild Card copies it to card `+0x48`. 0 in all three slots |
 
 "sPlayer" here is the player data the getter `0x277454` returns: the loaded object
 `+0x7C`. The loader's offsets below are therefore `0x7C` higher than the header
@@ -194,8 +194,8 @@ activity manager. Its methods are in the `sItem` unit (`0x193000 … 0x199000`);
 | `0x23819` … `0x2381D` | `+0x6a` … `+0x6e` | 5 | u8, u8, u16, u8. UNRESOLVED |
 | `0x2381E` | `+0x6f` | 23 | pending village rewards ([10](10-npc-talk.md)) |
 | `0x23835`, `0x2383B` | `+0x86`, `+0x50` | 6, 25 | UNRESOLVED |
-| `0x23854`, `0x23954` | `+0x214`, `+0x314` | 256 each | two byte tables of the item box screen, `0, 0, 1, 2 …` in the analysed save; `0x194d6c` tests bit 1 of an entry. UNRESOLVED |
-| `0x23A54` | `+0x98` | u32 | read by Alchemy and the quest result (`0x3f2810`). UNRESOLVED |
+| `0x23854`, `0x23954` | `+0x214`, `+0x314` | 256 each | the Combination List's user order, for the pouch list (`cMixListPouch`) and the item box list (`cMixListBox`). Byte 0 is flags: bit 1 = custom order in use (set by the move `0x194dd8`; `0x194d6c` returns the order only then), bit 0 = filter toggle (`0x194fa0`). Then one byte per position: the index of a recipe of `table/itemPreData.itp` (183 records of 24 B: u16 ID, u32 item A, u32 item B, u32 result, u32 rate %). Default `order[i] = i` (`0x193178`); all three slots hold the default |
+| `0x23A54` | `+0x98` | u32 | Horns Coins traded in total, capped at 99,999,999 (`0x1978b0`, from `uUICrossCoin` and `uUICrossTicket`). The award check (`0x3f2810`) grants award 104 *Felicity's Picture Book* at 2000. 13 in the analysed save |
 
 The equipment entries use the 36-byte box format of [07](07-equipment.md); the
 helpers `0xdaba4` / `0xdac14` / `0xdadf0` construct, clear and copy them.
@@ -210,19 +210,25 @@ helpers `0xdaba4` / `0xdac14` / `0xdadf0` construct, clear and copy them.
 | `0x2248B` | `+0x34` | play time in seconds. The slot header (`+0x20`) and the own Guild Card (`+0x914`) are copies |
 | `0x2248F` | `+0x38` | f32, the play-time remainder in frames: `0x3f83a8` (each frame, from `0x69fb24`) adds the frame delta and at 60.0 moves one second into `+0x34` (capped at 35,999,999). 28.19 in the analysed save, 0 in a fresh slot |
 | `0x22493` | `+0x3c` | u32, copied to the own Guild Card `+0x86C` (`0x161ac8`) |
-| `0x23B9D` | sOtomo `+0x13848` | u8, u16, u8, u8. UNRESOLVED |
+| `0x23B9D` | sOtomo `+0x13848` | five u8: the Palico played as Prowler, the two hunting buddies (Palico index 0–83, `0xFF` = none; `0x25f880`, `0x25f840`), Palico Dojo sessions completed (at most 100; award 53 at 50, `0x3ed174`), Palicoes hired in total (at most 200, `0x25e88c`; title words at 10, 30, 50, 80). Analysed save: none, none / 2, 0, 8; fresh slots `FF FF FF 00 00` |
 | `0x23BA2` | `+0x138f6` | Palico service settings (`uUIOtomoService`): a 2-bit mode, seven small values (at most 9, 6, then 10 each, stored minus one at run time) and four u32, all bit-packed |
-| `0x2C466` | `+0x13910` … `+0x4a5a0` | Palico manager tail: 40, 16, 48, 1, 5 and 4 bytes. UNRESOLVED |
-| `0x2C4D8` | sVillage `+0x472`, `+0x473` | u8 pair. UNRESOLVED |
+| `0x2C466` | `+0x13910` | 5 × 8 B: IDs of distinct Palicoes that reached level 50 (`0x262e1c`, at level-up after a quest). Five give award 50 *To the Best Hunter Ever* (`0x3f2084`). One in the analysed save |
+| `0x2C48E` | `+0x48a78` | 16 B, the Palico Dojo teaching session: 4 Palico indices, a kind (1 = Palico skill from `rOtSkill`, else a support move), the skill or move ID, u16 in progress (the quest end `0x25c288` runs and clears it), two u32 UNRESOLVED |
+| `0x2C49E` | `+0x48a88` | 3 × 16 B, Palico Dojo training slots: Palico index (`0xFF` = empty), type 0–3, sessions left (one per quest, `0x25c554`) |
+| `0x2C4CE` | `+0x48ab8` | u8 count and 5 × u8 Palico indices: a team of up to five Palicoes (`0x261ebc`; `cMonNyanProcOtomoListWindow`, the Courier), probably the Meownster Hunters; each member gets experience after every quest (`0x26248c`) |
+| `0x2C4D4` | `+0x4a5a0` | u32: bit 0 a Palico has reached level 20, bit 1 level 25 (`0x262db8`, the hire function). Tested by `0x262f68` for award-check conditions 148 and 16. 3 in the analysed save |
+| `0x2C4D8` | sVillage `+0x472`, `+0x473` | Dark Piece and Dark Stone counts from the lottery of the cut Cave feature (`0x50636c`, run by the quest result and the title); the only reader is `uUICave`, whose text table holds only "NOT USED". 2, 1 in the analysed save |
 | `0x2C4DE` | `+0x3e4` | village pets' affection, one u8 per village (0x50d728 adds, at most 10; reaching 6 unlocks a Guild Card title word). The Village Moofah NPCs read it |
-| `0x2C4E2` | `+0x471` | u8. UNRESOLVED |
+| `0x2C4E2` | `+0x471` | times the Bherna Moofahs gave an item, at most 10 (`0x50d7e8`, after the gift of `S+0x3670`). Award 49 *Ball of Moofah Wool* at 10 (`0x3f31e4`) |
 | `0x2C4E3` | `+0x3e8` | village pets' names, 4 × char[32]: Moofy, Poogie, Poogie, Poogie in the analysed save |
 | `0x2C563` | `+0x468` | village pets' costumes, one u8 per pet, below 40 (the pet menu, `0x50d830`) |
-| `0x2C567` | `+0x46c`, `+0x470`, `+0x474` | u32, u8, u8. UNRESOLVED |
+| `0x2C567` | `+0x46c` | u32, bit *v* − 1: a village pet event seen in village *v* (1–4; set by `0x50d890` from the village script). Each bit unlocks a title word (*Fluffball*, *Hide-and-Seek*, *Snow Sprite*, *Guardian Pig*), all four *Pet Lover*. The trigger in play was not traced |
+| `0x2C56B` | `+0x470` | the Housekeeper (Room Service, `0x50c988`): index into the NPC table `0x162bde8` = 10, 16, 17, 18, 19, 710, 711 |
+| `0x2C56C` | `+0x474` | the village to start in on load (`0x6a6ea8`), set at the quest result. 1 (Bherna) in all three slots |
 | `0x2C679` | sNpcTalk `+0x60c` | a second random word, copied with the first and tested modulo 10000 the same way (`0x24217c`) |
 | `0x2C6A5` | sFlagChecker `+0x20` | flags: `0x3f43e8` ORs in the bits set at `+0x1c` of another object, so they latch |
-| `0x2C6A9` | sMakeAmulet `+0x64` | talisman making: a 96-bit map over a 107-entry table of 12-byte records. The quest end (`aQuest`, `0x14c688`) tests each entry's condition and sets its bit |
-| `0x2C6B5` | `+0x70`, `+0x74` | two u32. UNRESOLVED |
+| `0x2C6A9` | sMakeAmulet `+0x64` | a 128-bit map (`+0x64 … +0x73`) over a 107-entry table of 12-byte records. The quest end (`aQuest`, `0x14c688`) tests each entry's condition and sets its bit; the rotation modes 1 / 2 read it ([05](05-quests.md#rotating-quests--base--0x504b)). Entries 104–106 are in the fourth word, `0x700` in the analysed save. The transfer copies only the first 96 bits |
+| `0x2C6B9` | `+0x74` | u32, 24 one-time event scenes (table `0x15a0c78`: u16 event ID, u8 village, u8). `0x14f5d4` queues a scene whose bit is clear (airship, branch select, NPC 024, village load); `0x14f660` sets the bit after it plays. `0x00FDFFFF` in the analysed save: all but bit 17 (event 212) |
 
 The block A bytes of `sGameControl` are in [Block A header](#block-a-header-and-shared-settings).
 

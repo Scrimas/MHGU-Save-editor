@@ -176,8 +176,8 @@
                              "note": "setting ingredients does not add dishes. Bit i = ingredient i of table/kitchenListMenu.kcm (meat 0-8, grain 9-18, vegetables 19-28, fish 29-38, drinks 39-44), names in data/canteen.csv. DERIVED" },
     "canteen_dishes":      { "rel": "0x2C67D", "slot1_abs": "0x1B9319", "size": 13, "bits": 99, "confidence": "CONFIRMED",
                              "note": "includes the 2 starter meals (bits 0, 1). Bit j = record j of table/kitchenListMenu.kcm, names in data/canteen.csv. DERIVED" },
-    "canteen_dishes_copy": { "rel": "0x2C68D", "size": 13, "confidence": "UNRESOLVED",
-                             "note": "subset of dishes, probably seen/new marker; safe to leave untouched" }
+    "canteen_dishes_copy": { "rel": "0x2C68D", "size": 13, "confidence": "DERIVED",
+                             "note": "dishes viewed in the Canteen list (sKitchen +0x118): a clear bit shows NEW (0x736438), highlighting the row sets it (0x736498)" }
   },
   "awards": {
     "earned": { "rel": "0xC8115", "slot1_abs": "0x254DB1", "size": 17, "bits": 132,

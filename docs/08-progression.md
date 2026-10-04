@@ -13,7 +13,7 @@ save, slot 1's base is `0x18CC9C`.
 | Hunter Arts unlocked | `base + 0x2C13` | 24 bytes | IDs 1–70, 83–190 (178) | CONFIRMED |
 | Canteen ingredients | `base + 0x2F8F` | 6 bytes | 0–44 (45) | CONFIRMED |
 | Canteen dishes | `base + 0x2C67D` | 13 bytes | 0–98 (99) | CONFIRMED |
-| Dish list, second copy | `base + 0x2C68D` | 13 bytes | 0–98 | UNRESOLVED |
+| Dishes viewed (NEW marks) | `base + 0x2C68D` | 13 bytes | 0–98 | DERIVED |
 
 ## Hunter Arts — `base + 0x2C13`
 
@@ -108,13 +108,16 @@ Crockpot, Spirited Chowder, Affectionate Soup, Exquisite Rice, Ultimate Rice). N
 are `Kitchen_eng.gmd` 134–210, then 265–286, and bit 76 is indeed *Jumbo Fried
 Dragon* (Jumbo Fish + Wyvern Amber Ale). List: [`data/canteen.csv`](../data/canteen.csv).
 
-### Second copy — `base + 0x2C68D`
+### Dishes viewed — `base + 0x2C68D`
 
-**UNRESOLVED.** `sKitchen +0x118`, same size, directly after the dish field, and a
-subset of it. It gained bits when dishes were made in-game, but not for the dish
-written by hand, and that dish still appeared. Apart from the initialiser
-(`0x1a49ec`), no code that loads the sKitchen global touches it. Most likely a
-"seen/not new" marker. It is safe to leave it untouched.
+**DERIVED.** `sKitchen +0x118`, same size and bit order, directly after the dish
+field: the dishes already viewed in the Canteen list (`cUIOKitchenUp`). `0x736438`
+shows NEW for a learned dish whose bit is clear, and `0x736498` sets the bit when the
+cursor rests on the row (`0x5c03cc`). The initialiser `0x1a49ec` clears it. In the
+analysed save it holds 86 of the 99 learned dishes, the 13 others were never
+highlighted (the dish written by hand among them). It gained bits when dishes were made
+in-game because the list was browsed then. Leave it alone, or set a bit to drop a NEW
+mark.
 
 ## Editing checklist
 
