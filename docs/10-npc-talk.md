@@ -76,7 +76,7 @@ anything else adds nothing. That is how an s16 reaches 41811 or 111304.
 | 22–25 | type of the quest just accepted (`0x3bd35c`): 0 hunt / 2 capture / 3 gathering / 1 (line text is a placeholder). Send-off lines of the quest counter Gals | from dialogue |
 | 26 / 27 | byte `+0x4d8` of the player data clear / set: the hunter's gender, male / female. The slot header writer turns the same byte into its gender flag and the Smithy and the Armory read it ([11](11-save-map.md#slot-header--base--0x0-632-b), `base + 0x23B4B`) | from code |
 | 28 | HR ≥ *b* (u16 `+0x554` of the player object) | from code |
-| 29 | an item check, *b* is the slot (`0x2484c0`; NPC 991 only) | not read further |
+| 29 | a statistic of the hunter, sub-test *b* (`0x2484c0`, jump table `0x2484f0`, 114 entries); only NPC 991, the house Palico. See [below](#condition-29--the-house-palicos-remarks) | from code + dialogue |
 | 36–39 | a state word (`+0x2cc`) is 0 / 1 / 2 / 3 (Courier only) | not read further |
 | 41 / 42 | 41: delivery request *b* (1–13, the kind 1 requests) has been delivered: `0x524db8` tests bit *b* of `S+0x35a8` (`base + 0x32AF`), on report lines. 42: result of `0x3b1b90` equals *b* (Hub Gal tutorial lines) | 41 from code + dialogue, 42 not read further |
 | 44 / 45 | a Hunter's Notes entry can be unlocked: large monsters (`0x554da4`, 123 entries) / the second list (`0x55515c`, 30 entries) | from code + text |
@@ -103,6 +103,32 @@ anything else adds nothing. That is how an s16 reaches 41811 or 111304.
 
 The jump table of the evaluator is at `0x2451fc` (163 types). 58 types do not occur
 in any file.
+
+#### Condition 29 — the house Palico's remarks
+
+NPC 991 picks a remark by testing one statistic; each line gives the group away.
+**DERIVED** from the sub-test code and the lines it gates. Without a test, 0, 87, 89,
+91, 93, 97, 99, 101, 103 and 104 are true (`0x2487e4`), the other values up to 114 false
+(`0x248f40`).
+
+| *b* | Test | Remark |
+|---|---|---|
+| 1–8 | the first Palico's support bias (`0xe8458`) is Charisma, Fighting, Protection, Assisting, Healing, Bombing, Gathering, Beast | "My Bias is …" |
+| 9 | a Hub star-level test | Meownster Hunter duties |
+| 10–12 | large monster hunts (`0x52308c`, tally + captures) in three bands | novice / mid-rank / expert |
+| 13–16 | quests cleared (`0x526348`) in four bands | |
+| 17–20 | a progress level (`0x523504`, starts from the Hub star level) in four bands, the first below 8 | "still got a lot to learn" … "you'll go down in history" |
+| 21–24 | number of awards (`0x526564`), the first below 30 | "could I check the Awards on your Guild Card" |
+| 25–27 | Palico equipment owned (`0x1418e0` − `0x142a38`) | |
+| 28–41 | most used weapon (`0x249004`, Guild Card weapon usage); table `0x2486b8` maps *b* − 28 to the weapon class, in the on-screen order Great Sword … Bow | "You really like …" |
+| 42–55 | least used weapon, same order | "Ever thought about trying …" |
+| 56–61 | most used hunting style, Guild, Striker, Aerial, Adept, Alchemy, Valor (`0x2493c8`, the counters at `S+0x11a`, [11](11-save-map.md#the-block-s0x20--0x41f--base--0x280b)) | |
+| 62–67 | least used style, same order | |
+| 68–70 | Arena quests: none / some / all cleared | |
+| 71–73 | Palicoes hired (sOtomo `+0x1384c`), the first below 13 | |
+| 74–77 | how full the equipment box is | |
+| 78–80 | Prowler weapon usage (index 14 summed over the venues, `0x166aac`): below 11, 11–30, above 30 | see [04](04-weapon-usage.md#open-questions) |
+| 81–83 | Prowler quests cleared (`0x3b1e24`): none / some / all | |
 
 ### Actions
 
@@ -257,7 +283,8 @@ from a talk callback.
 Found through the conditions and actions above. The character block copies
 `+0x20 … +0x41f` of the game's save object to `base + 0x280B` in one piece
 (`0x51d0a0`), which places the first three rows; they agree with funds at
-`base + 0x280F` (`+0x24`) and Wycademy points at `base + 0x2817` (`+0x2c`).
+`base + 0x280F` (`+0x24`) and Wycademy points at `base + 0x2817` (`+0x2c`). The whole
+block is mapped in [11](11-save-map.md#the-block-s0x20--0x41f--base--0x280b).
 
 | Field | Offset | Type | Status |
 |---|---|---|---|

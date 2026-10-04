@@ -333,9 +333,10 @@ a received card: HR 999 / 148, sensible equipment types, transmog IDs.
 | `+0x854` | 3 × u16 | title: the card editor's fields 0–2, word, connector (`GC_Title_2`), word. The own card has 140, 0 (none), 502 | cUIOGuildCardEdit |
 | `+0x85A` | u8 | scene (editor field 4): 35 on the own card, of 136 | cUIOGuildCardEdit |
 | `+0x85B` | u8 | pose (editor field 3; a change calls `0x1605b8`): 3, of 22 | cUIOGuildCardEdit |
-| `+0x85C` | u16 | copied from `S+0x41a` | `0x161ac8` |
+| `+0x85C` | u16 | HR of a transferred save, 0xFFFF = none; copied from `S+0x41a` | `0x161ac8` |
 | `+0x86C` | u32 | copied from `sGameControl +0x3c` | `0x161ac8` |
 | `+0x878` | | greeting, UTF-16 | |
+| `+0x8B0` | 8 | the card owner's ID (the arena records name hunters by it; the leaderboard reads it as 4 × u16) | `0x6e7800` |
 | `+0x8B8` | u8 | flags (bit 1 from sPlayer `+0x9C5C`) | |
 | `+0x8BA` | 3 × 15 × u16 | weapon usage, Village / Hub / Arena ([04](04-weapon-usage.md)) | |
 | `+0x914` | u32 | play time ([05](05-quests.md)) | |
@@ -382,11 +383,27 @@ Record kinds come from separate builders: 3 (`0x162888`, called by the Smithy at
 | | bit 28 | the monster's Hunter's Notes entry is unlocked (`S+0x35b0`, `0x524728`) |
 | | bits 29–30, 31 | crown marks derived from the size records (`0x67310`) |
 
-`+0x1224 … +0x1378` holds 85 u32, which the card's initialiser `0x161184` sets in
-groups of five to `0x63800000` or `0x61400000` depending on an Arena quest test
-(`0x3b5ac0`). This is most likely the Arena log of the card screen (best time per
-quest and equipment set). The own card has one real entry, `0x0F682125`; its packing is
-UNRESOLVED. The rest of the card, `+0x1378 … +0x18B8`, is zero on the own card.
+### Arena log
+
+`+0x1224 … +0x1378` is the Arena log: 17 entries of 20 bytes (5 × u32), one per Arena
+quest of the Arena Counter's table (`0x164fdb4`, [above](#the-block-s0x20--0x41f--base--0x280b)).
+The initialiser `0x161184` sets each u32 to `0x63800000` (Arena) or `0x61400000`
+(Prowler Arena, test `0x3b5ac0`). **DERIVED** from the leaderboard code
+(`0x6e47a4`, `0x6e7488`), which reads the first u32 of an entry:
+
+| Bits | Content |
+|---|---|
+| 0–17 | best time in 1/100 s, 0 = no record |
+| 18–25 | weapons, *w*: the hunter's is *w* mod 15 and the partner's (*w* / 15) mod 15, 14 = none. Prowler quests use 9 instead of 15 (support bias, 8 shown as 14) |
+| 26–31 | UNRESOLVED (3 on the own card, 24 in the initial value) |
+
+The partner's 8-byte ID is at `+0x16D4` + 8 × quest; the card owner's own ID at
+`+0x8B0`. The own card has one entry: quest 0, `0x0F682125` = 84.85 s, weapon 218
+mod 15 = 8, no partner. It agrees with the save object's best time for that quest
+(`S+0x134`); its other four u32 still hold the initial value. Five per quest fits the
+five equipment sets of an Arena quest (`S+0xca0`), but which u32 the code picks
+for a set was not traced (UNRESOLVED). The rest of the card, `+0x1378 … +0x18B8`
+(partner IDs included), is zero on the own card.
 
 ## The save object S
 
@@ -402,6 +419,42 @@ tests and setters of the `sUserInfo` unit (`0x51c900 … 0x528000`), every load 
 global followed through the function, and the MT class of the callers. A caller's
 class comes from its vtable: entry 5 is `getDTI`, and the DTI object gets its name
 from the static constructor call `0x7aedcc(DTI, "name")`.
+
+### The block `S+0x20 … +0x41f` — `base + 0x280B`
+
+The loader reads these 1024 bytes in one piece (`0x51d0a0`), so here the file keeps the
+object order: `base + 0x280B + (X − 0x20)` for `S+X`. Its layout also shows in
+`0x51e6d8`, which fills S field by field from an older save layout: four style
+counters instead of six, no G-rank contribution points (most likely the MHXX data
+transfer).
+
+| `base +` | S field | Content |
+|---|---|---|
+| `0x280B` | `+0x20` | u32 HR points ([05](05-quests.md)). The transfer sets it to the points of HR min(HR, 7) (table `0x15973bc`) |
+| `0x280F` | `+0x24` | u32 funds (zenny); the adder `0x523150` keeps it within 0 … 9,999,999 |
+| `0x2813` | `+0x28` | u32, a copy of sItem `+0x69`: the quest result (`0x195758`) draws it at random below n = 1, 2 or 3, n growing with the Village and Hub star levels. Meaning UNRESOLVED |
+| `0x2817` | `+0x2c` | u32 Wycademy points, 0 … 9,999,999 (`0x523194`) |
+| `0x281B` | `+0x30` | u32 × 4 contribution points, low rank, Bherna / Kokoto / Pokke / Yukumo ([10](10-npc-talk.md)) |
+| `0x282B` | `+0x40` | u32 × 4 contribution points, G rank |
+| `0x283B` | `+0x50` | u8. UNRESOLVED |
+| `0x283C` | `+0x51` | u8 × 18 Special Permits held per deviant, at most 99 (`0x527a80`, see `S+0x4424` below) |
+| `0x284F` | `+0x64` … `+0x7b` | 12 × u16, zero in the analysed save. UNRESOLVED |
+| `0x2873` | `+0x88` … `+0xb3` | 44 bytes copied as one block by the transfer. UNRESOLVED |
+| `0x28AB` | `+0xc0` | u8 counter, the quest result adds 1 (at most 255) when byte `+0x5b` of the quest data is set (`0x388b28`). 18 in the analysed save |
+| `0x28AC` | `+0xc1` … `+0x10f` | u8, then u16 fields (8 at `+0xc2`, a u32 at `+0xd4`, 28 at `+0xd8`). UNRESOLVED |
+| `0x28FB` | `+0x110` … `+0x117` | u8 and two u16 of talk condition 54 ([10](10-npc-talk.md)) |
+| `0x2903` | `+0x118` | u8; the Start Menu raises a notice bit once it reaches 50 (`0x3f5200`). UNRESOLVED |
+| `0x2905` | `+0x11a` | **hunting style use counts**, 6 × u16: Guild, Striker, Aerial, Adept, Alchemy, Valor. Talk condition 29 (sub-tests 56–67, `0x2493c8`) picks the most and least used; the Palico's lines name the style. The transfer fills only the first four. 0, 0, 1, 26, 0, 375 in the analysed save |
+| `0x2913` | `+0x128` | 3 × (u8 day, u8 month, u16 year): the dates of the Arena Counter's *Latest Updates* (`Lb_ArenaCounterMsg` 13, 14) |
+| `0x291F` | `+0x134` | **Arena best times**, 57 × 12 B: u32 time in 1/100 s, then the 8-byte Guild Card ID of the hunter who set it. Index = the Arena Counter's quest table `0x164fdb4`: 0–10 Arena quests 20001–20011, 11–16 Prowler Arena 120001–120006, 17 onwards the challenge quests 1020001 …. The leaderboard (`0x6e47a4`) compares it with the cards' Arena logs. The analysed save has entries 0 (84.85 s, own ID), 6, 8 and 16 (the ID of a card in list 1) |
+| `0x2BCF` | `+0x3e4` … `+0x403` | fields set only by the initialisers `0x51cbe4` / `0x51ce44`. UNRESOLVED |
+| `0x2BEF` | `+0x404` | u8 × 3, the quests of the three *Latest Updates*, index into the same table (17 = none) |
+| `0x2BF3` | `+0x408` | u32 taken over by the transfer (old `+0x264`). UNRESOLVED |
+| `0x2BF7` | `+0x40c` | u8 × 3: the quest counter's last three daily picks, newest first (255 = none; `0x5264f4`, `cUIOQuestCounterDailyInfo`) |
+| `0x2BFB` | `+0x410` | u64, Unix time of the last daily pick (2026-09-19 17:25 UTC in the analysed save) |
+| `0x2C03` | `+0x418` | u8 Jukebox song chosen; 0 = none, the village plays its own music (`sSoundControl`, `uUIJukeBox`) |
+| `0x2C05` | `+0x41a` | u16 HR of the transferred save (`0x6b1eec`), 0xFFFF = no transfer. Copied to the Guild Card (`+0x85C`) |
+| `0x2C07` | `+0x41c` | u32 HR points of the transferred save |
 
 ### Unlock maps
 
@@ -576,10 +629,13 @@ in place, where this map says it lives, writes what the game would write.
 
 - S ([above](#the-save-object-s)): the maps at `S+0x970` and `S+0x9c4`, the seven
   Trader maps (which trade list each one indexes), `S+0x35dc`, `S+0xd8c`,
-  `S+0x3670`, `S+0x4408`, and the 3444 zero bytes at `S+0x3684`.
+  `S+0x3670`, `S+0x4408`, and the 3444 zero bytes at `S+0x3684`. In the
+  [`S+0x20` block](#the-block-s0x20--0x41f--base--0x280b): `S+0x28`, `S+0x50`,
+  `S+0x64 … +0x117` apart from the counters named there, `S+0x118`, `S+0x3e4 … +0x403`
+  and `S+0x408`.
 - Guild Card: the card info fields at `+0x1C` and `+0x20`, the 276-byte StreetPass
-  Palico record, the Arena log packing at card `+0x1224`, and which highlight code
-  means what in a history record.
+  Palico record, the Arena log's bits 26–31 and its other four u32 per quest, and
+  which highlight code means what in a history record.
 - Slot header / player record: the 224-byte block (`+0x02C`) and the u32 at `+0x274`.
 - Block A: `S+0x3676` (6 bytes), `S+0x367c`, `S+0x367d` and `sGameControl +0x5c`,
   `+0x5d`. Block B header: which download category types 5, 6 and 7 are.

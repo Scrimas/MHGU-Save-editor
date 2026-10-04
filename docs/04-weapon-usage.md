@@ -75,5 +75,10 @@ largest.
   ([11](11-save-map.md#card-layout-6328-b)), and the next card field, `+0x914`, is the
   play time (`0x25476D`, see [05 — Quests](05-quests.md#counters)). There is no room
   for a fourth venue.
-- **UNRESOLVED — Prowler.** Index 14 is included by position and was zero throughout,
-  so its meaning is inferred from the on-screen bar rather than observed changing.
+- **RESOLVED — Prowler is index 14.** `0x166aac` sums index 14 over the three venues
+  (card `+0x8D6`, `+0x8F4`, `+0x912`), and talk condition 29 compares that sum
+  (sub-tests 78 / 79 / 80: below 11, 11–30, above 30;
+  [10](10-npc-talk.md#conditions)). Its only user, the Palico NPC 991, then says
+  "how far I have to go as a Palico", "even Palicoes can be a real help" and "it's
+  okay to let us Prowlers handle large meownsters". **DERIVED** (code + dialogue); the
+  value itself was zero throughout.

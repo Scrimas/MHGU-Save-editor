@@ -29,7 +29,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18CF14,0,5463,char1,0x278,sItemBox,2300,19,12b 7b,0x19a518,obj100+0x18d1a,"item box: 2300 x (u12 item ID, u7 count), bit stream",CONFIRMED
 0x18E46B,0,4080,char1,0x17CF,sItemBox,1,,4080B,0x3e77c8,obj100+0x1eff4,"item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))",DERIVED
 0x18F45B,0,76,char1,0x27BF,sItemPouch,32,19,12b 7b,0x19e0d4,obj100+0x18b1a,"item pouch: 32 x (u12 item ID, u7 count), bit stream",CONFIRMED
-0x18F4A7,0,1024,char1,0x280B,sUserInfo,1,,1024B,0x51dbd0,obj17+0x20,S+0x20 talk state block (contribution points +0x10/+0x20),DERIVED
+0x18F4A7,0,1024,char1,0x280B,sUserInfo,1,,1024B,0x51dbd0,obj17+0x20,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
 0x18F8A7,0,4,char1,0x2C0B,sUserInfo,1,,4B,0x51dc64,obj17+0x424,bonus packs announced: bit N = privilege pack N notice shown (S+0x424),DERIVED
 0x18F8AB,0,4,char1,0x2C0F,sUserInfo,1,,4B,0x51dc78,obj17+0x428,bonus packs granted: bit N = contents of privilege pack N given (S+0x428),DERIVED
 0x18F8AF,0,24,char1,0x2C13,sUserInfo,1,,24B,0x51dc8c,obj17+0xd24,Hunter Arts unlocked,CONFIRMED

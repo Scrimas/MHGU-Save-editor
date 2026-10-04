@@ -34,7 +34,7 @@ LABELS = [
     ('char', 0x278, 0x1557, 'item box: 2300 x (u12 item ID, u7 count), bit stream', 'CONFIRMED'),
     ('char', 0x17CF, 0xFF0, 'item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))', 'DERIVED'),
     ('char', 0x27BF, 0x4C, 'item pouch: 32 x (u12 item ID, u7 count), bit stream', 'CONFIRMED'),
-    ('char', 0x280B, 0x400, 'S+0x20 talk state block (contribution points +0x10/+0x20)', 'DERIVED'),
+    ('char', 0x280B, 0x400, 'S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)', 'DERIVED'),
     ('char', 0x281B, 0x10, 'Village contribution points, low rank', 'DERIVED'),
     ('char', 0x282B, 0x10, 'Village contribution points, G rank', 'DERIVED'),
     ('char', 0x283C, 0x12, 'deviant permit counts', 'CONFIRMED'),
