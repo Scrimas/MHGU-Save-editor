@@ -25,7 +25,7 @@
               "Dreadking Rathalos","Thunderlord Zinogre","Grimclaw Tigrex","Hellblade Glavenus",
               "Nightcloak Malfestio","Rustrazor Ceanataur","Soulseer Mizutsune","Boltreaver Astalos",
               "Elderfrost Gammoth","Bloodbath Diablos"],
-    "gating_note": "G-rank deviant levels additionally require hunting the base monster at G-rank; that flag is NOT in these bitmaps and is UNRESOLVED"
+    "gating_note": "G-rank deviant levels additionally require one cleared G-rank quest against the base monster (Bloodbath: event flag 1226). Not a flag of its own: the unlock script reads the ordinary cleared bitmap; quest lists in docs/03-deviants.md 'Unlock gating'. DERIVED, write not tested"
   },
   "monsters": {
     "valid_indices": "1-137",
