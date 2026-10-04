@@ -284,6 +284,97 @@ traced.
 Not yet labelled: `+0x854 … +0x8B8` around the greeting, `+0xF18 … +0xF58`, and
 everything after `+0xF6C`.
 
+## The save object S
+
+S is the `sUserInfo` object (global `0x1897f78`). The character block stores its
+fields in loader order, not in object order, so a field's file offset cannot be
+computed from its object offset: always go through the
+[CSV](../data/save-map.csv) (column `object_field`, `obj17+X` = `S+X`). **Earlier
+documents got this wrong once:** the Hunter's Notes maps are at `base + 0x32B7`, not
+`base + 0x5027` (corrected below and in [10](10-npc-talk.md)).
+
+**DERIVED** throughout. Each field was named from the methods that use it: the bit
+tests and setters of the `sUserInfo` unit (`0x51c900 … 0x528000`), every load of the
+global followed through the function, and the MT class of the callers. A caller's
+class comes from its vtable: entry 5 is `getDTI`, and the DTI object gets its name
+from the static constructor call `0x7aedcc(DTI, "name")`.
+
+### Unlock maps
+
+Most of S is unlock maps. A map comes with two copies of the same size:
+
+| Copy | Saved | Role |
+|---|---|---|
+| U | yes | unlocked / owned |
+| N1 | some | set with every newly set bit of U, cleared when the session's notice runs |
+| N2 | yes | the NEW mark: set with every newly set bit of U, cleared when the player views the item |
+
+A setter only touches N1 and N2 when the bit of U was clear. So an editor that unlocks
+something should set U and N2 (the game then shows it as NEW), or U only (no NEW mark).
+
+| `base +` | S field | Content |
+|---|---|---|
+| `0x2C0B` | `+0x424` | bonus packs announced. Bit N (1–4) = the Room Service showed the notice for privilege pack N (`0x78b6e4`) |
+| `0x2C0F` | `+0x428` | bonus packs granted. Bit N = the contents of pack N were given (`0x522c64` → `0x522d60`). Owned packs are bits 1–4 of the shared `S+0x420` ([below](#block-a-header-and-shared-settings)). A pack is a list of records: type 5 unlocks a title word, type 6 a Guild Card scene |
+| `0x2C2B`, `0x2C43` | `+0xd3c`, `+0xd54` | N1 and N2 of the Hunter Arts map at `0x2C13` |
+| `0x2C5B` | `+0xd6c` | 31-bit map. `0x524580` ORs in `S+0xd74` when a quest ends, monster code (`uEm014`, `uEm022`, `uEm085` through `0x524534`, table `0x162c124`) sets `S+0xd74`. Alchemy counts it over a range (`0x5244c8`) |
+| `0x2C5F` | `+0xd70`, `+0xd74` | u32 map tested by `0x5245d4`, then the pending map above |
+| `0x2F77`, `0x2F7F` | `+0x958`, `+0x968` | the progress map is 64 bits (U `+0x958`, N1 `+0x960` unsaved, N2 `+0x968`). The progress word of [10](10-npc-talk.md) is its first half |
+| `0x2F87`, `0x2F8B` | `+0x970` … `+0x978` | 32-bit map with copies. Bits 3–8 are set by the quest flow (`0x14d53c`) from the values 601, 504, 510, 508, 1005 of a 12-byte table, bit 2 when the quest with ID 601 is cleared (`0x524064`). Meaning UNRESOLVED |
+| `0x2F97` | `+0x98c` | N2 of the Canteen ingredients |
+| `0x2F9F`, `0x2FA7` | `+0x994`, `+0x9a4` | Poogie costumes, 64 bits. The award check sets award bit 68 (`GC_Medal` entry 68 is *Poogie Ball*, "collected some of the Poogie costumes") once 10 of bits 6–39 are set, bits 28, 35, 36 and 39 not counted (`0x524190`). The Trader's list builder also tests it |
+| `0x2FAF`, `0x2FB3` | `+0x9ac` … `+0x9b4` | deviants, 18 bits: bit i is set when the first Special Permit quest of deviant i becomes available (`0x3eb1f4`, table `0x162a5f4` = 40101, 40201 … 41811); also raises event flags 185 and 962 |
+| `0x2FB7`, `0x2FBB` | `+0x9b8` … `+0x9c0` | deviants the Courier hands out Special Permits for, 18 bits, same setter. `0x52779c` / `0x5278a8` lend the highest bit temporarily in two modes and keep what to restore at `S+0x43fc` / `S+0x4400` |
+| `0x2FBF` | `+0x9c4` … `+0x9cc` | a 32-bit map with copies. No reader found; 0 in the analysed save |
+| `0x2FC7`, `0x306B` | `+0x9d0`, `+0xb18` | Guild Card title words, first part: 1312 bits for the 1309 words of `GC_Title_1`. 77 are unlocked from the start (`0x162154`) |
+| `0x310F`, `0x311F` | `+0xbbc`, `+0xbdc` | title words, second part: 121 words of `GC_Title_2`, 117 from the start |
+| `0x312F`, `0x3143` | `+0xbec`, `+0xc14` | Guild Card scenes, the 136 backgrounds of `GC_background` |
+| `0x317F`, `0x3183` | `+0xc64`, `+0xc6c` | Guild Card poses: 22 (Stand … Beam Fire). 17 from the start, bits 17–21 from the DLC map at sPrivilege `+0xf44` |
+| `0x31A7`, `0x31CB` | `+0x2a0c`, `+0x2a54` | Smithy decorations listed / NEW, bit = `rDecoCreateData` entry |
+| `0x31EF` … `0x32AB` | `+0x3488` … `+0x35a4` | the Trader (`uUITradeCenter`): seven maps with copies. Sizes 32, 32, 448, 160, 32, 32 and 32 bits. The 448-bit map fits `tradeLimitedHonorList` (442 entries) and the 160-bit map `tradeLimitedPaperList` (131), by size only. The Cross ticket screen reads the N2 of the sixth map |
+| `0x32AF` | `+0x35a8` | u32 flags read by the Trader and the Start Menu. UNRESOLVED |
+| `0x32B3` | `+0x35ac` | Hunter's Notes tips read: a clear bit shows NEW (`cUIOHunterNoteTips`) |
+| `0x32B7`, `0x32C7` | `+0x35b0`, `+0x35c0` | **Hunter's Notes, large monsters**: 123 bits and their NEW copy. Talk action 6 sets both (`0x247ae4`); condition 44 tests them (`0x245848`) |
+| `0x32D7` | `+0x35d0` | **Hunter's Notes, second list**: 30 bits, talk action 7 and condition 45 |
+| `0x32DB` | `+0x35dc` | two u32 maps the Room Service compares with the DLC map sPrivilege `+0xf3c`. UNRESOLVED |
+| `0x32E3` | `+0x3668` | network flags of `sFestaNetwork`, which keeps a runtime part at `+0x366c` |
+| `0x32E7` … `0x3347` | `+0xd98` … `+0xe38` | two shop lists (`uUIGuildShop`, list index at UI `+0x8c`): 256 bits listed + NEW each, stride 96 |
+| `0x3367` | `+0xe58` | Armory (equipment shop): 21 equipment types × (20 B listed, 20 B NEW), stride 60 with the N1 copy between. Bit = shop entry of the type |
+| `0x36AF` | `+0x1344` | Smithy weapon lists, types 7–21: 15 × (20 B listed, 20 B NEW), stride 60 |
+| `0x3907` … `0x4327` | `+0x16c8` … | Smithy armor lists, head … legs: 5 × (288 B listed, 288 B NEW), stride 864. The list builder `0x6f9438` sets an entry when it first lists it; the cursor clears NEW (`0x524a38`) |
+| `0x4447` … `0x459B` | `+0x27a8` … | Palico smithy, weapons / helms / mail: 3 × (68 B listed, 68 B NEW), stride 204 |
+| `0x45DF` … `0x4CDF` | `+0x2a78` … | 15 weapon types × 1024 bits, by weapon ID. Set by the Smithy list builder `0x6ffd40` for the entries it shows |
+| `0x4D5F` | `+0x31f8` | the same for armor, 5248 bits by armor ID |
+| `0x4FFB`, `0x5023` | `+0xca0`, `+0xcf0` | Arena: bit 5 × quest + set = the Arena quest was cleared with that of its five equipment sets (`0x3b13c8`, read by `uUIArenaCounter`) |
+| `0x505B`, `0x505F` | `+0x35e4`, `+0x35ec` | Jukebox songs. `0x523b9c` unlocks the default ones |
+| `0x5063`, `0x506F` | `+0x35f0`, `+0x3608` | Lab upgrades offered (96 bits, set by quest clears in `0x524e58`) |
+| `0x507B`, `0x5087` | `+0x3614`, `+0x362c` | **Lab upgrades installed** (Soaratorium Lab, `researchReinforce`): bit = upgrade − 1. Bits 0–2 are the three Item Box expansions; `0x525878` counts them for the box size (202 callers) |
+| `0x5093`, `0x509B` | `+0x3638`, `+0x3648` | supply drop sets of the Provision Division |
+| `0x50A3`, `0x50AB` | `+0x3650`, `+0x3660` | Cross coin trades |
+| `0x50B3`, `0x50B7` | `+0xd18`, `+0xd20` | deviants, 18 bits: bit i is set when quest 40000 + 100 (i + 1) + 16 is cleared, the deviant's last level (`0x3f18b8`) |
+
+### Counters and other fields
+
+| `base +` | S field | Content |
+|---|---|---|
+| `0x4FEF` | `+0xd8c` | 12 bytes read by NPCs, the Footbath and Alchemy. UNRESOLVED |
+| `0x5053` | `+0x3670` | u32, cleared by the quest result flow (`0x38b948`). UNRESOLVED |
+| `0x50BB` | `+0x3680`, `+0x3682` | u8, then a u16 the game recomputes at load (`0x6b1e6c`: a sum over a 112-entry table, capped at 9999). The common script and the Start Menu test it (> 199) |
+| `0x50BE` | `+0x3684` | 3444 bytes, cleared together with `+0x3682` at init (`0x51cb08`). Zero in the analysed save; no reader found |
+| `0x5057` | — | not S: the u32 `+0x2838` of the chat-phrase object, loaded inside the S stream (`0x55d450` → `0x1cab58`). A value ≥ 0 is replaced by `0xF8FC7E3F` at load |
+| `0x5E32` | `+0x43f8` | 3 bytes, no reader found |
+| `0x5E35` | `+0x43fb` | control option byte: set by the Game options window, read by the player and the target camera. Cleared together with `+0x446c` (`0x3f7e1c`) |
+| `0x5E36`, `0x5E3A` | `+0x43fc`, `+0x4400` | the Courier's lent bit, see `+0x9b8` |
+| `0x5E3E` | `+0x4408` | u32 pair get/set by the title menu (`0x5279b4` / `0x5279cc`). UNRESOLVED |
+| `0x5E46` | `+0x4410` | u32. UNRESOLVED |
+| `0x5E4A` | `+0x4414` | Courier flags (`0x6d1e4c` and the Courier's talk code) |
+| `0x5E4E` | `+0x4418` | quest counter ([05](05-quests.md#counters)). `0x526f70` adds 1 per quest, except when the quest state is 6 |
+| `0x5E52` | `+0x441c` | counter reference. `0x5279e0` stores it and, at 210 or more, folds both into 210 … 419 |
+| `0x5E56` | `+0x4420` | Courier points: `0x526f70` adds a per-quest amount from a table |
+| `0x5E5A` | `+0x4424` | Special Permit points, 18 × u16, at most 9999. 100 points make one permit; the Courier (`0x527a80`, `0x527b2c`) hands them out up to 99 held, the held counts being the [deviant permit counts](#character-slot) at `base + 0x283C` (`S+0x51`) |
+| `0x5E7E` | `+0x4448` | permit points waiting at the Courier, 18 × u16 |
+| `0x5EA2` | `+0x446c` | control option bytes: the Game options window writes `+0`, the target camera reads `+0`, `+2`, `+3`, the Hunter Art gauge `+2`, `+3` |
+
 ## Downloaded quests — block B
 
 **CONFIRMED** (loader `0x36bdc` reads each store as one block; the archives parse and
@@ -333,8 +424,9 @@ in place, where this map says it lives, writes what the game would write.
 
 ## Open questions
 
-- Most bitmaps of S between `base + 0x2C0B` and `base + 0x5EA2` have exact boundaries
-  (see the CSV) but no meaning. Each needs the code that tests it.
+- S ([above](#the-save-object-s)): the maps at `S+0x970` and `S+0x9c4`, the seven
+  Trader maps (which trade list each one indexes), `S+0x35a8`, `S+0x35dc`, `S+0xd8c`,
+  `S+0x3670`, `S+0x4408`, and the 3444 zero bytes at `S+0x3684`.
 - The Guild Card manager's 4400 / 1800 / 276 / 13800 / 1800-byte members, and what
   list 2 holds.
 - The 224 + 12 + 4 bytes of the slot header taken from sPlayer. Their source fields are

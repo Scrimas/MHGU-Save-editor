@@ -30,139 +30,139 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18E46B,0,4080,char1,0x17CF,sItemBox,1,,4080B,0x3e77c8,obj100+0x1eff4,"item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))",DERIVED
 0x18F45B,0,76,char1,0x27BF,sItemPouch,32,19,12b 7b,0x19e0d4,obj100+0x18b1a,"item pouch: 32 x (u12 item ID, u7 count), bit stream",CONFIRMED
 0x18F4A7,0,1024,char1,0x280B,sUserInfo,1,,1024B,0x51dbd0,obj17+0x20,S+0x20 talk state block (contribution points +0x10/+0x20),DERIVED
-0x18F8A7,0,4,char1,0x2C0B,sUserInfo,1,,4B,0x51dc64,obj17+0x424,,
-0x18F8AB,0,4,char1,0x2C0F,sUserInfo,1,,4B,0x51dc78,obj17+0x428,,
+0x18F8A7,0,4,char1,0x2C0B,sUserInfo,1,,4B,0x51dc64,obj17+0x424,bonus packs announced: bit N = privilege pack N notice shown (S+0x424),DERIVED
+0x18F8AB,0,4,char1,0x2C0F,sUserInfo,1,,4B,0x51dc78,obj17+0x428,bonus packs granted: bit N = contents of privilege pack N given (S+0x428),DERIVED
 0x18F8AF,0,24,char1,0x2C13,sUserInfo,1,,24B,0x51dc8c,obj17+0xd24,Hunter Arts unlocked,CONFIRMED
-0x18F8C7,0,24,char1,0x2C2B,sUserInfo,1,,24B,0x51dca0,obj17+0xd3c,,
-0x18F8DF,0,24,char1,0x2C43,sUserInfo,1,,24B,0x51dcb4,obj17+0xd54,,
-0x18F8F7,0,4,char1,0x2C5B,sUserInfo,1,,4B,0x51dcc8,obj17+0xd6c,,
-0x18F8FB,0,4,char1,0x2C5F,sUserInfo,1,,4B,0x51dcd8,obj17+0xd70,,
+0x18F8C7,0,24,char1,0x2C2B,sUserInfo,1,,24B,0x51dca0,obj17+0xd3c,"Hunter Arts unlocked, runtime NEW copy (S+0xd3c)",DERIVED
+0x18F8DF,0,24,char1,0x2C43,sUserInfo,1,,24B,0x51dcb4,obj17+0xd54,"Hunter Arts unlocked, NEW (S+0xd54)",DERIVED
+0x18F8F7,0,4,char1,0x2C5B,sUserInfo,1,,4B,0x51dcc8,obj17+0xd6c,"31-bit map committed from S+0xd74 at quest end, counted by Alchemy (S+0xd6c)",DERIVED
+0x18F8FB,0,4,char1,0x2C5F,sUserInfo,1,,4B,0x51dcd8,obj17+0xd70,u32 map (S+0xd70) + pending 31-bit map set by monster code (S+0xd74),DERIVED
 0x18F8FF,0,12,char1,0x2C63,sUserInfo,1,,12B,0x51dcec,obj17+0xd78,Palico learned maps,DERIVED
 0x18F90B,0,8,char1,0x2C6F,sUserInfo,1,,8B,0x51dd00,obj17+0xd84,Palico learned maps,DERIVED
 0x18F913,0,256,char1,0x2C77,sUserInfo,1,,256B,0x51dd14,obj17+0x42c,quests cleared bitmap,CONFIRMED
 0x18FA13,0,256,char1,0x2D77,sUserInfo,1,,256B,0x51dd28,obj17+0x52c,quests seen bitmap,CONFIRMED
 0x18FB13,0,256,char1,0x2E77,sUserInfo,1,,256B,0x51dd3c,obj17+0x62c,quests failed bitmap,DERIVED
 0x18FC13,0,8,char1,0x2F77,sUserInfo,1,,8B,0x51dd50,obj17+0x958,contains: progress word,DERIVED
-0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,,
-0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,,
-0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,,
+0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,progress map NEW (S+0x968),DERIVED
+0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"unlock map set by the quest flow, bits 2-8 (S+0x970) + runtime NEW copy",UNRESOLVED
+0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,unlock map NEW (S+0x978),UNRESOLVED
 0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,contains: Canteen ingredients,CONFIRMED
-0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,,
-0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,,
-0x18FC43,0,8,char1,0x2FA7,sUserInfo,1,,8B,0x51ddd8,obj17+0x9a4,,
-0x18FC4B,0,4,char1,0x2FAF,sUserInfo,1,,4B,0x51ddec,obj17+0x9ac,,
-0x18FC4F,0,4,char1,0x2FB3,sUserInfo,1,,4B,0x51de00,obj17+0x9b4,,
-0x18FC53,0,4,char1,0x2FB7,sUserInfo,1,,4B,0x51de14,obj17+0x9b8,,
-0x18FC57,0,4,char1,0x2FBB,sUserInfo,1,,4B,0x51de24,obj17+0x9c0,,
-0x18FC5B,0,4,char1,0x2FBF,sUserInfo,1,,4B,0x51de38,obj17+0x9c4,,
-0x18FC5F,0,4,char1,0x2FC3,sUserInfo,1,,4B,0x51de4c,obj17+0x9cc,,
-0x18FC63,0,164,char1,0x2FC7,sUserInfo,1,,164B,0x51de5c,obj17+0x9d0,,
-0x18FD07,0,164,char1,0x306B,sUserInfo,1,,164B,0x51de70,obj17+0xb18,,
-0x18FDAB,0,16,char1,0x310F,sUserInfo,1,,16B,0x51de84,obj17+0xbbc,,
-0x18FDBB,0,16,char1,0x311F,sUserInfo,1,,16B,0x51de98,obj17+0xbdc,,
-0x18FDCB,0,20,char1,0x312F,sUserInfo,1,,20B,0x51deac,obj17+0xbec,,
-0x18FDDF,0,20,char1,0x3143,sUserInfo,1,,20B,0x51dec0,obj17+0xc14,,
+0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,Canteen ingredients NEW (S+0x98c),DERIVED
+0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,"Poogie costumes owned, 64 bits (S+0x994)",DERIVED
+0x18FC43,0,8,char1,0x2FA7,sUserInfo,1,,8B,0x51ddd8,obj17+0x9a4,Poogie costumes NEW (S+0x9a4),DERIVED
+0x18FC4B,0,4,char1,0x2FAF,sUserInfo,1,,4B,0x51ddec,obj17+0x9ac,deviants: bit i = deviant i's first Special Permit quest unlocked (S+0x9ac) + runtime NEW copy,DERIVED
+0x18FC4F,0,4,char1,0x2FB3,sUserInfo,1,,4B,0x51de00,obj17+0x9b4,"deviants unlocked, NEW (S+0x9b4)",DERIVED
+0x18FC53,0,4,char1,0x2FB7,sUserInfo,1,,4B,0x51de14,obj17+0x9b8,"deviants offered by the Courier, 18 bits (S+0x9b8) + runtime NEW copy",DERIVED
+0x18FC57,0,4,char1,0x2FBB,sUserInfo,1,,4B,0x51de24,obj17+0x9c0,"deviants offered by the Courier, NEW (S+0x9c0)",DERIVED
+0x18FC5B,0,4,char1,0x2FBF,sUserInfo,1,,4B,0x51de38,obj17+0x9c4,"unlock map S+0x9c4 with NEW copies, no reader found",UNRESOLVED
+0x18FC5F,0,4,char1,0x2FC3,sUserInfo,1,,4B,0x51de4c,obj17+0x9cc,"unlock map S+0x9c4 with NEW copies, no reader found",UNRESOLVED
+0x18FC63,0,164,char1,0x2FC7,sUserInfo,1,,164B,0x51de5c,obj17+0x9d0,"Guild Card title words, part 1 unlocked: 1312 bits, 1309 words (GC_Title_1)",DERIVED
+0x18FD07,0,164,char1,0x306B,sUserInfo,1,,164B,0x51de70,obj17+0xb18,"Guild Card title words, part 1 NEW",DERIVED
+0x18FDAB,0,16,char1,0x310F,sUserInfo,1,,16B,0x51de84,obj17+0xbbc,"Guild Card title words, part 2 unlocked: 121 words (GC_Title_2)",DERIVED
+0x18FDBB,0,16,char1,0x311F,sUserInfo,1,,16B,0x51de98,obj17+0xbdc,"Guild Card title words, part 2 NEW",DERIVED
+0x18FDCB,0,20,char1,0x312F,sUserInfo,1,,20B,0x51deac,obj17+0xbec,Guild Card scenes unlocked: 136 (GC_background),DERIVED
+0x18FDDF,0,20,char1,0x3143,sUserInfo,1,,20B,0x51dec0,obj17+0xc14,Guild Card scenes NEW,DERIVED
 0x18FDF3,0,20,char1,0x3157,sUserInfo,1,,20B,0x51ded4,obj17+0xc28,"awards, game-side map",DERIVED
 0x18FE07,0,20,char1,0x316B,sUserInfo,1,,20B,0x51dee4,obj17+0xc50,award notices,DERIVED
-0x18FE1B,0,4,char1,0x317F,sUserInfo,1,,4B,0x51def8,obj17+0xc64,,
-0x18FE1F,0,4,char1,0x3183,sUserInfo,1,,4B,0x51df0c,obj17+0xc6c,,
+0x18FE1B,0,4,char1,0x317F,sUserInfo,1,,4B,0x51def8,obj17+0xc64,Guild Card poses unlocked: 22,DERIVED
+0x18FE1F,0,4,char1,0x3183,sUserInfo,1,,4B,0x51df0c,obj17+0xc6c,Guild Card poses NEW,DERIVED
 0x18FE23,0,16,char1,0x3187,sUserInfo,1,,16B,0x51df1c,obj17+0xc70,quest sets completed,CONFIRMED
 0x18FE33,0,16,char1,0x3197,sUserInfo,1,,16B,0x51df2c,obj17+0xc90,quest set notices,DERIVED
-0x18FE43,0,36,char1,0x31A7,sUserInfo,1,,36B,0x51df40,obj17+0x2a0c,,
-0x18FE67,0,36,char1,0x31CB,sUserInfo,1,,36B,0x51df54,obj17+0x2a54,,
-0x18FE8B,0,4,char1,0x31EF,sUserInfo,1,,4B,0x51df68,obj17+0x3488,,
-0x18FE8F,0,4,char1,0x31F3,sUserInfo,1,,4B,0x51df7c,obj17+0x3490,,
-0x18FE93,0,4,char1,0x31F7,sUserInfo,1,,4B,0x51df90,obj17+0x3494,,
-0x18FE97,0,4,char1,0x31FB,sUserInfo,1,,4B,0x51dfa4,obj17+0x349c,,
-0x18FE9B,0,56,char1,0x31FF,sUserInfo,1,,56B,0x51dfb8,obj17+0x34a0,,
-0x18FED3,0,56,char1,0x3237,sUserInfo,1,,56B,0x51dfcc,obj17+0x3510,,
-0x18FF0B,0,20,char1,0x326F,sUserInfo,1,,20B,0x51dfe0,obj17+0x3548,,
-0x18FF1F,0,20,char1,0x3283,sUserInfo,1,,20B,0x51dff4,obj17+0x3570,,
-0x18FF33,0,4,char1,0x3297,sUserInfo,1,,4B,0x51e008,obj17+0x3584,,
-0x18FF37,0,4,char1,0x329B,sUserInfo,1,,4B,0x51e01c,obj17+0x358c,,
-0x18FF3B,0,4,char1,0x329F,sUserInfo,1,,4B,0x51e030,obj17+0x3590,,
-0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,,
-0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,,
-0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,,
-0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,,
-0x18FF4F,0,4,char1,0x32B3,sUserInfo,1,,4B,0x51e094,obj17+0x35ac,,
-0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,,
-0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,,
-0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,,
-0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,,
-0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,,
-0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,,
-0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,,
-0x18FFC3,0,32,char1,0x3327,sUserInfo,1,,32B,0x51e130,obj17+0xdf8,,
-0x18FFE3,0,32,char1,0x3347,sUserInfo,1,,32B,0x51e144,obj17+0xe38,,
-0x190003,0,840,char1,0x3367,sUserInfo,21,320,20B 20B,0x51e160,obj17+0xe58,,
-0x19034B,0,600,char1,0x36AF,sUserInfo,15,320,20B 20B,0x51e198,obj17+0x1344,,
-0x1905A3,0,288,char1,0x3907,sUserInfo,1,,288B,0x51e1c8,obj17+0x16c8,,
-0x1906C3,0,288,char1,0x3A27,sUserInfo,1,,288B,0x51e1dc,obj17+0x1908,,
-0x1907E3,0,288,char1,0x3B47,sUserInfo,1,,288B,0x51e1f0,obj17+0x1a28,,
-0x190903,0,288,char1,0x3C67,sUserInfo,1,,288B,0x51e204,obj17+0x1c68,,
-0x190A23,0,288,char1,0x3D87,sUserInfo,1,,288B,0x51e218,obj17+0x1d88,,
-0x190B43,0,288,char1,0x3EA7,sUserInfo,1,,288B,0x51e22c,obj17+0x1fc8,,
-0x190C63,0,288,char1,0x3FC7,sUserInfo,1,,288B,0x51e240,obj17+0x20e8,,
-0x190D83,0,288,char1,0x40E7,sUserInfo,1,,288B,0x51e254,obj17+0x2328,,
-0x190EA3,0,288,char1,0x4207,sUserInfo,1,,288B,0x51e268,obj17+0x2448,,
-0x190FC3,0,288,char1,0x4327,sUserInfo,1,,288B,0x51e27c,obj17+0x2688,,
-0x1910E3,0,68,char1,0x4447,sUserInfo,1,,68B,0x51e290,obj17+0x27a8,,
-0x191127,0,68,char1,0x448B,sUserInfo,1,,68B,0x51e2a4,obj17+0x2830,,
-0x19116B,0,68,char1,0x44CF,sUserInfo,1,,68B,0x51e2b8,obj17+0x2874,,
-0x1911AF,0,68,char1,0x4513,sUserInfo,1,,68B,0x51e2cc,obj17+0x28fc,,
-0x1911F3,0,68,char1,0x4557,sUserInfo,1,,68B,0x51e2dc,obj17+0x2940,,
-0x191237,0,68,char1,0x459B,sUserInfo,1,,68B,0x51e2f0,obj17+0x29c8,,
-0x19127B,0,128,char1,0x45DF,sUserInfo,1,,128B,0x51e304,obj17+0x2a78,,
-0x1912FB,0,128,char1,0x465F,sUserInfo,1,,128B,0x51e318,obj17+0x2af8,,
-0x19137B,0,128,char1,0x46DF,sUserInfo,1,,128B,0x51e32c,obj17+0x2b78,,
-0x1913FB,0,128,char1,0x475F,sUserInfo,1,,128B,0x51e340,obj17+0x2bf8,,
-0x19147B,0,128,char1,0x47DF,sUserInfo,1,,128B,0x51e354,obj17+0x2c78,,
-0x1914FB,0,128,char1,0x485F,sUserInfo,1,,128B,0x51e368,obj17+0x2cf8,,
-0x19157B,0,128,char1,0x48DF,sUserInfo,1,,128B,0x51e37c,obj17+0x2d78,,
-0x1915FB,0,128,char1,0x495F,sUserInfo,1,,128B,0x51e390,obj17+0x2df8,,
-0x19167B,0,128,char1,0x49DF,sUserInfo,1,,128B,0x51e3a4,obj17+0x2e78,,
-0x1916FB,0,128,char1,0x4A5F,sUserInfo,1,,128B,0x51e3b8,obj17+0x2ef8,,
-0x19177B,0,128,char1,0x4ADF,sUserInfo,1,,128B,0x51e3cc,obj17+0x2f78,,
-0x1917FB,0,128,char1,0x4B5F,sUserInfo,1,,128B,0x51e3e0,obj17+0x2ff8,,
-0x19187B,0,128,char1,0x4BDF,sUserInfo,1,,128B,0x51e3f4,obj17+0x3078,,
-0x1918FB,0,128,char1,0x4C5F,sUserInfo,1,,128B,0x51e408,obj17+0x30f8,,
-0x19197B,0,128,char1,0x4CDF,sUserInfo,1,,128B,0x51e41c,obj17+0x3178,,
-0x1919FB,0,656,char1,0x4D5F,sUserInfo,1,,656B,0x51e430,obj17+0x31f8,,
-0x191C8B,0,12,char1,0x4FEF,sUserInfo,1,,12B,0x51e444,obj17+0xd8c,,
-0x191C97,0,40,char1,0x4FFB,sUserInfo,1,,40B,0x51e454,obj17+0xca0,,
-0x191CBF,0,40,char1,0x5023,sUserInfo,1,,40B,0x51e464,obj17+0xcf0,"contains: Hunter's Notes, large monsters; Hunter's Notes, new marks; Hunter's Notes, second map",DERIVED
+0x18FE43,0,36,char1,0x31A7,sUserInfo,1,,36B,0x51df40,obj17+0x2a0c,Smithy decorations listed: bit = rDecoCreateData entry,DERIVED
+0x18FE67,0,36,char1,0x31CB,sUserInfo,1,,36B,0x51df54,obj17+0x2a54,Smithy decorations NEW,DERIVED
+0x18FE8B,0,4,char1,0x31EF,sUserInfo,1,,4B,0x51df68,obj17+0x3488,"Trader map 1, 32 bits (S+0x3488) + runtime NEW copy",DERIVED
+0x18FE8F,0,4,char1,0x31F3,sUserInfo,1,,4B,0x51df7c,obj17+0x3490,Trader map 1 NEW,DERIVED
+0x18FE93,0,4,char1,0x31F7,sUserInfo,1,,4B,0x51df90,obj17+0x3494,"Trader map 2, 32 bits (S+0x3494) + runtime NEW copy",DERIVED
+0x18FE97,0,4,char1,0x31FB,sUserInfo,1,,4B,0x51dfa4,obj17+0x349c,Trader map 2 NEW,DERIVED
+0x18FE9B,0,56,char1,0x31FF,sUserInfo,1,,56B,0x51dfb8,obj17+0x34a0,"Trader limited trades, 448 bits (tradeLimitedHonorList has 442)",DERIVED
+0x18FED3,0,56,char1,0x3237,sUserInfo,1,,56B,0x51dfcc,obj17+0x3510,Trader limited trades NEW,DERIVED
+0x18FF0B,0,20,char1,0x326F,sUserInfo,1,,20B,0x51dfe0,obj17+0x3548,"Trader limited trades, 160 bits (tradeLimitedPaperList has 131)",DERIVED
+0x18FF1F,0,20,char1,0x3283,sUserInfo,1,,20B,0x51dff4,obj17+0x3570,"Trader limited trades, 160 bits, NEW",DERIVED
+0x18FF33,0,4,char1,0x3297,sUserInfo,1,,4B,0x51e008,obj17+0x3584,"Trader map, 32 bits (S+0x3584)",DERIVED
+0x18FF37,0,4,char1,0x329B,sUserInfo,1,,4B,0x51e01c,obj17+0x358c,Trader map S+0x3584 NEW,DERIVED
+0x18FF3B,0,4,char1,0x329F,sUserInfo,1,,4B,0x51e030,obj17+0x3590,"Trader ticket map, 32 bits (S+0x3590)",DERIVED
+0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,Trader ticket map NEW (also read by the Cross ticket screen),DERIVED
+0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,"Trader map, 32 bits (S+0x359c)",DERIVED
+0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,Trader map S+0x359c NEW,DERIVED
+0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,u32 flags read by the Trader and the Start Menu (S+0x35a8),UNRESOLVED
+0x18FF4F,0,4,char1,0x32B3,sUserInfo,1,,4B,0x51e094,obj17+0x35ac,Hunter's Notes tips read: clear bit = NEW (S+0x35ac),DERIVED
+0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,"Hunter's Notes, large monsters: 123 bits (S+0x35b0)",DERIVED
+0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,"Hunter's Notes, large monsters NEW (S+0x35c0)",DERIVED
+0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,"Hunter's Notes, second list: 30 bits (S+0x35d0)",DERIVED
+0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,two u32 maps compared with the DLC map sPrivilege+0xf3c by the Room Service (S+0x35dc),UNRESOLVED
+0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,network flags (sFestaNetwork; runtime part at S+0x366c),UNRESOLVED
+0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,"shop list 1 listed: 256 bits (uUIGuildShop, S+0xd98)",DERIVED
+0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,shop list 1 NEW (S+0xdd8),DERIVED
+0x18FFC3,0,32,char1,0x3327,sUserInfo,1,,32B,0x51e130,obj17+0xdf8,shop list 2 listed: 256 bits (S+0xdf8),DERIVED
+0x18FFE3,0,32,char1,0x3347,sUserInfo,1,,32B,0x51e144,obj17+0xe38,shop list 2 NEW (S+0xe38),DERIVED
+0x190003,0,840,char1,0x3367,sUserInfo,21,320,20B 20B,0x51e160,obj17+0xe58,"Armory (equipment shop): 21 types x (20 B listed, 20 B NEW), bit = shop entry",DERIVED
+0x19034B,0,600,char1,0x36AF,sUserInfo,15,320,20B 20B,0x51e198,obj17+0x1344,"Smithy weapon lists, types 7-21: 15 x (20 B listed, 20 B NEW)",DERIVED
+0x1905A3,0,288,char1,0x3907,sUserInfo,1,,288B,0x51e1c8,obj17+0x16c8,"Smithy armor list, head: listed",DERIVED
+0x1906C3,0,288,char1,0x3A27,sUserInfo,1,,288B,0x51e1dc,obj17+0x1908,"Smithy armor list, head: NEW",DERIVED
+0x1907E3,0,288,char1,0x3B47,sUserInfo,1,,288B,0x51e1f0,obj17+0x1a28,"Smithy armor list, chest: listed",DERIVED
+0x190903,0,288,char1,0x3C67,sUserInfo,1,,288B,0x51e204,obj17+0x1c68,"Smithy armor list, chest: NEW",DERIVED
+0x190A23,0,288,char1,0x3D87,sUserInfo,1,,288B,0x51e218,obj17+0x1d88,"Smithy armor list, arms: listed",DERIVED
+0x190B43,0,288,char1,0x3EA7,sUserInfo,1,,288B,0x51e22c,obj17+0x1fc8,"Smithy armor list, arms: NEW",DERIVED
+0x190C63,0,288,char1,0x3FC7,sUserInfo,1,,288B,0x51e240,obj17+0x20e8,"Smithy armor list, waist: listed",DERIVED
+0x190D83,0,288,char1,0x40E7,sUserInfo,1,,288B,0x51e254,obj17+0x2328,"Smithy armor list, waist: NEW",DERIVED
+0x190EA3,0,288,char1,0x4207,sUserInfo,1,,288B,0x51e268,obj17+0x2448,"Smithy armor list, legs: listed",DERIVED
+0x190FC3,0,288,char1,0x4327,sUserInfo,1,,288B,0x51e27c,obj17+0x2688,"Smithy armor list, legs: NEW",DERIVED
+0x1910E3,0,68,char1,0x4447,sUserInfo,1,,68B,0x51e290,obj17+0x27a8,"Palico smithy, weapons: listed",DERIVED
+0x191127,0,68,char1,0x448B,sUserInfo,1,,68B,0x51e2a4,obj17+0x2830,"Palico smithy, weapons: NEW",DERIVED
+0x19116B,0,68,char1,0x44CF,sUserInfo,1,,68B,0x51e2b8,obj17+0x2874,"Palico smithy, helms: listed",DERIVED
+0x1911AF,0,68,char1,0x4513,sUserInfo,1,,68B,0x51e2cc,obj17+0x28fc,"Palico smithy, helms: NEW",DERIVED
+0x1911F3,0,68,char1,0x4557,sUserInfo,1,,68B,0x51e2dc,obj17+0x2940,"Palico smithy, mail: listed",DERIVED
+0x191237,0,68,char1,0x459B,sUserInfo,1,,68B,0x51e2f0,obj17+0x29c8,"Palico smithy, mail: NEW",DERIVED
+0x19127B,0,128,char1,0x45DF,sUserInfo,1,,128B,0x51e304,obj17+0x2a78,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1912FB,0,128,char1,0x465F,sUserInfo,1,,128B,0x51e318,obj17+0x2af8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x19137B,0,128,char1,0x46DF,sUserInfo,1,,128B,0x51e32c,obj17+0x2b78,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1913FB,0,128,char1,0x475F,sUserInfo,1,,128B,0x51e340,obj17+0x2bf8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x19147B,0,128,char1,0x47DF,sUserInfo,1,,128B,0x51e354,obj17+0x2c78,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1914FB,0,128,char1,0x485F,sUserInfo,1,,128B,0x51e368,obj17+0x2cf8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x19157B,0,128,char1,0x48DF,sUserInfo,1,,128B,0x51e37c,obj17+0x2d78,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1915FB,0,128,char1,0x495F,sUserInfo,1,,128B,0x51e390,obj17+0x2df8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x19167B,0,128,char1,0x49DF,sUserInfo,1,,128B,0x51e3a4,obj17+0x2e78,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1916FB,0,128,char1,0x4A5F,sUserInfo,1,,128B,0x51e3b8,obj17+0x2ef8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x19177B,0,128,char1,0x4ADF,sUserInfo,1,,128B,0x51e3cc,obj17+0x2f78,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1917FB,0,128,char1,0x4B5F,sUserInfo,1,,128B,0x51e3e0,obj17+0x2ff8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x19187B,0,128,char1,0x4BDF,sUserInfo,1,,128B,0x51e3f4,obj17+0x3078,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1918FB,0,128,char1,0x4C5F,sUserInfo,1,,128B,0x51e408,obj17+0x30f8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x19197B,0,128,char1,0x4CDF,sUserInfo,1,,128B,0x51e41c,obj17+0x3178,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
+0x1919FB,0,656,char1,0x4D5F,sUserInfo,1,,656B,0x51e430,obj17+0x31f8,Smithy armor map by armor ID: 5248 bits (set by the list builder 0x6ffd40),DERIVED
+0x191C8B,0,12,char1,0x4FEF,sUserInfo,1,,12B,0x51e444,obj17+0xd8c,"S+0xd8c: 12 bytes read by NPCs, the Footbath and Alchemy",UNRESOLVED
+0x191C97,0,40,char1,0x4FFB,sUserInfo,1,,40B,0x51e454,obj17+0xca0,Arena: bit 5 x quest + set = cleared with that equipment set (S+0xca0),DERIVED
+0x191CBF,0,40,char1,0x5023,sUserInfo,1,,40B,0x51e464,obj17+0xcf0,Arena equipment sets NEW (S+0xcf0),DERIVED
 0x191CE7,0,8,char1,0x504B,sUserInfo,1,,8B,0x51e478,obj17+0x35d4,rotating quests bitmap,CONFIRMED
-0x191CEF,0,4,char1,0x5053,sUserInfo,1,,4B,0x51e48c,obj17+0x3670,,
-0x191CF3,0,4,char1,0x5057,sUserInfo,1,,4B,0x1cab78,obj100+0x641c8,,
-0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,,
-0x191CFB,0,4,char1,0x505F,sUserInfo,1,,4B,0x51e4c8,obj17+0x35ec,,
-0x191CFF,0,12,char1,0x5063,sUserInfo,1,,12B,0x51e4dc,obj17+0x35f0,,
-0x191D0B,0,12,char1,0x506F,sUserInfo,1,,12B,0x51e4f0,obj17+0x3608,,
-0x191D17,0,12,char1,0x507B,sUserInfo,1,,12B,0x51e504,obj17+0x3614,,
-0x191D23,0,12,char1,0x5087,sUserInfo,1,,12B,0x51e518,obj17+0x362c,,
-0x191D2F,0,8,char1,0x5093,sUserInfo,1,,8B,0x51e52c,obj17+0x3638,,
-0x191D37,0,8,char1,0x509B,sUserInfo,1,,8B,0x51e540,obj17+0x3648,,
-0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,,
-0x191D47,0,8,char1,0x50AB,sUserInfo,1,,8B,0x51e568,obj17+0x3660,,
-0x191D4F,0,4,char1,0x50B3,sUserInfo,1,,4B,0x51e57c,obj17+0xd18,,
-0x191D53,0,4,char1,0x50B7,sUserInfo,1,,4B,0x51e58c,obj17+0xd20,,
-0x191D57,0,1,char1,0x50BB,sUserInfo,1,,1B,0x51e59c,obj17+0x3680,,
-0x191D58,0,2,char1,0x50BC,sUserInfo,1,,2B,0x51e5b0,obj17+0x3682,,
-0x191D5A,0,3444,char1,0x50BE,sUserInfo,1,,3444B,0x51e5c4,obj17+0x3684,,
-0x192ACE,0,3,char1,0x5E32,sUserInfo,1,,3B,0x51e5d8,obj17+0x43f8,,
-0x192AD1,0,1,char1,0x5E35,sUserInfo,1,,1B,0x51e5ec,obj17+0x43fb,,
-0x192AD2,0,4,char1,0x5E36,sUserInfo,1,,4B,0x51e600,obj17+0x43fc,,
-0x192AD6,0,4,char1,0x5E3A,sUserInfo,1,,4B,0x51e610,obj17+0x4400,,
-0x192ADA,0,8,char1,0x5E3E,sUserInfo,1,,8B,0x51e62c,,,
-0x192AE2,0,4,char1,0x5E46,sUserInfo,1,,4B,0x51e640,obj17+0x4410,,
-0x192AE6,0,4,char1,0x5E4A,sUserInfo,1,,4B,0x51e654,obj17+0x4414,,
+0x191CEF,0,4,char1,0x5053,sUserInfo,1,,4B,0x51e48c,obj17+0x3670,u32 cleared by the quest result flow 0x38b948 (S+0x3670),UNRESOLVED
+0x191CF3,0,4,char1,0x5057,sUserInfo,1,,4B,0x1cab78,obj100+0x641c8,u32 of the chat-phrase object (+0x2838) loaded inside the S stream; a value >= 0 is replaced by 0xF8FC7E3F at load,DERIVED
+0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,Jukebox songs unlocked (S+0x35e4) + runtime NEW copy,DERIVED
+0x191CFB,0,4,char1,0x505F,sUserInfo,1,,4B,0x51e4c8,obj17+0x35ec,Jukebox songs NEW (S+0x35ec),DERIVED
+0x191CFF,0,12,char1,0x5063,sUserInfo,1,,12B,0x51e4dc,obj17+0x35f0,"Lab upgrades offered, 96 bits (S+0x35f0) + runtime NEW copy",DERIVED
+0x191D0B,0,12,char1,0x506F,sUserInfo,1,,12B,0x51e4f0,obj17+0x3608,Lab upgrades offered NEW (S+0x3608),DERIVED
+0x191D17,0,12,char1,0x507B,sUserInfo,1,,12B,0x51e504,obj17+0x3614,"Lab upgrades installed, bit = researchReinforce ID - 1; bits 0-2 = Item Box expansions (S+0x3614) + runtime NEW copy",DERIVED
+0x191D23,0,12,char1,0x5087,sUserInfo,1,,12B,0x51e518,obj17+0x362c,Lab upgrades installed NEW (S+0x362c),DERIVED
+0x191D2F,0,8,char1,0x5093,sUserInfo,1,,8B,0x51e52c,obj17+0x3638,"supply drop sets unlocked (Provision Division, S+0x3638) + runtime NEW copy",DERIVED
+0x191D37,0,8,char1,0x509B,sUserInfo,1,,8B,0x51e540,obj17+0x3648,supply drop sets NEW (S+0x3648),DERIVED
+0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,Cross coin trades unlocked (S+0x3650) + runtime NEW copy,DERIVED
+0x191D47,0,8,char1,0x50AB,sUserInfo,1,,8B,0x51e568,obj17+0x3660,Cross coin trades NEW (S+0x3660),DERIVED
+0x191D4F,0,4,char1,0x50B3,sUserInfo,1,,4B,0x51e57c,obj17+0xd18,deviants: bit i = deviant i's last Special Permit quest (level 16) cleared (S+0xd18),DERIVED
+0x191D53,0,4,char1,0x50B7,sUserInfo,1,,4B,0x51e58c,obj17+0xd20,"deviant last level cleared, NEW (S+0xd20)",DERIVED
+0x191D57,0,1,char1,0x50BB,sUserInfo,1,,1B,0x51e59c,obj17+0x3680,"u8 + u16 (S+0x3680, S+0x3682); the u16 is recomputed at load (0x6b1e6c)",DERIVED
+0x191D58,0,2,char1,0x50BC,sUserInfo,1,,2B,0x51e5b0,obj17+0x3682,"u8 + u16 (S+0x3680, S+0x3682); the u16 is recomputed at load (0x6b1e6c)",DERIVED
+0x191D5A,0,3444,char1,0x50BE,sUserInfo,1,,3444B,0x51e5c4,obj17+0x3684,"S+0x3684: zero in the analysed save, cleared with S+0x3682 at init, no reader found",UNRESOLVED
+0x192ACE,0,3,char1,0x5E32,sUserInfo,1,,3B,0x51e5d8,obj17+0x43f8,"S+0x43f8, no reader found",UNRESOLVED
+0x192AD1,0,1,char1,0x5E35,sUserInfo,1,,1B,0x51e5ec,obj17+0x43fb,"control option byte: set by the Game options window, read by the player and the target camera (S+0x43fb)",DERIVED
+0x192AD2,0,4,char1,0x5E36,sUserInfo,1,,4B,0x51e600,obj17+0x43fc,"Courier: deviant bit lent for temporary mode 1, to restore (S+0x43fc)",DERIVED
+0x192AD6,0,4,char1,0x5E3A,sUserInfo,1,,4B,0x51e610,obj17+0x4400,"Courier: deviant bit lent for temporary mode 2, to restore (S+0x4400)",DERIVED
+0x192ADA,0,8,char1,0x5E3E,sUserInfo,1,,8B,0x51e62c,,u32 pair get/set by the title menu (S+0x4408),UNRESOLVED
+0x192AE2,0,4,char1,0x5E46,sUserInfo,1,,4B,0x51e640,obj17+0x4410,u32 (S+0x4410),UNRESOLVED
+0x192AE6,0,4,char1,0x5E4A,sUserInfo,1,,4B,0x51e654,obj17+0x4414,"Courier flags, u32 (S+0x4414)",DERIVED
 0x192AEA,0,4,char1,0x5E4E,sUserInfo,1,,4B,0x51e668,obj17+0x4418,contains: quest counter,DERIVED
-0x192AEE,0,4,char1,0x5E52,sUserInfo,1,,4B,0x51e67c,obj17+0x441c,,
-0x192AF2,0,4,char1,0x5E56,sUserInfo,1,,4B,0x51e690,obj17+0x4420,,
-0x192AF6,0,36,char1,0x5E5A,sUserInfo,1,,36B,0x51e6a4,obj17+0x4424,,
-0x192B1A,0,36,char1,0x5E7E,sUserInfo,1,,36B,0x51e6b8,obj17+0x4448,,
-0x192B3E,0,4,char1,0x5EA2,sUserInfo,1,,4B,0x51e6cc,obj17+0x446c,,
+0x192AEE,0,4,char1,0x5E52,sUserInfo,1,,4B,0x51e67c,obj17+0x441c,"quest counter reference: both folded into [210, 420) by 0x5279e0 (S+0x441c)",DERIVED
+0x192AF2,0,4,char1,0x5E56,sUserInfo,1,,4B,0x51e690,obj17+0x4420,"Courier points: added per quest, turned into Special Permits (S+0x4420)",DERIVED
+0x192AF6,0,36,char1,0x5E5A,sUserInfo,1,,36B,0x51e6a4,obj17+0x4424,"Special Permit points per deviant, 18 x u16, at most 9999 (100 = 1 permit, S+0x4424)",DERIVED
+0x192B1A,0,36,char1,0x5E7E,sUserInfo,1,,36B,0x51e6b8,obj17+0x4448,"Special Permit points waiting at the Courier, 18 x u16 (S+0x4448)",DERIVED
+0x192B3E,0,4,char1,0x5EA2,sUserInfo,1,,4B,0x51e6cc,obj17+0x446c,"control option bytes: target camera, Hunter Art gauge (S+0x446c)",DERIVED
 0x192B42,0,274,char1,0x5EA6,sUserInfo,1,,274B,0x51dbf0,obj17+0x72c,"monster hunt tallies, u16 index 1-137",CONFIRMED
 0x192C54,0,274,char1,0x5FB8,sUserInfo,1,,274B,0x51dc04,obj17+0x83e,"monster capture counts, u16 index 1-137",CONFIRMED
 0x192D66,0,548,char1,0x60CA,sUserInfo,1,,548B,0x51dc2c,obj99+0x0,"monster size records, (u16 min, u16 max) index 1-137",CONFIRMED
