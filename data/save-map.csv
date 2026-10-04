@@ -435,30 +435,30 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B934D,0,4,char1,0x2C6B1,sEventCtrl?,1,,4B,0x14c5a4,obj100+0x6606c,,
 0x1B9351,0,4,char1,0x2C6B5,sEventCtrl?,1,,4B,0x14c5b4,obj100+0x66070,,
 0x1B9355,0,4,char1,0x2C6B9,sEventCtrl?,1,,4B,0x3e78b8,obj100+0x66074,,
-0x1B9359,0,4,char1,0x2C6BD,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73208,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B935D,0,1233,char1,0x2C6C1,sGuildCard,1,,1233B,0x3cf810,obj100+0x1ccd00,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B982E,0,4,char1,0x2CB92,sGuildCard,1,,4B,0x3cf820,obj100+0x7320c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9832,0,2,char1,0x2CB96,sGuildCard,1,,2B,0x166d8c,obj100+0x71f10,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9834,0,22,char1,0x2CB98,sGuildCard,1,,22B,0x166d9c,obj100+0x71f12,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B984A,0,8,char1,0x2CBAE,sGuildCard,1,,8B,0x166dac,obj100+0x71f28,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9852,0,4,char1,0x2CBB6,sGuildCard,1,,4B,0x166dbc,obj100+0x71f30,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9856,0,4,char1,0x2CBBA,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73218,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B985A,0,1195,char1,0x2CBBE,sGuildCard,1,,1195B,0x3cf810,obj100+0x1cd200,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9D05,0,7154,char1,0x2D069,sGuildCard,98,584,4B 2B 22B 8B 4B 4B 29B,0x3cf820,obj100+0x7321c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB8F7,0,4,char1,0x2EC5B,sGuildCard,1,,4B,0x3cf820,obj100+0x7383c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB8FB,0,2,char1,0x2EC5F,sGuildCard,1,,2B,0x166d8c,obj100+0x73014,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB8FD,0,22,char1,0x2EC61,sGuildCard,1,,22B,0x166d9c,obj100+0x73016,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB913,0,8,char1,0x2EC77,sGuildCard,1,,8B,0x166dac,obj100+0x7302c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB91B,0,4,char1,0x2EC7F,sGuildCard,1,,4B,0x166dbc,obj100+0x73034,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB91F,0,623930,char1,0x2EC83,sGuildCard,1,,623930B,0x3cf8fc,obj100+0x1d3900,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x253E59,0,6328,char1,0xC71BD,sGuildCard,1,,6328B,0x163e30,obj100+0x66120,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, weapon usage +0x8BA, history +0x918, awards +0xF58)",DERIVED
-0x255711,0,4400,char1,0xC8A75,sGuildCard,1,,4400B,0x163e44,obj100+0x679d8,"Guild Card manager +0x18D8, 4400 B",UNRESOLVED
-0x256841,0,3650,char1,0xC9BA5,sGuildCard,50,584,4B 29B 4B 2B 22B 8B 4B,0x3cf7e4,obj100+0x7c208,Guild Card list 2: 50 elements + padding,DERIVED
-0x257683,0,313150,char1,0xCA9E7,sGuildCard,1,,313150B,0x3cf8fc,obj100+0x2a2100,Guild Card list 2: 50 elements + padding,DERIVED
-0x2A3DC1,0,1800,char1,0x117125,sGuildCard,1,,1800B,0x163e68,obj100+0x68b0c,"Guild Card manager +0x2A0C, 1800 B",UNRESOLVED
-0x2A44C9,0,276,char1,0x11782D,sGuildCard,1,,276B,0x163e7c,obj100+0x69214,"Guild Card manager +0x3114, 276 B",UNRESOLVED
-0x2A45DD,0,13800,char1,0x117941,sGuildCard,1,,13800B,0x163e90,obj100+0x69328,"Guild Card manager +0x3228, 13800 B",UNRESOLVED
-0x2A7BC5,0,1800,char1,0x11AF29,sGuildCard,1,,1800B,0x3e78cc,obj100+0x6c910,"Guild Card manager +0x6810, 1800 B",UNRESOLVED
+0x1B9359,0,4,char1,0x2C6BD,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73208,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B935D,0,1233,char1,0x2C6C1,sGuildCard,1,,1233B,0x3cf810,obj100+0x1ccd00,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B982E,0,4,char1,0x2CB92,sGuildCard,1,,4B,0x3cf820,obj100+0x7320c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9832,0,2,char1,0x2CB96,sGuildCard,1,,2B,0x166d8c,obj100+0x71f10,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9834,0,22,char1,0x2CB98,sGuildCard,1,,22B,0x166d9c,obj100+0x71f12,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B984A,0,8,char1,0x2CBAE,sGuildCard,1,,8B,0x166dac,obj100+0x71f28,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9852,0,4,char1,0x2CBB6,sGuildCard,1,,4B,0x166dbc,obj100+0x71f30,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9856,0,4,char1,0x2CBBA,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73218,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B985A,0,1195,char1,0x2CBBE,sGuildCard,1,,1195B,0x3cf810,obj100+0x1cd200,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9D05,0,7154,char1,0x2D069,sGuildCard,98,584,4B 2B 22B 8B 4B 4B 29B,0x3cf820,obj100+0x7321c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB8F7,0,4,char1,0x2EC5B,sGuildCard,1,,4B,0x3cf820,obj100+0x7383c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB8FB,0,2,char1,0x2EC5F,sGuildCard,1,,2B,0x166d8c,obj100+0x73014,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB8FD,0,22,char1,0x2EC61,sGuildCard,1,,22B,0x166d9c,obj100+0x73016,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB913,0,8,char1,0x2EC77,sGuildCard,1,,8B,0x166dac,obj100+0x7302c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB91B,0,4,char1,0x2EC7F,sGuildCard,1,,4B,0x166dbc,obj100+0x73034,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB91F,0,623930,char1,0x2EC83,sGuildCard,1,,623930B,0x3cf8fc,obj100+0x1d3900,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x253E59,0,6328,char1,0xC71BD,sGuildCard,1,,6328B,0x163e30,obj100+0x66120,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)",DERIVED
+0x255711,0,4400,char1,0xC8A75,sGuildCard,1,,4400B,0x163e44,obj100+0x679d8,"list 1 card info: 100 x 44 B (date received +0, comment +4, sort keys +0x1C/+0x20, sender ID +0x21)",DERIVED
+0x256841,0,3650,char1,0xC9BA5,sGuildCard,50,584,4B 29B 4B 2B 22B 8B 4B,0x3cf7e4,obj100+0x7c208,Guild Card inbox (list 2): 50 elements + padding,DERIVED
+0x257683,0,313150,char1,0xCA9E7,sGuildCard,1,,313150B,0x3cf8fc,obj100+0x2a2100,Guild Card inbox (list 2): 50 elements + padding,DERIVED
+0x2A3DC1,0,1800,char1,0x117125,sGuildCard,1,,1800B,0x163e68,obj100+0x68b0c,Guild Card inbox info: 50 x 36 B (date received +0),DERIVED
+0x2A44C9,0,276,char1,0x11782D,sGuildCard,1,,276B,0x163e7c,obj100+0x69214,StreetPass Palico to send: one 276 B record,DERIVED
+0x2A45DD,0,13800,char1,0x117941,sGuildCard,1,,13800B,0x163e90,obj100+0x69328,Palico inbox: 50 x 276 B,DERIVED
+0x2A7BC5,0,1800,char1,0x11AF29,sGuildCard,1,,1800B,0x3e78cc,obj100+0x6c910,Palico inbox info: 50 x 36 B,DERIVED
 0x2A82CD,0,1,char1,0x11B631,sGuestHunter,1,,1B,0x15bd58,obj100+0x81828,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
 0x2A82CE,0,1,char1,0x11B632,sGuestHunter,1,,1B,0x15bd68,obj100+0x81829,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
 0x2A82CF,0,1,char1,0x11B633,sGuestHunter,1,,1B,0x15bd78,obj100+0x8182a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED

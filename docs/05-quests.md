@@ -590,10 +590,11 @@ The Guild Card's list of the 10 most recently completed quests, newest first.
 | Field | Offset in record | Type |
 |---|---|---|
 | Date | `+0x00` | u8 day, u8 month, u16 year (`13 09 ea 07` = 19 September 2026), the console date of the clear |
-| Record kind | `+0x04` | u16, 7 in all ten records. The insert code `0x1628a0` also builds records of kind 3, and kind 11 is never inserted ([11](11-save-map.md#card-layout-6328-b)) |
+| Record kind | `+0x04` | u16, 7 (quest) in all ten records. Other builders make kinds 3–6 (Smithy, awards), and kind 11 is never inserted ([11](11-save-map.md#card-layout-6328-b)) |
 | Quest ID | `+0x06` | u16 |
 | Quest name | `+0x08` | UTF-16LE, 16 characters, cut with `…` |
-| unknown | `+0x28` | three bytes that repeat between records of the same period (`18 23 24`, `03 18 23`), then six u32. In the four EX deviant records the first u32 is `0x0402`, `0x0412`, `0x042d`, `0x0425`, which looks like a monster ID with a deviant marker |
+| Highlight codes | `+0x28` | u8 × 3, code 36 = empty. **DERIVED** from the writer `0x1636a8`: a new highlight replaces the slot with the highest code when its own code is lower, and the three are kept sorted ascending, so lower codes win. The quest end adds codes 20–22 for party results (`0x390cd0`). The card screen turns a code into a message through a 36-entry table (`0x5a35e8`); which code means what is UNRESOLVED |
+| Highlight values | `+0x2C`, `+0x38` | u32 × 3 and u32 × 3: the first and second value of each highlight, same slot order. In the four EX deviant records the code-3 highlight has `0x0402`, `0x0412`, `0x042d`, `0x0425` as its first value, which looks like a monster ID with a deviant marker |
 | Hunter and Palico names | from `+0x44` | UTF-16LE |
 | Weapon types | `+0x9C` | u8 × 4, one per party slot, in the order of [04 — Weapon usage](04-weapon-usage.md): 13 = Charge Blade in eight records, 10 = Dual Blades in two, which matches the usage counters; 15 = a Palico, `ff` = empty slot. **DERIVED** from the values |
 
@@ -653,9 +654,10 @@ otherwise.
   bitmap of [08](08-progression.md) and two copies that drive notices. The same
   serializer walk also lands on the Canteen ingredients of 08 (`base + 0x2F8F`), which
   cross-checks the field map.
-- **UNRESOLVED — quest history record**: the bytes at `+0x28`, and how an event
-  quest is logged. The u16 ID cannot hold event IDs (≥ 1 000 000), and no record of
-  the analysed save is an event quest.
+- **PARTLY RESOLVED — quest history record.** `+0x28` holds three highlights (code
+  and two values each, see the table above); the meaning of each code is open. How an
+  event quest is logged is UNRESOLVED: the u16 ID cannot hold event IDs (≥ 1 000 000),
+  and no record of the analysed save is an event quest.
 - **Not checked — whether a board filters on `questData+0x11` values 1–4.** The
   [quest set](#quest-sets--base--0x3187) counter reads them and treats 1–4 like 5–8
   (same village), which supports the home-village reading.

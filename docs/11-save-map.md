@@ -214,14 +214,39 @@ analysed save it contains DLC Palicoes with owner "Capcom".
 
 | `base +` | Size | Content |
 |---|---|---|
-| `0x2C6BD` | 633,600 | list 1: 100 elements, then padding |
+| `0x2C6BD` | 633,600 | list 1: the stored Guild Cards, 100 elements, then padding |
 | `0xC71BD` | 6328 | **own Guild Card** |
-| `0xC8A75` | 4400 | manager `+0x18D8`, UNRESOLVED |
-| `0xC9BA5` | 316,800 | list 2: 50 elements, then padding |
-| `0x117125` | 1800 | manager `+0x2A0C`, UNRESOLVED |
-| `0x11782D` | 276 | manager `+0x3114`, UNRESOLVED |
-| `0x117941` | 13800 | manager `+0x3228`, UNRESOLVED |
-| `0x11AF29` | 1800 | manager `+0x6810`, UNRESOLVED |
+| `0xC8A75` | 4400 | list 1 card info: 100 × 44 B, [below](#card-info-records) (manager `+0x18D8`) |
+| `0xC9BA5` | 316,800 | list 2: the Guild Card inbox, 50 elements, then padding |
+| `0x117125` | 1800 | list 2 card info: 50 × 36 B (`+0x2A0C`) |
+| `0x11782D` | 276 | the StreetPass Palico you send: one 276-byte record (`+0x3114`) |
+| `0x117941` | 13800 | Palico inbox: 50 × 276 B, same record (`+0x3228`) |
+| `0x11AF29` | 1800 | Palico inbox info: 50 × 36 B (`+0x6810`) |
+
+**DERIVED.** List 2 and the two Palico lists belong to the Courier Service, which the
+Courier describes in his talk file: received Guild Cards go to an inbox, received
+Palicoes to a Palico inbox, and the player picks one StreetPass Palico to send. The Post
+Office screen (`uUIPostOffice`) reads all three. The 276-byte record is built by
+`0x165f44` from one of the player's Palicoes (`0x26e354` / `0x26e600`, the Palico code)
+and the hunter name; `0x165a24` treats an inbox slot as empty when its first 8 bytes
+match a constant, `0x165a9c` deletes slot i and moves the later ones up. List 2's card
+info records start with the receive date (u16 year at `+2`, set by `0x165348`). All
+three are empty in the analysed save.
+
+### Card info records
+
+One 44-byte record per list 1 element. **DERIVED** from the receive code `0x16449c`
+(called by `uUIReceive` with the console date and the sender's ID) and the list
+screen `cUIOGuildCardList`:
+
+| Offset | Size | Content | Analysed save |
+|---|---|---|---|
+| `+0x00` | 4 | date received: u8 day, u8 month, u16 year | 30 August 2026 for both cards |
+| `+0x04` | 24 | the list's comment, UTF-16, up to 11 characters (*Add Comment*); cleared on receive | empty |
+| `+0x1C` | u32 | a sort key of the list screen (`0x59d580`); 0 on receive. Unity? UNRESOLVED | 7828, 3496 |
+| `+0x20` | s8 | a sort key of the list screen (`0x59d47c`); 0 on receive. Card type? UNRESOLVED | 0 |
+| `+0x21` | 8 | sender ID, unaligned | `fadefade fadefade` |
+| `+0x29` | 3 | — | 0 |
 
 A list element is:
 
@@ -254,12 +279,18 @@ a received card: HR 999 / 148, sensible equipment types, transmog IDs.
 | `+0x04C` | 4 × u16 | first 8 bytes of the 224-byte block | sPlayer `+0x240` |
 | `+0x054` | 7 × 44 | equipment, weapon … talisman (entry table below) | equipped gear |
 | `+0x188` | 3 × 580 | Palicoes: main, buddy 1, buddy 2. Name UTF-16 `+0`, then the hunter-section layout | sOtomo |
+| `+0x854` | 3 × u16 | title: the card editor's fields 0–2, word, connector (`GC_Title_2`), word. The own card has 140, 0 (none), 502 | cUIOGuildCardEdit |
+| `+0x85A` | u8 | scene (editor field 4): 35 on the own card, of 136 | cUIOGuildCardEdit |
+| `+0x85B` | u8 | pose (editor field 3; a change calls `0x1605b8`): 3, of 22 | cUIOGuildCardEdit |
+| `+0x85C` | u16 | copied from `S+0x41a` | `0x161ac8` |
+| `+0x86C` | u32 | copied from `sGameControl +0x3c` | `0x161ac8` |
 | `+0x878` | | greeting, UTF-16 | |
 | `+0x8B8` | u8 | flags (bit 1 from sPlayer `+0x9C5C`) | |
 | `+0x8BA` | 3 × 15 × u16 | weapon usage, Village / Hub / Arena ([04](04-weapon-usage.md)) | |
 | `+0x914` | u32 | play time ([05](05-quests.md)) | |
 | `+0x918` | 10 × 160 | quest history ([05](05-quests.md)) | |
-| `+0xF58` | 20 | awards, bits 0–159 (132 used, [09](09-awards.md)) | |
+| `+0xF58` | 20 | awards, bits 0–159 (132 used, [09](09-awards.md)); copied from the game-side award map `S+0xc28` | `0x161b98` |
+| `+0xF6C` | 87 × 8 | monster log, [below](#monster-log) | `0x161c38` |
 
 Card equipment entry (44 B), filled from the 36-byte box entry:
 
@@ -277,12 +308,34 @@ The game converts names through a reused stack buffer, so bytes after a short na
 terminator can hold the tail of an earlier name. They are not data.
 
 History record, from the insert code: day `+0`, month `+1`, u16 year `+2` (tm_year +
-1900), u16 record kind `+4` (7 for the analysed quest records, 3 for a second record
-type the code builds), u16 quest ID `+6`, name `+8`. The code that fills `+0x28` was not
-traced.
+1900), u16 record kind `+4`, u16 quest ID `+6`, name `+8`, and three highlights at
+`+0x28` ([05](05-quests.md#quest-history-log--0x254771)). The ten records fill
+`+0x918 … +0xF58`; the generic insert `0x162758` shifts them down by one.
 
-Not yet labelled: `+0x854 … +0x8B8` around the greeting, `+0xF18 … +0xF58`, and
-everything after `+0xF6C`.
+Record kinds come from separate builders: 3 (`0x162888`, called by the Smithy at
+`0x6fb160`), 4 (`0x162b54`, from `0x702e48`), 5 (`0x162e0c`, from the Smithy at
+`0x6fb0dc`), 6 (`0x1630c4`, from the award checks), 7 (quests, built at quest object
+`+0x2f8` and inserted by `0x390434`). `0x163454` (talk code) and `0x163aa4` build two more.
+
+### Monster log
+
+**DERIVED** from the builder loop `0x161c38` (87 entries from a monster table, stride
+8, `+0xF6C … +0x1224`):
+
+| Offset | Size | Content |
+|---|---|---|
+| `+0` | u16 | a size record (`0x526f48` with argument 1) |
+| `+2` | u16 | the other size record (`0x526f48` with argument 0) |
+| `+4` | bits 0–13 | hunts, at most 9999 |
+| | bits 14–27 | captures, at most 9999 |
+| | bit 28 | the monster's Hunter's Notes entry is unlocked (`S+0x35b0`, `0x524728`) |
+| | bits 29–30, 31 | crown marks derived from the size records (`0x67310`) |
+
+`+0x1224 … +0x1378` holds 85 u32, which the card's initialiser `0x161184` sets in
+groups of five to `0x63800000` or `0x61400000` depending on an Arena quest test
+(`0x3b5ac0`). This is most likely the Arena log of the card screen (best time per
+quest and equipment set). The own card has one real entry, `0x0F682125`; its packing is
+UNRESOLVED. The rest of the card, `+0x1378 … +0x18B8`, is zero on the own card.
 
 ## The save object S
 
@@ -473,8 +526,9 @@ in place, where this map says it lives, writes what the game would write.
 - S ([above](#the-save-object-s)): the maps at `S+0x970` and `S+0x9c4`, the seven
   Trader maps (which trade list each one indexes), `S+0x35a8`, `S+0x35dc`, `S+0xd8c`,
   `S+0x3670`, `S+0x4408`, and the 3444 zero bytes at `S+0x3684`.
-- The Guild Card manager's 4400 / 1800 / 276 / 13800 / 1800-byte members, and what
-  list 2 holds.
+- Guild Card: the card info fields at `+0x1C` and `+0x20`, the 276-byte StreetPass
+  Palico record, the Arena log packing at card `+0x1224`, and which highlight code
+  means what in a history record.
 - The 224 + 12 + 4 bytes of the slot header taken from sPlayer. Their source fields are
   known (table above), but not their meaning.
 - Block A: `S+0x3676` (6 bytes), `S+0x367c`, `S+0x367d` and `sGameControl +0x5c`,
