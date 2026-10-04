@@ -9,13 +9,14 @@ absolute. The absolute values quoted are for the first character slot.
 
 ## Character slots
 
-**DERIVED.** The file starts with a 36-byte (`0x24`) Switch header. The MHXX-layout
-body follows it, and its own header carries a slot-use table and slot pointers:
+**CONFIRMED** with three real characters (below). The file starts with a 36-byte
+(`0x24`) Switch header. The MHXX-layout body follows it, and its own header carries a
+slot-use table and slot pointers:
 
 | Absolute | Size | Field |
 |---|---|---|
 | `0x28` | 3 × u8 | slot in use (1 / 0) for characters 1–3 |
-| `0x2B` | u8 | last loaded slot |
+| `0x2B` | u8 | last loaded slot, 0-based |
 | `0x34` | 3 × u32 | offset of character 1–3, **relative to `0x24`** |
 
 ```python
@@ -27,9 +28,23 @@ have pointers (`0x2AC53C`, `0x3CBE00`), giving a stride of `0x11F8C4` bytes.
 `base + 0x00` is the character name. This matches the MHXX `system` layout once the
 `0x24` header is accounted for.
 
-Every absolute offset in docs 02–05 falls inside slot 1's block. That makes it very
-likely those structures are per-character too (for example, deviant permits are at
-`base + 0x283C`). This has **not** been checked against a save with two characters.
+Every absolute offset in docs 02–05 falls inside slot 1's block, so those structures
+are per-character too (for example, deviant permits are at `base + 0x283C`).
+
+**Checked with two new characters** (Scrimas2, Scrimas3, created on 2026-10-04 and
+saved before the introduction):
+
+- Each creation changed only its own slot, `0x28 + slot` (in use) and `0x2B` (last
+  loaded, 1 then 2). Blocks A and B and slot 1 stayed byte-identical.
+- Slot 2 starts at `0x2AC560` and slot 3 at `0x3CBE24`, as the pointers say; the name is
+  at `base + 0x00`.
+- The two fresh slots differ only in the name (slot header `+0x00`, player record
+  `+0x23B7D`, own Guild Card `+0xC71BD`), the own card's 8-byte owner ID (card `+0x8B0`),
+  the hireable Palico list at `+0x2A606` (rolled at creation) and the Guild Card list
+  padding (heap leftovers, [11](11-save-map.md#guild-card-manager)).
+- The slot-1 formats parse in the new slots: both card lists hold 100 / 50 empty
+  elements (state 1), the equipment box starts with ID-1 weapons, HR, HR points and
+  funds are 0.
 
 ## Equipment box
 

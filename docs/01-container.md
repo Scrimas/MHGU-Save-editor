@@ -79,10 +79,10 @@ applies to it.
 
 ## Open questions
 
-- **Character slots — answered from code.** The game's loader reads three slots of
+- **Character slots — answered.** The game's loader reads three slots of
   `0x11F8C4` bytes with the same chain, so the per-character structures repeat at the
-  slot base given by the pointer table ([11](11-save-map.md#method)). This has not been
-  tested with a second real character.
+  slot base given by the pointer table ([11](11-save-map.md#method)). Confirmed with two
+  more real characters ([07](07-equipment.md#character-slots)).
 - **The bulk of the file — mapped.** [11 — Whole-file map](11-save-map.md) assigns
   every byte to the game object that reads it. Most of the 5 MB is per-slot Guild Card
   lists (0.98 MB per slot, mostly padding) and the downloaded event quests (1.5 MB,

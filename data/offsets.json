@@ -130,10 +130,11 @@
     }
   },
   "characters": {
-    "slot_used":     { "offset": 40, "hex": "0x28", "type": "u8[3]", "confidence": "DERIVED" },
-    "slot_pointers": { "offset": 52, "hex": "0x34", "type": "u32[3]", "relative_to": "0x24", "confidence": "DERIVED",
-                       "note": "base = 0x24 + ptr; slot 1 base 0x18CC9C in analysed save; stride 0x11F8C4" },
-    "note": "every absolute offset above falls inside slot 1; per-character relocation likely but untested"
+    "slot_used":     { "offset": 40, "hex": "0x28", "type": "u8[3]", "confidence": "CONFIRMED" },
+    "last_loaded":   { "offset": 43, "hex": "0x2B", "type": "u8", "note": "0-based slot", "confidence": "CONFIRMED" },
+    "slot_pointers": { "offset": 52, "hex": "0x34", "type": "u32[3]", "relative_to": "0x24", "confidence": "CONFIRMED",
+                       "note": "base = 0x24 + ptr; bases 0x18CC9C, 0x2AC560, 0x3CBE24; stride 0x11F8C4" },
+    "note": "every absolute offset above is for slot 1; per-character structures relocate with the slot base (confirmed with characters in slots 2 and 3, docs/07)"
   },
   "equipment": {
     "_offsets": "relative to character base; slot1_abs given for the analysed save",
@@ -189,7 +190,7 @@
   },
   "save_map": {
     "_comment": "from the game's own loader run under emulation (docs/11-save-map.md, data/save-map.csv); rel = relative to the character base",
-    "slots": { "count": 3, "size": "0x11F8C4", "confidence": "CONFIRMED (code)", "note": "all three slots read by the same chain 0x3e77b0; layout identical except element lengths inside the Guild Card lists" },
+    "slots": { "count": 3, "size": "0x11F8C4", "confidence": "CONFIRMED", "note": "all three slots read by the same chain 0x3e77b0, checked with real characters in slots 2 and 3; layout identical except element lengths inside the Guild Card lists" },
     "block_a": { "offset": "0x40", "size": "0xB265", "note": "shared: sUserInfo 14 B, Palico pool 50 x 324 B at 0x4E, blacklist 100 x 96 B at 0x3F96, Guild Card copies 19852 B at 0x6516, 3 B at 0xB2A2" },
     "block_b": { "offset": "0xB2A5", "size": "0x1819F4", "note": "shared, sPrivilege (loader 0x36bdc)",
                  "dlc_item_packs": { "offset": "0xB311", "size": 5200, "layout": "50 x 104 B", "confidence": "DERIVED" },

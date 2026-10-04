@@ -58,7 +58,10 @@ All three character slots are read by the same chain at a fixed stride of `0x11F
 empty slots included. Their layout is identical (checked by `savemap.py`). The only
 exception is the element lengths inside the two Guild Card lists, whose totals are fixed.
 This closes the README open question on multi-character layout: every per-character
-structure is `base + offset`, with base from the pointer table at `0x34`.
+structure is `base + offset`, with base from the pointer table at `0x34`. **CONFIRMED**
+with two newly created characters in slots 2 and 3: each creation wrote only its own
+slot and the slot-use bytes, and the two fresh slots differ only in name, card owner ID,
+the rolled Palico list and the card list padding ([07](07-equipment.md#character-slots)).
 
 ## File layout
 

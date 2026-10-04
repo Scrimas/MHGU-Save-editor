@@ -17,9 +17,9 @@ evidence for a structural claim.
 | File | `system` (and `system_backup`), 5,159,100 bytes |
 | Method | Controlled before/after diffing of a real save (see [methodology](docs/06-methodology.md)) |
 
-All offsets are **absolute byte offsets into `system`**, little-endian, from a save
-containing a single character. See [Open questions](#open-questions) before assuming
-they are portable.
+All offsets are **absolute byte offsets into `system`**, little-endian, for character
+slot 1. Per-character offsets move with the slot base; see
+[Open questions](#open-questions).
 
 ## Documents
 
@@ -99,11 +99,12 @@ from observed bytes, and it is incomplete.
 
 ## Open questions
 
-- **Multiple character slots — answered from code.** The game's loader reads all three
+- **Multiple character slots — answered.** The game's loader reads all three
   slots with the same chain at a fixed stride, so every per-character offset is
   `base + const` with base from the pointer table at `0x34`
-  ([11](docs/11-save-map.md#method)). This is not yet tested with a second real
-  character. **An editor should resolve the base through the pointer, not hard-code it.**
+  ([11](docs/11-save-map.md#method)). Confirmed with two more real characters
+  ([07](docs/07-equipment.md#character-slots)).
+  **An editor should resolve the base through the pointer, not hard-code it.**
 - **Region portability.** Only the EU/western build was examined. Japanese builds
   may differ.
 - **Monster indices 106–112** are unused (`dummy1`–`dummy7` in the game's name
