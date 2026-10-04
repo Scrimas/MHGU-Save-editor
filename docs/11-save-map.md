@@ -230,7 +230,8 @@ The block A bytes of `sGameControl` are in [Block A header](#block-a-header-and-
 - **My Sets start at `base + 0x208CE`**, 6 bytes later than [07](07-equipment.md#my-sets)
   states. The loader reads 40 × 136 B from there. The field offsets in 07 are relative to
   `0x208C8`. Subtract 6 to get offsets within the record: name `+0x00`, box index
-  `+0x2A`, pigment `+0x64`, default flags `+0x7D`. Both conventions point at the same
+  `+0x2A`, pigment `+0x64`, default flags `+0x7D`, hunting style `+0x82`, Hunter Arts
+  `+0x83`, art flags `+0x86`. Both conventions point at the same
   bytes; only the record boundary moves.
 - **Palico equipment box**, `base + 0x17C2E`: 1000 × 36 B, same entry format as the hunter
   box. Only types 22, 23, 24 occur (Palico weapon, head, body).
