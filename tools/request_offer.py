@@ -5,12 +5,11 @@ The conditions in ../data/request-offer.csv come from the NPC talk data
 (see ../docs/10-npc-talk.md). Conditions this tool cannot evaluate are printed as "?".
 In the CSV, "a|b" means either condition holds.
 
-Usage:  request_offer.py [path/to/system]
+Usage:  request_offer.py [--slot 1|2|3] [path/to/system]
 """
 import sys, csv, pathlib
 
-BASE      = 0x18CC9C        # character slot 1
-HR        = 0x28            # u16
+HR       = 0x28            # u16
 CLEARED   = 0x2C77          # quest bitmap, index from quest-index.csv
 VIL_STAR  = 0x2C4DA         # u16
 HUB_STAR  = 0x2C4DC         # u16
@@ -24,8 +23,13 @@ VILLAGES  = ["Bherna", "Kokoto", "Pokke", "Yukumo"]
 DATA = pathlib.Path(__file__).resolve().parent.parent / "data"
 
 def main():
-    path = sys.argv[1] if len(sys.argv) > 1 else "system"
+    args = sys.argv[1:]
+    slot = 1
+    if "--slot" in args:
+        i = args.index("--slot"); slot = int(args[i + 1]); del args[i:i + 2]
+    path = args[0] if args else "system"
     buf = pathlib.Path(path).read_bytes()
+    BASE = 0x24 + int.from_bytes(buf[0x34 + 4 * (slot - 1):0x38 + 4 * (slot - 1)], "little")
     index, groups, sets = {}, {}, {}
     for row in csv.DictReader(open(DATA / "quest-index.csv")):
         if int(row["quest_id"]) not in index:
@@ -89,7 +93,8 @@ def main():
         if kind == "hr":           return None if hr >= int(arg) else f"HR {arg}"
         return "?" + c
 
-    print(f"HR {hr}, Village star level {vil}, Hub star level {hub}")
+    print(f"character {slot}: {buf[BASE:BASE + 32].split(b'\0')[0].decode(errors='replace')!r}, "
+          f"HR {hr}, Village star level {vil}, Hub star level {hub}")
     for row in offers:
         if bit(FLAGS, int(row["accept_flag"])):
             continue

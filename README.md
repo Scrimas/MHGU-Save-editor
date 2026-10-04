@@ -104,7 +104,8 @@ from observed bytes, and it is incomplete.
   `base + const` with base from the pointer table at `0x34`
   ([11](docs/11-save-map.md#method)). Confirmed with two more real characters
   ([07](docs/07-equipment.md#character-slots)).
-  **An editor should resolve the base through the pointer, not hard-code it.**
+  **An editor should resolve the base through the pointer, not hard-code it.** The
+  tools in [`tools/`](tools) do, and take `--slot 1|2|3` (default 1).
 - **Region portability.** Only the EU/western build was examined. Japanese builds
   may differ.
 - **Monster indices 106–112** are unused (`dummy1`–`dummy7` in the game's name

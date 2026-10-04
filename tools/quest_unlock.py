@@ -7,12 +7,11 @@ prints whether the board would list it, and for locked quests what is missing.
 "rotated" = the rule holds but the quest is one of the 51 rotating quests and its
 bit at base+0x504B is clear.
 
-Usage:  quest_unlock.py [path/to/system] [quest_id ...]
+Usage:  quest_unlock.py [--slot 1|2|3] [path/to/system] [quest_id ...]
 """
 import sys, csv, pathlib
 
-BASE      = 0x18CC9C        # character slot 1
-HR        = 0x28            # u16
+HR       = 0x28            # u16
 CLEARED   = 0x2C77          # quest bitmaps, index from quest-index.csv
 SEEN      = 0x2D77
 HUB_STAR  = 0x2C4DC         # u16, 1-13
@@ -23,9 +22,13 @@ DATA = pathlib.Path(__file__).resolve().parent.parent / "data"
 
 def main():
     args = sys.argv[1:]
+    slot = 1
+    if "--slot" in args:
+        i = args.index("--slot"); slot = int(args[i + 1]); del args[i:i + 2]
     path = args.pop(0) if args and not args[0].isdigit() else "system"
     want = {int(a) for a in args}
     buf = pathlib.Path(path).read_bytes()
+    BASE = 0x24 + int.from_bytes(buf[0x34 + 4 * (slot - 1):0x38 + 4 * (slot - 1)], "little")
 
     index = {}
     for row in csv.DictReader(open(DATA / "quest-index.csv")):
@@ -57,7 +60,7 @@ def main():
 
     rot = {int(r["quest_id"]): int(r["bit"]) for r in csv.DictReader(open(DATA / "rotating-quests.csv"))}
 
-    print(f"HR {hr}, Hub star level {hub}")
+    print(f"character {slot}: {buf[BASE:BASE + 32].split(b'\0')[0].decode(errors='replace')!r}, HR {hr}, Hub star level {hub}")
     locked = 0
     for row in csv.DictReader(open(DATA / "quest-unlock.csv")):
         q = int(row["quest_id"])

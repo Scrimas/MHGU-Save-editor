@@ -6,7 +6,10 @@ what it finds. If the documentation is correct, the output is self-evidently
 sensible: permit counts in range, weapon totals reconciling, monster names lining
 up with plausible hunt counts.
 
-Usage:  validate.py [path/to/system]
+The absolute offsets below are character slot 1's. --slot N moves them to another
+character by the difference of the slot bases (pointer table at 0x34).
+
+Usage:  validate.py [--slot 1|2|3] [path/to/system]
 """
 import sys, csv, pathlib
 
@@ -38,24 +41,28 @@ def bit(buf, g):
 def u16(buf, o):
     return int.from_bytes(buf[o:o+2], "little")
 
-def main(path):
+def main(path, slot=1):
     buf = pathlib.Path(path).read_bytes()
     print(f"file: {path}  ({len(buf)} bytes)")
     if len(buf) != 5159100:
         print("  WARNING: unexpected size; offsets may not apply")
+    slot_base = lambda n: 0x24 + int.from_bytes(buf[0x34 + 4*(n-1):0x38 + 4*(n-1)], "little")
+    base = slot_base(slot)
+    d = base - slot_base(1)                       # shift of the slot-1 absolute offsets
+    print(f"character {slot}: slot in use {buf[0x27 + slot]}  base 0x{base:X}  name {buf[base:base+32].split(b'\0')[0].decode('utf-8', 'replace')!r}")
 
     print("\n--- deviants (permit / cleared levels / highest cleared) ---")
     for i, name in enumerate(DEVIANTS):
         off, width = block(i)
-        lv = [bit(buf, CLEARED + off + j) for j in range(width)]
+        lv = [bit(buf, CLEARED + 8*d + off + j) for j in range(width)]
         top = max((j for j, v in enumerate(lv) if v), default=None)
         label = "none" if top is None else ("EX" if top == width - 1 else f"level {top+1}")
-        print(f"  {name:22s} permit {buf[PERMITS+i]:3d}  cleared {sum(lv):2d}/{width}  highest: {label}")
+        print(f"  {name:22s} permit {buf[PERMITS+d+i]:3d}  cleared {sum(lv):2d}/{width}  highest: {label}")
 
     print("\n--- weapon usage ---")
     tot = [0]*15
-    for venue, base in WEAPONS.items():
-        row = [u16(buf, base + 2*w) for w in range(15)]
+    for venue, w0 in WEAPONS.items():
+        row = [u16(buf, w0 + d + 2*w) for w in range(15)]
         for w in range(15):
             tot[w] += row[w]
         print(f"  {venue:8s} " + " ".join(f"{v:4d}" for v in row))
@@ -74,23 +81,22 @@ def main(path):
                 nosize.add(int(r["index"]))
     shown = 0
     for i in sorted(idx):
-        t = u16(buf, TALLIES + 2*i)
+        t = u16(buf, TALLIES + d + 2*i)
         if not t:
             continue
-        c = u16(buf, CAPTURES + 2*i)
-        mn, mx = u16(buf, SIZES + 4*i), u16(buf, SIZES + 4*i + 2)
+        c = u16(buf, CAPTURES + d + 2*i)
+        mn, mx = u16(buf, SIZES + d + 4*i), u16(buf, SIZES + d + 4*i + 2)
         size = "-" if i in nosize else f"{mn}%-{mx}%"
         print(f"  [{i:3d}] {idx[i]:24s} {t:4d} kills {c:4d} captures (shown {t+c}({c}))   size {size}")
         shown += 1
     print(f"  ({shown} of {len(idx)} named indices have hunts)")
     for i in sorted(nosize):
-        c = u16(buf, CAPTURES + 2*i)
+        c = u16(buf, CAPTURES + d + 2*i)
         if c and not 1 <= i <= 71 and not 113 <= i <= 135:
             print(f"  WARNING: [{i:3d}] {c} captures on a small monster (bad write? size index 0 aliases captures 136-137)")
 
     print("\n--- character slots / equipment (docs/07) ---")
-    base = 0x24 + int.from_bytes(buf[0x34:0x38], "little")
-    print(f"  slots in use {list(buf[0x28:0x2B])}  character 1 base 0x{base:X}  name {buf[base:base+32].split(b'\0')[0].decode('utf-8', 'replace')!r}")
+    print(f"  slots in use {list(buf[0x28:0x2B])}  bases " + " ".join(f"0x{slot_base(n):X}" for n in (1, 2, 3)))
     box = base + 0x62EE
     used = sum(1 for i in range(2000) if any(buf[box+36*i:box+36*i+4]))
     tm = sum(1 for i in range(2000) if 1 <= buf[box+36*i] & 0x1F <= 5 and u16(buf, box+36*i+4))
@@ -141,4 +147,8 @@ def main(path):
 
 if __name__ == "__main__":
     default = pathlib.Path.home()/".config/Ryujinx/bis/user/save/0000000000000001/0/system"
-    main(sys.argv[1] if len(sys.argv) > 1 else default)
+    args = sys.argv[1:]
+    slot = 1
+    if "--slot" in args:
+        i = args.index("--slot"); slot = int(args[i + 1]); del args[i:i + 2]
+    main(args[0] if args else default, slot)

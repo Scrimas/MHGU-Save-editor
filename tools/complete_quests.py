@@ -22,14 +22,15 @@ bitmap, Arena records, quest counters, the history log, awards, the pending set
 notices at base+0x3197, and the story flags that talk lines set once their quests are
 cleared (listed at the end of the run).
 
-Usage:  complete_quests.py [--write] [--no-events] [--no-requests] [--lessons] system [system ...]
-        With --write every given file is changed in place. Close the emulator and
-        take a copy first; give both save slots (0/system and 1/system).
+Usage:  complete_quests.py [--write] [--no-events] [--no-requests] [--lessons] [--slot 1|2|3]
+                           system [system ...]
+        --slot picks the character (default 1). With --write every given file is
+        changed in place. Close the emulator and take a copy first; give both save
+        slots (0/system and 1/system).
 """
 import sys, csv, re, pathlib
 
-BASE      = 0x18CC9C        # character slot 1
-HR        = 0x28
+HR       = 0x28
 CLEARED   = 0x2C77
 SEEN      = 0x2D77
 VIL_STAR  = 0x2C4DA
@@ -44,8 +45,9 @@ LESSONS   = {1283: (), 1287: (), 1297: (), 1313: (), 1317: (), 1331: (1398,)}
 
 DATA = pathlib.Path(__file__).resolve().parent.parent / "data"
 
-def plan(buf, events=True, requests=True, lessons=False):
+def plan(buf, events=True, requests=True, lessons=False, slot=1):
     """Return ({absolute offset: new byte}, report lines)."""
+    BASE = 0x24 + int.from_bytes(buf[0x34 + 4 * (slot - 1):0x38 + 4 * (slot - 1)], "little")
     new = {}
     def get(off):
         return new.get(BASE + off, buf[BASE + off])
@@ -57,7 +59,7 @@ def plan(buf, events=True, requests=True, lessons=False):
         if b != buf[BASE + o]: new[BASE + o] = b
         else: new.pop(BASE + o, None)
 
-    out = []
+    out = [f"character {slot}: {bytes(buf[BASE:BASE + 32]).split(b'\0')[0].decode(errors='replace')!r}"]
     rows = list(csv.DictReader(open(DATA / "quest-index.csv")))
     first, real = {}, []
     for r in rows:
@@ -126,14 +128,18 @@ def plan(buf, events=True, requests=True, lessons=False):
 
 def main():
     args = sys.argv[1:]
+    slot = 1
+    if "--slot" in args:
+        i = args.index("--slot"); slot = int(args[i + 1]); del args[i:i + 2]
     opts = {a for a in args if a.startswith("--")}
     paths = [a for a in args if not a.startswith("--")]
-    if not paths or opts - {"--write", "--no-events", "--no-requests", "--lessons"}:
+    if not paths or opts - {"--write", "--no-events", "--no-requests", "--lessons"} or not 1 <= slot <= 3:
         sys.exit(__doc__)
     for p in paths:
         buf = bytearray(pathlib.Path(p).read_bytes())
         if len(buf) != 5159100: sys.exit(f"{p}: not an MHGU Switch save (size {len(buf)})")
-        new, out = plan(buf, "--no-events" not in opts, "--no-requests" not in opts, "--lessons" in opts)
+        if not buf[0x28 + slot - 1]: sys.exit(f"{p}: character slot {slot} is not in use")
+        new, out = plan(buf, "--no-events" not in opts, "--no-requests" not in opts, "--lessons" in opts, slot)
         print(p); print("\n".join("  " + l for l in out))
         print(f"  bytes to change: {len(new)}")
         if "--write" in opts:
