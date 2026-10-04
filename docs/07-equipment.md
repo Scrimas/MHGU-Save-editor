@@ -143,13 +143,13 @@ within the game's record.
 | `+0x83` | 5 × u8 | per-part default flag: 1 = default colour, 0 = custom RGBA |
 | `+0x88` | u8 | hunting style: 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor (same order as the style counters of [11](11-save-map.md#the-block-s0x20--0x41f--base--0x280b)) |
 | `+0x89` | 3 × u8 | the three Hunter Arts (IDs of [`hunter-arts.csv`](../data/hunter-arts.csv)) |
-| `+0x8C` | u8 | bits 0–2: a flag per art slot, copied to the player with the arts. UNRESOLVED |
+| `+0x8C` | u8 | bits 0–2: art slot *i* is an **SP Art**, copied to the player's SP Art bits ([11](11-save-map.md#slot-header--base--0x0-632-b), header `+0x32`) |
 | `+0x8D` | u8 | padding |
 
 **DERIVED — the last six bytes (`+0x88 … +0x8D`, the game's record `+0x82 … +0x87`).**
 Loading a set (`0x72d0f8`, from the item box screen) writes the style byte into the
 player data and the three arts with `0xe79b4` to player `+0x240` (the arts the save
-screen shows at slot header `+0x2C`), the three flag bits with `0xe7a20`. The copy
+screen shows at slot header `+0x2C`), the three SP Art bits with `0xe7a20`. The copy
 routine `0x14709c` moves the same bytes. In the analysed save set 1 has style 5 and art
 179 (*Energy Blade I*, a Charge Blade art, the one equipped), sets 2–6 style 3 and art
 151 (*Wolf's Maw III*). The style numbering is **DERIVED** from these values and the

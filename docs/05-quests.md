@@ -243,7 +243,7 @@ Byte `0x11` of each quest's `questData` resource names the board that lists it
 
 | Value | Board |
 |---|---|
-| 1 / 2 / 3 / 4 | Home village Kokoto / Pokke / Yukumo / Bherna of a quest that is *not* a villager request. **DERIVED** from the members: 1 holds the Verdant Hills tours and *Alas, Astalos Again*, 2 Arctic Ridge and Gammoth, 3 Misty Peaks and Mizutsune, 4 Glavenus. Same village order as 5–8. Whether a board filters on it was not checked |
+| 1 / 2 / 3 / 4 | Home village Kokoto / Pokke / Yukumo / Bherna of a quest that is *not* a villager request. **DERIVED** from the members: 1 holds the Verdant Hills tours and *Alas, Astalos Again*, 2 Arctic Ridge and Gammoth, 3 Misty Peaks and Mizutsune, 4 Glavenus. Same village order as 5–8. No board filters on it (below) |
 | 5 / 6 / 7 / 8 | Kokoto / Pokke / Yukumo / Bherna |
 | 9 | Prowler |
 | 10 | Every board |
@@ -258,9 +258,16 @@ Two predicates of the quest manager read the byte. `0x3a3470` is true for 5–8 
 mask in the quest result code (`0x388d60`): for such a quest the cleared bit is
 written only if the quest is listed on this save (`0x54af8c`, which runs the unlock
 script). A request quest played through another hunter's posting therefore does not
-count. Values 1–4 are in neither mask; only the
-[quest set](#quest-sets--base--0x3187) counter reads them, and it treats 1–4 like
-5–8.
+count. Values 1–4 are in neither mask. The other readers treat 1–4 like 5–8: the
+[quest set](#quest-sets--base--0x3187) counter (`0x3b85d8`), and `0x3a9ea4`, which
+picks the village whose contribution points the result screen shows (`0x38b124`;
+4/8 Bherna, 1/5 Kokoto, 2/6 Pokke, 3/7 Yukumo, else none). The board icon tables of
+`uUIQuestBoard` map the value to an icon.
+
+**DERIVED — no board filters on the byte.** Which quests a board shows comes from
+static per-board, per-category lists (`0x54b994` → `0x3bc96c`), chosen by the scene
+index (table `0x159f0b0`): the Hunters Hub, the second hub, and one village board
+shared by all four villages.
 
 Almost every quest with a value of 1–8 is a villager request. It appears only after
 the request has been accepted, and only on that village's board.
@@ -400,9 +407,24 @@ The game re-rolls the field in `0x54b1c4`. In the snapshots it changed after eve
 completed quest and never otherwise. Entries 0–7 are the four village pairs 308/309,
 319/320, 324/325, 329/330, of which one each stays set; 8/9 are 618/619. The rest are
 elder dragon and other repeating hunts (10329–10333, 10641–10643, 10756–10761,
-11316–11318, 11412–11417, 11458–11460, …). The low byte of the parameter is 100, 80,
-50, 40, 25 or 0, **DERIVED** to be the chance in percent; the other bytes are
-**UNRESOLVED**.
+11316–11318, 11412–11417, 11458–11460, …).
+
+**DERIVED — the parameter** (roll `0x54b1c4`, mode switch `0x54b388`). Byte 0 is a
+chance in percent (100, 80, 50, 40, 25 or 0), byte 1 a mode (low nibble, signed; a
+negative mode is never listed), bytes 2–3 a u16 argument. Each re-roll draws
+`rng % 100` per entry, clears the bit and sets it again when:
+
+| Mode | Listed when |
+|---|---|
+| 0 | roll < chance |
+| 1 / 2 | bit *arg* of the talisman-making quest map at `base + 0x2C6A9` (sMakeAmulet `+0x64`, test `0x14ce9c`) is clear / set. No roll. Entries 44, 47, 49, 51 of that map belong to quests 308, 319, 329, 324, so each village pair shows its first quest until that bit is set at quest end (`0x14cd64`), then its second |
+| 3 | roll < chance and the quest of table entry *arg* is cleared (618: *arg* 9 = 619) |
+| 4 | always until the quest is cleared, then roll < chance (619, 633–635) |
+| 5 | group head, *arg* = number of entries that follow; one member is picked by cumulative chance. Followers (mode 5/7 with *arg* 0) are skipped by the loop (`0x54b318`) |
+| 6 | only while the quest is not cleared (730) |
+| 7 | like 5, but the head stays listed alone until it is cleared (1005, chance 0; then one of 1053, 1022, 1021, 1020 at 25 % each) |
+
+An abandoned quest (`0x54b0d4`) re-evaluates modes 1 and 2 only.
 
 Controlled write: with its rule satisfied, *It's Electric* (618, bit 8) stayed hidden
 while the bit was clear. Setting it (`0x191CE8` `0xBE → 0xBF`, both slots) listed the
@@ -593,13 +615,51 @@ The Guild Card's list of the 10 most recently completed quests, newest first.
 | Field | Offset in record | Type |
 |---|---|---|
 | Date | `+0x00` | u8 day, u8 month, u16 year (`13 09 ea 07` = 19 September 2026), the console date of the clear |
-| Record kind | `+0x04` | u16, 7 (quest) in all ten records. Other builders make kinds 3–6 (Smithy, awards), and kind 11 is never inserted ([11](11-save-map.md#card-layout-6328-b)) |
+| Record kind | `+0x04` | u16, 7 in all ten records. Kinds (message table `0x163129c`): 0 HR up (`+6` = HR), 1 MHGen transfer, 2 Welcome, 3 forged %s, 4 / 5 per-weapon upgrade / forge counts (`+6`), 6 "Earned all %s Awards", **7 / 8 / 9 quest completed / failed / abandoned**, 10 hired %s. 11 is the constructor's "unset" value and is never inserted ([11](11-save-map.md#card-layout-6328-b)) |
 | Quest ID | `+0x06` | u16 |
 | Quest name | `+0x08` | UTF-16LE, 16 characters, cut with `…` |
-| Highlight codes | `+0x28` | u8 × 3, code 36 = empty. **DERIVED** from the writer `0x1636a8`: a new highlight replaces the slot with the highest code when its own code is lower, and the three are kept sorted ascending, so lower codes win. The quest end adds codes 20–22 for party results (`0x390cd0`). The card screen turns a code into a message through a 36-entry table (`0x5a35e8`); which code means what is UNRESOLVED |
+| Highlight codes | `+0x28` | u8 × 3, code 36 = empty. **DERIVED** from the writer `0x1636a8`: a new highlight replaces the slot with the highest code when its own code is lower, and the three are kept sorted ascending, so lower codes win. The quest end adds codes 20–22 for party results (`0x390cd0`). The card screen turns a code into a message through a 36-entry table (`0x16313b0`, `0x5a35e8`); codes [below](#highlight-codes) |
 | Highlight values | `+0x2C`, `+0x38` | u32 × 3 and u32 × 3: the first and second value of each highlight, same slot order. In the four EX deviant records the code-3 highlight has `0x0402`, `0x0412`, `0x042d`, `0x0425` as its first value: the monster codes of Dreadking, Deadeye, Crystalbeard and Silverwind ([03](03-deviants.md#open-questions)) |
 | Hunter and Palico names | from `+0x44` | UTF-16LE |
 | Weapon types | `+0x9C` | u8 × 4, one per party slot, in the order of [04 — Weapon usage](04-weapon-usage.md): 13 = Charge Blade in eight records, 10 = Dual Blades in two, which matches the usage counters; 15 = a Palico, `ff` = empty slot. **DERIVED** from the values |
+
+### Highlight codes
+
+**DERIVED** from the quest-end builder `0x38f454` (called from `0x38ce60`) and the
+renderer table `0x16313b0`. Messages are `GuildCardMsg` entries.
+
+| Code | Message | Value 1 / value 2 |
+|---|---|---|
+| 0 | 103–108, 274–277: all N★ Village quests complete | star − 1 |
+| 1 | 109–115: all Hub N★ quests complete (1–7★) | star index |
+| 2 | 278–281: all Hub G1–G4★ quests complete | star index |
+| 3 | 284: completed an EX Special Permit quest | deviant monster code |
+| 4 | 116: completed a G5 Special Permit quest | deviant monster code |
+| 5 | 260 / 282 / 261 / 262 / 283: Prowler "all complete" | 0–4 |
+| 6 | 124: HR increased | HR |
+| 7 | 125: abandoned %d quests | count, every 10 (`S+0xc2`) |
+| 8 / 24 | 134: completed in under 5 minutes | 8 if a code-10 highlight exists, else 24 |
+| 9 / 25 | 135: completed with under a minute left | same rule |
+| 10 | 126: defeated a wild monster | monster name ID |
+| 11 | 127: played %d hours | hours, multiples of 100 |
+| 13 / 15 | 128: hunted %s %d times | monster / count milestone; 15 for deviants. 12 and 14 are never emitted |
+| 16 | 129: %d quests in total | multiples of 100 |
+| 17 | 130: obtained %s | item |
+| 18 | 131: fainted %d times in total | rounded down to 100 (`S+0xd4`) |
+| 19–22 | 132: %s fainted %d times | party slot / faints: 4+ → 19, 3 → 20, 2 → 21, 1 → 22 |
+| 23 | 133: completed without armor | — |
+| 26 | 136–149, 259: weapon used %d times | weapon index / count rounded to 100 |
+| 27 / 28 | 150 / 151: largest / smallest size | monster / size |
+| 29–35 | 154–160: Prowler party feats (traps, Barrel Bomb L, horn, attacks, gathering, rarely fainted) | party slot of the Prowler |
+| 36 | — | empty |
+
+The writer counts codes ≤ 8 as 8 when it picks the slot to replace in slot 0
+(`0x1636c8`).
+
+**Event quests.** For kinds 7–9 the card screen prints only the stored name at `+0x08`
+(`0x5a2194`); the u16 at `+0x06` is never shown, so an event quest displays correctly
+whatever it holds. Who writes `+0x06` (quest object `+0x2FE`) was not found; no store
+to that offset exists in the binary besides the constructor. UNRESOLVED.
 
 Record stride is `0xA0` bytes; ten records end exactly where the
 [award field](09-awards.md) begins (`0x254DB1`). **DERIVED** from the values: the
@@ -627,13 +687,19 @@ with the deviant numbered from 1.
 
 | Offset | Type | Behaviour |
 |---|---|---|
-| `0x192AEA` | u16 | Increments by 1 per completed quest, with one exception seen: a Harvest Tour (quest 201) left it unchanged |
+| `0x192AEA` | u32 | Completed quests, Harvest Tours and Training excluded (`S+0x4418`) |
 | `0x25476D` | u32 | Guild Card copy of the play time in seconds |
 
 `0x192AEA` advanced by one over each of five quests between the snapshots (382 → 387)
 and stayed at 387 over the Harvest Tour, which did get a
-[history record](#quest-history-log--0x254771) and a weapon usage count. What it
-counts exactly is **UNRESOLVED**.
+[history record](#quest-history-log--0x254771) and a weapon usage count.
+
+**DERIVED.** `0x526f70` adds 1 (saturating) when a quest ends completed (sQuest `+0x50`
+= 2; callers `0x39fef0`, `0x3a0810`, `0x3a94e4`). It skips an abandoned quest (6) and a
+quest whose file has the skip bit set (`0x3a340c`, [below](#what-all-quests-completed-takes)):
+all Harvest Tours and Training quests. The Courier reads it against the value at the
+last talk (`base + 0x5E52`) for his quest-count gifts
+([11](11-save-map.md#counters-and-other-fields)).
 
 Earlier revisions listed a second u16 counter at `0x25476E`. That was a misreading:
 the bytes are the middle of the u32 at `0x25476D`, which follows the play time at
@@ -659,13 +725,10 @@ otherwise.
   bitmap of [08](08-progression.md) and two copies that drive notices. The same
   serializer walk also lands on the Canteen ingredients of 08 (`base + 0x2F8F`), which
   cross-checks the field map.
-- **PARTLY RESOLVED — quest history record.** `+0x28` holds three highlights (code
-  and two values each, see the table above); the meaning of each code is open. How an
-  event quest is logged is UNRESOLVED: the u16 ID cannot hold event IDs (≥ 1 000 000),
-  and no record of the analysed save is an event quest.
-- **Not checked — whether a board filters on `questData+0x11` values 1–4.** The
-  [quest set](#quest-sets--base--0x3187) counter reads them and treats 1–4 like 5–8
-  (same village), which supports the home-village reading.
+- **PARTLY RESOLVED — quest history record.** The highlight codes are named
+  ([above](#highlight-codes)). Who writes the u16 quest ID is UNRESOLVED; it cannot
+  hold event IDs (≥ 1 000 000) but is never shown. No record of the analysed save is
+  an event quest.
 
 ## A caution on bulk edits
 
@@ -776,8 +839,13 @@ ten event flags in 1537–1592, which no talk record uses, were cleared.
 
 The [rotation field](#rotating-quests--base--0x504b) did **not** change over this
 quest, the first such case in the snapshots. In the quest flow step `0x38b904` the
-re-roll `0x54b1c4` sits in a block that is skipped when `0x3a340c` is true (bit 7 of
-byte `+0x10c` of the loaded quest object, a runtime field that is not part of the
-quest file), and an abandoned quest (end state 6) takes `0x54b0d4` instead.
-Which of the two applied here is **UNRESOLVED**.
+re-roll `0x54b1c4` sits in a block that is skipped when `0x3a340c` is true, and an
+abandoned quest (end state 6) takes `0x54b0d4` instead.
+
+**DERIVED — it was the skip bit.** `0x3a340c` tests bit 7 of `+0x10c` of the quest's
+`rQuestData` record (sQuest `+0xa4`). That is file data, not a runtime field: the
+deserializer `0x37539c` stores the last u16 of each `questData_*.ext` file there
+(`0x376ef0`). Bit 7 is set in exactly 171 files: all 58 Harvest Tours (23 Village, 35
+Hub) and the 113 Training quests. So tours and Training never re-roll the rotation and
+never advance the quest counter. The other bits of that u16 are UNRESOLVED.
 

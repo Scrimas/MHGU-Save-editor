@@ -118,8 +118,8 @@
                      "note": "newest first; ends where the award field begins (0x254DB1). Earlier revisions used 0x2546D7 with the ID at +0, which put the record boundary 6 bytes late",
                      "confidence": "DERIVED" },
     "counters": {
-      "quest_counter_a": { "offset": 1649386, "hex": "0x192AEA", "type": "u16", "confidence": "DERIVED",
-                           "note": "+1 per completed quest; unchanged over a Harvest Tour (quest 201)" },
+      "quest_counter_a": { "offset": 1649386, "hex": "0x192AEA", "type": "u32", "confidence": "DERIVED",
+                           "note": "S+0x4418: +1 per completed quest (0x526f70), except abandoned quests and quests whose file has the skip bit (all Harvest Tours and Training); read by the Courier's quest-count gifts" },
       "guild_card_play_time": { "offset": 2443117, "hex": "0x25476D", "type": "u32", "confidence": "DERIVED",
                                 "note": "seconds; copy of base+0x20, refreshed when a quest ends. Earlier revisions read its middle bytes as a u16 quest counter at 0x25476E" }
     },
@@ -163,7 +163,7 @@
                    "default_flags": "0x83 u8[5], 1 = default colour, 0 = custom",
                    "style":         "0x88 u8 hunting style 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor (DERIVED)",
                    "hunter_arts":   "0x89 u8[3] Hunter Art IDs (data/hunter-arts.csv) (DERIVED)",
-                   "art_flags":     "0x8C u8, bits 0-2 one flag per art slot (UNRESOLVED meaning)" } }
+                   "art_flags":     "0x8C u8, bits 0-2: art slot i is an SP Art (copied to the player's SP Art bits, header +0x32)" } }
   },
   "progression": {
     "_offsets": "relative to character base; LSB-first bitfields; set with OR",

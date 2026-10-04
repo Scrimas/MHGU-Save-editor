@@ -1,15 +1,15 @@
 offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_field,label,confidence
 0x40,0,4,A,0x0,sUserInfo (common),1,,4B,0x521658,obj17+0x420,"bonus packs loaded: bit N = privilege pack N (S+0x420, shared)",DERIVED
-0x44,0,6,A,0x4,sUserInfo (common),1,,6B,0x52166c,obj17+0x3676,"shared setting bytes (S+0x3676), zero in the analysed save",UNRESOLVED
-0x4A,0,1,A,0xA,sUserInfo (common),1,,1B,0x521684,obj17+0x367c,"shared u8 settings (S+0x367c, S+0x367d)",UNRESOLVED
-0x4B,0,1,A,0xB,sUserInfo (common),1,,1B,0x521698,obj17+0x367d,"shared u8 settings (S+0x367c, S+0x367d)",UNRESOLVED
+0x44,0,6,A,0x4,sUserInfo (common),1,,6B,0x52166c,obj17+0x3676,"3 x u16 written only by the transfer 0x52171c, no reader (S+0x3676)",DERIVED
+0x4A,0,1,A,0xA,sUserInfo (common),1,,1B,0x521684,obj17+0x367c,"title-menu one-time notice shown (S+0x367c), transfer-server link made (S+0x367d)",DERIVED
+0x4B,0,1,A,0xB,sUserInfo (common),1,,1B,0x521698,obj17+0x367d,"title-menu one-time notice shown (S+0x367c), transfer-server link made (S+0x367d)",DERIVED
 0x4C,0,1,A,0xC,sUserInfo (common),1,,1B,0x5216ac,obj17+0x367e,TV brightness: scale 0.4 + 0.025 x value (S+0x367e),DERIVED
 0x4D,0,1,A,0xD,sUserInfo (common),1,,1B,0x5216c0,obj17+0x367f,rumble on/off (S+0x367f),DERIVED
 0x4E,0,16200,A,0xE,sOtomo (common),50,2592,32B 224B 14B 12B 36B 4B 2B,0x2632d4,obj20+0x309c,"Palicoes, common pool: 50 x 324 B (DLC Palicoes, owner ""Capcom"")",DERIVED
 0x3F96,0,9600,A,0x3F56,sBlackList,100,768,64B 32B,0x1e63a8,,blacklist: 100 x 96 B (64 + 32),DERIVED
 0x6516,0,19852,A,0x64D6,sGuildCard (common),1,,19852B,0x1642b4,obj100+0x150900,sGuildCard common: 3 x 6616 B + 1 B,DERIVED
-0xB2A2,0,1,A,0xB262,sGameControl (common),1,,1B,0x3f8f18,obj100+0x5c,"shared u8 settings (sGameControl +0x5c, +0x5d)",UNRESOLVED
-0xB2A3,0,1,A,0xB263,sGameControl (common),1,,1B,0x3f8f28,obj100+0x5d,"shared u8 settings (sGameControl +0x5c, +0x5d)",UNRESOLVED
+0xB2A2,0,1,A,0xB262,sGameControl (common),1,,1B,0x3f8f18,obj100+0x5c,sGameControl +0x5c (no reader) and +0x5d (3DS Circle Pad Pro in use),DERIVED
+0xB2A3,0,1,A,0xB263,sGameControl (common),1,,1B,0x3f8f28,obj100+0x5d,sGameControl +0x5c (no reader) and +0x5d (3DS Circle Pad Pro in use),DERIVED
 0xB2A4,0,1,A,0xB264,sGameControl (common),1,,1B,0x3f8f38,obj100+0xa5,"text language, 0 = from the system language (sGameControl +0xa5)",DERIVED
 0xB2A5,0,8,B,0x0,sPrivilege,1,,8B,0x36bfc,obj59+0xf34,"DLC item packs received, 50 bits (sPrivilege +0xf34)",DERIVED
 0xB2AD,0,8,B,0x8,sPrivilege,1,,8B,0x36c10,obj59+0xf3c,"DLC Palicoes received, 50 bits (sPrivilege +0xf3c)",DERIVED
@@ -54,8 +54,8 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FC4F,0,4,char1,0x2FB3,sUserInfo,1,,4B,0x51de00,obj17+0x9b4,"deviants unlocked, NEW (S+0x9b4)",DERIVED
 0x18FC53,0,4,char1,0x2FB7,sUserInfo,1,,4B,0x51de14,obj17+0x9b8,"deviants offered by the Courier, 18 bits (S+0x9b8) + runtime NEW copy",DERIVED
 0x18FC57,0,4,char1,0x2FBB,sUserInfo,1,,4B,0x51de24,obj17+0x9c0,"deviants offered by the Courier, NEW (S+0x9c0)",DERIVED
-0x18FC5B,0,4,char1,0x2FBF,sUserInfo,1,,4B,0x51de38,obj17+0x9c4,"unlock map S+0x9c4 with NEW copies, no reader found",UNRESOLVED
-0x18FC5F,0,4,char1,0x2FC3,sUserInfo,1,,4B,0x51de4c,obj17+0x9cc,"unlock map S+0x9c4 with NEW copies, no reader found",UNRESOLVED
+0x18FC5B,0,4,char1,0x2FBF,sUserInfo,1,,4B,0x51de38,obj17+0x9c4,"vestigial map S+0x9c4 with NEW copies: only the transfer converter 0x51e6d8 writes it, no reader",DERIVED
+0x18FC5F,0,4,char1,0x2FC3,sUserInfo,1,,4B,0x51de4c,obj17+0x9cc,"vestigial map S+0x9c4 with NEW copies: only the transfer converter 0x51e6d8 writes it, no reader",DERIVED
 0x18FC63,0,164,char1,0x2FC7,sUserInfo,1,,164B,0x51de5c,obj17+0x9d0,"Guild Card title words, part 1 unlocked: 1312 bits, 1309 words (GC_Title_1)",DERIVED
 0x18FD07,0,164,char1,0x306B,sUserInfo,1,,164B,0x51de70,obj17+0xb18,"Guild Card title words, part 1 NEW",DERIVED
 0x18FDAB,0,16,char1,0x310F,sUserInfo,1,,16B,0x51de84,obj17+0xbbc,"Guild Card title words, part 2 unlocked: 121 words (GC_Title_2)",DERIVED
@@ -80,16 +80,16 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FF1F,0,20,char1,0x3283,sUserInfo,1,,20B,0x51dff4,obj17+0x3570,Trader scenes NEW,DERIVED
 0x18FF33,0,4,char1,0x3297,sUserInfo,1,,4B,0x51e008,obj17+0x3584,"Trader: pet costumes for sale, 32 bits (S+0x3584)",DERIVED
 0x18FF37,0,4,char1,0x329B,sUserInfo,1,,4B,0x51e01c,obj17+0x358c,Trader pet costumes NEW,DERIVED
-0x18FF3B,0,4,char1,0x329F,sUserInfo,1,,4B,0x51e030,obj17+0x3590,"Trader ticket map, 32 bits (S+0x3590)",DERIVED
-0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,Trader ticket map NEW (also read by the Cross ticket screen),DERIVED
-0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,"Trader map, 32 bits (S+0x359c)",DERIVED
-0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,Trader map S+0x359c NEW,DERIVED
+0x18FF3B,0,4,char1,0x329F,sUserInfo,1,,4B,0x51e030,obj17+0x3590,"Trader coin-ticket trades, bit = rTradeCoinTicketList entry; set only by the transfer (S+0x3590)",DERIVED
+0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,Trader coin-ticket trades NEW (read by the Cross ticket screen and the Trader),DERIVED
+0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,"Trader delivery requests offered, bit = rTradeDeliveryList entry, set once the request flag is raised (S+0x359c)",DERIVED
+0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,Trader delivery requests offered NEW (S+0x35a4),DERIVED
 0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,"delivery requests delivered: bit b = kind-1 request b, 1-13 (S+0x35a8; talk condition 41)",DERIVED
 0x18FF4F,0,4,char1,0x32B3,sUserInfo,1,,4B,0x51e094,obj17+0x35ac,Hunter's Notes tips read: clear bit = NEW (S+0x35ac),DERIVED
 0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,"Hunter's Notes, large monsters: 123 bits (S+0x35b0)",DERIVED
 0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,"Hunter's Notes, large monsters NEW (S+0x35c0)",DERIVED
 0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,"Hunter's Notes, second list: 30 bits (S+0x35d0)",DERIVED
-0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,two u32 maps compared with the DLC map sPrivilege+0xf3c by the Room Service (S+0x35dc),UNRESOLVED
+0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,"DLC Palicoes taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)",DERIVED
 0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,network flags (sFestaNetwork; runtime part at S+0x366c),UNRESOLVED
 0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,"shop list 1 listed: 256 bits (uUIGuildShop, S+0xd98)",DERIVED
 0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,shop list 1 NEW (S+0xdd8),DERIVED
@@ -133,7 +133,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x191C97,0,40,char1,0x4FFB,sUserInfo,1,,40B,0x51e454,obj17+0xca0,Arena: bit 5 x quest + set = cleared with that equipment set (S+0xca0),DERIVED
 0x191CBF,0,40,char1,0x5023,sUserInfo,1,,40B,0x51e464,obj17+0xcf0,Arena equipment sets NEW (S+0xcf0),DERIVED
 0x191CE7,0,8,char1,0x504B,sUserInfo,1,,8B,0x51e478,obj17+0x35d4,rotating quests bitmap,CONFIRMED
-0x191CEF,0,4,char1,0x5053,sUserInfo,1,,4B,0x51e48c,obj17+0x3670,u32 cleared by the quest result flow 0x38b948 (S+0x3670),UNRESOLVED
+0x191CEF,0,4,char1,0x5053,sUserInfo,1,,4B,0x51e48c,obj17+0x3670,"bit 0: Moofah Fleeceball given since the last quest (0x6be478; cleared by the quest result 0x38b948, S+0x3670)",DERIVED
 0x191CF3,0,4,char1,0x5057,sUserInfo,1,,4B,0x1cab78,obj100+0x641c8,u32 of the chat-phrase object (+0x2838) loaded inside the S stream; a value >= 0 is replaced by 0xF8FC7E3F at load,DERIVED
 0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,Jukebox songs unlocked (S+0x35e4) + runtime NEW copy,DERIVED
 0x191CFB,0,4,char1,0x505F,sUserInfo,1,,4B,0x51e4c8,obj17+0x35ec,Jukebox songs NEW (S+0x35ec),DERIVED
@@ -149,15 +149,15 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x191D53,0,4,char1,0x50B7,sUserInfo,1,,4B,0x51e58c,obj17+0xd20,"deviant last level cleared, NEW (S+0xd20)",DERIVED
 0x191D57,0,1,char1,0x50BB,sUserInfo,1,,1B,0x51e59c,obj17+0x3680,"u8 + u16 (S+0x3680, S+0x3682); the u16 is recomputed at load (0x6b1e6c)",DERIVED
 0x191D58,0,2,char1,0x50BC,sUserInfo,1,,2B,0x51e5b0,obj17+0x3682,"u8 + u16 (S+0x3680, S+0x3682); the u16 is recomputed at load (0x6b1e6c)",DERIVED
-0x191D5A,0,3444,char1,0x50BE,sUserInfo,1,,3444B,0x51e5c4,obj17+0x3684,"S+0x3684: zero in the analysed save, cleared with S+0x3682 at init, no reader found",UNRESOLVED
-0x192ACE,0,3,char1,0x5E32,sUserInfo,1,,3B,0x51e5d8,obj17+0x43f8,"S+0x43f8, no reader found",UNRESOLVED
+0x191D5A,0,3444,char1,0x50BE,sUserInfo,1,,3444B,0x51e5c4,obj17+0x3684,"S+0x3684: reserved, only init / save / load touch it; zero in all slots",DERIVED
+0x192ACE,0,3,char1,0x5E32,sUserInfo,1,,3B,0x51e5d8,obj17+0x43f8,"S+0x43f8: reserved, only save / load touch it",DERIVED
 0x192AD1,0,1,char1,0x5E35,sUserInfo,1,,1B,0x51e5ec,obj17+0x43fb,"control option byte: set by the Game options window, read by the player and the target camera (S+0x43fb)",DERIVED
 0x192AD2,0,4,char1,0x5E36,sUserInfo,1,,4B,0x51e600,obj17+0x43fc,"Courier: deviant bit lent for temporary mode 1, to restore (S+0x43fc)",DERIVED
 0x192AD6,0,4,char1,0x5E3A,sUserInfo,1,,4B,0x51e610,obj17+0x4400,"Courier: deviant bit lent for temporary mode 2, to restore (S+0x4400)",DERIVED
-0x192ADA,0,8,char1,0x5E3E,sUserInfo,1,,8B,0x51e62c,,u32 pair get/set by the title menu (S+0x4408),UNRESOLVED
-0x192AE2,0,4,char1,0x5E46,sUserInfo,1,,4B,0x51e640,obj17+0x4410,u32 (S+0x4410),UNRESOLVED
+0x192ADA,0,8,char1,0x5E3E,sUserInfo,1,,8B,0x51e62c,,u64 Nintendo Account ID linked to the save-transfer server (S+0x4408; shared copy at file 0x12C2D6),DERIVED
+0x192AE2,0,4,char1,0x5E46,sUserInfo,1,,4B,0x51e640,obj17+0x4410,"S+0x4410: reserved, only save / load touch it",DERIVED
 0x192AE6,0,4,char1,0x5E4A,sUserInfo,1,,4B,0x51e654,obj17+0x4414,"Courier flags, u32 (S+0x4414)",DERIVED
-0x192AEA,0,4,char1,0x5E4E,sUserInfo,1,,4B,0x51e668,obj17+0x4418,contains: quest counter,DERIVED
+0x192AEA,0,4,char1,0x5E4E,sUserInfo,1,,4B,0x51e668,obj17+0x4418,"quest counter, u32: completed quests except tours and Training (S+0x4418, 0x526f70)",DERIVED
 0x192AEE,0,4,char1,0x5E52,sUserInfo,1,,4B,0x51e67c,obj17+0x441c,"quest counter reference: both folded into [210, 420) by 0x5279e0 (S+0x441c)",DERIVED
 0x192AF2,0,4,char1,0x5E56,sUserInfo,1,,4B,0x51e690,obj17+0x4420,"Courier points: added per quest, turned into Special Permits (S+0x4420)",DERIVED
 0x192AF6,0,36,char1,0x5E5A,sUserInfo,1,,36B,0x51e6a4,obj17+0x4424,"Special Permit points per deviant, 18 x u16, at most 9999 (100 = 1 permit, S+0x4424)",DERIVED
@@ -172,7 +172,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1AEAAA,0,1632,char1,0x21E0E,sEquipBox,1,,1632B,0x3e7804,obj100+0x5f58c,"Palico equipment sets: 24 x 68 B (name char[42], 3 x u16 box index)",DERIVED
 0x1AF10A,0,29,char1,0x2246E,sGameControl,1,,29B,0x3f8dfc,obj100+0x5e,"game options, 29 bytes (Game / Chat / Network option windows, quest camera; sGameControl +0x5e)",DERIVED
 0x1AF127,0,4,char1,0x2248B,sGameControl,1,,4B,0x3f8e1c,obj100+0x34,"play time in seconds (sGameControl +0x34; slot header +0x20, Guild Card +0x914)",DERIVED
-0x1AF12B,0,4,char1,0x2248F,sGameControl,1,,4B,0x3f8e2c,obj100+0x38,u32 (sGameControl +0x38),UNRESOLVED
+0x1AF12B,0,4,char1,0x2248F,sGameControl,1,,4B,0x3f8e2c,obj100+0x38,"f32 play-time remainder in frames, carried into the seconds at 60 (sGameControl +0x38, 0x3f83a8)",DERIVED
 0x1AF12F,0,4,char1,0x22493,sGameControl,1,,4B,0x3e7818,obj100+0x3c,u32 copied to the Guild Card +0x86C (sGameControl +0x3c),DERIVED
 0x1AF133,0,376,char1,0x22497,sItem,94,32,32b,0x1979d8,obj100+0x1679c,"items obtained: bit = item ID, 94 x u32 (sItem +0x9c)",DERIVED
 0x1AF2AB,0,136,char1,0x2260F,sItem,1,,136B,0x1979fc,,"Trader cargo 1, 136 B (sItem +0xea4)",DERIVED
@@ -380,11 +380,11 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B05F0,0,256,char1,0x23954,sItem,1,,256B,0x1980f0,obj100+0x16a14,"item box table 2, same form (sItem +0x314)",UNRESOLVED
 0x1B06F0,0,4,char1,0x23A54,sItem,1,,4B,0x198100,obj100+0x16798,u32 read by Alchemy and the quest result (sItem +0x98),UNRESOLVED
 0x1B06F4,0,1,char1,0x23A58,sPlayer,1,,1B,0x275614,obj100+0x9d5c,player record (loaded copy of the slot header fields),DERIVED
-0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,"player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 (style?), rest unknown; first 4 u16 copied to the Guild Card +0x4C",DERIVED
+0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,"player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 SP Art bits per art slot; bytes 8-223 unused by a hunter (Palico parameters); first 4 u16 copied to the Guild Card +0x4C",DERIVED
 0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,"equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none",DERIVED
 0x1B07E3,0,12,char1,0x23B47,sPlayer,1,,12B,0x275740,obj100+0x650,weapon class (+0; 15 = Prowler) and character creation choices (+4 = gender),DERIVED
 0x1B07EF,0,36,char1,0x23B53,sPlayer,1,,36B,0x275754,obj100+0x65c,"current pigment, 5 x RGBA + 16 B",DERIVED
-0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,"u32 (header +0x274, Guild Card +0x48)",UNRESOLVED
+0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,"u32: five 5-bit values, one per pigment slot, set by the appearance menu; meaning open (header +0x274, Guild Card +0x48)",UNRESOLVED
 0x1B0817,0,2,char1,0x23B7B,sPlayer,1,,2B,0x27577c,obj100+0x682,current pigment default-colour flags,DERIVED
 0x1B0819,0,32,char1,0x23B7D,sPlayer,1,,32B,0x27578c,obj100+0x690,hunter name,DERIVED
 0x1B0839,0,1,char1,0x23B9D,sOtomo,1,,1B,0x2639d0,obj20+0x13848,"Palico manager: u8, u16, u8, u8 (sOtomo +0x13848)",UNRESOLVED
@@ -452,12 +452,12 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1BB91B,0,4,char1,0x2EC7F,sGuildCard,1,,4B,0x166dbc,obj100+0x73034,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
 0x1BB91F,0,623930,char1,0x2EC83,sGuildCard,1,,623930B,0x3cf8fc,obj100+0x1d3900,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
 0x253E59,0,6328,char1,0xC71BD,sGuildCard,1,,6328B,0x163e30,obj100+0x66120,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)",DERIVED
-0x255711,0,4400,char1,0xC8A75,sGuildCard,1,,4400B,0x163e44,obj100+0x679d8,"list 1 card info: 100 x 44 B (date received +0, comment +4, sort keys +0x1C/+0x20, sender ID +0x21)",DERIVED
+0x255711,0,4400,char1,0xC8A75,sGuildCard,1,,4400B,0x163e44,obj100+0x679d8,"list 1 card info: 100 x 44 B (date received +0, comment +4, Unity +0x1C, card type +0x20, sender ID +0x21)",DERIVED
 0x256841,0,3650,char1,0xC9BA5,sGuildCard,50,584,4B 29B 4B 2B 22B 8B 4B,0x3cf7e4,obj100+0x7c208,Guild Card inbox (list 2): 50 elements + padding,DERIVED
 0x257683,0,313150,char1,0xCA9E7,sGuildCard,1,,313150B,0x3cf8fc,obj100+0x2a2100,Guild Card inbox (list 2): 50 elements + padding,DERIVED
 0x2A3DC1,0,1800,char1,0x117125,sGuildCard,1,,1800B,0x163e68,obj100+0x68b0c,Guild Card inbox info: 50 x 36 B (date received +0),DERIVED
-0x2A44C9,0,276,char1,0x11782D,sGuildCard,1,,276B,0x163e7c,obj100+0x69214,StreetPass Palico to send: one 276 B record,DERIVED
-0x2A45DD,0,13800,char1,0x117941,sGuildCard,1,,13800B,0x163e90,obj100+0x69328,Palico inbox: 50 x 276 B,DERIVED
+0x2A44C9,0,276,char1,0x11782D,sGuildCard,1,,276B,0x163e7c,obj100+0x69214,"StreetPass Palico to send: one 276 B record (sender ID +0, name UTF-16 +8, appearance +0x1E, 9 colours +0x2C, parameters +0x50)",DERIVED
+0x2A45DD,0,13800,char1,0x117941,sGuildCard,1,,13800B,0x163e90,obj100+0x69328,"Palico inbox: 50 x 276 B, same record",DERIVED
 0x2A7BC5,0,1800,char1,0x11AF29,sGuildCard,1,,1800B,0x3e78cc,obj100+0x6c910,Palico inbox info: 50 x 36 B,DERIVED
 0x2A82CD,0,1,char1,0x11B631,sGuestHunter,1,,1B,0x15bd58,obj100+0x81828,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
 0x2A82CE,0,1,char1,0x11B632,sGuestHunter,1,,1B,0x15bd68,obj100+0x81829,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED

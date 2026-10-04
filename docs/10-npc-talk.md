@@ -72,13 +72,13 @@ anything else adds nothing. That is how an s16 reaches 41811 or 111304.
 | 11 / 12 | quest cleared / not cleared (`0x523da4`) | CONFIRMED (code + save) |
 | 13 / 14 | Village / Hub key quest set *b* all cleared (`0x526d28` / `0x526d48`) | from code |
 | 16–21 | 1, 2, 11–14 again, OR-ed with the condition before | from code |
-| 3–7, 9, 135, 136 | a u16 of the talk request equals 1, 2, 3, 4, 0, 5, 6, 7. Only on ordinary talk lines | not read further |
+| 3–7, 9, 135, 136 | the player is in scene 1, 2, 3, 4, 0, 5, 6, 7: the u16 at `+2` of the talk request is the scene index, taken from byte `+0x4c` of the scene object (GOT `0x1838bb4`; the talk cache prebuild `0x50b4dc` loops over the eight scenes). Scenes: 0 Hunters Hub, 1 Bherna, 2 Kokoto, 3 Pokke, 4 Yukumo, 5 Palico Ranch, 6 Wycademy, 7 the second hub (Pub Manager, Questender). Requests built elsewhere hold `0xFFFF`, so all are false there. Used: 3 (Head Researcher in Bherna), 7 (NPC 701), 9 (NPC 613), 135 (NPC 9); 4, 5, 6, 136 unused | from code + NPC data |
 | 22–25 | type of the quest just accepted (`0x3bd35c`): 0 hunt / 2 capture / 3 gathering / 1 (line text is a placeholder). Send-off lines of the quest counter Gals | from dialogue |
 | 26 / 27 | byte `+0x4d8` of the player data clear / set: the hunter's gender, male / female. The slot header writer turns the same byte into its gender flag and the Smithy and the Armory read it ([11](11-save-map.md#slot-header--base--0x0-632-b), `base + 0x23B4B`) | from code |
 | 28 | HR ≥ *b* (u16 `+0x554` of the player object) | from code |
 | 29 | a statistic of the hunter, sub-test *b* (`0x2484c0`, jump table `0x2484f0`, 114 entries); only NPC 991, the house Palico. See [below](#condition-29--the-house-palicos-remarks) | from code + dialogue |
-| 36–39 | a state word (`+0x2cc`) is 0 / 1 / 2 / 3 (Courier only) | not read further |
-| 41 / 42 | 41: delivery request *b* (1–13, the kind 1 requests) has been delivered: `0x524db8` tests bit *b* of `S+0x35a8` (`base + 0x32AF`), on report lines. 42: result of `0x3b1b90` equals *b* (Hub Gal tutorial lines) | 41 from code + dialogue, 42 not read further |
+| 36–39 | how many Special Permits the Courier can hand out: word `+0x2cc` of the lobby-state object (GOT `0x1838fc0`) is 0 / 1 / 2 / 3. The Courier (`0x6d148c`) stores `0x50f440(0x527a80(S))`: the permits due, Σ over the 18 deviants of min((waiting `S+0x4448` + points `S+0x4424`) / 100, 99 − held), bucketed 0 / 1–50 / 51–100 / ≥ 101. True for all four without the object. Courier lines 78, 81, 84, 87 | from code + dialogue |
+| 41 / 42 | 41: delivery request *b* (1–13, the kind 1 requests) has been delivered: `0x524db8` tests bit *b* of `S+0x35a8` (`base + 0x32AF`), on report lines. 42: at least *b* Hub ★1 quests (IDs 101xx) cleared, counted by `0x3b1b90` over the quest list. One use: NPC 502 line 20 (*b* = 1), the HR tutorial after the first Hub ★1 clear | from code + dialogue |
 | 44 / 45 | a Hunter's Notes entry can be unlocked: large monsters (`0x554da4`, 123 entries) / the second list (`0x55515c`, 30 entries) | from code + text |
 | 46–53, 141, 142 | a Hunter Art lesson of this teacher is due (`0x3f0ff0` … `0x3f1294` with 1 = ask): one of the teacher's arts is not yet in the [Hunter Arts map](08-progression.md) (`0x524040`) and its requirement holds. With every art unlocked by an edit the lesson is never due, and a request report that carries this condition never fires | from code + text; the blocked reports CONFIRMED on the save |
 | 54 | a threshold is due (`0x197598`): with `S+0x110` clear and the Hub star level at least 8, the u32 at `S+0x20` has passed u16 `S+0x114` × 20000. The dialogue ties it to Wycademy points | from code + dialogue |
@@ -98,7 +98,7 @@ anything else adds nothing. That is how an s16 reaches 41811 or 111304.
 | 118 / 119 / 120 | the selected quest is / is (OR type) / is not the given quest | from code |
 | 122 | quest 10644 is listed, like 64 but not latched in the save | from code |
 | 123–126 | result of `0x1a57bc` + 1 compared with *b* (=, ≥, ≤, <): a shop level, used by "the shop just got an upgrade" lines | from dialogue |
-| 143–146 | multiplayer session state (`0x227a98`) | not read further |
+| 143–146 | online lobby state, no save field. All need a session in modes 2, 7–11 with byte `+0x640` = 0 (`0x227a98`, object at GOT `0x1838d7c`). 143: also u32 `+0x644` = 0 (written by `uUILobbyStartMenu`), 144 its negation. 145: the session's `+0x41cc` equals `+0x41c8` (probably "this player is the host"), 146 its negation. Used by NPC 9's Hunter Call and boarding lines | structure from code; field meanings UNRESOLVED |
 | 8, 10, 15, 30–35, 63, 71–74, 76–84, 137, 138, 147 | always true | from code |
 
 The jump table of the evaluator is at `0x2451fc` (163 types). 58 types do not occur
@@ -138,7 +138,7 @@ Action 1, jump table at `0x2479d8`:
 |---|---|---|
 | 1 | set event flag, then refresh through `0x3ef68c` | CONFIRMED (code + save) |
 | 2 | clear event flag | from code |
-| 3 | set byte `+6` of the talk state (107 lines, no save effect seen) | not read further |
+| 3 | end the talk without the follow-up menu: sets byte `+6` of the talk result (`0x1884c5c`, reset by the executor `0x246b1c`). When `+6` or `+7` is set, the NPC base (`0x6ce8cc`) and `uUIOtomoService` skip their service step and close the talk. 107 intro, story and request lines; no save effect | from code; the menu reading from the lines |
 | 4 | set event flag without the refresh (not used) | from code |
 | 5 | release the HR limit: `0x5231d8` sets bit 20 of the progress word and recomputes HR. One line: Pub Manager, after 11432 | from code + text |
 | 6 / 7 | unlock every Hunter's Notes entry that is due, in the large monster list / the second list | from code + text |
@@ -317,4 +317,5 @@ sets them: 237, 239 (shop stock upgrades), 677, 1502 (a weapon at its last level
 
 ## Open questions
 
-- Conditions marked "not read further" above. None of them gates a request.
+- Conditions 143–146: what the lobby fields `+0x644` and `+0x41cc` / `+0x41c8` mean.
+  No save field, and none of them gates a request.

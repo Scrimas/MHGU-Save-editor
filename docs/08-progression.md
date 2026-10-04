@@ -57,8 +57,11 @@ names were not checked in-game one by one.
 
 ### Save-screen art slots — `base + 0x2C`
 
-**DERIVED.** 3 × u16 art IDs, as in the MHXX notes. Only slot 1 was non-zero in the
-analysed save. This is most likely a save-screen summary, not the loadout itself.
+**DERIVED.** 3 × u16 art IDs, as in the MHXX notes, then a u16 of SP Art bits (bit *i*
+= art slot *i* is an SP Art). Only slot 1 was non-zero in the analysed save. The slot
+header is a save-screen summary; the copy the game loads is the player record at
+`base + 0x23A59` ([11](11-save-map.md#player-record--base--0x23a58)), which holds the
+equipped arts themselves. A new character starts with arts 26 and 1.
 
 ## Canteen ingredients — `base + 0x2F8F`
 
