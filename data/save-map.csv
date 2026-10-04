@@ -90,7 +90,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,"Hunter's Notes, large monsters NEW (S+0x35c0)",DERIVED
 0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,"Hunter's Notes, second list: 30 bits (S+0x35d0)",DERIVED
 0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,"DLC Palicoes taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)",DERIVED
-0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,network flags (sFestaNetwork; runtime part at S+0x366c),UNRESOLVED
+0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,"flags: bit 0 network-mode switch (mirrored to sFestaNetwork), bit 1 daily quest bonus received (S+0x3668)",DERIVED
 0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,"shop list 1 listed: 256 bits (uUIGuildShop, S+0xd98)",DERIVED
 0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,shop list 1 NEW (S+0xdd8),DERIVED
 0x18FFC3,0,32,char1,0x3327,sUserInfo,1,,32B,0x51e130,obj17+0xdf8,shop list 2 listed: 256 bits (S+0xdf8),DERIVED
@@ -369,13 +369,13 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B035F,0,24,char1,0x236C3,sItem,1,,24B,0x197d34,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
 0x1B0377,0,308,char1,0x236DB,sItem,7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,"Alchemy requests: 10 x 420 B (u8, u8, u16, 3 x 36 B equipment, 7 x (u32, u32, 36 B equipment))",DERIVED
 0x1B04AB,0,10,char1,0x2380F,sItem,1,,10B,0x198060,obj100+0x1678c,village tier bytes (4) and 6 bytes (sItem +0x8c),DERIVED
-0x1B04B5,0,1,char1,0x23819,sItem,1,,1B,0x198070,obj100+0x1676a,,
-0x1B04B6,0,1,char1,0x2381A,sItem,1,,1B,0x198080,obj100+0x1676b,,
-0x1B04B7,0,2,char1,0x2381B,sItem,1,,2B,0x198090,obj100+0x1676c,,
-0x1B04B9,0,1,char1,0x2381D,sItem,1,,1B,0x1980a0,obj100+0x1676e,,
+0x1B04B5,0,1,char1,0x23819,sItem,1,,1B,0x198070,obj100+0x1676a,"Trader cargo shipments counter, pays pending reward byte 1 (sItem +0x6a)",DERIVED
+0x1B04B6,0,1,char1,0x2381A,sItem,1,,1B,0x198080,obj100+0x1676b,"low-rank contribution points accumulator, 250 = 2 to pending byte 3 (sItem +0x6b)",DERIVED
+0x1B04B7,0,2,char1,0x2381B,sItem,1,,2B,0x198090,obj100+0x1676c,"G-rank contribution points accumulator, 800 = 2 to pending byte 22 (sItem +0x6c)",DERIVED
+0x1B04B9,0,1,char1,0x2381D,sItem,1,,1B,0x1980a0,obj100+0x1676e,"Footbath uses, 15 = 3 to pending byte 4 (sItem +0x6e)",DERIVED
 0x1B04BA,0,23,char1,0x2381E,sItem,1,,23B,0x1980b0,obj100+0x1676f,activity: pending village rewards,DERIVED
-0x1B04D1,0,6,char1,0x23835,sItem,1,,6B,0x1980c0,obj100+0x16786,,
-0x1B04D7,0,25,char1,0x2383B,sItem,1,,25B,0x1980d0,obj100+0x16750,,
+0x1B04D1,0,6,char1,0x23835,sItem,1,,6B,0x1980c0,obj100+0x16786,"staged quest-clear counters: G-rank 1-4 star clears, villager-request clears (sItem +0x86)",DERIVED
+0x1B04D7,0,25,char1,0x2383B,sItem,1,,25B,0x1980d0,obj100+0x16750,"Combination List recipes combined, bit = itemPreData record; award 27 at 130 (sItem +0x50)",DERIVED
 0x1B04F0,0,256,char1,0x23854,sItem,1,,256B,0x1980e0,obj100+0x16914,"Combination List order, pouch list: flags byte (bit 1 custom order, bit 0 filter), then itemPreData recipe index per position (sItem +0x214)",DERIVED
 0x1B05F0,0,256,char1,0x23954,sItem,1,,256B,0x1980f0,obj100+0x16a14,"Combination List order, item box list, same form (sItem +0x314)",DERIVED
 0x1B06F0,0,4,char1,0x23A54,sItem,1,,4B,0x198100,obj100+0x16798,Horns Coins traded in total; award 104 at 2000 (sItem +0x98),DERIVED
