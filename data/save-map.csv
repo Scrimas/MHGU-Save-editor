@@ -37,8 +37,8 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18F8DF,0,24,char1,0x2C43,sUserInfo,1,,24B,0x51dcb4,obj17+0xd54,"Hunter Arts unlocked, NEW (S+0xd54)",DERIVED
 0x18F8F7,0,4,char1,0x2C5B,sUserInfo,1,,4B,0x51dcc8,obj17+0xd6c,"31-bit map committed from S+0xd74 at quest end, counted by Alchemy (S+0xd6c)",DERIVED
 0x18F8FB,0,4,char1,0x2C5F,sUserInfo,1,,4B,0x51dcd8,obj17+0xd70,u32 map (S+0xd70) + pending 31-bit map set by monster code (S+0xd74),DERIVED
-0x18F8FF,0,12,char1,0x2C63,sUserInfo,1,,12B,0x51dcec,obj17+0xd78,Palico learned maps,DERIVED
-0x18F90B,0,8,char1,0x2C6F,sUserInfo,1,,8B,0x51dd00,obj17+0xd84,Palico learned maps,DERIVED
+0x18F8FF,0,12,char1,0x2C63,sUserInfo,1,,12B,0x51dcec,obj17+0xd78,"Palico skills learned: 96 bits, bit = ot_skl entry (S+0xd78)",DERIVED
+0x18F90B,0,8,char1,0x2C6F,sUserInfo,1,,8B,0x51dd00,obj17+0xd84,Palico support moves learned: 57 bits (S+0xd84),DERIVED
 0x18F913,0,256,char1,0x2C77,sUserInfo,1,,256B,0x51dd14,obj17+0x42c,quests cleared bitmap,CONFIRMED
 0x18FA13,0,256,char1,0x2D77,sUserInfo,1,,256B,0x51dd28,obj17+0x52c,quests seen bitmap,CONFIRMED
 0x18FB13,0,256,char1,0x2E77,sUserInfo,1,,256B,0x51dd3c,obj17+0x62c,quests failed bitmap,DERIVED

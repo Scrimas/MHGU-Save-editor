@@ -648,9 +648,11 @@ otherwise.
   Palicoes, 12 slots each, when the Palico's level reaches the entry's requirement
   (byte `+0xa`); `+0xd84` is a 57-bit map (test `0x52462c`) filled by `0x262560`
   (entries without a requirement) and `0x2625cc` (entries whose requirement is a
-  cleared quest, `0x3a3930`). 96 and 57 fit the Palico skills and support moves, that
-  is, what the player's Palicoes have learned and can pass on; which map is which was
-  not checked. The 3 × 24 bytes before them (`base + 0x2C13`) are the Hunter Arts
+  cleared quest, `0x3a3930`). `+0xd78` is the **Palico skills** map: `ot_skl_eng.gmd`
+  has exactly 96 skills (name and description each), and the test's callers pass a
+  Palico's skill byte (`+0x264` of the Palico object, `0xe9e64`). `+0xd84` is therefore
+  the **support moves** map; its callers pass the Palico's 16 support move slots
+  (`+0x18`, `0xe877c`). **DERIVED.** The 3 × 24 bytes before them (`base + 0x2C13`) are the Hunter Arts
   bitmap of [08](08-progression.md) and two copies that drive notices. The same
   serializer walk also lands on the Canteen ingredients of 08 (`base + 0x2F8F`), which
   cross-checks the field map.
