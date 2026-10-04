@@ -27,8 +27,22 @@ contiguous run, in on-screen reading order (left to right, top to bottom):
 | 55–69 | Kokoto | 15 |
 | 70–84 | Pokke | 15 |
 | 85–99 | Yukumo | 15 |
-| 100–101 | no visible award, see below | 2 |
+| 100–101 | Bherna slot 26: one of the two, see below | 2 |
 | 102–131 | Soaratorium | 30 |
+
+**Names.** Bit *i* is entry *i* of `table/GC_Medal_eng.gmd` (132 names, then the 132
+descriptions in the same order). Bit 0 is *Bherna Chief's Ornamental Belt*, as the
+controlled write showed, bit 34 *Crest of Generations* (the Fated Four,
+[05](05-quests.md)), bit 68 *Poogie Ball*. All 132:
+[`data/awards.csv`](../data/awards.csv). **DERIVED.**
+
+**Bits 100 and 101 share Bherna's 26th slot.** Bit 101 is *A Pat on the Back* ("your
+first step into the world of monster hunting"), bit 100 *Veteran Hunter's Prize*, whose
+description prints the total play time and Hunter Rank of a *Monster Hunter
+Generations* save. The game grants one of them once (`0x3ea570`, called next to the
+save transfer code): 101, or 100 when the source byte it tests is negative. The card
+screen (`0x5a88f8`) shows bit 100 in that slot when the card's flag byte `+0x8B8` is
+negative (bit 7 set) and bit 101 otherwise. **DERIVED** from code.
 
 ```
 earned(bit) = (buf[base + 0xC8115 + (bit >> 3)] >> (bit & 7)) & 1
@@ -85,8 +99,8 @@ The first thirteen awards, **DERIVED** from the code:
 |---|---|
 | 0–5 | pairs and triples of the Village and Hub level sets 13–25 (0 = sets 13 and 14, 1 = 15 and 16, …) |
 | 6 | awards 0–5 all earned (the check reads its own map: `& 0x7f == 0x3f`) |
-| 7, 8 | `0x3f3624` / `0x3f3824` with 66: a count over the 87 monster list entries, one per crown size by the look of it (**UNRESOLVED**) |
-| 9 | `0x3f1b1c`, not read |
+| 7, 8 | *Miniature Crown* / *Large Crown*: `0x3f3624` / `0x3f3824` count the monsters of the 87-entry monster list whose size record carries the gold crown mark (`0x67310` returns 3), skipping a few codes; the award needs 66 |
+| 9 | *Bionomical Report*, "captured" monsters: `0x3f1b1c`, a loop over monster codes, not read in detail |
 | 10, 11, 12 | sets 45, 46, 47: every Arena quest cleared, all with rank A, all with rank S |
 
 The check runs after every quest and needs no "last clear": on the first quest after
@@ -94,18 +108,18 @@ the [bulk completion write](05-quests.md#what-all-quests-completed-takes), a Har
 Tour, this map and its notice copy gained 0–6, 10, 59, 74, 89, 103 and 109–114 at
 once. 11 and 12 stayed clear with the rank sets, 7–9 do not depend on quests.
 
-Whether the Guild Card copy is rebuilt from this map, and when, was not tested; it
-was already full when these awards arrived.
+The Guild Card copy is not rebuilt from this map but OR-ed with it: the card update
+`0x161ac8` sets every card bit whose game-side bit is set (`0x161b98`, bits 0–131) and
+clears nothing. So a bit written to the card stays (the full-field write survived),
+while a card bit cleared by an edit comes back if the game-side bit is set.
 
 ## Open questions
 
-- **UNRESOLVED — Bherna's 26th slot**, *A Pat on the Back* ("your first step into
-  the world of monster hunting", crossed-swords icon, earned). Bherna's first 25
-  slots fill bits 30–54 and Kokoto starts immediately at 55, so slot 26 is not in the
-  Bherna run. It is **not** bit 100 or 101 either: clearing bit 101 and setting bit
-  100 changed nothing on any of the six grids. Possibly granted unconditionally or
-  stored elsewhere.
-- **UNRESOLVED — bits 100–101.** No visible effect in either state. The analysed save
-  has 100 = 0 and 101 = 1; leave them as found.
-- **UNRESOLVED — award names/IDs.** Only positions are mapped; names come from the
-  in-game descriptions.
+- **RESOLVED — Bherna's 26th slot is bit 101** (*A Pat on the Back*), or bit 100 on a
+  transferred card, see [Layout](#layout). The earlier test, clearing bit 101 and
+  setting bit 100 in the card copy, changed nothing for two reasons the code shows:
+  the card update ORs the game-side map back in (bit 101 is set there), and the slot
+  shows bit 100 only when the card's flag byte `+0x8B8` has bit 7 set. To remove the
+  award, clear bit 101 in both maps (`base + 0x3157` and the card). **DERIVED**, not
+  re-tested.
+- **RESOLVED — award names**, from `GC_Medal_eng.gmd` ([`data/awards.csv`](../data/awards.csv)).

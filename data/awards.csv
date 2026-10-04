@@ -1,0 +1,133 @@
+bit,grid,name
+0,Wycademy,Bherna Chief's Ornamental Belt
+1,Wycademy,Bherna Chief's Cane
+2,Wycademy,Bherna Chief's Cap
+3,Wycademy,Copper Medal
+4,Wycademy,Silver Medal
+5,Wycademy,Gold Medal
+6,Wycademy,Crest of the Empyrean Hunter
+7,Wycademy,Miniature Crown
+8,Wycademy,Large Crown
+9,Wycademy,Bionomical Report
+10,Wycademy,Jasper Shield
+11,Wycademy,Sapphire Shield
+12,Wycademy,Golden Sunshield
+13,Wycademy,Elder Dragon Guide
+14,Wycademy,Nakarkos Esoterica
+15,Wycademy,Redhelm Esoterica
+16,Wycademy,Snowbaron Esoterica
+17,Wycademy,Crystalbeard Esoterica
+18,Wycademy,Stonefist Esoterica
+19,Wycademy,Drilltusk Esoterica
+20,Wycademy,Dreadking Esoterica
+21,Wycademy,Dreadqueen Esoterica
+22,Wycademy,Deadeye Esoterica
+23,Wycademy,Silverwind Esoterica
+24,Wycademy,Thunderlord Esoterica
+25,Wycademy,Grimclaw Esoterica
+26,Wycademy,Hellblade Esoterica
+27,Wycademy,Sage's Tome
+28,Wycademy,Artisan's Hammer
+29,Wycademy,Artisan's Mitts
+30,Bherna,Wycademy Necktie
+31,Bherna,Caudal Blade
+32,Bherna,Jurassic Frontier Map
+33,Bherna,Bherna Village Moofahbell
+34,Bherna,Crest of Generations
+35,Bherna,Brute Wyvern Guide
+36,Bherna,Brute Wyvern Guide - Hyper Edition
+37,Bherna,Moofah Milk
+38,Bherna,Moofah Cheese Fondue
+39,Bherna,Worker's Hand Towel
+40,Bherna,Bherna Certificate of Style
+41,Bherna,Bherna Certificate of Expert Style
+42,Bherna,Purr-prietress's Vegetable Medley
+43,Bherna,Purr-prietress's Feast
+44,Bherna,Gourmet Hunter's Badge
+45,Bherna,Patron's Order Slip
+46,Bherna,Trader's Signboard
+47,Bherna,Moofy Ball
+48,Bherna,Platinum Moofy
+49,Bherna,Ball of Moofah Wool
+50,Bherna,To the Best Hunter Ever
+51,Bherna,Great Felvine
+52,Bherna,Hunter with a Big Heart
+53,Bherna,Dojo Grandmeowster's Letter
+54,Bherna,A True Meownster Hunter
+55,Kokoto,Thunderwing Robe
+56,Kokoto,Verdant Hills Map
+57,Kokoto,Kokoto Cherry Sapling
+58,Kokoto,Hero Plumage
+59,Kokoto,Kokoto Chief's Cloak
+60,Kokoto,Flying Wyvern Guide
+61,Kokoto,Flying Wyvern Guide - Hyper Edition
+62,Kokoto,Writhe Nut Noodle Soup
+63,Kokoto,Simmered Goldendrome
+64,Kokoto,Kokoto Certificate of Style
+65,Kokoto,Kokoto Certificate of Expert Style
+66,Kokoto,Meat Meowster's Sample Platter
+67,Kokoto,Meat Meowster's Full Course Meal
+68,Kokoto,Poogie Ball
+69,Kokoto,Golden Poogie
+70,Pokke,Wooly Scarf
+71,Pokke,Arctic Ridge Map
+72,Pokke,Pokke Welkin Stone
+73,Pokke,Black Bracelet
+74,Pokke,Pokke Chief's Frock
+75,Pokke,Fanged Beast Guide
+76,Pokke,Fanged Beast Guide - Hyper Edition
+77,Pokke,Blangonga Apple
+78,Pokke,Frozen Meatball
+79,Pokke,Pokke Certificate of Style
+80,Pokke,Pokke Certificate of Expert Style
+81,Pokke,Sushi Meowster's Appetizer
+82,Pokke,Sushi Meowster's Special
+83,Pokke,Fine Poogie Ball
+84,Pokke,Crystal Poogie
+85,Yukumo,Vulpine Haori
+86,Yukumo,Misty Peaks Map
+87,Yukumo,Felyne Daruma Doll
+88,Yukumo,Cypress Bath Bucket
+89,Yukumo,Yukumo Chief's Kimono
+90,Yukumo,Leviathan Guide
+91,Yukumo,Leviathan Guide - Hyper Edition
+92,Yukumo,Yukumo Onsen Manju
+93,Yukumo,Super Sprout Rice
+94,Yukumo,Yukumo Certificate of Style
+95,Yukumo,Yukumo Certificate of Expert Style
+96,Yukumo,Brew Meowster's Noveltea
+97,Yukumo,Brew Meowster's Miracle Macchiato
+98,Yukumo,Supreme Poogie Ball
+99,Yukumo,Amber Poogie
+100,none (transfer),Veteran Hunter's Prize
+101,Bherna (slot 26),A Pat on the Back
+102,Soaratorium,Cometchaser
+103,Soaratorium,Letter from the Wyventurer
+104,Soaratorium,Felicity's Picture Book
+105,Soaratorium,Ambusher Commendation
+106,Soaratorium,Ahtal-Ka Esoterica
+107,Soaratorium,Pub Manager's Necklace
+108,Soaratorium,Obsidian Ring
+109,Soaratorium,Wyventurer's Amulet
+110,Soaratorium,Wyventurer's Research Compendium
+111,Soaratorium,Wyventurer's Spyglass
+112,Soaratorium,Cupric Medal
+113,Soaratorium,Argent Medal
+114,Soaratorium,Auric Medal
+115,Soaratorium,Miniature Master Crown
+116,Soaratorium,Huge Master Crown
+117,Soaratorium,Crimson Shield
+118,Soaratorium,Platinum Shield
+119,Soaratorium,Nightcloak Esoterica
+120,Soaratorium,Rustrazor Esoterica
+121,Soaratorium,Soulseer Esoterica
+122,Soaratorium,Boltreaver Esoterica
+123,Soaratorium,Elderfrost Esoterica
+124,Soaratorium,Bloodbath Esoterica
+125,Soaratorium,Mark of a Deviant Dominator
+126,Soaratorium,Ruined Pinnacle Map
+127,Soaratorium,Weapon Master
+128,Soaratorium,Meowstress's Pouch
+129,Soaratorium,A Million Thanks
+130,Soaratorium,Gourmew Chef's Special Menu
+131,Soaratorium,Sweet Poogie & Pretty Moofy

@@ -548,8 +548,11 @@ Other flags those steps changed. The quest block serializer (`0x51d12c`) places 
 Fated Four set bit 10 of the u32 at `base + 0x2C5F` and award 34 in the game-side
 [award map](09-awards.md#game-side-map--base--0x3157) at `base + 0x3157` and its
 notice copy at `+0x316B`; the Captain report set award 83 in the same two maps and
-bit 14 of the 8-byte words at `base + 0x2F9F` / `+0x2FA7` (**UNRESOLVED**). Such fields
-come in pairs, a state word and a copy that drives a one-time notice.
+bit 14 of the 8-byte words at `base + 0x2F9F` / `+0x2FA7`. Those words are the Poogie
+costume map and its NEW copy ([11](11-save-map.md#unlock-maps)): the report gave a
+costume, and award 83 is *Fine Poogie Ball*, "collected most of the Poogie costumes"
+([09](09-awards.md#layout)). Such fields come in pairs, a state word and a copy that
+drives a one-time notice.
 
 **What makes an NPC offer a request** is in the NPC's talk data, see
 [10 — NPC talk data](10-npc-talk.md) and [`data/request-offer.csv`](../data/request-offer.csv).

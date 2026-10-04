@@ -337,7 +337,7 @@ a received card: HR 999 / 148, sensible equipment types, transmog IDs.
 | `+0x86C` | u32 | copied from `sGameControl +0x3c` | `0x161ac8` |
 | `+0x878` | | greeting, UTF-16 | |
 | `+0x8B0` | 8 | the card owner's ID (the arena records name hunters by it; the leaderboard reads it as 4 × u16) | `0x6e7800` |
-| `+0x8B8` | u8 | flags (bit 1 from sPlayer `+0x9C5C`) | |
+| `+0x8B8` | u8 | flags (bit 1 from sPlayer `+0x9C5C`; bit 7 set = the award screen shows award 100 instead of 101, [09](09-awards.md#layout)) | `0x5a88f8` |
 | `+0x8BA` | 3 × 15 × u16 | weapon usage, Village / Hub / Arena ([04](04-weapon-usage.md)) | |
 | `+0x914` | u32 | play time ([05](05-quests.md)) | |
 | `+0x918` | 10 × 160 | quest history ([05](05-quests.md)) | |

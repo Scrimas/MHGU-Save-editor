@@ -180,8 +180,9 @@
                 "bit_order": "LSB-first", "confidence": "CONFIRMED",
                 "note": "exact match of all six in-game award grids (74 bits set) + controlled write of bit 0 (Wycademy slot 1 appeared) + full write of bits 0-99,102-131 (every slot on all six grids lit);'?' slots are computed, not stored; see docs/09-awards.md",
                 "grids": { "0-29": "Wycademy", "30-54": "Bherna (slots 1-25)", "55-69": "Kokoto",
-                           "70-84": "Pokke", "85-99": "Yukumo", "100-101": "UNRESOLVED, no visible effect; Bherna slot 26 is NOT here",
-                           "102-131": "Soaratorium" } }
+                           "70-84": "Pokke", "85-99": "Yukumo", "100-101": "Bherna slot 26: 101 = A Pat on the Back, 100 = Veteran Hunter's Prize on a transferred card (card +0x8B8 bit 7). The card copy is OR-ed with the game-side map (rel 0x3157) by 0x161b98, so clear both to remove an award. DERIVED",
+                           "102-131": "Soaratorium" },
+                "names": "bit i = entry i of table/GC_Medal_eng.gmd; data/awards.csv" }
   },
   "save_map": {
     "_comment": "from the game's own loader run under emulation (docs/11-save-map.md, data/save-map.csv); rel = relative to the character base",
