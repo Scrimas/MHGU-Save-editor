@@ -4,6 +4,7 @@ system
 system_backup
 snapshots/
 scratch/
+TODO-savemap.md
 
 # Python
 __pycache__/

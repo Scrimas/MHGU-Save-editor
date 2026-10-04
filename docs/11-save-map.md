@@ -259,8 +259,8 @@ and owner names are sensible.
 | `+0x00` | char[32] | name |
 | `+0x20` | u32 | experience |
 | `+0x24` | u8 | level (raw; ordering matches experience) |
-| `+0x25` | u8 | forte / bias (UNRESOLVED) |
-| `+0x26` | u8 | UNRESOLVED (55–99 seen) |
+| `+0x25` | u8 | support bias (parameter block `+5`, see [StreetPass Palico record](#streetpass-palico-record-276-b)) |
+| `+0x26` | u8 | parameter block `+6`, a 0–99 value capped per entry, UNRESOLVED (55–99 seen; 55 in all but eight records of slot 1) |
 | `+0x27` | u8 | target (1–5 seen) |
 | `+0x60` | char[60] | greeting |
 | `+0x9C` | char[32] | original owner name |
