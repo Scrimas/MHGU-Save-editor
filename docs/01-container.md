@@ -79,14 +79,11 @@ applies to it.
 
 ## Open questions
 
-- **UNRESOLVED — character slots.** MHGU allows more than one character per save.
-  The analysed file contained one. Whether the structures documented here repeat per
-  character, and at what stride, is unknown. Every offset in these documents should
-  be treated as "offset for the first character of a single-character save" until
-  someone verifies otherwise against a multi-character file.
-  Lead: the body header has a slot-use table and per-character pointers — see
-  [07 — Equipment § Character slots](07-equipment.md#character-slots).
-- **UNRESOLVED — the bulk of the file.** The identified structures account for a few
-  kilobytes. The remaining ~5 MB includes item boxes, Palico data, and much else
-  that was never touched. The equipment box and saved sets are now covered in
-  [07](07-equipment.md), Hunter Arts and Canteen unlocks in [08](08-progression.md).
+- **Character slots — answered from code.** The game's loader reads three slots of
+  `0x11F8C4` bytes with the same chain, so the per-character structures repeat at the
+  slot base given by the pointer table ([11](11-save-map.md#method)). This has not been
+  tested with a second real character.
+- **The bulk of the file — mapped.** [11 — Whole-file map](11-save-map.md) assigns
+  every byte to the game object that reads it. Most of the 5 MB is per-slot Guild Card
+  lists (0.98 MB per slot, mostly padding) and the downloaded event quests (1.5 MB,
+  shared). Many fields inside those objects are bounded but not yet named.

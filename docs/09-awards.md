@@ -11,7 +11,9 @@ commented out in their `Offsets.cs` and reads as all zeros on Switch.
 Offsets are **relative to the character base** (see
 [07 — Equipment § Character slots](07-equipment.md#character-slots)). The field sits
 inside the Guild Card block (`base + 0xC71BD`), directly after the last quest-history
-record, and is followed by zero bits 132–135.
+record, and is followed by zero bits 132–135. The game's award test `0x162720` accepts
+bit numbers below 160, so the card reserves 20 bytes (`+0xF58` of the 6328-byte card,
+[11](11-save-map.md#card-layout-6328-b)); bits 132–159 are unused.
 
 ## Layout
 

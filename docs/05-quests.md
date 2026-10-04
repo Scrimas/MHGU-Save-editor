@@ -590,7 +590,7 @@ The Guild Card's list of the 10 most recently completed quests, newest first.
 | Field | Offset in record | Type |
 |---|---|---|
 | Date | `+0x00` | u8 day, u8 month, u16 year (`13 09 ea 07` = 19 September 2026), the console date of the clear |
-| unknown | `+0x04` | u16, 7 in all ten records |
+| Record kind | `+0x04` | u16, 7 in all ten records. The insert code `0x1628a0` also builds records of kind 3, and kind 11 is never inserted ([11](11-save-map.md#card-layout-6328-b)) |
 | Quest ID | `+0x06` | u16 |
 | Quest name | `+0x08` | UTF-16LE, 16 characters, cut with `…` |
 | unknown | `+0x28` | three bytes that repeat between records of the same period (`18 23 24`, `03 18 23`), then six u32. In the four EX deviant records the first u32 is `0x0402`, `0x0412`, `0x042d`, `0x0425`, which looks like a monster ID with a deviant marker |

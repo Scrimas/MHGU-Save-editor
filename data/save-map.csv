@@ -1,0 +1,830 @@
+offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_field,label,confidence
+0x40,0,4,A,0x0,sUserInfo (common),1,,4B,0x521658,obj17+0x420,sUserInfo common header,UNRESOLVED
+0x44,0,6,A,0x4,sUserInfo (common),1,,6B,0x52166c,obj17+0x3676,sUserInfo common header,UNRESOLVED
+0x4A,0,1,A,0xA,sUserInfo (common),1,,1B,0x521684,obj17+0x367c,sUserInfo common header,UNRESOLVED
+0x4B,0,1,A,0xB,sUserInfo (common),1,,1B,0x521698,obj17+0x367d,sUserInfo common header,UNRESOLVED
+0x4C,0,1,A,0xC,sUserInfo (common),1,,1B,0x5216ac,obj17+0x367e,sUserInfo common header,UNRESOLVED
+0x4D,0,1,A,0xD,sUserInfo (common),1,,1B,0x5216c0,obj17+0x367f,sUserInfo common header,UNRESOLVED
+0x4E,0,16200,A,0xE,sOtomo (common),50,2592,32B 224B 14B 12B 36B 4B 2B,0x2632d4,obj20+0x309c,"Palicoes, common pool: 50 x 324 B (DLC Palicoes, owner ""Capcom"")",DERIVED
+0x3F96,0,9600,A,0x3F56,sBlackList,100,768,64B 32B,0x1e63a8,,blacklist: 100 x 96 B (64 + 32),DERIVED
+0x6516,0,19852,A,0x64D6,sGuildCard (common),1,,19852B,0x1642b4,obj100+0x150900,sGuildCard common: 3 x 6616 B + 1 B,DERIVED
+0xB2A2,0,1,A,0xB262,sGameControl (common),1,,1B,0x3f8f18,obj100+0x5c,,
+0xB2A3,0,1,A,0xB263,sGameControl (common),1,,1B,0x3f8f28,obj100+0x5d,,
+0xB2A4,0,1,A,0xB264,sGameControl (common),1,,1B,0x3f8f38,obj100+0xa5,,
+0xB2A5,0,8,B,0x0,sPrivilege,1,,8B,0x36bfc,obj59+0xf34,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2AD,0,8,B,0x8,sPrivilege,1,,8B,0x36c10,obj59+0xf3c,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2B5,0,4,B,0x10,sPrivilege,1,,4B,0x36c24,obj59+0xf44,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2B9,0,12,B,0x14,sPrivilege,1,,12B,0x36c38,obj59+0xf48,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2C5,0,4,B,0x20,sPrivilege,1,,4B,0x36c4c,obj59+0xf54,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2C9,0,40,B,0x24,sPrivilege,1,,40B,0x36c60,obj59+0xf58,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2F1,0,8,B,0x4C,sPrivilege,1,,8B,0x36c70,obj59+0xf80,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB2F9,0,20,B,0x54,sPrivilege,1,,20B,0x36c84,obj59+0xf88,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB30D,0,4,B,0x68,sPrivilege,1,,4B,0x36c98,obj59+0xf9c,sPrivilege header: bitmaps (+0xf34 .. +0xf9c),UNRESOLVED
+0xB311,0,5200,B,0x6C,sPrivilege,1,,5200B,0x36cb0,obj94+0x0,DLC item pack list: 50 x 104 B,DERIVED
+0xC761,0,12600,B,0x14BC,sPrivilege,1,,12600B,0x36ce0,obj95+0x0,"DLC Palico info, 12600 B",DERIVED
+0xF899,0,1146880,B,0x45F4,sPrivilege,1,,1146880B,0x36d10,obj96+0x0,"event quests: 160 x 0x1C00 (u32 ID, u32 size, ARC)",CONFIRMED
+0x127899,0,322560,B,0x11C5F4,sPrivilege,1,,322560B,0x36d44,obj97+0x0,"challenge quests: 45 x 0x1C00 (u32 ID, u32 size, ARC)",CONFIRMED
+0x176499,0,92160,B,0x16B1F4,sPrivilege,1,,92160B,0x3e7df4,obj98+0x0,"challenge quest records: 45 x 0x800 (u32 ID, u32 size, data)",DERIVED
+0x18CC9C,0,632,char1,0x0,character header,1,,632B,0x3e7df4,,"character header (name +0, HR +0x28, art slots +0x2C, equipped cache +0x110, pigment +0x24C)",DERIVED
+0x18CF14,0,5463,char1,0x278,sItemBox,2300,19,12b 7b,0x19a518,obj100+0x18d1a,"item box: 2300 x (u12 item ID, u7 count), bit stream",CONFIRMED
+0x18E46B,0,4080,char1,0x17CF,sItemBox,1,,4080B,0x3e77c8,obj100+0x1eff4,"item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))",DERIVED
+0x18F45B,0,76,char1,0x27BF,sItemPouch,32,19,12b 7b,0x19e0d4,obj100+0x18b1a,"item pouch: 32 x (u12 item ID, u7 count), bit stream",CONFIRMED
+0x18F4A7,0,1024,char1,0x280B,sUserInfo,1,,1024B,0x51dbd0,obj17+0x20,S+0x20 talk state block (contribution points +0x10/+0x20),DERIVED
+0x18F8A7,0,4,char1,0x2C0B,sUserInfo,1,,4B,0x51dc64,obj17+0x424,,
+0x18F8AB,0,4,char1,0x2C0F,sUserInfo,1,,4B,0x51dc78,obj17+0x428,,
+0x18F8AF,0,24,char1,0x2C13,sUserInfo,1,,24B,0x51dc8c,obj17+0xd24,Hunter Arts unlocked,CONFIRMED
+0x18F8C7,0,24,char1,0x2C2B,sUserInfo,1,,24B,0x51dca0,obj17+0xd3c,,
+0x18F8DF,0,24,char1,0x2C43,sUserInfo,1,,24B,0x51dcb4,obj17+0xd54,,
+0x18F8F7,0,4,char1,0x2C5B,sUserInfo,1,,4B,0x51dcc8,obj17+0xd6c,,
+0x18F8FB,0,4,char1,0x2C5F,sUserInfo,1,,4B,0x51dcd8,obj17+0xd70,,
+0x18F8FF,0,12,char1,0x2C63,sUserInfo,1,,12B,0x51dcec,obj17+0xd78,Palico learned maps,DERIVED
+0x18F90B,0,8,char1,0x2C6F,sUserInfo,1,,8B,0x51dd00,obj17+0xd84,Palico learned maps,DERIVED
+0x18F913,0,256,char1,0x2C77,sUserInfo,1,,256B,0x51dd14,obj17+0x42c,quests cleared bitmap,CONFIRMED
+0x18FA13,0,256,char1,0x2D77,sUserInfo,1,,256B,0x51dd28,obj17+0x52c,quests seen bitmap,CONFIRMED
+0x18FB13,0,256,char1,0x2E77,sUserInfo,1,,256B,0x51dd3c,obj17+0x62c,quests failed bitmap,DERIVED
+0x18FC13,0,8,char1,0x2F77,sUserInfo,1,,8B,0x51dd50,obj17+0x958,contains: progress word,DERIVED
+0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,,
+0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,,
+0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,,
+0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,contains: Canteen ingredients,CONFIRMED
+0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,,
+0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,,
+0x18FC43,0,8,char1,0x2FA7,sUserInfo,1,,8B,0x51ddd8,obj17+0x9a4,,
+0x18FC4B,0,4,char1,0x2FAF,sUserInfo,1,,4B,0x51ddec,obj17+0x9ac,,
+0x18FC4F,0,4,char1,0x2FB3,sUserInfo,1,,4B,0x51de00,obj17+0x9b4,,
+0x18FC53,0,4,char1,0x2FB7,sUserInfo,1,,4B,0x51de14,obj17+0x9b8,,
+0x18FC57,0,4,char1,0x2FBB,sUserInfo,1,,4B,0x51de24,obj17+0x9c0,,
+0x18FC5B,0,4,char1,0x2FBF,sUserInfo,1,,4B,0x51de38,obj17+0x9c4,,
+0x18FC5F,0,4,char1,0x2FC3,sUserInfo,1,,4B,0x51de4c,obj17+0x9cc,,
+0x18FC63,0,164,char1,0x2FC7,sUserInfo,1,,164B,0x51de5c,obj17+0x9d0,,
+0x18FD07,0,164,char1,0x306B,sUserInfo,1,,164B,0x51de70,obj17+0xb18,,
+0x18FDAB,0,16,char1,0x310F,sUserInfo,1,,16B,0x51de84,obj17+0xbbc,,
+0x18FDBB,0,16,char1,0x311F,sUserInfo,1,,16B,0x51de98,obj17+0xbdc,,
+0x18FDCB,0,20,char1,0x312F,sUserInfo,1,,20B,0x51deac,obj17+0xbec,,
+0x18FDDF,0,20,char1,0x3143,sUserInfo,1,,20B,0x51dec0,obj17+0xc14,,
+0x18FDF3,0,20,char1,0x3157,sUserInfo,1,,20B,0x51ded4,obj17+0xc28,"awards, game-side map",DERIVED
+0x18FE07,0,20,char1,0x316B,sUserInfo,1,,20B,0x51dee4,obj17+0xc50,award notices,DERIVED
+0x18FE1B,0,4,char1,0x317F,sUserInfo,1,,4B,0x51def8,obj17+0xc64,,
+0x18FE1F,0,4,char1,0x3183,sUserInfo,1,,4B,0x51df0c,obj17+0xc6c,,
+0x18FE23,0,16,char1,0x3187,sUserInfo,1,,16B,0x51df1c,obj17+0xc70,quest sets completed,CONFIRMED
+0x18FE33,0,16,char1,0x3197,sUserInfo,1,,16B,0x51df2c,obj17+0xc90,quest set notices,DERIVED
+0x18FE43,0,36,char1,0x31A7,sUserInfo,1,,36B,0x51df40,obj17+0x2a0c,,
+0x18FE67,0,36,char1,0x31CB,sUserInfo,1,,36B,0x51df54,obj17+0x2a54,,
+0x18FE8B,0,4,char1,0x31EF,sUserInfo,1,,4B,0x51df68,obj17+0x3488,,
+0x18FE8F,0,4,char1,0x31F3,sUserInfo,1,,4B,0x51df7c,obj17+0x3490,,
+0x18FE93,0,4,char1,0x31F7,sUserInfo,1,,4B,0x51df90,obj17+0x3494,,
+0x18FE97,0,4,char1,0x31FB,sUserInfo,1,,4B,0x51dfa4,obj17+0x349c,,
+0x18FE9B,0,56,char1,0x31FF,sUserInfo,1,,56B,0x51dfb8,obj17+0x34a0,,
+0x18FED3,0,56,char1,0x3237,sUserInfo,1,,56B,0x51dfcc,obj17+0x3510,,
+0x18FF0B,0,20,char1,0x326F,sUserInfo,1,,20B,0x51dfe0,obj17+0x3548,,
+0x18FF1F,0,20,char1,0x3283,sUserInfo,1,,20B,0x51dff4,obj17+0x3570,,
+0x18FF33,0,4,char1,0x3297,sUserInfo,1,,4B,0x51e008,obj17+0x3584,,
+0x18FF37,0,4,char1,0x329B,sUserInfo,1,,4B,0x51e01c,obj17+0x358c,,
+0x18FF3B,0,4,char1,0x329F,sUserInfo,1,,4B,0x51e030,obj17+0x3590,,
+0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,,
+0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,,
+0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,,
+0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,,
+0x18FF4F,0,4,char1,0x32B3,sUserInfo,1,,4B,0x51e094,obj17+0x35ac,,
+0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,,
+0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,,
+0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,,
+0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,,
+0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,,
+0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,,
+0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,,
+0x18FFC3,0,32,char1,0x3327,sUserInfo,1,,32B,0x51e130,obj17+0xdf8,,
+0x18FFE3,0,32,char1,0x3347,sUserInfo,1,,32B,0x51e144,obj17+0xe38,,
+0x190003,0,840,char1,0x3367,sUserInfo,21,320,20B 20B,0x51e160,obj17+0xe58,,
+0x19034B,0,600,char1,0x36AF,sUserInfo,15,320,20B 20B,0x51e198,obj17+0x1344,,
+0x1905A3,0,288,char1,0x3907,sUserInfo,1,,288B,0x51e1c8,obj17+0x16c8,,
+0x1906C3,0,288,char1,0x3A27,sUserInfo,1,,288B,0x51e1dc,obj17+0x1908,,
+0x1907E3,0,288,char1,0x3B47,sUserInfo,1,,288B,0x51e1f0,obj17+0x1a28,,
+0x190903,0,288,char1,0x3C67,sUserInfo,1,,288B,0x51e204,obj17+0x1c68,,
+0x190A23,0,288,char1,0x3D87,sUserInfo,1,,288B,0x51e218,obj17+0x1d88,,
+0x190B43,0,288,char1,0x3EA7,sUserInfo,1,,288B,0x51e22c,obj17+0x1fc8,,
+0x190C63,0,288,char1,0x3FC7,sUserInfo,1,,288B,0x51e240,obj17+0x20e8,,
+0x190D83,0,288,char1,0x40E7,sUserInfo,1,,288B,0x51e254,obj17+0x2328,,
+0x190EA3,0,288,char1,0x4207,sUserInfo,1,,288B,0x51e268,obj17+0x2448,,
+0x190FC3,0,288,char1,0x4327,sUserInfo,1,,288B,0x51e27c,obj17+0x2688,,
+0x1910E3,0,68,char1,0x4447,sUserInfo,1,,68B,0x51e290,obj17+0x27a8,,
+0x191127,0,68,char1,0x448B,sUserInfo,1,,68B,0x51e2a4,obj17+0x2830,,
+0x19116B,0,68,char1,0x44CF,sUserInfo,1,,68B,0x51e2b8,obj17+0x2874,,
+0x1911AF,0,68,char1,0x4513,sUserInfo,1,,68B,0x51e2cc,obj17+0x28fc,,
+0x1911F3,0,68,char1,0x4557,sUserInfo,1,,68B,0x51e2dc,obj17+0x2940,,
+0x191237,0,68,char1,0x459B,sUserInfo,1,,68B,0x51e2f0,obj17+0x29c8,,
+0x19127B,0,128,char1,0x45DF,sUserInfo,1,,128B,0x51e304,obj17+0x2a78,,
+0x1912FB,0,128,char1,0x465F,sUserInfo,1,,128B,0x51e318,obj17+0x2af8,,
+0x19137B,0,128,char1,0x46DF,sUserInfo,1,,128B,0x51e32c,obj17+0x2b78,,
+0x1913FB,0,128,char1,0x475F,sUserInfo,1,,128B,0x51e340,obj17+0x2bf8,,
+0x19147B,0,128,char1,0x47DF,sUserInfo,1,,128B,0x51e354,obj17+0x2c78,,
+0x1914FB,0,128,char1,0x485F,sUserInfo,1,,128B,0x51e368,obj17+0x2cf8,,
+0x19157B,0,128,char1,0x48DF,sUserInfo,1,,128B,0x51e37c,obj17+0x2d78,,
+0x1915FB,0,128,char1,0x495F,sUserInfo,1,,128B,0x51e390,obj17+0x2df8,,
+0x19167B,0,128,char1,0x49DF,sUserInfo,1,,128B,0x51e3a4,obj17+0x2e78,,
+0x1916FB,0,128,char1,0x4A5F,sUserInfo,1,,128B,0x51e3b8,obj17+0x2ef8,,
+0x19177B,0,128,char1,0x4ADF,sUserInfo,1,,128B,0x51e3cc,obj17+0x2f78,,
+0x1917FB,0,128,char1,0x4B5F,sUserInfo,1,,128B,0x51e3e0,obj17+0x2ff8,,
+0x19187B,0,128,char1,0x4BDF,sUserInfo,1,,128B,0x51e3f4,obj17+0x3078,,
+0x1918FB,0,128,char1,0x4C5F,sUserInfo,1,,128B,0x51e408,obj17+0x30f8,,
+0x19197B,0,128,char1,0x4CDF,sUserInfo,1,,128B,0x51e41c,obj17+0x3178,,
+0x1919FB,0,656,char1,0x4D5F,sUserInfo,1,,656B,0x51e430,obj17+0x31f8,,
+0x191C8B,0,12,char1,0x4FEF,sUserInfo,1,,12B,0x51e444,obj17+0xd8c,,
+0x191C97,0,40,char1,0x4FFB,sUserInfo,1,,40B,0x51e454,obj17+0xca0,,
+0x191CBF,0,40,char1,0x5023,sUserInfo,1,,40B,0x51e464,obj17+0xcf0,"contains: Hunter's Notes, large monsters; Hunter's Notes, new marks; Hunter's Notes, second map",DERIVED
+0x191CE7,0,8,char1,0x504B,sUserInfo,1,,8B,0x51e478,obj17+0x35d4,rotating quests bitmap,CONFIRMED
+0x191CEF,0,4,char1,0x5053,sUserInfo,1,,4B,0x51e48c,obj17+0x3670,,
+0x191CF3,0,4,char1,0x5057,sUserInfo,1,,4B,0x1cab78,obj100+0x641c8,,
+0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,,
+0x191CFB,0,4,char1,0x505F,sUserInfo,1,,4B,0x51e4c8,obj17+0x35ec,,
+0x191CFF,0,12,char1,0x5063,sUserInfo,1,,12B,0x51e4dc,obj17+0x35f0,,
+0x191D0B,0,12,char1,0x506F,sUserInfo,1,,12B,0x51e4f0,obj17+0x3608,,
+0x191D17,0,12,char1,0x507B,sUserInfo,1,,12B,0x51e504,obj17+0x3614,,
+0x191D23,0,12,char1,0x5087,sUserInfo,1,,12B,0x51e518,obj17+0x362c,,
+0x191D2F,0,8,char1,0x5093,sUserInfo,1,,8B,0x51e52c,obj17+0x3638,,
+0x191D37,0,8,char1,0x509B,sUserInfo,1,,8B,0x51e540,obj17+0x3648,,
+0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,,
+0x191D47,0,8,char1,0x50AB,sUserInfo,1,,8B,0x51e568,obj17+0x3660,,
+0x191D4F,0,4,char1,0x50B3,sUserInfo,1,,4B,0x51e57c,obj17+0xd18,,
+0x191D53,0,4,char1,0x50B7,sUserInfo,1,,4B,0x51e58c,obj17+0xd20,,
+0x191D57,0,1,char1,0x50BB,sUserInfo,1,,1B,0x51e59c,obj17+0x3680,,
+0x191D58,0,2,char1,0x50BC,sUserInfo,1,,2B,0x51e5b0,obj17+0x3682,,
+0x191D5A,0,3444,char1,0x50BE,sUserInfo,1,,3444B,0x51e5c4,obj17+0x3684,,
+0x192ACE,0,3,char1,0x5E32,sUserInfo,1,,3B,0x51e5d8,obj17+0x43f8,,
+0x192AD1,0,1,char1,0x5E35,sUserInfo,1,,1B,0x51e5ec,obj17+0x43fb,,
+0x192AD2,0,4,char1,0x5E36,sUserInfo,1,,4B,0x51e600,obj17+0x43fc,,
+0x192AD6,0,4,char1,0x5E3A,sUserInfo,1,,4B,0x51e610,obj17+0x4400,,
+0x192ADA,0,8,char1,0x5E3E,sUserInfo,1,,8B,0x51e62c,,,
+0x192AE2,0,4,char1,0x5E46,sUserInfo,1,,4B,0x51e640,obj17+0x4410,,
+0x192AE6,0,4,char1,0x5E4A,sUserInfo,1,,4B,0x51e654,obj17+0x4414,,
+0x192AEA,0,4,char1,0x5E4E,sUserInfo,1,,4B,0x51e668,obj17+0x4418,contains: quest counter,DERIVED
+0x192AEE,0,4,char1,0x5E52,sUserInfo,1,,4B,0x51e67c,obj17+0x441c,,
+0x192AF2,0,4,char1,0x5E56,sUserInfo,1,,4B,0x51e690,obj17+0x4420,,
+0x192AF6,0,36,char1,0x5E5A,sUserInfo,1,,36B,0x51e6a4,obj17+0x4424,,
+0x192B1A,0,36,char1,0x5E7E,sUserInfo,1,,36B,0x51e6b8,obj17+0x4448,,
+0x192B3E,0,4,char1,0x5EA2,sUserInfo,1,,4B,0x51e6cc,obj17+0x446c,,
+0x192B42,0,274,char1,0x5EA6,sUserInfo,1,,274B,0x51dbf0,obj17+0x72c,"monster hunt tallies, u16 index 1-137",CONFIRMED
+0x192C54,0,274,char1,0x5FB8,sUserInfo,1,,274B,0x51dc04,obj17+0x83e,"monster capture counts, u16 index 1-137",CONFIRMED
+0x192D66,0,548,char1,0x60CA,sUserInfo,1,,548B,0x51dc2c,obj99+0x0,"monster size records, (u16 min, u16 max) index 1-137",CONFIRMED
+0x192F8A,0,72000,char1,0x62EE,sEquipBox,2000,288,2B 2B 2B 6B 24B,0x14b0d4,obj100+0x20020,equipment box: 2000 x 36 B,CONFIRMED
+0x1A48CA,0,36000,char1,0x17C2E,sEquipBox,1000,288,2B 2B 2B 6B 24B,0x14b144,obj100+0x357e0,Palico equipment box: 1000 x 36 B (types 22-24),DERIVED
+0x1AD56A,0,5440,char1,0x208CE,sEquipBox,1,,5440B,0x14b1ac,obj100+0x5e04c,My Sets: 40 x 136 B (name at +0),CONFIRMED
+0x1AEAAA,0,1632,char1,0x21E0E,sEquipBox,1,,1632B,0x3e7804,obj100+0x5f58c,"Palico equipment sets: 24 x 68 B (name char[42], 3 x u16 box index)",DERIVED
+0x1AF10A,0,29,char1,0x2246E,sGameControl,1,,29B,0x3f8dfc,obj100+0x5e,,
+0x1AF127,0,4,char1,0x2248B,sGameControl,1,,4B,0x3f8e1c,obj100+0x34,,
+0x1AF12B,0,4,char1,0x2248F,sGameControl,1,,4B,0x3f8e2c,obj100+0x38,,
+0x1AF12F,0,4,char1,0x22493,sGameControl,1,,4B,0x3e7818,obj100+0x3c,,
+0x1AF133,0,376,char1,0x22497,sItem? (activity),94,32,32b,0x1979d8,obj100+0x1679c,,
+0x1AF2AB,0,136,char1,0x2260F,sItem? (activity),1,,136B,0x1979fc,,,
+0x1AF333,0,136,char1,0x22697,sItem? (activity),1,,136B,0x197a28,,,
+0x1AF3BB,0,136,char1,0x2271F,sItem? (activity),1,,136B,0x197a4c,,,
+0x1AF443,0,1,char1,0x227A7,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AF444,0,1,char1,0x227A8,sItem? (activity),1,,1B,0x197be4,,,
+0x1AF445,0,2,char1,0x227A9,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AF447,0,2,char1,0x227AB,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AF449,0,2,char1,0x227AD,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AF44B,0,2,char1,0x227AF,sItem? (activity),1,,2B,0x197c40,,,
+0x1AF44D,0,6,char1,0x227B1,sItem? (activity),1,,6B,0x197c50,,,
+0x1AF453,0,24,char1,0x227B7,sItem? (activity),1,,24B,0x197c68,,,
+0x1AF46B,0,2,char1,0x227CF,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AF46D,0,2,char1,0x227D1,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AF46F,0,2,char1,0x227D3,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AF471,0,6,char1,0x227D5,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AF477,0,24,char1,0x227DB,sItem? (activity),1,,24B,0x197cd0,,,
+0x1AF48F,0,2,char1,0x227F3,sItem? (activity),1,,2B,0x197cf4,,,
+0x1AF491,0,2,char1,0x227F5,sItem? (activity),1,,2B,0x197d04,,,
+0x1AF493,0,2,char1,0x227F7,sItem? (activity),1,,2B,0x197d14,,,
+0x1AF495,0,6,char1,0x227F9,sItem? (activity),1,,6B,0x197d24,,,
+0x1AF49B,0,24,char1,0x227FF,sItem? (activity),1,,24B,0x197d34,,,
+0x1AF4B3,0,308,char1,0x22817,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1AF5E7,0,1,char1,0x2294B,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AF5E8,0,1,char1,0x2294C,sItem? (activity),1,,1B,0x197be4,,,
+0x1AF5E9,0,2,char1,0x2294D,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AF5EB,0,2,char1,0x2294F,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AF5ED,0,2,char1,0x22951,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AF5EF,0,2,char1,0x22953,sItem? (activity),1,,2B,0x197c40,,,
+0x1AF5F1,0,6,char1,0x22955,sItem? (activity),1,,6B,0x197c50,,,
+0x1AF5F7,0,24,char1,0x2295B,sItem? (activity),1,,24B,0x197c68,,,
+0x1AF60F,0,2,char1,0x22973,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AF611,0,2,char1,0x22975,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AF613,0,2,char1,0x22977,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AF615,0,6,char1,0x22979,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AF61B,0,24,char1,0x2297F,sItem? (activity),1,,24B,0x197cd0,,,
+0x1AF633,0,2,char1,0x22997,sItem? (activity),1,,2B,0x197cf4,,,
+0x1AF635,0,2,char1,0x22999,sItem? (activity),1,,2B,0x197d04,,,
+0x1AF637,0,2,char1,0x2299B,sItem? (activity),1,,2B,0x197d14,,,
+0x1AF639,0,6,char1,0x2299D,sItem? (activity),1,,6B,0x197d24,,,
+0x1AF63F,0,24,char1,0x229A3,sItem? (activity),1,,24B,0x197d34,,,
+0x1AF657,0,308,char1,0x229BB,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1AF78B,0,1,char1,0x22AEF,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AF78C,0,1,char1,0x22AF0,sItem? (activity),1,,1B,0x197be4,,,
+0x1AF78D,0,2,char1,0x22AF1,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AF78F,0,2,char1,0x22AF3,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AF791,0,2,char1,0x22AF5,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AF793,0,2,char1,0x22AF7,sItem? (activity),1,,2B,0x197c40,,,
+0x1AF795,0,6,char1,0x22AF9,sItem? (activity),1,,6B,0x197c50,,,
+0x1AF79B,0,24,char1,0x22AFF,sItem? (activity),1,,24B,0x197c68,,,
+0x1AF7B3,0,2,char1,0x22B17,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AF7B5,0,2,char1,0x22B19,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AF7B7,0,2,char1,0x22B1B,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AF7B9,0,6,char1,0x22B1D,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AF7BF,0,24,char1,0x22B23,sItem? (activity),1,,24B,0x197cd0,,,
+0x1AF7D7,0,2,char1,0x22B3B,sItem? (activity),1,,2B,0x197cf4,,,
+0x1AF7D9,0,2,char1,0x22B3D,sItem? (activity),1,,2B,0x197d04,,,
+0x1AF7DB,0,2,char1,0x22B3F,sItem? (activity),1,,2B,0x197d14,,,
+0x1AF7DD,0,6,char1,0x22B41,sItem? (activity),1,,6B,0x197d24,,,
+0x1AF7E3,0,24,char1,0x22B47,sItem? (activity),1,,24B,0x197d34,,,
+0x1AF7FB,0,308,char1,0x22B5F,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1AF92F,0,1,char1,0x22C93,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AF930,0,1,char1,0x22C94,sItem? (activity),1,,1B,0x197be4,,,
+0x1AF931,0,2,char1,0x22C95,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AF933,0,2,char1,0x22C97,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AF935,0,2,char1,0x22C99,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AF937,0,2,char1,0x22C9B,sItem? (activity),1,,2B,0x197c40,,,
+0x1AF939,0,6,char1,0x22C9D,sItem? (activity),1,,6B,0x197c50,,,
+0x1AF93F,0,24,char1,0x22CA3,sItem? (activity),1,,24B,0x197c68,,,
+0x1AF957,0,2,char1,0x22CBB,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AF959,0,2,char1,0x22CBD,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AF95B,0,2,char1,0x22CBF,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AF95D,0,6,char1,0x22CC1,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AF963,0,24,char1,0x22CC7,sItem? (activity),1,,24B,0x197cd0,,,
+0x1AF97B,0,2,char1,0x22CDF,sItem? (activity),1,,2B,0x197cf4,,,
+0x1AF97D,0,2,char1,0x22CE1,sItem? (activity),1,,2B,0x197d04,,,
+0x1AF97F,0,2,char1,0x22CE3,sItem? (activity),1,,2B,0x197d14,,,
+0x1AF981,0,6,char1,0x22CE5,sItem? (activity),1,,6B,0x197d24,,,
+0x1AF987,0,24,char1,0x22CEB,sItem? (activity),1,,24B,0x197d34,,,
+0x1AF99F,0,308,char1,0x22D03,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1AFAD3,0,1,char1,0x22E37,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AFAD4,0,1,char1,0x22E38,sItem? (activity),1,,1B,0x197be4,,,
+0x1AFAD5,0,2,char1,0x22E39,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AFAD7,0,2,char1,0x22E3B,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AFAD9,0,2,char1,0x22E3D,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AFADB,0,2,char1,0x22E3F,sItem? (activity),1,,2B,0x197c40,,,
+0x1AFADD,0,6,char1,0x22E41,sItem? (activity),1,,6B,0x197c50,,,
+0x1AFAE3,0,24,char1,0x22E47,sItem? (activity),1,,24B,0x197c68,,,
+0x1AFAFB,0,2,char1,0x22E5F,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AFAFD,0,2,char1,0x22E61,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AFAFF,0,2,char1,0x22E63,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AFB01,0,6,char1,0x22E65,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AFB07,0,24,char1,0x22E6B,sItem? (activity),1,,24B,0x197cd0,,,
+0x1AFB1F,0,2,char1,0x22E83,sItem? (activity),1,,2B,0x197cf4,,,
+0x1AFB21,0,2,char1,0x22E85,sItem? (activity),1,,2B,0x197d04,,,
+0x1AFB23,0,2,char1,0x22E87,sItem? (activity),1,,2B,0x197d14,,,
+0x1AFB25,0,6,char1,0x22E89,sItem? (activity),1,,6B,0x197d24,,,
+0x1AFB2B,0,24,char1,0x22E8F,sItem? (activity),1,,24B,0x197d34,,,
+0x1AFB43,0,308,char1,0x22EA7,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1AFC77,0,1,char1,0x22FDB,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AFC78,0,1,char1,0x22FDC,sItem? (activity),1,,1B,0x197be4,,,
+0x1AFC79,0,2,char1,0x22FDD,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AFC7B,0,2,char1,0x22FDF,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AFC7D,0,2,char1,0x22FE1,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AFC7F,0,2,char1,0x22FE3,sItem? (activity),1,,2B,0x197c40,,,
+0x1AFC81,0,6,char1,0x22FE5,sItem? (activity),1,,6B,0x197c50,,,
+0x1AFC87,0,24,char1,0x22FEB,sItem? (activity),1,,24B,0x197c68,,,
+0x1AFC9F,0,2,char1,0x23003,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AFCA1,0,2,char1,0x23005,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AFCA3,0,2,char1,0x23007,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AFCA5,0,6,char1,0x23009,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AFCAB,0,24,char1,0x2300F,sItem? (activity),1,,24B,0x197cd0,,,
+0x1AFCC3,0,2,char1,0x23027,sItem? (activity),1,,2B,0x197cf4,,,
+0x1AFCC5,0,2,char1,0x23029,sItem? (activity),1,,2B,0x197d04,,,
+0x1AFCC7,0,2,char1,0x2302B,sItem? (activity),1,,2B,0x197d14,,,
+0x1AFCC9,0,6,char1,0x2302D,sItem? (activity),1,,6B,0x197d24,,,
+0x1AFCCF,0,24,char1,0x23033,sItem? (activity),1,,24B,0x197d34,,,
+0x1AFCE7,0,308,char1,0x2304B,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1AFE1B,0,1,char1,0x2317F,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AFE1C,0,1,char1,0x23180,sItem? (activity),1,,1B,0x197be4,,,
+0x1AFE1D,0,2,char1,0x23181,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AFE1F,0,2,char1,0x23183,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AFE21,0,2,char1,0x23185,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AFE23,0,2,char1,0x23187,sItem? (activity),1,,2B,0x197c40,,,
+0x1AFE25,0,6,char1,0x23189,sItem? (activity),1,,6B,0x197c50,,,
+0x1AFE2B,0,24,char1,0x2318F,sItem? (activity),1,,24B,0x197c68,,,
+0x1AFE43,0,2,char1,0x231A7,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AFE45,0,2,char1,0x231A9,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AFE47,0,2,char1,0x231AB,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AFE49,0,6,char1,0x231AD,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AFE4F,0,24,char1,0x231B3,sItem? (activity),1,,24B,0x197cd0,,,
+0x1AFE67,0,2,char1,0x231CB,sItem? (activity),1,,2B,0x197cf4,,,
+0x1AFE69,0,2,char1,0x231CD,sItem? (activity),1,,2B,0x197d04,,,
+0x1AFE6B,0,2,char1,0x231CF,sItem? (activity),1,,2B,0x197d14,,,
+0x1AFE6D,0,6,char1,0x231D1,sItem? (activity),1,,6B,0x197d24,,,
+0x1AFE73,0,24,char1,0x231D7,sItem? (activity),1,,24B,0x197d34,,,
+0x1AFE8B,0,308,char1,0x231EF,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1AFFBF,0,1,char1,0x23323,sItem? (activity),1,,1B,0x197bd4,,,
+0x1AFFC0,0,1,char1,0x23324,sItem? (activity),1,,1B,0x197be4,,,
+0x1AFFC1,0,2,char1,0x23325,sItem? (activity),1,,2B,0x197bf4,,,
+0x1AFFC3,0,2,char1,0x23327,sItem? (activity),1,,2B,0x197c1c,,,
+0x1AFFC5,0,2,char1,0x23329,sItem? (activity),1,,2B,0x197c2c,,,
+0x1AFFC7,0,2,char1,0x2332B,sItem? (activity),1,,2B,0x197c40,,,
+0x1AFFC9,0,6,char1,0x2332D,sItem? (activity),1,,6B,0x197c50,,,
+0x1AFFCF,0,24,char1,0x23333,sItem? (activity),1,,24B,0x197c68,,,
+0x1AFFE7,0,2,char1,0x2334B,sItem? (activity),1,,2B,0x197c8c,,,
+0x1AFFE9,0,2,char1,0x2334D,sItem? (activity),1,,2B,0x197c9c,,,
+0x1AFFEB,0,2,char1,0x2334F,sItem? (activity),1,,2B,0x197cb0,,,
+0x1AFFED,0,6,char1,0x23351,sItem? (activity),1,,6B,0x197cc0,,,
+0x1AFFF3,0,24,char1,0x23357,sItem? (activity),1,,24B,0x197cd0,,,
+0x1B000B,0,2,char1,0x2336F,sItem? (activity),1,,2B,0x197cf4,,,
+0x1B000D,0,2,char1,0x23371,sItem? (activity),1,,2B,0x197d04,,,
+0x1B000F,0,2,char1,0x23373,sItem? (activity),1,,2B,0x197d14,,,
+0x1B0011,0,6,char1,0x23375,sItem? (activity),1,,6B,0x197d24,,,
+0x1B0017,0,24,char1,0x2337B,sItem? (activity),1,,24B,0x197d34,,,
+0x1B002F,0,308,char1,0x23393,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1B0163,0,1,char1,0x234C7,sItem? (activity),1,,1B,0x197bd4,,,
+0x1B0164,0,1,char1,0x234C8,sItem? (activity),1,,1B,0x197be4,,,
+0x1B0165,0,2,char1,0x234C9,sItem? (activity),1,,2B,0x197bf4,,,
+0x1B0167,0,2,char1,0x234CB,sItem? (activity),1,,2B,0x197c1c,,,
+0x1B0169,0,2,char1,0x234CD,sItem? (activity),1,,2B,0x197c2c,,,
+0x1B016B,0,2,char1,0x234CF,sItem? (activity),1,,2B,0x197c40,,,
+0x1B016D,0,6,char1,0x234D1,sItem? (activity),1,,6B,0x197c50,,,
+0x1B0173,0,24,char1,0x234D7,sItem? (activity),1,,24B,0x197c68,,,
+0x1B018B,0,2,char1,0x234EF,sItem? (activity),1,,2B,0x197c8c,,,
+0x1B018D,0,2,char1,0x234F1,sItem? (activity),1,,2B,0x197c9c,,,
+0x1B018F,0,2,char1,0x234F3,sItem? (activity),1,,2B,0x197cb0,,,
+0x1B0191,0,6,char1,0x234F5,sItem? (activity),1,,6B,0x197cc0,,,
+0x1B0197,0,24,char1,0x234FB,sItem? (activity),1,,24B,0x197cd0,,,
+0x1B01AF,0,2,char1,0x23513,sItem? (activity),1,,2B,0x197cf4,,,
+0x1B01B1,0,2,char1,0x23515,sItem? (activity),1,,2B,0x197d04,,,
+0x1B01B3,0,2,char1,0x23517,sItem? (activity),1,,2B,0x197d14,,,
+0x1B01B5,0,6,char1,0x23519,sItem? (activity),1,,6B,0x197d24,,,
+0x1B01BB,0,24,char1,0x2351F,sItem? (activity),1,,24B,0x197d34,,,
+0x1B01D3,0,308,char1,0x23537,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1B0307,0,1,char1,0x2366B,sItem? (activity),1,,1B,0x197bd4,,,
+0x1B0308,0,1,char1,0x2366C,sItem? (activity),1,,1B,0x197be4,,,
+0x1B0309,0,2,char1,0x2366D,sItem? (activity),1,,2B,0x197bf4,,,
+0x1B030B,0,2,char1,0x2366F,sItem? (activity),1,,2B,0x197c1c,,,
+0x1B030D,0,2,char1,0x23671,sItem? (activity),1,,2B,0x197c2c,,,
+0x1B030F,0,2,char1,0x23673,sItem? (activity),1,,2B,0x197c40,,,
+0x1B0311,0,6,char1,0x23675,sItem? (activity),1,,6B,0x197c50,,,
+0x1B0317,0,24,char1,0x2367B,sItem? (activity),1,,24B,0x197c68,,,
+0x1B032F,0,2,char1,0x23693,sItem? (activity),1,,2B,0x197c8c,,,
+0x1B0331,0,2,char1,0x23695,sItem? (activity),1,,2B,0x197c9c,,,
+0x1B0333,0,2,char1,0x23697,sItem? (activity),1,,2B,0x197cb0,,,
+0x1B0335,0,6,char1,0x23699,sItem? (activity),1,,6B,0x197cc0,,,
+0x1B033B,0,24,char1,0x2369F,sItem? (activity),1,,24B,0x197cd0,,,
+0x1B0353,0,2,char1,0x236B7,sItem? (activity),1,,2B,0x197cf4,,,
+0x1B0355,0,2,char1,0x236B9,sItem? (activity),1,,2B,0x197d04,,,
+0x1B0357,0,2,char1,0x236BB,sItem? (activity),1,,2B,0x197d14,,,
+0x1B0359,0,6,char1,0x236BD,sItem? (activity),1,,6B,0x197d24,,,
+0x1B035F,0,24,char1,0x236C3,sItem? (activity),1,,24B,0x197d34,,,
+0x1B0377,0,308,char1,0x236DB,sItem? (activity),7,352,4B 4B 2B 2B 2B 6B 24B,0x197d60,,,
+0x1B04AB,0,10,char1,0x2380F,sItem? (activity),1,,10B,0x198060,obj100+0x1678c,,
+0x1B04B5,0,1,char1,0x23819,sItem? (activity),1,,1B,0x198070,obj100+0x1676a,,
+0x1B04B6,0,1,char1,0x2381A,sItem? (activity),1,,1B,0x198080,obj100+0x1676b,,
+0x1B04B7,0,2,char1,0x2381B,sItem? (activity),1,,2B,0x198090,obj100+0x1676c,,
+0x1B04B9,0,1,char1,0x2381D,sItem? (activity),1,,1B,0x1980a0,obj100+0x1676e,,
+0x1B04BA,0,23,char1,0x2381E,sItem? (activity),1,,23B,0x1980b0,obj100+0x1676f,activity: pending village rewards,DERIVED
+0x1B04D1,0,6,char1,0x23835,sItem? (activity),1,,6B,0x1980c0,obj100+0x16786,,
+0x1B04D7,0,25,char1,0x2383B,sItem? (activity),1,,25B,0x1980d0,obj100+0x16750,,
+0x1B04F0,0,256,char1,0x23854,sItem? (activity),1,,256B,0x1980e0,obj100+0x16914,,
+0x1B05F0,0,256,char1,0x23954,sItem? (activity),1,,256B,0x1980f0,obj100+0x16a14,,
+0x1B06F0,0,4,char1,0x23A54,sItem? (activity),1,,4B,0x198100,obj100+0x16798,,
+0x1B06F4,0,1,char1,0x23A58,sPlayer,1,,1B,0x275614,obj100+0x9d5c,player record (loaded copy of the slot header fields),DERIVED
+0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,player record (loaded copy of the slot header fields),DERIVED
+0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,player record (loaded copy of the slot header fields),DERIVED
+0x1B07E3,0,12,char1,0x23B47,sPlayer,1,,12B,0x275740,obj100+0x650,player record (loaded copy of the slot header fields),DERIVED
+0x1B07EF,0,36,char1,0x23B53,sPlayer,1,,36B,0x275754,obj100+0x65c,"current pigment, 5 x RGBA + 16 B",DERIVED
+0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,player record (loaded copy of the slot header fields),DERIVED
+0x1B0817,0,2,char1,0x23B7B,sPlayer,1,,2B,0x27577c,obj100+0x682,current pigment default-colour flags,DERIVED
+0x1B0819,0,32,char1,0x23B7D,sPlayer,1,,32B,0x27578c,obj100+0x690,hunter name,DERIVED
+0x1B0839,0,1,char1,0x23B9D,sOtomo,1,,1B,0x2639d0,obj20+0x13848,,
+0x1B083A,0,2,char1,0x23B9E,sOtomo,1,,2B,0x2639e4,obj20+0x13849,,
+0x1B083C,0,1,char1,0x23BA0,sOtomo,1,,1B,0x2639f8,obj20+0x1384c,,
+0x1B083D,0,1,char1,0x23BA1,sOtomo,1,,1B,0x263a0c,obj20+0x1384b,,
+0x1B083E,0,1,char1,0x23BA2,sOtomo,1,,2b,0x263a24,obj20+0x138f6,,
+0x1B083E,2,1,char1,0x23BA2,sOtomo,1,,4b,0x263a48,obj20+0x138f7,,
+0x1B083E,6,2,char1,0x23BA2,sOtomo,1,,3b,0x263a6c,obj20+0x138f8,,
+0x1B083F,1,1,char1,0x23BA3,sOtomo,1,,4b,0x263a90,obj20+0x138f9,,
+0x1B083F,5,2,char1,0x23BA3,sOtomo,1,,4b,0x263ab4,obj20+0x138fa,,
+0x1B0840,1,1,char1,0x23BA4,sOtomo,1,,4b,0x263ad8,obj20+0x138fb,,
+0x1B0840,5,2,char1,0x23BA4,sOtomo,1,,4b,0x263afc,obj20+0x138fc,,
+0x1B0841,1,1,char1,0x23BA5,sOtomo,1,,4b,0x263b20,obj20+0x138fd,,
+0x1B0841,5,5,char1,0x23BA5,sOtomo,1,,32b,0x263b38,obj20+0x13900,,
+0x1B0845,5,5,char1,0x23BA9,sOtomo,1,,32b,0x263b50,obj20+0x13904,,
+0x1B0849,5,5,char1,0x23BAD,sOtomo,1,,32b,0x263b68,obj20+0x13908,,
+0x1B084D,5,5,char1,0x23BB1,sOtomo,1,,32b,0x263b80,obj20+0x1390c,,
+0x1B0852,0,27216,char1,0x23BB6,sOtomo,84,2592,32B 224B 14B 12B 36B 4B 2B,0x263390,obj20+0x13e4c,"Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level u8 +0x24, greeting +0x60, owner +0x9C)",DERIVED
+0x1B72A2,0,7776,char1,0x2A606,sOtomo,24,2592,32B 224B 14B 12B 36B 4B 2B,0x263bf0,obj20+0x301cc,"Palicoes, second list: 24 x 324 B, same record",DERIVED
+0x1B9102,0,40,char1,0x2C466,sOtomo,1,,40B,0x263c70,obj20+0x13910,,
+0x1B912A,0,16,char1,0x2C48E,sOtomo,1,,16B,0x263c88,obj20+0x48a78,,
+0x1B913A,0,48,char1,0x2C49E,sOtomo,1,,48B,0x263ca0,obj20+0x48a88,,
+0x1B916A,0,1,char1,0x2C4CE,sOtomo,1,,1B,0x263cb8,obj20+0x48ab8,,
+0x1B916B,0,5,char1,0x2C4CF,sOtomo,1,,5B,0x263cd0,obj20+0x48ab9,,
+0x1B9170,0,4,char1,0x2C4D4,sOtomo,1,,4B,0x263cec,obj20+0x4a5a0,,
+0x1B9174,0,1,char1,0x2C4D8,sVillage,1,,1B,0x507d64,obj100+0x64e72,,
+0x1B9175,0,1,char1,0x2C4D9,sVillage,1,,1B,0x507d78,obj100+0x64e73,,
+0x1B9176,0,2,char1,0x2C4DA,sVillage,1,,2B,0x507d88,obj100+0x64de0,Village star level,CONFIRMED
+0x1B9178,0,2,char1,0x2C4DC,sVillage,1,,2B,0x507d9c,obj100+0x64de2,Hub star level,CONFIRMED
+0x1B917A,0,4,char1,0x2C4DE,sVillage,1,,4B,0x507dac,obj100+0x64de4,,
+0x1B917E,0,1,char1,0x2C4E2,sVillage,1,,1B,0x507dc0,obj100+0x64e71,,
+0x1B917F,0,128,char1,0x2C4E3,sVillage,1,,128B,0x507dd0,obj100+0x64de8,,
+0x1B91FF,0,4,char1,0x2C563,sVillage,1,,4B,0x507de4,obj100+0x64e68,,
+0x1B9203,0,4,char1,0x2C567,sVillage,1,,4B,0x507df8,obj100+0x64e6c,,
+0x1B9207,0,1,char1,0x2C56B,sVillage,1,,1B,0x507e08,obj100+0x64e70,,
+0x1B9208,0,1,char1,0x2C56C,sVillage,1,,1B,0x3e7868,obj100+0x64e74,,
+0x1B9209,0,192,char1,0x2C56D,sNpcTalk,1,,192B,0x240d7c,obj100+0x64700,event flags (villager requests),CONFIRMED
+0x1B92C9,0,24,char1,0x2C62D,sNpcTalk,1,,24B,0x240d8c,obj100+0x647c0,per-NPC talk hold bits,CONFIRMED
+0x1B92E1,0,24,char1,0x2C645,sNpcTalk,1,,24B,0x240da0,obj100+0x647d8,per-NPC talk hold bits,CONFIRMED
+0x1B92F9,0,24,char1,0x2C65D,sNpcTalk,1,,24B,0x240db0,obj100+0x647f0,per-NPC talk hold bits,CONFIRMED
+0x1B9311,0,4,char1,0x2C675,sNpcTalk,1,,4B,0x240dc4,obj100+0x64808,random word (talk conditions),DERIVED
+0x1B9315,0,4,char1,0x2C679,sNpcTalk,1,,4B,0x3e787c,obj100+0x6480c,,
+0x1B9319,0,40,char1,0x2C67D,sKitchen,1,,40B,0x3e7890,obj100+0x81608,contains: Canteen dishes; Canteen dishes copy,UNRESOLVED
+0x1B9341,0,4,char1,0x2C6A5,sFlagChecker,1,,4B,0x3e78a4,obj100+0x64920,,
+0x1B9345,0,4,char1,0x2C6A9,sEventCtrl?,1,,4B,0x14c584,obj100+0x66064,,
+0x1B9349,0,4,char1,0x2C6AD,sEventCtrl?,1,,4B,0x14c594,obj100+0x66068,,
+0x1B934D,0,4,char1,0x2C6B1,sEventCtrl?,1,,4B,0x14c5a4,obj100+0x6606c,,
+0x1B9351,0,4,char1,0x2C6B5,sEventCtrl?,1,,4B,0x14c5b4,obj100+0x66070,,
+0x1B9355,0,4,char1,0x2C6B9,sEventCtrl?,1,,4B,0x3e78b8,obj100+0x66074,,
+0x1B9359,0,4,char1,0x2C6BD,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73208,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B935D,0,1233,char1,0x2C6C1,sGuildCard,1,,1233B,0x3cf810,obj100+0x1ccd00,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B982E,0,4,char1,0x2CB92,sGuildCard,1,,4B,0x3cf820,obj100+0x7320c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9832,0,2,char1,0x2CB96,sGuildCard,1,,2B,0x166d8c,obj100+0x71f10,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9834,0,22,char1,0x2CB98,sGuildCard,1,,22B,0x166d9c,obj100+0x71f12,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B984A,0,8,char1,0x2CBAE,sGuildCard,1,,8B,0x166dac,obj100+0x71f28,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9852,0,4,char1,0x2CBB6,sGuildCard,1,,4B,0x166dbc,obj100+0x71f30,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9856,0,4,char1,0x2CBBA,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73218,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B985A,0,1195,char1,0x2CBBE,sGuildCard,1,,1195B,0x3cf810,obj100+0x1cd200,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1B9D05,0,7154,char1,0x2D069,sGuildCard,98,584,4B 2B 22B 8B 4B 4B 29B,0x3cf820,obj100+0x7321c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB8F7,0,4,char1,0x2EC5B,sGuildCard,1,,4B,0x3cf820,obj100+0x7383c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB8FB,0,2,char1,0x2EC5F,sGuildCard,1,,2B,0x166d8c,obj100+0x73014,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB8FD,0,22,char1,0x2EC61,sGuildCard,1,,22B,0x166d9c,obj100+0x73016,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB913,0,8,char1,0x2EC77,sGuildCard,1,,8B,0x166dac,obj100+0x7302c,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB91B,0,4,char1,0x2EC7F,sGuildCard,1,,4B,0x166dbc,obj100+0x73034,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x1BB91F,0,623930,char1,0x2EC83,sGuildCard,1,,623930B,0x3cf8fc,obj100+0x1d3900,"Guild Card list 1: 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
+0x253E59,0,6328,char1,0xC71BD,sGuildCard,1,,6328B,0x163e30,obj100+0x66120,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, weapon usage +0x8BA, history +0x918, awards +0xF58)",DERIVED
+0x255711,0,4400,char1,0xC8A75,sGuildCard,1,,4400B,0x163e44,obj100+0x679d8,"Guild Card manager +0x18D8, 4400 B",UNRESOLVED
+0x256841,0,3650,char1,0xC9BA5,sGuildCard,50,584,4B 29B 4B 2B 22B 8B 4B,0x3cf7e4,obj100+0x7c208,Guild Card list 2: 50 elements + padding,DERIVED
+0x257683,0,313150,char1,0xCA9E7,sGuildCard,1,,313150B,0x3cf8fc,obj100+0x2a2100,Guild Card list 2: 50 elements + padding,DERIVED
+0x2A3DC1,0,1800,char1,0x117125,sGuildCard,1,,1800B,0x163e68,obj100+0x68b0c,"Guild Card manager +0x2A0C, 1800 B",UNRESOLVED
+0x2A44C9,0,276,char1,0x11782D,sGuildCard,1,,276B,0x163e7c,obj100+0x69214,"Guild Card manager +0x3114, 276 B",UNRESOLVED
+0x2A45DD,0,13800,char1,0x117941,sGuildCard,1,,13800B,0x163e90,obj100+0x69328,"Guild Card manager +0x3228, 13800 B",UNRESOLVED
+0x2A7BC5,0,1800,char1,0x11AF29,sGuildCard,1,,1800B,0x3e78cc,obj100+0x6c910,"Guild Card manager +0x6810, 1800 B",UNRESOLVED
+0x2A82CD,0,1,char1,0x11B631,sGuestHunter,1,,1B,0x15bd58,obj100+0x81828,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82CE,0,1,char1,0x11B632,sGuestHunter,1,,1B,0x15bd68,obj100+0x81829,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82CF,0,1,char1,0x11B633,sGuestHunter,1,,1B,0x15bd78,obj100+0x8182a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82D0,0,1,char1,0x11B634,sGuestHunter,1,,1B,0x15bd88,obj100+0x8182b,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82D1,0,1,char1,0x11B635,sGuestHunter,1,,1B,0x15bd98,obj100+0x8182c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82D2,0,1,char1,0x11B636,sGuestHunter,1,,1B,0x15bda8,obj100+0x8182e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82D3,0,1,char1,0x11B637,sGuestHunter,1,,1B,0x15bdb8,obj100+0x81830,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82D4,0,1,char1,0x11B638,sGuestHunter,1,,1B,0x15bdc8,obj100+0x81831,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82D5,0,19,char1,0x11B639,sGuestHunter,1,,19B,0x15bdd8,obj100+0x81832,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82E8,0,3,char1,0x11B64C,sGuestHunter,1,,3B,0x15bde8,obj100+0x81845,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82EB,0,68,char1,0x11B64F,sGuestHunter,1,,68B,0x15be14,obj100+0x83518,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A832F,0,22,char1,0x11B693,sGuestHunter,1,,22B,0x1599f4,obj100+0x81850,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8345,0,2,char1,0x11B6A9,sGuestHunter,1,,2B,0x159a04,obj100+0x81866,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8347,0,2,char1,0x11B6AB,sGuestHunter,1,,2B,0x159a14,obj100+0x81868,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8349,0,2,char1,0x11B6AD,sGuestHunter,1,,2B,0x159a24,obj100+0x8186a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A834B,0,2,char1,0x11B6AF,sGuestHunter,1,,2B,0x159a34,obj100+0x8186c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A834D,0,56,char1,0x11B6B1,sGuestHunter,1,,56B,0x159a44,obj100+0x81870,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8385,0,2,char1,0x11B6E9,sGuestHunter,1,,2B,0x159a54,obj100+0x8186e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8387,0,4,char1,0x11B6EB,sGuestHunter,1,,4B,0x159a64,obj100+0x818fc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A838B,0,4,char1,0x11B6EF,sGuestHunter,1,,4B,0x159a74,obj100+0x81900,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A838F,0,4,char1,0x11B6F3,sGuestHunter,1,,4B,0x159a84,obj100+0x81904,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8393,0,1,char1,0x11B6F7,sGuestHunter,1,,1B,0x159a94,obj100+0x81908,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8394,0,8,char1,0x11B6F8,sGuestHunter,1,,8B,0x159aa4,obj100+0x8190c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A839C,0,2,char1,0x11B700,sGuestHunter,1,,2B,0x159ab4,obj100+0x81914,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A839E,0,1,char1,0x11B702,sGuestHunter,1,,1B,0x159ac4,obj100+0x8190b,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A839F,0,1,char1,0x11B703,sGuestHunter,1,,1B,0x159ad4,obj100+0x8190a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A83A0,0,1,char1,0x11B704,sGuestHunter,1,,1B,0x159ae4,obj100+0x81909,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A83A1,0,12,char1,0x11B705,sGuestHunter,1,,12B,0x159af4,obj100+0x81916,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A83AD,0,36,char1,0x11B711,sGuestHunter,1,,36B,0x159b04,obj100+0x81924,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A83D1,0,308,char1,0x11B735,sGuestHunter,1,,308B,0x15be24,obj100+0x81948,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8505,0,22,char1,0x11B869,sGuestHunter,1,,22B,0x1599f4,obj100+0x81a84,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A851B,0,2,char1,0x11B87F,sGuestHunter,1,,2B,0x159a04,obj100+0x81a9a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A851D,0,2,char1,0x11B881,sGuestHunter,1,,2B,0x159a14,obj100+0x81a9c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A851F,0,2,char1,0x11B883,sGuestHunter,1,,2B,0x159a24,obj100+0x81a9e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8521,0,2,char1,0x11B885,sGuestHunter,1,,2B,0x159a34,obj100+0x81aa0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8523,0,56,char1,0x11B887,sGuestHunter,1,,56B,0x159a44,obj100+0x81aa4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A855B,0,2,char1,0x11B8BF,sGuestHunter,1,,2B,0x159a54,obj100+0x81aa2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A855D,0,4,char1,0x11B8C1,sGuestHunter,1,,4B,0x159a64,obj100+0x81b30,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8561,0,4,char1,0x11B8C5,sGuestHunter,1,,4B,0x159a74,obj100+0x81b34,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8565,0,4,char1,0x11B8C9,sGuestHunter,1,,4B,0x159a84,obj100+0x81b38,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8569,0,1,char1,0x11B8CD,sGuestHunter,1,,1B,0x159a94,obj100+0x81b3c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A856A,0,8,char1,0x11B8CE,sGuestHunter,1,,8B,0x159aa4,obj100+0x81b40,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8572,0,2,char1,0x11B8D6,sGuestHunter,1,,2B,0x159ab4,obj100+0x81b48,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8574,0,1,char1,0x11B8D8,sGuestHunter,1,,1B,0x159ac4,obj100+0x81b3f,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8575,0,1,char1,0x11B8D9,sGuestHunter,1,,1B,0x159ad4,obj100+0x81b3e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8576,0,1,char1,0x11B8DA,sGuestHunter,1,,1B,0x159ae4,obj100+0x81b3d,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8577,0,12,char1,0x11B8DB,sGuestHunter,1,,12B,0x159af4,obj100+0x81b4a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8583,0,36,char1,0x11B8E7,sGuestHunter,1,,36B,0x159b04,obj100+0x81b58,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A85A7,0,308,char1,0x11B90B,sGuestHunter,1,,308B,0x15be48,obj100+0x81b7c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A86DB,0,22,char1,0x11BA3F,sGuestHunter,1,,22B,0x1599f4,obj100+0x81cb8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A86F1,0,2,char1,0x11BA55,sGuestHunter,1,,2B,0x159a04,obj100+0x81cce,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A86F3,0,2,char1,0x11BA57,sGuestHunter,1,,2B,0x159a14,obj100+0x81cd0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A86F5,0,2,char1,0x11BA59,sGuestHunter,1,,2B,0x159a24,obj100+0x81cd2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A86F7,0,2,char1,0x11BA5B,sGuestHunter,1,,2B,0x159a34,obj100+0x81cd4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A86F9,0,56,char1,0x11BA5D,sGuestHunter,1,,56B,0x159a44,obj100+0x81cd8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8731,0,2,char1,0x11BA95,sGuestHunter,1,,2B,0x159a54,obj100+0x81cd6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8733,0,4,char1,0x11BA97,sGuestHunter,1,,4B,0x159a64,obj100+0x81d64,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8737,0,4,char1,0x11BA9B,sGuestHunter,1,,4B,0x159a74,obj100+0x81d68,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A873B,0,4,char1,0x11BA9F,sGuestHunter,1,,4B,0x159a84,obj100+0x81d6c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A873F,0,1,char1,0x11BAA3,sGuestHunter,1,,1B,0x159a94,obj100+0x81d70,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8740,0,8,char1,0x11BAA4,sGuestHunter,1,,8B,0x159aa4,obj100+0x81d74,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8748,0,2,char1,0x11BAAC,sGuestHunter,1,,2B,0x159ab4,obj100+0x81d7c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A874A,0,1,char1,0x11BAAE,sGuestHunter,1,,1B,0x159ac4,obj100+0x81d73,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A874B,0,1,char1,0x11BAAF,sGuestHunter,1,,1B,0x159ad4,obj100+0x81d72,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A874C,0,1,char1,0x11BAB0,sGuestHunter,1,,1B,0x159ae4,obj100+0x81d71,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A874D,0,12,char1,0x11BAB1,sGuestHunter,1,,12B,0x159af4,obj100+0x81d7e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8759,0,36,char1,0x11BABD,sGuestHunter,1,,36B,0x159b04,obj100+0x81d8c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A877D,0,308,char1,0x11BAE1,sGuestHunter,1,,308B,0x15be70,obj100+0x81db0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A88B1,0,22,char1,0x11BC15,sGuestHunter,1,,22B,0x1599f4,obj100+0x81eec,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A88C7,0,2,char1,0x11BC2B,sGuestHunter,1,,2B,0x159a04,obj100+0x81f02,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A88C9,0,2,char1,0x11BC2D,sGuestHunter,1,,2B,0x159a14,obj100+0x81f04,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A88CB,0,2,char1,0x11BC2F,sGuestHunter,1,,2B,0x159a24,obj100+0x81f06,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A88CD,0,2,char1,0x11BC31,sGuestHunter,1,,2B,0x159a34,obj100+0x81f08,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A88CF,0,56,char1,0x11BC33,sGuestHunter,1,,56B,0x159a44,obj100+0x81f0c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8907,0,2,char1,0x11BC6B,sGuestHunter,1,,2B,0x159a54,obj100+0x81f0a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8909,0,4,char1,0x11BC6D,sGuestHunter,1,,4B,0x159a64,obj100+0x81f98,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A890D,0,4,char1,0x11BC71,sGuestHunter,1,,4B,0x159a74,obj100+0x81f9c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8911,0,4,char1,0x11BC75,sGuestHunter,1,,4B,0x159a84,obj100+0x81fa0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8915,0,1,char1,0x11BC79,sGuestHunter,1,,1B,0x159a94,obj100+0x81fa4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8916,0,8,char1,0x11BC7A,sGuestHunter,1,,8B,0x159aa4,obj100+0x81fa8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A891E,0,2,char1,0x11BC82,sGuestHunter,1,,2B,0x159ab4,obj100+0x81fb0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8920,0,1,char1,0x11BC84,sGuestHunter,1,,1B,0x159ac4,obj100+0x81fa7,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8921,0,1,char1,0x11BC85,sGuestHunter,1,,1B,0x159ad4,obj100+0x81fa6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8922,0,1,char1,0x11BC86,sGuestHunter,1,,1B,0x159ae4,obj100+0x81fa5,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8923,0,12,char1,0x11BC87,sGuestHunter,1,,12B,0x159af4,obj100+0x81fb2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A892F,0,36,char1,0x11BC93,sGuestHunter,1,,36B,0x159b04,obj100+0x81fc0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8953,0,308,char1,0x11BCB7,sGuestHunter,1,,308B,0x15be98,obj100+0x81fe4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8A87,0,22,char1,0x11BDEB,sGuestHunter,1,,22B,0x1599f4,obj100+0x82120,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8A9D,0,2,char1,0x11BE01,sGuestHunter,1,,2B,0x159a04,obj100+0x82136,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8A9F,0,2,char1,0x11BE03,sGuestHunter,1,,2B,0x159a14,obj100+0x82138,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AA1,0,2,char1,0x11BE05,sGuestHunter,1,,2B,0x159a24,obj100+0x8213a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AA3,0,2,char1,0x11BE07,sGuestHunter,1,,2B,0x159a34,obj100+0x8213c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AA5,0,56,char1,0x11BE09,sGuestHunter,1,,56B,0x159a44,obj100+0x82140,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8ADD,0,2,char1,0x11BE41,sGuestHunter,1,,2B,0x159a54,obj100+0x8213e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8ADF,0,4,char1,0x11BE43,sGuestHunter,1,,4B,0x159a64,obj100+0x821cc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AE3,0,4,char1,0x11BE47,sGuestHunter,1,,4B,0x159a74,obj100+0x821d0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AE7,0,4,char1,0x11BE4B,sGuestHunter,1,,4B,0x159a84,obj100+0x821d4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AEB,0,1,char1,0x11BE4F,sGuestHunter,1,,1B,0x159a94,obj100+0x821d8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AEC,0,8,char1,0x11BE50,sGuestHunter,1,,8B,0x159aa4,obj100+0x821dc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AF4,0,2,char1,0x11BE58,sGuestHunter,1,,2B,0x159ab4,obj100+0x821e4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AF6,0,1,char1,0x11BE5A,sGuestHunter,1,,1B,0x159ac4,obj100+0x821db,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AF7,0,1,char1,0x11BE5B,sGuestHunter,1,,1B,0x159ad4,obj100+0x821da,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AF8,0,1,char1,0x11BE5C,sGuestHunter,1,,1B,0x159ae4,obj100+0x821d9,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8AF9,0,12,char1,0x11BE5D,sGuestHunter,1,,12B,0x159af4,obj100+0x821e6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8B05,0,36,char1,0x11BE69,sGuestHunter,1,,36B,0x159b04,obj100+0x821f4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8B29,0,308,char1,0x11BE8D,sGuestHunter,1,,308B,0x15bec0,obj100+0x82218,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8C5D,0,22,char1,0x11BFC1,sGuestHunter,1,,22B,0x1599f4,obj100+0x82354,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8C73,0,2,char1,0x11BFD7,sGuestHunter,1,,2B,0x159a04,obj100+0x8236a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8C75,0,2,char1,0x11BFD9,sGuestHunter,1,,2B,0x159a14,obj100+0x8236c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8C77,0,2,char1,0x11BFDB,sGuestHunter,1,,2B,0x159a24,obj100+0x8236e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8C79,0,2,char1,0x11BFDD,sGuestHunter,1,,2B,0x159a34,obj100+0x82370,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8C7B,0,56,char1,0x11BFDF,sGuestHunter,1,,56B,0x159a44,obj100+0x82374,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CB3,0,2,char1,0x11C017,sGuestHunter,1,,2B,0x159a54,obj100+0x82372,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CB5,0,4,char1,0x11C019,sGuestHunter,1,,4B,0x159a64,obj100+0x82400,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CB9,0,4,char1,0x11C01D,sGuestHunter,1,,4B,0x159a74,obj100+0x82404,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CBD,0,4,char1,0x11C021,sGuestHunter,1,,4B,0x159a84,obj100+0x82408,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CC1,0,1,char1,0x11C025,sGuestHunter,1,,1B,0x159a94,obj100+0x8240c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CC2,0,8,char1,0x11C026,sGuestHunter,1,,8B,0x159aa4,obj100+0x82410,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CCA,0,2,char1,0x11C02E,sGuestHunter,1,,2B,0x159ab4,obj100+0x82418,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CCC,0,1,char1,0x11C030,sGuestHunter,1,,1B,0x159ac4,obj100+0x8240f,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CCD,0,1,char1,0x11C031,sGuestHunter,1,,1B,0x159ad4,obj100+0x8240e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CCE,0,1,char1,0x11C032,sGuestHunter,1,,1B,0x159ae4,obj100+0x8240d,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CCF,0,12,char1,0x11C033,sGuestHunter,1,,12B,0x159af4,obj100+0x8241a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CDB,0,36,char1,0x11C03F,sGuestHunter,1,,36B,0x159b04,obj100+0x82428,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8CFF,0,308,char1,0x11C063,sGuestHunter,1,,308B,0x15bee4,obj100+0x8244c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E33,0,22,char1,0x11C197,sGuestHunter,1,,22B,0x1599f4,obj100+0x82588,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E49,0,2,char1,0x11C1AD,sGuestHunter,1,,2B,0x159a04,obj100+0x8259e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E4B,0,2,char1,0x11C1AF,sGuestHunter,1,,2B,0x159a14,obj100+0x825a0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E4D,0,2,char1,0x11C1B1,sGuestHunter,1,,2B,0x159a24,obj100+0x825a2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E4F,0,2,char1,0x11C1B3,sGuestHunter,1,,2B,0x159a34,obj100+0x825a4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E51,0,56,char1,0x11C1B5,sGuestHunter,1,,56B,0x159a44,obj100+0x825a8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E89,0,2,char1,0x11C1ED,sGuestHunter,1,,2B,0x159a54,obj100+0x825a6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E8B,0,4,char1,0x11C1EF,sGuestHunter,1,,4B,0x159a64,obj100+0x82634,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E8F,0,4,char1,0x11C1F3,sGuestHunter,1,,4B,0x159a74,obj100+0x82638,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E93,0,4,char1,0x11C1F7,sGuestHunter,1,,4B,0x159a84,obj100+0x8263c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E97,0,1,char1,0x11C1FB,sGuestHunter,1,,1B,0x159a94,obj100+0x82640,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8E98,0,8,char1,0x11C1FC,sGuestHunter,1,,8B,0x159aa4,obj100+0x82644,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8EA0,0,2,char1,0x11C204,sGuestHunter,1,,2B,0x159ab4,obj100+0x8264c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8EA2,0,1,char1,0x11C206,sGuestHunter,1,,1B,0x159ac4,obj100+0x82643,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8EA3,0,1,char1,0x11C207,sGuestHunter,1,,1B,0x159ad4,obj100+0x82642,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8EA4,0,1,char1,0x11C208,sGuestHunter,1,,1B,0x159ae4,obj100+0x82641,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8EA5,0,12,char1,0x11C209,sGuestHunter,1,,12B,0x159af4,obj100+0x8264e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8EB1,0,36,char1,0x11C215,sGuestHunter,1,,36B,0x159b04,obj100+0x8265c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A8ED5,0,308,char1,0x11C239,sGuestHunter,1,,308B,0x15bf0c,obj100+0x82680,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9009,0,22,char1,0x11C36D,sGuestHunter,1,,22B,0x1599f4,obj100+0x827bc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A901F,0,2,char1,0x11C383,sGuestHunter,1,,2B,0x159a04,obj100+0x827d2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9021,0,2,char1,0x11C385,sGuestHunter,1,,2B,0x159a14,obj100+0x827d4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9023,0,2,char1,0x11C387,sGuestHunter,1,,2B,0x159a24,obj100+0x827d6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9025,0,2,char1,0x11C389,sGuestHunter,1,,2B,0x159a34,obj100+0x827d8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9027,0,56,char1,0x11C38B,sGuestHunter,1,,56B,0x159a44,obj100+0x827dc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A905F,0,2,char1,0x11C3C3,sGuestHunter,1,,2B,0x159a54,obj100+0x827da,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9061,0,4,char1,0x11C3C5,sGuestHunter,1,,4B,0x159a64,obj100+0x82868,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9065,0,4,char1,0x11C3C9,sGuestHunter,1,,4B,0x159a74,obj100+0x8286c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9069,0,4,char1,0x11C3CD,sGuestHunter,1,,4B,0x159a84,obj100+0x82870,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A906D,0,1,char1,0x11C3D1,sGuestHunter,1,,1B,0x159a94,obj100+0x82874,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A906E,0,8,char1,0x11C3D2,sGuestHunter,1,,8B,0x159aa4,obj100+0x82878,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9076,0,2,char1,0x11C3DA,sGuestHunter,1,,2B,0x159ab4,obj100+0x82880,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9078,0,1,char1,0x11C3DC,sGuestHunter,1,,1B,0x159ac4,obj100+0x82877,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9079,0,1,char1,0x11C3DD,sGuestHunter,1,,1B,0x159ad4,obj100+0x82876,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A907A,0,1,char1,0x11C3DE,sGuestHunter,1,,1B,0x159ae4,obj100+0x82875,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A907B,0,12,char1,0x11C3DF,sGuestHunter,1,,12B,0x159af4,obj100+0x82882,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9087,0,36,char1,0x11C3EB,sGuestHunter,1,,36B,0x159b04,obj100+0x82890,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A90AB,0,308,char1,0x11C40F,sGuestHunter,1,,308B,0x15bf34,obj100+0x828b4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A91DF,0,22,char1,0x11C543,sGuestHunter,1,,22B,0x1599f4,obj100+0x829f0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A91F5,0,2,char1,0x11C559,sGuestHunter,1,,2B,0x159a04,obj100+0x82a06,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A91F7,0,2,char1,0x11C55B,sGuestHunter,1,,2B,0x159a14,obj100+0x82a08,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A91F9,0,2,char1,0x11C55D,sGuestHunter,1,,2B,0x159a24,obj100+0x82a0a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A91FB,0,2,char1,0x11C55F,sGuestHunter,1,,2B,0x159a34,obj100+0x82a0c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A91FD,0,56,char1,0x11C561,sGuestHunter,1,,56B,0x159a44,obj100+0x82a10,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9235,0,2,char1,0x11C599,sGuestHunter,1,,2B,0x159a54,obj100+0x82a0e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9237,0,4,char1,0x11C59B,sGuestHunter,1,,4B,0x159a64,obj100+0x82a9c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A923B,0,4,char1,0x11C59F,sGuestHunter,1,,4B,0x159a74,obj100+0x82aa0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A923F,0,4,char1,0x11C5A3,sGuestHunter,1,,4B,0x159a84,obj100+0x82aa4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9243,0,1,char1,0x11C5A7,sGuestHunter,1,,1B,0x159a94,obj100+0x82aa8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9244,0,8,char1,0x11C5A8,sGuestHunter,1,,8B,0x159aa4,obj100+0x82aac,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A924C,0,2,char1,0x11C5B0,sGuestHunter,1,,2B,0x159ab4,obj100+0x82ab4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A924E,0,1,char1,0x11C5B2,sGuestHunter,1,,1B,0x159ac4,obj100+0x82aab,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A924F,0,1,char1,0x11C5B3,sGuestHunter,1,,1B,0x159ad4,obj100+0x82aaa,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9250,0,1,char1,0x11C5B4,sGuestHunter,1,,1B,0x159ae4,obj100+0x82aa9,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9251,0,12,char1,0x11C5B5,sGuestHunter,1,,12B,0x159af4,obj100+0x82ab6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A925D,0,36,char1,0x11C5C1,sGuestHunter,1,,36B,0x159b04,obj100+0x82ac4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9281,0,308,char1,0x11C5E5,sGuestHunter,1,,308B,0x15bf5c,obj100+0x82ae8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A93B5,0,22,char1,0x11C719,sGuestHunter,1,,22B,0x1599f4,obj100+0x82c24,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A93CB,0,2,char1,0x11C72F,sGuestHunter,1,,2B,0x159a04,obj100+0x82c3a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A93CD,0,2,char1,0x11C731,sGuestHunter,1,,2B,0x159a14,obj100+0x82c3c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A93CF,0,2,char1,0x11C733,sGuestHunter,1,,2B,0x159a24,obj100+0x82c3e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A93D1,0,2,char1,0x11C735,sGuestHunter,1,,2B,0x159a34,obj100+0x82c40,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A93D3,0,56,char1,0x11C737,sGuestHunter,1,,56B,0x159a44,obj100+0x82c44,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A940B,0,2,char1,0x11C76F,sGuestHunter,1,,2B,0x159a54,obj100+0x82c42,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A940D,0,4,char1,0x11C771,sGuestHunter,1,,4B,0x159a64,obj100+0x82cd0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9411,0,4,char1,0x11C775,sGuestHunter,1,,4B,0x159a74,obj100+0x82cd4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9415,0,4,char1,0x11C779,sGuestHunter,1,,4B,0x159a84,obj100+0x82cd8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9419,0,1,char1,0x11C77D,sGuestHunter,1,,1B,0x159a94,obj100+0x82cdc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A941A,0,8,char1,0x11C77E,sGuestHunter,1,,8B,0x159aa4,obj100+0x82ce0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9422,0,2,char1,0x11C786,sGuestHunter,1,,2B,0x159ab4,obj100+0x82ce8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9424,0,1,char1,0x11C788,sGuestHunter,1,,1B,0x159ac4,obj100+0x82cdf,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9425,0,1,char1,0x11C789,sGuestHunter,1,,1B,0x159ad4,obj100+0x82cde,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9426,0,1,char1,0x11C78A,sGuestHunter,1,,1B,0x159ae4,obj100+0x82cdd,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9427,0,12,char1,0x11C78B,sGuestHunter,1,,12B,0x159af4,obj100+0x82cea,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9433,0,36,char1,0x11C797,sGuestHunter,1,,36B,0x159b04,obj100+0x82cf8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9457,0,308,char1,0x11C7BB,sGuestHunter,1,,308B,0x15bf84,obj100+0x82d1c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A958B,0,22,char1,0x11C8EF,sGuestHunter,1,,22B,0x1599f4,obj100+0x82e58,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95A1,0,2,char1,0x11C905,sGuestHunter,1,,2B,0x159a04,obj100+0x82e6e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95A3,0,2,char1,0x11C907,sGuestHunter,1,,2B,0x159a14,obj100+0x82e70,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95A5,0,2,char1,0x11C909,sGuestHunter,1,,2B,0x159a24,obj100+0x82e72,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95A7,0,2,char1,0x11C90B,sGuestHunter,1,,2B,0x159a34,obj100+0x82e74,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95A9,0,56,char1,0x11C90D,sGuestHunter,1,,56B,0x159a44,obj100+0x82e78,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95E1,0,2,char1,0x11C945,sGuestHunter,1,,2B,0x159a54,obj100+0x82e76,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95E3,0,4,char1,0x11C947,sGuestHunter,1,,4B,0x159a64,obj100+0x82f04,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95E7,0,4,char1,0x11C94B,sGuestHunter,1,,4B,0x159a74,obj100+0x82f08,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95EB,0,4,char1,0x11C94F,sGuestHunter,1,,4B,0x159a84,obj100+0x82f0c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95EF,0,1,char1,0x11C953,sGuestHunter,1,,1B,0x159a94,obj100+0x82f10,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95F0,0,8,char1,0x11C954,sGuestHunter,1,,8B,0x159aa4,obj100+0x82f14,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95F8,0,2,char1,0x11C95C,sGuestHunter,1,,2B,0x159ab4,obj100+0x82f1c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95FA,0,1,char1,0x11C95E,sGuestHunter,1,,1B,0x159ac4,obj100+0x82f13,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95FB,0,1,char1,0x11C95F,sGuestHunter,1,,1B,0x159ad4,obj100+0x82f12,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95FC,0,1,char1,0x11C960,sGuestHunter,1,,1B,0x159ae4,obj100+0x82f11,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A95FD,0,12,char1,0x11C961,sGuestHunter,1,,12B,0x159af4,obj100+0x82f1e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9609,0,36,char1,0x11C96D,sGuestHunter,1,,36B,0x159b04,obj100+0x82f2c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A962D,0,308,char1,0x11C991,sGuestHunter,1,,308B,0x15bfac,obj100+0x82f50,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9761,0,22,char1,0x11CAC5,sGuestHunter,1,,22B,0x1599f4,obj100+0x8308c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9777,0,2,char1,0x11CADB,sGuestHunter,1,,2B,0x159a04,obj100+0x830a2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9779,0,2,char1,0x11CADD,sGuestHunter,1,,2B,0x159a14,obj100+0x830a4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A977B,0,2,char1,0x11CADF,sGuestHunter,1,,2B,0x159a24,obj100+0x830a6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A977D,0,2,char1,0x11CAE1,sGuestHunter,1,,2B,0x159a34,obj100+0x830a8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A977F,0,56,char1,0x11CAE3,sGuestHunter,1,,56B,0x159a44,obj100+0x830ac,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97B7,0,2,char1,0x11CB1B,sGuestHunter,1,,2B,0x159a54,obj100+0x830aa,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97B9,0,4,char1,0x11CB1D,sGuestHunter,1,,4B,0x159a64,obj100+0x83138,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97BD,0,4,char1,0x11CB21,sGuestHunter,1,,4B,0x159a74,obj100+0x8313c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97C1,0,4,char1,0x11CB25,sGuestHunter,1,,4B,0x159a84,obj100+0x83140,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97C5,0,1,char1,0x11CB29,sGuestHunter,1,,1B,0x159a94,obj100+0x83144,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97C6,0,8,char1,0x11CB2A,sGuestHunter,1,,8B,0x159aa4,obj100+0x83148,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97CE,0,2,char1,0x11CB32,sGuestHunter,1,,2B,0x159ab4,obj100+0x83150,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97D0,0,1,char1,0x11CB34,sGuestHunter,1,,1B,0x159ac4,obj100+0x83147,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97D1,0,1,char1,0x11CB35,sGuestHunter,1,,1B,0x159ad4,obj100+0x83146,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97D2,0,1,char1,0x11CB36,sGuestHunter,1,,1B,0x159ae4,obj100+0x83145,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97D3,0,12,char1,0x11CB37,sGuestHunter,1,,12B,0x159af4,obj100+0x83152,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A97DF,0,36,char1,0x11CB43,sGuestHunter,1,,36B,0x159b04,obj100+0x83160,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9803,0,308,char1,0x11CB67,sGuestHunter,1,,308B,0x15bfd4,obj100+0x83184,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9937,0,22,char1,0x11CC9B,sGuestHunter,1,,22B,0x1599f4,obj100+0x832c0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A994D,0,2,char1,0x11CCB1,sGuestHunter,1,,2B,0x159a04,obj100+0x832d6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A994F,0,2,char1,0x11CCB3,sGuestHunter,1,,2B,0x159a14,obj100+0x832d8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9951,0,2,char1,0x11CCB5,sGuestHunter,1,,2B,0x159a24,obj100+0x832da,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9953,0,2,char1,0x11CCB7,sGuestHunter,1,,2B,0x159a34,obj100+0x832dc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9955,0,56,char1,0x11CCB9,sGuestHunter,1,,56B,0x159a44,obj100+0x832e0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A998D,0,2,char1,0x11CCF1,sGuestHunter,1,,2B,0x159a54,obj100+0x832de,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A998F,0,4,char1,0x11CCF3,sGuestHunter,1,,4B,0x159a64,obj100+0x8336c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9993,0,4,char1,0x11CCF7,sGuestHunter,1,,4B,0x159a74,obj100+0x83370,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9997,0,4,char1,0x11CCFB,sGuestHunter,1,,4B,0x159a84,obj100+0x83374,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A999B,0,1,char1,0x11CCFF,sGuestHunter,1,,1B,0x159a94,obj100+0x83378,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A999C,0,8,char1,0x11CD00,sGuestHunter,1,,8B,0x159aa4,obj100+0x8337c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A99A4,0,2,char1,0x11CD08,sGuestHunter,1,,2B,0x159ab4,obj100+0x83384,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A99A6,0,1,char1,0x11CD0A,sGuestHunter,1,,1B,0x159ac4,obj100+0x8337b,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A99A7,0,1,char1,0x11CD0B,sGuestHunter,1,,1B,0x159ad4,obj100+0x8337a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A99A8,0,1,char1,0x11CD0C,sGuestHunter,1,,1B,0x159ae4,obj100+0x83379,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A99A9,0,12,char1,0x11CD0D,sGuestHunter,1,,12B,0x159af4,obj100+0x83386,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A99B5,0,36,char1,0x11CD19,sGuestHunter,1,,36B,0x159b04,obj100+0x83394,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A99D9,0,308,char1,0x11CD3D,sGuestHunter,1,,308B,0x15bffc,obj100+0x833b8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9B0D,0,40,char1,0x11CE71,sGuestHunter,1,,40B,0x3e78e0,obj100+0x834f0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A9B35,0,8,char1,0x11CE99,sTutorial,1,,8B,0x53913c,obj60+0x1cc,tutorial flags (8 + 152 B),DERIVED
+0x2A9B3D,0,152,char1,0x11CEA1,sTutorial,1,,152B,0x3e78f4,obj60+0x1d4,tutorial flags (8 + 152 B),DERIVED
+0x2A9BD5,0,4,char1,0x11CF39,sMonNyan,1,,4B,0x1ac034,obj100+0x812bc,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BD9,0,1,char1,0x11CF3D,sMonNyan,1,,1B,0x1ac044,obj100+0x812c0,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BDA,0,18,char1,0x11CF3E,sMonNyan,1,,18B,0x1ac054,obj100+0x812c1,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BEC,0,4,char1,0x11CF50,sMonNyan,1,,4B,0x1baedc,obj100+0x812dc,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BF0,0,4,char1,0x11CF54,sMonNyan,1,,4B,0x1baeec,obj100+0x812e0,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BF4,0,4,char1,0x11CF58,sMonNyan,1,,4B,0x1baefc,obj100+0x812e4,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BF8,0,1,char1,0x11CF5C,sMonNyan,1,,1B,0x1ac060,obj100+0x812e8,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BF9,0,4,char1,0x11CF5D,sMonNyan,1,,4B,0x1baedc,obj100+0x812f4,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9BFD,0,4,char1,0x11CF61,sMonNyan,1,,4B,0x1baeec,obj100+0x812f8,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C01,0,4,char1,0x11CF65,sMonNyan,1,,4B,0x1baefc,obj100+0x812fc,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C05,0,1,char1,0x11CF69,sMonNyan,1,,1B,0x1ac088,obj100+0x81300,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C06,0,4,char1,0x11CF6A,sMonNyan,1,,4B,0x1baedc,obj100+0x8130c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C0A,0,4,char1,0x11CF6E,sMonNyan,1,,4B,0x1baeec,obj100+0x81310,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C0E,0,4,char1,0x11CF72,sMonNyan,1,,4B,0x1baefc,obj100+0x81314,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C12,0,1,char1,0x11CF76,sMonNyan,1,,1B,0x1ac0ac,obj100+0x81318,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C13,0,4,char1,0x11CF77,sMonNyan,1,,4B,0x1baedc,obj100+0x81324,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C17,0,4,char1,0x11CF7B,sMonNyan,1,,4B,0x1baeec,obj100+0x81328,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C1B,0,4,char1,0x11CF7F,sMonNyan,1,,4B,0x1baefc,obj100+0x8132c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C1F,0,1,char1,0x11CF83,sMonNyan,1,,1B,0x1ac0d0,obj100+0x81330,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C20,0,1,char1,0x11CF84,sMonNyan,1,,1B,0x1bb054,obj100+0x8133c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C21,0,1,char1,0x11CF85,sMonNyan,1,,1B,0x1bb064,obj100+0x8133d,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C22,0,1,char1,0x11CF86,sMonNyan,1,,1B,0x1bb074,obj100+0x8133e,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C23,0,1,char1,0x11CF87,sMonNyan,1,,1B,0x1bb084,obj100+0x8133f,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C24,0,1,char1,0x11CF88,sMonNyan,1,,1B,0x1ac0f4,obj100+0x81340,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C25,0,1,char1,0x11CF89,sMonNyan,1,,1B,0x1bab8c,obj100+0x8134c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C26,0,1,char1,0x11CF8A,sMonNyan,1,,1B,0x1bab9c,obj100+0x8134d,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C27,0,2,char1,0x11CF8B,sMonNyan,1,,2B,0x1babac,obj100+0x8134e,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C29,0,1,char1,0x11CF8D,sMonNyan,1,,1B,0x1babbc,obj100+0x81350,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C2A,0,1,char1,0x11CF8E,sMonNyan,1,,1B,0x1babcc,obj100+0x81351,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C2B,0,1,char1,0x11CF8F,sMonNyan,1,,1B,0x1babdc,obj100+0x81352,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C2C,0,4,char1,0x11CF90,sMonNyan,1,,4B,0x1babec,obj100+0x81358,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C30,0,4,char1,0x11CF94,sMonNyan,1,,4B,0x1ac100,obj100+0x8135c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C34,0,1,char1,0x11CF98,sMonNyan,1,,1B,0x1bab8c,obj100+0x81364,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C35,0,1,char1,0x11CF99,sMonNyan,1,,1B,0x1bab9c,obj100+0x81365,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C36,0,2,char1,0x11CF9A,sMonNyan,1,,2B,0x1babac,obj100+0x81366,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C38,0,1,char1,0x11CF9C,sMonNyan,1,,1B,0x1babbc,obj100+0x81368,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C39,0,1,char1,0x11CF9D,sMonNyan,1,,1B,0x1babcc,obj100+0x81369,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C3A,0,1,char1,0x11CF9E,sMonNyan,1,,1B,0x1babdc,obj100+0x8136a,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C3B,0,4,char1,0x11CF9F,sMonNyan,1,,4B,0x1babec,obj100+0x81370,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C3F,0,4,char1,0x11CFA3,sMonNyan,1,,4B,0x1ac124,obj100+0x81374,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C43,0,1,char1,0x11CFA7,sMonNyan,1,,1B,0x1bab8c,obj100+0x8137c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C44,0,1,char1,0x11CFA8,sMonNyan,1,,1B,0x1bab9c,obj100+0x8137d,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C45,0,2,char1,0x11CFA9,sMonNyan,1,,2B,0x1babac,obj100+0x8137e,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C47,0,1,char1,0x11CFAB,sMonNyan,1,,1B,0x1babbc,obj100+0x81380,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C48,0,1,char1,0x11CFAC,sMonNyan,1,,1B,0x1babcc,obj100+0x81381,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C49,0,1,char1,0x11CFAD,sMonNyan,1,,1B,0x1babdc,obj100+0x81382,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C4A,0,4,char1,0x11CFAE,sMonNyan,1,,4B,0x1babec,obj100+0x81388,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C4E,0,4,char1,0x11CFB2,sMonNyan,1,,4B,0x1ac148,obj100+0x8138c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C52,0,1,char1,0x11CFB6,sMonNyan,1,,1B,0x1bab8c,obj100+0x81394,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C53,0,1,char1,0x11CFB7,sMonNyan,1,,1B,0x1bab9c,obj100+0x81395,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C54,0,2,char1,0x11CFB8,sMonNyan,1,,2B,0x1babac,obj100+0x81396,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C56,0,1,char1,0x11CFBA,sMonNyan,1,,1B,0x1babbc,obj100+0x81398,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C57,0,1,char1,0x11CFBB,sMonNyan,1,,1B,0x1babcc,obj100+0x81399,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C58,0,1,char1,0x11CFBC,sMonNyan,1,,1B,0x1babdc,obj100+0x8139a,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C59,0,4,char1,0x11CFBD,sMonNyan,1,,4B,0x1babec,obj100+0x813a0,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C5D,0,4,char1,0x11CFC1,sMonNyan,1,,4B,0x1ac16c,obj100+0x813a4,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C61,0,1,char1,0x11CFC5,sMonNyan,1,,1B,0x1bab8c,obj100+0x813ac,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C62,0,1,char1,0x11CFC6,sMonNyan,1,,1B,0x1bab9c,obj100+0x813ad,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C63,0,2,char1,0x11CFC7,sMonNyan,1,,2B,0x1babac,obj100+0x813ae,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C65,0,1,char1,0x11CFC9,sMonNyan,1,,1B,0x1babbc,obj100+0x813b0,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C66,0,1,char1,0x11CFCA,sMonNyan,1,,1B,0x1babcc,obj100+0x813b1,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C67,0,1,char1,0x11CFCB,sMonNyan,1,,1B,0x1babdc,obj100+0x813b2,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C68,0,4,char1,0x11CFCC,sMonNyan,1,,4B,0x1babec,obj100+0x813b8,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C6C,0,4,char1,0x11CFD0,sMonNyan,1,,4B,0x1ac190,obj100+0x813bc,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C70,0,12,char1,0x11CFD4,sMonNyan,1,,12B,0x1ac1b8,obj100+0x813c0,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C7C,0,12,char1,0x11CFE0,sMonNyan,1,,12B,0x1ac1c8,obj100+0x813cc,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C88,0,12,char1,0x11CFEC,sMonNyan,1,,12B,0x1ac1d8,obj100+0x813d8,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C94,0,4,char1,0x11CFF8,sMonNyan,1,,4B,0x1ac1e8,obj100+0x813e4,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C98,0,4,char1,0x11CFFC,sMonNyan,1,,4B,0x1ac1f8,obj100+0x813e8,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9C9C,0,4,char1,0x11D000,sMonNyan,1,,4B,0x1ac208,obj100+0x813ec,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CA0,0,4,char1,0x11D004,sMonNyan,1,,4B,0x1ac218,obj100+0x813f0,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CA4,0,4,char1,0x11D008,sMonNyan,1,,4B,0x1ac228,obj100+0x813f4,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CA8,0,4,char1,0x11D00C,sMonNyan,1,,4B,0x1ac238,obj100+0x813f8,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CAC,0,4,char1,0x11D010,sMonNyan,1,,4B,0x1ac248,obj100+0x813fc,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CB0,0,4,char1,0x11D014,sMonNyan,1,,4B,0x1ac258,obj100+0x81400,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CB4,0,4,char1,0x11D018,sMonNyan,1,,4B,0x1ac268,obj100+0x81404,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CB8,0,4,char1,0x11D01C,sMonNyan,1,,4B,0x1ac278,obj100+0x81408,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CBC,0,4,char1,0x11D020,sMonNyan,1,,4B,0x1ac288,obj100+0x8140c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CC0,0,4,char1,0x11D024,sMonNyan,1,,4B,0x1ac298,obj100+0x81410,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CC4,0,4,char1,0x11D028,sMonNyan,1,,4B,0x1ac2a8,obj100+0x81414,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CC8,0,4,char1,0x11D02C,sMonNyan,1,,4B,0x1ac2b8,obj100+0x81418,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CCC,0,4,char1,0x11D030,sMonNyan,1,,4B,0x1ac2c8,obj100+0x8141c,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CD0,0,4,char1,0x11D034,sMonNyan,1,,4B,0x1ac2d8,obj100+0x81420,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CD4,0,4,char1,0x11D038,sMonNyan,1,,4B,0x1ac2e8,obj100+0x81424,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CD8,0,4,char1,0x11D03C,sMonNyan,1,,4B,0x1c9398,obj100+0x81428,Meownster Hunters (sMonNyan) state,DERIVED
+0x2A9CDC,0,6,char1,0x11D040,chat phrases (0x55d2c0),1,,6B,0x55d2dc,obj100+0x5fdac,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CE2,0,6,char1,0x11D046,chat phrases (0x55d2c0),1,,6B,0x55d2f0,obj100+0x5fdb2,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CE8,0,6,char1,0x11D04C,chat phrases (0x55d2c0),1,,6B,0x55d300,obj100+0x5fdb8,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CEE,0,6,char1,0x11D052,chat phrases (0x55d2c0),1,,6B,0x55d314,obj100+0x5fdbe,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CF4,0,1,char1,0x11D058,chat phrases (0x55d2c0),1,,1B,0x55d36c,obj100+0x5fdc4,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CF5,0,1,char1,0x11D059,chat phrases (0x55d2c0),1,,1B,0x55d37c,obj100+0x5fdc5,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CF6,0,4,char1,0x11D05A,chat phrases (0x55d2c0),1,,4B,0x55d38c,obj100+0x5fdc6,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CFA,0,8,char1,0x11D05E,chat phrases (0x55d2c0),1,,8B,0x55d39c,obj100+0x5fdca,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D02,0,2,char1,0x11D066,chat phrases (0x55d2c0),1,,2B,0x55d3ac,obj100+0x5fdd2,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D04,0,4,char1,0x11D068,chat phrases (0x55d2c0),1,,4B,0x55d3bc,obj100+0x5fdd4,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D08,0,4,char1,0x11D06C,chat phrases (0x55d2c0),1,,4B,0x55d3cc,obj100+0x5fdd8,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D0C,0,2,char1,0x11D070,chat phrases (0x55d2c0),1,,2B,0x55d3dc,obj100+0x5fddc,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D0E,0,2,char1,0x11D072,chat phrases (0x55d2c0),1,,2B,0x55d3ec,obj100+0x5fdde,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D10,0,4,char1,0x11D074,chat phrases (0x55d2c0),1,,4B,0x55d3fc,obj100+0x5fde0,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D14,0,4,char1,0x11D078,chat phrases (0x55d2c0),1,,4B,0x55d40c,obj100+0x5fde4,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D18,0,2,char1,0x11D07C,chat phrases (0x55d2c0),1,,2B,0x55d41c,obj100+0x5fde8,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D1A,0,2,char1,0x11D07E,chat phrases (0x55d2c0),1,,2B,0x55d42c,obj100+0x5fdea,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D1C,0,4,char1,0x11D080,chat phrases (0x55d2c0),1,,4B,0x55d43c,obj100+0x5fdec,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D20,0,4,char1,0x11D084,chat phrases (0x55d2c0),1,,4B,0x55d324,obj100+0x5fdf0,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D24,0,1,char1,0x11D088,chat phrases (0x55d2c0),1,,2b,0x55d33c,obj100+0x5fdf4,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9D25,0,7488,char1,0x11D089,chat phrases (0x55d2c0),1,,7488B,0x1cab18,obj100+0x61990,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2ABA65,0,2808,char1,0x11EDC9,chat phrases (0x55d2c0),1,,2808B,0x1cab28,obj100+0x636d0,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2AC55D,0,2,char1,0x11F8C1,chat phrases (0x55d2c0),1,,2B,0x3e791c,obj100+0x641cc,chat phrases: 104 B slots (auto-chat lines),DERIVED

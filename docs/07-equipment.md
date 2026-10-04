@@ -91,11 +91,24 @@ one colour per body part, kept in two places.
 Changing sets rewrites these, so they are just a copy of the equipped set's values.
 Default colours are written out explicitly (e.g. `fa f5 e6 ff`), not stored as zero.
 
+**The copy the game loads is elsewhere** ([11](11-save-map.md#player-record--base--0x23a58)).
+`base + 0x24C` / `+0x270` sit in the 632-byte slot header, which the loader discards.
+The live values are in the player record: pigment at `base + 0x23B53` (5 × RGBA + 16 B)
+and flags at `base + 0x23B7B` (u16). Both copies were byte-identical in the analysed save.
+An editor that dyes the current outfit should write both.
+
 ### My Sets (saved equipment sets)
 
 **CONFIRMED** for the box indices, name and pigment. Set 1 is at `base + 0x208C8`
 (absolute `0x1AD564`), stride `0x88`. The menu shows 5 pages × 8 sets, so there are
 most likely 40 records. That count is **DERIVED** from the UI.
+
+**Record boundary (from the loader, [11](11-save-map.md#equipment-manager-additions)).**
+The game reads the sets as 40 × 136 B starting at `base + 0x208CE`, 6 bytes later than
+the offsets below assume. So the 6 "varying" bytes at `+0x00` are the last 6 bytes of the
+previous set. For set 1 they are the end of the Palico equipment box. The count of 40 is
+confirmed by the loader. The table keeps the original offsets; subtract 6 for offsets
+within the game's record.
 
 | Offset | Size | Field |
 |---|---|---|
@@ -123,9 +136,10 @@ specular "shine". That is untested here.
 **DERIVED.** `base + 0x110`: 7 × 44-byte records (weapon, head, chest, arms, waist,
 legs, talisman). Each record starts with a copy of the 36-byte box entry. A u32 that
 was constant across all seven slots (`14 a5 e3 01` in the analysed save) sits 4 bytes
-before each copy; its meaning is UNRESOLVED. The game appears to rebuild this cache
-from the box. If an editor changes a worn piece in the box, it should patch the
-matching cache record the same way.
+before each copy. It is a runtime vtable pointer written as is, not data
+([11](11-save-map.md#slot-header--base--0x0-632-b)). The cache lives in the 632-byte
+slot header, which the loader discards and the writer rebuilds. Patching it only
+changes the slot-select screen until the next save, so an editor can leave it alone.
 
 ## Editing checklist
 

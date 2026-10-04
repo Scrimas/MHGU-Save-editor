@@ -1,6 +1,11 @@
 """runfull.py : run the game's full-save loader 0x3e7d10 on a save and log every field read.
 
-    runfull.py SAVE [--resume]      -> scratch/fullmap.pkl  (load log + object assignment)
+    runfull.py SAVE [--resume] [--write]   -> scratch/fullmap.pkl  (load log + object assignment)
+
+--write: reload slot RT_SLOT (default 1) last, run the full writer 0x3e798c on the loaded objects,
+report the bytes that differ, write scratch/work/roundtrip.bin. Then tools/emu/savemap.py.
+Seeded at startup (the game fills these before loading): monster size record list S+0x950,
+block B buffers sPrivilege+0xfa0..0xfb0.
 
 Loader order: block A at body+[body+8] (managers 0x52163c 0x263298 0x2257e4 0x16424c 0x3f8ef8),
 block B at body+[body+0xc] (0x36bdc), then character slots 1-3 (0x3e0db8, body+[body+0x10+4i]).
@@ -51,6 +56,18 @@ def add_attrib(e):
         e.hook_pc(A(t), (lambda t: lambda uc: setattr(e, 'mgr', t))(t))
     e.hook_pc(A(0x3df2a8), lambda uc: setattr(e, 'caller', uc.reg_read(UC_ARM_REG_LR) - BASE))
     e.hook_pc(A(0x51dbb4), seed_size_records)
+    e.hook_pc(A(0x36bdc), seed_block_b)
+    e.hook_pc(A(0x3e0db8), lambda uc: setattr(e, 'mgr', 0x3e0db8))
+
+def seed_block_b(uc):
+    """block B reads its bulk into buffers at obj+0xfa0..0xfb0 allocated at startup (skipped when null):
+    DLC list 0x1450, 0x3138, event quests 0x118000, challenge quests 0x4ec00, challenge records 0x16800"""
+    o = uc.reg_read(UC_ARM_REG_R0)
+    try: uc.mem_map((o + 0xfa0) & ~0xfff, 0x1000)
+    except UcError: pass
+    for k, f in enumerate((0xfa0, 0xfa4, 0xfa8, 0xfac, 0xfb0)):
+        if struct.unpack('<I', uc.mem_read(o + f, 4))[0] == 0:
+            uc.mem_write(o + f, struct.pack('<I', OBJ + (94 + k) * OBJ_SZ))
 
 def seed_size_records(uc):
     """S+0x950/+0x954: list of (ptr, n u16) filled at startup; the monster size records are 137 x (min, max)"""
@@ -126,4 +143,46 @@ for r in reads:
     else:
         cov[r['off']:r['off'] + (r['bit'] + r['n'] + 7) // 8] = b'\1' * ((r['bit'] + r['n'] + 7) // 8)
 print('bytes read', sum(cov), 'of', len(save), flush=True)
-pickle.dump({'log': e.log, 'assign': assign, 'funcs': funcs, 'cov': bytes(cov)}, open(ROOT + 'scratch/fullmap.pkl', 'wb'))
+out = {'log': e.log, 'assign': assign, 'funcs': funcs, 'cov': bytes(cov)}
+
+# writer pass on the loaded objects: full-file writer 0x3e798c(this, body) -> must give the same bytes
+WRITE, WBITS = 0x3e798c, 0x3df300
+if '--write' in sys.argv and e.fault is None:
+    # the slot loader 0x3e0db8 fills the same singletons for every slot, and the writer serializes the
+    # singletons into every slot: reload the slot under test last, then compare that slot only
+    RT = int(os.environ.get('RT_SLOT', 1))
+    rt_base = BODY + struct.unpack_from('<I', save, BODY + 0x10 + 4 * (RT - 1))[0]
+    e.stream(FILEBUF, rt_base)
+    e.log = []                       # keep the reload out of the load log
+    err = e.call(0x3e0db8, THIS, STREAM, limit=int(os.environ.get('LIMIT', 200_000_000)))
+    print('reload slot', RT, hex(rt_base), err, e.fault, flush=True)
+    e.log = []; e.pending = None; e.mgr = None
+    def wb(uc):
+        st = uc.reg_read(UC_ARM_REG_R0)
+        bitpos, cur = struct.unpack('<II', uc.mem_read(st + 4, 8))
+        e.log.append({'k': 'WB', 'off': cur - OUTBUF, 'bit': bitpos, 'n': uc.reg_read(UC_ARM_REG_R2),
+                      'val': uc.reg_read(UC_ARM_REG_R1), 'pc': uc.reg_read(UC_ARM_REG_LR) - BASE, 'mgr': e.mgr})
+    e.hook_pc(A(WBITS), wb)
+    WRITERS = [t for t in bl_targets(0x3e75f8, 0x3e77b0) + bl_targets(WRITE, 0x3e7be4) if t != 0x3e0ea4]
+    for t in WRITERS + [0x3e0ea4]:
+        e.hook_pc(A(t), (lambda t: lambda uc: setattr(e, 'mgr', t))(t))
+    uc.mem_write(OUTBUF, save[:BODY])
+    t = time.time()
+    err = e.call(WRITE, THIS, OUTBUF + BODY, limit=int(os.environ.get('LIMIT', 200_000_000)))
+    size = uc.reg_read(UC_ARM_REG_R0)
+    print('write', err, 'fault', e.fault, 'at', hex(uc.reg_read(UC_ARM_REG_PC) - BASE), 'body size', hex(size), '%.0fs' % (time.time() - t), flush=True)
+    wout = bytes(uc.mem_read(OUTBUF, len(save)))
+    rt_end = BODY + struct.unpack_from('<I', save, BODY + 0x10 + 4 * RT)[0] if RT < 3 else BODY + size
+    print('slot %d differing bytes: %d of %d' % (RT, sum(1 for k in range(rt_base, rt_end) if wout[k] != save[k]), rt_end - rt_base), flush=True)
+    diff, i = [], 0
+    while i < len(save):
+        if wout[i] == save[i]: i += 1; continue
+        j = i
+        while j < len(save) and (wout[j] != save[j] or wout[j:j + 16] != save[j:j + 16]): j += 1
+        diff.append((i, j)); i = j
+    print('round trip: %d differing ranges, %d bytes' % (len(diff), sum(b - a for a, b in diff)), flush=True)
+    for a, b in diff[:40]:
+        print('  diff 0x%X-0x%X (%d)' % (a, b, b - a), flush=True)
+    out.update({"wlog": e.log, "wdiff": diff, "wsize": size, "rt": (RT, rt_base, rt_end)})
+    open(ROOT + 'scratch/work/roundtrip.bin', 'wb').write(wout)
+pickle.dump(out, open(ROOT + 'scratch/fullmap.pkl', 'wb'))

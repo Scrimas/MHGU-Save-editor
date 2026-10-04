@@ -1,0 +1,7 @@
+bytes read by the loader: 5158562 of 5159100 (100.0%)
+unread ranges (start, end, size, non-zero bytes in the analysed save, block):
+0x0000000 0x0000040       64       23 header+0x0
+0x018CC99 0x018CC9C        3        0 B+0x1819F4
+0x02AC55F 0x02AC560        1        0 char1+0x11F8C3
+0x03CBE23 0x03CBE24        1        0 char2+0x11F8C3
+0x04EB6E7 0x04EB8BC      469        0 char3+0x11F8C3

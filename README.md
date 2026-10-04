@@ -35,8 +35,9 @@ they are portable.
 | [08 — Hunter Arts and Canteen](docs/08-progression.md) | Hunter Art unlocks, Canteen ingredients and dishes |
 | [09 — Awards](docs/09-awards.md) | Guild Card award bitfield |
 | [10 — NPC talk data](docs/10-npc-talk.md) | Talk tables: request offers, star-level flags, per-NPC bits |
+| [11 — Whole-file map](docs/11-save-map.md) | Every byte assigned to its game object by running the game's own loader: item box, Palicoes, Guild Cards, downloaded quests |
 
-Machine-readable: [`data/monster-index.csv`](data/monster-index.csv), [`data/quest-index.csv`](data/quest-index.csv), [`data/request-index.csv`](data/request-index.csv), [`data/quest-unlock.csv`](data/quest-unlock.csv), [`data/request-offer.csv`](data/request-offer.csv), [`data/rotating-quests.csv`](data/rotating-quests.csv), [`data/npc-index.csv`](data/npc-index.csv), [`data/hunter-arts.csv`](data/hunter-arts.csv), [`data/offsets.json`](data/offsets.json)
+Machine-readable: [`data/monster-index.csv`](data/monster-index.csv), [`data/quest-index.csv`](data/quest-index.csv), [`data/request-index.csv`](data/request-index.csv), [`data/quest-unlock.csv`](data/quest-unlock.csv), [`data/request-offer.csv`](data/request-offer.csv), [`data/rotating-quests.csv`](data/rotating-quests.csv), [`data/npc-index.csv`](data/npc-index.csv), [`data/hunter-arts.csv`](data/hunter-arts.csv), [`data/save-map.csv`](data/save-map.csv), [`data/save-coverage.txt`](data/save-coverage.txt), [`data/offsets.json`](data/offsets.json)
 
 ## Quick reference
 
@@ -75,6 +76,13 @@ Machine-readable: [`data/monster-index.csv`](data/monster-index.csv), [`data/que
 | Canteen dishes | `base + 0x2C67D` | 13-byte bitfield, 99 dishes |
 | Canteen ingredients | `base + 0x2F8F` | 6-byte bitfield, 45 ingredients |
 | Awards earned | `base + 0xC8115` | 132-bit bitfield, one run per location grid |
+| Item box | `base + 0x278` | 2300 × 19-bit slots (u12 item ID, u7 count), LSB-first bit stream; [`tools/items.py`](tools/items.py) |
+| Item loadouts | `base + 0x17CF` | 24 × 170 B: name char[42], 32 × (u16 item, u16 count) |
+| Item pouch | `base + 0x27BF` | 32 × 19-bit slots, same format |
+| Palico equipment box | `base + 0x17C2E` | 1000 × 36 B, equipment box format |
+| Palicoes | `base + 0x23BB6` | 84 × 324 B (+ 24 at `base + 0x2A606`): name +0, exp u32 +0x20, level +0x24, greeting +0x60, owner +0x9C |
+| Own Guild Card | `base + 0xC71BD` | 6328 B; weapon usage, history and awards live inside it |
+| Downloaded quests | `0xF899` / `0x127899` | 160 / 45 × `0x1C00`: u32 ID, u32 size, ARC; shared by all slots; [`tools/event_quests.py`](tools/event_quests.py) |
 
 ## Confidence levels
 
@@ -91,12 +99,11 @@ from observed bytes, and it is incomplete.
 
 ## Open questions
 
-- **Multiple character slots.** MHGU supports several characters per save. Only one
-  was ever present in the analysed file. The header's slot-pointer table (`0x34`,
-  see [07](docs/07-equipment.md#character-slots)) puts character 1 at `0x18CC9C`,
-  and every offset above falls inside that character's block. So they are most
-  likely `base + const`, but this has not been tested with a second character.
-  **An editor should resolve the base through the pointer, not hard-code it.**
+- **Multiple character slots — answered from code.** The game's loader reads all three
+  slots with the same chain at a fixed stride, so every per-character offset is
+  `base + const` with base from the pointer table at `0x34`
+  ([11](docs/11-save-map.md#method)). This is not yet tested with a second real
+  character. **An editor should resolve the base through the pointer, not hard-code it.**
 - **Region portability.** Only the EU/western build was examined. Japanese builds
   may differ.
 - **Monster indices 106–112** carry no known monster (the Switch editor labels them
