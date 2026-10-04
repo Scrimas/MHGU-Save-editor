@@ -12,7 +12,7 @@ columns are bytes `+4` … `+6` of the `quest_group` entry described below.
 |---|---|---|---|
 | Cleared | `base + 0x2C77` | `0x18F913` | quest cleared at least once |
 | Seen | `base + 0x2D77` | `0x18FA13` | quest has been highlighted on the board (clears **NEW**) |
-| Third | `base + 0x2E77` | `0x18FB13` | **UNRESOLVED**, see below |
+| Failed | `base + 0x2E77` | `0x18FB13` | quest failed at least once (end state 5), **DERIVED**, see [below](#third-bitmap--failed-quests) |
 
 Each bitmap is 1509 bits (189 bytes, list indices 0–1508), LSB-first as elsewhere:
 
@@ -594,7 +594,7 @@ The Guild Card's list of the 10 most recently completed quests, newest first.
 | Quest ID | `+0x06` | u16 |
 | Quest name | `+0x08` | UTF-16LE, 16 characters, cut with `…` |
 | Highlight codes | `+0x28` | u8 × 3, code 36 = empty. **DERIVED** from the writer `0x1636a8`: a new highlight replaces the slot with the highest code when its own code is lower, and the three are kept sorted ascending, so lower codes win. The quest end adds codes 20–22 for party results (`0x390cd0`). The card screen turns a code into a message through a 36-entry table (`0x5a35e8`); which code means what is UNRESOLVED |
-| Highlight values | `+0x2C`, `+0x38` | u32 × 3 and u32 × 3: the first and second value of each highlight, same slot order. In the four EX deviant records the code-3 highlight has `0x0402`, `0x0412`, `0x042d`, `0x0425` as its first value, which looks like a monster ID with a deviant marker |
+| Highlight values | `+0x2C`, `+0x38` | u32 × 3 and u32 × 3: the first and second value of each highlight, same slot order. In the four EX deviant records the code-3 highlight has `0x0402`, `0x0412`, `0x042d`, `0x0425` as its first value: the monster codes of Dreadking, Deadeye, Crystalbeard and Silverwind ([03](03-deviants.md#open-questions)) |
 | Hunter and Palico names | from `+0x44` | UTF-16LE |
 | Weapon types | `+0x9C` | u8 × 4, one per party slot, in the order of [04 — Weapon usage](04-weapon-usage.md): 13 = Charge Blade in eight records, 10 = Dual Blades in two, which matches the usage counters; 15 = a Palico, `ff` = empty slot. **DERIVED** from the values |
 
