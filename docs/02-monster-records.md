@@ -34,14 +34,14 @@ controlled diffs (indices 48 and 121) agree with that alignment.
 |---|---|---|
 | 1–71 | Large monsters | yes, except a few with no size variation |
 | 72–104 | Small monsters | **no** |
-| 105 | Moofah (editor-derived) | no |
-| 106–112 | Unused; the editor labels them *Unknown* | — |
-| 113–135 | Additional large monsters, incl. GU-exclusive deviants | yes, with exceptions |
-| 136–137 | Great Thunderbug, Conga (editor-derived) | no |
+| 105 | Moofah | no |
+| 106–112 | Unused: the game's name table calls them `dummy1`–`dummy7` | — |
+| 113–135 | Additional large monsters, incl. GU-exclusive deviants; 134 is an empty slot | yes, with exceptions |
+| 136–137 | Great Thunderbug, Conga | no |
 
 The small-vs-large split is **CONFIRMED** by cross-referencing which indices carry
-size records against which carry only tallies. Names for 105 and 113–137 are
-editor-derived.
+size records against which carry only tallies. Names for 105 and 113–137 come from
+the game's monster name table, see [below](#the-games-name-table).
 
 The small-monster block at 72–104 is the structural detail that defeats naive
 alignment attempts. Small monsters have hunt counts but **no** size record, so any
@@ -129,7 +129,8 @@ Confidence:
 - **[C]** CONFIRMED — controlled write or hunt diff, two independent lines
 - **[V]** DERIVED, count-validated — marker readout, and the stored value matches an
   independently reported hunt count
-- **[E]** DERIVED from the editor's `MonsterHuntNames` list alone (editor index + 1)
+- **[E]** DERIVED from the editor's `MonsterHuntNames` list (editor index + 1) and the
+  game's own name table (entry index − 1, [below](#the-games-name-table)), which agree
 - unmarked — DERIVED from the marker readout alone
 
 Over 1–104 the editor list agrees with every marker-derived entry, and its names
@@ -189,7 +190,7 @@ fill exactly the gaps the marker pass left.
 | 78 | Felyne | | 89 | Hermitaur | | 100 | Gargwa |
 | 79 | Melynx | | 90 | Ceanataur | | 101 | Zamite |
 | 80 | Velociprey | | 91 | Blango | | 102 | Konchu |
-| 81 | Genprey | | 92 | Thenoplos | | 103 | Maccao |
+| 81 | Genprey | | 92 | Rhenoplos | | 103 | Maccao |
 | 82 | Ioprey | | 93 | Bnahabra | | 104 | Larinoth |
 
 ### Moofah and unused slots, 105–112
@@ -197,7 +198,7 @@ fill exactly the gaps the marker pass left.
 | # | Monster |
 |---|---|
 | 105 | Moofah **[E]** |
-| 106–112 | unused — the editor labels them *Unknown* |
+| 106–112 | unused — `dummy1`–`dummy7` in the game's name table, *Unknown* in the editor |
 
 ### GU block, 113–137
 
@@ -211,7 +212,7 @@ fill exactly the gaps the marker pass left.
 | 118 | Fatalis **[E]** | | 131 | **Soulseer Mizutsune [C]** |
 | 119 | Crimson Fatalis **[E]** | | 132 | Elderfrost Gammoth **[E]** |
 | 120 | White Fatalis **[E]** | | 133 | Valstrax **[E]** |
-| 121 | **Rustrazor Ceanataur [C]** | | 134 | *unknown* (editor: `Unknown[133]`) |
+| 121 | **Rustrazor Ceanataur [C]** | | 134 | *empty slot* (code `0x57`, empty name in the game's table) |
 | 122 | **Congalala [C]** | | 135 | Ahtal-Ka **[E]** |
 | 123 | Giadrome **[E]** | | 136 | Great Thunderbug **[E]** (small) |
 | 124 | Barioth **[E]** | | 137 | Conga **[E]** (small) |
@@ -252,17 +253,28 @@ sound; only the hand transcription was lossy.
 
 ## Open questions
 
-- **UNRESOLVED — index 134.** The editor has no name for it either. The game's
-  index-to-monster-code table (`0x1597ea4`, see [03](03-deviants.md#open-questions))
-  gives it code `0x57`, between Valstrax (`0x56`, index 133) and Ahtal-Ka (`0x58`,
-  index 135).
-- **DERIVED — [E] names.** Taken from the editor's list, not read back from the game.
-  The code table agrees with them wherever a code can be checked: Fatalis, Crimson and
-  White Fatalis are `0x0D`, `0x10D`, `0x20D` (118–120), every deviant is the variant-4
-  code of its base monster ([03](03-deviants.md#open-questions)), and the confirmed
-  rows (48, 121, 122, 131) fit. Indices 106–112 are codes `0x1064`–`0x106A`, small
-  monster codes with no entry in the editor. A marker pass over 105–137 would still
-  confirm the names one by one.
+- **RESOLVED — index 134: an empty slot.** The game's name table has an empty string
+  for it in every language, and the index-to-monster-code table (`0x1597ea4`, see
+  [03](03-deviants.md#open-questions)) gives it code `0x57`, between Valstrax (`0x56`,
+  index 133) and Ahtal-Ka (`0x58`, index 135): a code reserved for a monster that is
+  not in the game. **DERIVED.**
+- **DERIVED — [E] names, now from the game.** See the next section. The code table
+  agrees as well wherever a code can be checked: Fatalis, Crimson and White Fatalis
+  are `0x0D`, `0x10D`, `0x20D` (118–120), every deviant is the variant-4 code of its
+  base monster ([03](03-deviants.md#open-questions)). Indices 106–112 are codes
+  `0x1064`–`0x106A`. A marker pass over 105–137 is no longer needed to name them; it
+  would only add the in-game readout as a second line.
+
+### The game's name table
+
+`GUI/06_msg/monsterName_eng.gmd` (romfs) holds 268 names. Its first 137 entries are the
+tally order: **entry i − 1 is index i**, with no gaps. Checked against every index of
+this document: all names agree (the four controlled rows 48, 121, 122, 131, every
+marker-derived row and every editor row), except for a typo here (92 was spelled
+*Thenoplos*). Variants share the base name (22/23 *Rajang*, 118–120 *Fatalis*,
+126 *Brachydios*, 128 *Gore Magala*); the variant is in the code table. Entries
+105–111 are `dummy1`–`dummy7` (indices 106–112) and entry 133 (index 134) is empty.
+Entries 137–267 repeat the large monsters for another list. **DERIVED.**
 - **RESOLVED — captures vs kills.** The `M` of `N(M)` lives in the capture array at
   `0x192C52`, directly after the tallies; `N` = tally + capture, and a capture
   increments only the capture array.

@@ -106,10 +106,10 @@ from observed bytes, and it is incomplete.
   character. **An editor should resolve the base through the pointer, not hard-code it.**
 - **Region portability.** Only the EU/western build was examined. Japanese builds
   may differ.
-- **Monster indices 106–112** carry no known monster (the Switch editor labels them
-  *Unknown*), and index 134 is unnamed. Names for 105 and 113–137 are taken from the
-  editor, not yet read back in-game — see
-  [02 — Monster records](docs/02-monster-records.md).
+- **Monster indices 106–112** are unused (`dummy1`–`dummy7` in the game's name
+  table), and index 134 is an empty slot. Names for 105 and 113–137 come from the
+  game's name table and agree with the editor; they were not read back in-game — see
+  [02 — Monster records](docs/02-monster-records.md#the-games-name-table).
 
 ## Licence
 

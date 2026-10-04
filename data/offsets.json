@@ -42,10 +42,11 @@
     "index_blocks": {
       "1-71":    "large monsters (have size records)",
       "72-104":  "small monsters (NO size records)",
-      "105":     "Moofah (editor-derived)",
-      "106-112": "unused / unknown (editor labels Unknown)",
-      "113-135": "additional large monsters incl. GU-exclusive deviants",
-      "136-137": "Great Thunderbug, Conga (editor-derived; no size records)"
+      "105":     "Moofah",
+      "106-112": "unused (dummy1-dummy7 in the game's monsterName table)",
+      "113-135": "additional large monsters incl. GU-exclusive deviants; 134 = empty slot (code 0x57, empty name)",
+      "136-137": "Great Thunderbug, Conga (no size records)",
+      "names": "romfs GUI/06_msg/monsterName_eng.gmd entry i-1 = index i (DERIVED, agrees with every confirmed row)"
     },
     "deviant_rollup": false,
     "deviant_rollup_note": "CONFIRMED: deviant hunts do not increment the base monster tally; family total = base + deviant",
