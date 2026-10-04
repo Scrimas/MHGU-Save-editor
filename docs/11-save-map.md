@@ -96,15 +96,15 @@ Blocks A and B are shared by all characters. Each block starts 4-aligned relativ
 | `0x17C2E` | 36000 | sEquipBox | Palico equipment box, 1000 × 36 B |
 | `0x208CE` | 5440 | sEquipBox | My Sets, 40 × 136 B |
 | `0x21E0E` | 1632 | sEquipBox | Palico equipment sets, 24 × 68 B |
-| `0x2246E` | 41 | sGameControl (`0x3f8de0`) | 29 + 3 × 4 B; holds a copy of the play time (`base + 0x20`) |
+| `0x2246E` | 41 | sGameControl (`0x3f8de0`) | game options (29 B), play time, two u32 ([below](#smaller-managers)) |
 | `0x22497` | 5569 | sItem (`0x1979b0`) | items obtained, Trader cargo, Alchemy requests, pending village rewards ([below](#the-item-manager-sitem)) |
 | `0x23A58` | 325 | sPlayer (`0x2755f0`) | player record: the loaded copy of the header's appearance, pigment and name ([below](#player-record--base--0x23a58)) |
 | `0x23B9D` | 35131 | sOtomo (`0x2639ac`) | Palicoes: 25 B of bit fields, 84 + 24 records of 324 B, 114 B tail |
 | `0x2C4D8` | 149 | sVillage (`0x507d44`) | star levels at +2 / +4 ([05](05-quests.md#star-levels--base--0x2c4da)) |
 | `0x2C56D` | 272 | sNpcTalk (`0x240d60`) | event flags, NPC hold bits, random word ([10](10-npc-talk.md)) |
 | `0x2C67D` | 40 | sKitchen (`0x1a4e64`) | Canteen dishes and copy ([08](08-progression.md)) |
-| `0x2C6A5` | 4 | sFlagChecker (`0x3f43d4`) | u32 |
-| `0x2C6A9` | 20 | sEventCtrl? (`0x14c568`) | 5 × u32 |
+| `0x2C6A5` | 4 | sFlagChecker (`0x3f43d4`) | u32 flags ([below](#smaller-managers)) |
+| `0x2C6A9` | 20 | sMakeAmulet (`0x14c568`) | talisman making: 96-bit map, two u32 ([below](#smaller-managers)) |
 | `0x2C6BD` | 978804 | sGuildCard (`0x163e0c`) | Guild Cards ([below](#guild-card-manager)) |
 | `0x11B631` | 6248 | sGuestHunter (`0x15bd3c`) | hunters met online: UTF-16 name, greeting, records of 308 B, "Hired …" copies |
 | `0x11CE99` | 160 | sTutorial (`0x539120`) | 8 + 152 B |
@@ -196,6 +196,32 @@ activity manager. Its methods are in the `sItem` unit (`0x193000 … 0x199000`);
 
 The equipment entries use the 36-byte box format of [07](07-equipment.md); the
 helpers `0xdaba4` / `0xdac14` / `0xdadf0` construct, clear and copy them.
+
+## Smaller managers
+
+**DERIVED** from the loaders and the code that uses each field.
+
+| `base +` | Owner | Content |
+|---|---|---|
+| `0x2246E` | sGameControl `+0x5e` | game options, 29 bytes: written by the Game, Chat and Network option windows (`cUIOOptionWindowFor…`), read by the quest camera and the players |
+| `0x2248B` | `+0x34` | play time in seconds. The slot header (`+0x20`) and the own Guild Card (`+0x914`) are copies |
+| `0x2248F` | `+0x38` | u32, UNRESOLVED |
+| `0x22493` | `+0x3c` | u32, copied to the own Guild Card `+0x86C` (`0x161ac8`) |
+| `0x23B9D` | sOtomo `+0x13848` | u8, u16, u8, u8. UNRESOLVED |
+| `0x23BA2` | `+0x138f6` | Palico service settings (`uUIOtomoService`): a 2-bit mode, seven small values (at most 9, 6, then 10 each, stored minus one at run time) and four u32, all bit-packed |
+| `0x2C466` | `+0x13910` … `+0x4a5a0` | Palico manager tail: 40, 16, 48, 1, 5 and 4 bytes. UNRESOLVED |
+| `0x2C4D8` | sVillage `+0x472`, `+0x473` | u8 pair. UNRESOLVED |
+| `0x2C4DE` | `+0x3e4` | village pets' affection, one u8 per village (0x50d728 adds, at most 10; reaching 6 unlocks a Guild Card title word). The Village Moofah NPCs read it |
+| `0x2C4E2` | `+0x471` | u8. UNRESOLVED |
+| `0x2C4E3` | `+0x3e8` | village pets' names, 4 × char[32]: Moofy, Poogie, Poogie, Poogie in the analysed save |
+| `0x2C563` | `+0x468` | village pets' costumes, one u8 per pet, below 40 (the pet menu, `0x50d830`) |
+| `0x2C567` | `+0x46c`, `+0x470`, `+0x474` | u32, u8, u8. UNRESOLVED |
+| `0x2C679` | sNpcTalk `+0x60c` | a second random word, copied with the first and tested modulo 10000 the same way (`0x24217c`) |
+| `0x2C6A5` | sFlagChecker `+0x20` | flags: `0x3f43e8` ORs in the bits set at `+0x1c` of another object, so they latch |
+| `0x2C6A9` | sMakeAmulet `+0x64` | talisman making: a 96-bit map over a 107-entry table of 12-byte records. The quest end (`aQuest`, `0x14c688`) tests each entry's condition and sets its bit |
+| `0x2C6B5` | `+0x70`, `+0x74` | two u32. UNRESOLVED |
+
+The block A bytes of `sGameControl` are in [Block A header](#block-a-header-and-shared-settings).
 
 ## Equipment manager additions
 
