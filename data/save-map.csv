@@ -380,11 +380,11 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B05F0,0,256,char1,0x23954,sItem,1,,256B,0x1980f0,obj100+0x16a14,"item box table 2, same form (sItem +0x314)",UNRESOLVED
 0x1B06F0,0,4,char1,0x23A54,sItem,1,,4B,0x198100,obj100+0x16798,u32 read by Alchemy and the quest result (sItem +0x98),UNRESOLVED
 0x1B06F4,0,1,char1,0x23A58,sPlayer,1,,1B,0x275614,obj100+0x9d5c,player record (loaded copy of the slot header fields),DERIVED
-0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,player record (loaded copy of the slot header fields),DERIVED
-0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,player record (loaded copy of the slot header fields),DERIVED
-0x1B07E3,0,12,char1,0x23B47,sPlayer,1,,12B,0x275740,obj100+0x650,player record (loaded copy of the slot header fields),DERIVED
+0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,"player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 (style?), rest unknown; first 4 u16 copied to the Guild Card +0x4C",DERIVED
+0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,"equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none",DERIVED
+0x1B07E3,0,12,char1,0x23B47,sPlayer,1,,12B,0x275740,obj100+0x650,weapon class (+0; 15 = Prowler) and character creation choices (+4 = gender),DERIVED
 0x1B07EF,0,36,char1,0x23B53,sPlayer,1,,36B,0x275754,obj100+0x65c,"current pigment, 5 x RGBA + 16 B",DERIVED
-0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,player record (loaded copy of the slot header fields),DERIVED
+0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,"u32 (header +0x274, Guild Card +0x48)",UNRESOLVED
 0x1B0817,0,2,char1,0x23B7B,sPlayer,1,,2B,0x27577c,obj100+0x682,current pigment default-colour flags,DERIVED
 0x1B0819,0,32,char1,0x23B7D,sPlayer,1,,32B,0x27578c,obj100+0x690,hunter name,DERIVED
 0x1B0839,0,1,char1,0x23B9D,sOtomo,1,,1B,0x2639d0,obj20+0x13848,,

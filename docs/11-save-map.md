@@ -125,15 +125,19 @@ character, and the next save overwrites it (not tested in game).
 | `0x020` | u32 | global `+0x34` | play time, seconds (the Guild Card copy is `+0x914` of the own card) |
 | `0x024` | u32 | global `+0x24` | money (zenny); 9,999,999 in the analysed save |
 | `0x028` | u16 | sPlayer `+0x554` | HR |
-| `0x02A` | u8 | sPlayer `+0x4D4` / `+0x4D8` | 2 if `+0x4D4` is 15, else `+0x4D8 != 0` |
+| `0x02A` | u8 | sPlayer `+0x4D4` / `+0x4D8` | 2 for a Prowler (weapon class 15), else 1 for female, 0 for male |
 | `0x02B` | u8 | writer argument | |
-| `0x02C` | 224 | sPlayer `+0x240` | UNRESOLVED (character creation data?) |
+| `0x02C` | 224 | sPlayer `+0x240` | starts with the three equipped Hunter Arts ([08](08-progression.md#save-screen-art-slots--base--0x2c)): 179 (*Energy Blade I*, a Charge Blade art), 0, 0, then u16 1 (style?) and zeros in the analysed save. The Guild Card copies these four u16 to card `+0x4C`. The rest is UNRESOLVED |
 | `0x10C` | 7 × 44 | sPlayer `+0x18 + 44k` | equipped-gear cache: u32 **vtable pointer** (runtime address, see below), 36-B box entry, u32 |
-| `0x240` | 12 | sPlayer `+0x4D4` | UNRESOLVED |
+| `0x240` | 12 | sPlayer `+0x4D4` | `+0` current weapon class (15 = Prowler; a new character gets 1 with a Sword and Shield), `+1 … +8` character creation choices copied to the model by the title menu (`0x68894c`), `+4` = gender (read by the Smithy, the Armory and the talk conditions) |
 | `0x24C` | 36 | sPlayer `+0x4E0` | current pigment, 5 × RGBA + 16 B ([07](07-equipment.md)) |
 | `0x270` | u16 | sPlayer `+0x506` | default-colour flags |
 | `0x272` | 2 | — | struct padding (stale bytes) |
-| `0x274` | u32 | sPlayer `+0x508` | UNRESOLVED |
+| `0x274` | u32 | sPlayer `+0x508` | UNRESOLVED; the Guild Card copies it to card `+0x48`. 0 in the analysed save |
+
+"sPlayer" here is the player data the getter `0x277454` returns: the loaded object
+`+0x7C`. The loader's offsets below are therefore `0x7C` higher than the header
+writer's.
 
 The u32 before each equipped-cache copy is the in-memory address of the object's vtable,
 written as is. It was `0x01E3A514` in the game and `0x11736514` in the emulator: vtable
@@ -147,9 +151,9 @@ shared field was byte-identical in the analysed save). This is the copy the game
 | `base +` | Size | sPlayer field | Same as header |
 |---|---|---|---|
 | `0x23A58` | 1 | `+0x9C5C` | — |
-| `0x23A59` | 224 | `+0x2BC` | `+0x02C` (character creation data?) |
-| `0x23B39` | 14 | `+0x84` | — (7 × u16) |
-| `0x23B47` | 12 | `+0x550` | `+0x240` |
+| `0x23A59` | 224 | `+0x2BC` | `+0x02C` |
+| `0x23B39` | 14 | `+0x84` | — **equipped gear**: 7 × u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman; `0xFFFF` = none). The loader copies each entry from the box into the equipped cache (`0x275660`). 22, 45, 51, 57, 62, 69, 199 in the analysed save |
+| `0x23B47` | 12 | `+0x550` | `+0x240`, weapon class and character creation choices |
 | `0x23B53` | 36 | `+0x55C` | `+0x24C`, current pigment |
 | `0x23B77` | 4 | `+0x584` | `+0x274` |
 | `0x23B7B` | 2 | `+0x582` | `+0x270`, default-colour flags |
@@ -550,7 +554,6 @@ in place, where this map says it lives, writes what the game would write.
 - Guild Card: the card info fields at `+0x1C` and `+0x20`, the 276-byte StreetPass
   Palico record, the Arena log packing at card `+0x1224`, and which highlight code
   means what in a history record.
-- The 224 + 12 + 4 bytes of the slot header taken from sPlayer. Their source fields are
-  known (table above), but not their meaning.
+- Slot header / player record: the 224-byte block (`+0x02C`) and the u32 at `+0x274`.
 - Block A: `S+0x3676` (6 bytes), `S+0x367c`, `S+0x367d` and `sGameControl +0x5c`,
   `+0x5d`. Block B header: which download category types 5, 6 and 7 are.
