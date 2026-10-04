@@ -74,14 +74,14 @@ anything else adds nothing. That is how an s16 reaches 41811 or 111304.
 | 16–21 | 1, 2, 11–14 again, OR-ed with the condition before | from code |
 | 3–7, 9, 135, 136 | a u16 of the talk request equals 1, 2, 3, 4, 0, 5, 6, 7. Only on ordinary talk lines | not read further |
 | 22–25 | type of the quest just accepted (`0x3bd35c`): 0 hunt / 2 capture / 3 gathering / 1 (line text is a placeholder). Send-off lines of the quest counter Gals | from dialogue |
-| 26 / 27 | byte `+0x4d8` of the player object clear / set. Always two copies of the same report line, so a property of the hunter such as gender | from dialogue, not read further |
+| 26 / 27 | byte `+0x4d8` of the player data clear / set: the hunter's gender, male / female. The slot header writer turns the same byte into its gender flag and the Smithy and the Armory read it ([11](11-save-map.md#slot-header--base--0x0-632-b), `base + 0x23B4B`) | from code |
 | 28 | HR ≥ *b* (u16 `+0x554` of the player object) | from code |
 | 29 | an item check, *b* is the slot (`0x2484c0`; NPC 991 only) | not read further |
 | 36–39 | a state word (`+0x2cc`) is 0 / 1 / 2 / 3 (Courier only) | not read further |
-| 41 / 42 | 41: delivery request *b* (1–13, the kind 1 requests) has been delivered (`0x524db8`), on report lines. 42: result of `0x3b1b90` equals *b* (Hub Gal tutorial lines) | 41 from dialogue, 42 not read further |
+| 41 / 42 | 41: delivery request *b* (1–13, the kind 1 requests) has been delivered: `0x524db8` tests bit *b* of `S+0x35a8` (`base + 0x32AF`), on report lines. 42: result of `0x3b1b90` equals *b* (Hub Gal tutorial lines) | 41 from code + dialogue, 42 not read further |
 | 44 / 45 | a Hunter's Notes entry can be unlocked: large monsters (`0x554da4`, 123 entries) / the second list (`0x55515c`, 30 entries) | from code + text |
 | 46–53, 141, 142 | a Hunter Art lesson of this teacher is due (`0x3f0ff0` … `0x3f1294` with 1 = ask): one of the teacher's arts is not yet in the [Hunter Arts map](08-progression.md) (`0x524040`) and its requirement holds. With every art unlocked by an edit the lesson is never due, and a request report that carries this condition never fires | from code + text; the blocked reports CONFIRMED on the save |
-| 54 | a Wycademy points threshold is due (`0x197598`) | not read further |
+| 54 | a threshold is due (`0x197598`): with `S+0x110` clear and the Hub star level at least 8, the u32 at `S+0x20` has passed u16 `S+0x114` × 20000. The dialogue ties it to Wycademy points | from code + dialogue |
 | 55–62, 102–105, 139, 151–156 | a byte of the [activity state](#other-save-state-the-talk-data-reads) is not 0: a reward is waiting. 102–105 / 151–154 are the village tickets of Bherna, Kokoto, Pokke, Yukumo in low and G rank, 139 the Soaratorium ticket | from code + text |
 | 64 | quest 10646 is listed. Runs the [unlock script](05-quests.md#board-visibility--scriptcheck_quest_unlocked) for 10646 (`0x3f12c4`) and latches the result in bit 31 of the progress word | from code |
 | 65 | the HR limit is released: bit 20 of the progress word. Set by talk action 1 type 5, the Pub Manager after 11432 | from code + text |

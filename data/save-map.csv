@@ -84,7 +84,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,Trader ticket map NEW (also read by the Cross ticket screen),DERIVED
 0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,"Trader map, 32 bits (S+0x359c)",DERIVED
 0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,Trader map S+0x359c NEW,DERIVED
-0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,u32 flags read by the Trader and the Start Menu (S+0x35a8),UNRESOLVED
+0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,"delivery requests delivered: bit b = kind-1 request b, 1-13 (S+0x35a8; talk condition 41)",DERIVED
 0x18FF4F,0,4,char1,0x32B3,sUserInfo,1,,4B,0x51e094,obj17+0x35ac,Hunter's Notes tips read: clear bit = NEW (S+0x35ac),DERIVED
 0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,"Hunter's Notes, large monsters: 123 bits (S+0x35b0)",DERIVED
 0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,"Hunter's Notes, large monsters NEW (S+0x35c0)",DERIVED

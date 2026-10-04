@@ -436,7 +436,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x317F`, `0x3183` | `+0xc64`, `+0xc6c` | Guild Card poses: 22 (Stand … Beam Fire). 17 from the start, bits 17–21 from the DLC map at sPrivilege `+0xf44` |
 | `0x31A7`, `0x31CB` | `+0x2a0c`, `+0x2a54` | Smithy decorations listed / NEW, bit = `rDecoCreateData` entry |
 | `0x31EF` … `0x32AB` | `+0x3488` … `+0x35a4` | the Trader (`uUITradeCenter`): seven maps with copies. Sizes 32, 32, 448, 160, 32, 32 and 32 bits. The 448-bit map fits `tradeLimitedHonorList` (442 entries) and the 160-bit map `tradeLimitedPaperList` (131), by size only. The Cross ticket screen reads the N2 of the sixth map |
-| `0x32AF` | `+0x35a8` | u32 flags read by the Trader and the Start Menu. UNRESOLVED |
+| `0x32AF` | `+0x35a8` | delivery requests delivered: bit *b* for kind-1 request *b* (1–13), tested by `0x524db8` for talk condition 41 ([10](10-npc-talk.md)), the Trader and the Start Menu |
 | `0x32B3` | `+0x35ac` | Hunter's Notes tips read: a clear bit shows NEW (`cUIOHunterNoteTips`) |
 | `0x32B7`, `0x32C7` | `+0x35b0`, `+0x35c0` | **Hunter's Notes, large monsters**: 123 bits and their NEW copy. Talk action 6 sets both (`0x247ae4`); condition 44 tests them (`0x245848`) |
 | `0x32D7` | `+0x35d0` | **Hunter's Notes, second list**: 30 bits, talk action 7 and condition 45 |
@@ -575,7 +575,7 @@ in place, where this map says it lives, writes what the game would write.
 ## Open questions
 
 - S ([above](#the-save-object-s)): the maps at `S+0x970` and `S+0x9c4`, the seven
-  Trader maps (which trade list each one indexes), `S+0x35a8`, `S+0x35dc`, `S+0xd8c`,
+  Trader maps (which trade list each one indexes), `S+0x35dc`, `S+0xd8c`,
   `S+0x3670`, `S+0x4408`, and the 3444 zero bytes at `S+0x3684`.
 - Guild Card: the card info fields at `+0x1C` and `+0x20`, the 276-byte StreetPass
   Palico record, the Arena log packing at card `+0x1224`, and which highlight code

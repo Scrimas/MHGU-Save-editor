@@ -93,7 +93,7 @@ LABELS = [
     ('char', 0x32A3, 0x4, 'Trader ticket map NEW (also read by the Cross ticket screen)', 'DERIVED'),
     ('char', 0x32A7, 0x4, 'Trader map, 32 bits (S+0x359c)', 'DERIVED'),
     ('char', 0x32AB, 0x4, 'Trader map S+0x359c NEW', 'DERIVED'),
-    ('char', 0x32AF, 0x4, 'u32 flags read by the Trader and the Start Menu (S+0x35a8)', 'UNRESOLVED'),
+    ('char', 0x32AF, 0x4, 'delivery requests delivered: bit b = kind-1 request b, 1-13 (S+0x35a8; talk condition 41)', 'DERIVED'),
     ('char', 0x32B3, 0x4, "Hunter's Notes tips read: clear bit = NEW (S+0x35ac)", 'DERIVED'),
     ('char', 0x32B7, 0x10, "Hunter's Notes, large monsters: 123 bits (S+0x35b0)", 'DERIVED'),
     ('char', 0x32C7, 0x10, "Hunter's Notes, large monsters NEW (S+0x35c0)", 'DERIVED'),
