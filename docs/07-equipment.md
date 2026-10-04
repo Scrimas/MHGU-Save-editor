@@ -48,10 +48,17 @@ Type codes seen: 1 head, 2 chest, 3 arms, 4 waist, 5 legs, 6 talisman, 7–21 we
 classes (18 = Dual Blades). The level field stores the in-game level minus one.
 Writing max level produced the right raw and element values on the status screen.
 
-**UNRESOLVED — bits 10–15 of `+0x00`.** The MHXX notes call this the "transmog
-level". It was zero on every box entry, including transmogged ones. The equipped
-cache copy of one transmogged helm had bit 15 set when its box source did not.
-Leaving it at zero is safe: transmog works without it.
+**DERIVED — bits 10–14 of `+0x00`: level − 1 of the transmog source.** When a look
+is applied, the transmog screen (`uUICoordinate`, `0x148f00`) writes the source
+piece's equipment ID to `+0x04` and its level field (bits 5–9) to bits 10–14. The
+equipment detail window (`0x56e810`) reads the pair together: with the appearance
+shown it swaps (ID, level) for (`+0x04`, bits 10–14). The Guild Card keeps the field
+as a byte of its own (card equipment entry `+0x2A`). So 0 means the source piece was
+at level 1, which fits every transmogged entry of the analysed save. The MHXX notes'
+name, "transmog level", is right.
+
+**UNRESOLVED — bit 15.** The equipped cache copy of one transmogged helm had it set
+when its box source did not; no reader was found. Leaving it at zero is safe.
 
 ### Talisman fields
 
@@ -112,13 +119,26 @@ within the game's record.
 
 | Offset | Size | Field |
 |---|---|---|
-| `+0x00` | 6 | UNRESOLVED (varies per set) |
+| `+0x00` | 6 | the previous set's last 6 bytes, see below |
 | `+0x06` | 24 | set name, single-byte text, NUL-padded (`---` when unused) |
 | `+0x30` | 7 × u16 | box index for weapon, head, chest, arms, waist, legs, talisman; `0xFFFF` = empty |
 | `+0x3E` | 7 × 3 × u16 | copy of each piece's decorations (**DERIVED**) |
 | `+0x6A` | 5 × RGBA | pigment per body part |
-| `+0x7E` | 5 | zero |
+| `+0x7E` | 5 × u8 | per part, handed to the dye call with the colour and the flag (`0x26f958`); zero in every set. UNRESOLVED |
 | `+0x83` | 5 × u8 | per-part default flag: 1 = default colour, 0 = custom RGBA |
+| `+0x88` | u8 | hunting style: 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor (same order as the style counters of [11](11-save-map.md#the-block-s0x20--0x41f--base--0x280b)) |
+| `+0x89` | 3 × u8 | the three Hunter Arts (IDs of [`hunter-arts.csv`](../data/hunter-arts.csv)) |
+| `+0x8C` | u8 | bits 0–2: a flag per art slot, copied to the player with the arts. UNRESOLVED |
+| `+0x8D` | u8 | padding |
+
+**DERIVED — the last six bytes (`+0x88 … +0x8D`, the game's record `+0x82 … +0x87`).**
+Loading a set (`0x72d0f8`, from the item box screen) writes the style byte into the
+player data and the three arts with `0xe79b4` to player `+0x240` (the arts the save
+screen shows at slot header `+0x2C`), the three flag bits with `0xe7a20`. The copy
+routine `0x14709c` moves the same bytes. In the analysed save set 1 has style 5 and art
+179 (*Energy Blade I*, a Charge Blade art, the one equipped), sets 2–6 style 3 and art
+151 (*Wolf's Maw III*). The style numbering is **DERIVED** from these values and the
+counters (Valor used 375 times).
 
 The five RGBA values are probably ordered chest, arms, waist, legs, head, as in the
 MHXX Guild Card. That order is **DERIVED** only: every test used the same colour on

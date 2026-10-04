@@ -168,7 +168,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x192D66,0,548,char1,0x60CA,sUserInfo,1,,548B,0x51dc2c,obj99+0x0,"monster size records, (u16 min, u16 max) index 1-137",CONFIRMED
 0x192F8A,0,72000,char1,0x62EE,sEquipBox,2000,288,2B 2B 2B 6B 24B,0x14b0d4,obj100+0x20020,equipment box: 2000 x 36 B,CONFIRMED
 0x1A48CA,0,36000,char1,0x17C2E,sEquipBox,1000,288,2B 2B 2B 6B 24B,0x14b144,obj100+0x357e0,Palico equipment box: 1000 x 36 B (types 22-24),DERIVED
-0x1AD56A,0,5440,char1,0x208CE,sEquipBox,1,,5440B,0x14b1ac,obj100+0x5e04c,My Sets: 40 x 136 B (name at +0),CONFIRMED
+0x1AD56A,0,5440,char1,0x208CE,sEquipBox,1,,5440B,0x14b1ac,obj100+0x5e04c,"My Sets: 40 x 136 B (name +0, box indices +0x2A, pigment +0x64, default flags +0x7D, style +0x82, Hunter Arts +0x83)",CONFIRMED
 0x1AEAAA,0,1632,char1,0x21E0E,sEquipBox,1,,1632B,0x3e7804,obj100+0x5f58c,"Palico equipment sets: 24 x 68 B (name char[42], 3 x u16 box index)",DERIVED
 0x1AF10A,0,29,char1,0x2246E,sGameControl,1,,29B,0x3f8dfc,obj100+0x5e,"game options, 29 bytes (Game / Chat / Network option windows, quest camera; sGameControl +0x5e)",DERIVED
 0x1AF127,0,4,char1,0x2248B,sGameControl,1,,4B,0x3f8e1c,obj100+0x34,"play time in seconds (sGameControl +0x34; slot header +0x20, Guild Card +0x914)",DERIVED

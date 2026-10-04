@@ -139,7 +139,7 @@
     "_offsets": "relative to character base; slot1_abs given for the analysed save",
     "box": { "rel": "0x62EE", "slot1_abs": "0x192F8A", "count": 2000, "stride": 36, "confidence": "CONFIRMED",
              "fields": {
-               "type_level":  { "offset": 0, "type": "u16", "layout": "type bits 0-4, level-1 bits 5-9, bits 10-15 UNRESOLVED" },
+               "type_level":  { "offset": 0, "type": "u16", "layout": "type bits 0-4, level-1 bits 5-9, bits 10-14 level-1 of the transmog source piece (DERIVED, set with +0x04 by uUICoordinate 0x148f00), bit 15 UNRESOLVED" },
                "eq_id":       { "offset": 2, "type": "u16" },
                "transmog_id": { "offset": 4, "type": "u16", "confidence": "CONFIRMED", "note": "armor ID displayed; 0 = own model" },
                "decorations": { "offset": 6, "type": "u16[3]" },
@@ -159,7 +159,10 @@
                    "box_index":     "0x30 u16[7] weapon..talisman, 0xFFFF = empty",
                    "decorations":   "0x3E u16[7][3] (DERIVED)",
                    "pigment":       "0x6A RGBA[5], order chest,arms,waist,legs,head (DERIVED)",
-                   "default_flags": "0x83 u8[5], 1 = default colour, 0 = custom" } }
+                   "default_flags": "0x83 u8[5], 1 = default colour, 0 = custom",
+                   "style":         "0x88 u8 hunting style 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor (DERIVED)",
+                   "hunter_arts":   "0x89 u8[3] Hunter Art IDs (data/hunter-arts.csv) (DERIVED)",
+                   "art_flags":     "0x8C u8, bits 0-2 one flag per art slot (UNRESOLVED meaning)" } }
   },
   "progression": {
     "_offsets": "relative to character base; LSB-first bitfields; set with OR",

@@ -162,7 +162,7 @@ LABELS = [
     ('char', 0x60CA, 0x224, 'monster size records, (u16 min, u16 max) index 1-137', 'CONFIRMED'),
     ('char', 0x62EE, 0x11940, 'equipment box: 2000 x 36 B', 'CONFIRMED'),
     ('char', 0x17C2E, 0x8CA0, 'Palico equipment box: 1000 x 36 B (types 22-24)', 'DERIVED'),
-    ('char', 0x208CE, 0x1540, 'My Sets: 40 x 136 B (name at +0)', 'CONFIRMED'),
+    ('char', 0x208CE, 0x1540, 'My Sets: 40 x 136 B (name +0, box indices +0x2A, pigment +0x64, default flags +0x7D, style +0x82, Hunter Arts +0x83)', 'CONFIRMED'),
     ('char', 0x21E0E, 0x660, 'Palico equipment sets: 24 x 68 B (name char[42], 3 x u16 box index)', 'DERIVED'),
     ('char', 0x22497, 0x178, 'items obtained: bit = item ID, 94 x u32 (sItem +0x9c)', 'DERIVED'),
     ('char', 0x2260F, 0x88, 'Trader cargo 1, 136 B (sItem +0xea4)', 'DERIVED'),
