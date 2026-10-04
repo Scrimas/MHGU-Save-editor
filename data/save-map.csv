@@ -14,9 +14,9 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0xB2A5,0,8,B,0x0,sPrivilege,1,,8B,0x36bfc,obj59+0xf34,"DLC item packs received, 50 bits (sPrivilege +0xf34)",DERIVED
 0xB2AD,0,8,B,0x8,sPrivilege,1,,8B,0x36c10,obj59+0xf3c,"DLC Palicoes received, 50 bits (sPrivilege +0xf3c)",DERIVED
 0xB2B5,0,4,B,0x10,sPrivilege,1,,4B,0x36c24,obj59+0xf44,"DLC extras received, download type 4: 9 entries; bits 0-3 unlock Guild Card poses (sPrivilege +0xf44)",DERIVED
-0xB2B9,0,12,B,0x14,sPrivilege,1,,12B,0x36c38,obj59+0xf48,"DLC extras received, download type 5: 80 entries (sPrivilege +0xf48)",DERIVED
-0xB2C5,0,4,B,0x20,sPrivilege,1,,4B,0x36c4c,obj59+0xf54,"DLC extras received, download type 6: 10 entries (sPrivilege +0xf54)",DERIVED
-0xB2C9,0,40,B,0x24,sPrivilege,1,,40B,0x36c60,obj59+0xf58,"DLC extras received, download type 7: 300 entries (sPrivilege +0xf58)",DERIVED
+0xB2B9,0,12,B,0x14,sPrivilege,1,,12B,0x36c38,obj59+0xf48,"DLC extras received, download type 5: 80 Guild Card scenes sold by the Trader (sPrivilege +0xf48)",DERIVED
+0xB2C5,0,4,B,0x20,sPrivilege,1,,4B,0x36c4c,obj59+0xf54,"DLC extras received, download type 6: 10 pet costumes sold by the Trader (sPrivilege +0xf54)",DERIVED
+0xB2C9,0,40,B,0x24,sPrivilege,1,,40B,0x36c60,obj59+0xf58,"DLC extras received, download type 7: 300 title words sold by the Trader (sPrivilege +0xf58)",DERIVED
 0xB2F1,0,8,B,0x4C,sPrivilege,1,,8B,0x36c70,obj59+0xf80,"challenge quests stored, 45 bits = block B slots (sPrivilege +0xf80)",DERIVED
 0xB2F9,0,20,B,0x54,sPrivilege,1,,20B,0x36c84,obj59+0xf88,"event quests stored, 160 bits = block B slots (sPrivilege +0xf88)",DERIVED
 0xB30D,0,4,B,0x68,sPrivilege,1,,4B,0x36c98,obj59+0xf9c,u32 compared with the download catalog stamp +0xe5c (sPrivilege +0xf9c),DERIVED
@@ -70,16 +70,16 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FE33,0,16,char1,0x3197,sUserInfo,1,,16B,0x51df2c,obj17+0xc90,quest set notices,DERIVED
 0x18FE43,0,36,char1,0x31A7,sUserInfo,1,,36B,0x51df40,obj17+0x2a0c,Smithy decorations listed: bit = rDecoCreateData entry,DERIVED
 0x18FE67,0,36,char1,0x31CB,sUserInfo,1,,36B,0x51df54,obj17+0x2a54,Smithy decorations NEW,DERIVED
-0x18FE8B,0,4,char1,0x31EF,sUserInfo,1,,4B,0x51df68,obj17+0x3488,"Trader map 1, 32 bits (S+0x3488) + runtime NEW copy",DERIVED
-0x18FE8F,0,4,char1,0x31F3,sUserInfo,1,,4B,0x51df7c,obj17+0x3490,Trader map 1 NEW,DERIVED
-0x18FE93,0,4,char1,0x31F7,sUserInfo,1,,4B,0x51df90,obj17+0x3494,"Trader map 2, 32 bits (S+0x3494) + runtime NEW copy",DERIVED
-0x18FE97,0,4,char1,0x31FB,sUserInfo,1,,4B,0x51dfa4,obj17+0x349c,Trader map 2 NEW,DERIVED
-0x18FE9B,0,56,char1,0x31FF,sUserInfo,1,,56B,0x51dfb8,obj17+0x34a0,"Trader limited trades, 448 bits (tradeLimitedHonorList has 442)",DERIVED
-0x18FED3,0,56,char1,0x3237,sUserInfo,1,,56B,0x51dfcc,obj17+0x3510,Trader limited trades NEW,DERIVED
-0x18FF0B,0,20,char1,0x326F,sUserInfo,1,,20B,0x51dfe0,obj17+0x3548,"Trader limited trades, 160 bits (tradeLimitedPaperList has 131)",DERIVED
-0x18FF1F,0,20,char1,0x3283,sUserInfo,1,,20B,0x51dff4,obj17+0x3570,"Trader limited trades, 160 bits, NEW",DERIVED
-0x18FF33,0,4,char1,0x3297,sUserInfo,1,,4B,0x51e008,obj17+0x3584,"Trader map, 32 bits (S+0x3584)",DERIVED
-0x18FF37,0,4,char1,0x329B,sUserInfo,1,,4B,0x51e01c,obj17+0x358c,Trader map S+0x3584 NEW,DERIVED
+0x18FE8B,0,4,char1,0x31EF,sUserInfo,1,,4B,0x51df68,obj17+0x3488,"Trader item list 0, 32 bits (S+0x3488) + runtime NEW copy",DERIVED
+0x18FE8F,0,4,char1,0x31F3,sUserInfo,1,,4B,0x51df7c,obj17+0x3490,Trader item list 0 NEW,DERIVED
+0x18FE93,0,4,char1,0x31F7,sUserInfo,1,,4B,0x51df90,obj17+0x3494,"Trader item list 1, 32 bits (S+0x3494) + runtime NEW copy",DERIVED
+0x18FE97,0,4,char1,0x31FB,sUserInfo,1,,4B,0x51dfa4,obj17+0x349c,Trader item list 1 NEW,DERIVED
+0x18FE9B,0,56,char1,0x31FF,sUserInfo,1,,56B,0x51dfb8,obj17+0x34a0,"Trader: Guild Card title words for sale, 448 bits (tradeLimitedHonorList has 442)",DERIVED
+0x18FED3,0,56,char1,0x3237,sUserInfo,1,,56B,0x51dfcc,obj17+0x3510,Trader title words NEW,DERIVED
+0x18FF0B,0,20,char1,0x326F,sUserInfo,1,,20B,0x51dfe0,obj17+0x3548,"Trader: Guild Card scenes for sale, 160 bits (tradeLimitedPaperList has 131)",DERIVED
+0x18FF1F,0,20,char1,0x3283,sUserInfo,1,,20B,0x51dff4,obj17+0x3570,Trader scenes NEW,DERIVED
+0x18FF33,0,4,char1,0x3297,sUserInfo,1,,4B,0x51e008,obj17+0x3584,"Trader: pet costumes for sale, 32 bits (S+0x3584)",DERIVED
+0x18FF37,0,4,char1,0x329B,sUserInfo,1,,4B,0x51e01c,obj17+0x358c,Trader pet costumes NEW,DERIVED
 0x18FF3B,0,4,char1,0x329F,sUserInfo,1,,4B,0x51e030,obj17+0x3590,"Trader ticket map, 32 bits (S+0x3590)",DERIVED
 0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,Trader ticket map NEW (also read by the Cross ticket screen),DERIVED
 0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,"Trader map, 32 bits (S+0x359c)",DERIVED

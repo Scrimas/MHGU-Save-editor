@@ -489,7 +489,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x312F`, `0x3143` | `+0xbec`, `+0xc14` | Guild Card scenes, the 136 backgrounds of `GC_background` |
 | `0x317F`, `0x3183` | `+0xc64`, `+0xc6c` | Guild Card poses: 22 (Stand … Beam Fire). 17 from the start, bits 17–21 from the DLC map at sPrivilege `+0xf44` |
 | `0x31A7`, `0x31CB` | `+0x2a0c`, `+0x2a54` | Smithy decorations listed / NEW, bit = `rDecoCreateData` entry |
-| `0x31EF` … `0x32AB` | `+0x3488` … `+0x35a4` | the Trader (`uUITradeCenter`): seven maps with copies. Sizes 32, 32, 448, 160, 32, 32 and 32 bits. The 448-bit map fits `tradeLimitedHonorList` (442 entries) and the 160-bit map `tradeLimitedPaperList` (131), by size only. The Cross ticket screen reads the N2 of the sixth map |
+| `0x31EF` … `0x32AB` | `+0x3488` … `+0x35a4` | the Trader (`uUITradeCenter`): seven maps, each followed by its N1 and N2. U at `+0x3488` (32 bits) and `+0x3494` (32): entries of the Trader's two item lists (UI byte `+0x3c` = 0 / 1), set by `0x7a9abc` once the entry's progress condition (`0x561b28`) holds. `+0x34a0` (448): Guild Card title words for sale (`tradeLimitedHonorList`, 442), `+0x3548` (160): Guild Card scenes for sale (`tradeLimitedPaperList`, 131), `+0x3584` (32): pet costumes for sale, the three set by the tabs of [block B's download test](#downloads-held--block-b-header). `+0x3590` (32): no reader besides the Cross ticket screen (its N2). `+0x359c` (32): set by `0x79da8c` when an entry's item flag is set (`0x1971f0`). UNRESOLVED for the last two |
 | `0x32AF` | `+0x35a8` | delivery requests delivered: bit *b* for kind-1 request *b* (1–13), tested by `0x524db8` for talk condition 41 ([10](10-npc-talk.md)), the Trader and the Start Menu |
 | `0x32B3` | `+0x35ac` | Hunter's Notes tips read: a clear bit shows NEW (`cUIOHunterNoteTips`) |
 | `0x32B7`, `0x32C7` | `+0x35b0`, `+0x35c0` | **Hunter's Notes, large monsters**: 123 bits and their NEW copy. Talk action 6 sets both (`0x247ae4`); condition 44 tests them (`0x245848`) |
@@ -526,6 +526,12 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x5E3E` | `+0x4408` | u32 pair get/set by the title menu (`0x5279b4` / `0x5279cc`). UNRESOLVED |
 | `0x5E46` | `+0x4410` | u32. UNRESOLVED |
 | `0x5E4A` | `+0x4414` | Courier flags (`0x6d1e4c` and the Courier's talk code) |
+| `0x5E4E` | `+0x4418` | quest counter ([05](05-quests.md#counters)). `0x526f70` adds 1 per quest, except when the quest state is 6 |
+| `0x5E52` | `+0x441c` | counter reference. `0x5279e0` stores it and, at 210 or more, folds both into 210 … 419 |
+| `0x5E56` | `+0x4420` | Courier points: `0x526f70` adds a per-quest amount from a table |
+| `0x5E5A` | `+0x4424` | Special Permit points, 18 × u16, at most 9999. 100 points make one permit; the Courier (`0x527a80`, `0x527b2c`) hands them out up to 99 held, the held counts being the [deviant permit counts](#the-block-s0x20--0x41f--base--0x280b) at `base + 0x283C` (`S+0x51`) |
+| `0x5E7E` | `+0x4448` | permit points waiting at the Courier, 18 × u16 |
+| `0x5EA2` | `+0x446c` | control option bytes: the Game options window writes `+0`, the target camera reads `+0`, `+2`, `+3`, the Hunter Art gauge `+2`, `+3` |
 
 ## Block A header and shared settings
 
@@ -570,15 +576,21 @@ the server catalog at `+0xed0` (runtime).
 
 The counts match block B: 40 challenge and 125 event quests are stored. The download
 menu's extras are titles, Wycademy points, Trader wares, Guild Card backgrounds, pet
-costumes and poses (`DLC_eng.gmd`). Which of types 5–7 is which is UNRESOLVED; by size,
-type 7 (300) fits the downloadable title words.
-| `0x5E4E` | `+0x4418` | quest counter ([05](05-quests.md#counters)). `0x526f70` adds 1 per quest, except when the quest state is 6 |
-| `0x5E52` | `+0x441c` | counter reference. `0x5279e0` stores it and, at 210 or more, folds both into 210 … 419 |
-| `0x5E56` | `+0x4420` | Courier points: `0x526f70` adds a per-quest amount from a table |
-| `0x5E5A` | `+0x4424` | Special Permit points, 18 × u16, at most 9999. 100 points make one permit; the Courier (`0x527a80`, `0x527b2c`) hands them out up to 99 held, the held counts being the [deviant permit counts](#character-slot) at `base + 0x283C` (`S+0x51`) |
-| `0x5E7E` | `+0x4448` | permit points waiting at the Courier, 18 × u16 |
-| `0x5EA2` | `+0x446c` | control option bytes: the Game options window writes `+0`, the target camera reads `+0`, `+2`, `+3`, the Hunter Art gauge `+2`, `+3` |
+costumes and poses (`DLC_eng.gmd`).
 
+**DERIVED — types 5–7 are Trader wares.** The Trader screen (`uUITradeCenter`,
+`0x7a7f08`) has three tabs (UI byte `+0x3d`). Each tab skips what is already unlocked
+and otherwise asks whether the download that sells it is held:
+
+| Tab | Unlock map tested | Download test | Trader map set |
+|---|---|---|---|
+| 0, Guild Card title words | `S+0x9d0` | type 7, catalog − 170 (`0x7a84a0`) | `S+0x34a0` (448 bits) |
+| 1, Guild Card scenes | `S+0xbec` | type 5, catalog − 80 (`0x7a85ac`) | `S+0x3548` (160 bits) |
+| 2, pet costumes | `S+0x994` | type 6, catalog − 160 (`0x7a7d30`) | `S+0x3584` (32 bits) |
+
+So type 5 = 80 Guild Card scenes, type 6 = 10 Poogie and Moofy costumes, type 7 = 300
+title words; the sizes agree with `tradeLimitedPaperList` (131) and
+`tradeLimitedHonorList` (442) for the two big Trader maps.
 ## Downloaded quests — block B
 
 **CONFIRMED** (loader `0x36bdc` reads each store as one block; the archives parse and
