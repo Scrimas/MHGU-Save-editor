@@ -1,0 +1,138 @@
+index,family_of,size_record,base_cm,mini_le,silver_ge,gold_ge,fixed_size,crown_awards,card_pos,notes_bit,class
+1,,yes,1654.3,90,115,123,no,yes,29,79,Flying Wyvern
+2,,yes,1654.3,97,117,123,no,yes,30,81,Flying Wyvern
+3,,yes,2055.68,96,105,109,no,yes,31,80,Flying Wyvern
+4,,yes,1711.3,90,115,123,no,yes,47,82,Flying Wyvern
+5,,yes,1711.3,97,117,123,no,yes,48,84,Flying Wyvern
+6,,yes,2057.78,96,105,109,no,yes,49,83,Flying Wyvern
+7,,yes,871.9,90,109,114,no,yes,27,85,Flying Wyvern
+8,,yes,898.6,90,115,123,no,yes,9,35,Bird Wyvern
+9,,yes,990.9,90,115,123,no,yes,14,36,Bird Wyvern
+10,,yes,2624.83,90,115,123,no,yes,33,11,
+11,,yes,549.8,90,117,123,no,yes,70,95,Elder Dragon
+12,,yes,868.2,90,115,123,no,yes,1,28,Bird Wyvern
+13,,yes,864.5,90,115,123,no,yes,7,30,Bird Wyvern
+14,,yes,911.7,90,115,123,no,yes,10,32,Bird Wyvern
+15,,yes,1677.6,90,115,123,no,yes,8,10,
+16,,yes,1395.6,90,115,123,no,yes,41,37,Bird Wyvern
+17,,yes,1186.33,97,117,123,no,yes,42,38,Bird Wyvern
+18,,yes,495.0,90,115,123,no,yes,17,58,
+19,,yes,1494.73,97,114,119,no,yes,18,59,
+20,,yes,597.99,90,115,123,no,yes,36,60,
+21,,yes,859.91,90,115,123,no,yes,34,48,Fanged Beast
+22,,yes,965.6,90,117,123,no,yes,74,50,Fanged Beast
+23,22,no,966.0,90,117,123,no,no,,,
+24,,yes,1801.3,90,117,123,no,yes,76,97,Elder Dragon
+25,,yes,1993.0,90,117,123,no,yes,77,98,Elder Dragon
+26,,yes,1739.8,90,117,123,no,yes,78,99,Elder Dragon
+27,,yes,565.85,90,115,123,no,yes,2,41,Fanged Beast
+28,,yes,1735.4,90,115,123,no,yes,66,86,Flying Wyvern
+29,,yes,2121.1,96,105,109,no,yes,67,87,Flying Wyvern
+30,,yes,3049.0,,,,yes,no,80,90,Flying Wyvern
+31,,yes,2077.67,90,115,123,no,yes,35,12,
+32,,yes,1602.19,90,115,123,no,yes,39,77,Flying Wyvern
+33,,yes,1702.33,97,117,123,no,yes,40,78,Flying Wyvern
+34,,yes,3186.6,,,,yes,no,81,91,Flying Wyvern
+35,,yes,2046.8,90,120,128,no,yes,75,70,Brute Wyvern
+36,35,no,2046.8,90,120,128,no,no,,,
+37,,yes,2085.42,90,115,123,no,yes,43,71,Brute Wyvern
+38,,yes,2654.74,96,105,109,no,yes,44,72,Brute Wyvern
+39,,yes,2648.58,90,115,123,no,yes,50,66,Leviathan
+40,,yes,1545.33,90,115,123,no,yes,21,62,Leviathan
+41,,yes,2737.31,90,115,123,no,yes,62,64,Leviathan
+42,,yes,2872.48,,,,yes,no,85,100,Elder Dragon
+43,,yes,2084.2,90,115,123,no,yes,65,73,Brute Wyvern
+44,,yes,2040.46,90,115,123,no,yes,32,65,Leviathan
+45,,yes,1455.4,90,115,123,no,yes,51,93,
+46,,yes,1534.46,97,117,123,no,yes,52,94,
+47,,yes,2611.48,,,,yes,no,82,101,Elder Dragon
+48,,yes,562.63,90,115,123,no,yes,4,45,Fanged Beast
+49,,yes,822.34,96,105,109,no,yes,5,46,Fanged Beast
+50,,yes,527.3,90,115,123,no,yes,12,43,Fanged Beast
+51,,yes,639.49,97,117,123,no,yes,13,44,Fanged Beast
+52,,yes,696.68,90,115,123,no,yes,19,49,Fanged Beast
+53,,yes,1521.8,90,115,123,no,yes,71,74,Brute Wyvern
+54,,yes,886.1,90,109,114,no,yes,11,42,Fanged Beast
+55,,yes,1265.8,90,115,123,no,yes,15,52,
+56,,yes,1512.91,96,105,109,no,yes,16,53,
+57,,yes,1519.6,90,115,123,no,yes,26,55,
+58,,yes,4055.0,90,115,123,no,yes,38,68,
+59,,yes,1444.8,90,115,123,no,yes,46,8,
+60,,yes,1760.9,90,115,123,no,yes,63,92,
+61,,yes,1778.1,90,117,123,no,yes,72,96,Elder Dragon
+62,,yes,615.9,90,115,123,no,yes,3,7,
+63,,yes,1728.1,90,109,114,no,yes,64,88,Flying Wyvern
+64,,yes,611.66,90,115,123,no,yes,24,39,Bird Wyvern
+65,,yes,2539.49,90,115,123,no,yes,60,75,Brute Wyvern
+66,,yes,2840.85,97,114,119,no,yes,61,76,Brute Wyvern
+67,,yes,1755.26,90,115,123,no,yes,56,89,Flying Wyvern
+68,,yes,1885.12,90,115,123,no,yes,54,67,Leviathan
+69,,yes,2276.07,90,109,114,no,yes,58,51,Fanged Beast
+70,,yes,5812.86,,,,yes,no,83,102,Elder Dragon
+71,,yes,797.31,90,115,123,no,yes,0,34,Bird Wyvern
+72,,no,,,,,no,no,,13,
+73,,no,,,,,no,no,,14,
+74,,no,,,,,no,no,,15,
+75,,no,,,,,no,no,,16,
+76,,no,,,,,no,no,,2,
+77,,no,,,,,no,no,,3,
+78,,no,,,,,no,no,,0,
+79,,no,,,,,no,no,,1,
+80,,no,,,,,no,no,,27,Bird Wyvern
+81,,no,,,,,no,no,,29,Bird Wyvern
+82,,no,,,,,no,no,,31,Bird Wyvern
+83,,no,,,,,no,no,,9,
+84,,no,,,,,no,no,,40,Fanged Beast
+85,,no,,,,,no,no,,17,
+86,,no,,,,,no,no,,26,Bird Wyvern
+87,,no,,,,,no,no,,18,
+88,,no,,,,,no,no,,69,
+89,,no,,,,,no,no,,56,
+90,,no,,,,,no,no,,57,
+91,,no,,,,,no,no,,47,Fanged Beast
+92,,no,,,,,no,no,,19,
+93,,no,,,,,no,no,,4,
+94,,no,,,,,no,no,,5,
+95,,no,,,,,no,no,,24,Bird Wyvern
+96,,no,,,,,no,no,,25,Bird Wyvern
+97,,no,,,,,no,no,,61,Leviathan
+98,,no,,,,,no,no,,63,Leviathan
+99,,no,,,,,no,no,,20,
+100,,no,,,,,no,no,,23,Bird Wyvern
+101,,no,,,,,no,no,,54,
+102,,no,,,,,no,no,,6,
+103,,no,,,,,no,no,,33,Bird Wyvern
+104,,no,,,,,no,no,,21,
+105,,no,,,,,no,no,,22,
+106,,no,,,,,no,no,,,
+107,,no,,,,,no,no,,,
+108,,no,,,,,no,no,,,
+109,,no,,,,,no,no,,,
+110,,no,,,,,no,no,,,
+111,,no,,,,,no,no,,,
+112,,no,,,,,no,no,,,
+113,,yes,1426.5,90,115,123,no,yes,23,116,Flying Wyvern
+114,,yes,2098.7,90,115,123,no,yes,53,117,Flying Wyvern
+115,,yes,1993.0,90,115,123,no,yes,68,112,Flying Wyvern
+116,,yes,2409.35,96,110,114,no,yes,69,108,Flying Wyvern
+117,,yes,6959.79,,,,yes,no,79,119,Elder Dragon
+118,,yes,4110.6,,,,yes,no,86,120,Elder Dragon
+119,118,no,4110.6,,,,yes,no,,,
+120,118,no,4119.2,,,,yes,no,,,
+121,,yes,688.44,96,110,114,no,yes,37,109,
+122,,yes,984.0,90,115,123,no,yes,20,115,Fanged Beast
+123,,yes,866.75,90,115,123,no,yes,6,118,Bird Wyvern
+124,,yes,1821.74,90,115,123,no,yes,45,111,Flying Wyvern
+125,,yes,1406.19,90,115,123,no,yes,22,114,Brute Wyvern
+126,53,no,1521.8,90,115,123,no,no,,,
+127,,yes,998.9,90,112,118,no,yes,28,113,
+128,60,no,1794.7,90,115,123,no,no,,,
+129,,yes,733.02,97,117,123,no,yes,25,110,Bird Wyvern
+130,,yes,2219.42,96,105,109,no,yes,57,105,Flying Wyvern
+131,,yes,2428.5,97,110,114,no,yes,55,106,Leviathan
+132,,yes,2276.07,97,110,114,no,yes,59,107,Fanged Beast
+133,,yes,2267.35,90,112,118,no,yes,73,103,Elder Dragon
+134,,no,,,,,no,no,,,
+135,,yes,1223.67,,,,yes,no,84,104,
+136,,no,,,,,no,no,,121,
+137,,no,,,,,no,no,,122,Fanged Beast
