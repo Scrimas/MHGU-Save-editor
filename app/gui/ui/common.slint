@@ -895,49 +895,78 @@ export component Modal inherits Rectangle {
     }
 }
 
+// Shown or collapsed to nothing, for blocks with wrapped text in a layout that sizes a
+// card, dialog or popup. Slint (1.18) gives an `if` block's wrapped text a stale one-line
+// height in its parent's size, so the buttons below spill out of the card; a Reveal is
+// always there and measured like any other child. `gap` is the space above it when shown:
+// put it in a layout without spacing, or hidden it still costs that layout's spacing.
+export component Reveal inherits Rectangle {
+    in property <bool> shown;
+    in property <length> gap;
+    in property <length> spacing;
+    visible: shown;
+    height: shown ? lay.preferred-height : 0px;
+    lay := VerticalLayout {
+        padding-top: root.gap;
+        spacing: root.spacing;
+        @children
+    }
+}
+
 // Before → after list of a goal or bulk action (03, mockup C).
 export component PreviewBody inherits VerticalLayout {
     in property <Preview> p;
     in-out property <bool> tech-open;
-    spacing: 10px;
+    // no spacing: each block brings the 10px above it, so a collapsed Reveal costs nothing
     HorizontalLayout {
         spacing: Tok.tight;
         Text { text: p.title; font-size: Tok.section; font-weight: 600; horizontal-stretch: 1; wrap: word-wrap; }
         if p.confidence != Confidence.confirmed: ConfidenceTag { level: p.confidence; }
     }
-    Muted { text: p.summary; }
-    if !p.empty: Rectangle {
-        border-radius: Tok.radius;
-        border-width: 1px;
-        border-color: Tok.line;
-        height: min(lines.preferred-height, 300px);
-        Flickable {
-            content-height: lines.preferred-height;
-            lines := VerticalLayout {
-                padding-left: 14px;
-                padding-right: 14px;
-                for l[i] in p.lines: Rectangle {
-                    height: 36px;
-                    HorizontalLayout {
-                        spacing: Tok.tight;
-                        Text { text: l.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
-                        Text { text: l.old; color: Tok.muted; vertical-alignment: center; }
-                        Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
-                        Text { text: l.new; font-weight: 600; vertical-alignment: center; }
+    VerticalLayout {
+        padding-top: 10px;
+        Muted { text: p.summary; }
+    }
+    Reveal {
+        shown: !p.empty;
+        gap: 10px;
+        Rectangle {
+            border-radius: Tok.radius;
+            border-width: 1px;
+            border-color: Tok.line;
+            height: min(lines.preferred-height, 300px);
+            Flickable {
+                content-height: lines.preferred-height;
+                lines := VerticalLayout {
+                    padding-left: 14px;
+                    padding-right: 14px;
+                    for l[i] in p.lines: Rectangle {
+                        height: 36px;
+                        HorizontalLayout {
+                            spacing: Tok.tight;
+                            Text { text: l.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                            Text { text: l.old; color: Tok.muted; vertical-alignment: center; }
+                            Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
+                            Text { text: l.new; font-weight: 600; vertical-alignment: center; }
+                        }
+                        if i > 0: Hairline { y: 0; width: parent.width; }
                     }
-                    if i > 0: Hairline { y: 0; width: parent.width; }
-                }
-                if p.more > 0: Text { height: 32px; text: "and " + Fmt.num(p.more) + " more"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
-                if p.note != "": VerticalLayout {
-                    padding-top: 8px;
-                    padding-bottom: 10px;
-                    Muted { text: p.note; }
+                    if p.more > 0: Text { height: 32px; text: "and " + Fmt.num(p.more) + " more"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                    Reveal {
+                        shown: p.note != "";
+                        gap: 8px;
+                        VerticalLayout {
+                            padding-bottom: 10px;
+                            Muted { text: p.note; }
+                        }
+                    }
                 }
             }
         }
     }
-    if p.tech != "": VerticalLayout {
-        spacing: 6px;
+    Reveal {
+        shown: p.tech != "";
+        gap: 10px;
         HorizontalLayout {
             spacing: 6px;
             alignment: start;
@@ -949,7 +978,11 @@ export component PreviewBody inherits VerticalLayout {
                 clicked => { root.tech-open = !root.tech-open; }
             }
         }
-        if root.tech-open: Muted { text: p.tech; font-family: "monospace"; }
+        Reveal {
+            shown: root.tech-open;
+            gap: 6px;
+            Muted { text: p.tech; font-family: "monospace"; }
+        }
     }
 }
 

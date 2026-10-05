@@ -186,6 +186,11 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                 api.invoke_check_emulator();
                 api.set_write_open(true);
             }
+            // the Write dialog's blocked state without starting the emulator
+            (_, &["running"]) => {
+                api.set_emulator_running(true);
+                api.set_emulator_name("Ryujinx".into());
+            }
             (_, &["snapshots"]) => {
                 api.invoke_list_snapshots();
                 api.set_snapshots_open(true);

@@ -1,7 +1,7 @@
 import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint } from "std-widgets.slint";
 import {
     Api, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
-    Modal, EmptyState, ChangeRow, Chevron, SectionTitle,
+    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal,
 } from "common.slint";
 import { OpenPage } from "pages/open.slint";
 import { OverviewPage } from "pages/overview.slint";
@@ -40,17 +40,20 @@ component ReviewEntry inherits VerticalLayout {
             clicked => { Api.goto(c.key); }
         }
         Rectangle { x: 0; width: 3px; border-radius: 1.5px; background: Tok.accent; }
+        // no spacing: the rows below bring the 4px above them, so collapsed Reveals cost nothing
         body := VerticalLayout {
             padding: 12px;
             padding-left: 16px;
-            spacing: 4px;
             HorizontalLayout {
                 spacing: Tok.tight;
                 VerticalLayout {
                     horizontal-stretch: 1;
                     alignment: center;
                     Text { text: c.title; font-weight: 600; overflow: elide; }
-                    if c.sub != "": Muted { text: c.sub; }
+                    Reveal {
+                        shown: c.sub != "";
+                        Muted { text: c.sub; }
+                    }
                 }
                 if c.single: Text { text: c.old; color: Tok.muted; vertical-alignment: center; }
                 if c.single: Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
@@ -60,14 +63,23 @@ component ReviewEntry inherits VerticalLayout {
             }
             for l in c.lines: HorizontalLayout {
                 spacing: Tok.tight;
-                height: 30px;
+                padding-top: 4px;
+                height: 34px;
                 Text { text: l.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
                 Text { text: l.old; color: Tok.muted; vertical-alignment: center; }
                 Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
                 Text { text: l.new; font-weight: 600; vertical-alignment: center; }
             }
-            if c.more > 0: Muted { text: "and " + Fmt.num(c.more) + " more"; }
-            if c.note != "": Muted { text: c.note; }
+            Reveal {
+                shown: c.more > 0;
+                gap: 4px;
+                Muted { text: "and " + Fmt.num(c.more) + " more"; }
+            }
+            Reveal {
+                shown: c.note != "";
+                gap: 4px;
+                Muted { text: c.note; }
+            }
         }
     }
 }
@@ -173,50 +185,64 @@ component WriteDialog inherits Modal {
                 font-weight: Api.emulator-running ? 600 : 400;
                 wrap: word-wrap;
             }
-            if Api.emulator-running: Muted { text: "Close it first: it overwrites the save when it exits."; }
+            Reveal {
+                shown: Api.emulator-running;
+                Muted { text: "Close it first: it overwrites the save when it exits."; }
+            }
         }
         if Api.emulator-running: Button { text: "Check again"; clicked => { Api.check-emulator(); } }
     }
     VerticalLayout {
-        spacing: 2px;
         CheckBox { text: "Take a snapshot first (recommended)"; checked <=> root.snapshot; }
-        Muted { text: "You can restore it any time from Snapshots in the sidebar."; x: 28px; width: parent.width - 28px; }
-    }
-    if Api.derived-count > 0: HorizontalLayout {
-        spacing: 10px;
-        Dot { level: Confidence.derived; y: 6px; }
-        Text {
-            text: (Api.derived-count == 1 ? "1 change is" : Api.derived-count + " changes are")
-                + " Derived: worked out from the game's code, not yet checked in game." + (root.snapshot ? " Keep the snapshot on." : " A snapshot lets you go back.");
-            color: Tok.warn;
-            font-size: Tok.small;
-            wrap: word-wrap;
-            horizontal-stretch: 1;
+        VerticalLayout {
+            padding-top: 2px;
+            padding-left: 28px;
+            Muted { text: "You can restore it any time from Snapshots in the sidebar."; }
+        }
+        Reveal {
+            shown: Api.derived-count > 0;
+            gap: Tok.gap;
+            HorizontalLayout {
+                spacing: 10px;
+                Dot { level: Confidence.derived; y: 6px; }
+                Text {
+                    text: (Api.derived-count == 1 ? "1 change is" : Api.derived-count + " changes are")
+                        + " Derived: worked out from the game's code, not yet checked in game." + (root.snapshot ? " Keep the snapshot on." : " A snapshot lets you go back.");
+                    color: Tok.warn;
+                    font-size: Tok.small;
+                    wrap: word-wrap;
+                    horizontal-stretch: 1;
+                }
+            }
         }
     }
     SectionTitle { text: "Files"; font-size: Tok.small; color: Tok.muted; }
-    HorizontalLayout {
-        spacing: Tok.tight;
-        Text {
-            text: Api.write-targets.length == 1 ? "The data goes into the save file." : "The same data goes into all " + Api.write-targets.length + " save files.";
-            horizontal-stretch: 1;
-            wrap: word-wrap;
-        }
+    VerticalLayout {
         HorizontalLayout {
-            spacing: 4px;
-            TextLink {
-                text: root.paths ? "Hide paths" : "Show paths";
-                font-weight: 400;
-                y: (parent.height - self.height) / 2;
-                clicked => { root.paths = !root.paths; }
+            spacing: Tok.tight;
+            Text {
+                text: Api.write-targets.length == 1 ? "The data goes into the save file." : "The same data goes into all " + Api.write-targets.length + " save files.";
+                horizontal-stretch: 1;
+                wrap: word-wrap;
             }
-            Chevron { dir: root.paths ? "up" : "down"; y: (parent.height - self.height) / 2; stroke: Tok.accent-text; }
+            HorizontalLayout {
+                spacing: 4px;
+                TextLink {
+                    text: root.paths ? "Hide paths" : "Show paths";
+                    font-weight: 400;
+                    y: (parent.height - self.height) / 2;
+                    clicked => { root.paths = !root.paths; }
+                }
+                Chevron { dir: root.paths ? "up" : "down"; y: (parent.height - self.height) / 2; stroke: Tok.accent-text; }
+            }
         }
-    }
-    if root.paths: VerticalLayout {
-        spacing: 2px;
-        Muted { text: "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."; }
-        for t in Api.write-targets: Text { text: t; font-size: Tok.small; color: Tok.muted; font-family: "monospace"; overflow: elide; }
+        Reveal {
+            shown: root.paths;
+            gap: Tok.gap;
+            spacing: 2px;
+            Muted { text: "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."; }
+            for t in Api.write-targets: Text { text: t; font-size: Tok.small; color: Tok.muted; font-family: "monospace"; overflow: elide; }
+        }
     }
     HorizontalLayout {
         alignment: end;
@@ -242,75 +268,95 @@ component SnapshotsDialog inherits Modal {
         Api.snapshots-open = false;
         Api.restore-ask = "";
     }
-    if Api.restore-ask == "": VerticalLayout {
-        spacing: Tok.gap;
-        Text { text: "Snapshots"; font-size: 20px; font-weight: 600; }
-        Muted { text: "A copy of the whole save folder, taken before each write and before each restore."; }
-        if Api.snapshots.length == 0: EmptyState { text: "No snapshots of this save yet. Write takes one first unless you untick it."; }
-        if Api.snapshots.length > 0: Rectangle {
-            border-radius: Tok.radius;
-            border-width: 1px;
-            border-color: Tok.line;
-            height: min(list.preferred-height, 320px);
-            Flickable {
-                content-height: list.preferred-height;
-                list := VerticalLayout {
-                    for s[i] in Api.snapshots: Rectangle {
-                        height: 58px;
-                        if i > 0: Hairline { y: 0; width: parent.width; }
-                        HorizontalLayout {
-                            padding-left: 14px;
-                            padding-right: 10px;
-                            spacing: Tok.tight;
-                            VerticalLayout {
-                                alignment: center;
-                                horizontal-stretch: 1;
-                                Text { text: s.when; overflow: elide; }
-                                Muted { text: s.before; wrap: no-wrap; overflow: elide; }
-                            }
-                            Button {
-                                y: (parent.height - 32px) / 2;
-                                height: 32px;
-                                text: "Restore…";
-                                clicked => {
-                                    Api.restore-ask = s.dir;
-                                    Api.restore-when = s.when;
+    // the list, or the Restore question; Reveals rather than `if` (see Reveal)
+    VerticalLayout {
+        Reveal {
+            shown: Api.restore-ask == "";
+            spacing: Tok.gap;
+            Text { text: "Snapshots"; font-size: 20px; font-weight: 600; }
+            Muted { text: "A copy of the whole save folder, taken before each write and before each restore."; }
+            VerticalLayout {
+                Reveal {
+                    shown: Api.snapshots.length == 0;
+                    EmptyState { text: "No snapshots of this save yet. Write takes one first unless you untick it."; }
+                }
+                if Api.snapshots.length > 0: Rectangle {
+                    border-radius: Tok.radius;
+                    border-width: 1px;
+                    border-color: Tok.line;
+                    height: min(list.preferred-height, 320px);
+                    Flickable {
+                        content-height: list.preferred-height;
+                        list := VerticalLayout {
+                            for s[i] in Api.snapshots: Rectangle {
+                                height: 58px;
+                                if i > 0: Hairline { y: 0; width: parent.width; }
+                                HorizontalLayout {
+                                    padding-left: 14px;
+                                    padding-right: 10px;
+                                    spacing: Tok.tight;
+                                    VerticalLayout {
+                                        alignment: center;
+                                        horizontal-stretch: 1;
+                                        Text { text: s.when; overflow: elide; }
+                                        Muted { text: s.before; wrap: no-wrap; overflow: elide; }
+                                    }
+                                    Button {
+                                        y: (parent.height - 32px) / 2;
+                                        height: 32px;
+                                        text: "Restore…";
+                                        clicked => {
+                                            Api.restore-ask = s.dir;
+                                            Api.restore-when = s.when;
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+            HorizontalLayout {
+                spacing: Tok.tight;
+                Text { text: Api.snapshot-dir; color: Tok.muted; font-size: Tok.small; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
+                Button { text: "Open folder"; clicked => { Api.open-snapshots(); } }
+                Button { text: "Close"; clicked => { Api.snapshots-open = false; } }
+            }
         }
-        HorizontalLayout {
-            spacing: Tok.tight;
-            Text { text: Api.snapshot-dir; color: Tok.muted; font-size: Tok.small; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
-            Button { text: "Open folder"; clicked => { Api.open-snapshots(); } }
-            Button { text: "Close"; clicked => { Api.snapshots-open = false; } }
-        }
-    }
-    if Api.restore-ask != "": VerticalLayout {
-        spacing: Tok.gap;
-        Text { text: "Restore the save from " + Api.restore-when + "?"; font-size: 20px; font-weight: 600; wrap: word-wrap; }
-        Muted { text: "Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."; }
-        if Api.change-count > 0: Text {
-            text: (Api.change-count == 1 ? "Your staged change is" : "Your " + Api.change-count + " staged changes are") + " dropped.";
-            color: Tok.warn;
-            font-size: Tok.small;
-            wrap: word-wrap;
-        }
-        if Api.emulator-running: Text { text: Api.emulator-name + " is running. Close it first: it overwrites the save when it exits."; color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
-        HorizontalLayout {
-            alignment: end;
-            spacing: Tok.tight;
-            Button { text: "Cancel"; clicked => { Api.restore-ask = ""; } }
-            Button {
-                text: "Restore";
-                primary: true;
-                enabled: !Api.emulator-running;
-                clicked => {
-                    Api.restore(Api.restore-ask);
-                    Api.restore-ask = "";
+        Reveal {
+            shown: Api.restore-ask != "";
+            spacing: Tok.gap;
+            Text { text: "Restore the save from " + Api.restore-when + "?"; font-size: 20px; font-weight: 600; wrap: word-wrap; }
+            VerticalLayout {
+                Muted { text: "Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."; }
+                Reveal {
+                    shown: Api.change-count > 0;
+                    gap: Tok.gap;
+                    Text {
+                        text: (Api.change-count == 1 ? "Your staged change is" : "Your " + Api.change-count + " staged changes are") + " dropped.";
+                        color: Tok.warn;
+                        font-size: Tok.small;
+                        wrap: word-wrap;
+                    }
+                }
+                Reveal {
+                    shown: Api.emulator-running;
+                    gap: Tok.gap;
+                    Text { text: Api.emulator-name + " is running. Close it first: it overwrites the save when it exits."; color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+                }
+            }
+            HorizontalLayout {
+                alignment: end;
+                spacing: Tok.tight;
+                Button { text: "Cancel"; clicked => { Api.restore-ask = ""; } }
+                Button {
+                    text: "Restore";
+                    primary: true;
+                    enabled: !Api.emulator-running;
+                    clicked => {
+                        Api.restore(Api.restore-ask);
+                        Api.restore-ask = "";
+                    }
                 }
             }
         }
