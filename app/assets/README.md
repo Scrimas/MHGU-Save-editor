@@ -6,8 +6,8 @@ monster and award icons. They are embedded in the binary at build time from `gen
 
 ## Why `gen.tar.gz.gpg` is an encrypted blob
 
-`gen/` is Capcom's copyrighted artwork and text. This repository is public-domain research
-and must not host it, so `gen/` is gitignored and never committed in readable form. (The
+`gen/` is Capcom's copyrighted artwork and text. This repository is GPL-licensed and
+cannot relicense or host it, so `gen/` is gitignored and never committed in readable form. (The
 release binaries embed it, like every local build; they are drafts until published.)
 
 The release workflow (`.github/workflows/release.yml`) still has to build the same binaries

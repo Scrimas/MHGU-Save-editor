@@ -1,119 +1,104 @@
-# MHGU Switch Save Format — Reverse-Engineering Notes
+# MHGU Save Editor
 
-Structural notes on the Monster Hunter Generations Ultimate save file as written by
-the Nintendo Switch release, recovered by differential analysis against a live save.
+A desktop save editor for **Monster Hunter Generations Ultimate** (Nintendo Switch,
+emulator saves), and the reverse-engineering notes and data it is built on.
 
-The goal of these documents is to describe **how the save is organised**, not to
-describe any one player's data. Where a concrete value is quoted it is only ever as
-evidence for a structural claim.
+Every value it shows is read where the game itself keeps it, and every change is
+described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") before
+anything touches the file. Fields are marked **Confirmed** (checked in game) or
+**Derived** (from the format notes, not yet checked in game).
 
-## Scope and provenance
+## Download
 
-| | |
+Single-file builds are attached to each [release](https://github.com/Scrimas/mhgu-save-reverse-engineering/releases):
+
+| File | Runs on |
 |---|---|
-| Title | Monster Hunter Generations Ultimate |
-| Title ID | `0100770008DD8000` (EU / western release) |
-| Platform | Nintendo Switch, observed through the Ryujinx emulator |
-| File | `system` (and `system_backup`), 5,159,100 bytes |
-| Method | Controlled before/after diffing of a real save (see [methodology](docs/06-methodology.md)) |
+| `MHGU-Save-Editor-<version>-x86_64.AppImage` | Linux x86-64, glibc 2.28 or newer (distros from 2019 on) |
+| `MHGU-Save-Editor-<version>-x86_64.exe` | Windows 10 / 11, nothing to install |
 
-All offsets are **absolute byte offsets into `system`**, little-endian, for character
-slot 1. Per-character offsets move with the slot base; see
-[Open questions](#open-questions).
+Ryujinx saves are found automatically (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
+Flatpak folders). For another emulator, use **Open save…** on its
+`…/save/<id>/0/system` file. Title ID `0100770008DD8000` (EU / western release).
 
-## Documents
+## What it edits
 
-| Document | Covers |
+| Page | |
 |---|---|
-| [01 — Container](docs/01-container.md) | File layout, commit slots, encryption and integrity |
-| [02 — Monster records](docs/02-monster-records.md) | Hunt tallies, size records, the monster index table |
-| [03 — Deviants](docs/03-deviants.md) | Permit counts, level bitmaps, unlock gating |
-| [04 — Weapon usage](docs/04-weapon-usage.md) | Guild Card weapon usage counters |
-| [05 — Quests](docs/05-quests.md) | Quest bitmaps and the full quest index, history log, counters |
-| [06 — Methodology](docs/06-methodology.md) | How this was derived, and how to extend it |
-| [07 — Equipment](docs/07-equipment.md) | Character slots, equipment box, talismans, transmog, dye, My Sets |
-| [08 — Hunter Arts and Canteen](docs/08-progression.md) | Hunter Art unlocks, Canteen ingredients and dishes |
-| [09 — Awards](docs/09-awards.md) | Guild Card award bitfield |
-| [10 — NPC talk data](docs/10-npc-talk.md) | Talk tables: request offers, star-level flags, per-NPC bits |
-| [11 — Whole-file map](docs/11-save-map.md) | Every byte assigned to its game object by running the game's own loader: item box, Palicoes, Guild Cards, downloaded quests |
+| Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points |
+| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time |
+| Items | Item box, pouch and loadouts; sort and merge, max counts. Pouch stacks stop at each item's carry limit |
+| Equipment | Hunter and Palico equipment boxes: add pieces, levels, decorations, talismans |
+| Palicoes | Name, level and experience, forte, greeting, original owner |
+| Quests | Every quest cleared or not (seen and quest sets follow, as in game); says what unlocks a quest that is not on the board yet |
+| Requests | Villager requests: accepted (quest posted on the board) and completed |
+| Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards |
+| Monsters | Hunted and captured counts, smallest and largest sizes, Hunter's Notes |
+| Save map | Every byte range of the save, named from the game's own loader (read-only) |
 
-Machine-readable: [`data/monster-index.csv`](data/monster-index.csv), [`data/quest-index.csv`](data/quest-index.csv), [`data/request-index.csv`](data/request-index.csv), [`data/quest-unlock.csv`](data/quest-unlock.csv), [`data/request-offer.csv`](data/request-offer.csv), [`data/rotating-quests.csv`](data/rotating-quests.csv), [`data/npc-index.csv`](data/npc-index.csv), [`data/hunter-arts.csv`](data/hunter-arts.csv), [`data/save-map.csv`](data/save-map.csv), [`data/save-coverage.txt`](data/save-coverage.txt), [`data/offsets.json`](data/offsets.json)
+All three character slots are supported.
 
-## Quick reference
+## Keeping your save safe
 
-| Structure | Offset | Layout |
-|---|---|---|
-| Header nonce | `0x000014` | u32, changes every write, **not** a checksum |
-| Deviant permit counts | `0x18F4D8` | 18 × u8 |
-| Quests cleared | `base + 0x2C77` | 1509 bits, index = position in `quest_group`, see [`quest-index.csv`](data/quest-index.csv) |
-| Quests seen (NEW cleared) | `base + 0x2D77` | same indexing, `+0x100` bytes |
-| Quests failed | `base + 0x2E77` | same indexing, `+0x200` bytes; a failed quest counts as "met the monster" for the Hunter's Notes (DERIVED) |
-| Villager request flags | `base + 0x2C56D` | 1536-bit event flag map; per-request accepted/completed bits in [`request-index.csv`](data/request-index.csv). Accepted = quest posted on the board |
-| Quest unlock rules | script, not a save field | the board runs `script\check_quest_unlocked` per quest; it reads event flags, cleared bits, HR and the Hub star level. Rules in [`quest-unlock.csv`](data/quest-unlock.csv), evaluator [`tools/quest_unlock.py`](tools/quest_unlock.py) |
-| Request offer conditions | talk data, not a save field | per-NPC tables `table/npc/script/npc_NNN_td.ntd`; conditions in [`request-offer.csv`](data/request-offer.csv), evaluator [`tools/request_offer.py`](tools/request_offer.py) |
-| Mark every quest cleared | several fields | [`tools/complete_quests.py`](tools/complete_quests.py): cleared and seen bits, request accepted flags, quest set bits; dry run by default. See [05](docs/05-quests.md#what-all-quests-completed-takes) |
-| Rotating quests | `base + 0x504B` | u64, bit = row of [`rotating-quests.csv`](data/rotating-quests.csv); 51 quests are listed only while their bit is set; re-rolled after each completed quest |
-| Per-NPC talk hold bits | `base + 0x2C62D` | 3 × 24 bytes after the event flags, bit = row of [`npc-index.csv`](data/npc-index.csv). Set = NPC skips request offers / kind 9 talk / announcements until the next cleared quest (CONFIRMED by write), see [10](docs/10-npc-talk.md) |
-| Village / Hub star level | `base + 0x2C4DA` / `+0x2C4DC` | u16 each, 1–10 / 0–13. The game raises them when a quest is cleared and all urgents of a level are cleared (`quest_group` groups 24–46); not recomputed on load, see [05](docs/05-quests.md#star-levels--base--0x2c4da) |
-| Village contribution points | `base + 0x281B` / `+0x282B` | 4 × u32 low rank, 4 × u32 G rank: Bherna, Kokoto, Pokke, Yukumo (DERIVED) |
-| Progress word | `base + 0x2F77` | u32; bit 20 = HR limit released, bit 31 = quest 10646 was listed (from code) |
-| Quest sets completed | `base + 0x3187` | 100 bits, bit N = every quest of set N cleared (column `sets` of `quest-index.csv`); read by NPC talk and the award check. Bit 48 CONFIRMED by write |
-| Pending village rewards | `base + 0x2381E` | 23 × u8 counters of the activity manager (DERIVED) |
-| Deviant levels (cleared) | bit `0x18F989`.3 | quest indices 947–1174 (Special Permit), 228 bits |
-| Deviant levels (seen) | bit `0x18FA89`.3 | same layout, `+0x100` bytes |
-| Quest counter | `0x192AEA` | u16 |
-| Monster hunt tallies | `0x192B40` | u16, index 1–137 (`0x192B40 + 2i`) |
-| Monster capture counts | `0x192C52` | u16, index 1–137 (`0x192C52 + 2i`) |
-| Monster size records | `0x192D62` | (u16 min%, u16 max%), stride 4, index 1–137 |
-| Weapon usage — Village | `0x254713` | 15 × u16 |
-| Weapon usage — Hub | `0x254731` | 15 × u16 |
-| Weapon usage — Arena | `0x25474F` | 15 × u16 |
-| Quest history log | `0x254771` | 10 × `0xA0` records: date, u16 quest ID at `+6`, name at `+8` |
-| Character slot pointers | `0x34` | 3 × u32, relative to `0x24` |
-| Equipment box | `base + 0x62EE` | 2000 × 36 bytes; transmog at `+0x04` |
-| My Sets (dye lives here) | `base + 0x208C8` | stride `0x88`; pigment 5 × RGBA at `+0x6A` |
-| Hunter Arts unlocked | `base + 0x2C13` | 24-byte bitfield, IDs 1–70 and 83–190 |
-| Canteen dishes | `base + 0x2C67D` | 13-byte bitfield, 99 dishes |
-| Canteen ingredients | `base + 0x2F8F` | 6-byte bitfield, 45 ingredients |
-| Awards earned | `base + 0xC8115` | 132-bit bitfield, one run per location grid |
-| Item box | `base + 0x278` | 2300 × 19-bit slots (u12 item ID, u7 count), LSB-first bit stream; [`tools/items.py`](tools/items.py) |
-| Item loadouts | `base + 0x17CF` | 24 × 170 B: name char[42], 32 × (u16 item, u16 count) |
-| Item pouch | `base + 0x27BF` | 32 × 19-bit slots, same format |
-| Palico equipment box | `base + 0x17C2E` | 1000 × 36 B, equipment box format |
-| Palicoes | `base + 0x23BB6` | 84 × 324 B (+ 24 at `base + 0x2A606`): name +0, exp u32 +0x20, level +0x24, greeting +0x60, owner +0x9C |
-| Own Guild Card | `base + 0xC71BD` | 6328 B; weapon usage, history and awards live inside it |
-| Downloaded quests | `0xF899` / `0x127899` | 160 / 45 × `0x1C00`: u32 ID, u32 size, ARC; shared by all slots; [`tools/event_quests.py`](tools/event_quests.py) |
+- **Nothing is written until you press Write.** Edits are staged; Review lists them
+  in game terms, each one can be undone, and the page shows what each value was.
+- **Write refuses while an emulator is running**: Ryujinx (and others) overwrite the
+  save when they exit.
+- **A snapshot is taken before every write** (and before every restore). Snapshots
+  restores the whole save folder from any of them.
+- The emulator keeps two copies of the save, each with a backup; all four files get
+  the same bytes and keep their own headers. Each write is checked by reading it back.
 
-## Confidence levels
+Keep your own backup anyway. This is an unofficial tool.
 
-Every claim in these documents carries one of three tags:
+## Building from source
 
-- **CONFIRMED** — verified by at least two independent lines of evidence, normally a
-  controlled write plus an observed in-game change, or two separate diffs agreeing.
-- **DERIVED** — follows from a confirmed structure plus a single observation.
-  Very likely correct, not independently cross-checked.
-- **UNRESOLVED** — known to exist, layout or meaning not established.
+Needs a stable Rust toolchain (edition 2024).
 
-Nothing here is from official documentation or leaked source. It is all inference
-from observed bytes, and it is incomplete.
+```bash
+cd app
+cargo build --release
+```
 
-## Open questions
+The binary is `app/target/release/mhgu-editor`. `app/packaging/build.sh` makes the
+AppImage and the Windows `.exe` (see its header for the toolchain).
 
-- **Multiple character slots — answered.** The game's loader reads all three
-  slots with the same chain at a fixed stride, so every per-character offset is
-  `base + const` with base from the pointer table at `0x34`
-  ([11](docs/11-save-map.md#method)). Confirmed with two more real characters
-  ([07](docs/07-equipment.md#character-slots)).
-  **An editor should resolve the base through the pointer, not hard-code it.** The
-  tools in [`tools/`](tools) do, and take `--slot 1|2|3` (default 1).
-- **Region portability.** Only the EU/western build was examined. Japanese builds
-  may differ.
-- **Monster indices 106–112** are unused (`dummy1`–`dummy7` in the game's name
-  table), and index 134 is an empty slot. Names for 105 and 113–137 come from the
-  game's name table and agree with the editor; they were not read back in-game — see
-  [02 — Monster records](docs/02-monster-records.md#the-games-name-table).
+**Game assets.** Item, equipment, skill and monster names and icons come from the
+game's own files. They are Capcom's and are not in this repository in readable form.
+Without them the editor still works, with `#ID` names and placeholder icons. With
+your own dump of the game:
+
+```bash
+python3 tools/build_assets.py path/to/base_romfs.bin
+```
+
+then rebuild. [`app/assets/README.md`](app/assets/README.md) explains how the release
+builds get them.
+
+## Repository layout
+
+| Path | |
+|---|---|
+| [`app/core`](app/core) | `mhgu-save`: the save format as a Rust library (read, edit, write every copy, snapshots) |
+| [`app/gui`](app/gui) | The editor (Rust + [Slint](https://slint.dev)) |
+| [`app/packaging`](app/packaging) | Release builds, asset pack sealing |
+| [`docs/`](docs/README.md) | **The save format notes**: container, quests, monsters, equipment, items, awards, NPC talk, a whole-file map |
+| [`data/`](data) | Machine-readable tables: quest, request, monster and NPC indexes, unlock rules, the whole-file map |
+| [`tools/`](tools) | Python scripts the notes use: readers, the quest unlock evaluator, the asset builder, the loader emulation |
+
+Start with [docs/README.md](docs/README.md) for the format itself, its quick-reference
+table and how each claim was established.
 
 ## Licence
 
-Released into the public domain. Use freely, including in save editors.
-No warranty — verify against your own data before writing to anyone's save.
+Copyright © 2026 Scrimas.
+
+This program is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version. It is
+distributed WITHOUT ANY WARRANTY; see [`LICENSE`](LICENSE). This covers the whole
+repository: the editor, the tools, the notes and the data.
+
+Monster Hunter and its assets are © CAPCOM. This is an unofficial fan project, not
+affiliated with or endorsed by Capcom or Nintendo. The editor's UI toolkit,
+[Slint](https://slint.dev), is used under its Royalty-free 2.0 licence.
