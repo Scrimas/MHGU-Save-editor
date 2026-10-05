@@ -4,7 +4,9 @@
 
 Every byte or bit read of the game's loader becomes a row. Repeated reads (same loader
 pc sequence at a constant stride) collapse into one array row. Rows are labelled from
-LABELS (offsets relative to the character base or absolute, see docs/11-save-map.md).
+LABELS (offsets relative to the character base or absolute, see docs/11-save-map.md); a
+single-copy row that holds smaller labelled fields is cut at their edges. A CONFIRMED tag
+that rests on the save timeline has its check in tools/evidence/run.py.
 """
 import os, sys, pickle, csv, collections
 
@@ -30,13 +32,15 @@ MANAGERS = {
 LABELS = [
     ('abs', 0x0, 0x24, 'Switch header (nonce at 0x14)', 'CONFIRMED'),
     ('abs', 0x24, 0x1c, 'body header: version 0xc6, 1, block A/B offsets, 3 character offsets', 'CONFIRMED'),
-    ('char', 0x0, 0x278, 'character header (name +0, HR +0x28, art slots +0x2C, equipped cache +0x110, pigment +0x24C)', 'DERIVED'),
+    ('char', 0x0, 0x278, 'character header (name +0, play time +0x20, funds +0x24, HR +0x28, art slots +0x2C, equipped cache +0x110, pigment +0x24C)', 'CONFIRMED'),
     ('char', 0x278, 0x1557, 'item box: 2300 x (u12 item ID, u7 count), bit stream', 'CONFIRMED'),
-    ('char', 0x17CF, 0xFF0, 'item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))', 'DERIVED'),
+    ('char', 0x17CF, 0xFF0, 'item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))', 'CONFIRMED'),
     ('char', 0x27BF, 0x4C, 'item pouch: 32 x (u12 item ID, u7 count), bit stream', 'CONFIRMED'),
     ('char', 0x280B, 0x400, 'S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)', 'DERIVED'),
-    ('char', 0x281B, 0x10, 'Village contribution points, low rank', 'DERIVED'),
-    ('char', 0x282B, 0x10, 'Village contribution points, G rank', 'DERIVED'),
+    ('char', 0x280F, 0x4, 'funds (zenny), at most 9999999; slot header +0x24 copy', 'CONFIRMED'),
+    ('char', 0x2817, 0x4, 'Wycademy points, added per quest', 'CONFIRMED'),
+    ('char', 0x281B, 0x10, 'Village contribution points, low rank', 'CONFIRMED'),
+    ('char', 0x282B, 0x10, 'Village contribution points, G rank', 'CONFIRMED'),
     ('char', 0x283C, 0x12, 'deviant permit counts', 'CONFIRMED'),
     ('char', 0x2C13, 0x18, 'Hunter Arts unlocked', 'CONFIRMED'),
     ('char', 0x2C63, 0xC, 'Palico skills learned: 96 bits, bit = ot_skl entry (S+0xd78)', 'DERIVED'),
@@ -46,8 +50,8 @@ LABELS = [
     ('char', 0x2E77, 0x100, 'quests failed bitmap', 'DERIVED'),
     ('char', 0x2F77, 0x4, 'progress word', 'DERIVED'),
     ('char', 0x2F8F, 0x6, 'Canteen ingredients (bit = kitchenListMenu ingredient, data/canteen.csv)', 'CONFIRMED'),
-    ('char', 0x3157, 0x14, 'awards, game-side map', 'DERIVED'),
-    ('char', 0x316B, 0x14, 'award notices', 'DERIVED'),
+    ('char', 0x3157, 0x14, 'awards, game-side map', 'CONFIRMED'),
+    ('char', 0x316B, 0x14, 'award notices', 'CONFIRMED'),
     ('char', 0x3187, 0x10, 'quest sets completed', 'CONFIRMED'),
     ('char', 0x3197, 0x10, 'quest set notices', 'DERIVED'),
     # S fields named from the code (docs/11-save-map.md#the-save-object-s). "NEW" = the saved notice copy of
@@ -57,31 +61,31 @@ LABELS = [
     ('char', 0x2C2B, 0x18, 'Hunter Arts unlocked, runtime NEW copy (S+0xd3c)', 'DERIVED'),
     ('char', 0x2C43, 0x18, 'Hunter Arts unlocked, NEW (S+0xd54)', 'DERIVED'),
     ('char', 0x2C5B, 0x4, '31-bit map committed from S+0xd74 at quest end, counted by Alchemy (S+0xd6c)', 'DERIVED'),
-    ('char', 0x2C5F, 0x8, 'u32 map (S+0xd70) + pending 31-bit map set by monster code (S+0xd74)', 'DERIVED'),
+    ('char', 0x2C5F, 0x4, 'u32 map (S+0xd70); the pending map S+0xd74 is not saved', 'DERIVED'),
     ('char', 0x2F7F, 0x8, 'progress map NEW (S+0x968)', 'DERIVED'),
-    ('char', 0x2F87, 0x8, 'flagship monster story events, bits 2-8 set by the quest flow (S+0x970) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x2F87, 0x4, 'flagship monster story events, bits 2-8 set by the quest flow (S+0x970; runtime NEW copy S+0x974 not saved)', 'DERIVED'),
     ('char', 0x2F8B, 0x4, 'flagship monster story events NEW (S+0x978)', 'DERIVED'),
     ('char', 0x2F97, 0x8, 'Canteen ingredients NEW (S+0x98c)', 'DERIVED'),
-    ('char', 0x2F9F, 0x8, 'Poogie costumes owned, 64 bits (S+0x994)', 'DERIVED'),
+    ('char', 0x2F9F, 0x8, 'Poogie costumes owned, 64 bits (S+0x994)', 'CONFIRMED'),
     ('char', 0x2FA7, 0x8, 'Poogie costumes NEW (S+0x9a4)', 'DERIVED'),
-    ('char', 0x2FAF, 0x8, "deviants: bit i = deviant i's first Special Permit quest unlocked (S+0x9ac) + runtime NEW copy", 'DERIVED'),
+    ('char', 0x2FAF, 0x4, "deviants: bit i = deviant i's first Special Permit quest unlocked (S+0x9ac; runtime NEW copy not saved)", 'DERIVED'),
     ('char', 0x2FB3, 0x4, 'deviants unlocked, NEW (S+0x9b4)', 'DERIVED'),
-    ('char', 0x2FB7, 0x8, 'deviants offered by the Courier, 18 bits (S+0x9b8) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x2FB7, 0x4, 'deviants offered by the Courier, 18 bits (S+0x9b8; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x2FBB, 0x4, 'deviants offered by the Courier, NEW (S+0x9c0)', 'DERIVED'),
-    ('char', 0x2FBF, 0xC, 'vestigial map S+0x9c4 with NEW copies: only the transfer converter 0x51e6d8 writes it, no reader', 'DERIVED'),
-    ('char', 0x2FC7, 0xA4, 'Guild Card title words, part 1 unlocked: 1312 bits, 1309 words (GC_Title_1)', 'DERIVED'),
-    ('char', 0x306B, 0xA4, 'Guild Card title words, part 1 NEW', 'DERIVED'),
+    ('char', 0x2FBF, 0x8, 'vestigial map S+0x9c4 and its NEW copy S+0x9cc: only the transfer converter 0x51e6d8 writes it, no reader', 'DERIVED'),
+    ('char', 0x2FC7, 0xA4, 'Guild Card title words, part 1 unlocked: 1312 bits, 1309 words (GC_Title_1); 79 from the start', 'CONFIRMED'),
+    ('char', 0x306B, 0xA4, 'Guild Card title words, part 1 NEW', 'CONFIRMED'),
     ('char', 0x310F, 0x10, 'Guild Card title words, part 2 unlocked: 121 words (GC_Title_2)', 'DERIVED'),
     ('char', 0x311F, 0x10, 'Guild Card title words, part 2 NEW', 'DERIVED'),
-    ('char', 0x312F, 0x14, 'Guild Card scenes unlocked: 136 (GC_background)', 'DERIVED'),
+    ('char', 0x312F, 0x14, 'Guild Card scenes unlocked: 136 (GC_background)', 'CONFIRMED'),
     ('char', 0x3143, 0x14, 'Guild Card scenes NEW', 'DERIVED'),
     ('char', 0x317F, 0x4, 'Guild Card poses unlocked: 22', 'DERIVED'),
     ('char', 0x3183, 0x4, 'Guild Card poses NEW', 'DERIVED'),
     ('char', 0x31A7, 0x24, 'Smithy decorations listed: bit = rDecoCreateData entry', 'DERIVED'),
     ('char', 0x31CB, 0x24, 'Smithy decorations NEW', 'DERIVED'),
-    ('char', 0x31EF, 0x8, 'Trader item list 0, 32 bits (S+0x3488) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x31EF, 0x4, 'Trader item list 0, 32 bits (S+0x3488; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x31F3, 0x4, 'Trader item list 0 NEW', 'DERIVED'),
-    ('char', 0x31F7, 0x8, 'Trader item list 1, 32 bits (S+0x3494) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x31F7, 0x4, 'Trader item list 1, 32 bits (S+0x3494; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x31FB, 0x4, 'Trader item list 1 NEW', 'DERIVED'),
     ('char', 0x31FF, 0x38, 'Trader: Guild Card title words for sale, 448 bits (tradeLimitedHonorList has 442)', 'DERIVED'),
     ('char', 0x3237, 0x38, 'Trader title words NEW', 'DERIVED'),
@@ -91,14 +95,14 @@ LABELS = [
     ('char', 0x329B, 0x4, 'Trader pet costumes NEW', 'DERIVED'),
     ('char', 0x329F, 0x4, 'Trader coin-ticket trades, bit = rTradeCoinTicketList entry; set only by the transfer (S+0x3590)', 'DERIVED'),
     ('char', 0x32A3, 0x4, 'Trader coin-ticket trades NEW (read by the Cross ticket screen and the Trader)', 'DERIVED'),
-    ('char', 0x32A7, 0x4, 'Trader delivery requests offered, bit = rTradeDeliveryList entry, set once the request flag is raised (S+0x359c)', 'DERIVED'),
+    ('char', 0x32A7, 0x4, 'Trader delivery requests offered, bit = rTradeDeliveryList entry, set once the request flag is raised (S+0x359c)', 'CONFIRMED'),
     ('char', 0x32AB, 0x4, 'Trader delivery requests offered NEW (S+0x35a4)', 'DERIVED'),
-    ('char', 0x32AF, 0x4, 'delivery requests delivered: bit b = kind-1 request b, 1-13 (S+0x35a8; talk condition 41)', 'DERIVED'),
+    ('char', 0x32AF, 0x4, 'delivery requests delivered: bit b = kind-1 request b, 0-12 (S+0x35a8; talk condition 41)', 'CONFIRMED'),
     ('char', 0x32B3, 0x4, "Hunter's Notes tips read: clear bit = NEW (S+0x35ac)", 'DERIVED'),
     ('char', 0x32B7, 0x10, "Hunter's Notes, large monsters: 123 bits (S+0x35b0)", 'DERIVED'),
     ('char', 0x32C7, 0x10, "Hunter's Notes, large monsters NEW (S+0x35c0)", 'DERIVED'),
     ('char', 0x32D7, 0x4, "Hunter's Notes, second list: 30 bits (S+0x35d0)", 'DERIVED'),
-    ('char', 0x32DB, 0x8, 'DLC Palicoes taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)', 'DERIVED'),
+    ('char', 0x32DB, 0x8, 'DLC item packs taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)', 'CONFIRMED'),
     ('char', 0x32E3, 0x4, 'flags: bit 0 network-mode switch (mirrored to sFestaNetwork), bit 1 daily quest bonus received (S+0x3668)', 'DERIVED'),
     ('char', 0x32E7, 0x20, 'shop list 1 listed: 256 bits (uUIGuildShop, S+0xd98)', 'DERIVED'),
     ('char', 0x3307, 0x20, 'shop list 1 NEW (S+0xdd8)', 'DERIVED'),
@@ -129,15 +133,15 @@ LABELS = [
     ('char', 0x5023, 0x28, 'Arena equipment sets NEW (S+0xcf0)', 'DERIVED'),
     ('char', 0x504B, 0x8, 'rotating quests bitmap', 'CONFIRMED'),
     ('char', 0x5053, 0x4, 'bit 0: Moofah Fleeceball given since the last quest (0x6be478; cleared by the quest result 0x38b948, S+0x3670)', 'DERIVED'),
-    ('char', 0x505B, 0x8, 'Jukebox songs unlocked (S+0x35e4) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x505B, 0x4, 'Jukebox songs unlocked (S+0x35e4; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x505F, 0x4, 'Jukebox songs NEW (S+0x35ec)', 'DERIVED'),
-    ('char', 0x5063, 0x18, 'Lab upgrades offered, 96 bits (S+0x35f0) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x5063, 0xC, 'Lab upgrades offered, 96 bits (S+0x35f0; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x506F, 0xC, 'Lab upgrades offered NEW (S+0x3608)', 'DERIVED'),
-    ('char', 0x507B, 0x18, 'Lab upgrades installed, bit = researchReinforce ID - 1; bits 0-2 = Item Box expansions (S+0x3614) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x507B, 0xC, 'Lab upgrades installed, bit = researchReinforce ID - 1; bits 0-2 = Item Box expansions (S+0x3614; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x5087, 0xC, 'Lab upgrades installed NEW (S+0x362c)', 'DERIVED'),
-    ('char', 0x5093, 0x8, 'supply drop sets unlocked (Provision Division, S+0x3638) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x5093, 0x8, 'supply drop sets unlocked (Provision Division, S+0x3638; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x509B, 0x8, 'supply drop sets NEW (S+0x3648)', 'DERIVED'),
-    ('char', 0x50A3, 0x8, 'Cross coin trades unlocked (S+0x3650) + runtime NEW copy', 'DERIVED'),
+    ('char', 0x50A3, 0x8, 'Cross coin trades unlocked (S+0x3650; runtime NEW copy not saved)', 'DERIVED'),
     ('char', 0x50AB, 0x8, 'Cross coin trades NEW (S+0x3660)', 'DERIVED'),
     ('char', 0x50B3, 0x4, "deviants: bit i = deviant i's EX Special Permit quest (level 16) cleared (S+0xd18)", 'DERIVED'),
     ('char', 0x50B7, 0x4, 'deviant last level cleared, NEW (S+0xd20)', 'DERIVED'),
@@ -151,7 +155,7 @@ LABELS = [
     ('char', 0x5E3E, 0x8, 'u64 Nintendo Account ID linked to the save-transfer server (S+0x4408; shared copy at file 0x12C2D6)', 'DERIVED'),
     ('char', 0x5E46, 0x4, 'S+0x4410: reserved, only save / load touch it', 'DERIVED'),
     ('char', 0x5E4A, 0x4, 'Courier flags, u32 (S+0x4414)', 'DERIVED'),
-    ('char', 0x5E4E, 0x4, 'quest counter, u32: completed quests except tours and Training (S+0x4418, 0x526f70)', 'DERIVED'),
+    ('char', 0x5E4E, 0x4, 'quest counter, u32: completed quests except tours and Training (S+0x4418, 0x526f70)', 'CONFIRMED'),
     ('char', 0x5E52, 0x4, 'quest counter reference: both folded into [210, 420) by 0x5279e0 (S+0x441c)', 'DERIVED'),
     ('char', 0x5E56, 0x4, 'Courier points: added per quest, turned into Special Permits (S+0x4420)', 'DERIVED'),
     ('char', 0x5E5A, 0x24, 'Special Permit points per deviant, 18 x u16, at most 9999 (100 = 1 permit, S+0x4424)', 'DERIVED'),
@@ -161,10 +165,10 @@ LABELS = [
     ('char', 0x5FB8, 0x112, 'monster capture counts, u16 index 1-137', 'CONFIRMED'),
     ('char', 0x60CA, 0x224, 'monster size records, (u16 min, u16 max) index 1-137', 'CONFIRMED'),
     ('char', 0x62EE, 0x11940, 'equipment box: 2000 x 36 B', 'CONFIRMED'),
-    ('char', 0x17C2E, 0x8CA0, 'Palico equipment box: 1000 x 36 B (types 22-24)', 'DERIVED'),
+    ('char', 0x17C2E, 0x8CA0, 'Palico equipment box: 1000 x 36 B (types 22-24)', 'CONFIRMED'),
     ('char', 0x208CE, 0x1540, 'My Sets: 40 x 136 B (name +0, box indices +0x2A, pigment +0x64, default flags +0x7D, style +0x82, Hunter Arts +0x83)', 'CONFIRMED'),
     ('char', 0x21E0E, 0x660, 'Palico equipment sets: 24 x 68 B (name char[42], 3 x u16 box index)', 'DERIVED'),
-    ('char', 0x22497, 0x178, 'items obtained: bit = item ID, 94 x u32 (sItem +0x9c)', 'DERIVED'),
+    ('char', 0x22497, 0x178, 'items obtained: bit = item ID, 94 x u32 (sItem +0x9c)', 'CONFIRMED'),
     ('char', 0x2260F, 0x88, 'Trader cargo 1, 136 B (sItem +0xea4)', 'DERIVED'),
     ('char', 0x22697, 0x88, 'Trader cargo 2, 136 B (sItem +0xf2c)', 'DERIVED'),
     ('char', 0x2271F, 0x88, 'Trader cargo 3, 136 B (sItem +0xfb4)', 'DERIVED'),
@@ -172,36 +176,47 @@ LABELS = [
     ('char', 0x2380F, 0xA, 'village tier bytes (4) and 6 bytes (sItem +0x8c)', 'DERIVED'),
     ('char', 0x23819, 0x1, 'Trader cargo shipments counter, pays pending reward byte 1 (sItem +0x6a)', 'DERIVED'),
     ('char', 0x2381A, 0x1, 'low-rank contribution points accumulator, 250 = 2 to pending byte 3 (sItem +0x6b)', 'DERIVED'),
-    ('char', 0x2381B, 0x2, 'G-rank contribution points accumulator, 800 = 2 to pending byte 22 (sItem +0x6c)', 'DERIVED'),
+    ('char', 0x2381B, 0x2, 'G-rank contribution points accumulator, 800 = 2 to pending byte 22 (sItem +0x6c)', 'CONFIRMED'),
     ('char', 0x2381D, 0x1, 'Footbath uses, 15 = 3 to pending byte 4 (sItem +0x6e)', 'DERIVED'),
     ('char', 0x2381E, 0x17, 'activity: pending village rewards', 'DERIVED'),
     ('char', 0x23835, 0x6, 'staged quest-clear counters: G-rank 1-4 star clears, villager-request clears (sItem +0x86)', 'DERIVED'),
+    ('char', 0x23835, 0x1, 'staged quest-clear counter 0: G-rank 1-4 star quests cleared (sItem +0x86)', 'CONFIRMED'),
     ('char', 0x2383B, 0x19, 'Combination List recipes combined, bit = itemPreData record; award 27 at 130 (sItem +0x50)', 'DERIVED'),
     ('char', 0x23854, 0x100, 'Combination List order, pouch list: flags byte (bit 1 custom order, bit 0 filter), then itemPreData recipe index per position (sItem +0x214)', 'DERIVED'),
     ('char', 0x23954, 0x100, 'Combination List order, item box list, same form (sItem +0x314)', 'DERIVED'),
     ('char', 0x23A54, 0x4, 'Horns Coins traded in total; award 104 at 2000 (sItem +0x98)', 'DERIVED'),
     ('char', 0x23A58, 0x145, 'player record (loaded copy of the slot header fields)', 'DERIVED'),
-    ('char', 0x23A59, 0xE0, 'player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 SP Art bits per art slot; bytes 8-223 unused by a hunter (Palico parameters); first 4 u16 copied to the Guild Card +0x4C', 'DERIVED'),
-    ('char', 0x23B39, 0xE, 'equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none', 'DERIVED'),
-    ('char', 0x23B47, 0xC, 'weapon class (+0; 15 = Prowler) and character creation choices (+4 = gender)', 'DERIVED'),
+    ('char', 0x23A59, 0xE0, 'player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 SP Art bits per art slot; bytes 8-223 unused by a hunter (Palico parameters)', 'DERIVED'),
+    ('char', 0x23A59, 0x8, 'equipped Hunter Arts: 3 x u16 art ID, u16 SP Art bits per art slot', 'CONFIRMED'),
+    ('char', 0x23B39, 0xE, 'equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none', 'CONFIRMED'),
+    ('char', 0x23B47, 0xC, 'weapon class (+0; 15 = Prowler), gender (+4), hunting style (+5)', 'DERIVED'),
+    ('char', 0x23B47, 0x1, 'weapon class: equipped weapon type - 7 (15 = Prowler)', 'CONFIRMED'),
+    ('char', 0x23B4C, 0x1, 'hunting style: 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor', 'CONFIRMED'),
     ('char', 0x23B77, 0x4, 'u32: five 5-bit colour modes, one per pigment slot (0 RGBA, 2+ preset v-2; header +0x274, Guild Card +0x48)', 'DERIVED'),
     ('char', 0x23B53, 0x24, 'current pigment, 5 x RGBA + 16 B', 'DERIVED'),
-    ('char', 0x23B7B, 0x2, 'current pigment default-colour flags', 'DERIVED'),
-    ('char', 0x23B7D, 0x20, 'hunter name', 'DERIVED'),
-    ('char', 0x23BB6, 0x6A50, 'Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level u8 +0x24, greeting +0x60, owner +0x9C)', 'DERIVED'),
-    ('char', 0x2A606, 0x1E60, 'Palicoes, second list: 24 x 324 B, same record', 'DERIVED'),
-    ('char', 0x2C6BD, 0x9AB00, 'Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding', 'DERIVED'),
+    ('char', 0x23B53, 0x14, 'current pigment: 5 x RGBA', 'CONFIRMED'),
+    ('char', 0x23B7B, 0x2, 'current pigment default-colour flags', 'CONFIRMED'),
+    ('char', 0x23B7D, 0x20, 'hunter name', 'CONFIRMED'),
+    ('char', 0x23BB6, 0x6A50, 'Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level byte +0x24 (seen up to 63), greeting +0x60, owner +0x9C)', 'CONFIRMED'),
+    ('char', 0x2A606, 0x1E60, 'Palicoes for hire: 24 x 324 B, same record, rerolled after each counted quest', 'CONFIRMED'),
+    ('char', 0x2C6BD, 0x9AB00, 'Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding', 'CONFIRMED'),
     ('char', 0xC71BD, 0x18B8, 'own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)', 'DERIVED'),
+    ('char', 0xC71BD, 0x16, 'own Guild Card: hunter name, UTF-16', 'CONFIRMED'),
+    ('char', 0xC7211, 0x134, 'own Guild Card: equipment, 7 x 44 B (a snapshot taken at an unidentified trigger, not on every gear change)', 'CONFIRMED'),
+    ('char', 0xC8129, 0x2B8, 'own Guild Card: monster log, 87 x 8 B (u16 size max, u16 size min, hunts and captures summed per family, crown bits)', 'CONFIRMED'),
     ('char', 0xC8A75, 0x1130, 'list 1 card info: 100 x 44 B (date received +0, comment +4, Unity +0x1C, card type +0x20, sender ID +0x21)', 'DERIVED'),
     ('char', 0xC9BA5, 0x4D580, 'Guild Card inbox (list 2): 50 elements + padding', 'DERIVED'),
     ('char', 0x117125, 0x708, 'Guild Card inbox info: 50 x 36 B (date received +0)', 'DERIVED'),
     ('char', 0x11782D, 0x114, 'StreetPass Palico to send: one 276 B record (sender ID +0, name UTF-16 +8, appearance +0x1E, 9 colours +0x2C, parameters +0x50)', 'DERIVED'),
     ('char', 0x117941, 0x35E8, 'Palico inbox: 50 x 276 B, same record', 'DERIVED'),
     ('char', 0x11AF29, 0x708, 'Palico inbox info: 50 x 36 B', 'DERIVED'),
-    ('char', 0x11B631, 0x1868, 'guest hunters: hunters met online (UTF-16 name, greeting, hired copies)', 'DERIVED'),
+    ('char', 0x11B631, 0x1868, 'guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs', 'DERIVED'),
+    ('char', 0x11B693, 0x17DE, 'guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest', 'CONFIRMED'),
     ('char', 0x11CE99, 0xA0, 'tutorial flags (8 + 152 B)', 'DERIVED'),
     ('char', 0x11CF39, 0x107, 'Meownster Hunters (sMonNyan) state', 'DERIVED'),
-    ('char', 0x11D040, 0x2883, 'chat phrases: 104 B slots (auto-chat lines)', 'DERIVED'),
+    ('char', 0x11D040, 0x2883, 'chat phrases: 0x49 B header, then 104 B text slots', 'DERIVED'),
+    ('char', 0x11D089, 0x1D40, 'chat phrases: 72 x 104 B = 3 copies of the 24 shortcut phrases', 'CONFIRMED'),
+    ('char', 0x11EDC9, 0xAF8, 'chat phrases: 27 x 104 B = 3 copies of the 9 auto-chat lines', 'CONFIRMED'),
     ('char', 0x2C4DA, 0x2, 'Village star level', 'CONFIRMED'),
     ('char', 0x2C4DC, 0x2, 'Hub star level', 'CONFIRMED'),
     ('char', 0x2C56D, 0xC0, 'event flags (villager requests)', 'CONFIRMED'),
@@ -209,10 +224,11 @@ LABELS = [
     ('char', 0x2C675, 0x4, 'random word (talk conditions)', 'DERIVED'),
     ('char', 0x2C679, 0x4, 'second random word, copied with the first (0x240e4c) and used the same way (0x24217c)', 'DERIVED'),
     ('char', 0x2246E, 0x1D, 'game options, 29 bytes (Game / Chat / Network option windows, quest camera; sGameControl +0x5e)', 'DERIVED'),
-    ('char', 0x2248B, 0x4, 'play time in seconds (sGameControl +0x34; slot header +0x20, Guild Card +0x914)', 'DERIVED'),
-    ('char', 0x2248F, 0x4, 'f32 play-time remainder in frames, carried into the seconds at 60 (sGameControl +0x38, 0x3f83a8)', 'DERIVED'),
+    ('char', 0x2248B, 0x4, 'play time in seconds (sGameControl +0x34; slot header +0x20, Guild Card +0x914)', 'CONFIRMED'),
+    ('char', 0x2248F, 0x4, 'f32 play-time remainder in frames, carried into the seconds at 60 (sGameControl +0x38, 0x3f83a8)', 'CONFIRMED'),
     ('char', 0x22493, 0x4, 'u32 copied to the Guild Card +0x86C (sGameControl +0x3c)', 'DERIVED'),
     ('char', 0x23B9D, 0x5, 'Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)', 'DERIVED'),
+    ('char', 0x23B9E, 0x1, 'hunting buddy 1: Palico list index, 0xFF = none', 'CONFIRMED'),
     ('char', 0x23BA2, 0x14, 'Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)', 'DERIVED'),
     ('char', 0x2C466, 0x28, 'Palicoes that reached level 50: 5 x 8 B ID; award 50 (sOtomo +0x13910)', 'DERIVED'),
     ('char', 0x2C48E, 0x10, 'Palico Dojo teaching session: 4 indices, kind, skill/move, u16 in progress, two u32 (sOtomo +0x48a78)', 'DERIVED'),
@@ -222,7 +238,7 @@ LABELS = [
     ('char', 0x2C4D8, 0x2, 'Dark Piece / Dark Stone counts of the cut Cave feature (sVillage +0x472, +0x473)', 'DERIVED'),
     ('char', 0x2C4DE, 0x4, 'village pet affection, u8 per village, at most 10; 6 unlocks a title word (sVillage +0x3e4)', 'DERIVED'),
     ('char', 0x2C4E2, 0x1, 'Moofah gifts received, at most 10; award 49 (sVillage +0x471)', 'DERIVED'),
-    ('char', 0x2C4E3, 0x80, 'village pet names, 4 x char[32] (Moofy, Poogie x 3; sVillage +0x3e8)', 'DERIVED'),
+    ('char', 0x2C4E3, 0x80, 'village pet names, 4 x char[32] (Moofy, Poogie x 3; sVillage +0x3e8)', 'CONFIRMED'),
     ('char', 0x2C563, 0x4, 'village pet costumes, u8 per pet, below 40 (sVillage +0x468, pet menu)', 'DERIVED'),
     ('char', 0x2C567, 0x6, 'village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)', 'DERIVED'),
     ('char', 0x2C6A5, 0x4, 'flags latched from another object (sFlagChecker +0x20, 0x3f43e8)', 'DERIVED'),
@@ -233,8 +249,8 @@ LABELS = [
     ('char', 0xC7A77, 0x1E, 'Guild Card weapon usage, Village', 'CONFIRMED'),
     ('char', 0xC7A95, 0x1E, 'Guild Card weapon usage, Hub', 'CONFIRMED'),
     ('char', 0xC7AB3, 0x1E, 'Guild Card weapon usage, Arena', 'CONFIRMED'),
-    ('char', 0xC7AD1, 0x4, 'Guild Card play time (s)', 'DERIVED'),
-    ('char', 0xC7AD5, 0x640, 'quest history log, 10 x 160 B', 'DERIVED'),
+    ('char', 0xC7AD1, 0x4, 'Guild Card play time (s), refreshed when the card is rebuilt (quest end)', 'CONFIRMED'),
+    ('char', 0xC7AD5, 0x640, 'quest history log, 10 x 160 B, newest first', 'CONFIRMED'),
     ('char', 0xC8115, 0x11, 'Guild Card awards', 'CONFIRMED'),
     ('abs', 0x40, 0x4, 'bonus packs loaded: bit N = privilege pack N (S+0x420, shared)', 'DERIVED'),
     ('abs', 0x44, 0x6, '3 x u16 written only by the transfer 0x52171c, no reader (S+0x3676)', 'DERIVED'),
@@ -243,23 +259,23 @@ LABELS = [
     ('abs', 0x4D, 0x1, 'rumble on/off (S+0x367f)', 'DERIVED'),
     ('abs', 0xB2A2, 0x2, 'sGameControl +0x5c (no reader) and +0x5d (3DS Circle Pad Pro in use)', 'DERIVED'),
     ('abs', 0xB2A4, 0x1, 'text language, 0 = from the system language (sGameControl +0xa5)', 'DERIVED'),
-    ('abs', 0xB2A5, 0x8, 'DLC item packs received, 50 bits (sPrivilege +0xf34)', 'DERIVED'),
-    ('abs', 0xB2AD, 0x8, 'DLC Palicoes received, 50 bits (sPrivilege +0xf3c)', 'DERIVED'),
+    ('abs', 0xB2A5, 0x8, 'DLC Palicoes received, 50 bits, bit = DLC Palico info entry (sPrivilege +0xf34)', 'CONFIRMED'),
+    ('abs', 0xB2AD, 0x8, 'DLC item packs received, 50 bits, bit = pack record, catalog ID 507 + bit (sPrivilege +0xf3c)', 'CONFIRMED'),
     ('abs', 0xB2B5, 0x4, 'DLC extras received, download type 4: 9 entries; bits 0-3 unlock Guild Card poses (sPrivilege +0xf44)', 'DERIVED'),
     ('abs', 0xB2B9, 0xC, 'DLC extras received, download type 5: 80 Guild Card scenes sold by the Trader (sPrivilege +0xf48)', 'DERIVED'),
     ('abs', 0xB2C5, 0x4, 'DLC extras received, download type 6: 10 pet costumes sold by the Trader (sPrivilege +0xf54)', 'DERIVED'),
     ('abs', 0xB2C9, 0x28, 'DLC extras received, download type 7: 300 title words sold by the Trader (sPrivilege +0xf58)', 'DERIVED'),
-    ('abs', 0xB2F1, 0x8, 'challenge quests stored, 45 bits = block B slots (sPrivilege +0xf80)', 'DERIVED'),
-    ('abs', 0xB2F9, 0x14, 'event quests stored, 160 bits = block B slots (sPrivilege +0xf88)', 'DERIVED'),
+    ('abs', 0xB2F1, 0x8, 'challenge quest records in use, 45 bits, bit = slot of the record store 0x176499, not of the packed archive store (sPrivilege +0xf80)', 'CONFIRMED'),
+    ('abs', 0xB2F9, 0x14, 'event quests stored, 160 bits; as many set bits as stored quests, but the index is not the block B slot (sPrivilege +0xf88)', 'DERIVED'),
     ('abs', 0xB30D, 0x4, 'u32 compared with the download catalog stamp +0xe5c (sPrivilege +0xf9c)', 'DERIVED'),
-    ('abs', 0x4E, 0x3F48, 'Palicoes, common pool: 50 x 324 B (DLC Palicoes, owner "Capcom")', 'DERIVED'),
+    ('abs', 0x4E, 0x3F48, 'Palicoes, common pool: 50 x 324 B (DLC Palicoes, owner "Capcom")', 'CONFIRMED'),
     ('abs', 0x3F96, 0x2580, 'blacklist: 100 x 96 B (64 + 32)', 'DERIVED'),
-    ('abs', 0x6516, 0x4D8C, 'sGuildCard common: 3 x 6616 B + 1 B', 'DERIVED'),
-    ('abs', 0xB311, 0x1450, 'DLC item pack list: 50 x 104 B', 'DERIVED'),
-    ('abs', 0xC761, 0x3138, 'DLC Palico info, 12600 B', 'DERIVED'),
+    ('abs', 0x6516, 0x4D8C, 'sGuildCard common: 3 x 6616 B + 1 B, then 3 unused bytes', 'DERIVED'),
+    ('abs', 0xB311, 0x1450, 'DLC item pack list: 50 x 104 B', 'CONFIRMED'),
+    ('abs', 0xC761, 0x3138, 'DLC Palico info, 12600 B', 'CONFIRMED'),
     ('abs', 0xF899, 0x118000, 'event quests: 160 x 0x1C00 (u32 ID, u32 size, ARC)', 'CONFIRMED'),
     ('abs', 0x127899, 0x4EC00, 'challenge quests: 45 x 0x1C00 (u32 ID, u32 size, ARC)', 'CONFIRMED'),
-    ('abs', 0x176499, 0x16800, 'challenge quest records: 45 x 0x800 (u32 ID, u32 size, data)', 'DERIVED'),
+    ('abs', 0x176499, 0x16800, 'challenge quest records: 45 x 0x800 (u32 ID, u32 size, data)', 'CONFIRMED'),
 ]
 
 
@@ -300,6 +316,32 @@ def objfield(r):
     d = r.get('dst')
     if d is None or not (OBJ <= d < OBJ + 160 * OBJ_SZ): return ''
     return 'obj%d+0x%x' % ((d - OBJ) // OBJ_SZ, (d - OBJ) % OBJ_SZ)
+
+
+def split(r, labs, label):
+    """Cut a single-copy row at the edges of the labelled fields inside it (the S+0x20 block, the
+    slot header, the own Guild Card, ...), so each field gets its own row and tag. Arrays, bit
+    reads and rows with no label of their own stay whole."""
+    lo = int(r['offset'], 16); hi = lo + r['size']
+    if r['count'] != 1 or r['bit'] or not r['element'].endswith('B') or not r['label'] or r['label'].startswith('contains: '):
+        return [r]
+    cuts, end = {lo, hi}, lo
+    for a, b, _, _ in sorted(labs, key=lambda h: (h[0], -h[1])):
+        if lo <= a and b <= hi and (a, b) != (lo, hi) and a >= end:  # outermost labels only
+            cuts |= {a, b}; end = b
+    if len(cuts) == 2: return [r]
+    cuts = sorted(cuts)
+    out = []
+    for x, y in zip(cuts, cuts[1:]):
+        p = dict(r)
+        p['offset'] = '0x%X' % x; p['size'] = y - x; p['element'] = '%dB' % (y - x)
+        p['rel'] = '0x%X' % (int(r['rel'], 16) + x - lo)
+        if r['object_field']:
+            o, f = r['object_field'].split('+')
+            p['object_field'] = '%s+0x%x' % (o, int(f, 16) + x - lo)
+        p['label'], p['confidence'] = label(x, y)
+        out.append(p)
+    return out
 
 
 def main():
@@ -356,6 +398,7 @@ def main():
     print('character slots 2 and 3 repeat the layout of slot 1:', same)
     if same:
         rows = [r for r in rows if r['block'] not in ('char2', 'char3')]
+    rows = [p for r in rows for p in split(r, labs, label)]
     with open(ROOT + 'data/save-map.csv', 'w', newline='') as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader(); w.writerows(rows)

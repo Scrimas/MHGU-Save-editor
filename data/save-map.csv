@@ -5,38 +5,46 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x4B,0,1,A,0xB,sUserInfo (common),1,,1B,0x521698,obj17+0x367d,"title-menu one-time notice shown (S+0x367c), transfer-server link made (S+0x367d)",DERIVED
 0x4C,0,1,A,0xC,sUserInfo (common),1,,1B,0x5216ac,obj17+0x367e,TV brightness: scale 0.4 + 0.025 x value (S+0x367e),DERIVED
 0x4D,0,1,A,0xD,sUserInfo (common),1,,1B,0x5216c0,obj17+0x367f,rumble on/off (S+0x367f),DERIVED
-0x4E,0,16200,A,0xE,sOtomo (common),50,2592,32B 224B 14B 12B 36B 4B 2B,0x2632d4,obj20+0x309c,"Palicoes, common pool: 50 x 324 B (DLC Palicoes, owner ""Capcom"")",DERIVED
+0x4E,0,16200,A,0xE,sOtomo (common),50,2592,32B 224B 14B 12B 36B 4B 2B,0x2632d4,obj20+0x309c,"Palicoes, common pool: 50 x 324 B (DLC Palicoes, owner ""Capcom"")",CONFIRMED
 0x3F96,0,9600,A,0x3F56,sBlackList,100,768,64B 32B,0x1e63a8,,blacklist: 100 x 96 B (64 + 32),DERIVED
-0x6516,0,19852,A,0x64D6,sGuildCard (common),1,,19852B,0x1642b4,obj100+0x150900,sGuildCard common: 3 x 6616 B + 1 B,DERIVED
+0x6516,0,19852,A,0x64D6,sGuildCard (common),1,,19852B,0x1642b4,obj100+0x150900,"sGuildCard common: 3 x 6616 B + 1 B, then 3 unused bytes",DERIVED
 0xB2A2,0,1,A,0xB262,sGameControl (common),1,,1B,0x3f8f18,obj100+0x5c,sGameControl +0x5c (no reader) and +0x5d (3DS Circle Pad Pro in use),DERIVED
 0xB2A3,0,1,A,0xB263,sGameControl (common),1,,1B,0x3f8f28,obj100+0x5d,sGameControl +0x5c (no reader) and +0x5d (3DS Circle Pad Pro in use),DERIVED
 0xB2A4,0,1,A,0xB264,sGameControl (common),1,,1B,0x3f8f38,obj100+0xa5,"text language, 0 = from the system language (sGameControl +0xa5)",DERIVED
-0xB2A5,0,8,B,0x0,sPrivilege,1,,8B,0x36bfc,obj59+0xf34,"DLC item packs received, 50 bits (sPrivilege +0xf34)",DERIVED
-0xB2AD,0,8,B,0x8,sPrivilege,1,,8B,0x36c10,obj59+0xf3c,"DLC Palicoes received, 50 bits (sPrivilege +0xf3c)",DERIVED
+0xB2A5,0,8,B,0x0,sPrivilege,1,,8B,0x36bfc,obj59+0xf34,"DLC Palicoes received, 50 bits, bit = DLC Palico info entry (sPrivilege +0xf34)",CONFIRMED
+0xB2AD,0,8,B,0x8,sPrivilege,1,,8B,0x36c10,obj59+0xf3c,"DLC item packs received, 50 bits, bit = pack record, catalog ID 507 + bit (sPrivilege +0xf3c)",CONFIRMED
 0xB2B5,0,4,B,0x10,sPrivilege,1,,4B,0x36c24,obj59+0xf44,"DLC extras received, download type 4: 9 entries; bits 0-3 unlock Guild Card poses (sPrivilege +0xf44)",DERIVED
 0xB2B9,0,12,B,0x14,sPrivilege,1,,12B,0x36c38,obj59+0xf48,"DLC extras received, download type 5: 80 Guild Card scenes sold by the Trader (sPrivilege +0xf48)",DERIVED
 0xB2C5,0,4,B,0x20,sPrivilege,1,,4B,0x36c4c,obj59+0xf54,"DLC extras received, download type 6: 10 pet costumes sold by the Trader (sPrivilege +0xf54)",DERIVED
 0xB2C9,0,40,B,0x24,sPrivilege,1,,40B,0x36c60,obj59+0xf58,"DLC extras received, download type 7: 300 title words sold by the Trader (sPrivilege +0xf58)",DERIVED
-0xB2F1,0,8,B,0x4C,sPrivilege,1,,8B,0x36c70,obj59+0xf80,"challenge quests stored, 45 bits = block B slots (sPrivilege +0xf80)",DERIVED
-0xB2F9,0,20,B,0x54,sPrivilege,1,,20B,0x36c84,obj59+0xf88,"event quests stored, 160 bits = block B slots (sPrivilege +0xf88)",DERIVED
+0xB2F1,0,8,B,0x4C,sPrivilege,1,,8B,0x36c70,obj59+0xf80,"challenge quest records in use, 45 bits, bit = slot of the record store 0x176499, not of the packed archive store (sPrivilege +0xf80)",CONFIRMED
+0xB2F9,0,20,B,0x54,sPrivilege,1,,20B,0x36c84,obj59+0xf88,"event quests stored, 160 bits; as many set bits as stored quests, but the index is not the block B slot (sPrivilege +0xf88)",DERIVED
 0xB30D,0,4,B,0x68,sPrivilege,1,,4B,0x36c98,obj59+0xf9c,u32 compared with the download catalog stamp +0xe5c (sPrivilege +0xf9c),DERIVED
-0xB311,0,5200,B,0x6C,sPrivilege,1,,5200B,0x36cb0,obj94+0x0,DLC item pack list: 50 x 104 B,DERIVED
-0xC761,0,12600,B,0x14BC,sPrivilege,1,,12600B,0x36ce0,obj95+0x0,"DLC Palico info, 12600 B",DERIVED
+0xB311,0,5200,B,0x6C,sPrivilege,1,,5200B,0x36cb0,obj94+0x0,DLC item pack list: 50 x 104 B,CONFIRMED
+0xC761,0,12600,B,0x14BC,sPrivilege,1,,12600B,0x36ce0,obj95+0x0,"DLC Palico info, 12600 B",CONFIRMED
 0xF899,0,1146880,B,0x45F4,sPrivilege,1,,1146880B,0x36d10,obj96+0x0,"event quests: 160 x 0x1C00 (u32 ID, u32 size, ARC)",CONFIRMED
 0x127899,0,322560,B,0x11C5F4,sPrivilege,1,,322560B,0x36d44,obj97+0x0,"challenge quests: 45 x 0x1C00 (u32 ID, u32 size, ARC)",CONFIRMED
-0x176499,0,92160,B,0x16B1F4,sPrivilege,1,,92160B,0x3e7df4,obj98+0x0,"challenge quest records: 45 x 0x800 (u32 ID, u32 size, data)",DERIVED
-0x18CC9C,0,632,char1,0x0,character header,1,,632B,0x3e7df4,,"character header (name +0, HR +0x28, art slots +0x2C, equipped cache +0x110, pigment +0x24C)",DERIVED
+0x176499,0,92160,B,0x16B1F4,sPrivilege,1,,92160B,0x3e7df4,obj98+0x0,"challenge quest records: 45 x 0x800 (u32 ID, u32 size, data)",CONFIRMED
+0x18CC9C,0,632,char1,0x0,character header,1,,632B,0x3e7df4,,"character header (name +0, play time +0x20, funds +0x24, HR +0x28, art slots +0x2C, equipped cache +0x110, pigment +0x24C)",CONFIRMED
 0x18CF14,0,5463,char1,0x278,sItemBox,2300,19,12b 7b,0x19a518,obj100+0x18d1a,"item box: 2300 x (u12 item ID, u7 count), bit stream",CONFIRMED
-0x18E46B,0,4080,char1,0x17CF,sItemBox,1,,4080B,0x3e77c8,obj100+0x1eff4,"item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))",DERIVED
+0x18E46B,0,4080,char1,0x17CF,sItemBox,1,,4080B,0x3e77c8,obj100+0x1eff4,"item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))",CONFIRMED
 0x18F45B,0,76,char1,0x27BF,sItemPouch,32,19,12b 7b,0x19e0d4,obj100+0x18b1a,"item pouch: 32 x (u12 item ID, u7 count), bit stream",CONFIRMED
-0x18F4A7,0,1024,char1,0x280B,sUserInfo,1,,1024B,0x51dbd0,obj17+0x20,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
+0x18F4A7,0,4,char1,0x280B,sUserInfo,1,,4B,0x51dbd0,obj17+0x20,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
+0x18F4AB,0,4,char1,0x280F,sUserInfo,1,,4B,0x51dbd0,obj17+0x24,"funds (zenny), at most 9999999; slot header +0x24 copy",CONFIRMED
+0x18F4AF,0,4,char1,0x2813,sUserInfo,1,,4B,0x51dbd0,obj17+0x28,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
+0x18F4B3,0,4,char1,0x2817,sUserInfo,1,,4B,0x51dbd0,obj17+0x2c,"Wycademy points, added per quest",CONFIRMED
+0x18F4B7,0,16,char1,0x281B,sUserInfo,1,,16B,0x51dbd0,obj17+0x30,"Village contribution points, low rank",CONFIRMED
+0x18F4C7,0,16,char1,0x282B,sUserInfo,1,,16B,0x51dbd0,obj17+0x40,"Village contribution points, G rank",CONFIRMED
+0x18F4D7,0,1,char1,0x283B,sUserInfo,1,,1B,0x51dbd0,obj17+0x50,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
+0x18F4D8,0,18,char1,0x283C,sUserInfo,1,,18B,0x51dbd0,obj17+0x51,deviant permit counts,CONFIRMED
+0x18F4EA,0,957,char1,0x284E,sUserInfo,1,,957B,0x51dbd0,obj17+0x63,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
 0x18F8A7,0,4,char1,0x2C0B,sUserInfo,1,,4B,0x51dc64,obj17+0x424,bonus packs announced: bit N = privilege pack N notice shown (S+0x424),DERIVED
 0x18F8AB,0,4,char1,0x2C0F,sUserInfo,1,,4B,0x51dc78,obj17+0x428,bonus packs granted: bit N = contents of privilege pack N given (S+0x428),DERIVED
 0x18F8AF,0,24,char1,0x2C13,sUserInfo,1,,24B,0x51dc8c,obj17+0xd24,Hunter Arts unlocked,CONFIRMED
 0x18F8C7,0,24,char1,0x2C2B,sUserInfo,1,,24B,0x51dca0,obj17+0xd3c,"Hunter Arts unlocked, runtime NEW copy (S+0xd3c)",DERIVED
 0x18F8DF,0,24,char1,0x2C43,sUserInfo,1,,24B,0x51dcb4,obj17+0xd54,"Hunter Arts unlocked, NEW (S+0xd54)",DERIVED
 0x18F8F7,0,4,char1,0x2C5B,sUserInfo,1,,4B,0x51dcc8,obj17+0xd6c,"31-bit map committed from S+0xd74 at quest end, counted by Alchemy (S+0xd6c)",DERIVED
-0x18F8FB,0,4,char1,0x2C5F,sUserInfo,1,,4B,0x51dcd8,obj17+0xd70,u32 map (S+0xd70) + pending 31-bit map set by monster code (S+0xd74),DERIVED
+0x18F8FB,0,4,char1,0x2C5F,sUserInfo,1,,4B,0x51dcd8,obj17+0xd70,u32 map (S+0xd70); the pending map S+0xd74 is not saved,DERIVED
 0x18F8FF,0,12,char1,0x2C63,sUserInfo,1,,12B,0x51dcec,obj17+0xd78,"Palico skills learned: 96 bits, bit = ot_skl entry (S+0xd78)",DERIVED
 0x18F90B,0,8,char1,0x2C6F,sUserInfo,1,,8B,0x51dd00,obj17+0xd84,Palico support moves learned: 57 bits (S+0xd84),DERIVED
 0x18F913,0,256,char1,0x2C77,sUserInfo,1,,256B,0x51dd14,obj17+0x42c,quests cleared bitmap,CONFIRMED
@@ -44,35 +52,35 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FB13,0,256,char1,0x2E77,sUserInfo,1,,256B,0x51dd3c,obj17+0x62c,quests failed bitmap,DERIVED
 0x18FC13,0,8,char1,0x2F77,sUserInfo,1,,8B,0x51dd50,obj17+0x958,contains: progress word,DERIVED
 0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,progress map NEW (S+0x968),DERIVED
-0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"flagship monster story events, bits 2-8 set by the quest flow (S+0x970) + runtime NEW copy",DERIVED
+0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"flagship monster story events, bits 2-8 set by the quest flow (S+0x970; runtime NEW copy S+0x974 not saved)",DERIVED
 0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,flagship monster story events NEW (S+0x978),DERIVED
 0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,"contains: Canteen ingredients (bit = kitchenListMenu ingredient, data/canteen.csv)",CONFIRMED
 0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,Canteen ingredients NEW (S+0x98c),DERIVED
-0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,"Poogie costumes owned, 64 bits (S+0x994)",DERIVED
+0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,"Poogie costumes owned, 64 bits (S+0x994)",CONFIRMED
 0x18FC43,0,8,char1,0x2FA7,sUserInfo,1,,8B,0x51ddd8,obj17+0x9a4,Poogie costumes NEW (S+0x9a4),DERIVED
-0x18FC4B,0,4,char1,0x2FAF,sUserInfo,1,,4B,0x51ddec,obj17+0x9ac,deviants: bit i = deviant i's first Special Permit quest unlocked (S+0x9ac) + runtime NEW copy,DERIVED
+0x18FC4B,0,4,char1,0x2FAF,sUserInfo,1,,4B,0x51ddec,obj17+0x9ac,deviants: bit i = deviant i's first Special Permit quest unlocked (S+0x9ac; runtime NEW copy not saved),DERIVED
 0x18FC4F,0,4,char1,0x2FB3,sUserInfo,1,,4B,0x51de00,obj17+0x9b4,"deviants unlocked, NEW (S+0x9b4)",DERIVED
-0x18FC53,0,4,char1,0x2FB7,sUserInfo,1,,4B,0x51de14,obj17+0x9b8,"deviants offered by the Courier, 18 bits (S+0x9b8) + runtime NEW copy",DERIVED
+0x18FC53,0,4,char1,0x2FB7,sUserInfo,1,,4B,0x51de14,obj17+0x9b8,"deviants offered by the Courier, 18 bits (S+0x9b8; runtime NEW copy not saved)",DERIVED
 0x18FC57,0,4,char1,0x2FBB,sUserInfo,1,,4B,0x51de24,obj17+0x9c0,"deviants offered by the Courier, NEW (S+0x9c0)",DERIVED
-0x18FC5B,0,4,char1,0x2FBF,sUserInfo,1,,4B,0x51de38,obj17+0x9c4,"vestigial map S+0x9c4 with NEW copies: only the transfer converter 0x51e6d8 writes it, no reader",DERIVED
-0x18FC5F,0,4,char1,0x2FC3,sUserInfo,1,,4B,0x51de4c,obj17+0x9cc,"vestigial map S+0x9c4 with NEW copies: only the transfer converter 0x51e6d8 writes it, no reader",DERIVED
-0x18FC63,0,164,char1,0x2FC7,sUserInfo,1,,164B,0x51de5c,obj17+0x9d0,"Guild Card title words, part 1 unlocked: 1312 bits, 1309 words (GC_Title_1)",DERIVED
-0x18FD07,0,164,char1,0x306B,sUserInfo,1,,164B,0x51de70,obj17+0xb18,"Guild Card title words, part 1 NEW",DERIVED
+0x18FC5B,0,4,char1,0x2FBF,sUserInfo,1,,4B,0x51de38,obj17+0x9c4,"vestigial map S+0x9c4 and its NEW copy S+0x9cc: only the transfer converter 0x51e6d8 writes it, no reader",DERIVED
+0x18FC5F,0,4,char1,0x2FC3,sUserInfo,1,,4B,0x51de4c,obj17+0x9cc,"vestigial map S+0x9c4 and its NEW copy S+0x9cc: only the transfer converter 0x51e6d8 writes it, no reader",DERIVED
+0x18FC63,0,164,char1,0x2FC7,sUserInfo,1,,164B,0x51de5c,obj17+0x9d0,"Guild Card title words, part 1 unlocked: 1312 bits, 1309 words (GC_Title_1); 79 from the start",CONFIRMED
+0x18FD07,0,164,char1,0x306B,sUserInfo,1,,164B,0x51de70,obj17+0xb18,"Guild Card title words, part 1 NEW",CONFIRMED
 0x18FDAB,0,16,char1,0x310F,sUserInfo,1,,16B,0x51de84,obj17+0xbbc,"Guild Card title words, part 2 unlocked: 121 words (GC_Title_2)",DERIVED
 0x18FDBB,0,16,char1,0x311F,sUserInfo,1,,16B,0x51de98,obj17+0xbdc,"Guild Card title words, part 2 NEW",DERIVED
-0x18FDCB,0,20,char1,0x312F,sUserInfo,1,,20B,0x51deac,obj17+0xbec,Guild Card scenes unlocked: 136 (GC_background),DERIVED
+0x18FDCB,0,20,char1,0x312F,sUserInfo,1,,20B,0x51deac,obj17+0xbec,Guild Card scenes unlocked: 136 (GC_background),CONFIRMED
 0x18FDDF,0,20,char1,0x3143,sUserInfo,1,,20B,0x51dec0,obj17+0xc14,Guild Card scenes NEW,DERIVED
-0x18FDF3,0,20,char1,0x3157,sUserInfo,1,,20B,0x51ded4,obj17+0xc28,"awards, game-side map",DERIVED
-0x18FE07,0,20,char1,0x316B,sUserInfo,1,,20B,0x51dee4,obj17+0xc50,award notices,DERIVED
+0x18FDF3,0,20,char1,0x3157,sUserInfo,1,,20B,0x51ded4,obj17+0xc28,"awards, game-side map",CONFIRMED
+0x18FE07,0,20,char1,0x316B,sUserInfo,1,,20B,0x51dee4,obj17+0xc50,award notices,CONFIRMED
 0x18FE1B,0,4,char1,0x317F,sUserInfo,1,,4B,0x51def8,obj17+0xc64,Guild Card poses unlocked: 22,DERIVED
 0x18FE1F,0,4,char1,0x3183,sUserInfo,1,,4B,0x51df0c,obj17+0xc6c,Guild Card poses NEW,DERIVED
 0x18FE23,0,16,char1,0x3187,sUserInfo,1,,16B,0x51df1c,obj17+0xc70,quest sets completed,CONFIRMED
 0x18FE33,0,16,char1,0x3197,sUserInfo,1,,16B,0x51df2c,obj17+0xc90,quest set notices,DERIVED
 0x18FE43,0,36,char1,0x31A7,sUserInfo,1,,36B,0x51df40,obj17+0x2a0c,Smithy decorations listed: bit = rDecoCreateData entry,DERIVED
 0x18FE67,0,36,char1,0x31CB,sUserInfo,1,,36B,0x51df54,obj17+0x2a54,Smithy decorations NEW,DERIVED
-0x18FE8B,0,4,char1,0x31EF,sUserInfo,1,,4B,0x51df68,obj17+0x3488,"Trader item list 0, 32 bits (S+0x3488) + runtime NEW copy",DERIVED
+0x18FE8B,0,4,char1,0x31EF,sUserInfo,1,,4B,0x51df68,obj17+0x3488,"Trader item list 0, 32 bits (S+0x3488; runtime NEW copy not saved)",DERIVED
 0x18FE8F,0,4,char1,0x31F3,sUserInfo,1,,4B,0x51df7c,obj17+0x3490,Trader item list 0 NEW,DERIVED
-0x18FE93,0,4,char1,0x31F7,sUserInfo,1,,4B,0x51df90,obj17+0x3494,"Trader item list 1, 32 bits (S+0x3494) + runtime NEW copy",DERIVED
+0x18FE93,0,4,char1,0x31F7,sUserInfo,1,,4B,0x51df90,obj17+0x3494,"Trader item list 1, 32 bits (S+0x3494; runtime NEW copy not saved)",DERIVED
 0x18FE97,0,4,char1,0x31FB,sUserInfo,1,,4B,0x51dfa4,obj17+0x349c,Trader item list 1 NEW,DERIVED
 0x18FE9B,0,56,char1,0x31FF,sUserInfo,1,,56B,0x51dfb8,obj17+0x34a0,"Trader: Guild Card title words for sale, 448 bits (tradeLimitedHonorList has 442)",DERIVED
 0x18FED3,0,56,char1,0x3237,sUserInfo,1,,56B,0x51dfcc,obj17+0x3510,Trader title words NEW,DERIVED
@@ -82,14 +90,14 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FF37,0,4,char1,0x329B,sUserInfo,1,,4B,0x51e01c,obj17+0x358c,Trader pet costumes NEW,DERIVED
 0x18FF3B,0,4,char1,0x329F,sUserInfo,1,,4B,0x51e030,obj17+0x3590,"Trader coin-ticket trades, bit = rTradeCoinTicketList entry; set only by the transfer (S+0x3590)",DERIVED
 0x18FF3F,0,4,char1,0x32A3,sUserInfo,1,,4B,0x51e044,obj17+0x3598,Trader coin-ticket trades NEW (read by the Cross ticket screen and the Trader),DERIVED
-0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,"Trader delivery requests offered, bit = rTradeDeliveryList entry, set once the request flag is raised (S+0x359c)",DERIVED
+0x18FF43,0,4,char1,0x32A7,sUserInfo,1,,4B,0x51e058,obj17+0x359c,"Trader delivery requests offered, bit = rTradeDeliveryList entry, set once the request flag is raised (S+0x359c)",CONFIRMED
 0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,Trader delivery requests offered NEW (S+0x35a4),DERIVED
-0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,"delivery requests delivered: bit b = kind-1 request b, 1-13 (S+0x35a8; talk condition 41)",DERIVED
+0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,"delivery requests delivered: bit b = kind-1 request b, 0-12 (S+0x35a8; talk condition 41)",CONFIRMED
 0x18FF4F,0,4,char1,0x32B3,sUserInfo,1,,4B,0x51e094,obj17+0x35ac,Hunter's Notes tips read: clear bit = NEW (S+0x35ac),DERIVED
 0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,"Hunter's Notes, large monsters: 123 bits (S+0x35b0)",DERIVED
 0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,"Hunter's Notes, large monsters NEW (S+0x35c0)",DERIVED
 0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,"Hunter's Notes, second list: 30 bits (S+0x35d0)",DERIVED
-0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,"DLC Palicoes taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)",DERIVED
+0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,"DLC item packs taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)",CONFIRMED
 0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,"flags: bit 0 network-mode switch (mirrored to sFestaNetwork), bit 1 daily quest bonus received (S+0x3668)",DERIVED
 0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,"shop list 1 listed: 256 bits (uUIGuildShop, S+0xd98)",DERIVED
 0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,shop list 1 NEW (S+0xdd8),DERIVED
@@ -135,15 +143,15 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x191CE7,0,8,char1,0x504B,sUserInfo,1,,8B,0x51e478,obj17+0x35d4,rotating quests bitmap,CONFIRMED
 0x191CEF,0,4,char1,0x5053,sUserInfo,1,,4B,0x51e48c,obj17+0x3670,"bit 0: Moofah Fleeceball given since the last quest (0x6be478; cleared by the quest result 0x38b948, S+0x3670)",DERIVED
 0x191CF3,0,4,char1,0x5057,sUserInfo,1,,4B,0x1cab78,obj100+0x641c8,u32 of the chat-phrase object (+0x2838) loaded inside the S stream; a value >= 0 is replaced by 0xF8FC7E3F at load,DERIVED
-0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,Jukebox songs unlocked (S+0x35e4) + runtime NEW copy,DERIVED
+0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,Jukebox songs unlocked (S+0x35e4; runtime NEW copy not saved),DERIVED
 0x191CFB,0,4,char1,0x505F,sUserInfo,1,,4B,0x51e4c8,obj17+0x35ec,Jukebox songs NEW (S+0x35ec),DERIVED
-0x191CFF,0,12,char1,0x5063,sUserInfo,1,,12B,0x51e4dc,obj17+0x35f0,"Lab upgrades offered, 96 bits (S+0x35f0) + runtime NEW copy",DERIVED
+0x191CFF,0,12,char1,0x5063,sUserInfo,1,,12B,0x51e4dc,obj17+0x35f0,"Lab upgrades offered, 96 bits (S+0x35f0; runtime NEW copy not saved)",DERIVED
 0x191D0B,0,12,char1,0x506F,sUserInfo,1,,12B,0x51e4f0,obj17+0x3608,Lab upgrades offered NEW (S+0x3608),DERIVED
-0x191D17,0,12,char1,0x507B,sUserInfo,1,,12B,0x51e504,obj17+0x3614,"Lab upgrades installed, bit = researchReinforce ID - 1; bits 0-2 = Item Box expansions (S+0x3614) + runtime NEW copy",DERIVED
+0x191D17,0,12,char1,0x507B,sUserInfo,1,,12B,0x51e504,obj17+0x3614,"Lab upgrades installed, bit = researchReinforce ID - 1; bits 0-2 = Item Box expansions (S+0x3614; runtime NEW copy not saved)",DERIVED
 0x191D23,0,12,char1,0x5087,sUserInfo,1,,12B,0x51e518,obj17+0x362c,Lab upgrades installed NEW (S+0x362c),DERIVED
-0x191D2F,0,8,char1,0x5093,sUserInfo,1,,8B,0x51e52c,obj17+0x3638,"supply drop sets unlocked (Provision Division, S+0x3638) + runtime NEW copy",DERIVED
+0x191D2F,0,8,char1,0x5093,sUserInfo,1,,8B,0x51e52c,obj17+0x3638,"supply drop sets unlocked (Provision Division, S+0x3638; runtime NEW copy not saved)",DERIVED
 0x191D37,0,8,char1,0x509B,sUserInfo,1,,8B,0x51e540,obj17+0x3648,supply drop sets NEW (S+0x3648),DERIVED
-0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,Cross coin trades unlocked (S+0x3650) + runtime NEW copy,DERIVED
+0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,Cross coin trades unlocked (S+0x3650; runtime NEW copy not saved),DERIVED
 0x191D47,0,8,char1,0x50AB,sUserInfo,1,,8B,0x51e568,obj17+0x3660,Cross coin trades NEW (S+0x3660),DERIVED
 0x191D4F,0,4,char1,0x50B3,sUserInfo,1,,4B,0x51e57c,obj17+0xd18,deviants: bit i = deviant i's EX Special Permit quest (level 16) cleared (S+0xd18),DERIVED
 0x191D53,0,4,char1,0x50B7,sUserInfo,1,,4B,0x51e58c,obj17+0xd20,"deviant last level cleared, NEW (S+0xd20)",DERIVED
@@ -157,7 +165,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x192ADA,0,8,char1,0x5E3E,sUserInfo,1,,8B,0x51e62c,,u64 Nintendo Account ID linked to the save-transfer server (S+0x4408; shared copy at file 0x12C2D6),DERIVED
 0x192AE2,0,4,char1,0x5E46,sUserInfo,1,,4B,0x51e640,obj17+0x4410,"S+0x4410: reserved, only save / load touch it",DERIVED
 0x192AE6,0,4,char1,0x5E4A,sUserInfo,1,,4B,0x51e654,obj17+0x4414,"Courier flags, u32 (S+0x4414)",DERIVED
-0x192AEA,0,4,char1,0x5E4E,sUserInfo,1,,4B,0x51e668,obj17+0x4418,"quest counter, u32: completed quests except tours and Training (S+0x4418, 0x526f70)",DERIVED
+0x192AEA,0,4,char1,0x5E4E,sUserInfo,1,,4B,0x51e668,obj17+0x4418,"quest counter, u32: completed quests except tours and Training (S+0x4418, 0x526f70)",CONFIRMED
 0x192AEE,0,4,char1,0x5E52,sUserInfo,1,,4B,0x51e67c,obj17+0x441c,"quest counter reference: both folded into [210, 420) by 0x5279e0 (S+0x441c)",DERIVED
 0x192AF2,0,4,char1,0x5E56,sUserInfo,1,,4B,0x51e690,obj17+0x4420,"Courier points: added per quest, turned into Special Permits (S+0x4420)",DERIVED
 0x192AF6,0,36,char1,0x5E5A,sUserInfo,1,,36B,0x51e6a4,obj17+0x4424,"Special Permit points per deviant, 18 x u16, at most 9999 (100 = 1 permit, S+0x4424)",DERIVED
@@ -167,14 +175,14 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x192C54,0,274,char1,0x5FB8,sUserInfo,1,,274B,0x51dc04,obj17+0x83e,"monster capture counts, u16 index 1-137",CONFIRMED
 0x192D66,0,548,char1,0x60CA,sUserInfo,1,,548B,0x51dc2c,obj99+0x0,"monster size records, (u16 min, u16 max) index 1-137",CONFIRMED
 0x192F8A,0,72000,char1,0x62EE,sEquipBox,2000,288,2B 2B 2B 6B 24B,0x14b0d4,obj100+0x20020,equipment box: 2000 x 36 B,CONFIRMED
-0x1A48CA,0,36000,char1,0x17C2E,sEquipBox,1000,288,2B 2B 2B 6B 24B,0x14b144,obj100+0x357e0,Palico equipment box: 1000 x 36 B (types 22-24),DERIVED
+0x1A48CA,0,36000,char1,0x17C2E,sEquipBox,1000,288,2B 2B 2B 6B 24B,0x14b144,obj100+0x357e0,Palico equipment box: 1000 x 36 B (types 22-24),CONFIRMED
 0x1AD56A,0,5440,char1,0x208CE,sEquipBox,1,,5440B,0x14b1ac,obj100+0x5e04c,"My Sets: 40 x 136 B (name +0, box indices +0x2A, pigment +0x64, default flags +0x7D, style +0x82, Hunter Arts +0x83)",CONFIRMED
 0x1AEAAA,0,1632,char1,0x21E0E,sEquipBox,1,,1632B,0x3e7804,obj100+0x5f58c,"Palico equipment sets: 24 x 68 B (name char[42], 3 x u16 box index)",DERIVED
 0x1AF10A,0,29,char1,0x2246E,sGameControl,1,,29B,0x3f8dfc,obj100+0x5e,"game options, 29 bytes (Game / Chat / Network option windows, quest camera; sGameControl +0x5e)",DERIVED
-0x1AF127,0,4,char1,0x2248B,sGameControl,1,,4B,0x3f8e1c,obj100+0x34,"play time in seconds (sGameControl +0x34; slot header +0x20, Guild Card +0x914)",DERIVED
-0x1AF12B,0,4,char1,0x2248F,sGameControl,1,,4B,0x3f8e2c,obj100+0x38,"f32 play-time remainder in frames, carried into the seconds at 60 (sGameControl +0x38, 0x3f83a8)",DERIVED
+0x1AF127,0,4,char1,0x2248B,sGameControl,1,,4B,0x3f8e1c,obj100+0x34,"play time in seconds (sGameControl +0x34; slot header +0x20, Guild Card +0x914)",CONFIRMED
+0x1AF12B,0,4,char1,0x2248F,sGameControl,1,,4B,0x3f8e2c,obj100+0x38,"f32 play-time remainder in frames, carried into the seconds at 60 (sGameControl +0x38, 0x3f83a8)",CONFIRMED
 0x1AF12F,0,4,char1,0x22493,sGameControl,1,,4B,0x3e7818,obj100+0x3c,u32 copied to the Guild Card +0x86C (sGameControl +0x3c),DERIVED
-0x1AF133,0,376,char1,0x22497,sItem,94,32,32b,0x1979d8,obj100+0x1679c,"items obtained: bit = item ID, 94 x u32 (sItem +0x9c)",DERIVED
+0x1AF133,0,376,char1,0x22497,sItem,94,32,32b,0x1979d8,obj100+0x1679c,"items obtained: bit = item ID, 94 x u32 (sItem +0x9c)",CONFIRMED
 0x1AF2AB,0,136,char1,0x2260F,sItem,1,,136B,0x1979fc,,"Trader cargo 1, 136 B (sItem +0xea4)",DERIVED
 0x1AF333,0,136,char1,0x22697,sItem,1,,136B,0x197a28,,"Trader cargo 2, 136 B (sItem +0xf2c)",DERIVED
 0x1AF3BB,0,136,char1,0x2271F,sItem,1,,136B,0x197a4c,,"Trader cargo 3, 136 B (sItem +0xfb4)",DERIVED
@@ -371,24 +379,31 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B04AB,0,10,char1,0x2380F,sItem,1,,10B,0x198060,obj100+0x1678c,village tier bytes (4) and 6 bytes (sItem +0x8c),DERIVED
 0x1B04B5,0,1,char1,0x23819,sItem,1,,1B,0x198070,obj100+0x1676a,"Trader cargo shipments counter, pays pending reward byte 1 (sItem +0x6a)",DERIVED
 0x1B04B6,0,1,char1,0x2381A,sItem,1,,1B,0x198080,obj100+0x1676b,"low-rank contribution points accumulator, 250 = 2 to pending byte 3 (sItem +0x6b)",DERIVED
-0x1B04B7,0,2,char1,0x2381B,sItem,1,,2B,0x198090,obj100+0x1676c,"G-rank contribution points accumulator, 800 = 2 to pending byte 22 (sItem +0x6c)",DERIVED
+0x1B04B7,0,2,char1,0x2381B,sItem,1,,2B,0x198090,obj100+0x1676c,"G-rank contribution points accumulator, 800 = 2 to pending byte 22 (sItem +0x6c)",CONFIRMED
 0x1B04B9,0,1,char1,0x2381D,sItem,1,,1B,0x1980a0,obj100+0x1676e,"Footbath uses, 15 = 3 to pending byte 4 (sItem +0x6e)",DERIVED
 0x1B04BA,0,23,char1,0x2381E,sItem,1,,23B,0x1980b0,obj100+0x1676f,activity: pending village rewards,DERIVED
-0x1B04D1,0,6,char1,0x23835,sItem,1,,6B,0x1980c0,obj100+0x16786,"staged quest-clear counters: G-rank 1-4 star clears, villager-request clears (sItem +0x86)",DERIVED
+0x1B04D1,0,1,char1,0x23835,sItem,1,,1B,0x1980c0,obj100+0x16786,staged quest-clear counter 0: G-rank 1-4 star quests cleared (sItem +0x86),CONFIRMED
+0x1B04D2,0,5,char1,0x23836,sItem,1,,5B,0x1980c0,obj100+0x16787,"staged quest-clear counters: G-rank 1-4 star clears, villager-request clears (sItem +0x86)",DERIVED
 0x1B04D7,0,25,char1,0x2383B,sItem,1,,25B,0x1980d0,obj100+0x16750,"Combination List recipes combined, bit = itemPreData record; award 27 at 130 (sItem +0x50)",DERIVED
 0x1B04F0,0,256,char1,0x23854,sItem,1,,256B,0x1980e0,obj100+0x16914,"Combination List order, pouch list: flags byte (bit 1 custom order, bit 0 filter), then itemPreData recipe index per position (sItem +0x214)",DERIVED
 0x1B05F0,0,256,char1,0x23954,sItem,1,,256B,0x1980f0,obj100+0x16a14,"Combination List order, item box list, same form (sItem +0x314)",DERIVED
 0x1B06F0,0,4,char1,0x23A54,sItem,1,,4B,0x198100,obj100+0x16798,Horns Coins traded in total; award 104 at 2000 (sItem +0x98),DERIVED
 0x1B06F4,0,1,char1,0x23A58,sPlayer,1,,1B,0x275614,obj100+0x9d5c,player record (loaded copy of the slot header fields),DERIVED
-0x1B06F5,0,224,char1,0x23A59,sPlayer,1,,224B,0x27562c,obj100+0x3bc,"player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 SP Art bits per art slot; bytes 8-223 unused by a hunter (Palico parameters); first 4 u16 copied to the Guild Card +0x4C",DERIVED
-0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,"equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none",DERIVED
-0x1B07E3,0,12,char1,0x23B47,sPlayer,1,,12B,0x275740,obj100+0x650,weapon class (+0; 15 = Prowler) and character creation choices (+4 = gender),DERIVED
-0x1B07EF,0,36,char1,0x23B53,sPlayer,1,,36B,0x275754,obj100+0x65c,"current pigment, 5 x RGBA + 16 B",DERIVED
+0x1B06F5,0,8,char1,0x23A59,sPlayer,1,,8B,0x27562c,obj100+0x3bc,"equipped Hunter Arts: 3 x u16 art ID, u16 SP Art bits per art slot",CONFIRMED
+0x1B06FD,0,216,char1,0x23A61,sPlayer,1,,216B,0x27562c,obj100+0x3c4,"player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 SP Art bits per art slot; bytes 8-223 unused by a hunter (Palico parameters)",DERIVED
+0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,"equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none",CONFIRMED
+0x1B07E3,0,1,char1,0x23B47,sPlayer,1,,1B,0x275740,obj100+0x650,weapon class: equipped weapon type - 7 (15 = Prowler),CONFIRMED
+0x1B07E4,0,4,char1,0x23B48,sPlayer,1,,4B,0x275740,obj100+0x651,"weapon class (+0; 15 = Prowler), gender (+4), hunting style (+5)",DERIVED
+0x1B07E8,0,1,char1,0x23B4C,sPlayer,1,,1B,0x275740,obj100+0x655,"hunting style: 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor",CONFIRMED
+0x1B07E9,0,6,char1,0x23B4D,sPlayer,1,,6B,0x275740,obj100+0x656,"weapon class (+0; 15 = Prowler), gender (+4), hunting style (+5)",DERIVED
+0x1B07EF,0,20,char1,0x23B53,sPlayer,1,,20B,0x275754,obj100+0x65c,current pigment: 5 x RGBA,CONFIRMED
+0x1B0803,0,16,char1,0x23B67,sPlayer,1,,16B,0x275754,obj100+0x670,"current pigment, 5 x RGBA + 16 B",DERIVED
 0x1B0813,0,4,char1,0x23B77,sPlayer,1,,4B,0x275768,obj100+0x684,"u32: five 5-bit colour modes, one per pigment slot (0 RGBA, 2+ preset v-2; header +0x274, Guild Card +0x48)",DERIVED
-0x1B0817,0,2,char1,0x23B7B,sPlayer,1,,2B,0x27577c,obj100+0x682,current pigment default-colour flags,DERIVED
-0x1B0819,0,32,char1,0x23B7D,sPlayer,1,,32B,0x27578c,obj100+0x690,hunter name,DERIVED
+0x1B0817,0,2,char1,0x23B7B,sPlayer,1,,2B,0x27577c,obj100+0x682,current pigment default-colour flags,CONFIRMED
+0x1B0819,0,32,char1,0x23B7D,sPlayer,1,,32B,0x27578c,obj100+0x690,hunter name,CONFIRMED
 0x1B0839,0,1,char1,0x23B9D,sOtomo,1,,1B,0x2639d0,obj20+0x13848,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
-0x1B083A,0,2,char1,0x23B9E,sOtomo,1,,2B,0x2639e4,obj20+0x13849,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
+0x1B083A,0,1,char1,0x23B9E,sOtomo,1,,1B,0x2639e4,obj20+0x13849,"hunting buddy 1: Palico list index, 0xFF = none",CONFIRMED
+0x1B083B,0,1,char1,0x23B9F,sOtomo,1,,1B,0x2639e4,obj20+0x1384a,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
 0x1B083C,0,1,char1,0x23BA0,sOtomo,1,,1B,0x2639f8,obj20+0x1384c,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
 0x1B083D,0,1,char1,0x23BA1,sOtomo,1,,1B,0x263a0c,obj20+0x1384b,"Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)",DERIVED
 0x1B083E,0,1,char1,0x23BA2,sOtomo,1,,2b,0x263a24,obj20+0x138f6,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
@@ -403,8 +418,8 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B0845,5,5,char1,0x23BA9,sOtomo,1,,32b,0x263b50,obj20+0x13904,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
 0x1B0849,5,5,char1,0x23BAD,sOtomo,1,,32b,0x263b68,obj20+0x13908,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
 0x1B084D,5,5,char1,0x23BB1,sOtomo,1,,32b,0x263b80,obj20+0x1390c,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
-0x1B0852,0,27216,char1,0x23BB6,sOtomo,84,2592,32B 224B 14B 12B 36B 4B 2B,0x263390,obj20+0x13e4c,"Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level u8 +0x24, greeting +0x60, owner +0x9C)",DERIVED
-0x1B72A2,0,7776,char1,0x2A606,sOtomo,24,2592,32B 224B 14B 12B 36B 4B 2B,0x263bf0,obj20+0x301cc,"Palicoes, second list: 24 x 324 B, same record",DERIVED
+0x1B0852,0,27216,char1,0x23BB6,sOtomo,84,2592,32B 224B 14B 12B 36B 4B 2B,0x263390,obj20+0x13e4c,"Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level byte +0x24 (seen up to 63), greeting +0x60, owner +0x9C)",CONFIRMED
+0x1B72A2,0,7776,char1,0x2A606,sOtomo,24,2592,32B 224B 14B 12B 36B 4B 2B,0x263bf0,obj20+0x301cc,"Palicoes for hire: 24 x 324 B, same record, rerolled after each counted quest",CONFIRMED
 0x1B9102,0,40,char1,0x2C466,sOtomo,1,,40B,0x263c70,obj20+0x13910,Palicoes that reached level 50: 5 x 8 B ID; award 50 (sOtomo +0x13910),DERIVED
 0x1B912A,0,16,char1,0x2C48E,sOtomo,1,,16B,0x263c88,obj20+0x48a78,"Palico Dojo teaching session: 4 indices, kind, skill/move, u16 in progress, two u32 (sOtomo +0x48a78)",DERIVED
 0x1B913A,0,48,char1,0x2C49E,sOtomo,1,,48B,0x263ca0,obj20+0x48a88,"Palico Dojo training slots: 3 x 16 B (index, type, sessions left; sOtomo +0x48a88)",DERIVED
@@ -417,7 +432,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B9178,0,2,char1,0x2C4DC,sVillage,1,,2B,0x507d9c,obj100+0x64de2,Hub star level,CONFIRMED
 0x1B917A,0,4,char1,0x2C4DE,sVillage,1,,4B,0x507dac,obj100+0x64de4,"village pet affection, u8 per village, at most 10; 6 unlocks a title word (sVillage +0x3e4)",DERIVED
 0x1B917E,0,1,char1,0x2C4E2,sVillage,1,,1B,0x507dc0,obj100+0x64e71,"Moofah gifts received, at most 10; award 49 (sVillage +0x471)",DERIVED
-0x1B917F,0,128,char1,0x2C4E3,sVillage,1,,128B,0x507dd0,obj100+0x64de8,"village pet names, 4 x char[32] (Moofy, Poogie x 3; sVillage +0x3e8)",DERIVED
+0x1B917F,0,128,char1,0x2C4E3,sVillage,1,,128B,0x507dd0,obj100+0x64de8,"village pet names, 4 x char[32] (Moofy, Poogie x 3; sVillage +0x3e8)",CONFIRMED
 0x1B91FF,0,4,char1,0x2C563,sVillage,1,,4B,0x507de4,obj100+0x64e68,"village pet costumes, u8 per pet, below 40 (sVillage +0x468, pet menu)",DERIVED
 0x1B9203,0,4,char1,0x2C567,sVillage,1,,4B,0x507df8,obj100+0x64e6c,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
 0x1B9207,0,1,char1,0x2C56B,sVillage,1,,1B,0x507e08,obj100+0x64e70,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
@@ -435,23 +450,35 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B934D,0,4,char1,0x2C6B1,sMakeAmulet,1,,4B,0x14c5a4,obj100+0x6606c,"sMakeAmulet: 128-bit map over a 107-entry table, tested and set at quest end (0x14c688), read by the quest rotation",DERIVED
 0x1B9351,0,4,char1,0x2C6B5,sMakeAmulet,1,,4B,0x14c5b4,obj100+0x66070,"sMakeAmulet: 128-bit map over a 107-entry table, tested and set at quest end (0x14c688), read by the quest rotation",DERIVED
 0x1B9355,0,4,char1,0x2C6B9,sMakeAmulet,1,,4B,0x3e78b8,obj100+0x66074,"one-time event scenes played, 24 bits (sMakeAmulet +0x74, table 0x15a0c78)",DERIVED
-0x1B9359,0,4,char1,0x2C6BD,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73208,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B935D,0,1233,char1,0x2C6C1,sGuildCard,1,,1233B,0x3cf810,obj100+0x1ccd00,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B982E,0,4,char1,0x2CB92,sGuildCard,1,,4B,0x3cf820,obj100+0x7320c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9832,0,2,char1,0x2CB96,sGuildCard,1,,2B,0x166d8c,obj100+0x71f10,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9834,0,22,char1,0x2CB98,sGuildCard,1,,22B,0x166d9c,obj100+0x71f12,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B984A,0,8,char1,0x2CBAE,sGuildCard,1,,8B,0x166dac,obj100+0x71f28,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9852,0,4,char1,0x2CBB6,sGuildCard,1,,4B,0x166dbc,obj100+0x71f30,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9856,0,4,char1,0x2CBBA,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73218,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B985A,0,1195,char1,0x2CBBE,sGuildCard,1,,1195B,0x3cf810,obj100+0x1cd200,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1B9D05,0,7154,char1,0x2D069,sGuildCard,98,584,4B 2B 22B 8B 4B 4B 29B,0x3cf820,obj100+0x7321c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB8F7,0,4,char1,0x2EC5B,sGuildCard,1,,4B,0x3cf820,obj100+0x7383c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB8FB,0,2,char1,0x2EC5F,sGuildCard,1,,2B,0x166d8c,obj100+0x73014,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB8FD,0,22,char1,0x2EC61,sGuildCard,1,,22B,0x166d9c,obj100+0x73016,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB913,0,8,char1,0x2EC77,sGuildCard,1,,8B,0x166dac,obj100+0x7302c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB91B,0,4,char1,0x2EC7F,sGuildCard,1,,4B,0x166dbc,obj100+0x73034,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x1BB91F,0,623930,char1,0x2EC83,sGuildCard,1,,623930B,0x3cf8fc,obj100+0x1d3900,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",DERIVED
-0x253E59,0,6328,char1,0xC71BD,sGuildCard,1,,6328B,0x163e30,obj100+0x66120,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)",DERIVED
+0x1B9359,0,4,char1,0x2C6BD,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73208,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B935D,0,1233,char1,0x2C6C1,sGuildCard,1,,1233B,0x3cf810,obj100+0x1ccd00,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B982E,0,4,char1,0x2CB92,sGuildCard,1,,4B,0x3cf820,obj100+0x7320c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B9832,0,2,char1,0x2CB96,sGuildCard,1,,2B,0x166d8c,obj100+0x71f10,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B9834,0,22,char1,0x2CB98,sGuildCard,1,,22B,0x166d9c,obj100+0x71f12,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B984A,0,8,char1,0x2CBAE,sGuildCard,1,,8B,0x166dac,obj100+0x71f28,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B9852,0,4,char1,0x2CBB6,sGuildCard,1,,4B,0x166dbc,obj100+0x71f30,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B9856,0,4,char1,0x2CBBA,sGuildCard,1,,4B,0x3cf7e4,obj100+0x73218,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B985A,0,1195,char1,0x2CBBE,sGuildCard,1,,1195B,0x3cf810,obj100+0x1cd200,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1B9D05,0,7154,char1,0x2D069,sGuildCard,98,584,4B 2B 22B 8B 4B 4B 29B,0x3cf820,obj100+0x7321c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1BB8F7,0,4,char1,0x2EC5B,sGuildCard,1,,4B,0x3cf820,obj100+0x7383c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1BB8FB,0,2,char1,0x2EC5F,sGuildCard,1,,2B,0x166d8c,obj100+0x73014,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1BB8FD,0,22,char1,0x2EC61,sGuildCard,1,,22B,0x166d9c,obj100+0x73016,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1BB913,0,8,char1,0x2EC77,sGuildCard,1,,8B,0x166dac,obj100+0x7302c,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1BB91B,0,4,char1,0x2EC7F,sGuildCard,1,,4B,0x166dbc,obj100+0x73034,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x1BB91F,0,623930,char1,0x2EC83,sGuildCard,1,,623930B,0x3cf8fc,obj100+0x1d3900,"Guild Card list 1 (stored cards): 100 elements (u32 len, zlib card, u32 state, 36 B trailer) + padding",CONFIRMED
+0x253E59,0,22,char1,0xC71BD,sGuildCard,1,,22B,0x163e30,obj100+0x66120,"own Guild Card: hunter name, UTF-16",CONFIRMED
+0x253E6F,0,62,char1,0xC71D3,sGuildCard,1,,62B,0x163e30,obj100+0x66136,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)",DERIVED
+0x253EAD,0,308,char1,0xC7211,sGuildCard,1,,308B,0x163e30,obj100+0x66174,"own Guild Card: equipment, 7 x 44 B (a snapshot taken at an unidentified trigger, not on every gear change)",CONFIRMED
+0x253FE1,0,1842,char1,0xC7345,sGuildCard,1,,1842B,0x163e30,obj100+0x662a8,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)",DERIVED
+0x254713,0,30,char1,0xC7A77,sGuildCard,1,,30B,0x163e30,obj100+0x669da,"Guild Card weapon usage, Village",CONFIRMED
+0x254731,0,30,char1,0xC7A95,sGuildCard,1,,30B,0x163e30,obj100+0x669f8,"Guild Card weapon usage, Hub",CONFIRMED
+0x25474F,0,30,char1,0xC7AB3,sGuildCard,1,,30B,0x163e30,obj100+0x66a16,"Guild Card weapon usage, Arena",CONFIRMED
+0x25476D,0,4,char1,0xC7AD1,sGuildCard,1,,4B,0x163e30,obj100+0x66a34,"Guild Card play time (s), refreshed when the card is rebuilt (quest end)",CONFIRMED
+0x254771,0,1600,char1,0xC7AD5,sGuildCard,1,,1600B,0x163e30,obj100+0x66a38,"quest history log, 10 x 160 B, newest first",CONFIRMED
+0x254DB1,0,17,char1,0xC8115,sGuildCard,1,,17B,0x163e30,obj100+0x67078,Guild Card awards,CONFIRMED
+0x254DC2,0,3,char1,0xC8126,sGuildCard,1,,3B,0x163e30,obj100+0x67089,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)",DERIVED
+0x254DC5,0,696,char1,0xC8129,sGuildCard,1,,696B,0x163e30,obj100+0x6708c,"own Guild Card: monster log, 87 x 8 B (u16 size max, u16 size min, hunts and captures summed per family, crown bits)",CONFIRMED
+0x25507D,0,1684,char1,0xC83E1,sGuildCard,1,,1684B,0x163e30,obj100+0x67344,"own Guild Card, 6328 B (name UTF-16 +0, HR +0x16, equipment 7 x 44 +0x54, Palicoes 3 x 580 +0x188, title +0x854, scene +0x85A, pose +0x85B, weapon usage +0x8BA, history +0x918, awards +0xF58, monster log +0xF6C, Arena log +0x1224)",DERIVED
 0x255711,0,4400,char1,0xC8A75,sGuildCard,1,,4400B,0x163e44,obj100+0x679d8,"list 1 card info: 100 x 44 B (date received +0, comment +4, Unity +0x1C, card type +0x20, sender ID +0x21)",DERIVED
 0x256841,0,3650,char1,0xC9BA5,sGuildCard,50,584,4B 29B 4B 2B 22B 8B 4B,0x3cf7e4,obj100+0x7c208,Guild Card inbox (list 2): 50 elements + padding,DERIVED
 0x257683,0,313150,char1,0xCA9E7,sGuildCard,1,,313150B,0x3cf8fc,obj100+0x2a2100,Guild Card inbox (list 2): 50 elements + padding,DERIVED
@@ -459,265 +486,265 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x2A44C9,0,276,char1,0x11782D,sGuildCard,1,,276B,0x163e7c,obj100+0x69214,"StreetPass Palico to send: one 276 B record (sender ID +0, name UTF-16 +8, appearance +0x1E, 9 colours +0x2C, parameters +0x50)",DERIVED
 0x2A45DD,0,13800,char1,0x117941,sGuildCard,1,,13800B,0x163e90,obj100+0x69328,"Palico inbox: 50 x 276 B, same record",DERIVED
 0x2A7BC5,0,1800,char1,0x11AF29,sGuildCard,1,,1800B,0x3e78cc,obj100+0x6c910,Palico inbox info: 50 x 36 B,DERIVED
-0x2A82CD,0,1,char1,0x11B631,sGuestHunter,1,,1B,0x15bd58,obj100+0x81828,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82CE,0,1,char1,0x11B632,sGuestHunter,1,,1B,0x15bd68,obj100+0x81829,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82CF,0,1,char1,0x11B633,sGuestHunter,1,,1B,0x15bd78,obj100+0x8182a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82D0,0,1,char1,0x11B634,sGuestHunter,1,,1B,0x15bd88,obj100+0x8182b,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82D1,0,1,char1,0x11B635,sGuestHunter,1,,1B,0x15bd98,obj100+0x8182c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82D2,0,1,char1,0x11B636,sGuestHunter,1,,1B,0x15bda8,obj100+0x8182e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82D3,0,1,char1,0x11B637,sGuestHunter,1,,1B,0x15bdb8,obj100+0x81830,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82D4,0,1,char1,0x11B638,sGuestHunter,1,,1B,0x15bdc8,obj100+0x81831,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82D5,0,19,char1,0x11B639,sGuestHunter,1,,19B,0x15bdd8,obj100+0x81832,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82E8,0,3,char1,0x11B64C,sGuestHunter,1,,3B,0x15bde8,obj100+0x81845,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A82EB,0,68,char1,0x11B64F,sGuestHunter,1,,68B,0x15be14,obj100+0x83518,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A832F,0,22,char1,0x11B693,sGuestHunter,1,,22B,0x1599f4,obj100+0x81850,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8345,0,2,char1,0x11B6A9,sGuestHunter,1,,2B,0x159a04,obj100+0x81866,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8347,0,2,char1,0x11B6AB,sGuestHunter,1,,2B,0x159a14,obj100+0x81868,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8349,0,2,char1,0x11B6AD,sGuestHunter,1,,2B,0x159a24,obj100+0x8186a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A834B,0,2,char1,0x11B6AF,sGuestHunter,1,,2B,0x159a34,obj100+0x8186c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A834D,0,56,char1,0x11B6B1,sGuestHunter,1,,56B,0x159a44,obj100+0x81870,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8385,0,2,char1,0x11B6E9,sGuestHunter,1,,2B,0x159a54,obj100+0x8186e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8387,0,4,char1,0x11B6EB,sGuestHunter,1,,4B,0x159a64,obj100+0x818fc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A838B,0,4,char1,0x11B6EF,sGuestHunter,1,,4B,0x159a74,obj100+0x81900,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A838F,0,4,char1,0x11B6F3,sGuestHunter,1,,4B,0x159a84,obj100+0x81904,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8393,0,1,char1,0x11B6F7,sGuestHunter,1,,1B,0x159a94,obj100+0x81908,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8394,0,8,char1,0x11B6F8,sGuestHunter,1,,8B,0x159aa4,obj100+0x8190c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A839C,0,2,char1,0x11B700,sGuestHunter,1,,2B,0x159ab4,obj100+0x81914,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A839E,0,1,char1,0x11B702,sGuestHunter,1,,1B,0x159ac4,obj100+0x8190b,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A839F,0,1,char1,0x11B703,sGuestHunter,1,,1B,0x159ad4,obj100+0x8190a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A83A0,0,1,char1,0x11B704,sGuestHunter,1,,1B,0x159ae4,obj100+0x81909,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A83A1,0,12,char1,0x11B705,sGuestHunter,1,,12B,0x159af4,obj100+0x81916,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A83AD,0,36,char1,0x11B711,sGuestHunter,1,,36B,0x159b04,obj100+0x81924,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A83D1,0,308,char1,0x11B735,sGuestHunter,1,,308B,0x15be24,obj100+0x81948,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8505,0,22,char1,0x11B869,sGuestHunter,1,,22B,0x1599f4,obj100+0x81a84,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A851B,0,2,char1,0x11B87F,sGuestHunter,1,,2B,0x159a04,obj100+0x81a9a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A851D,0,2,char1,0x11B881,sGuestHunter,1,,2B,0x159a14,obj100+0x81a9c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A851F,0,2,char1,0x11B883,sGuestHunter,1,,2B,0x159a24,obj100+0x81a9e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8521,0,2,char1,0x11B885,sGuestHunter,1,,2B,0x159a34,obj100+0x81aa0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8523,0,56,char1,0x11B887,sGuestHunter,1,,56B,0x159a44,obj100+0x81aa4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A855B,0,2,char1,0x11B8BF,sGuestHunter,1,,2B,0x159a54,obj100+0x81aa2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A855D,0,4,char1,0x11B8C1,sGuestHunter,1,,4B,0x159a64,obj100+0x81b30,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8561,0,4,char1,0x11B8C5,sGuestHunter,1,,4B,0x159a74,obj100+0x81b34,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8565,0,4,char1,0x11B8C9,sGuestHunter,1,,4B,0x159a84,obj100+0x81b38,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8569,0,1,char1,0x11B8CD,sGuestHunter,1,,1B,0x159a94,obj100+0x81b3c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A856A,0,8,char1,0x11B8CE,sGuestHunter,1,,8B,0x159aa4,obj100+0x81b40,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8572,0,2,char1,0x11B8D6,sGuestHunter,1,,2B,0x159ab4,obj100+0x81b48,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8574,0,1,char1,0x11B8D8,sGuestHunter,1,,1B,0x159ac4,obj100+0x81b3f,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8575,0,1,char1,0x11B8D9,sGuestHunter,1,,1B,0x159ad4,obj100+0x81b3e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8576,0,1,char1,0x11B8DA,sGuestHunter,1,,1B,0x159ae4,obj100+0x81b3d,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8577,0,12,char1,0x11B8DB,sGuestHunter,1,,12B,0x159af4,obj100+0x81b4a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8583,0,36,char1,0x11B8E7,sGuestHunter,1,,36B,0x159b04,obj100+0x81b58,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A85A7,0,308,char1,0x11B90B,sGuestHunter,1,,308B,0x15be48,obj100+0x81b7c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A86DB,0,22,char1,0x11BA3F,sGuestHunter,1,,22B,0x1599f4,obj100+0x81cb8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A86F1,0,2,char1,0x11BA55,sGuestHunter,1,,2B,0x159a04,obj100+0x81cce,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A86F3,0,2,char1,0x11BA57,sGuestHunter,1,,2B,0x159a14,obj100+0x81cd0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A86F5,0,2,char1,0x11BA59,sGuestHunter,1,,2B,0x159a24,obj100+0x81cd2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A86F7,0,2,char1,0x11BA5B,sGuestHunter,1,,2B,0x159a34,obj100+0x81cd4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A86F9,0,56,char1,0x11BA5D,sGuestHunter,1,,56B,0x159a44,obj100+0x81cd8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8731,0,2,char1,0x11BA95,sGuestHunter,1,,2B,0x159a54,obj100+0x81cd6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8733,0,4,char1,0x11BA97,sGuestHunter,1,,4B,0x159a64,obj100+0x81d64,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8737,0,4,char1,0x11BA9B,sGuestHunter,1,,4B,0x159a74,obj100+0x81d68,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A873B,0,4,char1,0x11BA9F,sGuestHunter,1,,4B,0x159a84,obj100+0x81d6c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A873F,0,1,char1,0x11BAA3,sGuestHunter,1,,1B,0x159a94,obj100+0x81d70,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8740,0,8,char1,0x11BAA4,sGuestHunter,1,,8B,0x159aa4,obj100+0x81d74,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8748,0,2,char1,0x11BAAC,sGuestHunter,1,,2B,0x159ab4,obj100+0x81d7c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A874A,0,1,char1,0x11BAAE,sGuestHunter,1,,1B,0x159ac4,obj100+0x81d73,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A874B,0,1,char1,0x11BAAF,sGuestHunter,1,,1B,0x159ad4,obj100+0x81d72,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A874C,0,1,char1,0x11BAB0,sGuestHunter,1,,1B,0x159ae4,obj100+0x81d71,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A874D,0,12,char1,0x11BAB1,sGuestHunter,1,,12B,0x159af4,obj100+0x81d7e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8759,0,36,char1,0x11BABD,sGuestHunter,1,,36B,0x159b04,obj100+0x81d8c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A877D,0,308,char1,0x11BAE1,sGuestHunter,1,,308B,0x15be70,obj100+0x81db0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A88B1,0,22,char1,0x11BC15,sGuestHunter,1,,22B,0x1599f4,obj100+0x81eec,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A88C7,0,2,char1,0x11BC2B,sGuestHunter,1,,2B,0x159a04,obj100+0x81f02,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A88C9,0,2,char1,0x11BC2D,sGuestHunter,1,,2B,0x159a14,obj100+0x81f04,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A88CB,0,2,char1,0x11BC2F,sGuestHunter,1,,2B,0x159a24,obj100+0x81f06,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A88CD,0,2,char1,0x11BC31,sGuestHunter,1,,2B,0x159a34,obj100+0x81f08,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A88CF,0,56,char1,0x11BC33,sGuestHunter,1,,56B,0x159a44,obj100+0x81f0c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8907,0,2,char1,0x11BC6B,sGuestHunter,1,,2B,0x159a54,obj100+0x81f0a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8909,0,4,char1,0x11BC6D,sGuestHunter,1,,4B,0x159a64,obj100+0x81f98,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A890D,0,4,char1,0x11BC71,sGuestHunter,1,,4B,0x159a74,obj100+0x81f9c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8911,0,4,char1,0x11BC75,sGuestHunter,1,,4B,0x159a84,obj100+0x81fa0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8915,0,1,char1,0x11BC79,sGuestHunter,1,,1B,0x159a94,obj100+0x81fa4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8916,0,8,char1,0x11BC7A,sGuestHunter,1,,8B,0x159aa4,obj100+0x81fa8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A891E,0,2,char1,0x11BC82,sGuestHunter,1,,2B,0x159ab4,obj100+0x81fb0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8920,0,1,char1,0x11BC84,sGuestHunter,1,,1B,0x159ac4,obj100+0x81fa7,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8921,0,1,char1,0x11BC85,sGuestHunter,1,,1B,0x159ad4,obj100+0x81fa6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8922,0,1,char1,0x11BC86,sGuestHunter,1,,1B,0x159ae4,obj100+0x81fa5,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8923,0,12,char1,0x11BC87,sGuestHunter,1,,12B,0x159af4,obj100+0x81fb2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A892F,0,36,char1,0x11BC93,sGuestHunter,1,,36B,0x159b04,obj100+0x81fc0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8953,0,308,char1,0x11BCB7,sGuestHunter,1,,308B,0x15be98,obj100+0x81fe4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8A87,0,22,char1,0x11BDEB,sGuestHunter,1,,22B,0x1599f4,obj100+0x82120,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8A9D,0,2,char1,0x11BE01,sGuestHunter,1,,2B,0x159a04,obj100+0x82136,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8A9F,0,2,char1,0x11BE03,sGuestHunter,1,,2B,0x159a14,obj100+0x82138,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AA1,0,2,char1,0x11BE05,sGuestHunter,1,,2B,0x159a24,obj100+0x8213a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AA3,0,2,char1,0x11BE07,sGuestHunter,1,,2B,0x159a34,obj100+0x8213c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AA5,0,56,char1,0x11BE09,sGuestHunter,1,,56B,0x159a44,obj100+0x82140,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8ADD,0,2,char1,0x11BE41,sGuestHunter,1,,2B,0x159a54,obj100+0x8213e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8ADF,0,4,char1,0x11BE43,sGuestHunter,1,,4B,0x159a64,obj100+0x821cc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AE3,0,4,char1,0x11BE47,sGuestHunter,1,,4B,0x159a74,obj100+0x821d0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AE7,0,4,char1,0x11BE4B,sGuestHunter,1,,4B,0x159a84,obj100+0x821d4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AEB,0,1,char1,0x11BE4F,sGuestHunter,1,,1B,0x159a94,obj100+0x821d8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AEC,0,8,char1,0x11BE50,sGuestHunter,1,,8B,0x159aa4,obj100+0x821dc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AF4,0,2,char1,0x11BE58,sGuestHunter,1,,2B,0x159ab4,obj100+0x821e4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AF6,0,1,char1,0x11BE5A,sGuestHunter,1,,1B,0x159ac4,obj100+0x821db,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AF7,0,1,char1,0x11BE5B,sGuestHunter,1,,1B,0x159ad4,obj100+0x821da,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AF8,0,1,char1,0x11BE5C,sGuestHunter,1,,1B,0x159ae4,obj100+0x821d9,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8AF9,0,12,char1,0x11BE5D,sGuestHunter,1,,12B,0x159af4,obj100+0x821e6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8B05,0,36,char1,0x11BE69,sGuestHunter,1,,36B,0x159b04,obj100+0x821f4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8B29,0,308,char1,0x11BE8D,sGuestHunter,1,,308B,0x15bec0,obj100+0x82218,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8C5D,0,22,char1,0x11BFC1,sGuestHunter,1,,22B,0x1599f4,obj100+0x82354,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8C73,0,2,char1,0x11BFD7,sGuestHunter,1,,2B,0x159a04,obj100+0x8236a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8C75,0,2,char1,0x11BFD9,sGuestHunter,1,,2B,0x159a14,obj100+0x8236c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8C77,0,2,char1,0x11BFDB,sGuestHunter,1,,2B,0x159a24,obj100+0x8236e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8C79,0,2,char1,0x11BFDD,sGuestHunter,1,,2B,0x159a34,obj100+0x82370,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8C7B,0,56,char1,0x11BFDF,sGuestHunter,1,,56B,0x159a44,obj100+0x82374,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CB3,0,2,char1,0x11C017,sGuestHunter,1,,2B,0x159a54,obj100+0x82372,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CB5,0,4,char1,0x11C019,sGuestHunter,1,,4B,0x159a64,obj100+0x82400,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CB9,0,4,char1,0x11C01D,sGuestHunter,1,,4B,0x159a74,obj100+0x82404,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CBD,0,4,char1,0x11C021,sGuestHunter,1,,4B,0x159a84,obj100+0x82408,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CC1,0,1,char1,0x11C025,sGuestHunter,1,,1B,0x159a94,obj100+0x8240c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CC2,0,8,char1,0x11C026,sGuestHunter,1,,8B,0x159aa4,obj100+0x82410,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CCA,0,2,char1,0x11C02E,sGuestHunter,1,,2B,0x159ab4,obj100+0x82418,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CCC,0,1,char1,0x11C030,sGuestHunter,1,,1B,0x159ac4,obj100+0x8240f,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CCD,0,1,char1,0x11C031,sGuestHunter,1,,1B,0x159ad4,obj100+0x8240e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CCE,0,1,char1,0x11C032,sGuestHunter,1,,1B,0x159ae4,obj100+0x8240d,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CCF,0,12,char1,0x11C033,sGuestHunter,1,,12B,0x159af4,obj100+0x8241a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CDB,0,36,char1,0x11C03F,sGuestHunter,1,,36B,0x159b04,obj100+0x82428,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8CFF,0,308,char1,0x11C063,sGuestHunter,1,,308B,0x15bee4,obj100+0x8244c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E33,0,22,char1,0x11C197,sGuestHunter,1,,22B,0x1599f4,obj100+0x82588,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E49,0,2,char1,0x11C1AD,sGuestHunter,1,,2B,0x159a04,obj100+0x8259e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E4B,0,2,char1,0x11C1AF,sGuestHunter,1,,2B,0x159a14,obj100+0x825a0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E4D,0,2,char1,0x11C1B1,sGuestHunter,1,,2B,0x159a24,obj100+0x825a2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E4F,0,2,char1,0x11C1B3,sGuestHunter,1,,2B,0x159a34,obj100+0x825a4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E51,0,56,char1,0x11C1B5,sGuestHunter,1,,56B,0x159a44,obj100+0x825a8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E89,0,2,char1,0x11C1ED,sGuestHunter,1,,2B,0x159a54,obj100+0x825a6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E8B,0,4,char1,0x11C1EF,sGuestHunter,1,,4B,0x159a64,obj100+0x82634,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E8F,0,4,char1,0x11C1F3,sGuestHunter,1,,4B,0x159a74,obj100+0x82638,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E93,0,4,char1,0x11C1F7,sGuestHunter,1,,4B,0x159a84,obj100+0x8263c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E97,0,1,char1,0x11C1FB,sGuestHunter,1,,1B,0x159a94,obj100+0x82640,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8E98,0,8,char1,0x11C1FC,sGuestHunter,1,,8B,0x159aa4,obj100+0x82644,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8EA0,0,2,char1,0x11C204,sGuestHunter,1,,2B,0x159ab4,obj100+0x8264c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8EA2,0,1,char1,0x11C206,sGuestHunter,1,,1B,0x159ac4,obj100+0x82643,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8EA3,0,1,char1,0x11C207,sGuestHunter,1,,1B,0x159ad4,obj100+0x82642,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8EA4,0,1,char1,0x11C208,sGuestHunter,1,,1B,0x159ae4,obj100+0x82641,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8EA5,0,12,char1,0x11C209,sGuestHunter,1,,12B,0x159af4,obj100+0x8264e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8EB1,0,36,char1,0x11C215,sGuestHunter,1,,36B,0x159b04,obj100+0x8265c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A8ED5,0,308,char1,0x11C239,sGuestHunter,1,,308B,0x15bf0c,obj100+0x82680,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9009,0,22,char1,0x11C36D,sGuestHunter,1,,22B,0x1599f4,obj100+0x827bc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A901F,0,2,char1,0x11C383,sGuestHunter,1,,2B,0x159a04,obj100+0x827d2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9021,0,2,char1,0x11C385,sGuestHunter,1,,2B,0x159a14,obj100+0x827d4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9023,0,2,char1,0x11C387,sGuestHunter,1,,2B,0x159a24,obj100+0x827d6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9025,0,2,char1,0x11C389,sGuestHunter,1,,2B,0x159a34,obj100+0x827d8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9027,0,56,char1,0x11C38B,sGuestHunter,1,,56B,0x159a44,obj100+0x827dc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A905F,0,2,char1,0x11C3C3,sGuestHunter,1,,2B,0x159a54,obj100+0x827da,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9061,0,4,char1,0x11C3C5,sGuestHunter,1,,4B,0x159a64,obj100+0x82868,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9065,0,4,char1,0x11C3C9,sGuestHunter,1,,4B,0x159a74,obj100+0x8286c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9069,0,4,char1,0x11C3CD,sGuestHunter,1,,4B,0x159a84,obj100+0x82870,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A906D,0,1,char1,0x11C3D1,sGuestHunter,1,,1B,0x159a94,obj100+0x82874,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A906E,0,8,char1,0x11C3D2,sGuestHunter,1,,8B,0x159aa4,obj100+0x82878,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9076,0,2,char1,0x11C3DA,sGuestHunter,1,,2B,0x159ab4,obj100+0x82880,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9078,0,1,char1,0x11C3DC,sGuestHunter,1,,1B,0x159ac4,obj100+0x82877,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9079,0,1,char1,0x11C3DD,sGuestHunter,1,,1B,0x159ad4,obj100+0x82876,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A907A,0,1,char1,0x11C3DE,sGuestHunter,1,,1B,0x159ae4,obj100+0x82875,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A907B,0,12,char1,0x11C3DF,sGuestHunter,1,,12B,0x159af4,obj100+0x82882,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9087,0,36,char1,0x11C3EB,sGuestHunter,1,,36B,0x159b04,obj100+0x82890,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A90AB,0,308,char1,0x11C40F,sGuestHunter,1,,308B,0x15bf34,obj100+0x828b4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A91DF,0,22,char1,0x11C543,sGuestHunter,1,,22B,0x1599f4,obj100+0x829f0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A91F5,0,2,char1,0x11C559,sGuestHunter,1,,2B,0x159a04,obj100+0x82a06,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A91F7,0,2,char1,0x11C55B,sGuestHunter,1,,2B,0x159a14,obj100+0x82a08,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A91F9,0,2,char1,0x11C55D,sGuestHunter,1,,2B,0x159a24,obj100+0x82a0a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A91FB,0,2,char1,0x11C55F,sGuestHunter,1,,2B,0x159a34,obj100+0x82a0c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A91FD,0,56,char1,0x11C561,sGuestHunter,1,,56B,0x159a44,obj100+0x82a10,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9235,0,2,char1,0x11C599,sGuestHunter,1,,2B,0x159a54,obj100+0x82a0e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9237,0,4,char1,0x11C59B,sGuestHunter,1,,4B,0x159a64,obj100+0x82a9c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A923B,0,4,char1,0x11C59F,sGuestHunter,1,,4B,0x159a74,obj100+0x82aa0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A923F,0,4,char1,0x11C5A3,sGuestHunter,1,,4B,0x159a84,obj100+0x82aa4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9243,0,1,char1,0x11C5A7,sGuestHunter,1,,1B,0x159a94,obj100+0x82aa8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9244,0,8,char1,0x11C5A8,sGuestHunter,1,,8B,0x159aa4,obj100+0x82aac,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A924C,0,2,char1,0x11C5B0,sGuestHunter,1,,2B,0x159ab4,obj100+0x82ab4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A924E,0,1,char1,0x11C5B2,sGuestHunter,1,,1B,0x159ac4,obj100+0x82aab,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A924F,0,1,char1,0x11C5B3,sGuestHunter,1,,1B,0x159ad4,obj100+0x82aaa,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9250,0,1,char1,0x11C5B4,sGuestHunter,1,,1B,0x159ae4,obj100+0x82aa9,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9251,0,12,char1,0x11C5B5,sGuestHunter,1,,12B,0x159af4,obj100+0x82ab6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A925D,0,36,char1,0x11C5C1,sGuestHunter,1,,36B,0x159b04,obj100+0x82ac4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9281,0,308,char1,0x11C5E5,sGuestHunter,1,,308B,0x15bf5c,obj100+0x82ae8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A93B5,0,22,char1,0x11C719,sGuestHunter,1,,22B,0x1599f4,obj100+0x82c24,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A93CB,0,2,char1,0x11C72F,sGuestHunter,1,,2B,0x159a04,obj100+0x82c3a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A93CD,0,2,char1,0x11C731,sGuestHunter,1,,2B,0x159a14,obj100+0x82c3c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A93CF,0,2,char1,0x11C733,sGuestHunter,1,,2B,0x159a24,obj100+0x82c3e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A93D1,0,2,char1,0x11C735,sGuestHunter,1,,2B,0x159a34,obj100+0x82c40,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A93D3,0,56,char1,0x11C737,sGuestHunter,1,,56B,0x159a44,obj100+0x82c44,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A940B,0,2,char1,0x11C76F,sGuestHunter,1,,2B,0x159a54,obj100+0x82c42,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A940D,0,4,char1,0x11C771,sGuestHunter,1,,4B,0x159a64,obj100+0x82cd0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9411,0,4,char1,0x11C775,sGuestHunter,1,,4B,0x159a74,obj100+0x82cd4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9415,0,4,char1,0x11C779,sGuestHunter,1,,4B,0x159a84,obj100+0x82cd8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9419,0,1,char1,0x11C77D,sGuestHunter,1,,1B,0x159a94,obj100+0x82cdc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A941A,0,8,char1,0x11C77E,sGuestHunter,1,,8B,0x159aa4,obj100+0x82ce0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9422,0,2,char1,0x11C786,sGuestHunter,1,,2B,0x159ab4,obj100+0x82ce8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9424,0,1,char1,0x11C788,sGuestHunter,1,,1B,0x159ac4,obj100+0x82cdf,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9425,0,1,char1,0x11C789,sGuestHunter,1,,1B,0x159ad4,obj100+0x82cde,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9426,0,1,char1,0x11C78A,sGuestHunter,1,,1B,0x159ae4,obj100+0x82cdd,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9427,0,12,char1,0x11C78B,sGuestHunter,1,,12B,0x159af4,obj100+0x82cea,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9433,0,36,char1,0x11C797,sGuestHunter,1,,36B,0x159b04,obj100+0x82cf8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9457,0,308,char1,0x11C7BB,sGuestHunter,1,,308B,0x15bf84,obj100+0x82d1c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A958B,0,22,char1,0x11C8EF,sGuestHunter,1,,22B,0x1599f4,obj100+0x82e58,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95A1,0,2,char1,0x11C905,sGuestHunter,1,,2B,0x159a04,obj100+0x82e6e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95A3,0,2,char1,0x11C907,sGuestHunter,1,,2B,0x159a14,obj100+0x82e70,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95A5,0,2,char1,0x11C909,sGuestHunter,1,,2B,0x159a24,obj100+0x82e72,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95A7,0,2,char1,0x11C90B,sGuestHunter,1,,2B,0x159a34,obj100+0x82e74,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95A9,0,56,char1,0x11C90D,sGuestHunter,1,,56B,0x159a44,obj100+0x82e78,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95E1,0,2,char1,0x11C945,sGuestHunter,1,,2B,0x159a54,obj100+0x82e76,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95E3,0,4,char1,0x11C947,sGuestHunter,1,,4B,0x159a64,obj100+0x82f04,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95E7,0,4,char1,0x11C94B,sGuestHunter,1,,4B,0x159a74,obj100+0x82f08,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95EB,0,4,char1,0x11C94F,sGuestHunter,1,,4B,0x159a84,obj100+0x82f0c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95EF,0,1,char1,0x11C953,sGuestHunter,1,,1B,0x159a94,obj100+0x82f10,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95F0,0,8,char1,0x11C954,sGuestHunter,1,,8B,0x159aa4,obj100+0x82f14,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95F8,0,2,char1,0x11C95C,sGuestHunter,1,,2B,0x159ab4,obj100+0x82f1c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95FA,0,1,char1,0x11C95E,sGuestHunter,1,,1B,0x159ac4,obj100+0x82f13,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95FB,0,1,char1,0x11C95F,sGuestHunter,1,,1B,0x159ad4,obj100+0x82f12,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95FC,0,1,char1,0x11C960,sGuestHunter,1,,1B,0x159ae4,obj100+0x82f11,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A95FD,0,12,char1,0x11C961,sGuestHunter,1,,12B,0x159af4,obj100+0x82f1e,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9609,0,36,char1,0x11C96D,sGuestHunter,1,,36B,0x159b04,obj100+0x82f2c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A962D,0,308,char1,0x11C991,sGuestHunter,1,,308B,0x15bfac,obj100+0x82f50,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9761,0,22,char1,0x11CAC5,sGuestHunter,1,,22B,0x1599f4,obj100+0x8308c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9777,0,2,char1,0x11CADB,sGuestHunter,1,,2B,0x159a04,obj100+0x830a2,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9779,0,2,char1,0x11CADD,sGuestHunter,1,,2B,0x159a14,obj100+0x830a4,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A977B,0,2,char1,0x11CADF,sGuestHunter,1,,2B,0x159a24,obj100+0x830a6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A977D,0,2,char1,0x11CAE1,sGuestHunter,1,,2B,0x159a34,obj100+0x830a8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A977F,0,56,char1,0x11CAE3,sGuestHunter,1,,56B,0x159a44,obj100+0x830ac,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97B7,0,2,char1,0x11CB1B,sGuestHunter,1,,2B,0x159a54,obj100+0x830aa,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97B9,0,4,char1,0x11CB1D,sGuestHunter,1,,4B,0x159a64,obj100+0x83138,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97BD,0,4,char1,0x11CB21,sGuestHunter,1,,4B,0x159a74,obj100+0x8313c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97C1,0,4,char1,0x11CB25,sGuestHunter,1,,4B,0x159a84,obj100+0x83140,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97C5,0,1,char1,0x11CB29,sGuestHunter,1,,1B,0x159a94,obj100+0x83144,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97C6,0,8,char1,0x11CB2A,sGuestHunter,1,,8B,0x159aa4,obj100+0x83148,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97CE,0,2,char1,0x11CB32,sGuestHunter,1,,2B,0x159ab4,obj100+0x83150,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97D0,0,1,char1,0x11CB34,sGuestHunter,1,,1B,0x159ac4,obj100+0x83147,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97D1,0,1,char1,0x11CB35,sGuestHunter,1,,1B,0x159ad4,obj100+0x83146,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97D2,0,1,char1,0x11CB36,sGuestHunter,1,,1B,0x159ae4,obj100+0x83145,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97D3,0,12,char1,0x11CB37,sGuestHunter,1,,12B,0x159af4,obj100+0x83152,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A97DF,0,36,char1,0x11CB43,sGuestHunter,1,,36B,0x159b04,obj100+0x83160,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9803,0,308,char1,0x11CB67,sGuestHunter,1,,308B,0x15bfd4,obj100+0x83184,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9937,0,22,char1,0x11CC9B,sGuestHunter,1,,22B,0x1599f4,obj100+0x832c0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A994D,0,2,char1,0x11CCB1,sGuestHunter,1,,2B,0x159a04,obj100+0x832d6,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A994F,0,2,char1,0x11CCB3,sGuestHunter,1,,2B,0x159a14,obj100+0x832d8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9951,0,2,char1,0x11CCB5,sGuestHunter,1,,2B,0x159a24,obj100+0x832da,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9953,0,2,char1,0x11CCB7,sGuestHunter,1,,2B,0x159a34,obj100+0x832dc,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9955,0,56,char1,0x11CCB9,sGuestHunter,1,,56B,0x159a44,obj100+0x832e0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A998D,0,2,char1,0x11CCF1,sGuestHunter,1,,2B,0x159a54,obj100+0x832de,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A998F,0,4,char1,0x11CCF3,sGuestHunter,1,,4B,0x159a64,obj100+0x8336c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9993,0,4,char1,0x11CCF7,sGuestHunter,1,,4B,0x159a74,obj100+0x83370,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9997,0,4,char1,0x11CCFB,sGuestHunter,1,,4B,0x159a84,obj100+0x83374,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A999B,0,1,char1,0x11CCFF,sGuestHunter,1,,1B,0x159a94,obj100+0x83378,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A999C,0,8,char1,0x11CD00,sGuestHunter,1,,8B,0x159aa4,obj100+0x8337c,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A99A4,0,2,char1,0x11CD08,sGuestHunter,1,,2B,0x159ab4,obj100+0x83384,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A99A6,0,1,char1,0x11CD0A,sGuestHunter,1,,1B,0x159ac4,obj100+0x8337b,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A99A7,0,1,char1,0x11CD0B,sGuestHunter,1,,1B,0x159ad4,obj100+0x8337a,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A99A8,0,1,char1,0x11CD0C,sGuestHunter,1,,1B,0x159ae4,obj100+0x83379,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A99A9,0,12,char1,0x11CD0D,sGuestHunter,1,,12B,0x159af4,obj100+0x83386,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A99B5,0,36,char1,0x11CD19,sGuestHunter,1,,36B,0x159b04,obj100+0x83394,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A99D9,0,308,char1,0x11CD3D,sGuestHunter,1,,308B,0x15bffc,obj100+0x833b8,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
-0x2A9B0D,0,40,char1,0x11CE71,sGuestHunter,1,,40B,0x3e78e0,obj100+0x834f0,"guest hunters: hunters met online (UTF-16 name, greeting, hired copies)",DERIVED
+0x2A82CD,0,1,char1,0x11B631,sGuestHunter,1,,1B,0x15bd58,obj100+0x81828,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82CE,0,1,char1,0x11B632,sGuestHunter,1,,1B,0x15bd68,obj100+0x81829,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82CF,0,1,char1,0x11B633,sGuestHunter,1,,1B,0x15bd78,obj100+0x8182a,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82D0,0,1,char1,0x11B634,sGuestHunter,1,,1B,0x15bd88,obj100+0x8182b,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82D1,0,1,char1,0x11B635,sGuestHunter,1,,1B,0x15bd98,obj100+0x8182c,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82D2,0,1,char1,0x11B636,sGuestHunter,1,,1B,0x15bda8,obj100+0x8182e,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82D3,0,1,char1,0x11B637,sGuestHunter,1,,1B,0x15bdb8,obj100+0x81830,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82D4,0,1,char1,0x11B638,sGuestHunter,1,,1B,0x15bdc8,obj100+0x81831,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82D5,0,19,char1,0x11B639,sGuestHunter,1,,19B,0x15bdd8,obj100+0x81832,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82E8,0,3,char1,0x11B64C,sGuestHunter,1,,3B,0x15bde8,obj100+0x81845,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A82EB,0,68,char1,0x11B64F,sGuestHunter,1,,68B,0x15be14,obj100+0x83518,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
+0x2A832F,0,22,char1,0x11B693,sGuestHunter,1,,22B,0x1599f4,obj100+0x81850,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8345,0,2,char1,0x11B6A9,sGuestHunter,1,,2B,0x159a04,obj100+0x81866,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8347,0,2,char1,0x11B6AB,sGuestHunter,1,,2B,0x159a14,obj100+0x81868,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8349,0,2,char1,0x11B6AD,sGuestHunter,1,,2B,0x159a24,obj100+0x8186a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A834B,0,2,char1,0x11B6AF,sGuestHunter,1,,2B,0x159a34,obj100+0x8186c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A834D,0,56,char1,0x11B6B1,sGuestHunter,1,,56B,0x159a44,obj100+0x81870,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8385,0,2,char1,0x11B6E9,sGuestHunter,1,,2B,0x159a54,obj100+0x8186e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8387,0,4,char1,0x11B6EB,sGuestHunter,1,,4B,0x159a64,obj100+0x818fc,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A838B,0,4,char1,0x11B6EF,sGuestHunter,1,,4B,0x159a74,obj100+0x81900,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A838F,0,4,char1,0x11B6F3,sGuestHunter,1,,4B,0x159a84,obj100+0x81904,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8393,0,1,char1,0x11B6F7,sGuestHunter,1,,1B,0x159a94,obj100+0x81908,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8394,0,8,char1,0x11B6F8,sGuestHunter,1,,8B,0x159aa4,obj100+0x8190c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A839C,0,2,char1,0x11B700,sGuestHunter,1,,2B,0x159ab4,obj100+0x81914,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A839E,0,1,char1,0x11B702,sGuestHunter,1,,1B,0x159ac4,obj100+0x8190b,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A839F,0,1,char1,0x11B703,sGuestHunter,1,,1B,0x159ad4,obj100+0x8190a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A83A0,0,1,char1,0x11B704,sGuestHunter,1,,1B,0x159ae4,obj100+0x81909,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A83A1,0,12,char1,0x11B705,sGuestHunter,1,,12B,0x159af4,obj100+0x81916,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A83AD,0,36,char1,0x11B711,sGuestHunter,1,,36B,0x159b04,obj100+0x81924,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A83D1,0,308,char1,0x11B735,sGuestHunter,1,,308B,0x15be24,obj100+0x81948,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8505,0,22,char1,0x11B869,sGuestHunter,1,,22B,0x1599f4,obj100+0x81a84,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A851B,0,2,char1,0x11B87F,sGuestHunter,1,,2B,0x159a04,obj100+0x81a9a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A851D,0,2,char1,0x11B881,sGuestHunter,1,,2B,0x159a14,obj100+0x81a9c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A851F,0,2,char1,0x11B883,sGuestHunter,1,,2B,0x159a24,obj100+0x81a9e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8521,0,2,char1,0x11B885,sGuestHunter,1,,2B,0x159a34,obj100+0x81aa0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8523,0,56,char1,0x11B887,sGuestHunter,1,,56B,0x159a44,obj100+0x81aa4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A855B,0,2,char1,0x11B8BF,sGuestHunter,1,,2B,0x159a54,obj100+0x81aa2,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A855D,0,4,char1,0x11B8C1,sGuestHunter,1,,4B,0x159a64,obj100+0x81b30,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8561,0,4,char1,0x11B8C5,sGuestHunter,1,,4B,0x159a74,obj100+0x81b34,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8565,0,4,char1,0x11B8C9,sGuestHunter,1,,4B,0x159a84,obj100+0x81b38,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8569,0,1,char1,0x11B8CD,sGuestHunter,1,,1B,0x159a94,obj100+0x81b3c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A856A,0,8,char1,0x11B8CE,sGuestHunter,1,,8B,0x159aa4,obj100+0x81b40,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8572,0,2,char1,0x11B8D6,sGuestHunter,1,,2B,0x159ab4,obj100+0x81b48,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8574,0,1,char1,0x11B8D8,sGuestHunter,1,,1B,0x159ac4,obj100+0x81b3f,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8575,0,1,char1,0x11B8D9,sGuestHunter,1,,1B,0x159ad4,obj100+0x81b3e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8576,0,1,char1,0x11B8DA,sGuestHunter,1,,1B,0x159ae4,obj100+0x81b3d,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8577,0,12,char1,0x11B8DB,sGuestHunter,1,,12B,0x159af4,obj100+0x81b4a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8583,0,36,char1,0x11B8E7,sGuestHunter,1,,36B,0x159b04,obj100+0x81b58,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A85A7,0,308,char1,0x11B90B,sGuestHunter,1,,308B,0x15be48,obj100+0x81b7c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A86DB,0,22,char1,0x11BA3F,sGuestHunter,1,,22B,0x1599f4,obj100+0x81cb8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A86F1,0,2,char1,0x11BA55,sGuestHunter,1,,2B,0x159a04,obj100+0x81cce,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A86F3,0,2,char1,0x11BA57,sGuestHunter,1,,2B,0x159a14,obj100+0x81cd0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A86F5,0,2,char1,0x11BA59,sGuestHunter,1,,2B,0x159a24,obj100+0x81cd2,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A86F7,0,2,char1,0x11BA5B,sGuestHunter,1,,2B,0x159a34,obj100+0x81cd4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A86F9,0,56,char1,0x11BA5D,sGuestHunter,1,,56B,0x159a44,obj100+0x81cd8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8731,0,2,char1,0x11BA95,sGuestHunter,1,,2B,0x159a54,obj100+0x81cd6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8733,0,4,char1,0x11BA97,sGuestHunter,1,,4B,0x159a64,obj100+0x81d64,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8737,0,4,char1,0x11BA9B,sGuestHunter,1,,4B,0x159a74,obj100+0x81d68,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A873B,0,4,char1,0x11BA9F,sGuestHunter,1,,4B,0x159a84,obj100+0x81d6c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A873F,0,1,char1,0x11BAA3,sGuestHunter,1,,1B,0x159a94,obj100+0x81d70,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8740,0,8,char1,0x11BAA4,sGuestHunter,1,,8B,0x159aa4,obj100+0x81d74,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8748,0,2,char1,0x11BAAC,sGuestHunter,1,,2B,0x159ab4,obj100+0x81d7c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A874A,0,1,char1,0x11BAAE,sGuestHunter,1,,1B,0x159ac4,obj100+0x81d73,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A874B,0,1,char1,0x11BAAF,sGuestHunter,1,,1B,0x159ad4,obj100+0x81d72,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A874C,0,1,char1,0x11BAB0,sGuestHunter,1,,1B,0x159ae4,obj100+0x81d71,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A874D,0,12,char1,0x11BAB1,sGuestHunter,1,,12B,0x159af4,obj100+0x81d7e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8759,0,36,char1,0x11BABD,sGuestHunter,1,,36B,0x159b04,obj100+0x81d8c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A877D,0,308,char1,0x11BAE1,sGuestHunter,1,,308B,0x15be70,obj100+0x81db0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A88B1,0,22,char1,0x11BC15,sGuestHunter,1,,22B,0x1599f4,obj100+0x81eec,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A88C7,0,2,char1,0x11BC2B,sGuestHunter,1,,2B,0x159a04,obj100+0x81f02,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A88C9,0,2,char1,0x11BC2D,sGuestHunter,1,,2B,0x159a14,obj100+0x81f04,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A88CB,0,2,char1,0x11BC2F,sGuestHunter,1,,2B,0x159a24,obj100+0x81f06,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A88CD,0,2,char1,0x11BC31,sGuestHunter,1,,2B,0x159a34,obj100+0x81f08,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A88CF,0,56,char1,0x11BC33,sGuestHunter,1,,56B,0x159a44,obj100+0x81f0c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8907,0,2,char1,0x11BC6B,sGuestHunter,1,,2B,0x159a54,obj100+0x81f0a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8909,0,4,char1,0x11BC6D,sGuestHunter,1,,4B,0x159a64,obj100+0x81f98,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A890D,0,4,char1,0x11BC71,sGuestHunter,1,,4B,0x159a74,obj100+0x81f9c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8911,0,4,char1,0x11BC75,sGuestHunter,1,,4B,0x159a84,obj100+0x81fa0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8915,0,1,char1,0x11BC79,sGuestHunter,1,,1B,0x159a94,obj100+0x81fa4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8916,0,8,char1,0x11BC7A,sGuestHunter,1,,8B,0x159aa4,obj100+0x81fa8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A891E,0,2,char1,0x11BC82,sGuestHunter,1,,2B,0x159ab4,obj100+0x81fb0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8920,0,1,char1,0x11BC84,sGuestHunter,1,,1B,0x159ac4,obj100+0x81fa7,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8921,0,1,char1,0x11BC85,sGuestHunter,1,,1B,0x159ad4,obj100+0x81fa6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8922,0,1,char1,0x11BC86,sGuestHunter,1,,1B,0x159ae4,obj100+0x81fa5,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8923,0,12,char1,0x11BC87,sGuestHunter,1,,12B,0x159af4,obj100+0x81fb2,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A892F,0,36,char1,0x11BC93,sGuestHunter,1,,36B,0x159b04,obj100+0x81fc0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8953,0,308,char1,0x11BCB7,sGuestHunter,1,,308B,0x15be98,obj100+0x81fe4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8A87,0,22,char1,0x11BDEB,sGuestHunter,1,,22B,0x1599f4,obj100+0x82120,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8A9D,0,2,char1,0x11BE01,sGuestHunter,1,,2B,0x159a04,obj100+0x82136,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8A9F,0,2,char1,0x11BE03,sGuestHunter,1,,2B,0x159a14,obj100+0x82138,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AA1,0,2,char1,0x11BE05,sGuestHunter,1,,2B,0x159a24,obj100+0x8213a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AA3,0,2,char1,0x11BE07,sGuestHunter,1,,2B,0x159a34,obj100+0x8213c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AA5,0,56,char1,0x11BE09,sGuestHunter,1,,56B,0x159a44,obj100+0x82140,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8ADD,0,2,char1,0x11BE41,sGuestHunter,1,,2B,0x159a54,obj100+0x8213e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8ADF,0,4,char1,0x11BE43,sGuestHunter,1,,4B,0x159a64,obj100+0x821cc,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AE3,0,4,char1,0x11BE47,sGuestHunter,1,,4B,0x159a74,obj100+0x821d0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AE7,0,4,char1,0x11BE4B,sGuestHunter,1,,4B,0x159a84,obj100+0x821d4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AEB,0,1,char1,0x11BE4F,sGuestHunter,1,,1B,0x159a94,obj100+0x821d8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AEC,0,8,char1,0x11BE50,sGuestHunter,1,,8B,0x159aa4,obj100+0x821dc,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AF4,0,2,char1,0x11BE58,sGuestHunter,1,,2B,0x159ab4,obj100+0x821e4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AF6,0,1,char1,0x11BE5A,sGuestHunter,1,,1B,0x159ac4,obj100+0x821db,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AF7,0,1,char1,0x11BE5B,sGuestHunter,1,,1B,0x159ad4,obj100+0x821da,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AF8,0,1,char1,0x11BE5C,sGuestHunter,1,,1B,0x159ae4,obj100+0x821d9,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8AF9,0,12,char1,0x11BE5D,sGuestHunter,1,,12B,0x159af4,obj100+0x821e6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8B05,0,36,char1,0x11BE69,sGuestHunter,1,,36B,0x159b04,obj100+0x821f4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8B29,0,308,char1,0x11BE8D,sGuestHunter,1,,308B,0x15bec0,obj100+0x82218,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8C5D,0,22,char1,0x11BFC1,sGuestHunter,1,,22B,0x1599f4,obj100+0x82354,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8C73,0,2,char1,0x11BFD7,sGuestHunter,1,,2B,0x159a04,obj100+0x8236a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8C75,0,2,char1,0x11BFD9,sGuestHunter,1,,2B,0x159a14,obj100+0x8236c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8C77,0,2,char1,0x11BFDB,sGuestHunter,1,,2B,0x159a24,obj100+0x8236e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8C79,0,2,char1,0x11BFDD,sGuestHunter,1,,2B,0x159a34,obj100+0x82370,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8C7B,0,56,char1,0x11BFDF,sGuestHunter,1,,56B,0x159a44,obj100+0x82374,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CB3,0,2,char1,0x11C017,sGuestHunter,1,,2B,0x159a54,obj100+0x82372,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CB5,0,4,char1,0x11C019,sGuestHunter,1,,4B,0x159a64,obj100+0x82400,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CB9,0,4,char1,0x11C01D,sGuestHunter,1,,4B,0x159a74,obj100+0x82404,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CBD,0,4,char1,0x11C021,sGuestHunter,1,,4B,0x159a84,obj100+0x82408,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CC1,0,1,char1,0x11C025,sGuestHunter,1,,1B,0x159a94,obj100+0x8240c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CC2,0,8,char1,0x11C026,sGuestHunter,1,,8B,0x159aa4,obj100+0x82410,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CCA,0,2,char1,0x11C02E,sGuestHunter,1,,2B,0x159ab4,obj100+0x82418,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CCC,0,1,char1,0x11C030,sGuestHunter,1,,1B,0x159ac4,obj100+0x8240f,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CCD,0,1,char1,0x11C031,sGuestHunter,1,,1B,0x159ad4,obj100+0x8240e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CCE,0,1,char1,0x11C032,sGuestHunter,1,,1B,0x159ae4,obj100+0x8240d,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CCF,0,12,char1,0x11C033,sGuestHunter,1,,12B,0x159af4,obj100+0x8241a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CDB,0,36,char1,0x11C03F,sGuestHunter,1,,36B,0x159b04,obj100+0x82428,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8CFF,0,308,char1,0x11C063,sGuestHunter,1,,308B,0x15bee4,obj100+0x8244c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E33,0,22,char1,0x11C197,sGuestHunter,1,,22B,0x1599f4,obj100+0x82588,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E49,0,2,char1,0x11C1AD,sGuestHunter,1,,2B,0x159a04,obj100+0x8259e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E4B,0,2,char1,0x11C1AF,sGuestHunter,1,,2B,0x159a14,obj100+0x825a0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E4D,0,2,char1,0x11C1B1,sGuestHunter,1,,2B,0x159a24,obj100+0x825a2,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E4F,0,2,char1,0x11C1B3,sGuestHunter,1,,2B,0x159a34,obj100+0x825a4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E51,0,56,char1,0x11C1B5,sGuestHunter,1,,56B,0x159a44,obj100+0x825a8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E89,0,2,char1,0x11C1ED,sGuestHunter,1,,2B,0x159a54,obj100+0x825a6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E8B,0,4,char1,0x11C1EF,sGuestHunter,1,,4B,0x159a64,obj100+0x82634,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E8F,0,4,char1,0x11C1F3,sGuestHunter,1,,4B,0x159a74,obj100+0x82638,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E93,0,4,char1,0x11C1F7,sGuestHunter,1,,4B,0x159a84,obj100+0x8263c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E97,0,1,char1,0x11C1FB,sGuestHunter,1,,1B,0x159a94,obj100+0x82640,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8E98,0,8,char1,0x11C1FC,sGuestHunter,1,,8B,0x159aa4,obj100+0x82644,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8EA0,0,2,char1,0x11C204,sGuestHunter,1,,2B,0x159ab4,obj100+0x8264c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8EA2,0,1,char1,0x11C206,sGuestHunter,1,,1B,0x159ac4,obj100+0x82643,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8EA3,0,1,char1,0x11C207,sGuestHunter,1,,1B,0x159ad4,obj100+0x82642,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8EA4,0,1,char1,0x11C208,sGuestHunter,1,,1B,0x159ae4,obj100+0x82641,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8EA5,0,12,char1,0x11C209,sGuestHunter,1,,12B,0x159af4,obj100+0x8264e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8EB1,0,36,char1,0x11C215,sGuestHunter,1,,36B,0x159b04,obj100+0x8265c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A8ED5,0,308,char1,0x11C239,sGuestHunter,1,,308B,0x15bf0c,obj100+0x82680,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9009,0,22,char1,0x11C36D,sGuestHunter,1,,22B,0x1599f4,obj100+0x827bc,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A901F,0,2,char1,0x11C383,sGuestHunter,1,,2B,0x159a04,obj100+0x827d2,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9021,0,2,char1,0x11C385,sGuestHunter,1,,2B,0x159a14,obj100+0x827d4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9023,0,2,char1,0x11C387,sGuestHunter,1,,2B,0x159a24,obj100+0x827d6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9025,0,2,char1,0x11C389,sGuestHunter,1,,2B,0x159a34,obj100+0x827d8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9027,0,56,char1,0x11C38B,sGuestHunter,1,,56B,0x159a44,obj100+0x827dc,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A905F,0,2,char1,0x11C3C3,sGuestHunter,1,,2B,0x159a54,obj100+0x827da,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9061,0,4,char1,0x11C3C5,sGuestHunter,1,,4B,0x159a64,obj100+0x82868,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9065,0,4,char1,0x11C3C9,sGuestHunter,1,,4B,0x159a74,obj100+0x8286c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9069,0,4,char1,0x11C3CD,sGuestHunter,1,,4B,0x159a84,obj100+0x82870,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A906D,0,1,char1,0x11C3D1,sGuestHunter,1,,1B,0x159a94,obj100+0x82874,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A906E,0,8,char1,0x11C3D2,sGuestHunter,1,,8B,0x159aa4,obj100+0x82878,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9076,0,2,char1,0x11C3DA,sGuestHunter,1,,2B,0x159ab4,obj100+0x82880,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9078,0,1,char1,0x11C3DC,sGuestHunter,1,,1B,0x159ac4,obj100+0x82877,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9079,0,1,char1,0x11C3DD,sGuestHunter,1,,1B,0x159ad4,obj100+0x82876,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A907A,0,1,char1,0x11C3DE,sGuestHunter,1,,1B,0x159ae4,obj100+0x82875,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A907B,0,12,char1,0x11C3DF,sGuestHunter,1,,12B,0x159af4,obj100+0x82882,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9087,0,36,char1,0x11C3EB,sGuestHunter,1,,36B,0x159b04,obj100+0x82890,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A90AB,0,308,char1,0x11C40F,sGuestHunter,1,,308B,0x15bf34,obj100+0x828b4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A91DF,0,22,char1,0x11C543,sGuestHunter,1,,22B,0x1599f4,obj100+0x829f0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A91F5,0,2,char1,0x11C559,sGuestHunter,1,,2B,0x159a04,obj100+0x82a06,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A91F7,0,2,char1,0x11C55B,sGuestHunter,1,,2B,0x159a14,obj100+0x82a08,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A91F9,0,2,char1,0x11C55D,sGuestHunter,1,,2B,0x159a24,obj100+0x82a0a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A91FB,0,2,char1,0x11C55F,sGuestHunter,1,,2B,0x159a34,obj100+0x82a0c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A91FD,0,56,char1,0x11C561,sGuestHunter,1,,56B,0x159a44,obj100+0x82a10,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9235,0,2,char1,0x11C599,sGuestHunter,1,,2B,0x159a54,obj100+0x82a0e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9237,0,4,char1,0x11C59B,sGuestHunter,1,,4B,0x159a64,obj100+0x82a9c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A923B,0,4,char1,0x11C59F,sGuestHunter,1,,4B,0x159a74,obj100+0x82aa0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A923F,0,4,char1,0x11C5A3,sGuestHunter,1,,4B,0x159a84,obj100+0x82aa4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9243,0,1,char1,0x11C5A7,sGuestHunter,1,,1B,0x159a94,obj100+0x82aa8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9244,0,8,char1,0x11C5A8,sGuestHunter,1,,8B,0x159aa4,obj100+0x82aac,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A924C,0,2,char1,0x11C5B0,sGuestHunter,1,,2B,0x159ab4,obj100+0x82ab4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A924E,0,1,char1,0x11C5B2,sGuestHunter,1,,1B,0x159ac4,obj100+0x82aab,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A924F,0,1,char1,0x11C5B3,sGuestHunter,1,,1B,0x159ad4,obj100+0x82aaa,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9250,0,1,char1,0x11C5B4,sGuestHunter,1,,1B,0x159ae4,obj100+0x82aa9,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9251,0,12,char1,0x11C5B5,sGuestHunter,1,,12B,0x159af4,obj100+0x82ab6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A925D,0,36,char1,0x11C5C1,sGuestHunter,1,,36B,0x159b04,obj100+0x82ac4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9281,0,308,char1,0x11C5E5,sGuestHunter,1,,308B,0x15bf5c,obj100+0x82ae8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A93B5,0,22,char1,0x11C719,sGuestHunter,1,,22B,0x1599f4,obj100+0x82c24,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A93CB,0,2,char1,0x11C72F,sGuestHunter,1,,2B,0x159a04,obj100+0x82c3a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A93CD,0,2,char1,0x11C731,sGuestHunter,1,,2B,0x159a14,obj100+0x82c3c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A93CF,0,2,char1,0x11C733,sGuestHunter,1,,2B,0x159a24,obj100+0x82c3e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A93D1,0,2,char1,0x11C735,sGuestHunter,1,,2B,0x159a34,obj100+0x82c40,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A93D3,0,56,char1,0x11C737,sGuestHunter,1,,56B,0x159a44,obj100+0x82c44,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A940B,0,2,char1,0x11C76F,sGuestHunter,1,,2B,0x159a54,obj100+0x82c42,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A940D,0,4,char1,0x11C771,sGuestHunter,1,,4B,0x159a64,obj100+0x82cd0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9411,0,4,char1,0x11C775,sGuestHunter,1,,4B,0x159a74,obj100+0x82cd4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9415,0,4,char1,0x11C779,sGuestHunter,1,,4B,0x159a84,obj100+0x82cd8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9419,0,1,char1,0x11C77D,sGuestHunter,1,,1B,0x159a94,obj100+0x82cdc,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A941A,0,8,char1,0x11C77E,sGuestHunter,1,,8B,0x159aa4,obj100+0x82ce0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9422,0,2,char1,0x11C786,sGuestHunter,1,,2B,0x159ab4,obj100+0x82ce8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9424,0,1,char1,0x11C788,sGuestHunter,1,,1B,0x159ac4,obj100+0x82cdf,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9425,0,1,char1,0x11C789,sGuestHunter,1,,1B,0x159ad4,obj100+0x82cde,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9426,0,1,char1,0x11C78A,sGuestHunter,1,,1B,0x159ae4,obj100+0x82cdd,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9427,0,12,char1,0x11C78B,sGuestHunter,1,,12B,0x159af4,obj100+0x82cea,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9433,0,36,char1,0x11C797,sGuestHunter,1,,36B,0x159b04,obj100+0x82cf8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9457,0,308,char1,0x11C7BB,sGuestHunter,1,,308B,0x15bf84,obj100+0x82d1c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A958B,0,22,char1,0x11C8EF,sGuestHunter,1,,22B,0x1599f4,obj100+0x82e58,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95A1,0,2,char1,0x11C905,sGuestHunter,1,,2B,0x159a04,obj100+0x82e6e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95A3,0,2,char1,0x11C907,sGuestHunter,1,,2B,0x159a14,obj100+0x82e70,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95A5,0,2,char1,0x11C909,sGuestHunter,1,,2B,0x159a24,obj100+0x82e72,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95A7,0,2,char1,0x11C90B,sGuestHunter,1,,2B,0x159a34,obj100+0x82e74,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95A9,0,56,char1,0x11C90D,sGuestHunter,1,,56B,0x159a44,obj100+0x82e78,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95E1,0,2,char1,0x11C945,sGuestHunter,1,,2B,0x159a54,obj100+0x82e76,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95E3,0,4,char1,0x11C947,sGuestHunter,1,,4B,0x159a64,obj100+0x82f04,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95E7,0,4,char1,0x11C94B,sGuestHunter,1,,4B,0x159a74,obj100+0x82f08,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95EB,0,4,char1,0x11C94F,sGuestHunter,1,,4B,0x159a84,obj100+0x82f0c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95EF,0,1,char1,0x11C953,sGuestHunter,1,,1B,0x159a94,obj100+0x82f10,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95F0,0,8,char1,0x11C954,sGuestHunter,1,,8B,0x159aa4,obj100+0x82f14,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95F8,0,2,char1,0x11C95C,sGuestHunter,1,,2B,0x159ab4,obj100+0x82f1c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95FA,0,1,char1,0x11C95E,sGuestHunter,1,,1B,0x159ac4,obj100+0x82f13,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95FB,0,1,char1,0x11C95F,sGuestHunter,1,,1B,0x159ad4,obj100+0x82f12,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95FC,0,1,char1,0x11C960,sGuestHunter,1,,1B,0x159ae4,obj100+0x82f11,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A95FD,0,12,char1,0x11C961,sGuestHunter,1,,12B,0x159af4,obj100+0x82f1e,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9609,0,36,char1,0x11C96D,sGuestHunter,1,,36B,0x159b04,obj100+0x82f2c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A962D,0,308,char1,0x11C991,sGuestHunter,1,,308B,0x15bfac,obj100+0x82f50,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9761,0,22,char1,0x11CAC5,sGuestHunter,1,,22B,0x1599f4,obj100+0x8308c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9777,0,2,char1,0x11CADB,sGuestHunter,1,,2B,0x159a04,obj100+0x830a2,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9779,0,2,char1,0x11CADD,sGuestHunter,1,,2B,0x159a14,obj100+0x830a4,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A977B,0,2,char1,0x11CADF,sGuestHunter,1,,2B,0x159a24,obj100+0x830a6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A977D,0,2,char1,0x11CAE1,sGuestHunter,1,,2B,0x159a34,obj100+0x830a8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A977F,0,56,char1,0x11CAE3,sGuestHunter,1,,56B,0x159a44,obj100+0x830ac,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97B7,0,2,char1,0x11CB1B,sGuestHunter,1,,2B,0x159a54,obj100+0x830aa,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97B9,0,4,char1,0x11CB1D,sGuestHunter,1,,4B,0x159a64,obj100+0x83138,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97BD,0,4,char1,0x11CB21,sGuestHunter,1,,4B,0x159a74,obj100+0x8313c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97C1,0,4,char1,0x11CB25,sGuestHunter,1,,4B,0x159a84,obj100+0x83140,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97C5,0,1,char1,0x11CB29,sGuestHunter,1,,1B,0x159a94,obj100+0x83144,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97C6,0,8,char1,0x11CB2A,sGuestHunter,1,,8B,0x159aa4,obj100+0x83148,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97CE,0,2,char1,0x11CB32,sGuestHunter,1,,2B,0x159ab4,obj100+0x83150,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97D0,0,1,char1,0x11CB34,sGuestHunter,1,,1B,0x159ac4,obj100+0x83147,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97D1,0,1,char1,0x11CB35,sGuestHunter,1,,1B,0x159ad4,obj100+0x83146,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97D2,0,1,char1,0x11CB36,sGuestHunter,1,,1B,0x159ae4,obj100+0x83145,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97D3,0,12,char1,0x11CB37,sGuestHunter,1,,12B,0x159af4,obj100+0x83152,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A97DF,0,36,char1,0x11CB43,sGuestHunter,1,,36B,0x159b04,obj100+0x83160,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9803,0,308,char1,0x11CB67,sGuestHunter,1,,308B,0x15bfd4,obj100+0x83184,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9937,0,22,char1,0x11CC9B,sGuestHunter,1,,22B,0x1599f4,obj100+0x832c0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A994D,0,2,char1,0x11CCB1,sGuestHunter,1,,2B,0x159a04,obj100+0x832d6,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A994F,0,2,char1,0x11CCB3,sGuestHunter,1,,2B,0x159a14,obj100+0x832d8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9951,0,2,char1,0x11CCB5,sGuestHunter,1,,2B,0x159a24,obj100+0x832da,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9953,0,2,char1,0x11CCB7,sGuestHunter,1,,2B,0x159a34,obj100+0x832dc,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9955,0,56,char1,0x11CCB9,sGuestHunter,1,,56B,0x159a44,obj100+0x832e0,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A998D,0,2,char1,0x11CCF1,sGuestHunter,1,,2B,0x159a54,obj100+0x832de,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A998F,0,4,char1,0x11CCF3,sGuestHunter,1,,4B,0x159a64,obj100+0x8336c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9993,0,4,char1,0x11CCF7,sGuestHunter,1,,4B,0x159a74,obj100+0x83370,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9997,0,4,char1,0x11CCFB,sGuestHunter,1,,4B,0x159a84,obj100+0x83374,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A999B,0,1,char1,0x11CCFF,sGuestHunter,1,,1B,0x159a94,obj100+0x83378,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A999C,0,8,char1,0x11CD00,sGuestHunter,1,,8B,0x159aa4,obj100+0x8337c,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A99A4,0,2,char1,0x11CD08,sGuestHunter,1,,2B,0x159ab4,obj100+0x83384,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A99A6,0,1,char1,0x11CD0A,sGuestHunter,1,,1B,0x159ac4,obj100+0x8337b,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A99A7,0,1,char1,0x11CD0B,sGuestHunter,1,,1B,0x159ad4,obj100+0x8337a,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A99A8,0,1,char1,0x11CD0C,sGuestHunter,1,,1B,0x159ae4,obj100+0x83379,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A99A9,0,12,char1,0x11CD0D,sGuestHunter,1,,12B,0x159af4,obj100+0x83386,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A99B5,0,36,char1,0x11CD19,sGuestHunter,1,,36B,0x159b04,obj100+0x83394,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A99D9,0,308,char1,0x11CD3D,sGuestHunter,1,,308B,0x15bffc,obj100+0x833b8,"guest hunters: 13 x 470 B records, hunters met online (copies of their Guild Card) and Hired hunters rerolled after each quest",CONFIRMED
+0x2A9B0D,0,40,char1,0x11CE71,sGuestHunter,1,,40B,0x3e78e0,obj100+0x834f0,"guest hunters: 98 B header, 13 hunter records, 5 x 8 B hunter IDs",DERIVED
 0x2A9B35,0,8,char1,0x11CE99,sTutorial,1,,8B,0x53913c,obj60+0x1cc,tutorial flags (8 + 152 B),DERIVED
 0x2A9B3D,0,152,char1,0x11CEA1,sTutorial,1,,152B,0x3e78f4,obj60+0x1d4,tutorial flags (8 + 152 B),DERIVED
 0x2A9BD5,0,4,char1,0x11CF39,sMonNyan,1,,4B,0x1ac034,obj100+0x812bc,Meownster Hunters (sMonNyan) state,DERIVED
@@ -805,26 +832,26 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x2A9CD0,0,4,char1,0x11D034,sMonNyan,1,,4B,0x1ac2d8,obj100+0x81420,Meownster Hunters (sMonNyan) state,DERIVED
 0x2A9CD4,0,4,char1,0x11D038,sMonNyan,1,,4B,0x1ac2e8,obj100+0x81424,Meownster Hunters (sMonNyan) state,DERIVED
 0x2A9CD8,0,4,char1,0x11D03C,sMonNyan,1,,4B,0x1c9398,obj100+0x81428,Meownster Hunters (sMonNyan) state,DERIVED
-0x2A9CDC,0,6,char1,0x11D040,chat phrases (0x55d2c0),1,,6B,0x55d2dc,obj100+0x5fdac,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9CE2,0,6,char1,0x11D046,chat phrases (0x55d2c0),1,,6B,0x55d2f0,obj100+0x5fdb2,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9CE8,0,6,char1,0x11D04C,chat phrases (0x55d2c0),1,,6B,0x55d300,obj100+0x5fdb8,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9CEE,0,6,char1,0x11D052,chat phrases (0x55d2c0),1,,6B,0x55d314,obj100+0x5fdbe,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9CF4,0,1,char1,0x11D058,chat phrases (0x55d2c0),1,,1B,0x55d36c,obj100+0x5fdc4,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9CF5,0,1,char1,0x11D059,chat phrases (0x55d2c0),1,,1B,0x55d37c,obj100+0x5fdc5,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9CF6,0,4,char1,0x11D05A,chat phrases (0x55d2c0),1,,4B,0x55d38c,obj100+0x5fdc6,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9CFA,0,8,char1,0x11D05E,chat phrases (0x55d2c0),1,,8B,0x55d39c,obj100+0x5fdca,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D02,0,2,char1,0x11D066,chat phrases (0x55d2c0),1,,2B,0x55d3ac,obj100+0x5fdd2,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D04,0,4,char1,0x11D068,chat phrases (0x55d2c0),1,,4B,0x55d3bc,obj100+0x5fdd4,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D08,0,4,char1,0x11D06C,chat phrases (0x55d2c0),1,,4B,0x55d3cc,obj100+0x5fdd8,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D0C,0,2,char1,0x11D070,chat phrases (0x55d2c0),1,,2B,0x55d3dc,obj100+0x5fddc,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D0E,0,2,char1,0x11D072,chat phrases (0x55d2c0),1,,2B,0x55d3ec,obj100+0x5fdde,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D10,0,4,char1,0x11D074,chat phrases (0x55d2c0),1,,4B,0x55d3fc,obj100+0x5fde0,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D14,0,4,char1,0x11D078,chat phrases (0x55d2c0),1,,4B,0x55d40c,obj100+0x5fde4,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D18,0,2,char1,0x11D07C,chat phrases (0x55d2c0),1,,2B,0x55d41c,obj100+0x5fde8,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D1A,0,2,char1,0x11D07E,chat phrases (0x55d2c0),1,,2B,0x55d42c,obj100+0x5fdea,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D1C,0,4,char1,0x11D080,chat phrases (0x55d2c0),1,,4B,0x55d43c,obj100+0x5fdec,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D20,0,4,char1,0x11D084,chat phrases (0x55d2c0),1,,4B,0x55d324,obj100+0x5fdf0,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D24,0,1,char1,0x11D088,chat phrases (0x55d2c0),1,,2b,0x55d33c,obj100+0x5fdf4,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2A9D25,0,7488,char1,0x11D089,chat phrases (0x55d2c0),1,,7488B,0x1cab18,obj100+0x61990,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2ABA65,0,2808,char1,0x11EDC9,chat phrases (0x55d2c0),1,,2808B,0x1cab28,obj100+0x636d0,chat phrases: 104 B slots (auto-chat lines),DERIVED
-0x2AC55D,0,2,char1,0x11F8C1,chat phrases (0x55d2c0),1,,2B,0x3e791c,obj100+0x641cc,chat phrases: 104 B slots (auto-chat lines),DERIVED
+0x2A9CDC,0,6,char1,0x11D040,chat phrases (0x55d2c0),1,,6B,0x55d2dc,obj100+0x5fdac,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9CE2,0,6,char1,0x11D046,chat phrases (0x55d2c0),1,,6B,0x55d2f0,obj100+0x5fdb2,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9CE8,0,6,char1,0x11D04C,chat phrases (0x55d2c0),1,,6B,0x55d300,obj100+0x5fdb8,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9CEE,0,6,char1,0x11D052,chat phrases (0x55d2c0),1,,6B,0x55d314,obj100+0x5fdbe,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9CF4,0,1,char1,0x11D058,chat phrases (0x55d2c0),1,,1B,0x55d36c,obj100+0x5fdc4,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9CF5,0,1,char1,0x11D059,chat phrases (0x55d2c0),1,,1B,0x55d37c,obj100+0x5fdc5,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9CF6,0,4,char1,0x11D05A,chat phrases (0x55d2c0),1,,4B,0x55d38c,obj100+0x5fdc6,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9CFA,0,8,char1,0x11D05E,chat phrases (0x55d2c0),1,,8B,0x55d39c,obj100+0x5fdca,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D02,0,2,char1,0x11D066,chat phrases (0x55d2c0),1,,2B,0x55d3ac,obj100+0x5fdd2,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D04,0,4,char1,0x11D068,chat phrases (0x55d2c0),1,,4B,0x55d3bc,obj100+0x5fdd4,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D08,0,4,char1,0x11D06C,chat phrases (0x55d2c0),1,,4B,0x55d3cc,obj100+0x5fdd8,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D0C,0,2,char1,0x11D070,chat phrases (0x55d2c0),1,,2B,0x55d3dc,obj100+0x5fddc,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D0E,0,2,char1,0x11D072,chat phrases (0x55d2c0),1,,2B,0x55d3ec,obj100+0x5fdde,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D10,0,4,char1,0x11D074,chat phrases (0x55d2c0),1,,4B,0x55d3fc,obj100+0x5fde0,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D14,0,4,char1,0x11D078,chat phrases (0x55d2c0),1,,4B,0x55d40c,obj100+0x5fde4,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D18,0,2,char1,0x11D07C,chat phrases (0x55d2c0),1,,2B,0x55d41c,obj100+0x5fde8,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D1A,0,2,char1,0x11D07E,chat phrases (0x55d2c0),1,,2B,0x55d42c,obj100+0x5fdea,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D1C,0,4,char1,0x11D080,chat phrases (0x55d2c0),1,,4B,0x55d43c,obj100+0x5fdec,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D20,0,4,char1,0x11D084,chat phrases (0x55d2c0),1,,4B,0x55d324,obj100+0x5fdf0,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D24,0,1,char1,0x11D088,chat phrases (0x55d2c0),1,,2b,0x55d33c,obj100+0x5fdf4,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED
+0x2A9D25,0,7488,char1,0x11D089,chat phrases (0x55d2c0),1,,7488B,0x1cab18,obj100+0x61990,chat phrases: 72 x 104 B = 3 copies of the 24 shortcut phrases,CONFIRMED
+0x2ABA65,0,2808,char1,0x11EDC9,chat phrases (0x55d2c0),1,,2808B,0x1cab28,obj100+0x636d0,chat phrases: 27 x 104 B = 3 copies of the 9 auto-chat lines,CONFIRMED
+0x2AC55D,0,2,char1,0x11F8C1,chat phrases (0x55d2c0),1,,2B,0x3e791c,obj100+0x641cc,"chat phrases: 0x49 B header, then 104 B text slots",DERIVED

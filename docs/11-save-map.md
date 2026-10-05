@@ -63,6 +63,59 @@ with two newly created characters in slots 2 and 3: each creation wrote only its
 slot and the slot-use bytes, and the two fresh slots differ only in name, card owner ID,
 the rolled Palico list and the card list padding ([07](07-equipment.md#character-slots)).
 
+## Confirmed by the save timeline
+
+A field named from the code is DERIVED. It becomes CONFIRMED when real saves agree with
+it, independently of the code. The timeline is 36 saves of the same file, 2026-09-05 to
+2026-10-05:
+- the snapshots of [06](06-methodology.md);
+- the editor's own pre-write snapshots;
+- the live save.
+
+Each step between two saves is a known in-game action or a tool write:
+- a counted quest, the Harvest Tour, a round of NPC reports;
+- the creation of Scrimas2 and Scrimas3;
+- an editor write that a later game session carried on from.
+
+[`tools/evidence/run.py`](../tools/evidence/run.py) re-runs every check. It needs the
+local snapshots. In the CSV, a single loader row that holds labelled fields is cut at
+their edges, so each field carries its own tag.
+
+| Field | Independent evidence |
+|---|---|
+| slot header, player name, card name | Scrimas2 / Scrimas3 appear at their creation in all three copies. The header's gear cache equals the box entries at the equipped indices (264 of 264). Its pigment equals the loaded My Set's |
+| play time, remainder, card play time, header copy | The editor wrote 560908 s. The next game session went on to 561059, and the card copy to 561034. No game step ran longer than the wall-clock gap. The remainder stays below 60 and moves only with the seconds |
+| funds, Wycademy points, contribution points, G-rank accumulator | Funds and Wycademy points: see [the S+0x20 block](#the-block-s0x20--0x41f--base--0x280b). Contribution points: the accumulator arithmetic matches the point gains exactly |
+| quest counter `base + 0x5E4E` | +1 at each of the five counted quests. Unchanged at the Harvest Tour, at talks and at tool writes |
+| quest history log | Each quest pushed one record with its quest ID and shifted the other nine down. The weapon byte is the usage counter that rose. A fresh slot holds *Welcome* and nine unset records |
+| card monster log | Equals the size records and the family sums of the CONFIRMED tallies, in all 36 saves |
+| card equipment | Equals the CONFIRMED box entries at the equipped indices in the fresh slots, 28 of 28 |
+| awards game-side map, award notices | Award 130, granted in game, appears here before the card copy. The notices gain exactly the newly granted awards and are emptied in game |
+| crowns | A crowns write took the gold-crown count from 13 to 79. The next session's award check granted awards 7, 8, 115, 116 (needs 66) |
+| items obtained | Every item that entered the box or pouch in game had its bit set in the same save |
+| equipped gear, weapon class, hunting style, equipped arts, pigment, default flags | Always equal to the loaded My Set (CONFIRMED). The style's use counter rises at each quest |
+| Palicoes, hunting buddy 1, Palico box | Only the buddy's record gained experience after quests. Gear indices point at Palico box entries of the right type |
+| Palicoes for hire `base + 0x2A606` | Rerolled at exactly the five counted quests |
+| title words, NEW copy, scenes | A fresh slot holds exactly the entries described "Available from the start." (79 words, 5 scenes). The NEW copy gained exactly the new words |
+| Poogie costumes | Changed only at the Captain's reward (bit 14) and at the report round |
+| delivery requests offered / delivered | Equal to the accepted / done flags of the kind-1 requests (CONFIRMED event flags) |
+| item loadouts | Loadout 1 equals the pouch slot for slot |
+| guest hunter records | Online hunters are exact copies of their stored cards (144 copies). The "Hired" hunters carry their weapon class's type code |
+| Guild Card list 1 | Both cards inflate to 6328 B; trailer HR, name and ID match the card |
+| chat phrases | 3 × 24 shortcut phrases and 3 × 9 auto-chat lines, decoded |
+| block A / B: DLC lists, Palico pool, challenge records | Bitmaps, lists and pool agree entry for entry |
+
+The same pass corrected labels the data contradicts:
+- the two DLC bitmaps were swapped, and `base + 0x32DB` holds item packs;
+- the challenge-quest bitmap follows the record store, and the event-quest bitmap is not indexed by slot;
+- player record `+5` is the hunting style;
+- the card's `+0x4C` arts copy does not follow the player block;
+- the monster log's `+0` is the largest size;
+- the chat layout, the guest-hunter layout and the list-1 trailer "version" (the card's play time).
+
+Nine unlock maps had a "runtime NEW copy" counted in their size. That copy is not in the
+file, so those labels now cover only the saved map.
+
 ## File layout
 
 | Offset | Size | Block | Manager (loader) | Content |
@@ -109,16 +162,16 @@ Blocks A and B are shared by all characters. Each block starts 4-aligned relativ
 | `0x2C6A5` | 4 | sFlagChecker (`0x3f43d4`) | u32 flags ([below](#smaller-managers)) |
 | `0x2C6A9` | 20 | sMakeAmulet (`0x14c568`) | 128-bit quest map, event scenes played ([below](#smaller-managers)) |
 | `0x2C6BD` | 978804 | sGuildCard (`0x163e0c`) | Guild Cards ([below](#guild-card-manager)) |
-| `0x11B631` | 6248 | sGuestHunter (`0x15bd3c`) | hunters met online: UTF-16 name, greeting, records of 308 B, "Hired …" copies |
+| `0x11B631` | 6248 | sGuestHunter (`0x15bd3c`) | guest hunters: a 98-byte header, 13 records of 470 B, then 5 × 8-byte hunter IDs. A record is either a hunter met online, an exact copy of that hunter's stored Guild Card (name `+0`, title `+0x16`, HR `+0x1C`, greeting `+0x1E`, owner ID `+0x65`, appearance `+0x72`, pigment `+0x7E`, equipment 7 × 44 B `+0xA2`; u32 `+0x5C` = the card's Unity), or a "Hired *weapon*" hunter rerolled after every quest (CONFIRMED, [timeline](#confirmed-by-the-save-timeline)) |
 | `0x11CE99` | 160 | sTutorial (`0x539120`) | 8 + 152 B |
 | `0x11CF39` | 263 | sMonNyan (`0x1c9388`) | Meownster Hunters (Palico expeditions) state, bit fields |
-| `0x11D040` | 10371 | `0x55d2c0` | chat phrases: auto-chat lines in 104-byte slots ("Let's do this!", "Thanks!", …) |
+| `0x11D040` | 10371 | `0x55d2c0` | chat phrases: a 0x49-byte header, then 104-byte text slots: 72 = three copies of the 24 shortcut phrases ("Let's do this!" … "I'm outta here.") at `0x11D089`, 27 = three copies of the 9 auto-chat lines ("I mounted it!", "Hunter Art 1 activated!", …) at `0x11EDC9` |
 | `0x11F8C3` | 1 | — | alignment |
 
 ### Slot header — `base + 0x0`, 632 B
 
-**DERIVED** from the writer `0x3e0ea4`, which builds it on the stack from `sPlayer` and
-two globals. The loader `0x3e0db8` copies it to the stack and drops it. The header is
+**CONFIRMED** (the writer `0x3e0ea4` and the [save timeline](#confirmed-by-the-save-timeline)).
+The writer builds it on the stack from `sPlayer` and two globals. The loader `0x3e0db8` copies it to the stack and drops it. The header is
 therefore a summary for the slot screen. Editing it alone does not change the
 character, and the next save overwrites it (not tested in game).
 
@@ -130,9 +183,9 @@ character, and the next save overwrites it (not tested in game).
 | `0x028` | u16 | sPlayer `+0x554` | HR |
 | `0x02A` | u8 | sPlayer `+0x4D4` / `+0x4D8` | 2 for a Prowler (weapon class 15), else 1 for female, 0 for male |
 | `0x02B` | u8 | writer argument | |
-| `0x02C` | 224 | sPlayer `+0x240` | the three equipped Hunter Arts ([08](08-progression.md#save-screen-art-slots--base--0x2c)), u16 each (get `0xe79c8`, set `0xe79b4`), then u16 SP Art bits: bit *i* = art slot *i* is an SP Art (set `0xe7a20`, test `0xe7a6c`; the arts screen `0x5490fc` toggles it, a My Set load copies it). The Guild Card copies these four u16 to card `+0x4C`. The class is shared with the Palicoes, which keep exp, level, moves, greeting and owner in the rest; for a hunter bytes 8–223 have no reader and are zero. Analysed save: 179 (*Energy Blade I*), 0, 0, bits 1; fresh slots 26, 1, 0, bits 0 |
+| `0x02C` | 224 | sPlayer `+0x240` | the three equipped Hunter Arts ([08](08-progression.md#save-screen-art-slots--base--0x2c)), u16 each (get `0xe79c8`, set `0xe79b4`), then u16 SP Art bits: bit *i* = art slot *i* is an SP Art (set `0xe7a20`, test `0xe7a6c`; the arts screen `0x5490fc` toggles it, a My Set load copies it). The card builder copies these four u16 to card `+0x4C`, but in 36 saves card `+0x4C` kept 180, 0, 0, 1 while the arts went 179 → 150 → 151 and the card was rebuilt 11 times (UNRESOLVED). The class is shared with the Palicoes, which keep exp, level, moves, greeting and owner in the rest; for a hunter bytes 8–223 have no reader and are zero. Analysed save: 179 (*Energy Blade I*), 0, 0, bits 1; fresh slots 26, 1, 0, bits 0 |
 | `0x10C` | 7 × 44 | sPlayer `+0x18 + 44k` | equipped-gear cache: u32 **vtable pointer** (runtime address, see below), 36-B box entry, u32 |
-| `0x240` | 12 | sPlayer `+0x4D4` | `+0` current weapon class (15 = Prowler; a new character gets 1 with a Sword and Shield), `+1 … +8` character creation choices copied to the model by the title menu (`0x68894c`), `+4` = gender (read by the Smithy, the Armory and the talk conditions) |
+| `0x240` | 12 | sPlayer `+0x4D4` | `+0` current weapon class (15 = Prowler; a new character gets 1 with a Sword and Shield), `+1 … +8` character creation choices copied to the model by the title menu (`0x68894c`), `+4` = gender (read by the Smithy, the Armory and the talk conditions), `+5` = **hunting style** (0 Guild … 5 Valor; it always equals the style of the loaded My Set, and each quest raised the use counter of that style, `base + 0x2905`) |
 | `0x24C` | 36 | sPlayer `+0x4E0` | current pigment, 5 × RGBA + 16 B ([07](07-equipment.md)) |
 | `0x270` | u16 | sPlayer `+0x506` | default-colour flags |
 | `0x272` | 2 | — | struct padding (stale bytes) |
@@ -150,13 +203,16 @@ written as is. It was `0x01E3A514` in the game and `0x11736514` in the emulator:
 
 **DERIVED** (loader `0x2755f0` and the header writer use the same sPlayer fields; every
 shared field was byte-identical in the analysed save). This is the copy the game loads.
+**CONFIRMED** by the [save timeline](#confirmed-by-the-save-timeline): the three equipped arts
+and SP bits, the equipped gear, the weapon class (`+0`), the hunting style (`+5`), the five
+pigment colours, the default-colour flags and the name.
 
 | `base +` | Size | sPlayer field | Same as header |
 |---|---|---|---|
 | `0x23A58` | 1 | `+0x9C5C` | — |
 | `0x23A59` | 224 | `+0x2BC` | `+0x02C` |
 | `0x23B39` | 14 | `+0x84` | — **equipped gear**: 7 × u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman; `0xFFFF` = none). The loader copies each entry from the box into the equipped cache (`0x275660`). 22, 45, 51, 57, 62, 69, 199 in the analysed save |
-| `0x23B47` | 12 | `+0x550` | `+0x240`, weapon class and character creation choices |
+| `0x23B47` | 12 | `+0x550` | `+0x240`, weapon class (`+0`, equipped weapon type − 7), gender (`+4`), hunting style (`+5`) |
 | `0x23B53` | 36 | `+0x55C` | `+0x24C`, current pigment |
 | `0x23B77` | 4 | `+0x584` | `+0x274` |
 | `0x23B7B` | 2 | `+0x582` | `+0x270`, default-colour flags |
@@ -183,17 +239,19 @@ ID at `0xBAF`. Count is 7 bits, so 99 fits and 127 is the hard ceiling.
 
 `base + 0x22497`, 5569 bytes, loader `0x1979b0`. Earlier documents call it the
 activity manager. Its methods are in the `sItem` unit (`0x193000 … 0x199000`);
-**DERIVED** from the loader and the MT classes of the methods' callers.
+**DERIVED** from the loader and the MT classes of the methods' callers. CONFIRMED by the
+[save timeline](#confirmed-by-the-save-timeline): the items-obtained map, the G-rank
+accumulator and staged counter 0.
 
 | `base +` | sItem | Size | Content |
 |---|---|---|---|
-| `0x22497` | `+0x9c` | 94 × u32 | items obtained: bit = item ID. 1173 of the 1177 item IDs in the analysed item box have their bit set |
+| `0x22497` | `+0x9c` | 94 × u32 | items obtained: bit = item ID. 1173 of the 1177 item IDs in the analysed item box have their bit set; the four without it (485, 503, 1246, 1841) were already in the oldest snapshot, probably put there by a tool. Every item that entered the box or pouch in game got its bit in the same save |
 | `0x2260F` | `+0xea4` | 3 × 136 | the Trader's three cargo orders (`cUIOTradeCenterCargo`, `cUIOTradeCenterBox`) |
 | `0x227A7` | `+0x103c` | 10 × 420 | Alchemy requests (`uUIAlchemy`, `cUIOAlchemyRequest`): u8, u8 (255 = empty), u16, three 36-byte equipment entries, then seven of (u32, u32, 36-byte equipment entry). All ten are empty in the analysed save. Stride in memory 500 |
 | `0x2380F` | `+0x8c` | 10 | village tier bytes ([10](10-npc-talk.md)) |
 | `0x23819` … `0x2381D` | `+0x6a` … `+0x6e` | 5 | counters that feed the pending rewards below. `+0x6a` u8: Trader cargo shipments (`0x195758`, at each quest result per active order); at 10, 40, 90, 140 it adds 5 to pending byte 1, then drops back to 90 (every 50 after that). `+0x6b` u8: low-rank contribution points (`0x523a80` → `0x1973b0`), every 250 add 2 to pending byte 3. `+0x6c` u16: G-rank contribution points (`0x1973ec`), every 800 add 2 to pending byte 22. `+0x6e` u8: Footbath uses (`uUIFootBath` → `0x197448`), every 15 add 3 to pending byte 4. Analysed save 60, 242, 105, 5 |
 | `0x2381E` | `+0x6f` | 23 | pending village rewards ([10](10-npc-talk.md)), at most 99 each |
-| `0x23835` | `+0x86` | 6 | staged quest-clear counters (`0x1974ac`, from the quest result `0x38f278`; table `0x1625aee`: pending byte, threshold, amount). Counter 0: G★1–4 quests cleared, every 10 add 1 to pending byte 18. Counters 1 → 2 and 3 → 4: villager-request quests cleared, a one-off payout at 10 (3 to pending byte 17), then every 20 / 30. Which of the two chains runs depends on a byte of another singleton (GOT `0x1838d28` `+0xb8`), UNRESOLVED. Analysed save `01 0a 06 01 00 00` |
+| `0x23835` | `+0x86` | 6 | staged quest-clear counters (`0x1974ac`, from the quest result `0x38f278`; table `0x1625aee`: pending byte, threshold, amount). Counter 0: G★1–4 quests cleared, every 10 add 1 to pending byte 18. Counters 1 → 2 and 3 → 4: villager-request quests cleared, a one-off payout at 10 (3 to pending byte 17), then every 20 / 30. Which of the two chains runs depends on a byte of another singleton (GOT `0x1838d28` `+0xb8`), UNRESOLVED. Analysed save `01 0a 06 01 00 00`. Counter 0 went 0 → 1 at the first clear of a Hub G★4 quest and stayed at three other clears (CONFIRMED); counters 1–4 stayed `0a 06 01 00` over two villager-request clears (*The Fated Four*, *Ahoy! Royal Ludroth!*), so the chain that fills them did not run there |
 | `0x2383B` | `+0x50` | 25 | Combination List recipes combined successfully, bit = `itemPreData` record ID (`0x194c94` from the combine result `0x18b43c`). The list shows the real success rate only for these (`0x194474`). Award 27 *Sage's Tome* at 130 (`0x3eccc8`). A new character starts with 0, 1, 5; the analysed save has 9 |
 | `0x23854`, `0x23954` | `+0x214`, `+0x314` | 256 each | the Combination List's user order, for the pouch list (`cMixListPouch`) and the item box list (`cMixListBox`). Byte 0 is flags: bit 1 = custom order in use (set by the move `0x194dd8`; `0x194d6c` returns the order only then), bit 0 = filter toggle (`0x194fa0`). Then one byte per position: the index of a recipe of `table/itemPreData.itp` (183 records of 24 B: u16 ID, u32 item A, u32 item B, u32 result, u32 rate %). Default `order[i] = i` (`0x193178`); all three slots hold the default |
 | `0x23A54` | `+0x98` | u32 | Horns Coins traded in total, capped at 99,999,999 (`0x1978b0`, from `uUICrossCoin` and `uUICrossTicket`). The award check (`0x3f2810`) grants award 104 *Felicity's Picture Book* at 2000. 13 in the analysed save |
@@ -203,7 +261,9 @@ helpers `0xdaba4` / `0xdac14` / `0xdadf0` construct, clear and copy them.
 
 ## Smaller managers
 
-**DERIVED** from the loaders and the code that uses each field.
+**DERIVED** from the loaders and the code that uses each field. CONFIRMED by the
+[save timeline](#confirmed-by-the-save-timeline): play time and its remainder, hunting
+buddy 1 and the pet names.
 
 | `base +` | Owner | Content |
 |---|---|---|
@@ -225,7 +285,7 @@ helpers `0xdaba4` / `0xdac14` / `0xdadf0` construct, clear and copy them.
 | `0x2C563` | `+0x468` | village pets' costumes, one u8 per pet, below 40 (the pet menu, `0x50d830`) |
 | `0x2C567` | `+0x46c` | u32, bit *v* − 1: a village pet event seen in village *v* (1–4; set by `0x50d890` from the village script). Each bit unlocks a title word (*Fluffball*, *Hide-and-Seek*, *Snow Sprite*, *Guardian Pig*), all four *Pet Lover*. The trigger in play was not traced |
 | `0x2C56B` | `+0x470` | the Housekeeper (Room Service, `0x50c988`): index into the NPC table `0x162bde8` = 10, 16, 17, 18, 19, 710, 711 |
-| `0x2C56C` | `+0x474` | the village to start in on load (`0x6a6ea8`), set at the quest result. 1 (Bherna) in all three slots |
+| `0x2C56C` | `+0x474` | the village to start in on load (`0x6a6ea8`), set at the quest result. 1 (Bherna) in all three slots. It also changed in four game sessions without a counted quest (6 → 1, 1 → 2, 2 → 1, 1 → 6), so another writer exists |
 | `0x2C679` | sNpcTalk `+0x60c` | a second random word, copied with the first and tested modulo 10000 the same way (`0x24217c`) |
 | `0x2C6A5` | sFlagChecker `+0x20` | flags: `0x3f43e8` ORs in the bits set at `+0x1c` of another object, so they latch |
 | `0x2C6A9` | sMakeAmulet `+0x64` | a 128-bit map (`+0x64 … +0x73`) over a 107-entry table of 12-byte records. The quest end (`aQuest`, `0x14c688`) tests each entry's condition and sets its bit; the rotation modes 1 / 2 read it ([05](05-quests.md#rotating-quests--base--0x504b)). Entries 104–106 are in the fourth word, `0x700` in the analysed save. The transfer copies only the first 96 bits |
@@ -244,15 +304,18 @@ The block A bytes of `sGameControl` are in [Block A header](#block-a-header-and-
   `+0x83`, art flags `+0x86`. Both conventions point at the same
   bytes; only the record boundary moves.
 - **Palico equipment box**, `base + 0x17C2E`: 1000 × 36 B, same entry format as the hunter
-  box. Only types 22, 23, 24 occur (Palico weapon, head, body).
+  box. Only types 22, 23, 24 occur (Palico weapon, head, body). CONFIRMED: every gear
+  index of the Palicoes points at an entry of the right type, and a fresh slot holds the
+  five starter entries.
 - **Palico equipment sets**, `base + 0x21E0E`: 24 × 68 B. `+0x00` name char[42],
   `+0x2A` 3 × u16 box index (`0xFFFF` = empty), then flags.
 
 ## Palico records
 
-**DERIVED** from the loader (`0x263390`: 32 + 224 + 14 + 12 + 36 + 4 + 2 bytes per
-record) and from the values of the 32 Palicoes in the save: exp and level rise together,
-and owner names are sensible.
+**CONFIRMED** from the loader (`0x263390`: 32 + 224 + 14 + 12 + 36 + 4 + 2 bytes per
+record) and the [save timeline](#confirmed-by-the-save-timeline): after each of four quests
+only the hunting buddy's record gained experience. The level byte rises with experience
+but reaches 59–63 in the save, so it is kept as a raw value.
 
 | Offset | Size | Field |
 |---|---|---|
@@ -266,7 +329,8 @@ and owner names are sensible.
 | `+0x9C` | char[32] | original owner name |
 
 Lists: `base + 0x23BB6` 84 records (the Palicoes of the slot) and `base + 0x2A606` 24
-records (a second list, same format). Block A holds a shared pool of 50 records. In the
+records (same format: the Palicoes for hire, rerolled after each counted quest and at no
+other step). Block A holds a shared pool of 50 records. In the
 analysed save it contains DLC Palicoes with owner "Capcom".
 
 ## Guild Card manager
@@ -334,8 +398,9 @@ A list element is:
 2. zlib stream of one 6328-byte card;
 3. u32 state (3 = card, 1 = empty);
 4. a 36-byte trailer: u16 HR (sort *By HR*), 11 UTF-16 characters of name (sort *By
-   Name*), 8-byte ID, u32 version. A card arriving with the same name and ID replaces
-   the stored one only if its version is higher (`0x164b08`, "Updated").
+   Name*), 8-byte ID, u32 version. The version is the card's play time (card `+0x914`:
+   364261 and 231955 for the two stored cards), so a card arriving with the same name and
+   ID replaces the stored one only if it has more play time (`0x164b08`, "Updated").
 
 The list screen's sort modes (`0x59d30c`, *GuildCardMsg* 199–204) are slot order, HR,
 date, Unity, type and name.
@@ -352,7 +417,15 @@ with the same layout as the own card (history log at `+0x918` in both).
 
 **DERIVED** from the card builders `0x1623b4` (hunter) and `0x162574` (Palico), the
 award test `0x162720` and the history insert (`0x1628a0`). Checked on the own card and
-a received card: HR 999 / 148, sensible equipment types, transmog IDs.
+a received card: HR 999 / 148, sensible equipment types, transmog IDs. CONFIRMED by the
+[save timeline](#confirmed-by-the-save-timeline): name, equipment, weapon usage, play
+time, quest history, awards and monster log.
+
+The equipment and Palico blocks are a snapshot, not a mirror: over 36 saves the
+equipped gear changed three times with quests in between and card `+0x54` never moved;
+the card's buddy 2 is a Palico while sOtomo has none. Only play time, history, weapon
+usage, awards and the monster log follow each quest end. What rebuilds the rest is
+not identified.
 
 | Card offset | Size | Field | Source |
 |---|---|---|---|
@@ -405,13 +478,15 @@ Record kinds come from separate builders: 3 (`0x162888`, called by the Smithy at
 
 ### Monster log
 
-**DERIVED** from the builder loop `0x161c38` (87 entries from a monster table, stride
-8, `+0xF6C … +0x1224`):
+**CONFIRMED** from the builder loop `0x161c38` (87 entries from a monster table, stride
+8, `+0xF6C … +0x1224`) and the save timeline: in all 36 saves every entry equals the
+size records and the family sums of the hunt and capture tallies, and the totals moved
+at exactly the quests:
 
 | Offset | Size | Content |
 |---|---|---|
-| `+0` | u16 | a size record (`0x526f48` with argument 1) |
-| `+2` | u16 | the other size record (`0x526f48` with argument 0) |
+| `+0` | u16 | largest size (`0x526f48` with argument 1) |
+| `+2` | u16 | smallest size (`0x526f48` with argument 0) |
 | `+4` | bits 0–13 | hunts, at most 9999 |
 | | bits 14–27 | captures, at most 9999 |
 | | bit 28 | the monster's Hunter's Notes entry is unlocked (`S+0x35b0`, `0x524728`) |
@@ -454,7 +529,8 @@ computed from its object offset: always go through the
 documents got this wrong once:** the Hunter's Notes maps are at `base + 0x32B7`, not
 `base + 0x5027` (corrected below and in [10](10-npc-talk.md)).
 
-**DERIVED** throughout. Each field was named from the methods that use it: the bit
+**DERIVED** unless a row says CONFIRMED (the [save timeline](#confirmed-by-the-save-timeline)
+backs those). Each field was named from the methods that use it: the bit
 tests and setters of the `sUserInfo` unit (`0x51c900 … 0x528000`), every load of the
 global followed through the function, and the MT class of the callers. A caller's
 class comes from its vtable: entry 5 is `getDTI`, and the DTI object gets its name
@@ -471,11 +547,11 @@ transfer).
 | `base +` | S field | Content |
 |---|---|---|
 | `0x280B` | `+0x20` | u32 HR points ([05](05-quests.md)). The transfer sets it to the points of HR min(HR, 7) (table `0x15973bc`) |
-| `0x280F` | `+0x24` | u32 funds (zenny); the adder `0x523150` keeps it within 0 … 9,999,999 |
+| `0x280F` | `+0x24` | u32 funds (zenny); the adder `0x523150` keeps it within 0 … 9,999,999. CONFIRMED: a quest reward took it to exactly 9,999,999, a game session spent 960, and the slot header copy `+0x24` matched in all 36 saves |
 | `0x2813` | `+0x28` | u32, a copy of sItem `+0x69`: the quest result (`0x195758`) draws it at random below n = 1, 2 or 3, n growing with the Village and Hub star levels. Meaning UNRESOLVED |
-| `0x2817` | `+0x2c` | u32 Wycademy points, 0 … 9,999,999 (`0x523194`) |
-| `0x281B` | `+0x30` | u32 × 4 contribution points, low rank, Bherna / Kokoto / Pokke / Yukumo ([10](10-npc-talk.md)) |
-| `0x282B` | `+0x40` | u32 × 4 contribution points, G rank |
+| `0x2817` | `+0x2c` | u32 Wycademy points, 0 … 9,999,999 (`0x523194`). CONFIRMED: +4110, +540, +3720, +1200, +2640 at the five counted quests, no change at talks, tool writes or the Harvest Tour |
+| `0x281B` | `+0x30` | u32 × 4 contribution points, low rank, Bherna / Kokoto / Pokke / Yukumo ([10](10-npc-talk.md)). CONFIRMED: request rewards replaced a tool-written 9,999,999 with the cap 20000, village by village, while the low-rank accumulator (`base + 0x2381A`) rose |
+| `0x282B` | `+0x40` | u32 × 4 contribution points, G rank. CONFIRMED: +1750 over the four villages in the report round, and the G-rank accumulator went 755 → 105 = (755 + 1750) mod 800 |
 | `0x283B` | `+0x50` | u8. UNRESOLVED |
 | `0x283C` | `+0x51` | u8 × 18 Special Permits held per deviant, at most 99 (`0x527a80`, see `S+0x4424` below) |
 | `0x284F` | `+0x64` … `+0x7b` | 12 × u16, zero in the analysed save. UNRESOLVED |
@@ -515,7 +591,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x2C0F` | `+0x428` | bonus packs granted. Bit N = the contents of pack N were given (`0x522c64` → `0x522d60`). Owned packs are bits 1–4 of the shared `S+0x420` ([below](#block-a-header-and-shared-settings)). A pack is a list of records: type 5 unlocks a title word, type 6 a Guild Card scene |
 | `0x2C2B`, `0x2C43` | `+0xd3c`, `+0xd54` | N1 and N2 of the Hunter Arts map at `0x2C13` |
 | `0x2C5B` | `+0xd6c` | 31-bit map. `0x524580` ORs in `S+0xd74` when a quest ends, monster code (`uEm014`, `uEm022`, `uEm085` through `0x524534`, table `0x162c124`) sets `S+0xd74`. Alchemy counts it over a range (`0x5244c8`) |
-| `0x2C5F` | `+0xd70`, `+0xd74` | u32 map tested by `0x5245d4`, then the pending map above |
+| `0x2C5F` | `+0xd70` | u32 map tested by `0x5245d4`. The pending map `+0xd74` is not saved (the next field is `+0xd78`) |
 | `0x2F77`, `0x2F7F` | `+0x958`, `+0x968` | the progress map is 64 bits (U `+0x958`, N1 `+0x960` unsaved, N2 `+0x968`). The progress word of [10](10-npc-talk.md) is its first half |
 | `0x2F87`, `0x2F8B` | `+0x970` … `+0x978` | 32-bit map with copies: story events of the flagship monsters. The quest flow (`0x14d53c`) looks the current quest up in a 12-byte table (`0x15a06fc`: code, 1, quest ID) and sets bit 3 for 601 *The Scorching Blade* (Glavenus), 4 for 504 *The Thunderclaw Wyvern* (Astalos), 5 for 510 *The Entrancing Water Dancer* (Mizutsune), 6 for 508 *The Unwavering Colossus* (Gammoth), 8 for 1005 *Beware the Comet of Disaster* (Valstrax); bit 2 when quest 601 is cleared (`0x524064`). The village (`0x11e10`) reads it with its copies. Bits 0–13 set in the analysed save. Other bits UNRESOLVED |
 | `0x2F97` | `+0x98c` | N2 of the Canteen ingredients |
@@ -523,17 +599,17 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x2FAF`, `0x2FB3` | `+0x9ac` … `+0x9b4` | deviants, 18 bits: bit i is set when the first Special Permit quest of deviant i becomes available (`0x3eb1f4`, table `0x162a5f4` = 40101, 40201 … 41811); also raises event flags 185 and 962 |
 | `0x2FB7`, `0x2FBB` | `+0x9b8` … `+0x9c0` | deviants the Courier hands out Special Permits for, 18 bits, same setter. `0x52779c` / `0x5278a8` lend the highest bit temporarily in two modes and keep what to restore at `S+0x43fc` / `S+0x4400` |
 | `0x2FBF` | `+0x9c4` … `+0x9cc` | a 32-bit map with copies, vestigial: only the transfer converter `0x51e6d8` writes it (6 bits from the old save's `+0x790` … `+0x798`, the map after the old deviant maps). No reader in this game; 0 in all three slots |
-| `0x2FC7`, `0x306B` | `+0x9d0`, `+0xb18` | Guild Card title words, first part: 1312 bits for the 1309 words of `GC_Title_1`. 77 are unlocked from the start (`0x162154`) |
+| `0x2FC7`, `0x306B` | `+0x9d0`, `+0xb18` | Guild Card title words, first part: 1312 bits for the 1309 words of `GC_Title_1`. 79 are unlocked from the start (`0x162154`): a fresh slot has exactly the 79 words whose text says "Available from the start." (CONFIRMED with the NEW copy and the scenes map, [timeline](#confirmed-by-the-save-timeline)) |
 | `0x310F`, `0x311F` | `+0xbbc`, `+0xbdc` | title words, second part: 121 words of `GC_Title_2`, 117 from the start |
 | `0x312F`, `0x3143` | `+0xbec`, `+0xc14` | Guild Card scenes, the 136 backgrounds of `GC_background` |
 | `0x317F`, `0x3183` | `+0xc64`, `+0xc6c` | Guild Card poses: 22 (Stand … Beam Fire). 17 from the start, bits 17–21 from the DLC map at sPrivilege `+0xf44` |
 | `0x31A7`, `0x31CB` | `+0x2a0c`, `+0x2a54` | Smithy decorations listed / NEW, bit = `rDecoCreateData` entry |
 | `0x31EF` … `0x32AB` | `+0x3488` … `+0x35a4` | the Trader (`uUITradeCenter`): seven maps, each followed by its N1 and N2. U at `+0x3488` (32 bits) and `+0x3494` (32): entries of the Trader's two item lists (UI byte `+0x3c` = 0 / 1), set by `0x7a9abc` once the entry's progress condition (`0x561b28`) holds. `+0x34a0` (448): Guild Card title words for sale (`tradeLimitedHonorList`, 442), `+0x3548` (160): Guild Card scenes for sale (`tradeLimitedPaperList`, 131), `+0x3584` (32): pet costumes for sale, the three set by the tabs of [block B's download test](#downloads-held--block-b-header). `+0x3590` (32): the coin-ticket trades (`rTradeCoinTicketList`, paid in *Horns Coin*); only the transfer converter sets it, the Cross ticket screen and the Trader read its N2 as NEW. `+0x359c` (32): delivery requests offered at the Trader, bit = `rTradeDeliveryList` entry, set by `0x79da8c` once the request's event flag is raised (`0x1971f0`); `0xff5` in the analysed save |
-| `0x32AF` | `+0x35a8` | delivery requests delivered: bit *b* for kind-1 request *b* (1–13), tested by `0x524db8` for talk condition 41 ([10](10-npc-talk.md)), the Trader and the Start Menu |
+| `0x32AF` | `+0x35a8` | delivery requests delivered: bit *b* for kind-1 request *b* in [`request-index.csv`](../data/request-index.csv) order, 0–12 (CONFIRMED: bits 0, 4, 5, 7 = the done flags of those requests), tested by `0x524db8` for talk condition 41 ([10](10-npc-talk.md)), the Trader and the Start Menu |
 | `0x32B3` | `+0x35ac` | Hunter's Notes tips read: a clear bit shows NEW (`cUIOHunterNoteTips`) |
 | `0x32B7`, `0x32C7` | `+0x35b0`, `+0x35c0` | **Hunter's Notes, large monsters**: 123 bits and their NEW copy. Talk action 6 sets both (`0x247ae4`); condition 44 tests them (`0x245848`) |
 | `0x32D7` | `+0x35d0` | **Hunter's Notes, second list**: 30 bits, talk action 7 and condition 45 |
-| `0x32DB` | `+0x35dc` | 64 bits: DLC Palicoes this character has taken from the Room Service. Bit *b* pairs with bit *b* of sPrivilege `+0xf3c` (DLC Palicoes held). `uUIRoomService` sets it after the hand-over (`0x78ccb0`), buzzes on a second try (`0x78d01c`) and shows a notice while a held one is not taken (`0x78a39c`). `0x1ffff` (17) in the analysed save, the same as the held map; 0 in a fresh slot |
+| `0x32DB` | `+0x35dc` | 64 bits: DLC item packs this character has taken from the Room Service (CONFIRMED; earlier revisions said Palicoes). Bit *b* pairs with bit *b* of sPrivilege `+0xf3c` (DLC item packs held). `uUIRoomService` sets it after the hand-over (`0x78ccb0`), buzzes on a second try (`0x78d01c`) and shows a notice while a held one is not taken (`0x78a39c`). `0x1ffff` (17) in the analysed save, the same as the held map; 0 in a fresh slot |
 | `0x32E3` | `+0x3668` | u32 flags. Bit 0: a network-mode switch mirrored to sFestaNetwork `+0x1624e` (`0x228310`, set by `uUILobbyStartMenu`, copied back by the title menu; read by the room list and menu bar), probably local vs online, UNRESOLVED. Bit 1: today's quest-counter daily bonus received (set by `0x3bb96c` after the bonus is paid, cleared when new daily picks `+0x40c` are rolled, `0x3babf4`; read for the board icon). No other bit is used. `+0x366c` is a runtime field of the lobby code, not saved. 0 in all three slots |
 | `0x32E7` … `0x3347` | `+0xd98` … `+0xe38` | two shop lists (`uUIGuildShop`, list index at UI `+0x8c`): 256 bits listed + NEW each, stride 96 |
 | `0x3367` | `+0xe58` | Armory (equipment shop): 21 equipment types × (20 B listed, 20 B NEW), stride 60 with the N1 copy between. Bit = shop entry of the type |
@@ -567,7 +643,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x5E4A` | `+0x4414` | Courier flags (`0x6d1e4c` and the Courier's talk code) |
 | `0x5E4E` | `+0x4418` | u32 quest counter ([05](05-quests.md#counters)): completed quests except Harvest Tours and Training. `0x526f70` adds 1 when the quest ends completed (sQuest `+0x50` = 2), not when abandoned (6) or when the quest file's skip bit is set (`0x3a340c`) |
 | `0x5E52` | `+0x441c` | the counter at the Courier's last talk (`0x6d19e8`). One-time gifts at 10, 30, 50, 80, 100 and 150 quests (flags `+0x4414` bits 0–5), periodic ones when a multiple of 3, 7 or 10 was crossed. `0x5279e0` stores it and, at 210 (lcm of 3, 7, 10) or more, folds both into 210 … 419. 387 / 382 in the analysed save |
-| `0x5E56` | `+0x4420` | Courier points: `0x526f70` adds a per-quest amount from a table |
+| `0x5E56` | `+0x4420` | Courier points: `0x526f70` adds a per-quest amount from a table. Fell from 11600 to 10000 at the first quest of the timeline and stayed there, which looks like a cap of 10000 |
 | `0x5E5A` | `+0x4424` | Special Permit points, 18 × u16, at most 9999. 100 points make one permit; the Courier (`0x527a80`, `0x527b2c`) hands them out up to 99 held, the held counts being the [deviant permit counts](#the-block-s0x20--0x41f--base--0x280b) at `base + 0x283C` (`S+0x51`) |
 | `0x5E7E` | `+0x4448` | permit points waiting at the Courier, 18 × u16 |
 | `0x5EA2` | `+0x446c` | control option bytes: the Game options window writes `+0`, the target camera reads `+0`, `+2`, `+3`, the Hunter Art gauge `+2`, `+3` |
@@ -607,14 +683,14 @@ the server catalog at `+0xed0` (runtime).
 
 | File | Size | sPrivilege | Content | Analysed save |
 |---|---|---|---|---|
-| `0xB2A5` | 8 | `+0xf34` | DLC item packs received, 50 bits (catalog entries 11–60). The packs themselves are the list at `0xB311` | 3 |
-| `0xB2AD` | 8 | `+0xf3c` | DLC Palicoes received, 50 bits (catalog 507–556), the info at `0xC761` | 17 |
+| `0xB2A5` | 8 | `+0xf34` | DLC Palicoes received, 50 bits (catalog entries 11–60), the info at `0xC761`. CONFIRMED: bits 15–17 are exactly the occupied info entries and the three "Capcom" Palicoes of the block A pool (earlier revisions swapped the two maps) | 3 |
+| `0xB2AD` | 8 | `+0xf3c` | DLC item packs received, 50 bits (catalog 507–556). The packs themselves are the list at `0xB311`. CONFIRMED: bits 32–48 are exactly the 17 occupied pack records, catalog IDs 539–555 = 507 + bit | 17 |
 | `0xB2B5` | 4 | `+0xf44` | extras of download type 4, 9 entries (catalog 71–79). The Guild Card builder `0x161ac8` turns bits 0–3 into Guild Card poses 17, 20, 21 and 18 | 4 |
 | `0xB2B9` | 12 | `+0xf48` | extras of download type 5, 80 entries (catalog 80–159) | 57 |
 | `0xB2C5` | 4 | `+0xf54` | extras of download type 6, 10 entries (catalog 160–169) | 5 |
 | `0xB2C9` | 40 | `+0xf58` | extras of download type 7, 300 entries (catalog 170–469) | 215 |
-| `0xB2F1` | 8 | `+0xf80` | challenge quests stored, bit = slot of the 45 at `0x127899` | 40 |
-| `0xB2F9` | 20 | `+0xf88` | event quests stored, bit = slot of the 160 at `0xF899` | 125 |
+| `0xB2F1` | 8 | `+0xf80` | challenge quests stored, bit = slot of the 45 **records** at `0x176499` (CONFIRMED). The archive store `0x127899` is packed and the record store is not (record slot 25 is empty), so the two differ from slot 25 on: match them by quest ID, not by slot | 40 |
+| `0xB2F9` | 20 | `+0xf88` | event quests stored: as many set bits as stored quests, but bit ≠ slot of the 160 at `0xF899` (slots 0–2 hold quests whose bits are clear, 23 set bits fall on empty slots). Probably the download catalog position, UNRESOLVED | 125 |
 | `0xB30D` | u32 | `+0xf9c` | stamp compared with the catalog's `+0xe5c` (`0x3b714`); this is the u32 the writer round trip rewrites | |
 
 The counts match block B: 40 challenge and 125 event quests are stored. The download

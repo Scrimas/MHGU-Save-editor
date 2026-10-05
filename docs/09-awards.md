@@ -76,7 +76,10 @@ slot 29 showed `?` before the write and stores 0.
 
 ## Game-side map — `base + 0x3157`
 
-**DERIVED (code + values).** The Guild Card field above is not the only award map. The
+**CONFIRMED (code + the [save timeline](11-save-map.md#confirmed-by-the-save-timeline)):**
+award 130, granted in game, reached this map one save before the card copy, the notice
+copy gained exactly the newly granted awards, and the crown awards 7, 8, 115 and 116
+followed a crowns write. The Guild Card field above is not the only award map. The
 game keeps its own at `base + 0x3157` (`+0xc28` of the save object, 20 bytes, same bit
 order). The award check (`0x3ec020` onwards) sets a bit there and in two companion
 maps (`+0xc3c`, `+0xc50`) when its condition holds. Of those only `+0xc50` is saved,

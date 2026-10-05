@@ -694,7 +694,8 @@ with the deviant numbered from 1.
 and stayed at 387 over the Harvest Tour, which did get a
 [history record](#quest-history-log--0x254771) and a weapon usage count.
 
-**DERIVED.** `0x526f70` adds 1 (saturating) when a quest ends completed (sQuest `+0x50`
+**CONFIRMED** (code + save timeline: +1 at each of five counted quests, unchanged over a
+Harvest Tour, talks and tool writes). `0x526f70` adds 1 (saturating) when a quest ends completed (sQuest `+0x50`
 = 2; callers `0x39fef0`, `0x3a0810`, `0x3a94e4`). It skips an abandoned quest (6) and a
 quest whose file has the skip bit set (`0x3a340c`, [below](#what-all-quests-completed-takes)):
 all Harvest Tours and Training quests. The Courier reads it against the value at the
@@ -705,9 +706,9 @@ Earlier revisions listed a second u16 counter at `0x25476E`. That was a misreadi
 the bytes are the middle of the u32 at `0x25476D`, which follows the play time at
 `base + 0x20` (a second copy sits at `base + 0x2248B`) and is refreshed when a quest
 ends, so its second byte happened to step by one between the first captures.
-**DERIVED** from 22 snapshots: the value equals the play time in every snapshot taken
-right after a quest (175402 against 175408, 172975 against 172978) and lags behind it
-otherwise.
+**CONFIRMED** from 36 saves: the value equals the play time in every save taken
+right after a quest (175402 against 175408, 172975 against 172978), lags behind it
+otherwise, and went on from an editor-written play time in the next game session.
 
 ## Open questions
 

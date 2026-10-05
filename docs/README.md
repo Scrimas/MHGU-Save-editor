@@ -56,7 +56,7 @@ Machine-readable: [`data/monster-index.csv`](../data/monster-index.csv), [`data/
 | Rotating quests | `base + 0x504B` | u64, bit = row of [`rotating-quests.csv`](../data/rotating-quests.csv); 51 quests are listed only while their bit is set; re-rolled after each completed quest |
 | Per-NPC talk hold bits | `base + 0x2C62D` | 3 × 24 bytes after the event flags, bit = row of [`npc-index.csv`](../data/npc-index.csv). Set = NPC skips request offers / kind 9 talk / announcements until the next cleared quest (CONFIRMED by write), see [10](10-npc-talk.md) |
 | Village / Hub star level | `base + 0x2C4DA` / `+0x2C4DC` | u16 each, 1–10 / 0–13. The game raises them when a quest is cleared and all urgents of a level are cleared (`quest_group` groups 24–46); not recomputed on load, see [05](05-quests.md#star-levels--base--0x2c4da) |
-| Village contribution points | `base + 0x281B` / `+0x282B` | 4 × u32 low rank, 4 × u32 G rank: Bherna, Kokoto, Pokke, Yukumo (DERIVED) |
+| Village contribution points | `base + 0x281B` / `+0x282B` | 4 × u32 low rank, 4 × u32 G rank: Bherna, Kokoto, Pokke, Yukumo (CONFIRMED, [11](11-save-map.md#confirmed-by-the-save-timeline)) |
 | Progress word | `base + 0x2F77` | u32; bit 20 = HR limit released, bit 31 = quest 10646 was listed (from code) |
 | Quest sets completed | `base + 0x3187` | 100 bits, bit N = every quest of set N cleared (column `sets` of `quest-index.csv`); read by NPC talk and the award check. Bit 48 CONFIRMED by write |
 | Pending village rewards | `base + 0x2381E` | 23 × u8 counters of the activity manager (DERIVED) |
