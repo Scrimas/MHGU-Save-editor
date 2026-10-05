@@ -33,9 +33,10 @@ export struct MonsterRow {
     changed: bool,
 }
 
-export struct ItemSlot { slot: int, id: int, name: string, count: int, icon: image, has-icon: bool, changed: bool, was: string }
+// max: most of the item one slot holds (pouch: the item's carry limit)
+export struct ItemSlot { slot: int, id: int, name: string, count: int, max: int, icon: image, has-icon: bool, changed: bool, was: string }
 
-export struct PickItem { id: int, name: string, icon: image, has-icon: bool, sub: string }
+export struct PickItem { id: int, name: string, icon: image, has-icon: bool, sub: string, max: int }
 
 export struct LoadoutRow { index: int, name: string, summary: string, used: bool }
 

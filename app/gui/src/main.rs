@@ -175,7 +175,7 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                     api.invoke_put_equip(-1, num(id));
                 }
             }
-            (_, &["goal", id]) => api.invoke_apply_preview(id.into()),
+            (_, &["goal", ..]) => api.invoke_apply_preview(parts[1..].join(":").into()),
             (_, &["char", field, v]) => api.invoke_set_character(field.into(), num(v)),
             (_, &["monster", i, field, v]) => api.invoke_set_monster(num(i), field.into(), num(v)),
             (_, &["item", slot, id, n]) => api.invoke_set_item(num(slot), num(id), num(n)),

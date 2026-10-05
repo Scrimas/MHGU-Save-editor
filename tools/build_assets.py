@@ -8,8 +8,8 @@
 
 Writes:
   names.json       item, equipment, skill and Palico support move names; item icon /
-                   colour / rarity; palettes; equipment type icons; icon cell positions
-                   on items.png
+                   colour / rarity and pouch carry limit; palettes; equipment type icons;
+                   icon cell positions on items.png
   items.png        the grayscale item icon sheet (HD_cmn_icon_GSM); the editor tints it
   monsters/<i>.png 72x72 icon per save monster index 1-137
   awards/<b>.png   48x48 Guild Card award icon per award bit
@@ -196,15 +196,18 @@ def main(romfs, out):
         sh, c = divmod(ic, 98)
         mic[sh].crop((c % 7) * 72, (c // 7) * 72, 72, 72).save(P('monsters', '%d.png' % (i + 1)))
 
-    # items: itemData 44-B records (+4 type, +5 rarity - 1, +0x10 icon, +0x11 colour)
+    # items: itemData 44-B records (+4 type, +5 rarity - 1, +6 pouch carry limit, +0x10 icon,
+    # +0x11 colour). Carry: Potion 10, Max Potion 2, Ancient Potion 1, Pierce S Lv1 60, Crag S 9
     tex('HD_cmn_icon_GSM_NOMIP').save(P('items.png'))
     inames = gmd(reng['eng\\table\\itemData_eng'])[0::2]
     d = res['table\\itemData']; n = struct.unpack_from('<I', d, 4)[0]
     names['items'] = [inames[i] if i < len(inames) else '' for i in range(n)]
     names['item_icons'] = {}
+    names['item_carry'] = []
     for i in range(n):
         r = d[8 + i * 44:8 + i * 44 + 44]
         names['item_icons'][str(i)] = [r[0x10], r[0x11] % 17, r[5] + 1]
+        names['item_carry'].append(r[6])
     names['palette'] = [rgb(c) for c in PALETTE]
     names['rarity_colors'] = [[200, 200, 200]] + [rgb(c) for c in RARITY]     # index = rarity
     names['icon_rects'] = [list(item_rect(k)) for k in range(107)]

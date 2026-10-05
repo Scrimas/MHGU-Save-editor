@@ -31,8 +31,10 @@ component SlotCell inherits Rectangle {
             horizontal-stretch: 1;
             Text { text: it.id == 0 ? "Empty" : it.name; color: it.id == 0 ? Tok.faint : Palette.foreground; overflow: elide; }
             if it.was != "": Text { text: "was " + it.was; color: Tok.accent-text; font-size: Tok.small; overflow: elide; }
+            // stacks above the item's carry limit (written by older versions or other tools)
+            if it.was == "" && it.id != 0 && it.count > it.max: Text { text: "over the limit of " + it.max; color: Tok.bad; font-size: Tok.small; overflow: elide; }
         }
-        Text { text: it.id == 0 ? "" : "×" + it.count; width: 36px; vertical-alignment: center; horizontal-alignment: right; }
+        Text { text: it.id == 0 ? "" : "×" + it.count; color: it.id != 0 && it.count > it.max ? Tok.bad : Palette.foreground; width: 36px; vertical-alignment: center; horizontal-alignment: right; }
     }
 }
 
@@ -42,6 +44,7 @@ export component ItemsPage inherits Rectangle {
     property <int> edit-slot: -1;
     property <int> edit-id;
     property <int> edit-count: 1;
+    property <int> edit-max: 99;
     property <int> held-id;
     property <string> held;
     property <string> edit-was;
@@ -54,8 +57,9 @@ export component ItemsPage inherits Rectangle {
         root.edit-slot = it.slot;
         root.edit-id = it.id;
         root.held-id = it.id;
-        root.edit-count = it.id == 0 ? 1 : it.count;
-        root.held = it.id == 0 ? "Empty" : it.name + " ×" + it.count;
+        root.edit-max = it.id == 0 ? 99 : it.max;
+        root.edit-count = it.id == 0 ? 1 : min(it.count, it.max);
+        root.held =it.id == 0 ? "Empty" : it.name + " ×" + it.count;
         root.edit-was = it.was;
         Api.search-picker("");
         root.pick-search = "";
@@ -223,11 +227,14 @@ export component ItemsPage inherits Rectangle {
                             clicked => {
                                 if root.edit-id != p.id {
                                     root.edit-id = p.id;
-                                    root.edit-count = p.id == root.held-id ? root.edit-count : 1;
+                                    root.edit-max = p.max;
+                                    root.edit-count = p.id == root.held-id ? min(root.edit-count, p.max) : 1;
                                 }
                             }
                             double-clicked => {
                                 root.edit-id = p.id;
+                                root.edit-max = p.max;
+                                root.edit-count = min(root.edit-count, p.max);
                                 Api.set-item(root.edit-slot, root.edit-id, root.edit-count);
                                 picker.close();
                             }
@@ -242,12 +249,12 @@ export component ItemsPage inherits Rectangle {
                         width: 120px;
                         value: root.edit-count;
                         minimum: 1;
-                        maximum: 99;
+                        maximum: root.edit-max;
                         label: "Count";
                         enabled: root.edit-id != 0;
                         edited(v) => { root.edit-count = v; }
                     }
-                    Text { text: "of 99"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                    Text { text: Api.item-store == 0 ? "of 99" : "of " + root.edit-max + " (carry limit)"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
                 }
                 HorizontalLayout {
                     spacing: Tok.tight;

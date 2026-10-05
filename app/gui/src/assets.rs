@@ -1,6 +1,7 @@
 //! Game assets embedded at build time from app/assets/gen (made by tools/build_assets.py
 //! from a RomFS dump; not in git). Without them the UI shows placeholders and "#ID".
 
+use mhgu_save::items::{self, Store};
 use serde::Deserialize;
 use slint::{Image, Rgba8Pixel, SharedPixelBuffer};
 use std::cell::RefCell;
@@ -74,6 +75,9 @@ pub struct Names {
     /// Item ID -> [icon, colour, rarity].
     #[serde(default)]
     pub item_icons: HashMap<String, [u32; 3]>,
+    /// Item ID -> pouch carry limit (packs built before 2026-10-05 lack it: 99 for all).
+    #[serde(default)]
+    pub item_carry: Vec<u8>,
     /// Item colour index -> RGB.
     #[serde(default)]
     pub palette: Vec<[u8; 3]>,
@@ -102,6 +106,15 @@ pub fn item_name(id: u16) -> String {
     match names().items.get(id as usize) {
         Some(n) if !n.is_empty() => n.clone(),
         _ => format!("Item #{id}"),
+    }
+}
+
+/// Most of item `id` one slot of `store` holds: 99 in the box, the item's carry limit
+/// in the pouch (itemData +6).
+pub fn item_max(id: u16, store: Store) -> u8 {
+    match store {
+        Store::Box => items::MAX_COUNT,
+        Store::Pouch => names().item_carry.get(id as usize).map_or(items::MAX_COUNT, |&c| c.clamp(1, items::MAX_COUNT)),
     }
 }
 

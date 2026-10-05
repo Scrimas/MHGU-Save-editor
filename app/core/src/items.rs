@@ -71,10 +71,11 @@ pub fn set_all(s: &mut Save, base: usize, store: Store, v: &[Stack]) {
     }
 }
 
-/// Merge stacks of the same item (up to 99 each) and move used slots to the front,
-/// sorted by item ID. Returns the new slot list; overflow beyond the box size is kept
-/// as extra stacks only while slots remain.
-pub fn compact(v: &[Stack], sort: bool) -> Vec<Stack> {
+/// Merge stacks of the same item and move used slots to the front, sorted by item ID.
+/// Returns the new slot list. Box: stacks of up to 99, overflow kept as extra stacks
+/// while slots remain. Pouch: one stack per item of at most `max(id)` (its carry limit);
+/// the excess is dropped.
+pub fn compact(v: &[Stack], sort: bool, store: Store, max: impl Fn(u16) -> u8) -> Vec<Stack> {
     let mut order: Vec<u16> = vec![];
     let mut totals: std::collections::HashMap<u16, u32> = Default::default();
     for st in v.iter().filter(|s| !s.is_empty()) {
@@ -88,9 +89,10 @@ pub fn compact(v: &[Stack], sort: bool) -> Vec<Stack> {
     }
     let mut out = vec![];
     for id in order {
-        let mut t = totals[&id];
+        let m = max(id).clamp(1, MAX_COUNT) as u32;
+        let mut t = if store == Store::Pouch { totals[&id].min(m) } else { totals[&id] };
         while t > 0 && out.len() < v.len() {
-            let c = t.min(MAX_COUNT as u32);
+            let c = t.min(m);
             out.push(Stack { id, count: c as u8 });
             t -= c;
         }
@@ -136,7 +138,14 @@ mod tests {
             Stack { id: 2, count: 1 },
             Stack { id: 5, count: 60 },
         ];
-        let c = compact(&v, true);
+        let c = compact(&v, true, Store::Box, |_| MAX_COUNT);
         assert_eq!(c, vec![Stack { id: 2, count: 1 }, Stack { id: 5, count: 99 }, Stack { id: 5, count: 21 }, Stack::default()]);
+    }
+
+    #[test]
+    fn compact_pouch_keeps_one_stack_at_carry_limit() {
+        let v = [Stack { id: 29, count: 2 }, Stack { id: 10, count: 8 }, Stack { id: 10, count: 7 }, Stack::default()];
+        let c = compact(&v, true, Store::Pouch, |id| if id == 29 { 1 } else { 10 });
+        assert_eq!(c, vec![Stack { id: 10, count: 10 }, Stack { id: 29, count: 1 }, Stack::default(), Stack::default()]);
     }
 }

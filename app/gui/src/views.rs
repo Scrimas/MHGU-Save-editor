@@ -587,6 +587,7 @@ fn items_page(ui: &AppWindow, st: &State) {
                 id: x.id as i32,
                 name: if x.is_empty() { "".into() } else { assets::item_name(x.id).into() },
                 count: x.count as i32,
+                max: if x.is_empty() { 0 } else { assets::item_max(x.id, store) as i32 },
                 icon: img,
                 has_icon: has,
                 changed,
@@ -624,6 +625,7 @@ fn items_page(ui: &AppWindow, st: &State) {
 fn picker(ui: &AppWindow) {
     let f = view(|v| v.picker_filter.to_lowercase());
     let n = assets::names();
+    let store = store_of(ui);
     let mut v: Vec<PickItem> = vec![];
     let count = if n.items.is_empty() { 1900 } else { n.items.len() };
     for id in 1..count.min(items::MAX_ID as usize + 1) {
@@ -635,7 +637,8 @@ fn picker(ui: &AppWindow) {
             continue;
         }
         let (img, has) = icon(assets::item_icon(id as u16));
-        v.push(PickItem { id: id as i32, name: name.into(), icon: img, has_icon: has, sub: SharedString::default() });
+        let max = assets::item_max(id as u16, store) as i32;
+        v.push(PickItem { id: id as i32, name: name.into(), icon: img, has_icon: has, sub: SharedString::default(), max });
         if v.len() >= 400 {
             break;
         }
@@ -685,7 +688,7 @@ fn equip_picker(ui: &AppWindow) {
                 _ => {}
             }
             let (img, has) = icon(assets::equip_icon(k.code(), p.rarity));
-            PickItem { id: p.id as i32, name: p.name.clone().into(), icon: img, has_icon: has, sub: sub.join(" · ").into() }
+            PickItem { id: p.id as i32, name: p.name.clone().into(), icon: img, has_icon: has, sub: sub.join(" · ").into(), max: 0 }
         })
         .collect();
     api.set_pick_equip(model(v));
@@ -1843,7 +1846,8 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let t = Target::Item(store, slot as usize);
         let title = t.label(s.save(), s.slot);
         s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
-            items::set(sv, base, store, slot as usize, Stack { id: id as u16, count: count.clamp(0, 99) as u8 });
+            let max = assets::item_max(id as u16, store) as i32;
+            items::set(sv, base, store, slot as usize, Stack { id: id as u16, count: count.clamp(0, max) as u8 });
             vec![]
         });
     });

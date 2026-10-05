@@ -1,6 +1,7 @@
 //! Quick goals and page-level bulk actions: edits that write what playing would have
 //! written, planned on a copy of the save and described in game terms (03, R3, R4).
 
+use crate::assets;
 use crate::fmt::{count, list, num};
 use crate::state::Conf;
 use crate::targets::{Mon, Target};
@@ -187,8 +188,8 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
             let st = store(id);
             let v = items::all(s, base, st);
             let n: Vec<Stack> = match what {
-                "sort" => items::compact(&v, true),
-                "max" => v.iter().map(|x| if x.is_empty() { *x } else { Stack { id: x.id, count: items::MAX_COUNT } }).collect(),
+                "sort" => items::compact(&v, true, st, |id| assets::item_max(id, st)),
+                "max" => v.iter().map(|x| if x.is_empty() { *x } else { Stack { id: x.id, count: assets::item_max(x.id, st) } }).collect(),
                 _ => vec![Stack::default(); v.len()],
             };
             items::set_all(s, base, st, &n);
@@ -360,13 +361,24 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             match what {
                 "sort" => {
                     p.title = format!("Sort the {place}");
-                    p.summary = if n == 0 { format!("The {place} is already sorted.") } else { format!("Sorts the {place} by item and merges stacks of the same item; {} change.", count(n, "slot", "slots")) };
+                    p.summary = if n == 0 {
+                        format!("The {place} is already sorted.")
+                    } else if st == Store::Pouch {
+                        format!("Sorts the pouch by item and merges stacks of the same item into one, up to its carry limit (the rest is dropped); {} change.", count(n, "slot", "slots"))
+                    } else {
+                        format!("Sorts the {place} by item and merges stacks of the same item; {} change.", count(n, "slot", "slots"))
+                    };
                     p.review = format!("{}: sorted and merged", cap(place));
                 }
                 "max" => {
                     p.title = "Max counts".into();
-                    p.summary = if n == 0 { format!("Every stack in the {place} is at 99.") } else { format!("Raises the {} below 99 in the {place} to 99.", count(n, "stack", "stacks")) };
-                    p.review = format!("{}: every stack ×99", cap(place));
+                    if st == Store::Pouch {
+                        p.summary = if n == 0 { "Every stack in the pouch is at its carry limit.".into() } else { format!("Sets the {} in the pouch to the most the game lets you carry (Potion 10, Max Potion 2, Ancient Potion 1…).", count(n, "stack", "stacks")) };
+                        p.review = "Pouch: every stack at its carry limit".into();
+                    } else {
+                        p.summary = if n == 0 { format!("Every stack in the {place} is at 99.") } else { format!("Raises the {} below 99 in the {place} to 99.", count(n, "stack", "stacks")) };
+                        p.review = format!("{}: every stack ×99", cap(place));
+                    }
                 }
                 _ => {
                     p.title = format!("Empty the {place}");
