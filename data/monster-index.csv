@@ -132,7 +132,7 @@ index,monster,category,confidence,has_size_record,notes
 131,Soulseer Mizutsune,large,CONFIRMED,yes,editor name + Monster List 3(1) = tally 2 capture 1
 132,Elderfrost Gammoth,large,DERIVED_EDITOR,yes,name from the game's monsterName table (entry i-1) and MHXXSwitchSaveEditor MonsterHuntNames (editor index = i-1); they agree
 133,Valstrax,large,DERIVED_EDITOR,yes,name from the game's monsterName table (entry i-1) and MHXXSwitchSaveEditor MonsterHuntNames (editor index = i-1); they agree
-134,,unused,DERIVED,yes,empty slot: empty name in the game's monsterName table, code 0x57 in the code table 0x1597ea4; editor labels Unknown[133]; editor IgnoreList: no crown sizes shown
+134,,unused,DERIVED,yes,"empty slot: empty name in the game's monsterName table, code 0x57 in the code table 0x1597ea4; editor labels Unknown[133]; editor IgnoreList: no crown sizes shown"
 135,Ahtal-Ka,large,DERIVED_EDITOR,yes,name from the game's monsterName table (entry i-1) and MHXXSwitchSaveEditor MonsterHuntNames (editor index = i-1); they agree; editor IgnoreList: no crown sizes shown
 136,Great Thunderbug,small,DERIVED_EDITOR,no,name from the game's monsterName table (entry i-1) and MHXXSwitchSaveEditor MonsterHuntNames (editor index = i-1); they agree
 137,Conga,small,DERIVED_EDITOR,no,name from the game's monsterName table (entry i-1) and MHXXSwitchSaveEditor MonsterHuntNames (editor index = i-1); they agree

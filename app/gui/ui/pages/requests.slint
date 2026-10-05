@@ -1,0 +1,132 @@
+import { ListView, CheckBox, Palette, LineEdit } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, Chip, PageHeader, ColHead, InfoTip, Hairline, EmptyState, ListRow } from "../common.slint";
+
+export component RequestsPage inherits Rectangle {
+    // the first tick of Completed in this session shows what it costs (05.2)
+    property <bool> warned;
+    VerticalLayout {
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        // title identical to the nav label (C1)
+        PageHeader {
+            title: "Requests";
+            subtitle: Api.request-summary;
+            derived: true;
+            staged: Api.page-counts[6];
+        }
+        HorizontalLayout {
+            spacing: Tok.tight;
+            LineEdit {
+                placeholder-text: "Search requests or villages";
+                text <=> Api.request-search;
+                edited => { Api.filter-requests(); }
+            }
+            for f in [{k: "open", t: "Open"}, {k: "done", t: "Completed"}, {k: "all", t: "All"}]: Chip {
+                y: 2px;
+                text: f.t;
+                active: Api.request-filter == f.k;
+                clicked => {
+                    Api.request-filter = f.k;
+                    Api.filter-requests();
+                }
+            }
+        }
+        if root.warned: Rectangle {
+            height: 40px;
+            border-radius: Tok.radius;
+            background: Tok.warn.transparentize(0.88);
+            border-width: 1px;
+            border-color: Tok.warn.transparentize(0.5);
+            HorizontalLayout {
+                padding-left: 14px;
+                padding-right: 14px;
+                Text {
+                    text: "Completed skips the villager's report, so the game never hands over that reward. Leave it unticked to get the reward in game.";
+                    color: Tok.warn;
+                    font-size: Tok.small;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+            }
+        }
+        HorizontalLayout {
+            vertical-stretch: 1;
+            alignment: start;
+            Card {
+                width: min(root.width - 2 * Tok.margin, Tok.row-max);
+                VerticalLayout {
+                    Rectangle {
+                        height: 34px;
+                        HorizontalLayout {
+                            padding-left: 14px;
+                            padding-right: 12px;
+                            spacing: 10px;
+                            ColHead { text: "Request"; horizontal-stretch: 1; }
+                            HorizontalLayout {
+                                width: 110px;
+                                spacing: 6px;
+                                alignment: start;
+                                ColHead { text: "Accepted"; }
+                                InfoTip { y: 9px; text: "Accepted posts the request's quest on the board, as talking to the villager does."; }
+                            }
+                            // the consequence at the control, not in a footnote (05.1)
+                            HorizontalLayout {
+                                width: 120px;
+                                spacing: 6px;
+                                alignment: start;
+                                ColHead { text: "Completed"; }
+                                InfoTip {
+                                    y: 9px;
+                                    tint: Tok.warn;
+                                    text: "Completed marks the request as reported. The game hands out the reward only when you report to the villager yourself, so ticking it here loses that reward.";
+                                }
+                            }
+                        }
+                        Hairline { y: parent.height - 1px; width: parent.width; }
+                    }
+                    if Api.requests.length == 0: EmptyState { text: "No request matches."; }
+                    ListView {
+                        for r in Api.requests: ListRow {
+                            staged: r.changed;
+                            flash: Api.highlight != "" && Api.highlight == "request:" + r.index;
+                            HorizontalLayout {
+                                padding-left: 14px;
+                                padding-right: 12px;
+                                spacing: 10px;
+                                VerticalLayout {
+                                    alignment: center;
+                                    horizontal-stretch: 1;
+                                    Text { text: r.name; overflow: elide; }
+                                    HorizontalLayout {
+                                        spacing: 6px;
+                                        if r.was != "": Text { text: "was " + r.was; color: Tok.accent-text; font-size: Tok.small; }
+                                        Text { text: r.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; horizontal-stretch: 1; }
+                                    }
+                                }
+                                Rectangle {
+                                    width: 110px;
+                                    if r.has-flags: CheckBox { x: 0; checked: r.accepted; accessible-label: "Accepted: " + r.name; toggled => { Api.set-request(r.index, "accepted", self.checked); } }
+                                }
+                                Rectangle {
+                                    width: 120px;
+                                    if r.has-flags: CheckBox {
+                                        x: 0;
+                                        checked: r.completed;
+                                        accessible-label: "Completed: " + r.name;
+                                        toggled => {
+                                            if self.checked {
+                                                root.warned = true;
+                                            }
+                                            Api.set-request(r.index, "completed", self.checked);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

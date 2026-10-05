@@ -1,0 +1,1045 @@
+// Shared structs, the Rust bridge, design tokens and small widgets.
+import { Palette, Button } from "std-widgets.slint";
+
+export enum Confidence { confirmed, derived, unresolved }
+
+export struct SlotInfo { slot: int, used: bool, name: string, hr: int, playtime: string }
+
+// One value of a change, in game terms: "Wycademy points  9,793,209 → 9,999,999".
+export struct ValueLine { label: string, old: string, new: string }
+
+// A Review entry. The first entry of a page group carries the group label.
+export struct ChangeRow {
+    id: int, group: string, first: bool,
+    title: string, sub: string, confidence: Confidence,
+    // one value: shown on the title row
+    single: bool, old: string, new: string,
+    lines: [ValueLine], more: int, note: string,
+    key: string,  // the field to open (first value)
+}
+
+export struct WriteRow { title: string, right: string, confidence: Confidence, old: string, new: string }
+
+export struct SnapRow { dir: string, when: string, before: string }
+
+export struct DetectedSave { path: string, title: string, sub: string, when: string, short: string }
+
+export struct MonsterRow {
+    index: int, name: string, icon: image, has-icon: bool, large: bool, has-size: bool, sub: string,
+    hunts: int, captures: int, min: int, max: int, mini: bool, crown: int, notes: bool, has-notes: bool,
+    thresholds: string,
+    // value in the file when staged, else ""
+    was-hunts: string, was-captures: string, was-min: string, was-max: string, was-notes: string,
+    changed: bool,
+}
+
+export struct ItemSlot { slot: int, id: int, name: string, count: int, icon: image, has-icon: bool, changed: bool, was: string }
+
+export struct PickItem { id: int, name: string, icon: image, has-icon: bool, sub: string }
+
+export struct LoadoutRow { index: int, name: string, summary: string, used: bool }
+
+export struct EquipRow {
+    slot: int, kind-code: int, title: string, sub: string,
+    icon: image, has-icon: bool, changed: bool, status: string,
+}
+
+export struct DecoRow { index: int, name: string }
+
+export struct EquipDetail {
+    slot: int, kind: string, kind-code: int, name: string, id: int, level: int, was-level: string,
+    decos: [DecoRow], transmog: string, transmog-id: int,
+    is-talisman: bool, skill1: int, points1: int, skill2: int, points2: int, slots: int, tier: string,
+    raw: string, field: string,
+    // worn / My Sets referring to this box slot (then it can't be replaced or removed)
+    uses: string,
+    category: int,  // index in Api.equip-categories, -1 for none
+    was: string,    // piece in the file when the slot is staged
+}
+
+export struct PalicoRow { index: int, name: string, sub: string, changed: bool }
+
+export struct PalicoDetail {
+    index: int, name: string, level: int, exp: int, bias: int, target: int, greeting: string, owner: string,
+    moves: string, learned: string,
+    was-name: string, was-level: string, was-exp: string, was-bias: string, was-greeting: string, was-owner: string,
+}
+
+export struct QuestRow {
+    index: int, id: int, name: string, sub: string, cleared: bool, seen: bool, failed: bool,
+    locked: bool, prowler: bool, changed: bool, was: string,
+    // group header: label and the "Mark 1★ cleared" action (rank or deviant)
+    header: bool, group: string, action: string,
+}
+
+export struct RequestRow { index: int, name: string, sub: string, accepted: bool, completed: bool, has-flags: bool, changed: bool, was: string }
+
+export struct CheckRow { key: int, name: string, on: bool, changed: bool, icon: image, has-icon: bool }
+
+// Hunter Arts grouped by art: one row, one to three levels (I, II, III)
+export struct ArtRow { name: string, ids: [int], on: [bool], changed: bool }
+
+export struct DeviantRow {
+    index: int, name: string, permits: int, levels: int, total: int, icon: image, has-icon: bool,
+    was-permits: string, was-levels: string,
+}
+
+export struct FieldRow { index: int, offset: string, size: string, owner: string, label: string, confidence: Confidence, changed: bool }
+
+export struct StatCard { title: string, value: string, sub: string, progress: float, done: bool, bar: bool, page: string, tab: int }
+
+// state: 0 can change something, 1 staged (in Review), 2 already in the save
+export struct Goal { id: string, title: string, detail: string, count: string, confidence: Confidence, state: int, op: int }
+
+export struct PreviewLine { label: string, old: string, new: string }
+
+export struct Preview {
+    id: string, title: string, summary: string, confidence: Confidence,
+    lines: [PreviewLine], more: int, note: string, tech: string, empty: bool, action: string,
+}
+
+export struct CharacterInfo {
+    name: string, hr: int, hr-points: int, funds: int, wycademy: int, playtime-h: int, playtime-m: int,
+    village-star: int, hub-star: int, gender: string,
+    points-lr: [int], points-g: [int],
+    was-name: string, was-hr: string, was-hr-points: string, was-funds: string, was-wycademy: string,
+    was-playtime: string, was-village-star: string, was-hub-star: string, was-lr: [string], was-g: [string],
+}
+
+export global Api {
+    // shell
+    in-out property <string> page: "open";
+    in property <bool> loaded;
+    in property <string> file-path;
+    in property <string> path-label;    // "Ryujinx"
+    in property <string> path-tail;     // "…/save/0000000000000001/0/system"
+    in property <string> build-info;
+    in property <[SlotInfo]> slots;
+    in-out property <int> slot;
+    in property <[ChangeRow]> changes;
+    in property <int> change-count;
+    in property <int> value-count;      // values not written yet, every character
+    in property <string> review-summary;
+    // values staged per page, in nav order (overview … advanced)
+    in property <[int]> page-counts;
+    in-out property <bool> review-open;
+    in property <string> toast;
+    in property <string> toast-sub;
+    in property <string> toast-action;  // button label, "" for none
+    in property <bool> toast-error;
+    in property <string> warning;
+    in property <bool> assets-ok;
+    callback toast-act();
+    callback open-dialog();
+    callback open-path(string);
+    callback open-folder();
+    callback copy-path();
+    in property <[DetectedSave]> detected;
+    callback select-slot(int);
+    callback undo(int);
+    callback undo-all();
+    // the field staged under this key back to its value in the file
+    callback undo-value(string);
+    // open the page of a Review entry at its field
+    callback goto(string);
+    in property <string> highlight;     // key of the field to flash
+    in property <int> jump-row: -1;     // list row to scroll to
+    in property <int> jump-seq;         // bumped on every jump
+
+    // write flow
+    in-out property <bool> write-open;
+    in property <string> write-title;
+    in property <string> write-sub;
+    in property <[WriteRow]> write-rows;
+    in property <int> derived-count;
+    in property <bool> emulator-running;
+    in property <string> emulator-name;
+    in property <string> snapshot-dir;
+    in property <[string]> write-targets;
+    callback check-emulator();
+    callback write(bool /* snapshot */) -> bool;
+    callback open-snapshots();
+    // snapshots
+    in-out property <bool> snapshots-open;
+    in property <[SnapRow]> snapshots;
+    // snapshot waiting for the Restore confirmation ("" none) and its date
+    in-out property <string> restore-ask;
+    in-out property <string> restore-when;
+    callback list-snapshots();
+    callback restore(string /* dir */);
+    // quitting with staged changes
+    in-out property <bool> quit-open;
+    callback quit();
+
+    // overview
+    in property <[StatCard]> stats;
+    in property <[Goal]> goals;
+    in property <[Goal]> goals-done;
+    // preview of a goal or a page-level bulk action
+    in property <Preview> preview;
+    callback open-preview(string) -> bool;
+    callback apply-preview(string);
+
+    // character
+    in property <CharacterInfo> character;
+    callback set-character(string /* field */, int);
+    callback set-name(string);
+
+    // items
+    in property <[ItemSlot]> item-slots;
+    in-out property <int> item-store: 0;   // 0 box, 1 pouch, 2 loadouts
+    in-out property <string> item-filter;
+    in property <int> item-used;
+    in property <int> item-total;
+    in property <[PickItem]> pick-items;
+    callback filter-items(string);
+    callback search-picker(string);
+    callback set-item(int /* slot */, int /* id */, int /* count */);
+    callback item-bulk(string);
+    in property <[LoadoutRow]> loadouts;
+
+    // equipment
+    in property <[EquipRow]> equip-rows;
+    in-out property <int> equip-owner: 0;  // 0 hunter, 1 Palico
+    in-out property <string> equip-filter: "all";
+    in-out property <string> equip-search;
+    in property <string> equip-summary;
+    in property <EquipDetail> equip-detail;
+    in property <[string]> skill-names;
+    in-out property <bool> equip-advanced;  // raw bytes expanded (kept for the session)
+    callback filter-equip(string);
+    callback search-equip-list(string);
+    callback select-equip(int);
+    callback set-equip(string /* field */, int);
+    callback show-in-map(string);
+    // adding: categories are weapon classes, armor parts and talismans
+    in property <[string]> equip-categories;
+    in-out property <int> equip-category: 0;
+    in property <[PickItem]> pick-equip;
+    in property <int> equip-free;          // first free box slot, -1 when full
+    callback search-equip(string);         // fills pick-equip for equip-category
+    callback put-equip(int /* slot, -1 = first free */, int /* id, 0 = empty the slot */);
+
+    // screenshots (MHGU_SNAPSHOT): the popup to open ("equip-picker", "item-picker",
+    // "goal", "about", …; the owner clears it) and a forced "light" / "dark" scheme
+    in-out property <string> snapshot-popup;
+    in property <string> force-scheme;
+
+    // palicoes
+    in property <[PalicoRow]> palicoes;
+    in property <PalicoDetail> palico;
+    in property <[string]> biases;
+    in property <string> palico-summary;
+    callback select-palico(int);
+    callback set-palico(string, int);
+    callback set-palico-text(string, string);
+
+    // quests
+    in property <[string]> quest-tabs;
+    in-out property <int> quest-tab;
+    in property <[QuestRow]> quests;
+    in property <string> quest-summary;
+    in-out property <string> quest-search;
+    in-out property <bool> quest-missing;
+    callback select-quest-tab(int);
+    callback filter-quests();
+    callback set-quest(int /* index */, string /* bit */, bool);
+    callback quest-bulk(string /* group */);
+
+    // requests
+    in property <[RequestRow]> requests;
+    in-out property <string> request-filter: "open";
+    in-out property <string> request-search;
+    in property <string> request-summary;
+    callback filter-requests();
+    callback set-request(int, string, bool);
+
+    // collections
+    in-out property <int> collection-tab;
+    in property <[string]> collection-tabs;
+    in property <[CheckRow]> checks;
+    in property <[ArtRow]> arts;
+    in property <string> checks-summary;
+    in-out property <string> check-search;
+    in-out property <bool> check-missing;
+    callback select-collection(int);
+    callback filter-checks();
+    callback set-check(int, bool);
+    in property <[DeviantRow]> deviants;
+    callback set-deviant(int, string, int);
+
+    // monsters
+    in property <[MonsterRow]> monsters;
+    in-out property <string> monster-filter;
+    in-out property <bool> monster-large-only;
+    in-out property <bool> monster-missing;
+    in property <string> monster-summary;
+    callback filter-monsters();
+    callback set-monster(int /* index */, string /* field */, int);
+
+    // advanced
+    in property <[FieldRow]> fields;
+    in property <string> hex;
+    in property <string> field-info;
+    in-out property <string> field-filter;
+    in-out property <int> field-sel: -1;
+    callback filter-fields(string);
+    callback select-field(int);
+}
+
+// The window size, for popups that cover it (modal dialogs opened from a page).
+export global Win {
+    in-out property <length> width;
+    in-out property <length> height;
+}
+
+// Numbers as the UI shows them.
+export global Fmt {
+    // 1234567 -> "1,234,567"
+    public pure function num(v: int) -> string {
+        return v < 0 ? "-" + Fmt.pos(-v) : Fmt.pos(v);
+    }
+    public pure function pos(v: int) -> string {
+        return v >= 1000000 ? floor(v / 1000000) + "," + Fmt.pad(mod(floor(v / 1000), 1000)) + "," + Fmt.pad(mod(v, 1000))
+            : v >= 1000 ? floor(v / 1000) + "," + Fmt.pad(mod(v, 1000))
+            : "" + v;
+    }
+    public pure function pad(n: int) -> string {
+        return n < 10 ? "00" + n : n < 100 ? "0" + n : "" + n;
+    }
+}
+
+// Design tokens. Type scale and spacing from the UI review (C5, C6); in light the page
+// sits below white cards and every divider is one 8 % hairline (L2–L4).
+export global Tok {
+    out property <bool> dark: Palette.color-scheme == ColorScheme.dark;
+    out property <color> page: dark ? #1c1c1c : #f3f3f3;
+    out property <color> side: dark ? #262626 : #ebebeb;
+    out property <color> card: dark ? #2c2c2c : #fdfdfd;
+    out property <color> raised: dark ? #2f2f2f : #ffffff;
+    out property <color> line: dark ? #ffffff17 : #00000014;
+    out property <color> track: dark ? #ffffff1f : #0000001a;
+    out property <color> hover: dark ? #ffffff0d : #0000000a;
+    out property <color> muted: dark ? #ffffffb0 : #0000009c;
+    out property <color> faint: dark ? #ffffff5e : #0000005e;
+    out property <color> accent: Palette.accent-background;
+    out property <color> accent-soft: Palette.accent-background.transparentize(0.82);
+    out property <color> accent-text: dark ? #60cdff : #005fb8;
+    out property <color> ok: dark ? #6ccb5f : #0f7b0f;
+    out property <color> warn: dark ? #fce100 : #9d5d00;
+    out property <color> bad: dark ? #ff99a4 : #c42b1c;
+    // game icons were drawn for a dark UI: they always sit on this tile (L1)
+    out property <color> icon-tile: #2b2b2b;
+    // text boxes (Fluent)
+    out property <color> input: dark ? #ffffff0f : #ffffffb3;
+    out property <color> input-active: dark ? #1e1e1e : #ffffff;
+    out property <color> input-border: dark ? #ffffff14 : #0000000f;
+    out property <color> input-edge: dark ? #ffffff8a : #00000073;
+    out property <length> title: 24px;
+    out property <length> stat: 20px;
+    out property <length> section: 16px;
+    out property <length> body: 14px;
+    out property <length> small: 12px;
+    out property <length> margin: 24px;
+    out property <length> pad: 16px;
+    out property <length> gap: 12px;
+    out property <length> tight: 8px;
+    out property <length> radius: 6px;
+    // rows are capped so labels stay near their values (09)
+    out property <length> row-max: 1100px;
+}
+
+// --- small widgets -------------------------------------------------------------------
+
+export component Hairline inherits Rectangle {
+    height: 1px;
+    background: Tok.line;
+}
+
+export component Dot inherits Rectangle {
+    in property <Confidence> level;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: level == Confidence.confirmed ? Tok.ok : level == Confidence.derived ? Tok.warn : Tok.faint;
+}
+
+export component Muted inherits Text {
+    color: Tok.muted;
+    font-size: Tok.small;
+    wrap: word-wrap;
+}
+
+export component SectionTitle inherits Text {
+    font-size: Tok.section;
+    font-weight: 600;
+}
+
+// Text button ("Undo", "Show paths", "Back to Review").
+export component TextLink inherits Rectangle {
+    in property <string> text;
+    in property <length> font-size: Tok.small;
+    in property <int> font-weight: 600;
+    in property <color> tint: Tok.accent-text;
+    callback clicked;
+    width: t.preferred-width;
+    height: t.preferred-height;
+    accessible-role: button;
+    accessible-label: text;
+    t := Text {
+        text: root.text;
+        font-size: root.font-size;
+        font-weight: root.font-weight;
+        color: ta.has-hover ? root.tint.brighter(0.2) : root.tint;
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+// ⓘ that opens a short explanation.
+export component InfoTip inherits Rectangle {
+    in property <string> text;
+    in property <color> tint: Tok.muted;
+    in property <length> pop-width: 300px;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: ta.has-hover ? Tok.accent-text : tint;
+    accessible-role: button;
+    accessible-label: "More information";
+    accessible-description: text;
+    Text {
+        text: "i";
+        font-size: 11px;
+        font-weight: 700;
+        color: ta.has-hover ? Tok.accent-text : root.tint;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { pop.show(); }
+    }
+    pop := PopupWindow {
+        x: 0;
+        y: root.height + 6px;
+        width: root.pop-width;
+        close-policy: close-on-click-outside;
+        Rectangle {
+            background: Tok.raised;
+            border-radius: 6px;
+            border-width: 1px;
+            border-color: Tok.line;
+            drop-shadow-blur: 16px;
+            drop-shadow-color: #0005;
+            VerticalLayout {
+                padding: 12px;
+                Text { text: root.text; wrap: word-wrap; font-size: Tok.small; color: Palette.foreground; }
+            }
+        }
+    }
+}
+
+// Confidence as a dot, a text label and an ⓘ with the definition (06). Pages show it
+// only on the exceptions; the page header states the rule once.
+export component ConfidenceTag inherits HorizontalLayout {
+    in property <Confidence> level;
+    in property <bool> info: true;
+    spacing: 5px;
+    alignment: start;
+    horizontal-stretch: 0;
+    Dot { level: root.level; y: (parent.height - self.height) / 2; }
+    Text {
+        text: level == Confidence.confirmed ? "Confirmed" : level == Confidence.derived ? "Derived" : "Unresolved";
+        font-size: Tok.small;
+        color: level == Confidence.derived ? Tok.warn : Tok.muted;
+        vertical-alignment: center;
+    }
+    if info: InfoTip {
+        y: (parent.height - self.height) / 2;
+        tint: level == Confidence.derived ? Tok.warn : Tok.muted;
+        text: level == Confidence.confirmed ? "Confirmed: checked in game."
+            : level == Confidence.derived ? "Derived: worked out from the game's code, not yet checked in game. A snapshot before writing lets you go back."
+            : "Unresolved: what this value means in game is not known yet, so it is shown but not edited.";
+    }
+}
+
+export component Card inherits Rectangle {
+    background: Tok.card;
+    border-radius: Tok.radius;
+    border-width: 1px;
+    border-color: Tok.line;
+}
+
+// Game asset on its dark tile; nothing when the pack has no icon (no placeholder boxes).
+export component Asset inherits Rectangle {
+    in property <image> source;
+    in property <bool> available;
+    in property <color> tint: transparent;
+    border-radius: 4px;
+    clip: true;
+    background: available ? Tok.icon-tile : transparent;
+    if available: Image {
+        source: root.source;
+        width: 100%;
+        height: 100%;
+        image-rendering: smooth;
+        colorize: root.tint;
+    }
+}
+
+export component NavButton inherits Rectangle {
+    in property <string> text;
+    in property <int> count;
+    in property <bool> active;
+    in property <bool> enabled: true;
+    callback clicked;
+    height: 34px;
+    border-radius: 5px;
+    background: active ? Tok.accent-soft : ta.has-hover && enabled ? Tok.hover : transparent;
+    accessible-role: button;
+    accessible-label: count > 0 ? text + ", " + count + " values not written" : text;
+    Rectangle {
+        x: 0;
+        width: 3px;
+        height: active ? 16px : 0px;
+        border-radius: 2px;
+        background: Tok.accent;
+        animate height { duration: 120ms; }
+    }
+    HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 8px;
+        spacing: 6px;
+        Text {
+            text: root.text;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            color: enabled ? Palette.foreground : Tok.faint;
+            font-weight: active ? 600 : 400;
+        }
+        if count > 0: Rectangle {
+            y: (parent.height - self.height) / 2;
+            height: 20px;
+            width: max(20px, c.preferred-width + 12px);
+            border-radius: 10px;
+            background: Tok.accent-soft;
+            c := Text { text: root.count; font-size: Tok.small; font-weight: 600; color: Tok.accent-text; }
+        }
+    }
+    ta := TouchArea {
+        enabled: root.enabled;
+        clicked => { root.clicked(); }
+    }
+}
+
+// Filter chip (chips are only for filters, next to the search field).
+export component Chip inherits Rectangle {
+    in property <string> text;
+    in property <bool> active;
+    callback clicked;
+    height: 28px;
+    min-width: t.preferred-width + 24px;
+    horizontal-stretch: 0;
+    border-radius: 14px;
+    border-width: 1px;
+    border-color: active ? Tok.accent : Tok.line;
+    background: active ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+    accessible-role: checkbox;
+    accessible-checked: active;
+    accessible-label: text;
+    t := Text {
+        text: (root.active ? "✓ " : "") + root.text;
+        font-size: Tok.small;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    ta := TouchArea { clicked => { root.clicked(); } }
+}
+
+// Sub-pages as a tab bar under the title (C3).
+export component TabBar inherits Rectangle {
+    in property <[string]> tabs;
+    in property <int> current;
+    callback select(int);
+    height: 40px;
+    HorizontalLayout {
+        alignment: start;
+        spacing: 4px;
+        for t[i] in root.tabs: Rectangle {
+            width: label.preferred-width + 24px;
+            accessible-role: tab;
+            accessible-label: t;
+            accessible-item-selected: i == root.current;
+            background: ta.has-hover && i != root.current ? Tok.hover : transparent;
+            border-radius: 4px;
+            label := Text {
+                text: t;
+                font-weight: i == root.current ? 600 : 400;
+                color: i == root.current ? Palette.foreground : Tok.muted;
+                vertical-alignment: center;
+            }
+            Rectangle {
+                y: parent.height - 3px;
+                x: 12px;
+                width: parent.width - 24px;
+                height: 3px;
+                border-radius: 1.5px;
+                background: i == root.current ? Tok.accent : transparent;
+            }
+            ta := TouchArea { clicked => { root.select(i); } }
+        }
+    }
+    Hairline { y: parent.height - 1px; width: parent.width; }
+}
+
+// Title (same as the nav label), one subtitle line, page actions at the right (C1).
+export component PageHeader inherits VerticalLayout {
+    in property <string> title;
+    in property <string> subtitle;
+    // values staged on this page ("· 5 values changed on this page")
+    in property <int> staged;
+    // page-wide confidence when it is not "Confirmed in game except where marked"
+    in property <bool> derived;
+    spacing: 2px;
+    HorizontalLayout {
+        height: 40px;
+        spacing: Tok.tight;
+        Text { text: root.title; font-size: Tok.title; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+        // page actions at the standard button height (C2)
+        HorizontalLayout {
+            padding-top: 4px;
+            padding-bottom: 4px;
+            spacing: Tok.tight;
+            horizontal-stretch: 0;
+            @children
+        }
+    }
+    HorizontalLayout {
+        height: 20px;
+        spacing: 6px;
+        alignment: start;
+        if root.derived: ConfidenceTag { level: Confidence.derived; }
+        Text {
+            text: root.subtitle;
+            color: Tok.muted;
+            font-size: Tok.small;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+        if root.staged > 0: Text {
+            text: "· " + root.staged + (root.staged == 1 ? " value changed on this page" : " values changed on this page");
+            color: Tok.accent-text;
+            font-size: Tok.small;
+            vertical-alignment: center;
+        }
+    }
+}
+
+// Column header text of a table.
+export component ColHead inherits Text {
+    color: Tok.muted;
+    font-size: Tok.small;
+    vertical-alignment: center;
+    overflow: elide;
+}
+
+// 3 px accent bar beside a staged control or row (B1).
+export component StagedBar inherits Rectangle {
+    width: 3px;
+    border-radius: 1.5px;
+    background: Tok.accent;
+}
+
+// One list row (C4, 09.1): two densities, hover fill so the eye keeps the row across
+// its columns, the staged bar, a hairline below. Controls placed in it get their own
+// clicks; a click elsewhere on the row is `clicked`.
+export component ListRow inherits Rectangle {
+    in property <bool> two-line: true;
+    in property <bool> staged;
+    in property <bool> selected;
+    in property <bool> flash;
+    callback clicked;
+    height: root.two-line ? 52px : 40px;
+    background: root.flash || root.selected ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+    ta := TouchArea { clicked => { root.clicked(); } }
+    if root.staged: StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
+    @children
+    Hairline { y: parent.height - 1px; width: parent.width; }
+}
+
+// "was 830  Undo" under a staged control (B1).
+export component WasLine inherits HorizontalLayout {
+    in property <string> was;
+    in property <string> key;
+    spacing: 10px;
+    alignment: start;
+    height: 18px;
+    Text {
+        text: "was " + root.was;
+        font-size: Tok.small;
+        color: Tok.accent-text;
+        vertical-alignment: center;
+        overflow: elide;
+    }
+    TextLink {
+        y: (parent.height - self.height) / 2;
+        text: "Undo";
+        clicked => { Api.undo-value(root.key); }
+    }
+}
+
+// Small arrow drawn as a path: "up", "down" or "right".
+export component Chevron inherits Path {
+    in property <string> dir: "down";
+    width: dir == "right" ? 6px : 10px;
+    height: dir == "right" ? 10px : 6px;
+    stroke: Tok.muted;
+    stroke-width: 1.4px;
+    viewbox-width: dir == "right" ? 6 : 10;
+    viewbox-height: dir == "right" ? 10 : 6;
+    commands: dir == "up" ? "M 1 5.5 L 5 1.5 L 9 5.5" : dir == "right" ? "M 0.5 1 L 4.5 5 L 0.5 9" : "M 1 0.5 L 5 4.5 L 9 0.5";
+}
+
+// A number field with thousands separators: shows "9,999,999", edits as plain digits.
+// Enter or leaving the field stages the value. The arrows step by one; unlike the
+// standard SpinBox the mouse wheel never changes it, so lists scroll safely.
+export component NumberBox inherits Rectangle {
+    in property <int> value;
+    in property <int> minimum: 0;
+    in property <int> maximum: 2147483647;
+    in property <bool> spin: true;
+    // flat: no frame until hovered or focused (table cells)
+    in property <bool> flat;
+    in property <string> suffix;
+    in property <bool> enabled: true;
+    in property <string> label;
+    in property <TextHorizontalAlignment> align: left;
+    in property <int> font-weight: 400;
+    callback edited(int);
+    out property <bool> has-focus: input.has-focus;
+    min-width: 56px;
+    height: 32px;
+    border-radius: 4px;
+    background: !root.enabled ? transparent : input.has-focus ? Tok.input-active : root.flat && !area.has-hover ? transparent : Tok.input;
+    border-width: 1px;
+    border-color: root.flat && !area.has-hover && !input.has-focus ? transparent : Tok.input-border;
+    accessible-role: spinbox;
+    accessible-label: root.label;
+    accessible-value: root.value;
+    accessible-value-minimum: root.minimum;
+    accessible-value-maximum: root.maximum;
+    forward-focus: input;
+
+    function show() {
+        input.text = input.has-focus ? root.value : Fmt.num(root.value) + root.suffix;
+    }
+    function commit() {
+        if input.text.is-float() {
+            root.step(clamp(round(input.text.to-float()), root.minimum, root.maximum) - root.value);
+        }
+        root.show();
+    }
+    function step(d: int) {
+        if d != 0 && root.value + d >= root.minimum && root.value + d <= root.maximum {
+            root.edited(root.value + d);
+        }
+    }
+    changed value => { root.show(); }
+
+    area := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: text;
+        clicked => { input.focus(); }
+    }
+    HorizontalLayout {
+        padding-left: 10px;
+        padding-right: root.spin ? 2px : 10px;
+        input := TextInput {
+            text: Fmt.num(root.value) + root.suffix;
+            enabled: root.enabled;
+            single-line: true;
+            vertical-alignment: center;
+            horizontal-alignment: root.align;
+            horizontal-stretch: 1;
+            color: root.enabled ? Palette.foreground : Tok.faint;
+            font-size: Tok.body;
+            font-weight: root.font-weight;
+            accessible-role: none;
+            changed has-focus => {
+                if self.has-focus {
+                    root.show();
+                    self.select-all();
+                } else {
+                    root.commit();
+                }
+            }
+            accepted => { root.commit(); }
+            key-pressed(e) => {
+                if e.text == Key.UpArrow { root.step(1); return accept; }
+                if e.text == Key.DownArrow { root.step(-1); return accept; }
+                if e.text == Key.Escape { root.show(); self.clear-focus(); return accept; }
+                reject
+            }
+        }
+        if root.spin && root.enabled: HorizontalLayout {
+            spacing: 0px;
+            for d in [1, -1]: Rectangle {
+                width: 26px;
+                border-radius: 3px;
+                background: t.pressed ? Tok.hover : transparent;
+                Chevron { dir: d > 0 ? "up" : "down"; }
+                t := TouchArea { clicked => { root.step(d); } }
+            }
+        }
+    }
+    // Fluent text box: darker bottom edge, accent when focused
+    if !root.flat || area.has-hover || input.has-focus: Rectangle {
+        x: 4px;
+        y: parent.height - self.height;
+        width: parent.width - 8px;
+        height: input.has-focus ? 2px : 1px;
+        border-radius: 1px;
+        background: input.has-focus ? Tok.accent : Tok.input-edge;
+    }
+}
+
+// A centred sentence plus the next action (C8).
+export component EmptyState inherits VerticalLayout {
+    in property <string> text;
+    in property <string> action;
+    callback act();
+    alignment: center;
+    spacing: 12px;
+    padding: 24px;
+    Text { text: root.text; color: Tok.muted; horizontal-alignment: center; wrap: word-wrap; }
+    if root.action != "": HorizontalLayout {
+        alignment: center;
+        Button { text: root.action; clicked => { root.act(); } }
+    }
+}
+
+// Rounded status label ("New · in Review").
+export component Pill inherits Rectangle {
+    in property <string> text;
+    in property <color> tint: Tok.accent-text;
+    height: 22px;
+    width: t.preferred-width + 16px;
+    border-radius: 11px;
+    border-width: 1px;
+    border-color: tint.transparentize(0.4);
+    background: tint.transparentize(0.88);
+    t := Text { text: root.text; font-size: Tok.small; color: root.tint; }
+}
+
+export component StatTile inherits Card {
+    in property <StatCard> card;
+    callback open();
+    height: 108px;
+    accessible-role: button;
+    accessible-label: card.title + ": " + card.value + (card.done ? ", complete" : "");
+    Rectangle { border-radius: Tok.radius; background: ta.has-hover ? Tok.hover : transparent; }
+    ta := TouchArea { clicked => { root.open(); } }
+    VerticalLayout {
+        padding: Tok.pad;
+        spacing: 6px;
+        Text { text: card.title; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+        Text { text: card.value; font-size: Tok.stat; font-weight: 600; overflow: elide; }
+        if card.bar: Rectangle {
+            height: 4px;
+            border-radius: 2px;
+            background: Tok.track;
+            Rectangle {
+                x: 0;
+                width: parent.width * clamp(card.progress, 0, 1);
+                border-radius: 2px;
+                background: Tok.accent;
+            }
+        }
+        HorizontalLayout {
+            spacing: 4px;
+            if card.done: Text { text: "Complete"; color: Tok.ok; font-size: Tok.small; }
+            if card.done && card.sub != "": Text { text: "·"; color: Tok.muted; font-size: Tok.small; }
+            Text { text: card.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; horizontal-stretch: 1; }
+        }
+    }
+}
+
+// A modal dialog: scrim over everything, the card centred (C11: anything that confirms
+// or commits). Fills its parent: the window, or a PopupWindow the size of the window.
+export component Modal inherits Rectangle {
+    in property <length> card-width: 520px;
+    callback dismiss();  // click on the scrim
+    background: #00000080;
+    TouchArea { clicked => { root.dismiss(); } }
+    Rectangle {
+        width: min(root.card-width, root.width - 32px);
+        height: min(lay.preferred-height, root.height - 48px);
+        x: (root.width - self.width) / 2;
+        y: max(24px, (root.height - self.height) / 3);
+        background: Tok.raised;
+        border-radius: 8px;
+        border-width: 1px;
+        border-color: Tok.line;
+        drop-shadow-blur: 30px;
+        drop-shadow-color: #0008;
+        TouchArea { }
+        lay := VerticalLayout {
+            padding: 20px;
+            spacing: Tok.gap;
+            @children
+        }
+    }
+}
+
+// Before → after list of a goal or bulk action (03, mockup C).
+export component PreviewBody inherits VerticalLayout {
+    in property <Preview> p;
+    in-out property <bool> tech-open;
+    spacing: 10px;
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Text { text: p.title; font-size: Tok.section; font-weight: 600; horizontal-stretch: 1; wrap: word-wrap; }
+        if p.confidence != Confidence.confirmed: ConfidenceTag { level: p.confidence; }
+    }
+    Muted { text: p.summary; }
+    if !p.empty: Rectangle {
+        border-radius: Tok.radius;
+        border-width: 1px;
+        border-color: Tok.line;
+        height: min(lines.preferred-height, 300px);
+        Flickable {
+            content-height: lines.preferred-height;
+            lines := VerticalLayout {
+                padding-left: 14px;
+                padding-right: 14px;
+                for l[i] in p.lines: Rectangle {
+                    height: 36px;
+                    HorizontalLayout {
+                        spacing: Tok.tight;
+                        Text { text: l.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        Text { text: l.old; color: Tok.muted; vertical-alignment: center; }
+                        Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
+                        Text { text: l.new; font-weight: 600; vertical-alignment: center; }
+                    }
+                    if i > 0: Hairline { y: 0; width: parent.width; }
+                }
+                if p.more > 0: Text { height: 32px; text: "and " + Fmt.num(p.more) + " more"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                if p.note != "": VerticalLayout {
+                    padding-top: 8px;
+                    padding-bottom: 10px;
+                    Muted { text: p.note; }
+                }
+            }
+        }
+    }
+    if p.tech != "": VerticalLayout {
+        spacing: 6px;
+        HorizontalLayout {
+            spacing: 6px;
+            alignment: start;
+            Chevron { dir: root.tech-open ? "down" : "right"; y: (parent.height - self.height) / 2; }
+            TextLink {
+                text: "Technical details";
+                tint: Tok.muted;
+                font-weight: 400;
+                clicked => { root.tech-open = !root.tech-open; }
+            }
+        }
+        if root.tech-open: Muted { text: p.tech; font-family: "monospace"; }
+    }
+}
+
+// The preview popup of a goal or page-level bulk action, anchored to what opened it
+// (C11). Place it at the page's top-left; open() takes page coordinates.
+export component PreviewPopup inherits Rectangle {
+    in property <length> page-width;
+    property <length> px;
+    property <length> py;
+    property <bool> tech;
+    property <length> pw: min(520px, root.page-width - 16px);
+    width: 0px;
+    height: 0px;
+    // x: right edge of the anchor, y: its bottom
+    public function open(id: string, right: length, bottom: length) {
+        if Api.open-preview(id) {
+            root.tech = false;
+            root.px = clamp(right - root.pw, 8px, root.page-width - root.pw - 8px);
+            root.py = bottom + 8px;
+            pop.show();
+        }
+    }
+    pop := PopupWindow {
+        x: root.px;
+        y: root.py;
+        width: root.pw;
+        close-policy: close-on-click-outside;
+        Rectangle {
+            background: Tok.raised;
+            border-radius: 8px;
+            border-width: 1px;
+            border-color: Tok.line;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #0007;
+            VerticalLayout {
+                padding: 18px;
+                spacing: Tok.gap;
+                PreviewBody { p: Api.preview; tech-open <=> root.tech; }
+                HorizontalLayout {
+                    alignment: end;
+                    spacing: Tok.tight;
+                    Button { text: Api.preview.empty ? "Close" : "Cancel"; clicked => { pop.close(); } }
+                    if !Api.preview.empty: Button {
+                        text: Api.preview.action;
+                        primary: true;
+                        clicked => {
+                            Api.apply-preview(Api.preview.id);
+                            pop.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// "More…" button with a menu of less common or destructive page actions (04.4).
+export component MoreButton inherits Rectangle {
+    in property <[string]> items;
+    callback activated(int);
+    width: b.preferred-width;
+    height: 32px;
+    b := Button { text: "More…"; height: 32px; clicked => { menu.show(); } }
+    menu := PopupWindow {
+        x: root.width - 220px;
+        y: root.height + 4px;
+        width: 220px;
+        close-policy: close-on-click-outside;
+        Rectangle {
+            background: Tok.raised;
+            border-radius: 6px;
+            border-width: 1px;
+            border-color: Tok.line;
+            drop-shadow-blur: 16px;
+            drop-shadow-color: #0006;
+            VerticalLayout {
+                padding: 4px;
+                for it[i] in root.items: Rectangle {
+                    height: 34px;
+                    border-radius: 4px;
+                    background: ta.has-hover ? Tok.hover : transparent;
+                    Text { text: it; x: 12px; vertical-alignment: center; }
+                    ta := TouchArea {
+                        clicked => {
+                            menu.close();
+                            root.activated(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

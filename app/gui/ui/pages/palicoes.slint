@@ -1,0 +1,133 @@
+import { ListView, ComboBox, LineEdit, ScrollView, Palette } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow } from "../common.slint";
+
+// Label, control, "was … Undo" under it when staged.
+component Row inherits Rectangle {
+    in property <string> label;
+    in property <string> was;
+    in property <string> key;
+    lay := HorizontalLayout {
+        spacing: Tok.gap;
+        Text { text: root.label; width: 130px; height: 32px; vertical-alignment: center; }
+        VerticalLayout {
+            spacing: 4px;
+            horizontal-stretch: 1;
+            HorizontalLayout {
+                height: 32px;
+                spacing: Tok.gap;
+                @children
+            }
+            if root.was != "": WasLine { was: root.was; key: root.key; }
+        }
+    }
+    if root.was != "": StagedBar { x: 132px; y: 0; height: 32px; }
+}
+
+// Text field staged when it loses focus or on Enter (05.3).
+component TextRow inherits Row {
+    in property <string> value;
+    in property <string> field;
+    in property <length> field-width: 320px;
+    property <string> v: root.value;
+    changed v => { ed.text = self.v; }
+    ed := LineEdit {
+        width: root.field-width;
+        text: root.value;
+        accessible-label: root.label;
+        accepted(t) => { Api.set-palico-text(root.field, t); }
+        changed has-focus => {
+            if !self.has-focus && self.text != root.value {
+                Api.set-palico-text(root.field, self.text);
+            }
+        }
+    }
+}
+
+export component PalicoesPage inherits Rectangle {
+    property <string> key: "palico:" + Api.palico.index + ":";
+    VerticalLayout {
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: "Palicoes";
+            subtitle: Api.palico-summary;
+            derived: true;
+            staged: Api.page-counts[4];
+        }
+        HorizontalLayout {
+            spacing: Tok.pad;
+            vertical-stretch: 1;
+            Card {
+                width: min(320px, root.width * 0.38);
+                ListView {
+                    for p in Api.palicoes: ListRow {
+                        height: 50px;
+                        selected: p.index == Api.palico.index;
+                        staged: p.changed;
+                        accessible-role: list-item;
+                        accessible-label: p.name;
+                        clicked => { Api.select-palico(p.index); }
+                        VerticalLayout {
+                            padding-left: 14px;
+                            padding-right: 12px;
+                            alignment: center;
+                            Text { text: p.name; overflow: elide; }
+                            Text { text: p.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+                        }
+                    }
+                }
+            }
+            Card {
+                horizontal-stretch: 1;
+                if Api.palico.index < 0: EmptyState { text: "Pick a Palico to edit it."; }
+                if Api.palico.index >= 0: ScrollView {
+                    VerticalLayout {
+                        padding: Tok.pad;
+                        padding-left: 22px;
+                        spacing: 14px;
+                        alignment: start;
+                        Text { text: Api.palico.name; font-size: 18px; font-weight: 600; }
+                        TextRow { label: "Name"; field: "name"; value: Api.palico.name; was: Api.palico.was-name; key: root.key + "name"; field-width: 260px; }
+                        Row {
+                            label: "Level";
+                            was: Api.palico.was-level;
+                            key: root.key + "level";
+                            NumberBox { width: 110px; minimum: 1; maximum: 50; value: Api.palico.level; label: "Level"; edited(v) => { Api.set-palico("level", v); } }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+                        Row {
+                            label: "Experience";
+                            was: Api.palico.was-exp;
+                            key: root.key + "exp";
+                            NumberBox { width: 160px; maximum: 9999999; value: Api.palico.exp; label: "Experience"; edited(v) => { Api.set-palico("exp", v); } }
+                            Muted { text: "Separate from the level: the game does not recompute one from the other."; vertical-alignment: center; horizontal-stretch: 1; }
+                        }
+                        Row {
+                            label: "Forte";
+                            was: Api.palico.was-bias;
+                            key: root.key + "bias";
+                            ComboBox { width: 200px; model: Api.biases; current-index: Api.palico.bias; selected => { Api.set-palico("bias", self.current-index); } }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+                        TextRow { label: "Greeting"; field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }
+                        TextRow { label: "Original owner"; field: "owner"; value: Api.palico.owner; was: Api.palico.was-owner; key: root.key + "owner"; field-width: 260px; }
+                        Hairline { }
+                        SectionTitle { text: "Support moves"; }
+                        HorizontalLayout {
+                            spacing: Tok.gap;
+                            Text { text: "Equipped"; width: 130px; color: Tok.muted; }
+                            Text { text: Api.palico.moves; wrap: word-wrap; horizontal-stretch: 1; }
+                        }
+                        HorizontalLayout {
+                            spacing: Tok.gap;
+                            Text { text: "Learned"; width: 130px; color: Tok.muted; }
+                            Text { text: Api.palico.learned; wrap: word-wrap; horizontal-stretch: 1; }
+                        }
+                        Muted { text: "Support moves are shown, not edited: which moves a Palico may equip is not mapped yet."; }
+                    }
+                }
+            }
+        }
+    }
+}

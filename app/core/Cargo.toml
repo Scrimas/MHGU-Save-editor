@@ -1,0 +1,9 @@
+[package]
+name = "mhgu-save"
+description = "Read and edit Monster Hunter Generations Ultimate (Switch) saves"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+csv = "1"

@@ -1,0 +1,124 @@
+import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow } from "../common.slint";
+
+component QuestLine inherits ListRow {
+    in property <QuestRow> q;
+    height: q.header ? 46px : 48px;
+    staged: !q.header && q.changed;
+    flash: !q.header && Api.highlight != "" && Api.highlight == "quest:" + q.index;
+    if q.header: HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 12px;
+        spacing: Tok.tight;
+        Text { text: q.name; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+        // a group action, in the group header (C2); "Mark 1★ cleared", not "Clear" (04.2)
+        if q.action != "": Button { y: 7px; height: 32px; text: q.action; clicked => { Api.quest-bulk(q.group); } }
+    }
+    if !q.header: HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 12px;
+        spacing: 10px;
+        Rectangle {
+            width: 64px;
+            CheckBox {
+                x: 0;
+                checked: q.cleared;
+                accessible-label: "Cleared: " + q.name;
+                toggled => { Api.set-quest(q.index, "cleared", self.checked); }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: q.name + (q.prowler ? "  (Prowler)" : ""); overflow: elide; }
+            HorizontalLayout {
+                spacing: 6px;
+                if q.was != "": Text { text: "was " + q.was; color: Tok.accent-text; font-size: Tok.small; }
+                Text { text: q.sub; color: q.locked ? Tok.bad : Tok.muted; font-size: Tok.small; overflow: elide; horizontal-stretch: 1; }
+            }
+        }
+        Rectangle {
+            width: 60px;
+            CheckBox { x: 0; checked: q.seen; accessible-label: "Seen: " + q.name; toggled => { Api.set-quest(q.index, "seen", self.checked); } }
+        }
+        Rectangle {
+            width: 60px;
+            CheckBox { x: 0; checked: q.failed; accessible-label: "Failed: " + q.name; toggled => { Api.set-quest(q.index, "failed", self.checked); } }
+        }
+    }
+}
+
+export component QuestsPage inherits Rectangle {
+    VerticalLayout {
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: "Quests";
+            subtitle: Api.quest-summary;
+            staged: Api.page-counts[5];
+        }
+        TabBar { tabs: Api.quest-tabs; current: Api.quest-tab; select(i) => { Api.select-quest-tab(i); } }
+        HorizontalLayout {
+            spacing: Tok.tight;
+            LineEdit {
+                placeholder-text: "Search quests by name or number";
+                text <=> Api.quest-search;
+                edited => { Api.filter-quests(); }
+            }
+            Chip {
+                y: 2px;
+                text: "Missing only";
+                active: Api.quest-missing;
+                clicked => {
+                    Api.quest-missing = !Api.quest-missing;
+                    Api.filter-quests();
+                }
+            }
+        }
+        HorizontalLayout {
+            vertical-stretch: 1;
+            alignment: start;
+            Card {
+                width: min(root.width - 2 * Tok.margin, Tok.row-max);
+                VerticalLayout {
+                    // one table pattern: column headers, value columns next to the name (09)
+                    Rectangle {
+                        height: 34px;
+                        HorizontalLayout {
+                            padding-left: 14px;
+                            padding-right: 12px;
+                            spacing: 10px;
+                            ColHead { text: "Cleared"; width: 64px; }
+                            HorizontalLayout {
+                                horizontal-stretch: 1;
+                                spacing: 6px;
+                                alignment: start;
+                                ColHead { text: "Quest"; }
+                                InfoTip {
+                                    y: 9px;
+                                    text: "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does.";
+                                }
+                            }
+                            ColHead { text: "Seen"; width: 60px; }
+                            ColHead { text: "Failed"; width: 60px; }
+                        }
+                        Hairline { y: parent.height - 1px; width: parent.width; }
+                    }
+                    if Api.quests.length == 0: EmptyState { text: Api.quest-missing ? "Every quest here is cleared." : "No quest matches the search."; }
+                    ListView {
+                        property <int> seq: Api.jump-seq;
+                        function go() {
+                            if Api.page == "quests" && Api.jump-row >= 0 {
+                                self.content-y = -max(0px, Api.jump-row * 48px - self.visible-height / 3);
+                            }
+                        }
+                        init => { self.go(); }
+                        changed seq => { self.go(); }
+                        for q in Api.quests: QuestLine { q: q; }
+                    }
+                }
+            }
+        }
+    }
+}

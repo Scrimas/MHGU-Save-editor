@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=MHGU Save Editor
+Comment=Edit Monster Hunter Generations Ultimate (Switch) saves
+Exec=mhgu-editor %f
+Icon=mhgu-save-editor
+Categories=Utility;Game;
+Terminal=false
+StartupWMClass=mhgu-save-editor

@@ -1,0 +1,161 @@
+//! Monster Hunter Generations Ultimate (Switch) save: read, edit, write.
+//!
+//! Everything here follows the notes in ../../docs; offsets are relative to a character
+//! base unless named `abs`. The editor only writes fields documented as CONFIRMED or
+//! DERIVED.
+
+pub mod character;
+pub mod data;
+pub mod equipment;
+pub mod items;
+pub mod monsters;
+pub mod palico;
+pub mod progress;
+pub mod save;
+pub mod store;
+
+pub use save::{Error, Save};
+
+#[cfg(test)]
+mod real_save {
+    //! Read-only checks against a real save. Set MHGU_TEST_SAVE to a copy of `0/system`.
+    use super::*;
+
+    fn load() -> Option<Save> {
+        let p = std::env::var_os("MHGU_TEST_SAVE")?;
+        Some(Save::from_bytes(std::fs::read(p).unwrap()).unwrap())
+    }
+
+    #[test]
+    fn documented_values() {
+        let Some(mut s) = load() else { return };
+        assert_eq!(s.base(0), save::SLOT1_BASE);
+        assert!(s.slot_used(0));
+        let base = s.base(0);
+        // the computed HR equals the copies the game wrote
+        let st = character::get(&s, base);
+        assert_eq!(st.hr, s.u16(base + character::HDR_HR));
+        assert_eq!(st.hr, s.u16(base + character::CARD_HR));
+        // item box: every used slot has a count of 1-99
+        let box_ = items::all(&s, base, items::Store::Box);
+        let used = box_.iter().filter(|x| !x.is_empty()).count();
+        assert!(used > 100, "{used} used slots");
+        assert!(box_.iter().filter(|x| !x.is_empty()).all(|x| (1..=99).contains(&x.count)));
+        // monster 48 (Arzuros) and 121 (Rustrazor) have size records (docs/02)
+        for i in [48, 121] {
+            let r = monsters::get(&s, base, i);
+            assert!(r.min > 0 && r.min <= r.max, "{i}: {r:?}");
+        }
+        // round trip: rewriting every slot with what was read changes nothing
+        items::set_all(&mut s, base, items::Store::Box, &box_);
+        for k in 0..items::LOADOUT_N {
+            let l = items::loadout(&s, base, k);
+            items::set_loadout(&mut s, base, k, &l);
+        }
+        // the Guild Card log rebuilt from the records equals the card the game wrote
+        for i in 1..=monsters::N {
+            if let Some(p) = monsters::meta(i).card_pos {
+                assert_eq!(monsters::card_entry(&s, base, i), s.get(base + monsters::CARD_LOG + 8 * p, 8), "card entry of {i}");
+            }
+        }
+        for i in 1..=monsters::N {
+            let r = monsters::get(&s, base, i);
+            // the editor artefacts on 106-112 / folded variants (docs: sizes never read) stay
+            let before = s.get(base + monsters::SIZES + 4 * i, 4).to_vec();
+            monsters::set(&mut s, base, i, r);
+            assert_eq!(before, s.get(base + monsters::SIZES + 4 * i, 4));
+        }
+        for i in 0..palico::LIST_N {
+            let p = palico::get(&s, base, i);
+            palico::set(&mut s, base, i, &p);
+        }
+        assert!(s.diff().is_empty(), "round trip changed {:?}", &s.diff()[..s.diff().len().min(8)]);
+    }
+
+    /// New entries look like the game's own; worn and My Set pieces are found; the free
+    /// slot is empty and unreferenced.
+    #[test]
+    fn equipment_box() {
+        use equipment::{Entry, Kind, Owner, Use};
+        let Some(s) = load() else { return };
+        let base = s.base(0);
+        for i in 0..Owner::Hunter.len() {
+            let e = equipment::get(&s, base, Owner::Hunter, i);
+            match e.kind() {
+                Kind::Talisman => assert_eq!(e.talisman().unwrap().tier, equipment::talisman_tier(e.id()), "talisman {i}"),
+                // a fresh entry of the same piece differs only in level and decorations
+                k @ Kind::Weapon(_) => {
+                    let mut n = Entry::new(k, e.id());
+                    n.set_level(e.level());
+                    for (d, &item) in e.decos().iter().enumerate() {
+                        n.set_deco(d, item);
+                    }
+                    assert_eq!(n, e, "weapon {i}");
+                }
+                _ => {}
+            }
+        }
+        for k in 0..7 {
+            let i = s.u16(base + equipment::WORN + 2 * k);
+            if i != 0xFFFF {
+                assert!(equipment::uses(&s, base, i as usize).contains(&Use::Worn), "worn {i}");
+                assert!(!equipment::get(&s, base, Owner::Hunter, i as usize).is_empty());
+            }
+        }
+        let f = equipment::free_slot(&s, base, Owner::Hunter).unwrap();
+        assert!(equipment::get(&s, base, Owner::Hunter, f).is_empty() && equipment::uses(&s, base, f).is_empty());
+    }
+
+    /// Edit a copy of the whole save folder and write it: all four files get the body,
+    /// each keeps its header, and nothing but the edited bytes moves.
+    #[test]
+    fn write_copy_of_real_save() {
+        let Some(p) = std::env::var_os("MHGU_TEST_SAVE") else { return };
+        let src = std::path::Path::new(&p).parent().unwrap().parent().unwrap();
+        let dir = std::env::temp_dir().join(format!("mhgu-write-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        for c in ["0", "1"] {
+            std::fs::create_dir_all(dir.join(c)).unwrap();
+            for f in store::FILES {
+                std::fs::copy(src.join(c).join(f), dir.join(c).join(f)).unwrap();
+            }
+        }
+        let before: Vec<Vec<u8>> = ["0/system", "0/system_backup", "1/system", "1/system_backup"].iter().map(|f| std::fs::read(dir.join(f)).unwrap()).collect();
+        let (mut s, loc, _) = store::open(&dir.join("0/system")).unwrap();
+        let base = s.base(0);
+        let mut r = monsters::get(&s, base, 48);
+        r.hunts = 1234;
+        monsters::set(&mut s, base, 48, r);
+        let edited: Vec<usize> = s.diff().iter().map(|d| d.0).collect();
+        assert!(!edited.is_empty());
+        store::write_all(&mut s, &loc).unwrap();
+        for (k, f) in ["0/system", "0/system_backup", "1/system", "1/system_backup"].iter().enumerate() {
+            let after = std::fs::read(dir.join(f)).unwrap();
+            assert_eq!(after[..store::HEADER], before[k][..store::HEADER], "{f}: header kept");
+            assert_eq!(monsters::get(&Save::from_bytes(after.clone()).unwrap(), base, 48).hunts, 1234, "{f}");
+            let moved: Vec<usize> = (0..after.len()).filter(|&i| after[i] != before[0][i] && i >= store::HEADER).collect();
+            assert!(moved.iter().all(|i| edited.contains(i)), "{f}: unexpected bytes changed");
+        }
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn quest_logic_runs() {
+        let Some(mut s) = load() else { return };
+        let c = progress::Char::new(&mut s, 0);
+        let mut locked = 0;
+        for q in progress::Char::real_quests(true) {
+            if let progress::Lock::Locked(n) = c.lock(q.id) {
+                assert!(n.iter().all(|alt| alt.iter().all(|m| !m.starts_with('?'))), "{}: {n:?}", q.id);
+                locked += 1;
+            }
+        }
+        eprintln!("locked quests: {locked}");
+        // like tools/request_offer.py: only offers not accepted yet
+        for r in data::tables().offers.iter().filter(|o| !c.flag(o.accept_flag)) {
+            for m in c.offer_missing(r.index) {
+                assert!(!m.starts_with('?'), "offer {}: {m}", r.index);
+            }
+        }
+    }
+}
