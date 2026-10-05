@@ -68,7 +68,7 @@ pub struct Names {
     /// Talisman skill tree ID -> name.
     #[serde(default)]
     pub skills: Vec<String>,
-    /// Palico support move ID -> name (not in the pack yet: shown as IDs).
+    /// Palico support move ID -> name (packs built before 2026-10-05 lack it: shown as IDs).
     #[serde(default)]
     pub support_moves: Vec<String>,
     /// Item ID -> [icon, colour, rarity].

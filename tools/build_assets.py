@@ -7,8 +7,9 @@
            it holds Capcom's icons and text)
 
 Writes:
-  names.json       item, equipment, skill names; item icon / colour / rarity; palettes;
-                   equipment type icons; icon cell positions on items.png
+  names.json       item, equipment, skill and Palico support move names; item icon /
+                   colour / rarity; palettes; equipment type icons; icon cell positions
+                   on items.png
   items.png        the grayscale item icon sheet (HD_cmn_icon_GSM); the editor tints it
   monsters/<i>.png 72x72 icon per save monster index 1-137
   awards/<b>.png   48x48 Guild Card award icon per award bit
@@ -235,6 +236,9 @@ def main(romfs, out):
     names['talismans'] = [{'id': k, 'name': amn[k], 'rarity': am[8 + k * 9 + 8] + 1}
                           for k in range(struct.unpack_from('<I', am, 4)[0])]
     names['skills'] = gmd(reng['eng\\table\\skillTypeData_eng'])[0::2]
+    # Palico support moves: name and description pairs, move ID k -> entry 2k
+    # (0 "(No Move)"; the Palico record's learned slots use 57 for none). DERIVED
+    names['support_moves'] = gmd(reng['eng\\otomo\\support\\spt_act_base_eng'])[0::2]
 
     # Guild Card awards: bit i -> cell i, 10 x 48 px; 0-99 lby_deco, 100+ lby_deco2
     aw = [tex('HD_lby_deco_BM_MQ_NOMIP'), tex('HD_lby_deco2_BM_MQ_NOMIP')]
