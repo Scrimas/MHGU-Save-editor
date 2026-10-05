@@ -10,7 +10,7 @@ anything touches the file. Fields are marked **Confirmed** (checked in game) or
 
 ## Download
 
-Single-file builds are attached to each [release](https://github.com/Scrimas/mhgu-save-reverse-engineering/releases):
+Single-file builds are attached to each [release](https://github.com/Scrimas/MHGU-Save-editor/releases):
 
 | File | Runs on |
 |---|---|
