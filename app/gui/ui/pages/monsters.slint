@@ -1,155 +1,237 @@
-import { LineEdit, CheckBox, SpinBox, ListView, Button, Palette } from "std-widgets.slint";
-import { Api, Tok, Card, Asset, Muted, MonsterRow } from "../common.slint";
+import { LineEdit, CheckBox, ListView, Button, Palette } from "std-widgets.slint";
+import {
+    Api, Tok, Card, Asset, Muted, MonsterRow, PageHeader, Chip, ColHead, InfoTip, NumberBox, WasLine,
+    Hairline, EmptyState, PreviewPopup, Pill, ListRow,
+} from "../common.slint";
 
 global Cols {
-    in-out property <length> num: 96px;
+    out property <length> hunted: 130px;
+    out property <length> size: 170px;
 }
 
-component Num inherits SpinBox {
-    width: Cols.num;
-    minimum: 0;
-    maximum: 9999;
-}
-
-component Crown inherits Rectangle {
-    in property <string> text;
-    in property <color> tint;
-    height: 20px;
-    width: t.preferred-width + 12px;
-    border-radius: 10px;
-    background: tint.transparentize(0.8);
-    border-width: 1px;
-    border-color: tint.transparentize(0.4);
-    t := Text { text: root.text; font-size: 11px; color: Palette.foreground; }
-}
-
-component MonsterLine inherits Rectangle {
-    in property <MonsterRow> m;
-    height: 56px;
-    background: m.changed ? Palette.accent-background.transparentize(0.9) : transparent;
+// A count or size cell: a plain number until clicked (H4.4), "was … Undo" when staged.
+component Cell inherits VerticalLayout {
+    in property <int> value;
+    in property <int> maximum: 9999;
+    in property <string> suffix;
+    in property <string> was;
+    in property <string> key;
+    in property <string> label;
+    in property <string> crown;      // "Mini", "Silver", "Gold" or ""
+    in property <color> crown-tint;
+    in property <string> thresholds; // shown while the cell has focus (H4.2)
+    callback edited(int);
+    alignment: center;
+    spacing: 1px;
     HorizontalLayout {
-        padding-left: 10px;
-        padding-right: 10px;
-        spacing: 8px;
-        Asset {
-            width: 44px;
-            height: 44px;
-            y: 6px;
-            source: m.icon;
-            available: m.has-icon;
-            kind: "MON";
-            label: "#" + m.index;
+        spacing: 6px;
+        alignment: start;
+        nb := NumberBox {
+            width: 84px;
+            height: 30px;
+            flat: true;
+            spin: false;
+            value: root.value;
+            maximum: root.maximum;
+            suffix: root.suffix;
+            label: root.label;
+            font-weight: root.was != "" ? 600 : 400;
+            edited(v) => { root.edited(v); }
         }
+        if root.crown != "": Pill { y: 4px; text: root.crown; tint: root.crown-tint; }
+    }
+    if (nb.has-focus && root.thresholds != "") || (!nb.has-focus && root.was != ""): HorizontalLayout {
+        padding-left: 10px;
+        if nb.has-focus: Text { text: root.thresholds; color: Tok.muted; font-size: Tok.small; }
+        if !nb.has-focus: WasLine { was: root.was; key: root.key; }
+    }
+}
+
+component MonsterLine inherits ListRow {
+    in property <MonsterRow> m;
+    property <string> k: "mon:" + m.index + ":";
+    height: 60px;
+    staged: m.changed;
+    flash: Api.highlight != "" && Api.highlight == "mon:" + m.index;
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        spacing: 10px;
+        Rectangle {
+            width: Api.assets-ok ? 44px : 0px;
+            Asset { y: 8px; width: 44px; height: 44px; source: m.icon; available: m.has-icon; }
+        }
+        // number, class and size range recede (H4.3)
         VerticalLayout {
             alignment: center;
-            min-width: 120px;
             horizontal-stretch: 1;
-            spacing: 2px;
-            HorizontalLayout {
-                spacing: 6px;
-                Text { text: m.name; overflow: elide; font-weight: m.changed ? 600 : 400; vertical-alignment: center; }
-                if m.mini: Crown { text: "Mini"; tint: #4aa3df; }
-                if m.crown == 2: Crown { text: "Gold"; tint: #e2b93b; }
-                if m.crown == 1: Crown { text: "Silver"; tint: #a8b3bd; }
-                Rectangle { horizontal-stretch: 1; }
-            }
-            Text { text: m.sub; color: Tok.muted; font-size: 11px; overflow: elide; }
+            min-width: 120px;
+            Text { text: m.name; overflow: elide; }
+            Text { text: m.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
         }
-        Num {
-            y: 10px; height: 36px;
+        Cell {
+            width: Cols.hunted;
             value: m.hunts;
-            accessible-label: "Hunts of " + m.name;
+            was: m.was-hunts;
+            key: root.k + "hunts";
+            label: "Hunted " + m.name;
             edited(v) => { Api.set-monster(m.index, "hunts", v); }
         }
-        Num {
-            y: 10px; height: 36px;
+        Cell {
+            width: Cols.hunted;
             value: m.captures;
-            accessible-label: "Captures of " + m.name;
+            was: m.was-captures;
+            key: root.k + "captures";
+            label: "Captured " + m.name;
             edited(v) => { Api.set-monster(m.index, "captures", v); }
         }
-        if m.has-size: Num {
-            y: 10px; height: 36px;
-            maximum: 200;
+        // crowns sit in the cells that earn them (H4.1)
+        if m.has-size: Cell {
+            width: Cols.size;
             value: m.min;
-            accessible-label: "Smallest size of " + m.name;
+            maximum: 200;
+            suffix: " %";
+            was: m.was-min;
+            key: root.k + "min";
+            label: "Smallest size of " + m.name;
+            crown: m.mini ? "Mini" : "";
+            crown-tint: Tok.accent-text;
+            thresholds: m.thresholds;
             edited(v) => { Api.set-monster(m.index, "min", v); }
         }
-        if m.has-size: Num {
-            y: 10px; height: 36px;
-            maximum: 200;
+        if m.has-size: Cell {
+            width: Cols.size;
             value: m.max;
-            accessible-label: "Largest size of " + m.name;
+            maximum: 200;
+            suffix: " %";
+            was: m.was-max;
+            key: root.k + "max";
+            label: "Largest size of " + m.name;
+            crown: m.crown == 2 ? "Gold" : m.crown == 1 ? "Silver" : "";
+            crown-tint: m.crown == 2 ? (Tok.dark ? #e2b93b : #8a6100) : (Tok.dark ? #c3ccd4 : #4f5b66);
+            thresholds: m.thresholds;
             edited(v) => { Api.set-monster(m.index, "max", v); }
         }
-        if !m.has-size: Text { width: 2 * Cols.num + 8px; text: "no size record"; color: Tok.faint; vertical-alignment: center; horizontal-alignment: center; font-size: 12px; }
+        if !m.has-size: Text { width: 2 * Cols.size + 10px; text: "No size record"; color: Tok.faint; vertical-alignment: center; font-size: Tok.small; }
         Rectangle {
-            width: 40px;
+            width: 52px;
             if m.has-notes: CheckBox {
+                x: 0;
                 checked: m.notes;
                 accessible-label: "Hunter's Notes page of " + m.name;
                 toggled => { Api.set-monster(m.index, "notes", self.checked ? 1 : 0); }
             }
         }
     }
-    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
 }
 
 export component MonstersPage inherits Rectangle {
-    changed width => { Cols.num = self.width < 720px ? 80px : 96px; }
-    init => { Cols.num = self.width < 720px ? 80px : 96px; }
+    function bulk(id: string, right: length, bottom: length) {
+        pv.open(id, right, bottom);
+    }
     VerticalLayout {
-        padding: 20px;
-        spacing: 12px;
-        HorizontalLayout {
-            spacing: 12px;
-            VerticalLayout {
-                Text { text: "Monsters"; font-size: 22px; font-weight: 600; }
-                Muted { text: Api.monster-summary; }
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: "Monsters";
+            subtitle: Api.monster-summary;
+            staged: Api.page-counts[8];
+            Button {
+                text: "Max hunts…";
+                clicked => { root.bulk("monsters:hunts", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
-            Rectangle { horizontal-stretch: 1; }
-            Button { text: "Max hunts"; clicked => { Api.monsters-bulk("max-hunts"); } }
-            Button { text: "Every crown"; clicked => { Api.monsters-bulk("crowns"); } }
+            Button {
+                text: "Every crown…";
+                clicked => { root.bulk("crowns", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
+            }
         }
         HorizontalLayout {
-            spacing: 12px;
+            spacing: Tok.tight;
             LineEdit {
                 placeholder-text: "Search monsters";
                 text <=> Api.monster-filter;
-                edited(t) => { Api.filter-monsters(t, Api.monster-large-only); }
+                edited => { Api.filter-monsters(); }
             }
-            CheckBox {
-                text: "Large monsters only";
-                checked <=> Api.monster-large-only;
-                toggled => { Api.filter-monsters(Api.monster-filter, self.checked); }
+            // "Large monsters only" as a filter chip (C3)
+            Chip {
+                y: 2px;
+                text: "Large only";
+                active: Api.monster-large-only;
+                clicked => {
+                    Api.monster-large-only = !Api.monster-large-only;
+                    Api.filter-monsters();
+                }
+            }
+            Chip {
+                y: 2px;
+                text: "Missing a crown";
+                active: Api.monster-missing;
+                clicked => {
+                    Api.monster-missing = !Api.monster-missing;
+                    Api.filter-monsters();
+                }
             }
         }
-        Card {
+        HorizontalLayout {
             vertical-stretch: 1;
-            VerticalLayout {
-                Rectangle {
-                    height: 30px;
-                    HorizontalLayout {
-                        padding-left: 10px;
-                        padding-right: 10px;
-                        spacing: 8px;
-                        Rectangle { width: 44px; }
-                        Text { text: "Monster"; horizontal-stretch: 1; min-width: 120px; color: Tok.muted; font-size: 12px; vertical-alignment: center; }
-                        Text { width: Cols.num; text: "Hunted"; color: Tok.muted; font-size: 12px; vertical-alignment: center; }
-                        Text { width: Cols.num; text: "Captured"; color: Tok.muted; font-size: 12px; vertical-alignment: center; }
-                        Text { width: Cols.num; text: "Smallest %"; color: Tok.muted; font-size: 12px; vertical-alignment: center; }
-                        Text { width: Cols.num; text: "Largest %"; color: Tok.muted; font-size: 12px; vertical-alignment: center; }
-                        Text { width: 40px; text: "Notes"; color: Tok.muted; font-size: 12px; vertical-alignment: center; }
+            alignment: start;
+            Card {
+                width: min(root.width - 2 * Tok.margin, Tok.row-max);
+                VerticalLayout {
+                    Rectangle {
+                        height: 34px;
+                        HorizontalLayout {
+                            padding-left: 12px;
+                            padding-right: 12px;
+                            spacing: 10px;
+                            Rectangle { width: Api.assets-ok ? 44px : 0px; }
+                            ColHead { text: "Monster"; horizontal-stretch: 1; min-width: 120px; }
+                            HorizontalLayout {
+                                width: Cols.hunted;
+                                spacing: 6px;
+                                padding-left: 10px;
+                                alignment: start;
+                                ColHead { text: "Hunted"; }
+                                InfoTip { y: 9px; text: "Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."; }
+                            }
+                            HorizontalLayout {
+                                width: Cols.hunted;
+                                padding-left: 10px;
+                                ColHead { text: "Captured"; }
+                            }
+                            HorizontalLayout {
+                                width: 2 * Cols.size + 10px;
+                                spacing: 6px;
+                                padding-left: 10px;
+                                alignment: start;
+                                ColHead { text: "Smallest"; width: Cols.size - 10px; }
+                                ColHead { text: "Largest"; }
+                                InfoTip {
+                                    y: 9px;
+                                    text: "Sizes are % of the monster's base size. At or below its mini size it has the mini crown; at or above its silver or gold size, that crown. Click a size to see the monster's own sizes. The crown awards read the Guild Card's monster log, which every edit rebuilds.";
+                                }
+                            }
+                            ColHead { text: "Notes"; width: 52px; }
+                        }
+                        Hairline { y: parent.height - 1px; width: parent.width; }
                     }
-                    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
-                }
-                ListView {
-                    for m in Api.monsters: MonsterLine { m: m; }
+                    if Api.monsters.length == 0: EmptyState { text: Api.monster-missing ? "Every monster shown has its crowns." : "No monster matches the search."; }
+                    ListView {
+                        property <int> seq: Api.jump-seq;
+                        function go() {
+                            if Api.page == "monsters" && Api.jump-row >= 0 {
+                                self.content-y = -max(0px, Api.jump-row * 60px - self.visible-height / 3);
+                            }
+                        }
+                        // a jump that opened this page arrives before the list exists
+                        init => { self.go(); }
+                        changed seq => { self.go(); }
+                        for m in Api.monsters: MonsterLine { m: m; }
+                    }
                 }
             }
-        }
-        Muted {
-            text: "Hunted counts kills only; the game shows hunted + captured. Sizes are % of the base size; crowns follow the game's own thresholds for each monster. Every edit also rebuilds the Guild Card's monster log, which the crown awards read.";
-            font-size: 11px;
         }
     }
+    pv := PreviewPopup { x: 0; y: 0; page-width: root.width; }
 }

@@ -1,13 +1,16 @@
 //! Models for each page and the callbacks that edit the save.
 
 use crate::assets;
+use crate::fmt::{self, count, num};
 use crate::goals;
-use crate::state::{Conf, State};
+use crate::state::{Conf, Edit, State};
 use crate::system;
+use crate::targets::{self, Mon, Target, PAGES};
 use crate::{model, strings, Shared};
 use crate::{
-    Api, AppWindow, ChangeRow, CharacterInfo, CheckRow, Confidence, DeviantRow, EquipDetail, EquipRow, FieldRow, Goal, ItemSlot,
-    LoadoutRow, MonsterRow, PalicoDetail, PalicoRow, PickItem, QuestRow, RequestRow, SlotInfo, StatCard,
+    Api, AppWindow, ArtRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
+    EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, PalicoDetail, PalicoRow, PickItem, Preview, PreviewLine,
+    QuestRow, RequestRow, SlotInfo, SnapRow, StatCard, ValueLine, WriteRow,
 };
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Kind, Owner};
@@ -15,7 +18,7 @@ use mhgu_save::items::{self, Stack, Store};
 use mhgu_save::progress::{Char, Lock, QuestBit, DEVIANTS};
 use mhgu_save::{character, monsters, palico, store};
 use slint::{ComponentHandle, Image, SharedString, Weak};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 fn conf(c: Conf) -> Confidence {
     match c {
@@ -42,20 +45,40 @@ fn icon(i: Option<Image>) -> (Image, bool) {
     }
 }
 
-fn playtime(secs: u32) -> String {
-    format!("{}h {:02}m", secs / 3600, secs / 60 % 60)
+/// What the toast's button does.
+#[derive(Clone, Default)]
+enum ToastAct {
+    #[default]
+    None,
+    Redo,
+    Restore(PathBuf, String),
+}
+
+/// Toast with an optional second line and button; it stays longer when it has one.
+fn toast_full(ui: &AppWindow, msg: impl Into<SharedString>, sub: &str, action: &str, act: ToastAct, error: bool) {
+    let api = ui.global::<Api>();
+    api.set_toast(msg.into());
+    api.set_toast_sub(sub.into());
+    api.set_toast_action(action.into());
+    api.set_toast_error(error);
+    view(|v| {
+        v.toast_act = act;
+        v.toast_seq += 1;
+    });
+    let seq = view(|v| v.toast_seq);
+    let w = ui.as_weak();
+    let ms = if !action.is_empty() { 9000 } else if error { 6000 } else { 3000 };
+    slint::Timer::single_shot(std::time::Duration::from_millis(ms), move || {
+        if let Some(ui) = w.upgrade() {
+            if view(|v| v.toast_seq) == seq {
+                ui.global::<Api>().set_toast("".into());
+            }
+        }
+    });
 }
 
 fn toast(ui: &AppWindow, msg: impl Into<SharedString>, error: bool) {
-    let api = ui.global::<Api>();
-    api.set_toast(msg.into());
-    api.set_toast_error(error);
-    let w = ui.as_weak();
-    slint::Timer::single_shot(std::time::Duration::from_millis(if error { 6000 } else { 3000 }), move || {
-        if let Some(ui) = w.upgrade() {
-            ui.global::<Api>().set_toast("".into());
-        }
-    });
+    toast_full(ui, msg, "", "", ToastAct::None, error);
 }
 
 // --- names ----------------------------------------------------------------------------
@@ -73,6 +96,10 @@ fn kind_label(k: Kind) -> String {
         Kind::Head | Kind::Chest | Kind::Arms | Kind::Waist | Kind::Legs => ARMOR_PARTS[k.code() as usize - 1].into(),
         Kind::Talisman => "Talisman".into(),
         Kind::Weapon(w) => WEAPON_CLASSES.get(w as usize).copied().unwrap_or("Weapon").into(),
+        // the Palico box holds types 22-24 only (docs/11)
+        Kind::Other(22) => "Palico weapon".into(),
+        Kind::Other(23) => "Palico head".into(),
+        Kind::Other(24) => "Palico body".into(),
         Kind::Other(c) => format!("Type {c}"),
     }
 }
@@ -106,8 +133,8 @@ fn equip_categories() -> Vec<Kind> {
 
 fn equip_keep(filter: &str, k: Kind) -> bool {
     match filter {
-        "weapon" => matches!(k, Kind::Weapon(_)),
-        "armor" => k.is_armor(),
+        "weapon" => matches!(k, Kind::Weapon(_) | Kind::Other(22)),
+        "armor" => k.is_armor() || matches!(k, Kind::Other(23) | Kind::Other(24)),
         "talisman" => k == Kind::Talisman,
         "empty" => k == Kind::Empty,
         _ => k != Kind::Empty,
@@ -126,6 +153,26 @@ fn equip_name(owner: Owner, e: &equipment::Entry) -> String {
         _ => piece(owner, k, e.id())
             .map(|p| p.name_at(e.level() as u32).to_string())
             .unwrap_or_else(|| format!("{} #{}", kind_label(k), e.id())),
+    }
+}
+
+/// "Fire Res +1 · Attack +3 · 2 slots": what tells talismans apart (10.2).
+fn talisman_skills(e: &equipment::Entry) -> String {
+    let Some(t) = e.talisman() else { return String::new() };
+    let mut d: Vec<String> = (0..2).filter(|&j| t.skills[j] != 0).map(|j| format!("{} {:+}", skill_name(t.skills[j]), t.points[j])).collect();
+    if d.is_empty() {
+        d.push("No skills".into());
+    }
+    d.push(count(t.slots as usize, "slot", "slots"));
+    d.join(" · ")
+}
+
+/// A box entry as a value in Review: "Elder Rod Lv 3", "Fire Res +1 · 0 slots", "Empty".
+pub fn equip_value(owner: Owner, e: &equipment::Entry) -> String {
+    match e.kind() {
+        Kind::Empty => "Empty".into(),
+        Kind::Talisman => talisman_skills(e),
+        _ => format!("{} Lv {}", equip_name(owner, e), e.level()),
     }
 }
 
@@ -160,16 +207,32 @@ struct View {
     item_filter: String,
     picker_filter: String,
     equip_filter: String,
-    equip_sel: i32,
     equip_search: String,
+    equip_list_search: String,
+    equip_sel: i32,
+    /// box slot to scroll to on the next refresh
+    equip_jump: Option<i32>,
     palico_sel: i32,
     quest_tab: usize,
+    quest_search: String,
+    quest_missing: bool,
     request_filter: String,
+    request_search: String,
     collection: usize,
+    check_search: String,
+    check_missing: bool,
     monster_filter: String,
     monster_large: bool,
+    monster_missing: bool,
     field_filter: String,
     field_sel: i32,
+    toast_act: ToastAct,
+    toast_seq: u32,
+    /// key of the field a Review entry opened, until it is shown
+    goto: Option<String>,
+    jump_seq: i32,
+    /// the user chose to quit with staged changes
+    quitting: bool,
 }
 
 thread_local! {
@@ -182,6 +245,10 @@ fn view<R>(f: impl FnOnce(&mut View) -> R) -> R {
     VIEW.with_borrow_mut(f)
 }
 
+pub fn quitting() -> bool {
+    view(|v| v.quitting)
+}
+
 fn quest_tabs() -> Vec<String> {
     let mut v: Vec<String> = vec![];
     for q in Char::real_quests(true) {
@@ -190,6 +257,29 @@ fn quest_tabs() -> Vec<String> {
         }
     }
     v
+}
+
+/// Scroll the current page's list to `row` and flash `key`. A list made after the jump
+/// (its page just opened) takes it on creation; after 1.8 s it is stale and dropped.
+fn jump(ui: &AppWindow, row: Option<usize>, key: &str) {
+    let api = ui.global::<Api>();
+    let seq = view(|v| {
+        v.jump_seq += 1;
+        v.jump_seq
+    });
+    api.set_jump_row(row.map_or(-1, |r| r as i32));
+    api.set_jump_seq(seq);
+    api.set_highlight(key.into());
+    let w = ui.as_weak();
+    slint::Timer::single_shot(std::time::Duration::from_millis(1800), move || {
+        if let Some(ui) = w.upgrade() {
+            if view(|v| v.jump_seq) == seq {
+                let api = ui.global::<Api>();
+                api.set_highlight("".into());
+                api.set_jump_row(-1);
+            }
+        }
+    });
 }
 
 // --- refresh ----------------------------------------------------------------------------
@@ -203,32 +293,25 @@ pub fn refresh(ui: &AppWindow, st: &State) {
     let s = &doc.save;
     api.set_loaded(true);
     api.set_file_path(doc.loc.opened.display().to_string().into());
+    let emu = system::emulator_name(&doc.loc.opened);
+    api.set_path_label(if emu == "Ryujinx" { emu } else { "" }.into());
+    api.set_path_tail(fmt::path_tail(&doc.loc.opened, 4).into());
+    // a running emulator names itself (check-emulator); otherwise the save's folder does
+    if !api.get_emulator_running() {
+        api.set_emulator_name(emu.into());
+    }
     api.set_slot(st.slot as i32);
     api.set_slots(model(
         (0..3)
             .map(|k| {
-                let b = s.base(k);
-                let c = character::get(s, b);
-                SlotInfo { slot: k as i32, used: s.slot_used(k), name: c.name.into(), hr: c.hr as i32, playtime: playtime(c.playtime).into() }
+                let c = character::get(s, s.base(k));
+                SlotInfo { slot: k as i32, used: s.slot_used(k), name: c.name.into(), hr: c.hr as i32, playtime: fmt::playtime(c.playtime).into() }
             })
             .collect(),
     ));
-    let rows: Vec<ChangeRow> = st
-        .ops
-        .iter()
-        .rev()
-        .map(|o| ChangeRow {
-            id: o.id,
-            title: if o.slot != st.slot { format!("{} (character {})", o.title, o.slot + 1) } else { o.title.clone() }.into(),
-            detail: format!("{}{} bytes", if o.detail.is_empty() { String::new() } else { format!("{} · ", o.detail) }, o.bytes.len()).into(),
-            confidence: conf(o.conf),
-        })
-        .collect();
-    api.set_change_count(rows.len() as i32);
-    api.set_changes(model(rows));
-    let copies: Vec<String> = doc.loc.copies.iter().map(|p| p.display().to_string()).collect();
-    api.set_write_targets(strings(copies));
-    api.set_snapshot_dir(system::snapshot_root().display().to_string().into());
+    review(ui, st);
+    // paths elided in the middle, so the part that differs stays visible (02.4)
+    api.set_write_targets(strings(doc.loc.copies.iter().map(|p| fmt::elide_path(&p.display().to_string(), 64))));
     let warn: Vec<String> = doc
         .copies
         .iter()
@@ -253,6 +336,109 @@ pub fn refresh(ui: &AppWindow, st: &State) {
         "advanced" => fields_page(ui, st),
         _ => {}
     }
+    // a Review entry asked for this field: scroll to it now that its page is built
+    if let Some(key) = view(|v| v.goto.take()) {
+        let row = goto_row(ui, &key);
+        let t = find_target(st, &key);
+        jump(ui, row, &t.map(|t| t.row_key()).unwrap_or(key));
+    }
+}
+
+/// Review panel and Write dialog (mockup A): every value old → new, grouped by page.
+fn review(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let doc = st.doc.as_ref().unwrap();
+    let staged = st.staged();
+    let mut counts = vec![0i32; PAGES.len()];
+    for (slot, t) in &staged {
+        if *slot == st.slot {
+            counts[targets::page_index(t.page())] += 1;
+        }
+    }
+    api.set_page_counts(model(counts));
+    api.set_value_count(staged.len() as i32);
+    api.set_change_count(st.ops.len() as i32);
+    api.set_review_summary(
+        if st.ops.is_empty() {
+            "Nothing staged".to_string()
+        } else {
+            format!("{} · {} · not written yet", count(st.ops.len(), "change", "changes"), count(staged.len(), "value", "values"))
+        }
+        .into(),
+    );
+    let label = |t: &Target, slot: usize| t.label(&doc.save, slot);
+    let page_of = |o: &crate::state::Op| o.values.first().map(|(t, _)| targets::page_index(t.page())).unwrap_or(0);
+    let mut ops: Vec<&crate::state::Op> = st.ops.iter().rev().collect();
+    // grouped by page in nav order, then by character; newest first within a group
+    ops.sort_by_key(|o| (o.slot != st.slot, o.slot, page_of(o)));
+    let mut rows = vec![];
+    let mut last_group = String::new();
+    for o in ops {
+        let pi = page_of(o);
+        let group = if o.slot != st.slot { format!("Character {} · {}", o.slot + 1, PAGES[pi].1) } else { PAGES[pi].1.to_string() };
+        let first = group != last_group;
+        last_group = group.clone();
+        let single = o.values.len() == 1;
+        let (old, new) = match o.values.first() {
+            Some((t, v)) if single => (t.read(&doc.orig, o.slot), v.clone()),
+            _ => (String::new(), String::new()),
+        };
+        let lines: Vec<ValueLine> = if single {
+            vec![]
+        } else {
+            o.values.iter().take(8).map(|(t, v)| ValueLine { label: label(t, o.slot).into(), old: t.read(&doc.orig, o.slot).into(), new: v.into() }).collect()
+        };
+        let sub = if single {
+            o.note.clone()
+        } else {
+            let mut s = vec![];
+            if !o.detail.is_empty() {
+                s.push(o.detail.clone());
+            }
+            s.push(count(o.values.len(), "value", "values"));
+            s.join(" · ")
+        };
+        rows.push(ChangeRow {
+            id: o.id,
+            group: group.into(),
+            first,
+            title: if single { label(&o.values[0].0, o.slot) } else { o.title.clone() }.into(),
+            sub: sub.into(),
+            confidence: conf(o.conf),
+            single,
+            old: old.into(),
+            new: new.into(),
+            lines: model(lines),
+            more: o.values.len().saturating_sub(if single { 1 } else { 8 }) as i32,
+            note: if single { String::new() } else { o.note.clone() }.into(),
+            key: o.values.first().map(|(t, _)| t.key()).unwrap_or_default().into(),
+        });
+    }
+    api.set_changes(model(rows));
+    // Write dialog: changes first, then the checks, then the files (02.3)
+    let values = staged.len();
+    let mut chars: Vec<usize> = st.ops.iter().map(|o| o.slot).collect();
+    chars.sort_unstable();
+    chars.dedup();
+    let who: Vec<String> = chars.iter().map(|&k| format!("character {}, {}", k + 1, character::get(&doc.save, doc.save.base(k)).name)).collect();
+    api.set_write_title(format!("Write {} to the save", count(st.ops.len(), "change", "changes")).into());
+    api.set_write_sub(format!("{} · {}", count(values, "value", "values"), who.join("; ")).into());
+    api.set_write_rows(model(
+        st.ops
+            .iter()
+            .map(|o| {
+                let single = o.values.len() == 1;
+                WriteRow {
+                    title: if single { label(&o.values[0].0, o.slot) } else { o.title.clone() }.into(),
+                    right: if single { String::new() } else { count(o.values.len(), "value", "values") }.into(),
+                    confidence: conf(o.conf),
+                    old: if single { o.values[0].0.read(&doc.orig, o.slot) } else { String::new() }.into(),
+                    new: if single { o.values[0].1.clone() } else { String::new() }.into(),
+                }
+            })
+            .collect(),
+    ));
+    api.set_derived_count(st.ops.iter().filter(|o| o.conf != Conf::Confirmed).count() as i32);
 }
 
 fn overview(ui: &AppWindow, st: &State) {
@@ -261,41 +447,83 @@ fn overview(ui: &AppWindow, st: &State) {
     let base = st.base();
     let mut s2 = s.clone();
     let c = Char::new(&mut s2, st.slot);
+    let t = tables();
     let real = Char::real_quests(true);
     let done = real.iter().filter(|q| c.quest(QuestBit::Cleared, q.index)).count();
-    let arts = tables().arts.iter().filter(|a| c.art(a.0)).count();
+    let arts = t.arts.iter().filter(|a| c.art(a.0)).count();
     let dishes = (0..99).filter(|&i| c.dish(i)).count();
-    let awards = (0..132).filter(|&b| c.award(b)).count();
-    let large: Vec<usize> = (1..=monsters::N).filter(|&i| monsters::meta(i).crown_awards).collect();
-    let hunted = large.iter().filter(|&&i| {
+    // the same total as Collections: every award of the card (07.1)
+    let missing: Vec<String> = t.awards.iter().filter(|a| !c.award(a.0)).map(|a| a.2.clone()).collect();
+    let listed: Vec<usize> = (1..=monsters::N).filter(|&i| monsters::meta(i).crown_awards).collect();
+    let met = listed.iter().filter(|&&i| {
         let r = monsters::get(s, base, i);
         r.hunts + r.captures > 0
     }).count();
-    let gold = large.iter().filter(|&&i| monsters::crowns(i, monsters::get(s, base, i)).large == 2).count();
-    let mini = large.iter().filter(|&&i| monsters::crowns(i, monsters::get(s, base, i)).mini).count();
-    let ch = character::get(s, base);
-    let card = |title: &str, n: usize, of: usize, sub: String| StatCard {
+    let gold = listed.iter().filter(|&&i| monsters::crowns(i, monsters::get(s, base, i)).large == 2).count();
+    let mini = listed.iter().filter(|&&i| monsters::crowns(i, monsters::get(s, base, i)).mini).count();
+    let chs = character::get(s, base);
+    let card = |title: &str, n: usize, of: usize, sub: String, page: &str, tab: i32| StatCard {
         title: title.into(),
-        value: format!("{n} / {of}").into(),
+        value: format!("{} / {}", num(n as i64), num(of as i64)).into(),
         sub: sub.into(),
         progress: if of == 0 { 0.0 } else { n as f32 / of as f32 },
+        done: n >= of && of > 0,
+        bar: n < of,
+        page: page.into(),
+        tab,
+    };
+    let awards_sub = match missing.len() {
+        0 => String::new(),
+        1 => format!("1 missing: {}", missing[0]),
+        n => format!("{n} missing"),
     };
     api.set_stats(model(vec![
-        card("Quests cleared", done, real.len(), format!("Village ★{} · Hub ★{}", c.village_star(), c.hub_star())),
-        card("Hunter Arts", arts, tables().arts.len(), String::new()),
-        card("Canteen dishes", dishes, 99, String::new()),
-        card("Awards", awards, 131, String::new()),
-        card("Large monsters met", hunted, large.len(), String::new()),
-        card("Gold crowns", gold, large.len(), format!("{mini} mini crowns")),
-        StatCard { title: "Hunter Rank".into(), value: ch.hr.to_string().into(), sub: format!("{} HR points", ch.hr_points).into(), progress: ch.hr as f32 / 999.0 },
-        StatCard { title: "Zenny".into(), value: ch.funds.to_string().into(), sub: playtime(ch.playtime).into(), progress: ch.funds as f32 / 9_999_999.0 },
+        card("Quests cleared", done, real.len(), format!("Village ★{} · Hub ★{}", c.village_star(), c.hub_star()), "quests", 0),
+        card("Hunter Arts", arts, t.arts.len(), String::new(), "collections", 0),
+        card("Canteen dishes", dishes, 99, String::new(), "collections", 1),
+        card("Awards", t.awards.len() - missing.len(), t.awards.len(), awards_sub, "collections", 3),
+        // what is counted is named, so 79 here and 93 on Monsters can both be right (07.2)
+        card("Large monsters met", met, listed.len(), "Guild Card list".into(), "monsters", 0),
+        card("Gold crowns", gold, listed.len(), format!("{} mini crowns", num(mini as i64)), "monsters", 0),
+        // values, not progress: no bars (H1.2)
+        StatCard {
+            title: "Hunter Rank".into(),
+            value: num(chs.hr).into(),
+            sub: if chs.hr >= 999 { format!("Max · {} HR points", num(chs.hr_points)) } else { format!("{} HR points", num(chs.hr_points)) }.into(),
+            page: "character".into(),
+            ..Default::default()
+        },
+        StatCard {
+            title: "Zenny".into(),
+            value: num(chs.funds).into(),
+            sub: if chs.funds >= character::MAX_FUNDS { "Max" } else { "" }.into(),
+            page: "character".into(),
+            ..Default::default()
+        },
     ]));
-    api.set_goals(model(
-        goals::ALL
-            .iter()
-            .map(|g| Goal { id: g.id.into(), title: g.title.into(), detail: g.detail.into(), edits: goals::edits(g.id, s, st.slot) as i32 })
-            .collect(),
-    ));
+    let mut cards = vec![];
+    let mut done_goals = vec![];
+    for g in &goals::GOALS {
+        let staged = st.ops.iter().find(|o| o.slot == st.slot && o.key == format!("goal:{}", g.id));
+        let p = goals::plan(g.id, s, st.slot);
+        let goal = |state: i32, detail: String, cnt: String, op: i32| Goal {
+            id: g.id.into(),
+            title: p.title.clone().into(),
+            detail: detail.into(),
+            count: cnt.into(),
+            confidence: conf(g.conf),
+            state,
+            op,
+        };
+        match staged {
+            Some(o) => cards.push(goal(1, "Its changes are in Review. Nothing is written until you press Write.".into(), String::new(), o.id)),
+            None if p.blocked => cards.push(goal(3, p.summary.clone(), p.count.clone(), 0)),
+            None if p.lines.is_empty() => done_goals.push(goal(2, p.summary.clone(), String::new(), 0)),
+            None => cards.push(goal(0, p.summary.clone(), p.count.clone(), 0)),
+        }
+    }
+    api.set_goals(model(cards));
+    api.set_goals_done(model(done_goals));
 }
 
 fn character_page(ui: &AppWindow, st: &State) {
@@ -303,6 +531,7 @@ fn character_page(ui: &AppWindow, st: &State) {
     let c = character::get(s, st.base());
     let mut s2 = s.clone();
     let p = Char::new(&mut s2, st.slot);
+    let was = |t: Target| -> SharedString { st.was(t).into() };
     ui.global::<Api>().set_character(CharacterInfo {
         name: c.name.into(),
         hr: c.hr as i32,
@@ -320,6 +549,16 @@ fn character_page(ui: &AppWindow, st: &State) {
         },
         points_lr: model(c.points_lr.iter().map(|&v| v as i32).collect()),
         points_g: model(c.points_g.iter().map(|&v| v as i32).collect()),
+        was_name: was(Target::Name),
+        was_hr: was(Target::Hr),
+        was_hr_points: was(Target::HrPoints),
+        was_funds: was(Target::Funds),
+        was_wycademy: was(Target::Wycademy),
+        was_playtime: was(Target::Playtime),
+        was_village_star: was(Target::VillageStar),
+        was_hub_star: was(Target::HubStar),
+        was_lr: model((0..4).map(|v| was(Target::Points(v, false))).collect()),
+        was_g: model((0..4).map(|v| was(Target::Points(v, true))).collect()),
     });
 }
 
@@ -334,10 +573,7 @@ fn items_page(ui: &AppWindow, st: &State) {
     let store = store_of(ui);
     let all = items::all(s, base, store);
     let f = view(|v| v.item_filter.to_lowercase());
-    let (off, _) = match store {
-        Store::Box => (items::BOX, 0),
-        Store::Pouch => (items::POUCH, 0),
-    };
+    let off = if store == Store::Box { items::BOX } else { items::POUCH };
     let rows: Vec<ItemSlot> = all
         .iter()
         .enumerate()
@@ -345,6 +581,7 @@ fn items_page(ui: &AppWindow, st: &State) {
         .map(|(i, x)| {
             let (img, has) = if x.is_empty() { (Image::default(), false) } else { icon(assets::item_icon(x.id)) };
             let bit = 19 * i;
+            let changed = st.changed(base + off + bit / 8, 3) && !st.was(Target::Item(store, i)).is_empty();
             ItemSlot {
                 slot: i as i32,
                 id: x.id as i32,
@@ -352,22 +589,35 @@ fn items_page(ui: &AppWindow, st: &State) {
                 count: x.count as i32,
                 icon: img,
                 has_icon: has,
-                changed: st.changed(base + off + bit / 8, 3),
+                changed,
+                was: if changed { st.was(Target::Item(store, i)) } else { String::new() }.into(),
             }
         })
         .collect();
     api.set_item_used(all.iter().filter(|x| !x.is_empty()).count() as i32);
     api.set_item_total(all.len() as i32);
     api.set_item_slots(model(rows));
-    api.set_loadouts(model(
-        (0..items::LOADOUT_N)
-            .map(|k| {
-                let l = items::loadout(s, base, k);
-                let used: Vec<String> = l.items.iter().filter(|x| x.0 != 0).map(|x| format!("{} ×{}", assets::item_name(x.0), x.1)).collect();
-                LoadoutRow { index: k as i32, name: l.name.into(), used: !used.is_empty(), summary: used.join(", ").into() }
-            })
-            .collect(),
-    ));
+    // runs of empty loadouts collapse into one row (C8)
+    let mut lrows: Vec<LoadoutRow> = vec![];
+    let mut run: Option<(usize, usize)> = None;
+    let flush = |run: &mut Option<(usize, usize)>, lrows: &mut Vec<LoadoutRow>| {
+        if let Some((a, b)) = run.take() {
+            let name = if a == b { format!("Loadout {} · empty", a + 1) } else { format!("Loadouts {}–{} · empty", a + 1, b + 1) };
+            lrows.push(LoadoutRow { index: -1, name: name.into(), summary: "".into(), used: false });
+        }
+    };
+    for k in 0..items::LOADOUT_N {
+        let l = items::loadout(s, base, k);
+        let used: Vec<String> = l.items.iter().filter(|x| x.0 != 0).map(|x| format!("{} ×{}", assets::item_name(x.0), x.1)).collect();
+        if used.is_empty() {
+            run = Some(run.map_or((k, k), |(a, _)| (a, k)));
+            continue;
+        }
+        flush(&mut run, &mut lrows);
+        lrows.push(LoadoutRow { index: k as i32, name: l.name.into(), used: true, summary: used.join(", ").into() });
+    }
+    flush(&mut run, &mut lrows);
+    api.set_loadouts(model(lrows));
     picker(ui);
 }
 
@@ -444,71 +694,109 @@ fn equip_picker(ui: &AppWindow) {
 fn equipment_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let s = st.save();
+    let orig = st.orig();
     let base = st.base();
     let owner = owner_of(ui);
     let off = if owner == Owner::Hunter { equipment::BOX } else { equipment::PALICO_BOX };
-    let f = view(|v| v.equip_filter.clone());
+    let (f, q) = view(|v| (v.equip_filter.clone(), v.equip_list_search.to_lowercase()));
+    let mut used = 0;
     let rows: Vec<EquipRow> = (0..owner.len())
         .filter_map(|i| {
             let e = equipment::get(s, base, owner, i);
             let k = e.kind();
+            used += !e.is_empty() as usize;
             if !equip_keep(&f, k) {
+                return None;
+            }
+            let (title, sub) = match k {
+                Kind::Empty => ("Empty".to_string(), String::new()),
+                Kind::Talisman => (talisman_skills(&e), format!("{} · Talisman", equip_name(owner, &e))),
+                // Palico gear has no level or decorations; its type only when the name doesn't say it (K3)
+                _ if owner == Owner::Palico => {
+                    let (name, kind) = (equip_name(owner, &e), kind_label(k));
+                    let sub = if name.starts_with(&kind) { String::new() } else { kind };
+                    (name, sub)
+                }
+                _ => {
+                    let decos = e.decos().iter().filter(|&&d| d != 0).count();
+                    let mut sub = vec![kind_label(k), format!("Lv {}", e.level())];
+                    if decos > 0 {
+                        sub.push(count(decos, "decoration", "decorations"));
+                    }
+                    if e.transmog() != 0 {
+                        sub.push("transmog".into());
+                    }
+                    (equip_name(owner, &e), sub.join(" · "))
+                }
+            };
+            // search matches the name, the weapon type and talisman skills (08.2)
+            if !q.is_empty() && !title.to_lowercase().contains(&q) && !sub.to_lowercase().contains(&q) && (i + 1).to_string() != q {
                 return None;
             }
             let rarity = piece_rarity(owner, &e);
             let (img, has) = icon(assets::equip_icon(k.code(), rarity));
-            let rgb = assets::rarity_rgb(rarity);
-            let detail = match k {
-                Kind::Empty => String::new(),
-                Kind::Talisman => {
-                    let t = e.talisman().unwrap();
-                    let mut d = vec![];
-                    for j in 0..2 {
-                        if t.skills[j] != 0 {
-                            d.push(format!("{} {:+}", skill_name(t.skills[j]), t.points[j]));
-                        }
-                    }
-                    d.push(format!("{} slot{}", t.slots, if t.slots == 1 { "" } else { "s" }));
-                    d.join(", ")
-                }
-                _ => {
-                    let decos = e.decos().iter().filter(|&&d| d != 0).count();
-                    format!("Lv {}{}{}", e.level(), if decos > 0 { format!(" · {decos} deco") } else { String::new() }, if e.transmog() != 0 { " · transmog" } else { "" })
+            let changed = st.changed(base + off + equipment::ENTRY * i, equipment::ENTRY);
+            let status = if !changed {
+                ""
+            } else {
+                let was = equipment::get(orig, base, owner, i);
+                if was.is_empty() && !e.is_empty() {
+                    "New · in Review"
+                } else if e.is_empty() {
+                    "Removed · in Review"
+                } else {
+                    "Changed · in Review"
                 }
             };
-            Some(EquipRow {
-                slot: i as i32,
-                kind: kind_label(k).into(),
-                kind_code: k.code() as i32,
-                name: equip_name(owner, &e).into(),
-                level: e.level() as i32,
-                detail: detail.into(),
-                icon: img,
-                has_icon: has,
-                rarity: slint::Color::from_rgb_u8(rgb[0], rgb[1], rgb[2]),
-                changed: st.changed(base + off + equipment::ENTRY * i, equipment::ENTRY),
-            })
+            Some(EquipRow { slot: i as i32, kind_code: k.code() as i32, title: title.into(), sub: sub.into(), icon: img, has_icon: has, changed, status: status.into() })
         })
         .collect();
+    api.set_equip_summary(
+        if owner == Owner::Hunter {
+            format!("Hunter box: {} / {} slots used · confirmed in game except where marked", num(used as i64), num(owner.len() as i64))
+        } else {
+            format!("Palico box: {} / {} slots used · Palico gear names are not extracted from the game yet", num(used as i64), num(owner.len() as i64))
+        }
+        .into(),
+    );
+    // after selecting or adding, the row is scrolled into view (10.1)
+    if let Some(slot) = view(|v| v.equip_jump.take()) {
+        if let Some(row) = rows.iter().position(|r| r.slot == slot) {
+            jump(ui, Some(row), "");
+        }
+    }
     api.set_equip_rows(model(rows));
     let sel = view(|v| v.equip_sel);
-    let mut d = EquipDetail { slot: -1, ..Default::default() };
+    let mut d = EquipDetail { slot: -1, category: -1, ..Default::default() };
     if sel >= 0 && (sel as usize) < owner.len() {
-        let e = equipment::get(s, base, owner, sel as usize);
+        let i = sel as usize;
+        let e = equipment::get(s, base, owner, i);
         let k = e.kind();
-        let deco = |i: u16| if i == 0 { String::new() } else { assets::item_name(i) };
         let ds = e.decos();
         let t = e.talisman();
+        // one row per decoration slot the piece has (10.3): a talisman's slot count is in
+        // the save; for other pieces only the decorations present are known
+        let decos: Vec<DecoRow> = match t {
+            Some(t) => (0..(t.slots as usize).min(3)).map(|j| DecoRow { index: j as i32, name: if ds[j] == 0 { "".into() } else { assets::item_name(ds[j]).into() } }).collect(),
+            None => (0..3).filter(|&j| ds[j] != 0).map(|j| DecoRow { index: j as i32, name: assets::item_name(ds[j]).into() }).collect(),
+        };
+        let field = tables()
+            .fields
+            .iter()
+            .find(|fl| fl.block == "char1" && fl.rel <= off && off < fl.rel + fl.size)
+            .map(|fl| fl.label.clone())
+            .unwrap_or_default();
+        let was_e = equipment::get(orig, base, owner, i);
+        let staged = st.changed(base + off + equipment::ENTRY * i, equipment::ENTRY);
         d = EquipDetail {
             slot: sel,
             kind: kind_label(k).into(),
             kind_code: k.code() as i32,
-            name: equip_name(owner, &e).into(),
+            name: if k == Kind::Talisman { talisman_skills(&e) } else { equip_name(owner, &e) }.into(),
             id: e.id() as i32,
             level: e.level() as i32,
-            deco1: deco(ds[0]).into(),
-            deco2: deco(ds[1]).into(),
-            deco3: deco(ds[2]).into(),
+            was_level: if staged && was_e.kind() == k && was_e.id() == e.id() && was_e.level() != e.level() { num(was_e.level()) } else { String::new() }.into(),
+            decos: model(decos),
             transmog: if e.transmog() == 0 {
                 "".into()
             } else {
@@ -521,10 +809,12 @@ fn equipment_page(ui: &AppWindow, st: &State) {
             skill2: t.map(|t| t.skills[1] as i32).unwrap_or(0),
             points2: t.map(|t| t.points[1] as i32).unwrap_or(0),
             slots: t.map(|t| t.slots as i32).unwrap_or(0),
-            tier: t.map(|t| tier_name(t.tier)).unwrap_or("").into(),
+            tier: if k == Kind::Talisman { format!("{} · {}", equip_name(owner, &e), tier_name(t.unwrap().tier)) } else { String::new() }.into(),
             raw: e.raw.iter().map(|b| format!("{b:02x}")).collect::<Vec<_>>().join(" ").into(),
-            uses: if owner == Owner::Hunter { uses_label(s, base, sel as usize) } else { String::new() }.into(),
+            field: field.into(),
+            uses: if owner == Owner::Hunter { uses_label(s, base, i) } else { String::new() }.into(),
             category: equip_categories().iter().position(|&c| c == k).map_or(-1, |p| p as i32),
+            was: if staged { equip_value(owner, &was_e) } else { String::new() }.into(),
         };
     }
     api.set_equip_detail(d);
@@ -553,8 +843,7 @@ fn palico_page(ui: &AppWindow, st: &State) {
             PalicoRow {
                 index: i as i32,
                 name: p.name.into(),
-                level: p.level as i32,
-                bias: palico::BIASES.get(p.bias as usize).copied().unwrap_or("?").into(),
+                sub: format!("Lv {} · {}", p.level, palico::BIASES.get(p.bias as usize).copied().unwrap_or("?")).into(),
                 changed: st.changed(base + palico::LIST + palico::RECORD * i, palico::RECORD),
             }
         })
@@ -564,14 +853,19 @@ fn palico_page(ui: &AppWindow, st: &State) {
         sel = rows.first().map(|r| r.index).unwrap_or(-1);
         view(|v| v.palico_sel = sel);
     }
+    api.set_palico_summary(count(rows.len(), "Palico", "Palicoes").into());
     api.set_palicoes(model(rows));
     api.set_biases(strings(palico::BIASES.iter().map(|s| s.to_string())));
     let mv = |m: &[u8]| {
         let n = &assets::names().support_moves;
-        m.iter().filter(|&&x| x != palico::NO_MOVE && x != 0xFF).map(|&x| n.get(x as usize).cloned().unwrap_or_else(|| format!("#{x}"))).collect::<Vec<_>>().join(", ")
+        // 0 is "(No Move)", 57 an empty learned slot
+        let v: Vec<String> = m.iter().filter(|&&x| x != 0 && x != palico::NO_MOVE && x != 0xFF).map(|&x| n.get(x as usize).cloned().unwrap_or_else(|| format!("#{x}"))).collect();
+        if v.is_empty() { "None".to_string() } else { v.join(", ") }
     };
     api.set_palico(if sel >= 0 {
-        let p = palico::get(s, base, sel as usize);
+        let i = sel as usize;
+        let p = palico::get(s, base, i);
+        let was = |f: targets::Pal| -> SharedString { st.was(Target::Palico(i, f)).into() };
         PalicoDetail {
             index: sel,
             name: p.name.into(),
@@ -583,6 +877,12 @@ fn palico_page(ui: &AppWindow, st: &State) {
             owner: p.owner.into(),
             moves: mv(&p.moves).into(),
             learned: mv(&p.learned).into(),
+            was_name: was(targets::Pal::Name),
+            was_level: was(targets::Pal::Level),
+            was_exp: was(targets::Pal::Exp),
+            was_bias: was(targets::Pal::Bias),
+            was_greeting: was(targets::Pal::Greeting),
+            was_owner: was(targets::Pal::Owner),
         }
     } else {
         PalicoDetail { index: -1, ..Default::default() }
@@ -598,45 +898,82 @@ fn lock_text(l: &Lock) -> (String, bool) {
     }
 }
 
+/// Deviant of a Special Permit quest index.
+fn deviant_of(index: usize) -> Option<usize> {
+    (0..DEVIANTS.len()).find(|&d| {
+        let (q0, n) = Char::deviant_levels(d);
+        (q0..q0 + n).contains(&index)
+    })
+}
+
+/// Group of a quest on its tab: rank, or the deviant on Special Permit (R9).
+fn quest_group(q: &mhgu_save::data::Quest) -> String {
+    match deviant_of(q.index) {
+        Some(d) if q.category == "Special Permit" => format!("dev:{d}"),
+        _ => format!("rank:{}", q.rank),
+    }
+}
+
 fn quests_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let mut s2 = st.save().clone();
     let c = Char::new(&mut s2, st.slot);
     let tabs = quest_tabs();
     let tab = view(|v| v.quest_tab).min(tabs.len().saturating_sub(1));
+    let (search, missing) = view(|v| (v.quest_search.to_lowercase(), v.quest_missing));
     let cat = tabs.get(tab).cloned().unwrap_or_default();
     let mut qs: Vec<_> = Char::real_quests(true).into_iter().filter(|q| q.category == cat).collect();
-    qs.sort_by_key(|q| (q.rank.parse::<u32>().unwrap_or(99), q.id));
+    qs.sort_by_key(|q| (deviant_of(q.index).unwrap_or(0), q.rank.parse::<u32>().unwrap_or(99), q.id));
     let base = st.base();
+    let total = qs.len();
+    let done = qs.iter().filter(|q| c.quest(QuestBit::Cleared, q.index)).count();
     let mut rows = vec![];
-    let mut rank = String::from("\0");
-    let mut done = 0;
+    let mut group = String::from("\0");
     for q in &qs {
-        if q.rank != rank {
-            rank = q.rank.clone();
-            let label = if rank.is_empty() { cat.clone() } else { format!("{cat} {}★", rank) };
-            rows.push(QuestRow { header: true, name: label.into(), rank: rank.clone().into(), ..Default::default() });
-        }
         let cl = c.quest(QuestBit::Cleared, q.index);
-        done += cl as usize;
+        if (missing && cl) || (!search.is_empty() && !q.name.to_lowercase().contains(&search) && !q.id.to_string().contains(&search)) {
+            continue;
+        }
+        let g = quest_group(q);
+        if g != group {
+            group = g.clone();
+            let members: Vec<_> = qs.iter().filter(|x| quest_group(x) == g).collect();
+            let open = members.iter().any(|x| !c.quest(QuestBit::Cleared, x.index));
+            let (label, action) = match deviant_of(q.index) {
+                Some(d) if cat == "Special Permit" => (DEVIANTS[d].to_string(), "Mark all cleared".to_string()),
+                _ if q.rank.is_empty() => (cat.clone(), "Mark all cleared".to_string()),
+                _ => (format!("{cat} {}★", q.rank), format!("Mark {}★ cleared", q.rank)),
+            };
+            let cleared = members.iter().filter(|x| c.quest(QuestBit::Cleared, x.index)).count();
+            rows.push(QuestRow {
+                header: true,
+                name: format!("{label} · {} / {}", cleared, members.len()).into(),
+                group: g.into(),
+                action: if open { action } else { String::new() }.into(),
+                ..Default::default()
+            });
+        }
         let (lock, locked) = if cl { (String::new(), false) } else { lock_text(&c.lock(q.id)) };
         let byte = |o: usize| base + o + q.index / 8;
+        let changed = [mhgu_save::progress::CLEARED, mhgu_save::progress::SEEN, mhgu_save::progress::FAILED].iter().any(|&o| st.changed(byte(o), 1));
         rows.push(QuestRow {
             index: q.index as i32,
             id: q.id as i32,
             name: q.name.clone().into(),
-            rank: q.rank.clone().into(),
+            sub: format!("#{}{}", q.id, if lock.is_empty() { String::new() } else { format!(" · {lock}") }).into(),
             cleared: cl,
             seen: c.quest(QuestBit::Seen, q.index),
             failed: c.quest(QuestBit::Failed, q.index),
-            lock: lock.into(),
             locked,
             prowler: q.prowler,
-            changed: [mhgu_save::progress::CLEARED, mhgu_save::progress::SEEN, mhgu_save::progress::FAILED].iter().any(|&o| st.changed(byte(o), 1)),
+            changed,
+            was: if changed { st.was(Target::Quest(q.index)) } else { String::new() }.into(),
             header: false,
+            group: SharedString::default(),
+            action: SharedString::default(),
         });
     }
-    api.set_quest_summary(format!("{cat}: {done} of {} cleared", qs.len()).into());
+    api.set_quest_summary(format!("{cat}: {} / {} cleared · confirmed in game except where marked", num(done as i64), num(total as i64)).into());
     api.set_quest_tabs(strings(tabs));
     api.set_quest_tab(tab as i32);
     api.set_quests(model(rows));
@@ -646,43 +983,56 @@ fn requests_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let mut s2 = st.save().clone();
     let c = Char::new(&mut s2, st.slot);
-    let f = view(|v| v.request_filter.clone());
+    let (f, q) = view(|v| (v.request_filter.clone(), v.request_search.to_lowercase()));
     let base = st.base();
+    let (mut open, mut done_n) = (0, 0);
     let rows: Vec<RequestRow> = tables()
         .requests
         .iter()
         .filter_map(|r| {
             let acc = r.accept_flag.is_some_and(|x| c.flag(x));
             let done = r.done_flag.is_some_and(|x| c.flag(x));
+            if done { done_n += 1 } else { open += 1 }
             let keep = match f.as_str() {
                 "open" => !done,
                 "done" => done,
                 _ => true,
             };
-            if !keep {
-                return None;
-            }
-            let waiting = if acc { String::new() } else { c.offer_missing(r.index).join("; ") };
             let village = match r.village.as_str() {
                 "Bherna" | "Kokoto" | "Pokke" | "Yukumo" => r.village.clone(),
                 _ => "Hub".to_string(),
             };
             let name = if r.quest_name.is_empty() { "Delivery request".into() } else { r.quest_name.clone() };
+            if !keep || (!q.is_empty() && !name.to_lowercase().contains(&q) && !village.to_lowercase().contains(&q)) {
+                return None;
+            }
+            let waiting = if acc { String::new() } else { c.offer_missing(r.index).join("; ") };
             let flag_changed = |x: Option<usize>| x.is_some_and(|x| st.changed(base + mhgu_save::progress::FLAGS + x / 8, 1));
+            let changed = flag_changed(r.accept_flag) || flag_changed(r.done_flag);
             Some(RequestRow {
                 index: r.index as i32,
-                initial: village.chars().next().map(String::from).unwrap_or_default().into(),
-                village: village.clone().into(),
                 name: name.into(),
+                sub: format!("{village} · #{}{}", r.index, if waiting.is_empty() { String::new() } else { format!(" · waits for: {waiting}") }).into(),
                 accepted: acc,
                 completed: done,
-                waiting: waiting.into(),
                 has_flags: r.accept_flag.is_some(),
-                changed: flag_changed(r.accept_flag) || flag_changed(r.done_flag),
+                changed,
+                was: if changed { st.was(Target::Request(r.index)) } else { String::new() }.into(),
             })
         })
         .collect();
+    api.set_request_summary(format!("{} open · {} completed", num(open), num(done_n)).into());
     api.set_requests(model(rows));
+}
+
+/// Base name of a Hunter Art level ("Ground Slash III" -> "Ground Slash").
+fn art_base(name: &str) -> &str {
+    for suffix in [" III", " II", " I"] {
+        if let Some(b) = name.strip_suffix(suffix) {
+            return b;
+        }
+    }
+    name
 }
 
 fn collections_page(ui: &AppWindow, st: &State) {
@@ -690,28 +1040,74 @@ fn collections_page(ui: &AppWindow, st: &State) {
     let mut s2 = st.save().clone();
     let c = Char::new(&mut s2, st.slot);
     let tab = view(|v| v.collection);
+    let (q, missing) = view(|v| (v.check_search.to_lowercase(), v.check_missing));
     let t = tables();
+    let keep = |name: &str, on: bool| !(missing && on) && (q.is_empty() || name.to_lowercase().contains(&q));
+    let changed_of = |tg: Target| !st.was(tg).is_empty();
+    // counts in each tab (H5.1)
+    let arts_on = t.arts.iter().filter(|a| c.art(a.0)).count();
+    let dishes_on = (0..99).filter(|&b| c.dish(b)).count();
+    let ingr_on = (0..45).filter(|&b| c.ingredient(b)).count();
+    let awards_on = t.awards.iter().filter(|a| c.award(a.0)).count();
+    api.set_collection_tabs(strings([
+        format!("Hunter Arts {} / {}", arts_on, t.arts.len()),
+        format!("Canteen dishes {dishes_on} / 99"),
+        format!("Canteen ingredients {ingr_on} / 45"),
+        format!("Awards {} / {}", awards_on, t.awards.len()),
+        "Deviants".to_string(),
+    ]));
     let rows: Vec<CheckRow> = match tab {
-        0 => t.arts.iter().map(|(id, n)| CheckRow { key: *id as i32, name: n.clone().into(), on: c.art(*id), ..Default::default() }).collect(),
         1 | 2 => t
             .canteen
             .iter()
             .filter(|(k, ..)| k == if tab == 1 { "dish" } else { "ingredient" })
-            .map(|(_, b, n, g)| CheckRow { key: *b as i32, name: n.clone().into(), group: g.clone().into(), on: if tab == 1 { c.dish(*b) } else { c.ingredient(*b) }, ..Default::default() })
+            .map(|(_, b, n, _)| {
+                let on = if tab == 1 { c.dish(*b) } else { c.ingredient(*b) };
+                let tg = if tab == 1 { Target::Dish(*b) } else { Target::Ingredient(*b) };
+                CheckRow { key: *b as i32, name: n.clone().into(), on, changed: changed_of(tg), ..Default::default() }
+            })
+            .filter(|r| keep(&r.name, r.on))
             .collect(),
         3 => t
             .awards
             .iter()
-            .map(|(b, g, n)| {
+            .filter(|(b, _, n)| keep(n, c.award(*b)))
+            .map(|(b, _, n)| {
                 let (img, has) = icon(assets::award_icon(*b));
-                CheckRow { key: *b as i32, name: n.clone().into(), group: g.clone().into(), on: c.award(*b), changed: false, icon: img, has_icon: has }
+                CheckRow { key: *b as i32, name: n.clone().into(), on: c.award(*b), changed: changed_of(Target::Award(*b)), icon: img, has_icon: has }
             })
             .collect(),
         _ => vec![],
     };
-    let on = rows.iter().filter(|r| r.on).count();
-    api.set_checks_summary(if tab < 4 { format!("{on} of {}", rows.len()) } else { "18 deviants".into() }.into());
+    // Hunter Arts grouped by art: I, II and III on one row (H5.3)
+    let mut arts: Vec<(String, Vec<u32>)> = vec![];
+    for (id, n) in &t.arts {
+        let b = art_base(n);
+        match arts.last_mut() {
+            Some(last) if last.0 == b && n != b => last.1.push(*id),
+            _ => arts.push((b.to_string(), vec![*id])),
+        }
+    }
+    let art_rows: Vec<ArtRow> = arts
+        .into_iter()
+        .filter(|(n, ids)| keep(n, ids.iter().all(|&i| c.art(i))))
+        .map(|(n, ids)| ArtRow {
+            name: n.into(),
+            on: model(ids.iter().map(|&i| c.art(i)).collect()),
+            changed: ids.iter().any(|&i| changed_of(Target::Art(i))),
+            ids: model(ids.iter().map(|&i| i as i32).collect()),
+        })
+        .collect();
+    let summary = match tab {
+        0 => format!("Hunter Arts: {} / {}", arts_on, t.arts.len()),
+        1 => format!("Canteen dishes: {dishes_on} / 99"),
+        2 => format!("Canteen ingredients: {ingr_on} / 45"),
+        3 => format!("Awards: {} / {}", awards_on, t.awards.len()),
+        _ => "18 deviants".into(),
+    };
+    api.set_checks_summary(format!("{summary} · confirmed in game except where marked").into());
     api.set_checks(model(rows));
+    api.set_arts(model(art_rows));
     let devs: Vec<DeviantRow> = DEVIANTS
         .iter()
         .enumerate()
@@ -728,20 +1124,29 @@ fn collections_page(ui: &AppWindow, st: &State) {
                 total: n as i32,
                 icon: img,
                 has_icon: has,
-                changed: false,
+                was_permits: st.was(Target::Permits(d)).into(),
+                was_levels: st.was(Target::Levels(d)).into(),
             }
         })
         .collect();
     api.set_deviants(model(devs));
 }
 
+/// Large monster that can still get a crown.
+fn misses_crown(i: usize, r: monsters::Record) -> bool {
+    let c = monsters::crowns(i, r);
+    monsters::meta(i).size_record && monsters::meta(i).family_of.is_none() && (!c.mini && !monsters::meta(i).fixed_size || c.large < 2)
+}
+
 fn monsters_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let s = st.save();
     let base = st.base();
-    let (f, large) = view(|v| (v.monster_filter.to_lowercase(), v.monster_large));
+    let (f, large, missing) = view(|v| (v.monster_filter.to_lowercase(), v.monster_large, v.monster_missing));
     let t = tables();
-    let mut met = 0;
+    let mut n_large = 0;
+    let mut listed = 0;
+    let was = |i: usize, m: Mon| -> SharedString { st.was(Target::Monster(i, m)).into() };
     let rows: Vec<MonsterRow> = t
         .monsters
         .iter()
@@ -750,8 +1155,9 @@ fn monsters_page(ui: &AppWindow, st: &State) {
         .filter_map(|m| {
             let meta = monsters::meta(m.index);
             let r = monsters::get(s, base, m.index);
-            met += (r.hunts + r.captures > 0) as usize;
-            if large && !m.large {
+            n_large += m.large as usize;
+            listed += meta.crown_awards as usize;
+            if (large && !m.large) || (missing && !misses_crown(m.index, r)) {
                 return None;
             }
             if !f.is_empty() && !m.name.to_lowercase().contains(&f) {
@@ -770,7 +1176,17 @@ fn monsters_page(ui: &AppWindow, st: &State) {
             } else if let Some(b) = meta.base_cm.filter(|_| meta.size_record && r.max > 0 && r.min > 0) {
                 sub.push(format!("{:.0}–{:.0} cm", b * r.min as f32 / 100.0, b * r.max as f32 / 100.0));
             }
+            let thresholds = if meta.fixed_size {
+                "fixed size: any record is gold".to_string()
+            } else {
+                format!("mini ≤ {} % · silver ≥ {} % · gold ≥ {} %", meta.mini_le, meta.silver_ge, meta.gold_ge)
+            };
             let notes = monsters::notes(s, base, m.index);
+            let changed = st.changed(base + monsters::HUNTS + 2 * m.index, 2)
+                || st.changed(base + monsters::CAPTURES + 2 * m.index, 2)
+                || st.changed(base + monsters::SIZES + 4 * m.index, 4)
+                || meta.notes_bit.is_some_and(|b| st.changed(base + monsters::NOTES + b / 8, 1));
+            let w = |f: Mon| if changed { was(m.index, f) } else { SharedString::default() };
             Some(MonsterRow {
                 index: m.index as i32,
                 name: m.name.clone().into(),
@@ -778,22 +1194,28 @@ fn monsters_page(ui: &AppWindow, st: &State) {
                 has_icon: has,
                 large: m.large,
                 has_size: meta.size_record,
+                sub: sub.join(" · ").into(),
                 hunts: r.hunts as i32,
                 captures: r.captures as i32,
                 min: r.min as i32,
                 max: r.max as i32,
-                sub: sub.join(" · ").into(),
                 mini: crown.mini,
                 crown: crown.large as i32,
                 notes: notes.unwrap_or(false),
                 has_notes: notes.is_some(),
-                changed: st.changed(base + monsters::HUNTS + 2 * m.index, 2)
-                    || st.changed(base + monsters::CAPTURES + 2 * m.index, 2)
-                    || st.changed(base + monsters::SIZES + 4 * m.index, 4),
+                thresholds: thresholds.into(),
+                was_hunts: w(Mon::Hunts),
+                was_captures: w(Mon::Captures),
+                was_min: w(Mon::Min),
+                was_max: w(Mon::Max),
+                was_notes: w(Mon::Notes),
+                changed,
             })
         })
         .collect();
-    api.set_monster_summary(format!("{met} monsters met · {} shown", rows.len()).into());
+    api.set_monster_summary(
+        format!("{} large monsters, {} of them on the Guild Card list · {} shown · confirmed in game except where marked", n_large, listed, rows.len()).into(),
+    );
     api.set_monsters(model(rows));
 }
 
@@ -822,6 +1244,7 @@ fn fields_page(ui: &AppWindow, st: &State) {
         .collect();
     api.set_fields(model(rows));
     let sel = view(|v| v.field_sel);
+    api.set_field_sel(sel);
     if let Some(fl) = (sel >= 0).then(|| fields.get(sel as usize)).flatten() {
         let a = abs(fl);
         let n = fl.size.min(512);
@@ -836,14 +1259,60 @@ fn fields_page(ui: &AppWindow, st: &State) {
             hex.push('\n');
         }
         if fl.size > n {
-            hex.push_str(&format!("… {} more bytes\n", fl.size - n));
+            hex.push_str(&format!("… {} more bytes\n", num(fl.size as i64 - n as i64)));
         }
         api.set_hex(hex.into());
-        api.set_field_info(format!("{} · {} bytes · {} · {}\n{}", fl.manager, fl.size, if fl.block == "char1" { format!("base + 0x{:X}", fl.rel) } else { format!("block {}", fl.block) }, fl.confidence, fl.label).into());
+        let c = conf_of(&fl.confidence);
+        let tag = match c {
+            Confidence::Confirmed => "Confirmed",
+            Confidence::Derived => "Derived",
+            _ => "Unresolved",
+        };
+        api.set_field_info(
+            format!(
+                "{}\n{} · {} · {} · {tag}",
+                fl.label,
+                fl.manager,
+                count(fl.size, "byte", "bytes"),
+                if fl.block == "char1" { format!("base + 0x{:X}", fl.rel) } else { format!("block {}", fl.block) }
+            )
+            .into(),
+        );
     } else {
         api.set_hex("".into());
-        api.set_field_info("Select a row. * marks bytes changed by pending edits.".into());
+        api.set_field_info("".into());
     }
+}
+
+/// The Open screen's list: each detected save with its characters (R12).
+pub fn detected(ui: &AppWindow) {
+    let rows: Vec<DetectedSave> = system::detect_saves()
+        .into_iter()
+        .map(|p| {
+            let info = system::save_info(&p);
+            let (title, sub) = match &info {
+                Some(i) if !i.names.is_empty() => {
+                    let (n, hr, t) = &i.names[0];
+                    let more = if i.names.len() > 1 {
+                        format!(" · also {}", i.names[1..].iter().map(|x| x.0.clone()).collect::<Vec<_>>().join(", "))
+                    } else {
+                        String::new()
+                    };
+                    (n.clone(), format!("HR {} · {}{more}", num(*hr), fmt::playtime(*t)))
+                }
+                Some(_) => ("No characters yet".to_string(), String::new()),
+                None => ("Unreadable save".to_string(), String::new()),
+            };
+            DetectedSave {
+                path: p.display().to_string().into(),
+                title: title.into(),
+                sub: sub.into(),
+                when: info.and_then(|i| i.modified).map(fmt::when).unwrap_or_default().into(),
+                short: fmt::elide_path(&p.display().to_string(), 70).into(),
+            }
+        })
+        .collect();
+    ui.global::<Api>().set_detected(model(rows));
 }
 
 // --- actions --------------------------------------------------------------------------
@@ -857,15 +1326,110 @@ pub fn open(ui: &AppWindow, st: &Shared, p: &Path) {
             view(|v| {
                 v.equip_sel = -1;
                 v.palico_sel = -1;
+                v.field_sel = -1;
             });
             refresh(ui, &st.borrow());
             let n = st.borrow().doc.as_ref().map(|d| (0..3).filter(|&k| d.save.slot_used(k)).count()).unwrap_or(0);
-            toast(ui, format!("Save opened: {n} character{}", if n == 1 { "" } else { "s" }), false);
+            toast(ui, format!("Save opened: {}", count(n, "character", "characters")), false);
         }
         Err(e) => {
             ui.global::<Api>().set_warning(format!("Could not open {}: {e}", p.display()).into());
             toast(ui, e, true);
         }
+    }
+}
+
+/// The staged target with this key (current character first).
+fn find_target(st: &State, key: &str) -> Option<Target> {
+    let mut ops: Vec<&crate::state::Op> = st.ops.iter().collect();
+    ops.sort_by_key(|o| o.slot != st.slot);
+    ops.iter().flat_map(|o| o.values.iter()).map(|(t, _)| *t).find(|t| t.key() == key)
+}
+
+/// Show the field of a Review entry: its page, a view that lists it (01.6).
+fn goto(ui: &AppWindow, st: &State, key: &str) {
+    let Some(t) = find_target(st, key) else { return };
+    let api = ui.global::<Api>();
+    view(|v| match t {
+        Target::Item(s, _) => {
+            v.item_filter.clear();
+            api.set_item_filter("".into());
+            api.set_item_store(if s == Store::Pouch { 1 } else { 0 });
+        }
+        Target::Equip(o, i) => {
+            api.set_equip_owner(if o == Owner::Palico { 1 } else { 0 });
+            v.equip_filter = "all".into();
+            v.equip_list_search.clear();
+            api.set_equip_filter("all".into());
+            api.set_equip_search("".into());
+            v.equip_sel = i as i32;
+        }
+        Target::Palico(i, _) => v.palico_sel = i as i32,
+        Target::Quest(i) => {
+            if let Some(q) = tables().quests.iter().find(|q| q.index == i) {
+                v.quest_tab = quest_tabs().iter().position(|c| *c == q.category).unwrap_or(0);
+            }
+            v.quest_search.clear();
+            v.quest_missing = false;
+            api.set_quest_search("".into());
+            api.set_quest_missing(false);
+        }
+        Target::Request(_) => {
+            v.request_filter = "all".into();
+            v.request_search.clear();
+            api.set_request_filter("all".into());
+            api.set_request_search("".into());
+        }
+        Target::Art(_) | Target::Dish(_) | Target::Ingredient(_) | Target::Award(_) | Target::Permits(_) | Target::Levels(_) => {
+            v.collection = match t {
+                Target::Art(_) => 0,
+                Target::Dish(_) => 1,
+                Target::Ingredient(_) => 2,
+                Target::Award(_) => 3,
+                _ => 4,
+            };
+            api.set_collection_tab(v.collection as i32);
+            v.check_search.clear();
+            v.check_missing = false;
+            api.set_check_search("".into());
+            api.set_check_missing(false);
+        }
+        Target::Monster(..) => {
+            v.monster_filter.clear();
+            v.monster_large = false;
+            v.monster_missing = false;
+            api.set_monster_filter("".into());
+            api.set_monster_large_only(false);
+            api.set_monster_missing(false);
+        }
+        _ => {}
+    });
+    view(|v| v.goto = Some(key.to_string()));
+    api.set_review_open(api.get_review_open() && ui.window().size().width as f32 / ui.window().scale_factor() >= 1440.0);
+    if api.get_page().as_str() == t.page() {
+        refresh(ui, st);
+    } else {
+        // the page timer refreshes the new page, which then takes the goto
+        api.set_page(t.page().into());
+    }
+}
+
+/// Row of the field `key` in its page's current model.
+fn goto_row(ui: &AppWindow, key: &str) -> Option<usize> {
+    let api = ui.global::<Api>();
+    use slint::Model;
+    let kind = key.split(':').next()?;
+    // the row id: the monster index ("mon:48:hunts"), else the last field ("item:box:12")
+    let n = if kind == "mon" { key.split(':').nth(1) } else { key.rsplit(':').next() }?;
+    let n = n.parse::<i32>().ok()?;
+    match kind {
+        "item" => api.get_item_slots().iter().position(|r| r.slot == n),
+        "equip" => api.get_equip_rows().iter().position(|r| r.slot == n),
+        "quest" => api.get_quests().iter().position(|r| !r.header && r.index == n),
+        "request" => api.get_requests().iter().position(|r| r.index == n),
+        "check" => api.get_checks().iter().position(|r| r.key == n),
+        "mon" => api.get_monsters().iter().position(|r| r.index == n),
+        _ => None,
     }
 }
 
@@ -887,14 +1451,48 @@ macro_rules! on {
     }};
 }
 
+/// The full id of a page's bulk action: the store or tab it applies to.
+fn bulk_id(ui: &AppWindow, id: &str) -> String {
+    let api = ui.global::<Api>();
+    match id {
+        "items:sort" | "items:max" | "items:empty" => format!("{id}:{}", if store_of(ui) == Store::Pouch { "pouch" } else { "box" }),
+        "checks:all" | "checks:none" => format!("{id}:{}", api.get_collection_tab()),
+        _ => id.to_string(),
+    }
+}
+
+/// Run a goal or bulk action as one edit; only values that change are listed.
+fn apply_plan(ui: &AppWindow, s: &mut State, id: &str) {
+    let slot = s.slot;
+    let p = goals::plan(id, s.save(), slot);
+    if p.lines.is_empty() {
+        return;
+    }
+    let goal = goals::GOALS.iter().find(|g| g.id == id);
+    let e = Edit {
+        key: if goal.is_some() { format!("goal:{id}") } else { String::new() },
+        title: p.review.clone(),
+        detail: p.detail.clone(),
+        note: p.note.clone(),
+        conf: p.conf.unwrap_or(Conf::Confirmed),
+        targets: vec![],
+    };
+    let id2 = id.to_string();
+    s.edit(e, |sv, _| {
+        let pre = sv.clone();
+        goals::apply(&id2, sv, slot).into_iter().filter(|t| t.read(&pre, slot) != t.read(sv, slot)).collect()
+    });
+    toast_full(ui, "Added to Review", &p.review, "", ToastAct::None, false);
+}
+
 pub fn wire(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
+    detected(ui);
 
     // page switches refresh their model
     {
         let w = ui.as_weak();
         let st2 = st.clone();
-        slint::Timer::default().start(slint::TimerMode::Repeated, std::time::Duration::from_secs(3600), || {});
         let page = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
         let t = slint::Timer::default();
         t.start(slint::TimerMode::Repeated, std::time::Duration::from_millis(100), move || {
@@ -931,6 +1529,22 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             }
         });
     }
+    {
+        let st = st.clone();
+        api.on_open_folder(move || {
+            if let Some(d) = st.borrow().doc.as_ref().and_then(|d| d.loc.opened.parent().map(Path::to_path_buf)) {
+                system::open_folder(&d);
+            }
+        });
+    }
+    {
+        let w = ui.as_weak();
+        api.on_copy_path(move || {
+            if let Some(ui) = w.upgrade() {
+                toast(&ui, "Path copied", false);
+            }
+        });
+    }
     on!(ui, st, on_select_slot, |ui, s, k: i32| {
         if s.doc.is_some() {
             s.slot = k as usize;
@@ -945,15 +1559,67 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         s.undo(id);
         let _ = &ui;
     });
-    on!(ui, st, on_undo_all, |ui, s| {
-        s.undo_all();
+    on!(ui, st, on_undo_value, |ui, s, key: SharedString| {
+        s.undo_value(&key);
         let _ = &ui;
+    });
+    // Undo all says what it did and offers Redo (S10)
+    on!(ui, st, on_undo_all, |ui, s| {
+        let n = s.undo_all();
+        if n > 0 {
+            toast_full(&ui, format!("Undid {}", count(n, "change", "changes")), "", "Redo", ToastAct::Redo, false);
+        }
     });
     {
         let w = ui.as_weak();
+        let st = st.clone();
+        api.on_toast_act(move || {
+            let Some(ui) = w.upgrade() else { return };
+            let act = view(|v| std::mem::take(&mut v.toast_act));
+            ui.global::<Api>().set_toast("".into());
+            match act {
+                ToastAct::Redo => {
+                    let n = st.borrow_mut().redo_all();
+                    refresh(&ui, &st.borrow());
+                    if n > 0 {
+                        toast(&ui, format!("Redid {}", count(n, "change", "changes")), false);
+                    }
+                }
+                ToastAct::Restore(dir, when) => {
+                    let api = ui.global::<Api>();
+                    list_snapshots(&ui, &st.borrow());
+                    api.set_restore_ask(dir.display().to_string().into());
+                    api.set_restore_when(when.into());
+                    api.invoke_check_emulator();
+                    api.set_snapshots_open(true);
+                }
+                ToastAct::None => {}
+            }
+        });
+    }
+    {
+        let w = ui.as_weak();
+        let st = st.clone();
+        api.on_goto(move |key| {
+            if let Some(ui) = w.upgrade() {
+                goto(&ui, &st.borrow(), &key);
+            }
+        });
+    }
+    {
+        let w = ui.as_weak();
+        let st = st.clone();
         api.on_check_emulator(move || {
             if let Some(ui) = w.upgrade() {
-                ui.global::<Api>().set_emulator_running(!system::running_emulators().is_empty());
+                let running = system::running_emulators();
+                let api = ui.global::<Api>();
+                api.set_emulator_running(!running.is_empty());
+                if let Some(n) = running.first() {
+                    let ryujinx = n.to_lowercase().starts_with("ryujinx") || n.to_lowercase().starts_with("ryubing");
+                    api.set_emulator_name(if ryujinx { "Ryujinx".to_string() } else { n.clone() }.into());
+                } else if let Some(d) = st.borrow().doc.as_ref() {
+                    api.set_emulator_name(system::emulator_name(&d.loc.opened).into());
+                }
             }
         });
     }
@@ -961,15 +1627,22 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let running = system::running_emulators();
         if !running.is_empty() {
             toast(&ui, format!("Close {} first", running.join(", ")), true);
+            ui.global::<Api>().set_emulator_running(true);
             return false;
         }
+        let titles: Vec<String> = s.ops.iter().map(|o| if o.values.len() == 1 { o.values[0].0.label(s.save(), o.slot) } else { o.title.clone() }).collect();
+        let n = s.ops.len();
         let Some(doc) = s.doc.as_mut() else { return false };
-        let mut info = String::new();
+        let mut kept = None;
         if snapshot {
             let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
-            let stamp = chrono::Local::now().format("%Y-%m-%d_%H%M%S").to_string();
+            let now = chrono::Local::now();
+            let stamp = now.format("%Y-%m-%d_%H%M%S").to_string();
             match store::snapshot(&doc.loc, &system::snapshot_root().join(id), &stamp) {
-                Ok(p) => info = format!("Snapshot: {}\n", p.display()),
+                Ok(p) => {
+                    system::write_note(&p, &format!("Before: {}", fmt::list(&titles, 3)));
+                    kept = Some((p, fmt::when(now)));
+                }
                 Err(e) => {
                     toast(&ui, format!("Snapshot failed, nothing written: {e}"), true);
                     return false;
@@ -977,14 +1650,16 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             }
         }
         match store::write_all(&mut doc.save, &doc.loc) {
-            Ok(files) => {
-                let n = s.ops.len();
-                s.ops.clear();
-                if let Some(doc) = s.doc.as_mut() {
-                    doc.copies = doc.loc.copies.iter().map(|p| (p.clone(), store::CopyState::Same)).collect();
+            Ok(_) => {
+                s.written();
+                // after writing: a toast with Restore (02.5, S8)
+                match kept {
+                    Some((p, when)) => {
+                        let sub = format!("Snapshot from {} kept", when.trim_start_matches("Today, "));
+                        toast_full(&ui, format!("Wrote {}", count(n, "change", "changes")), &sub, "Restore…", ToastAct::Restore(p, when), false)
+                    }
+                    None => toast(&ui, format!("Wrote {} (no snapshot)", count(n, "change", "changes")), false),
                 }
-                info.push_str(&format!("{n} changes written to {} files and read back.", files.len()));
-                ui.global::<Api>().set_write_step_info(info.into());
                 true
             }
             Err(e) => {
@@ -993,78 +1668,158 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             }
         }
     });
-    api.on_open_snapshots(|| system::open_folder(&system::snapshot_root()));
-
-    // overview
     {
         let st = st.clone();
-        api.on_preview_goal(move |id| {
-            let s = st.borrow();
-            let Some(doc) = s.doc.as_ref() else { return strings(vec![]) };
-            let mut c = doc.save.clone();
-            let lines = goals::apply(&id, &mut c, s.slot);
-            let n = c.bytes().iter().zip(doc.save.bytes()).filter(|(a, b)| a != b).count();
-            strings(lines.into_iter().chain(std::iter::once(format!("{n} bytes in total"))))
+        api.on_open_snapshots(move || {
+            let dir = st
+                .borrow()
+                .doc
+                .as_ref()
+                .and_then(|d| d.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| system::snapshot_root().join(n)))
+                .filter(|p| p.is_dir())
+                .unwrap_or_else(system::snapshot_root);
+            system::open_folder(&dir);
         });
     }
-    on!(ui, st, on_apply_goal, |ui, s, id: SharedString| {
-        let g = goals::ALL.iter().find(|g| g.id == id.as_str()).unwrap();
-        let slot = s.slot;
-        let mut lines = vec![];
-        s.edit("", g.title.into(), String::new(), Conf::Derived, |sv, _| lines = goals::apply(&id, sv, slot));
-        if let Some(o) = s.ops.last_mut() {
-            o.detail = lines.join("; ");
+    on!(ui, st, on_list_snapshots, |ui, s| {
+        list_snapshots(&ui, &s);
+    });
+    // restoring snapshots the current save first, so a restore can be undone too (A3)
+    on!(ui, st, on_restore, |ui, s, dir: SharedString| {
+        let running = system::running_emulators();
+        if !running.is_empty() {
+            toast(&ui, format!("Close {} first", running.join(", ")), true);
+            return;
         }
-        toast(&ui, format!("{} — review it, then write", g.title), false);
+        let dir = PathBuf::from(dir.as_str());
+        let when = system::snapshots(dir.parent().unwrap_or(&dir)).into_iter().find(|x| x.dir == dir).map(|x| fmt::when(x.time)).unwrap_or_default();
+        let Some(doc) = s.doc.as_ref() else { return };
+        let loc = doc.loc.clone();
+        let id = loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
+        let stamp = chrono::Local::now().format("%Y-%m-%d_%H%M%S").to_string();
+        match store::snapshot(&loc, &system::snapshot_root().join(id), &stamp) {
+            Ok(p) => system::write_note(&p, &format!("Before restoring the snapshot from {when}")),
+            Err(e) => return toast(&ui, format!("Snapshot failed, nothing restored: {e}"), true),
+        }
+        match store::restore(&loc, &dir) {
+            Ok(_) => {
+                let opened = loc.opened.clone();
+                let slot = s.slot;
+                if let Err(e) = s.open(&opened) {
+                    return toast(&ui, format!("Restored, but reading it back failed: {e}"), true);
+                }
+                if s.save().slot_used(slot) {
+                    s.slot = slot;
+                }
+                ui.global::<Api>().set_snapshots_open(false);
+                toast_full(&ui, format!("Restored the save from {when}"), "The save before restoring is kept as a snapshot", "", ToastAct::None, false);
+            }
+            Err(e) => toast(&ui, format!("Restore failed: {e}"), true),
+        }
+    });
+    {
+        let w = ui.as_weak();
+        api.on_quit(move || {
+            view(|v| v.quitting = true);
+            if let Some(ui) = w.upgrade() {
+                let _ = ui.hide();
+            }
+            let _ = slint::quit_event_loop();
+        });
+    }
+
+    // overview: goals and page-level bulk actions share one preview (R3, R4)
+    {
+        let w = ui.as_weak();
+        let st = st.clone();
+        api.on_open_preview(move |id| {
+            let Some(ui) = w.upgrade() else { return false };
+            let s = st.borrow();
+            let Some(doc) = s.doc.as_ref() else { return false };
+            let id = bulk_id(&ui, &id);
+            let p = goals::plan(&id, &doc.save, s.slot);
+            let shown = 200;
+            let lines: Vec<PreviewLine> = p.lines.iter().take(shown).map(|(l, a, b)| PreviewLine { label: l.into(), old: a.into(), new: b.into() }).collect();
+            let empty = p.lines.is_empty();
+            ui.global::<Api>().set_preview(Preview {
+                id: id.clone().into(),
+                title: p.title.clone().into(),
+                // a goal's card already says what it does (C6m); a page action says it here
+                summary: if empty {
+                    format!("Nothing to change. {}", p.summary).into()
+                } else if goals::GOALS.iter().any(|g| g.id == id) {
+                    format!("{} change. Nothing is written until you press Write.", count(p.lines.len(), "value", "values")).into()
+                } else {
+                    format!("{} {} change. Nothing is written until you press Write.", p.summary, count(p.lines.len(), "value", "values")).into()
+                },
+                confidence: conf(p.conf.unwrap_or(Conf::Confirmed)),
+                lines: model(lines),
+                more: p.lines.len().saturating_sub(shown) as i32,
+                note: p.note.clone().into(),
+                tech: if empty { String::new() } else { p.tech.clone() }.into(),
+                empty,
+                action: p.action.into(),
+            });
+            true
+        });
+    }
+    on!(ui, st, on_apply_preview, |ui, s, id: SharedString| {
+        apply_plan(&ui, &mut s, &id);
     });
 
-    // character
+    // character: one value per edit, titled with its name
     on!(ui, st, on_set_character, |ui, s, key: SharedString, v: i32| {
         let v = v.max(0) as u32;
         let k = key.as_str();
-        let (title, conf) = match k {
-            "hr" => (format!("HR → {v}"), Conf::Confirmed),
-            "hr-points" => (format!("HR points → {v}"), Conf::Confirmed),
-            "funds" => (format!("Zenny → {v}"), Conf::Confirmed),
-            "wycademy" => (format!("Wycademy points → {v}"), Conf::Confirmed),
-            "village-star" => (format!("Village ★ → {v}"), Conf::Confirmed),
-            "hub-star" => (format!("Hub ★ → {v}"), Conf::Confirmed),
-            "play-h" | "play-m" => ("Play time".to_string(), Conf::Confirmed),
-            _ if k.starts_with("lr") || k.starts_with("g") => (format!("Village points ({k}) → {v}"), Conf::Confirmed),
-            _ => (k.to_string(), Conf::Derived),
+        let t = match k {
+            "hr" => Target::Hr,
+            "hr-points" => Target::HrPoints,
+            "funds" => Target::Funds,
+            "wycademy" => Target::Wycademy,
+            "village-star" => Target::VillageStar,
+            "hub-star" => Target::HubStar,
+            "play-h" | "play-m" => Target::Playtime,
+            _ => match k.trim_start_matches(|c: char| c.is_alphabetic()).parse::<usize>() {
+                Ok(i) if i < 4 => Target::Points(i, k.starts_with('g')),
+                _ => return,
+            },
         };
         let mut msg = None;
-        s.edit(&format!("char:{k}"), title, String::new(), conf, |sv, base| match k {
-            "hr" => {
-                if !character::set_hr(sv, base, v as u16) {
-                    msg = Some("HR below 13 follows the Hub star level: edit Hub ★ instead");
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+            match k {
+                "hr" => {
+                    if !character::set_hr(sv, base, v as u16) {
+                        msg = Some("HR below 13 follows the Hub star level: edit Hub ★ instead");
+                    }
+                }
+                "hr-points" => character::set_hr_points(sv, base, v),
+                "funds" => character::set_funds(sv, base, v),
+                "wycademy" => character::set_wycademy(sv, base, v),
+                "village-star" => sv.set_u16(base + mhgu_save::progress::VIL_STAR, (v as u16).clamp(1, 10)),
+                "hub-star" => character::set_hub_star(sv, base, v as u16),
+                "play-h" | "play-m" => {
+                    let cur = character::get(sv, base).playtime;
+                    let (h, m) = (cur / 3600, cur / 60 % 60);
+                    let secs = if k == "play-h" { v * 3600 + m * 60 } else { h * 3600 + v.min(59) * 60 };
+                    character::set_playtime(sv, base, secs + cur % 60);
+                }
+                _ => {
+                    if let Target::Points(i, g) = t {
+                        character::set_village_points(sv, base, i, g, v);
+                    }
                 }
             }
-            "hr-points" => character::set_hr_points(sv, base, v),
-            "funds" => character::set_funds(sv, base, v),
-            "wycademy" => character::set_wycademy(sv, base, v),
-            "village-star" => sv.set_u16(base + mhgu_save::progress::VIL_STAR, (v as u16).clamp(1, 10)),
-            "hub-star" => character::set_hub_star(sv, base, v as u16),
-            "play-h" | "play-m" => {
-                let cur = character::get(sv, base).playtime;
-                let (h, m) = (cur / 3600, cur / 60 % 60);
-                let secs = if k == "play-h" { v * 3600 + m * 60 } else { h * 3600 + v.min(59) * 60 };
-                character::set_playtime(sv, base, secs + cur % 60);
-            }
-            _ => {
-                let g = k.starts_with('g');
-                if let Ok(i) = k.trim_start_matches(|c: char| c.is_alphabetic()).parse::<usize>() {
-                    character::set_village_points(sv, base, i, g, v);
-                }
-            }
+            vec![]
         });
         if let Some(m) = msg {
             toast(&ui, m, true);
         }
     });
     on!(ui, st, on_set_name, |ui, s, name: SharedString| {
-        s.edit("char:name", format!("Name → {name}"), "player record, slot header, Guild Card".into(), Conf::Derived, |sv, base| {
-            character::set_name(sv, base, &name)
+        s.edit(Edit::one(Target::Name, "Name".into(), Conf::Derived).note("Written to the save, the player record and the Guild Card"), |sv, base| {
+            character::set_name(sv, base, &name);
+            vec![]
         });
         let _ = &ui;
     });
@@ -1085,29 +1840,16 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     }
     on!(ui, st, on_set_item, |ui, s, slot: i32, id: i32, count: i32| {
         let store = store_of(&ui);
-        let name = if id == 0 { "empty".to_string() } else { format!("{} ×{count}", assets::item_name(id as u16)) };
-        let where_ = if store == Store::Box { "Item box" } else { "Pouch" };
-        s.edit(&format!("item:{where_}:{slot}"), format!("{where_} slot {} → {name}", slot + 1), String::new(), Conf::Confirmed, |sv, base| {
-            items::set(sv, base, store, slot as usize, Stack { id: id as u16, count: count.clamp(0, 99) as u8 })
+        let t = Target::Item(store, slot as usize);
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+            items::set(sv, base, store, slot as usize, Stack { id: id as u16, count: count.clamp(0, 99) as u8 });
+            vec![]
         });
     });
     on!(ui, st, on_item_bulk, |ui, s, what: SharedString| {
-        let store = store_of(&ui);
-        let where_ = if store == Store::Box { "Item box" } else { "Pouch" };
-        let title = match what.as_str() {
-            "sort" => format!("{where_}: sort and merge stacks"),
-            "max" => format!("{where_}: every stack ×99"),
-            _ => format!("{where_}: cleared"),
-        };
-        s.edit("", title, String::new(), Conf::Confirmed, |sv, base| {
-            let v = items::all(sv, base, store);
-            let n = match what.as_str() {
-                "sort" => items::compact(&v, true),
-                "max" => v.iter().map(|x| if x.is_empty() { *x } else { Stack { id: x.id, count: 99 } }).collect(),
-                _ => vec![Stack::default(); v.len()],
-            };
-            items::set_all(sv, base, store, &n);
-        });
+        let id = bulk_id(&ui, &format!("items:{what}"));
+        apply_plan(&ui, &mut s, &id);
     });
 
     // equipment
@@ -1115,8 +1857,16 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         view(|v| v.equip_filter = f.to_string());
         let _ = (&ui, &s);
     });
+    on!(ui, st, on_search_equip_list, |ui, s, t: SharedString| {
+        view(|v| v.equip_list_search = t.to_string());
+        let _ = (&ui, &s);
+    });
     on!(ui, st, on_select_equip, |ui, s, i: i32| {
-        view(|v| v.equip_sel = i);
+        // the list scrolls to it when it is out of view (10.1)
+        view(|v| {
+            v.equip_sel = i;
+            v.equip_jump = Some(i);
+        });
         let _ = (&ui, &s);
     });
     on!(ui, st, on_set_equip, |ui, s, field: SharedString, v: i32| {
@@ -1126,10 +1876,12 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             return;
         }
         let i = i as usize;
-        let cur = equipment::get(s.save(), s.base(), owner, i);
-        let name = equip_name(owner, &cur);
         let f = field.as_str();
-        s.edit(&format!("equip:{owner:?}:{i}:{f}"), format!("{name} (box {}): {f} → {v}", i + 1), String::new(), Conf::Confirmed, |sv, base| {
+        let t = Target::Equip(owner, i);
+        let title = t.label(s.save(), s.slot);
+        let mut e = Edit::one(t, title, Conf::Confirmed);
+        e.key = format!("{}:{f}", t.key());
+        s.edit(e, |sv, base| {
             let mut e = equipment::get(sv, base, owner, i);
             match f {
                 "level" => e.set_level(v as u8),
@@ -1150,6 +1902,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                 _ => {}
             }
             equipment::set(sv, base, owner, i, &e);
+            vec![]
         });
     });
     {
@@ -1181,21 +1934,47 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             _ => equipment::Entry { raw: [0; equipment::ENTRY] },
         };
         let name = equip_name(Owner::Hunter, &e);
-        let detail = if e.is_empty() { String::new() } else { "new box entry at level 1, shaped like the game's own".into() };
-        s.edit(&format!("equip:Hunter:{slot}:piece"), format!("Equipment box slot {} → {name}", slot + 1), detail, Conf::Derived, |sv, base| {
-            equipment::set(sv, base, Owner::Hunter, slot, &e)
+        let t = Target::Equip(Owner::Hunter, slot);
+        let mut ed = Edit::one(t, t.label(s.save(), s.slot), Conf::Derived);
+        ed.key = format!("{}:piece", t.key());
+        if !e.is_empty() {
+            ed.note = "New box entry at level 1, shaped like the game's own".into();
+        }
+        s.edit(ed, |sv, base| {
+            equipment::set(sv, base, Owner::Hunter, slot, &e);
+            vec![]
         });
         view(|v| {
             v.equip_sel = slot as i32;
+            v.equip_jump = Some(slot as i32);
             if !equip_keep(&v.equip_filter, e.kind()) && !e.is_empty() {
                 v.equip_filter = "all".into();
                 api.set_equip_filter("all".into());
             }
+            v.equip_list_search.clear();
+            api.set_equip_search("".into());
         });
         if !e.is_empty() {
             toast(&ui, format!("{name} added to box slot {}", slot + 1), false);
         }
     });
+    {
+        let w = ui.as_weak();
+        let st = st.clone();
+        api.on_show_in_map(move |label| {
+            let Some(ui) = w.upgrade() else { return };
+            let i = tables().fields.iter().position(|f| f.label == label.as_str());
+            view(|v| {
+                v.field_filter = String::new();
+                v.field_sel = i.map_or(-1, |i| i as i32);
+            });
+            let api = ui.global::<Api>();
+            api.set_field_filter("".into());
+            api.set_page("advanced".into());
+            refresh(&ui, &st.borrow());
+            jump(&ui, i, "");
+        });
+    }
 
     // palicoes
     on!(ui, st, on_select_palico, |ui, s, i: i32| {
@@ -1208,8 +1987,9 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             return;
         }
         let i = i as usize;
-        let name = palico::get(s.save(), s.base(), i).name;
-        s.edit(&format!("palico:{i}:{f}"), format!("{name}: {f} → {v}"), String::new(), Conf::Derived, |sv, base| {
+        let t = Target::Palico(i, targets::pal_of(&f));
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
                 "level" => p.level = v.clamp(1, 50) as u8,
@@ -1218,6 +1998,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                 _ => {}
             }
             palico::set(sv, base, i, &p);
+            vec![]
         });
         let _ = &ui;
     });
@@ -1227,8 +2008,9 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             return;
         }
         let i = i as usize;
-        let name = palico::get(s.save(), s.base(), i).name;
-        s.edit(&format!("palico:{i}:{f}"), format!("{name}: {f} → {t}"), String::new(), Conf::Derived, |sv, base| {
+        let tg = Target::Palico(i, targets::pal_of(&f));
+        let title = tg.label(s.save(), s.slot);
+        s.edit(Edit::one(tg, title, Conf::Derived), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
                 "name" => p.name = t.to_string(),
@@ -1237,6 +2019,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                 _ => {}
             }
             palico::set(sv, base, i, &p);
+            vec![]
         });
         let _ = &ui;
     });
@@ -1246,57 +2029,82 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         view(|v| v.quest_tab = i as usize);
         let _ = (&ui, &s);
     });
+    on!(ui, st, on_filter_quests, |ui, s| {
+        let api = ui.global::<Api>();
+        view(|v| {
+            v.quest_search = api.get_quest_search().to_string();
+            v.quest_missing = api.get_quest_missing();
+        });
+        let _ = &s;
+    });
     on!(ui, st, on_set_quest, |ui, s, index: i32, bit: SharedString, on: bool| {
-        let q = tables().quests.iter().find(|q| q.index == index as usize).unwrap();
         let which = match bit.as_str() {
             "seen" => QuestBit::Seen,
             "failed" => QuestBit::Failed,
             _ => QuestBit::Cleared,
         };
         let slot = s.slot;
+        let t = Target::Quest(index as usize);
+        let title = t.label(s.save(), slot);
         let mut sets = vec![];
-        s.edit(&format!("quest:{index}:{bit}"), format!("{} — {bit} {}", q.name, if on { "on" } else { "off" }), String::new(), Conf::Confirmed, |sv, _| {
+        let mut e = Edit::one(t, title, Conf::Confirmed);
+        e.key = format!("{}:{bit}", t.key());
+        s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);
             if which == QuestBit::Cleared && on {
-                sets = c.clear_quests(&[q.index]);
+                sets = c.clear_quests(&[index as usize]);
             } else {
-                c.set_quest(which, q.index, on);
+                c.set_quest(which, index as usize, on);
             }
+            vec![]
         });
         if !sets.is_empty() {
             if let Some(o) = s.ops.last_mut() {
-                o.detail = format!("also quest set {}", sets.iter().map(u32::to_string).collect::<Vec<_>>().join(", "));
+                o.note = "Also completes its quest set, as the game does".into();
             }
         }
         let _ = &ui;
     });
-    on!(ui, st, on_quest_bulk, |ui, s, rank: SharedString, _action: SharedString| {
+    on!(ui, st, on_quest_bulk, |ui, s, group: SharedString| {
         let tabs = quest_tabs();
         let cat = tabs.get(view(|v| v.quest_tab)).cloned().unwrap_or_default();
         let slot = s.slot;
-        let mut sets = vec![];
-        let mut n = 0;
-        s.edit("", format!("Cleared every {cat} {}★ quest", rank), String::new(), Conf::Confirmed, |sv, _| {
+        let members: Vec<usize> = Char::real_quests(true).into_iter().filter(|q| q.category == cat && quest_group(q) == group.as_str()).map(|q| q.index).collect();
+        let label = match group.split_once(':') {
+            Some(("dev", d)) => format!("{} quests", d.parse::<usize>().ok().and_then(|d| DEVIANTS.get(d)).copied().unwrap_or("Deviant")),
+            Some((_, r)) if !r.is_empty() => format!("{cat} {r}★ quests"),
+            _ => format!("{cat} quests"),
+        };
+        let e = Edit { key: String::new(), title: format!("{label} marked cleared"), detail: "Quests".into(), note: "Completed quest sets are recorded too, as the game does".into(), conf: Conf::Confirmed, targets: vec![] };
+        s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);
-            let idx: Vec<usize> = Char::real_quests(true).iter().filter(|q| q.category == cat && q.rank == rank.as_str() && !c.quest(QuestBit::Cleared, q.index)).map(|q| q.index).collect();
-            n = idx.len();
-            sets = c.clear_quests(&idx);
+            let todo: Vec<usize> = members.iter().copied().filter(|&i| !c.quest(QuestBit::Cleared, i)).collect();
+            c.clear_quests(&todo);
+            todo.into_iter().map(Target::Quest).collect()
         });
-        if let Some(o) = s.ops.last_mut() {
-            o.detail = format!("{n} quests{}", if sets.is_empty() { String::new() } else { format!(", quest sets {}", sets.iter().map(u32::to_string).collect::<Vec<_>>().join(" ")) });
-        }
         let _ = &ui;
     });
 
     // requests
-    on!(ui, st, on_filter_requests, |ui, s, f: SharedString| {
-        view(|v| v.request_filter = f.to_string());
-        let _ = (&ui, &s);
+    on!(ui, st, on_filter_requests, |ui, s| {
+        let api = ui.global::<Api>();
+        view(|v| {
+            v.request_filter = api.get_request_filter().to_string();
+            v.request_search = api.get_request_search().to_string();
+        });
+        let _ = &s;
     });
     on!(ui, st, on_set_request, |ui, s, index: i32, what: SharedString, on: bool| {
         let r = tables().requests.iter().find(|r| r.index == index as usize).unwrap().clone();
         let slot = s.slot;
-        s.edit(&format!("req:{index}:{what}"), format!("Request {} — {what} {}", r.quest_name, if on { "on" } else { "off" }), String::new(), Conf::Derived, |sv, _| {
+        let t = Target::Request(r.index);
+        let title = t.label(s.save(), slot);
+        let mut e = Edit::one(t, title, Conf::Derived);
+        e.key = format!("{}:{what}", t.key());
+        if what == "completed" && on {
+            e.note = "The villager's reward is not handed over in game".into();
+        }
+        s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);
             match (what.as_str(), on) {
                 ("accepted", true) => c.accept_request(r.index),
@@ -1314,6 +2122,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     }
                 }
             }
+            vec![]
         });
         let _ = &ui;
     });
@@ -1324,18 +2133,29 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         ui.global::<Api>().set_collection_tab(i);
         let _ = &s;
     });
+    on!(ui, st, on_filter_checks, |ui, s| {
+        let api = ui.global::<Api>();
+        view(|v| {
+            v.check_search = api.get_check_search().to_string();
+            v.check_missing = api.get_check_missing();
+        });
+        let _ = &s;
+    });
     on!(ui, st, on_set_check, |ui, s, key: i32, on: bool| {
         let tab = view(|v| v.collection);
         let slot = s.slot;
-        let t = tables();
-        let name = match tab {
-            0 => t.arts.iter().find(|a| a.0 == key as u32).map(|a| a.1.clone()),
-            1 => t.canteen.iter().find(|c| c.0 == "dish" && c.1 == key as usize).map(|c| c.2.clone()),
-            2 => t.canteen.iter().find(|c| c.0 == "ingredient" && c.1 == key as usize).map(|c| c.2.clone()),
-            _ => t.awards.iter().find(|a| a.0 == key as usize).map(|a| a.2.clone()),
+        let t = match tab {
+            0 => Target::Art(key as u32),
+            1 => Target::Dish(key as usize),
+            2 => Target::Ingredient(key as usize),
+            _ => Target::Award(key as usize),
+        };
+        let title = t.label(s.save(), slot);
+        let mut e = Edit::one(t, title, Conf::Confirmed);
+        if tab == 3 {
+            e.note = "Written to both of the game's award lists".into();
         }
-        .unwrap_or_default();
-        s.edit(&format!("col:{tab}:{key}"), format!("{name} {}", if on { "on" } else { "off" }), String::new(), Conf::Confirmed, |sv, _| {
+        s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);
             match tab {
                 0 => c.set_art(key as u32, on),
@@ -1343,28 +2163,16 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                 2 => c.set_ingredient(key as usize, on),
                 _ => c.set_award(key as usize, on),
             }
-        });
-        let _ = &ui;
-    });
-    on!(ui, st, on_checks_all, |ui, s, on: bool| {
-        let tab = view(|v| v.collection);
-        let slot = s.slot;
-        let names = ["Hunter Arts", "Canteen dishes", "Canteen ingredients", "Awards"];
-        s.edit("", format!("{}: all {}", names[tab.min(3)], if on { "on" } else { "off" }), String::new(), Conf::Confirmed, |sv, _| {
-            let mut c = Char::new(sv, slot);
-            match tab {
-                0 => tables().arts.iter().for_each(|a| c.set_art(a.0, on)),
-                1 => (0..99).for_each(|b| c.set_dish(b, on)),
-                2 => (0..45).for_each(|b| c.set_ingredient(b, on)),
-                _ => (0..100).chain(102..132).for_each(|b| c.set_award(b, on)),
-            }
+            vec![]
         });
         let _ = &ui;
     });
     on!(ui, st, on_set_deviant, |ui, s, d: i32, what: SharedString, v: i32| {
         let d = d as usize;
         let slot = s.slot;
-        s.edit(&format!("dev:{d}:{what}"), format!("{} — {what} → {v}", DEVIANTS[d]), String::new(), Conf::Confirmed, |sv, _| {
+        let t = if what == "permits" { Target::Permits(d) } else { Target::Levels(d) };
+        let title = t.label(s.save(), slot);
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, _| {
             let mut c = Char::new(sv, slot);
             if what == "permits" {
                 c.set_permits(d, v.clamp(0, 99) as u8);
@@ -1378,79 +2186,63 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     }
                 }
             }
+            vec![]
         });
         let _ = &ui;
     });
 
     // monsters
-    on!(ui, st, on_filter_monsters, |ui, s, f: SharedString, large: bool| {
+    on!(ui, st, on_filter_monsters, |ui, s| {
+        let api = ui.global::<Api>();
         view(|v| {
-            v.monster_filter = f.to_string();
-            v.monster_large = large;
+            v.monster_filter = api.get_monster_filter().to_string();
+            v.monster_large = api.get_monster_large_only();
+            v.monster_missing = api.get_monster_missing();
         });
-        let _ = (&ui, &s);
+        let _ = &s;
     });
     on!(ui, st, on_set_monster, |ui, s, i: i32, field: SharedString, v: i32| {
         let i = i as usize;
-        let name = tables().monsters[i - 1].name.clone();
         let f = field.as_str();
-        let label = match f {
-            "hunts" => "hunted",
-            "captures" => "captured",
-            "min" => "smallest %",
-            "max" => "largest %",
-            _ => "Hunter's Notes",
+        let m = match f {
+            "hunts" => Mon::Hunts,
+            "captures" => Mon::Captures,
+            "min" => Mon::Min,
+            "max" => Mon::Max,
+            _ => Mon::Notes,
         };
-        let conf = if f == "notes" { Conf::Derived } else { Conf::Confirmed };
-        s.edit(&format!("mon:{i}:{f}"), format!("{name}: {label} → {v}"), "Guild Card log rebuilt".into(), conf, |sv, base| {
-            if f == "notes" {
+        let conf = if m == Mon::Notes { Conf::Derived } else { Conf::Confirmed };
+        let t = Target::Monster(i, m);
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, conf).note("Also rebuilds the Guild Card monster log"), |sv, base| {
+            if m == Mon::Notes {
                 monsters::set_notes(sv, base, i, v != 0);
-                return;
+                return vec![];
             }
             let mut r = monsters::get(sv, base, i);
             let v16 = v.clamp(0, 9999) as u16;
-            match f {
-                "hunts" => r.hunts = v16,
-                "captures" => r.captures = v16,
-                "min" => {
+            let mut more = vec![];
+            match m {
+                Mon::Hunts => r.hunts = v16,
+                Mon::Captures => r.captures = v16,
+                Mon::Min => {
                     r.min = v16;
                     if r.max < v16 {
                         r.max = v16;
+                        more.push(Target::Monster(i, Mon::Max));
                     }
                 }
                 _ => {
                     r.max = v16;
                     if r.min == 0 || r.min > v16 {
                         r.min = v16.min(r.min.max(1));
+                        more.push(Target::Monster(i, Mon::Min));
                     }
                 }
             }
             monsters::set(sv, base, i, r);
+            more
         });
-        let _ = &ui;
-    });
-    on!(ui, st, on_monsters_bulk, |ui, s, what: SharedString| {
-        let slot = s.slot;
-        let id = if what == "crowns" { "crowns" } else { "" };
-        if id == "crowns" {
-            let mut lines = vec![];
-            s.edit("", "Every crown".into(), String::new(), Conf::Derived, |sv, _| lines = goals::apply("crowns", sv, slot));
-            if let Some(o) = s.ops.last_mut() {
-                o.detail = lines.join("; ");
-            }
-        } else {
-            s.edit("", "Every monster hunted 9999 times".into(), "Guild Card log rebuilt".into(), Conf::Confirmed, |sv, base| {
-                for i in 1..=monsters::N {
-                    let m = &tables().monsters[i - 1];
-                    if m.name.is_empty() || (106..=112).contains(&i) {
-                        continue;
-                    }
-                    let mut r = monsters::get(sv, base, i);
-                    r.hunts = monsters::MAX_COUNT;
-                    monsters::set(sv, base, i, r);
-                }
-            });
-        }
         let _ = &ui;
     });
 
@@ -1463,4 +2255,21 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         view(|v| v.field_sel = i);
         let _ = (&ui, &s);
     });
+}
+
+fn list_snapshots(ui: &AppWindow, st: &State) {
+    let Some(doc) = st.doc.as_ref() else { return };
+    let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
+    let root = system::snapshot_root().join(&id);
+    let rows: Vec<SnapRow> = system::snapshots(&root)
+        .into_iter()
+        .map(|x| SnapRow {
+            dir: x.dir.display().to_string().into(),
+            when: fmt::when(x.time).into(),
+            before: if x.before.is_empty() { "Before a write".to_string() } else { x.before }.into(),
+        })
+        .collect();
+    let api = ui.global::<Api>();
+    api.set_snapshots(model(rows));
+    api.set_snapshot_dir(fmt::elide_path(&root.display().to_string(), 56).into());
 }

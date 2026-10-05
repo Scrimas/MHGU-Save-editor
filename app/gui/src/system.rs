@@ -58,6 +58,70 @@ pub fn snapshot_root() -> PathBuf {
     dirs::data_dir().unwrap_or_else(std::env::temp_dir).join("mhgu-save-editor").join("snapshots")
 }
 
+/// "Ryujinx" when the save sits in a Ryujinx folder, else a generic name.
+pub fn emulator_name(save: &std::path::Path) -> &'static str {
+    if save.to_string_lossy().to_lowercase().contains("ryujinx") { "Ryujinx" } else { "The emulator" }
+}
+
+/// What a snapshot was taken before, kept next to its files.
+const NOTE: &str = "snapshot.json";
+
+pub fn write_note(dir: &std::path::Path, before: &str) {
+    let v = serde_json::json!({ "before": before });
+    let _ = std::fs::write(dir.join(NOTE), v.to_string());
+}
+
+pub struct Snapshot {
+    pub dir: PathBuf,
+    pub time: chrono::DateTime<chrono::Local>,
+    pub before: String,
+}
+
+/// Snapshots of one save folder (`root/<save id>/<stamp>`), newest first.
+pub fn snapshots(root: &std::path::Path) -> Vec<Snapshot> {
+    let Ok(rd) = std::fs::read_dir(root) else { return vec![] };
+    let mut v: Vec<Snapshot> = rd
+        .flatten()
+        .filter(|e| e.path().is_dir())
+        .map(|e| {
+            let dir = e.path();
+            let name = e.file_name().to_string_lossy().into_owned();
+            let time = chrono::NaiveDateTime::parse_from_str(&name, "%Y-%m-%d_%H%M%S")
+                .ok()
+                .and_then(|t| t.and_local_timezone(chrono::Local).single())
+                .or_else(|| e.metadata().and_then(|m| m.modified()).ok().map(chrono::DateTime::<chrono::Local>::from))
+                .unwrap_or_else(chrono::Local::now);
+            let before = std::fs::read(dir.join(NOTE))
+                .ok()
+                .and_then(|b| serde_json::from_slice::<serde_json::Value>(&b).ok())
+                .and_then(|j| j.get("before").and_then(|s| s.as_str()).map(String::from))
+                .unwrap_or_default();
+            Snapshot { dir, time, before }
+        })
+        .collect();
+    v.sort_by(|a, b| b.time.cmp(&a.time));
+    v
+}
+
+/// Characters and last change of a detected save, for the Open screen.
+pub struct SaveInfo {
+    pub names: Vec<(String, u16, u32)>,
+    pub modified: Option<chrono::DateTime<chrono::Local>>,
+}
+
+pub fn save_info(p: &std::path::Path) -> Option<SaveInfo> {
+    let s = mhgu_save::Save::from_bytes(std::fs::read(p).ok()?).ok()?;
+    let names = (0..3)
+        .filter(|&k| s.slot_used(k))
+        .map(|k| {
+            let c = mhgu_save::character::get(&s, s.base(k));
+            (c.name, c.hr, c.playtime)
+        })
+        .collect();
+    let modified = p.metadata().and_then(|m| m.modified()).ok().map(chrono::DateTime::<chrono::Local>::from);
+    Some(SaveInfo { names, modified })
+}
+
 pub fn open_folder(p: &std::path::Path) {
     let _ = std::fs::create_dir_all(p);
     #[cfg(windows)]

@@ -1,87 +1,204 @@
-import { ListView, CheckBox, Button, SpinBox, Palette, ScrollView } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, Chip, Asset, ConfidenceTag, Confidence } from "../common.slint";
+import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
+import {
+    Api, Tok, Card, Muted, Chip, Asset, PageHeader, TabBar, ColHead, NumberBox, StagedBar, WasLine, Hairline,
+    EmptyState, PreviewPopup, MoreButton, CheckRow,
+} from "../common.slint";
+
+// Checkbox, icon, name: the order of the in-game lists (H5.4); long names elide (H5.2).
+component CheckCell inherits Rectangle {
+    in property <CheckRow> r;
+    in property <bool> flash;
+    height: 40px;
+    border-radius: 4px;
+    background: root.flash ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+    ta := TouchArea { clicked => { Api.set-check(r.key, !r.on); } }
+    if r.changed: StagedBar { x: 0; y: 6px; height: parent.height - 12px; }
+    HorizontalLayout {
+        padding-left: 8px;
+        padding-right: 6px;
+        spacing: 8px;
+        Rectangle {
+            width: 28px;
+            CheckBox { x: 0; checked: r.on; accessible-label: r.name; toggled => { Api.set-check(r.key, self.checked); } }
+        }
+        if r.has-icon: Asset { y: 6px; width: 28px; height: 28px; source: r.icon; available: true; opacity: r.on ? 1 : 0.45; }
+        Text { text: r.name; vertical-alignment: center; overflow: elide; horizontal-stretch: 1; color: r.on ? Palette.foreground : Tok.muted; }
+    }
+}
 
 export component CollectionsPage inherits Rectangle {
-    property <int> cols: max(1, floor((root.width - 40px) / 230px));
+    property <length> cw: min(root.width - 2 * Tok.margin, 1400px);
+    property <int> cols: max(1, floor((cw - 12px) / 270px));
+    property <length> cell-w: (cw - 12px - (cols - 1) * 6px) / cols;
+    property <bool> checks: Api.collection-tab < 4;
     VerticalLayout {
-        padding: 20px;
-        spacing: 12px;
-        HorizontalLayout {
-            spacing: 12px;
-            VerticalLayout {
-                Text { text: "Collections"; font-size: 22px; font-weight: 600; }
-                Muted { text: Api.checks-summary; }
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: "Collections";
+            subtitle: Api.checks-summary;
+            staged: Api.page-counts[7];
+            if root.checks: Button {
+                text: "Check all…";
+                clicked => { pv.open("checks:all", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
-            Rectangle { horizontal-stretch: 1; }
-            if Api.collection-tab < 4: Button { text: "Select all"; clicked => { Api.checks-all(true); } }
-            if Api.collection-tab < 4: Button { text: "Clear all"; clicked => { Api.checks-all(false); } }
-        }
-        HorizontalLayout {
-            spacing: 6px;
-            for t[i] in ["Hunter Arts", "Canteen dishes", "Canteen ingredients", "Awards", "Deviants"]: Chip {
-                text: t;
-                active: Api.collection-tab == i;
-                clicked => { Api.select-collection(i); }
+            if root.checks: MoreButton {
+                items: ["Uncheck all…"];
+                activated => { pv.open("checks:none", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
-            Rectangle { horizontal-stretch: 1; }
         }
-        if Api.collection-tab < 4: Card {
+        // the count in each tab (H5.1)
+        TabBar { tabs: Api.collection-tabs; current: Api.collection-tab; select(i) => { Api.select-collection(i); } }
+        if root.checks: HorizontalLayout {
+            spacing: Tok.tight;
+            LineEdit {
+                placeholder-text: "Search";
+                text <=> Api.check-search;
+                edited => { Api.filter-checks(); }
+            }
+            Chip {
+                y: 2px;
+                text: "Missing only";
+                active: Api.check-missing;
+                clicked => {
+                    Api.check-missing = !Api.check-missing;
+                    Api.filter-checks();
+                }
+            }
+        }
+        // Hunter Arts by art, levels I / II / III on one row (H5.3)
+        if Api.collection-tab == 0: HorizontalLayout {
             vertical-stretch: 1;
-            ListView {
-                for r in (Api.checks.length + cols - 1) / cols: HorizontalLayout {
-                    padding-left: 8px;
-                    padding-right: 8px;
-                    height: 40px;
-                    for c in cols: Rectangle {
-                        horizontal-stretch: 1;
-                        clip: true;
-                        property <int> k: r * cols + c;
-                        if k < Api.checks.length: HorizontalLayout {
-                            padding-left: 4px;
-                            spacing: 6px;
-                            if Api.checks[k].has-icon: Asset {
-                                width: 32px;
-                                height: 32px;
-                                y: 4px;
-                                source: Api.checks[k].icon;
-                                available: true;
-                                opacity: Api.checks[k].on ? 1 : 0.35;
+            alignment: start;
+            Card {
+                width: min(root.width - 2 * Tok.margin, 760px);
+                VerticalLayout {
+                    Rectangle {
+                        height: 34px;
+                        HorizontalLayout {
+                            padding-left: 14px;
+                            padding-right: 12px;
+                            spacing: 10px;
+                            ColHead { text: "Hunter Art"; horizontal-stretch: 1; }
+                            ColHead { text: "I"; width: 56px; }
+                            ColHead { text: "II"; width: 56px; }
+                            ColHead { text: "III"; width: 56px; }
+                        }
+                        Hairline { y: parent.height - 1px; width: parent.width; }
+                    }
+                    if Api.arts.length == 0: EmptyState { text: Api.check-missing ? "Every Hunter Art is unlocked." : "No art matches the search."; }
+                    ListView {
+                        for a in Api.arts: Rectangle {
+                            height: 44px;
+                            if a.changed: StagedBar { x: 2px; y: 7px; height: parent.height - 14px; }
+                            HorizontalLayout {
+                                padding-left: 14px;
+                                padding-right: 12px;
+                                spacing: 10px;
+                                Text { text: a.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                                for k in 3: Rectangle {
+                                    width: 56px;
+                                    if k < a.ids.length: CheckBox {
+                                        x: 0;
+                                        checked: a.on[k];
+                                        accessible-label: a.name + (a.ids.length == 1 ? "" : k == 0 ? " I" : k == 1 ? " II" : " III");
+                                        toggled => { Api.set-check(a.ids[k], self.checked); }
+                                    }
+                                }
                             }
-                            CheckBox {
-                                text: Api.checks[k].name;
-                                checked: Api.checks[k].on;
-                                toggled => { Api.set-check(Api.checks[k].key, self.checked); }
-                            }
+                            Hairline { y: parent.height - 1px; width: parent.width; }
                         }
                     }
                 }
             }
         }
-        if Api.collection-tab == 4: Card {
+        if Api.collection-tab >= 1 && Api.collection-tab <= 3: Card {
             vertical-stretch: 1;
+            if Api.checks.length == 0: EmptyState { text: Api.check-missing ? "Nothing is missing here." : "Nothing matches the search."; }
             ListView {
-                for d in Api.deviants: Rectangle {
-                    height: 54px;
-                    background: d.changed ? Palette.accent-background.transparentize(0.9) : transparent;
-                    HorizontalLayout {
-                        padding-left: 10px;
-                        padding-right: 10px;
-                        spacing: 12px;
-                        Asset { width: 40px; height: 40px; y: 7px; source: d.icon; available: d.has-icon; kind: "MON"; }
-                        Text { text: d.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
-                        Text { text: "Permits"; vertical-alignment: center; color: Tok.muted; font-size: 12px; }
-                        SpinBox { width: 100px; y: 9px; height: 36px; minimum: 0; maximum: 99; value: d.permits; edited(v) => { Api.set-deviant(d.index, "permits", v); } }
-                        Text { text: "Levels cleared"; vertical-alignment: center; color: Tok.muted; font-size: 12px; }
-                        SpinBox { width: 100px; y: 9px; height: 36px; minimum: 0; maximum: d.total; value: d.levels; edited(v) => { Api.set-deviant(d.index, "levels", v); } }
-                        Text { text: "/ " + d.total; width: 34px; vertical-alignment: center; color: Tok.muted; }
+                property <int> seq: Api.jump-seq;
+                function go() {
+                    if Api.page == "collections" && Api.jump-row >= 0 {
+                        self.content-y = -max(0, floor(Api.jump-row / root.cols) - 2) * 40px;
                     }
-                    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+                }
+                init => { self.go(); }
+                changed seq => { self.go(); }
+                for r in (Api.checks.length + root.cols - 1) / root.cols: HorizontalLayout {
+                    padding-left: 6px;
+                    padding-right: 6px;
+                    spacing: 6px;
+                    height: 40px;
+                    for c in root.cols: Rectangle {
+                        width: root.cell-w;
+                        if r * root.cols + c < Api.checks.length: CheckCell {
+                            r: Api.checks[r * root.cols + c];
+                            flash: Api.highlight != "" && Api.highlight == "check:" + Api.collection-tab + ":" + self.r.key;
+                        }
+                    }
                 }
             }
         }
-        Muted {
-            text: Api.collection-tab == 3 ? "Awards are kept in two maps; the Guild Card ORs the game's map back in after each quest, so both are written." : Api.collection-tab == 4 ? "Levels cleared sets the Special Permit quest bits from level 1 up." : "";
-            font-size: 11px;
+        // Deviants as a table with column headers (H5.5)
+        if Api.collection-tab == 4: HorizontalLayout {
+            vertical-stretch: 1;
+            alignment: start;
+            Card {
+                width: min(root.width - 2 * Tok.margin, 900px);
+                VerticalLayout {
+                    Rectangle {
+                        height: 34px;
+                        HorizontalLayout {
+                            padding-left: 14px;
+                            padding-right: 12px;
+                            spacing: 12px;
+                            Rectangle { width: Api.assets-ok ? 40px : 0px; }
+                            ColHead { text: "Deviant"; horizontal-stretch: 1; }
+                            ColHead { text: "Special Permits"; width: 220px; }
+                            ColHead { text: "Levels cleared"; width: 260px; }
+                        }
+                        Hairline { y: parent.height - 1px; width: parent.width; }
+                    }
+                    ListView {
+                        for d in Api.deviants: Rectangle {
+                            height: 60px;
+                            if d.was-permits != "" || d.was-levels != "": StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
+                            HorizontalLayout {
+                                padding-left: 14px;
+                                padding-right: 12px;
+                                spacing: 12px;
+                                Rectangle {
+                                    width: Api.assets-ok ? 40px : 0px;
+                                    Asset { y: 10px; width: 40px; height: 40px; source: d.icon; available: d.has-icon; }
+                                }
+                                Text { text: d.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                                VerticalLayout {
+                                    width: 220px;
+                                    alignment: center;
+                                    spacing: 2px;
+                                    NumberBox { width: 100px; minimum: 0; maximum: 99; value: d.permits; label: "Special Permits of " + d.name; edited(v) => { Api.set-deviant(d.index, "permits", v); } }
+                                    if d.was-permits != "": WasLine { was: d.was-permits; key: "permits:" + d.index; }
+                                }
+                                VerticalLayout {
+                                    width: 260px;
+                                    alignment: center;
+                                    spacing: 2px;
+                                    HorizontalLayout {
+                                        spacing: 8px;
+                                        alignment: start;
+                                        NumberBox { width: 100px; minimum: 0; maximum: d.total; value: d.levels; label: "Levels cleared of " + d.name; edited(v) => { Api.set-deviant(d.index, "levels", v); } }
+                                        Text { text: "/ " + d.total; color: Tok.muted; vertical-alignment: center; }
+                                    }
+                                    if d.was-levels != "": WasLine { was: d.was-levels; key: "levels:" + d.index; }
+                                }
+                            }
+                            Hairline { y: parent.height - 1px; width: parent.width; }
+                        }
+                    }
+                }
+            }
         }
     }
+    pv := PreviewPopup { x: 0; y: 0; page-width: root.width; }
 }

@@ -5,6 +5,7 @@ system_backup
 snapshots/
 scratch/
 TODO-savemap.md
+TODO-ui-review.md
 
 # Save editor: build output, and the game-asset pack (Capcom's icons and text, made
 # locally by tools/build_assets.py; never commit it)

@@ -1,5 +1,8 @@
 import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, NavButton, Dot, SlotInfo, Confidence } from "common.slint";
+import {
+    Api, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
+    Modal, EmptyState, ChangeRow, Chevron, SectionTitle,
+} from "common.slint";
 import { OpenPage } from "pages/open.slint";
 import { OverviewPage } from "pages/overview.slint";
 import { CharacterPage } from "pages/character.slint";
@@ -14,45 +17,100 @@ import { AdvancedPage } from "pages/advanced.slint";
 
 export { Api }
 
+// One Review entry (mockup A1): old → new per value, Undo, a click opens the field.
+component ReviewEntry inherits VerticalLayout {
+    in property <ChangeRow> c;
+    spacing: 6px;
+    if c.first: Text {
+        text: c.group;
+        font-size: Tok.small;
+        font-weight: 600;
+        color: Tok.muted;
+        height: 28px;
+        vertical-alignment: bottom;
+    }
+    Rectangle {
+        border-radius: Tok.radius;
+        border-width: 1px;
+        border-color: Tok.line;
+        background: ta.has-hover ? Tok.hover : transparent;
+        height: body.preferred-height;
+        ta := TouchArea {
+            mouse-cursor: pointer;
+            clicked => { Api.goto(c.key); }
+        }
+        Rectangle { x: 0; width: 3px; border-radius: 1.5px; background: Tok.accent; }
+        body := VerticalLayout {
+            padding: 12px;
+            padding-left: 16px;
+            spacing: 4px;
+            HorizontalLayout {
+                spacing: Tok.tight;
+                VerticalLayout {
+                    horizontal-stretch: 1;
+                    alignment: center;
+                    Text { text: c.title; font-weight: 600; overflow: elide; }
+                    if c.sub != "": Muted { text: c.sub; }
+                }
+                if c.single: Text { text: c.old; color: Tok.muted; vertical-alignment: center; }
+                if c.single: Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
+                if c.single: Text { text: c.new; font-weight: 600; vertical-alignment: center; }
+                if c.confidence != Confidence.confirmed: ConfidenceTag { level: c.confidence; info: false; }
+                Button { text: "Undo"; clicked => { Api.undo(c.id); } }
+            }
+            for l in c.lines: HorizontalLayout {
+                spacing: Tok.tight;
+                height: 30px;
+                Text { text: l.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                Text { text: l.old; color: Tok.muted; vertical-alignment: center; }
+                Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
+                Text { text: l.new; font-weight: 600; vertical-alignment: center; }
+            }
+            if c.more > 0: Muted { text: "and " + Fmt.num(c.more) + " more"; }
+            if c.note != "": Muted { text: c.note; }
+        }
+    }
+}
+
 component ReviewPanel inherits Rectangle {
-    background: Palette.background;
+    background: Tok.raised;
     border-width: 1px;
     border-color: Tok.line;
     VerticalLayout {
-        padding: 14px;
+        padding: Tok.pad;
         spacing: 10px;
         HorizontalLayout {
-            Text { text: "Review"; font-size: 16px; font-weight: 600; vertical-alignment: center; }
-            Rectangle { horizontal-stretch: 1; }
+            spacing: Tok.tight;
+            VerticalLayout {
+                horizontal-stretch: 1;
+                Text { text: "Review"; font-size: Tok.section; font-weight: 600; }
+                Muted { text: Api.review-summary; }
+            }
             Button { text: "Close"; clicked => { Api.review-open = false; } }
         }
-        if Api.change-count == 0: Muted { text: "No edits yet. Every change appears here with what it writes; you can undo each one."; }
-        ListView {
+        if Api.change-count == 0: EmptyState {
             vertical-stretch: 1;
-            for c in Api.changes: Rectangle {
-                height: max(56px, lay.preferred-height);
-                lay := HorizontalLayout {
-                    padding-top: 8px;
-                    padding-bottom: 8px;
-                    spacing: 8px;
-                    Dot { level: c.confidence; y: 14px; }
-                    VerticalLayout {
-                        horizontal-stretch: 1;
-                        spacing: 2px;
-                        Text { text: c.title; wrap: word-wrap; font-weight: 600; font-size: 12px; }
-                        Text { text: c.detail; wrap: word-wrap; color: Tok.muted; font-size: 11px; }
-                    }
-                    Button { text: "Undo"; clicked => { Api.undo(c.id); } }
-                }
-                Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+            text: "Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one.";
+        }
+        if Api.change-count > 0: ListView {
+            vertical-stretch: 1;
+            for c in Api.changes: ReviewEntry { c: c; }
+        }
+        Hairline { }
+        HorizontalLayout {
+            spacing: 6px;
+            Dot { level: Confidence.derived; y: 5px; }
+            Muted {
+                text: "Derived: worked out from the game's code, not yet checked in game. Untagged changes are confirmed in game.";
+                horizontal-stretch: 1;
             }
         }
         HorizontalLayout {
-            spacing: 8px;
+            spacing: Tok.tight;
             Button { text: "Undo all"; enabled: Api.change-count > 0; clicked => { Api.undo-all(); } }
             Rectangle { horizontal-stretch: 1; }
             Button {
-                text: "Write to save…";
+                text: "Write…";
                 primary: true;
                 enabled: Api.change-count > 0;
                 clicked => { Api.check-emulator(); Api.write-open = true; }
@@ -61,58 +119,198 @@ component ReviewPanel inherits Rectangle {
     }
 }
 
-component WriteDialog inherits Rectangle {
+// Write dialog (mockup A2): what changes, then the checks, then the files.
+component WriteDialog inherits Modal {
     property <bool> snapshot: true;
-    property <bool> done;
-    background: #0008;
-    TouchArea { }
-    Card {
-        background: Palette.background;
-        width: min(520px, root.width - 32px);
-        height: lay.preferred-height;
-        drop-shadow-blur: 30px;
-        drop-shadow-color: #0008;
-        lay := VerticalLayout {
-            padding: 20px;
-            spacing: 12px;
-            Text { text: done ? "Save written" : "Write " + Api.change-count + (Api.change-count == 1 ? " change" : " changes"); font-size: 18px; font-weight: 600; }
-            if !done: VerticalLayout {
-                spacing: 10px;
-                HorizontalLayout {
-                    spacing: 8px;
-                    Dot { level: Api.emulator-running ? Confidence.unresolved : Confidence.confirmed; y: 6px; }
-                    Text {
-                        text: Api.emulator-running ? "An emulator is running. Close it first: it writes its own copy of the save on exit and would undo these changes." : "No emulator running.";
-                        wrap: word-wrap;
-                        color: Api.emulator-running ? Tok.bad : Palette.foreground;
-                        horizontal-stretch: 1;
-                    }
-                    if Api.emulator-running: Button { text: "Check again"; clicked => { Api.check-emulator(); } }
-                }
-                CheckBox { text: "Take a snapshot of the save folder first (recommended)"; checked <=> root.snapshot; }
-                Muted { text: "Snapshots go to " + Api.snapshot-dir; font-size: 11px; }
-                Text { text: "These files get the same bytes (each keeps its own header):"; font-size: 12px; }
-                for t in Api.write-targets: Text { text: "  " + t; font-size: 11px; color: Tok.muted; overflow: elide; }
-                HorizontalLayout {
-                    alignment: end;
-                    spacing: 8px;
-                    Button { text: "Cancel"; clicked => { Api.write-open = false; } }
-                    Button {
-                        text: root.snapshot ? "Snapshot and write" : "Write without snapshot";
-                        primary: true;
-                        enabled: !Api.emulator-running;
-                        clicked => { root.done = Api.write(root.snapshot); }
+    property <bool> paths;
+    card-width: 560px;
+    dismiss => { Api.write-open = false; }
+    Text { text: Api.write-title; font-size: 20px; font-weight: 600; wrap: word-wrap; }
+    Muted { text: Api.write-sub; }
+    SectionTitle { text: "What changes"; font-size: Tok.small; color: Tok.muted; }
+    Rectangle {
+        border-radius: Tok.radius;
+        border-width: 1px;
+        border-color: Tok.line;
+        height: min(rows.preferred-height, 220px);
+        Flickable {
+            content-height: rows.preferred-height;
+            rows := VerticalLayout {
+                padding-left: 14px;
+                padding-right: 14px;
+                for r[i] in Api.write-rows: Rectangle {
+                    height: 40px;
+                    if i > 0: Hairline { y: 0; width: parent.width; }
+                    HorizontalLayout {
+                        spacing: Tok.tight;
+                        Text { text: r.title; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        if r.right != "": Text { text: r.right; color: Tok.muted; vertical-alignment: center; }
+                        if r.old != "": Text { text: r.old; color: Tok.muted; vertical-alignment: center; }
+                        if r.old != "": Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
+                        if r.new != "": Text { text: r.new; font-weight: 600; vertical-alignment: center; }
+                        if r.confidence != Confidence.confirmed: ConfidenceTag { level: r.confidence; info: false; }
                     }
                 }
             }
-            if done: VerticalLayout {
-                spacing: 10px;
-                Text { text: Api.write-step-info; wrap: word-wrap; }
-                HorizontalLayout {
-                    alignment: end;
-                    spacing: 8px;
-                    Button { text: "Show snapshots"; clicked => { Api.open-snapshots(); } }
-                    Button { text: "Done"; primary: true; clicked => { root.done = false; Api.write-open = false; } }
+        }
+    }
+    TextLink {
+        text: "Back to Review";
+        font-weight: 400;
+        clicked => {
+            Api.write-open = false;
+            Api.review-open = true;
+        }
+    }
+    SectionTitle { text: "Before writing"; font-size: Tok.small; color: Tok.muted; }
+    HorizontalLayout {
+        spacing: 10px;
+        Dot { level: Api.emulator-running ? Confidence.unresolved : Confidence.confirmed; y: 7px; background: Api.emulator-running ? Tok.bad : Tok.ok; }
+        VerticalLayout {
+            horizontal-stretch: 1;
+            Text {
+                text: Api.emulator-name + (Api.emulator-running ? " is running" : " is not running");
+                font-weight: Api.emulator-running ? 600 : 400;
+                wrap: word-wrap;
+            }
+            if Api.emulator-running: Muted { text: "Close it first: it overwrites the save when it exits."; }
+        }
+        if Api.emulator-running: Button { text: "Check again"; clicked => { Api.check-emulator(); } }
+    }
+    VerticalLayout {
+        spacing: 2px;
+        CheckBox { text: "Take a snapshot first (recommended)"; checked <=> root.snapshot; }
+        Muted { text: "You can restore it any time from Snapshots in the sidebar."; x: 28px; width: parent.width - 28px; }
+    }
+    if Api.derived-count > 0: HorizontalLayout {
+        spacing: 10px;
+        Dot { level: Confidence.derived; y: 6px; }
+        Text {
+            text: (Api.derived-count == 1 ? "1 change is" : Api.derived-count + " changes are")
+                + " Derived: worked out from the game's code, not yet checked in game." + (root.snapshot ? " Keep the snapshot on." : " A snapshot lets you go back.");
+            color: Tok.warn;
+            font-size: Tok.small;
+            wrap: word-wrap;
+            horizontal-stretch: 1;
+        }
+    }
+    SectionTitle { text: "Files"; font-size: Tok.small; color: Tok.muted; }
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Text {
+            text: Api.write-targets.length == 1 ? "The data goes into the save file." : "The same data goes into all " + Api.write-targets.length + " save files.";
+            horizontal-stretch: 1;
+            wrap: word-wrap;
+        }
+        HorizontalLayout {
+            spacing: 4px;
+            TextLink {
+                text: root.paths ? "Hide paths" : "Show paths";
+                font-weight: 400;
+                y: (parent.height - self.height) / 2;
+                clicked => { root.paths = !root.paths; }
+            }
+            Chevron { dir: root.paths ? "up" : "down"; y: (parent.height - self.height) / 2; stroke: Tok.accent-text; }
+        }
+    }
+    if root.paths: VerticalLayout {
+        spacing: 2px;
+        Muted { text: "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."; }
+        for t in Api.write-targets: Text { text: t; font-size: Tok.small; color: Tok.muted; font-family: "monospace"; overflow: elide; }
+    }
+    HorizontalLayout {
+        alignment: end;
+        spacing: Tok.tight;
+        Button { text: "Cancel"; clicked => { Api.write-open = false; } }
+        Button {
+            text: root.snapshot ? "Snapshot and write" : "Write without snapshot";
+            primary: true;
+            enabled: !Api.emulator-running;
+            clicked => {
+                if Api.write(root.snapshot) {
+                    Api.write-open = false;
+                }
+            }
+        }
+    }
+}
+
+// Snapshots (mockup A3): every copy taken before a write, with Restore.
+component SnapshotsDialog inherits Modal {
+    card-width: 560px;
+    dismiss => {
+        Api.snapshots-open = false;
+        Api.restore-ask = "";
+    }
+    if Api.restore-ask == "": VerticalLayout {
+        spacing: Tok.gap;
+        Text { text: "Snapshots"; font-size: 20px; font-weight: 600; }
+        Muted { text: "A copy of the whole save folder, taken before each write and before each restore."; }
+        if Api.snapshots.length == 0: EmptyState { text: "No snapshots of this save yet. Write takes one first unless you untick it."; }
+        if Api.snapshots.length > 0: Rectangle {
+            border-radius: Tok.radius;
+            border-width: 1px;
+            border-color: Tok.line;
+            height: min(list.preferred-height, 320px);
+            Flickable {
+                content-height: list.preferred-height;
+                list := VerticalLayout {
+                    for s[i] in Api.snapshots: Rectangle {
+                        height: 58px;
+                        if i > 0: Hairline { y: 0; width: parent.width; }
+                        HorizontalLayout {
+                            padding-left: 14px;
+                            padding-right: 10px;
+                            spacing: Tok.tight;
+                            VerticalLayout {
+                                alignment: center;
+                                horizontal-stretch: 1;
+                                Text { text: s.when; overflow: elide; }
+                                Muted { text: s.before; wrap: no-wrap; overflow: elide; }
+                            }
+                            Button {
+                                y: (parent.height - 32px) / 2;
+                                height: 32px;
+                                text: "Restore…";
+                                clicked => {
+                                    Api.restore-ask = s.dir;
+                                    Api.restore-when = s.when;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        HorizontalLayout {
+            spacing: Tok.tight;
+            Text { text: Api.snapshot-dir; color: Tok.muted; font-size: Tok.small; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
+            Button { text: "Open folder"; clicked => { Api.open-snapshots(); } }
+            Button { text: "Close"; clicked => { Api.snapshots-open = false; } }
+        }
+    }
+    if Api.restore-ask != "": VerticalLayout {
+        spacing: Tok.gap;
+        Text { text: "Restore the save from " + Api.restore-when + "?"; font-size: 20px; font-weight: 600; wrap: word-wrap; }
+        Muted { text: "Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."; }
+        if Api.change-count > 0: Text {
+            text: (Api.change-count == 1 ? "Your staged change is" : "Your " + Api.change-count + " staged changes are") + " dropped.";
+            color: Tok.warn;
+            font-size: Tok.small;
+            wrap: word-wrap;
+        }
+        if Api.emulator-running: Text { text: Api.emulator-name + " is running. Close it first: it overwrites the save when it exits."; color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+        HorizontalLayout {
+            alignment: end;
+            spacing: Tok.tight;
+            Button { text: "Cancel"; clicked => { Api.restore-ask = ""; } }
+            Button {
+                text: "Restore";
+                primary: true;
+                enabled: !Api.emulator-running;
+                clicked => {
+                    Api.restore(Api.restore-ask);
+                    Api.restore-ask = "";
                 }
             }
         }
@@ -126,12 +324,39 @@ export component AppWindow inherits Window {
     preferred-height: 820px;
     min-width: 760px;
     min-height: 520px;
-    background: Palette.background;
+    background: Tok.page;
     // Columns are placed by hand: a layout whose widths depend on the window width
     // would feed back into the window's own size constraints.
     property <bool> dock: root.width >= 1440px;
-    property <length> side: root.width >= 1000px ? 216px : 184px;
-    property <length> review-w: Api.review-open && dock ? 360px : 0px;
+    property <length> side: root.width >= 1000px ? 220px : 188px;
+    property <bool> about-open;
+    init => {
+        Win.width = self.width;
+        Win.height = self.height;
+    }
+    changed width => { Win.width = self.width; }
+    changed height => { Win.height = self.height; }
+    property <string> popup-request: Api.snapshot-popup;
+    changed popup-request => {
+        if popup-request == "about" {
+            Api.snapshot-popup = "";
+            root.about-open = true;
+        } else if popup-request == "path" {
+            Api.snapshot-popup = "";
+            path-pop.show();
+        }
+    }
+    property <string> scheme: Api.force-scheme;
+    changed scheme => {
+        if scheme == "light" {
+            Palette.color-scheme = ColorScheme.light;
+        } else if scheme == "dark" {
+            Palette.color-scheme = ColorScheme.dark;
+        }
+    }
+    property <length> review-w: Api.review-open && dock ? 380px : 0px;
+    property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "monsters", "advanced"];
+    property <[string]> nav-titles: ["Overview", "Character", "Items", "Equipment", "Palicoes", "Quests", "Requests", "Collections", "Monsters", "Save map"];
 
     Rectangle {
         // sidebar
@@ -139,11 +364,11 @@ export component AppWindow inherits Window {
             x: 0;
             width: side;
             height: root.height;
-            background: Palette.alternate-background;
+            background: Tok.side;
             VerticalLayout {
                 padding: 10px;
                 spacing: 2px;
-                Text { text: "MHGU Save Editor"; font-size: 15px; font-weight: 700; height: 34px; vertical-alignment: center; x: 10px; }
+                Text { text: "MHGU Save Editor"; font-size: 15px; font-weight: 700; height: 36px; vertical-alignment: center; x: 10px; }
                 if Api.loaded: VerticalLayout {
                     spacing: 6px;
                     padding-bottom: 8px;
@@ -152,22 +377,26 @@ export component AppWindow inherits Window {
                         current-index: Api.slot;
                         selected => { Api.select-slot(self.current-index); }
                     }
-                    Muted { text: "HR " + Api.slots[Api.slot].hr + " · " + Api.slots[Api.slot].playtime; font-size: 11px; x: 6px; }
+                    Muted { text: Api.slots[Api.slot].used ? "HR " + Api.slots[Api.slot].hr + " · " + Api.slots[Api.slot].playtime : "No character in this slot"; x: 6px; }
                 }
-                for p in [
-                    {id: "overview", t: "Overview"}, {id: "character", t: "Character"}, {id: "items", t: "Items"},
-                    {id: "equipment", t: "Equipment"}, {id: "palicoes", t: "Palicoes"}, {id: "quests", t: "Quests"},
-                    {id: "requests", t: "Requests"}, {id: "collections", t: "Collections"}, {id: "monsters", t: "Monsters"},
-                    {id: "advanced", t: "Save map"},
-                ]: NavButton {
-                    text: p.t;
-                    active: Api.page == p.id;
+                for id[i] in root.nav-ids: NavButton {
+                    text: root.nav-titles[i];
+                    count: Api.page-counts[i];
+                    active: Api.page == id;
                     enabled: Api.loaded && Api.slots[Api.slot].used;
-                    clicked => { Api.page = p.id; }
+                    clicked => { Api.page = id; }
                 }
                 Rectangle { vertical-stretch: 1; }
-                NavButton { text: "Open another save…"; clicked => { Api.open-dialog(); } }
-                NavButton { text: "About"; clicked => { about.show(); } }
+                NavButton {
+                    text: "Snapshots…";
+                    enabled: Api.loaded;
+                    clicked => {
+                        Api.list-snapshots();
+                        Api.snapshots-open = true;
+                    }
+                }
+                NavButton { text: "Open save…"; clicked => { Api.open-dialog(); } }
+                NavButton { text: "About"; clicked => { root.about-open = true; } }
             }
         }
         Rectangle {
@@ -180,16 +409,86 @@ export component AppWindow inherits Window {
                 height: 52px;
                 visible: Api.loaded;
                 HorizontalLayout {
-                    padding-left: 20px;
+                    padding-left: Tok.margin;
                     padding-right: 14px;
                     spacing: 10px;
-                    Text { text: Api.file-path; color: Tok.muted; font-size: 12px; vertical-alignment: center; overflow: elide; horizontal-stretch: 1; }
+                    // the path shortened from the start; a click shows all of it (K2)
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        path-ta := TouchArea {
+                            mouse-cursor: pointer;
+                            clicked => { path-pop.show(); }
+                        }
+                        HorizontalLayout {
+                            spacing: 8px;
+                            alignment: start;
+                            if Api.path-label != "": Text { text: Api.path-label; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                            Text {
+                                text: Api.path-tail;
+                                color: path-ta.has-hover ? Palette.foreground : Tok.muted;
+                                font-size: Tok.small;
+                                vertical-alignment: center;
+                                overflow: elide;
+                            }
+                        }
+                        path-pop := PopupWindow {
+                            x: 0;
+                            y: parent.height - 6px;
+                            width: min(640px, root.width - side - 48px);
+                            close-policy: close-on-click-outside;
+                            Rectangle {
+                                background: Tok.raised;
+                                border-radius: 8px;
+                                border-width: 1px;
+                                border-color: Tok.line;
+                                drop-shadow-blur: 20px;
+                                drop-shadow-color: #0006;
+                                VerticalLayout {
+                                    padding: 14px;
+                                    spacing: 10px;
+                                    Text { text: "Save file"; font-weight: 600; }
+                                    path-text := TextInput {
+                                        text: Api.file-path;
+                                        read-only: true;
+                                        wrap: char-wrap;
+                                        font-size: Tok.small;
+                                        font-family: "monospace";
+                                        color: Palette.foreground;
+                                    }
+                                    HorizontalLayout {
+                                        alignment: end;
+                                        spacing: Tok.tight;
+                                        Button { text: "Open folder"; clicked => { Api.open-folder(); path-pop.close(); } }
+                                        Button {
+                                            text: "Copy";
+                                            clicked => {
+                                                path-text.select-all();
+                                                path-text.copy();
+                                                Api.copy-path();
+                                                path-pop.close();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if Api.value-count > 0: HorizontalLayout {
+                        spacing: 6px;
+                        horizontal-stretch: 0;
+                        Rectangle { width: 7px; height: 7px; border-radius: 3.5px; background: Tok.accent; y: (parent.height - self.height) / 2; }
+                        Text {
+                            text: Fmt.num(Api.value-count) + (Api.value-count == 1 ? " value not written yet" : " values not written yet");
+                            color: Tok.accent-text;
+                            font-size: Tok.small;
+                            vertical-alignment: center;
+                        }
+                    }
+                    // only Write uses the accent; Review is a plain button (C12)
                     Button {
                         y: 10px;
                         height: 32px;
                         text: Api.change-count == 0 ? "Review" : "Review (" + Api.change-count + ")";
-                        checkable: true;
-                        checked: Api.review-open;
                         clicked => { Api.review-open = !Api.review-open; }
                     }
                     Button {
@@ -201,7 +500,7 @@ export component AppWindow inherits Window {
                         clicked => { Api.check-emulator(); Api.write-open = true; }
                     }
                 }
-                Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+                Hairline { y: parent.height - 1px; width: parent.width; }
             }
             Rectangle {
                 y: Api.loaded ? 52px : 0px;
@@ -221,39 +520,91 @@ export component AppWindow inherits Window {
                 }
             }
         }
-        if Api.review-open && dock: ReviewPanel { x: root.width - 360px; width: 360px; height: root.height; }
+        if Api.review-open && dock: ReviewPanel { x: root.width - 380px; width: 380px; height: root.height; }
     }
     if Api.review-open && !dock: Rectangle {
         background: #0005;
         TouchArea { clicked => { Api.review-open = false; } }
-        ReviewPanel { x: parent.width - self.width; width: min(380px, parent.width - 40px); height: parent.height; }
+        ReviewPanel { x: parent.width - self.width; width: min(400px, parent.width - 40px); height: parent.height; }
     }
     if Api.write-open: WriteDialog { }
+    if Api.snapshots-open: SnapshotsDialog { }
+    if Api.quit-open: Modal {
+        card-width: 460px;
+        dismiss => { Api.quit-open = false; }
+        Text { text: "Quit without writing?"; font-size: 20px; font-weight: 600; }
+        Muted {
+            text: (Api.change-count == 1 ? "1 change" : Api.change-count + " changes") + " (" + Fmt.num(Api.value-count) + (Api.value-count == 1 ? " value" : " values") + (Api.change-count == 1 ? ") is" : ") are") + " not written to the save and will be lost.";
+        }
+        HorizontalLayout {
+            alignment: end;
+            spacing: Tok.tight;
+            Button { text: "Cancel"; clicked => { Api.quit-open = false; } }
+            Button { text: "Quit without writing"; clicked => { Api.quit(); } }
+            Button {
+                text: "Write…";
+                primary: true;
+                clicked => {
+                    Api.quit-open = false;
+                    Api.check-emulator();
+                    Api.write-open = true;
+                }
+            }
+        }
+    }
+    if root.about-open: Modal {
+        card-width: 440px;
+        dismiss => { root.about-open = false; }
+        Text { text: "MHGU Save Editor"; font-size: 20px; font-weight: 600; }
+        Muted { text: Api.build-info; }
+        Muted { text: "Built on the notes of the mhgu-save-reverse-engineering project. Monster Hunter and its assets are © CAPCOM; this is an unofficial fan tool."; }
+        // the badge stays small: it was the largest, brightest element on screen (Q15)
+        HorizontalLayout {
+            alignment: start;
+            AboutSlint { width: 200px; height: 80px; }
+        }
+        HorizontalLayout {
+            alignment: end;
+            Button { text: "Close"; clicked => { root.about-open = false; } }
+        }
+    }
     if Api.toast != "": Rectangle {
         x: (parent.width - self.width) / 2;
         y: parent.height - self.height - 24px;
-        width: min(t.preferred-width + 32px, parent.width - 32px);
-        height: t.preferred-height + 20px;
+        width: min(lay.preferred-width, parent.width - 32px);
+        height: lay.preferred-height;
         border-radius: 8px;
-        background: Api.toast-error ? Tok.bad : Palette.foreground;
-        t := Text { text: Api.toast; color: Palette.background; wrap: word-wrap; width: parent.width - 32px; horizontal-alignment: center; }
-    }
-    about := PopupWindow {
-        x: (root.width - 420px) / 2;
-        y: 80px;
-        width: 420px;
-        close-policy: close-on-click-outside;
-        Card {
-            background: Palette.background;
-            drop-shadow-blur: 24px;
-            drop-shadow-color: #0006;
+        background: Api.toast-error ? Tok.bad : Tok.dark ? #f3f3f3 : #2b2b2b;
+        drop-shadow-blur: 16px;
+        drop-shadow-color: #0006;
+        lay := HorizontalLayout {
+            padding: 12px;
+            padding-left: 18px;
+            spacing: 16px;
             VerticalLayout {
-                padding: 18px;
-                spacing: 10px;
-                Text { text: "MHGU Save Editor"; font-size: 16px; font-weight: 600; }
-                Muted { text: Api.build-info; }
-                Muted { text: "Built on the notes of the mhgu-save-reverse-engineering project. Monster Hunter and its assets are © CAPCOM; this is an unofficial fan tool."; }
-                AboutSlint { }
+                alignment: center;
+                Text {
+                    text: Api.toast;
+                    color: Api.toast-error ? #ffffff : Tok.dark ? #1c1c1c : #ffffff;
+                    font-weight: Api.toast-sub != "" ? 600 : 400;
+                    wrap: word-wrap;
+                    max-width: 520px;
+                }
+                if Api.toast-sub != "": Text { text: Api.toast-sub; color: Tok.dark ? #1c1c1cb0 : #ffffffb0; font-size: Tok.small; }
+            }
+            // the toast is inverted against the theme, so its button is too
+            if Api.toast-action != "": Rectangle {
+                y: (parent.height - self.height) / 2;
+                width: tb.preferred-width + 28px;
+                height: 32px;
+                border-radius: 4px;
+                border-width: 1px;
+                border-color: Tok.dark ? #0000002e : #ffffff3d;
+                background: tba.pressed ? (Tok.dark ? #e6e6e6 : #4a4a4a) : tba.has-hover ? (Tok.dark ? #f0f0f0 : #444444) : (Tok.dark ? #ffffff : #3a3a3a);
+                accessible-role: button;
+                accessible-label: Api.toast-action;
+                tb := Text { text: Api.toast-action; color: Tok.dark ? #1c1c1c : #ffffff; }
+                tba := TouchArea { clicked => { Api.toast-act(); } }
             }
         }
     }

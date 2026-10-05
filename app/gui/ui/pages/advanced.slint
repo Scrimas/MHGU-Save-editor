@@ -1,45 +1,88 @@
 import { ListView, LineEdit, Palette, ScrollView } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, Dot, ConfidenceTag } from "../common.slint";
+import { Api, Tok, Card, Muted, ConfidenceTag, PageHeader, ColHead, Hairline, EmptyState, ListRow } from "../common.slint";
 
 export component AdvancedPage inherits Rectangle {
-    property <int> selected: -1;
     VerticalLayout {
-        padding: 20px;
-        spacing: 12px;
-        Text { text: "Save map"; font-size: 22px; font-weight: 600; }
-        Muted { text: "Every byte range of the save, named from the game's own loader (data/save-map.csv). Read-only view of the current character."; }
-        LineEdit { placeholder-text: "Filter by name, manager or offset"; edited(t) => { Api.filter-fields(t); } }
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: "Save map";
+            subtitle: "Every byte range of the save, named from the game's own loader · read-only, character " + (Api.slot + 1);
+        }
+        LineEdit {
+            placeholder-text: "Filter by name, manager or offset";
+            text <=> Api.field-filter;
+            edited(t) => { Api.filter-fields(t); }
+        }
         HorizontalLayout {
-            spacing: 16px;
+            spacing: Tok.pad;
             vertical-stretch: 1;
             Card {
                 horizontal-stretch: 3;
-                ListView {
-                    for f in Api.fields: Rectangle {
-                        height: 40px;
-                        background: f.index == root.selected ? Palette.selection-background.transparentize(0.75) : f.changed ? Palette.accent-background.transparentize(0.9) : ta.has-hover ? Palette.foreground.transparentize(0.95) : transparent;
-                        ta := TouchArea { clicked => { root.selected = f.index; Api.select-field(f.index); } }
+                VerticalLayout {
+                    Rectangle {
+                        height: 34px;
                         HorizontalLayout {
-                            padding-left: 10px;
-                            padding-right: 10px;
+                            padding-left: 12px;
+                            padding-right: 12px;
                             spacing: 10px;
-                            Dot { level: f.confidence; y: 16px; }
-                            Text { text: f.offset; width: 80px; vertical-alignment: center; font-family: "monospace"; font-size: 12px; }
-                            Text { text: f.size; width: 60px; vertical-alignment: center; color: Tok.muted; font-size: 12px; }
-                            Text { text: f.owner; width: 100px; vertical-alignment: center; color: Tok.muted; font-size: 12px; overflow: elide; }
-                            Text { text: f.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; font-size: 12px; }
+                            ColHead { text: "Offset"; width: 84px; }
+                            ColHead { text: "Size"; width: 64px; }
+                            ColHead { text: "Manager"; width: 110px; }
+                            ColHead { text: "Name"; horizontal-stretch: 1; }
+                            ColHead { text: "Confidence"; width: 100px; }
+                        }
+                        Hairline { y: parent.height - 1px; width: parent.width; }
+                    }
+                    ListView {
+                        property <int> seq: Api.jump-seq;
+                        function go() {
+                            if Api.page == "advanced" && Api.jump-row >= 0 {
+                                self.content-y = -max(0px, Api.jump-row * 40px - self.visible-height / 3);
+                            }
+                        }
+                        init => { self.go(); }
+                        changed seq => { self.go(); }
+                        for f in Api.fields: ListRow {
+                            two-line: false;
+                            selected: f.index == Api.field-sel;
+                            staged: f.changed;
+                            clicked => { Api.select-field(f.index); }
+                            HorizontalLayout {
+                                padding-left: 12px;
+                                padding-right: 12px;
+                                spacing: 10px;
+                                Text { text: f.offset; width: 84px; vertical-alignment: center; font-family: "monospace"; font-size: Tok.small; }
+                                Text { text: f.size; width: 64px; vertical-alignment: center; color: Tok.muted; font-size: Tok.small; }
+                                Text { text: f.owner; width: 110px; vertical-alignment: center; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+                                Text { text: f.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; font-size: Tok.small; }
+                                // the same tag as everywhere else, not "DERIVED" (06.4)
+                                Rectangle {
+                                    width: 100px;
+                                    ConfidenceTag { level: f.confidence; info: false; }
+                                }
+                            }
                         }
                     }
                 }
             }
             Card {
                 horizontal-stretch: 2;
-                VerticalLayout {
-                    padding: 12px;
-                    spacing: 8px;
-                    Text { text: Api.field-info; wrap: word-wrap; font-size: 12px; }
+                if Api.field-sel < 0: EmptyState { text: "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."; }
+                if Api.field-sel >= 0: VerticalLayout {
+                    padding: Tok.pad;
+                    spacing: 10px;
+                    Text { text: Api.field-info; wrap: word-wrap; font-size: Tok.small; }
                     ScrollView {
-                        Text { text: Api.hex; font-family: "monospace"; font-size: 12px; }
+                        TextInput {
+                            text: Api.hex;
+                            read-only: true;
+                            single-line: false;
+                            font-family: "monospace";
+                            font-size: Tok.small;
+                            color: Palette.foreground;
+                        }
                     }
                 }
             }

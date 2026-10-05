@@ -1,11 +1,13 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
 mod assets;
+mod fmt;
 mod goals;
 #[cfg(target_os = "linux")]
 mod scroll;
 mod state;
 mod system;
+mod targets;
 mod views;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
@@ -45,50 +47,55 @@ fn main() -> Result<(), slint::PlatformError> {
         .into(),
     );
     api.set_assets_ok(assets::available());
-    api.set_detected(strings(system::detect_saves().into_iter().map(|p| p.display().to_string())));
     views::wire(&ui, &st);
-
-    if let Some(p) = std::env::args_os().nth(1) {
-        views::open(&ui, &st, std::path::Path::new(&p));
-        // second argument: start page (used for screenshots)
-        if let Some(page) = std::env::args().nth(2) {
-            api.set_page(page.as_str().into());
-            // third argument: tab of the Collections or Quests page; on the Equipment page
-            // comma-separated steps: a box slot to select, add:<category>:<id>, picker
-            let arg = std::env::args().nth(3).unwrap_or_default();
-            if page == "equipment" {
-                views::refresh(&ui, &st.borrow());
-                for step in arg.split(',').filter(|s| !s.is_empty()) {
-                    match step.split(':').collect::<Vec<_>>()[..] {
-                        ["picker"] => {
-                            let w = ui.as_weak();
-                            slint::Timer::single_shot(std::time::Duration::from_millis(300), move || {
-                                if let Some(ui) = w.upgrade() {
-                                    ui.global::<Api>().set_equip_picker_request(-1);
-                                }
-                            });
-                        }
-                        ["add", cat, id] => {
-                            if let Some(c) = api.get_equip_categories().iter().position(|c| c == cat) {
-                                api.set_equip_category(c as i32);
-                                api.invoke_put_equip(-1, id.parse().unwrap_or(0));
-                            }
-                        }
-                        [slot] => api.invoke_select_equip(slot.parse().unwrap_or(-1)),
-                        _ => {}
-                    }
-                }
-            } else if let Ok(tab) = arg.parse() {
-                if page == "quests" { api.invoke_select_quest_tab(tab) } else { api.invoke_select_collection(tab) }
+    // quitting with staged changes asks first (S11)
+    {
+        let w = ui.as_weak();
+        let st = st.clone();
+        ui.window().on_close_requested(move || {
+            let Some(ui) = w.upgrade() else { return slint::CloseRequestResponse::HideWindow };
+            if !st.borrow().ops.is_empty() && !views::quitting() {
+                ui.global::<Api>().set_quit_open(true);
+                return slint::CloseRequestResponse::KeepWindowShown;
             }
-        }
+            slint::CloseRequestResponse::HideWindow
+        });
+    }
+
+    // arguments: save file ("-" for none), start page, snapshot steps (used for screenshots)
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if let Some(p) = args.first().filter(|p| *p != "-") {
+        views::open(&ui, &st, std::path::Path::new(p));
+    }
+    if let Some(page) = args.get(1) {
+        api.set_page(page.as_str().into());
+        views::refresh(&ui, &st.borrow());
+        // the "Save opened" toast would cover the page; toasts of the steps stay
+        api.set_toast("".into());
+        steps(&ui, page, args.get(2).map_or("", String::as_str));
     }
     // MHGU_SNAPSHOT=out.png: render the window to a PNG and quit (for checking the UI
-    // without capturing the screen)
+    // without capturing the screen). Waits until the compositor has sized the window:
+    // maximized, or the same size for a second (a sized floating window, e.g. parked
+    // off-screen), at most 8 s (a slow first page delays mapping); then it settles.
+    let snapshot_timer = slint::Timer::default();
     if let Some(out) = std::env::var_os("MHGU_SNAPSHOT") {
         let w = ui.as_weak();
-        slint::Timer::single_shot(std::time::Duration::from_millis(1500), move || {
+        let start = std::time::Instant::now();
+        let ready = std::cell::Cell::new(None::<std::time::Instant>);
+        let size = std::cell::Cell::new((slint::PhysicalSize::default(), 0u32));
+        snapshot_timer.start(slint::TimerMode::Repeated, std::time::Duration::from_millis(250), move || {
             let Some(ui) = w.upgrade() else { return };
+            let t = start.elapsed().as_millis();
+            let now = ui.window().size();
+            let (last, same) = size.get();
+            size.set((now, if now == last { same + 1 } else { 0 }));
+            if ready.get().is_none() && t >= 1500 && (ui.window().is_maximized() || same >= 4 || t >= 8000) {
+                ready.set(Some(std::time::Instant::now()));
+            }
+            if !ready.get().is_some_and(|r| r.elapsed().as_millis() >= 800) {
+                return;
+            }
             match ui.window().take_snapshot() {
                 Ok(buf) => {
                     let img = image::RgbaImage::from_raw(buf.width(), buf.height(), buf.as_bytes().to_vec()).unwrap();
@@ -102,6 +109,107 @@ fn main() -> Result<(), slint::PlatformError> {
         });
     }
     ui.run()
+}
+
+/// Put the UI in a given state for a screenshot: comma-separated steps run in order.
+///   slot:N  tab:N  sel:N  store:N  owner:N  filter:F  large  missing  search:S  add:<category>:<id>
+///   goal:<id>  char:<field>:<value>  monster:<index>:<field>:<value>  item:<slot>:<id>:<count>
+///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
+///   theme:light|dark
+fn steps(ui: &AppWindow, page: &str, list: &str) {
+    let api = ui.global::<Api>();
+    for step in list.split(',').filter(|s| !s.is_empty()) {
+        let num = |s: &str| s.parse::<i32>().unwrap_or(-1);
+        let parts: Vec<&str> = step.split(':').collect();
+        match (page, &parts[..]) {
+            (_, &["slot", n]) => api.invoke_select_slot(num(n)),
+            ("quests", &["tab", n]) => api.invoke_select_quest_tab(num(n)),
+            (_, &["tab", n]) => api.invoke_select_collection(num(n)),
+            ("palicoes", &["sel", n]) => api.invoke_select_palico(num(n)),
+            ("advanced", &["sel", n]) => api.invoke_select_field(num(n)),
+            (_, &["sel", n]) => api.invoke_select_equip(num(n)),
+            (_, &["store", n]) => {
+                api.set_item_store(num(n));
+                api.invoke_filter_items("".into());
+            }
+            (_, &["owner", n]) => {
+                api.set_equip_owner(num(n));
+                api.invoke_filter_equip(api.get_equip_filter());
+            }
+            ("requests", &["filter", f]) => {
+                api.set_request_filter(f.into());
+                api.invoke_filter_requests();
+            }
+            ("advanced", &["filter", f]) => api.invoke_filter_fields(f.into()),
+            (_, &["filter", f]) => {
+                api.set_equip_filter(f.into());
+                api.invoke_filter_equip(f.into());
+            }
+            (_, &["large"]) => {
+                api.set_monster_large_only(true);
+                api.invoke_filter_monsters();
+            }
+            ("quests", &["missing"]) => {
+                api.set_quest_missing(true);
+                api.invoke_filter_quests();
+            }
+            ("collections", &["missing"]) => {
+                api.set_check_missing(true);
+                api.invoke_filter_checks();
+            }
+            ("monsters", &["missing"]) => {
+                api.set_monster_missing(true);
+                api.invoke_filter_monsters();
+            }
+            ("quests", &["search", q]) => {
+                api.set_quest_search(q.into());
+                api.invoke_filter_quests();
+            }
+            ("equipment", &["search", q]) => {
+                api.set_equip_search(q.into());
+                api.invoke_search_equip_list(q.into());
+            }
+            (_, &["add", cat, id]) => {
+                if let Some(c) = api.get_equip_categories().iter().position(|c| c == cat) {
+                    api.set_equip_category(c as i32);
+                    api.invoke_put_equip(-1, num(id));
+                }
+            }
+            (_, &["goal", id]) => api.invoke_apply_preview(id.into()),
+            (_, &["char", field, v]) => api.invoke_set_character(field.into(), num(v)),
+            (_, &["monster", i, field, v]) => api.invoke_set_monster(num(i), field.into(), num(v)),
+            (_, &["item", slot, id, n]) => api.invoke_set_item(num(slot), num(id), num(n)),
+            (_, &["goto", ..]) => api.invoke_goto(parts[1..].join(":").into()),
+            (_, &["undo-all"]) => api.invoke_undo_all(),
+            (_, &["review"]) => api.set_review_open(true),
+            (_, &["write"]) => {
+                api.invoke_check_emulator();
+                api.set_write_open(true);
+            }
+            (_, &["snapshots"]) => {
+                api.invoke_list_snapshots();
+                api.set_snapshots_open(true);
+            }
+            (_, &["quit"]) => api.set_quit_open(true),
+            // write with a snapshot (point XDG_DATA_HOME elsewhere for tests), then press
+            // the toast's button
+            (_, &["dowrite"]) => {
+                api.invoke_write(true);
+            }
+            (_, &["toastact"]) => api.invoke_toast_act(),
+            (_, &["theme", s]) => api.set_force_scheme(s.into()),
+            // after the page exists and has its size
+            (_, &["popup", name]) => {
+                let (w, name) = (ui.as_weak(), SharedString::from(name));
+                slint::Timer::single_shot(std::time::Duration::from_millis(400), move || {
+                    if let Some(ui) = w.upgrade() {
+                        ui.global::<Api>().set_snapshot_popup(name.clone());
+                    }
+                });
+            }
+            _ => eprintln!("unknown step {step:?}"),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -143,6 +251,12 @@ mod tests {
         assert_eq!(api.get_change_count(), 1);
         assert_eq!(row(48).hunts, 777);
         assert!(row(48).changed);
+        // the page shows the file's value; Review lists old → new; the nav counts it
+        assert_eq!(row(48).was_hunts.as_str(), fmt::num(old));
+        let c = api.get_changes().row_data(0).unwrap();
+        assert!(c.single && c.old.as_str() == fmt::num(old) && c.new == "777" && c.title.ends_with("· Hunted"));
+        assert_eq!(api.get_page_counts().row_data(8), Some(1));
+        assert_eq!(api.get_value_count(), 1);
         api.invoke_set_monster(4, "captures".into(), 5);
         assert_eq!(api.get_change_count(), 2);
         // undo the first edit only: Arzuros back, Rathalos kept
@@ -185,14 +299,35 @@ mod tests {
         api.invoke_put_equip(worn, 0);
         assert_eq!(api.get_change_count(), 0);
 
-        // a goal, then write without snapshot
-        api.invoke_apply_goal("money".into());
-        assert_eq!(api.get_change_count(), 1);
+        // a goal is one edit of several values; one of them goes back on its own
+        let money = goals::plan("money", st.borrow().save(), st.borrow().slot);
+        api.invoke_apply_preview("money".into());
+        assert_eq!(api.get_change_count(), if money.lines.is_empty() { 0 } else { 1 });
+        let wyc = |s: &State| mhgu_save::character::get(s.save(), s.base()).wycademy;
+        let wyc0 = {
+            let s = st.borrow();
+            mhgu_save::character::get(s.orig(), s.base()).wycademy
+        };
+        if money.lines.len() > 1 && wyc0 != mhgu_save::character::MAX_POINTS {
+            api.invoke_undo_value("wycademy".into());
+            assert_eq!(api.get_change_count(), 1);
+            assert_eq!(wyc(&st.borrow()), wyc0);
+            assert_eq!(st.borrow().ops[0].values.len(), money.lines.len() - 1);
+        }
+        // Undo all, then Redo brings the edits back
+        let n = api.get_change_count();
+        api.invoke_undo_all();
+        assert_eq!(api.get_change_count(), 0);
+        assert_eq!(st.borrow_mut().redo_all(), n as usize);
+        views::refresh(&ui, &st.borrow());
+        assert_eq!(api.get_change_count(), n);
         if system::running_emulators().is_empty() {
             assert!(api.invoke_write(false));
             assert_eq!(api.get_change_count(), 0);
             let s = mhgu_save::Save::from_bytes(std::fs::read(dir.join("1/system_backup")).unwrap()).unwrap();
             assert_eq!(mhgu_save::character::get(&s, s.base(0)).funds, 9_999_999);
+            // after the write the file's values are the new "was" values: nothing staged
+            assert_eq!(api.get_value_count(), 0);
         }
         std::fs::remove_dir_all(&dir).unwrap();
     }
