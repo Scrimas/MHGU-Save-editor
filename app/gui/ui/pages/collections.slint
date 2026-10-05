@@ -1,0 +1,87 @@
+import { ListView, CheckBox, Button, SpinBox, Palette, ScrollView } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, Chip, Asset, ConfidenceTag, Confidence } from "../common.slint";
+
+export component CollectionsPage inherits Rectangle {
+    property <int> cols: max(1, floor((root.width - 40px) / 230px));
+    VerticalLayout {
+        padding: 20px;
+        spacing: 12px;
+        HorizontalLayout {
+            spacing: 12px;
+            VerticalLayout {
+                Text { text: "Collections"; font-size: 22px; font-weight: 600; }
+                Muted { text: Api.checks-summary; }
+            }
+            Rectangle { horizontal-stretch: 1; }
+            if Api.collection-tab < 4: Button { text: "Select all"; clicked => { Api.checks-all(true); } }
+            if Api.collection-tab < 4: Button { text: "Clear all"; clicked => { Api.checks-all(false); } }
+        }
+        HorizontalLayout {
+            spacing: 6px;
+            for t[i] in ["Hunter Arts", "Canteen dishes", "Canteen ingredients", "Awards", "Deviants"]: Chip {
+                text: t;
+                active: Api.collection-tab == i;
+                clicked => { Api.select-collection(i); }
+            }
+            Rectangle { horizontal-stretch: 1; }
+        }
+        if Api.collection-tab < 4: Card {
+            vertical-stretch: 1;
+            ListView {
+                for r in (Api.checks.length + cols - 1) / cols: HorizontalLayout {
+                    padding-left: 8px;
+                    padding-right: 8px;
+                    height: 40px;
+                    for c in cols: Rectangle {
+                        horizontal-stretch: 1;
+                        clip: true;
+                        property <int> k: r * cols + c;
+                        if k < Api.checks.length: HorizontalLayout {
+                            padding-left: 4px;
+                            spacing: 6px;
+                            if Api.checks[k].has-icon: Asset {
+                                width: 32px;
+                                height: 32px;
+                                y: 4px;
+                                source: Api.checks[k].icon;
+                                available: true;
+                                opacity: Api.checks[k].on ? 1 : 0.35;
+                            }
+                            CheckBox {
+                                text: Api.checks[k].name;
+                                checked: Api.checks[k].on;
+                                toggled => { Api.set-check(Api.checks[k].key, self.checked); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if Api.collection-tab == 4: Card {
+            vertical-stretch: 1;
+            ListView {
+                for d in Api.deviants: Rectangle {
+                    height: 54px;
+                    background: d.changed ? Palette.accent-background.transparentize(0.9) : transparent;
+                    HorizontalLayout {
+                        padding-left: 10px;
+                        padding-right: 10px;
+                        spacing: 12px;
+                        Asset { width: 40px; height: 40px; y: 7px; source: d.icon; available: d.has-icon; kind: "MON"; }
+                        Text { text: d.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        Text { text: "Permits"; vertical-alignment: center; color: Tok.muted; font-size: 12px; }
+                        SpinBox { width: 100px; y: 9px; height: 36px; minimum: 0; maximum: 99; value: d.permits; edited(v) => { Api.set-deviant(d.index, "permits", v); } }
+                        Text { text: "Levels cleared"; vertical-alignment: center; color: Tok.muted; font-size: 12px; }
+                        SpinBox { width: 100px; y: 9px; height: 36px; minimum: 0; maximum: d.total; value: d.levels; edited(v) => { Api.set-deviant(d.index, "levels", v); } }
+                        Text { text: "/ " + d.total; width: 34px; vertical-alignment: center; color: Tok.muted; }
+                    }
+                    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+                }
+            }
+        }
+        Muted {
+            text: Api.collection-tab == 3 ? "Awards are kept in two maps; the Guild Card ORs the game's map back in after each quest, so both are written." : Api.collection-tab == 4 ? "Levels cleared sets the Special Permit quest bits from level 1 up." : "";
+            font-size: 11px;
+        }
+    }
+}

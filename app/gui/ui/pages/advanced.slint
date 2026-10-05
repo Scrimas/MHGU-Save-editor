@@ -1,0 +1,48 @@
+import { ListView, LineEdit, Palette, ScrollView } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, Dot, ConfidenceTag } from "../common.slint";
+
+export component AdvancedPage inherits Rectangle {
+    property <int> selected: -1;
+    VerticalLayout {
+        padding: 20px;
+        spacing: 12px;
+        Text { text: "Save map"; font-size: 22px; font-weight: 600; }
+        Muted { text: "Every byte range of the save, named from the game's own loader (data/save-map.csv). Read-only view of the current character."; }
+        LineEdit { placeholder-text: "Filter by name, manager or offset"; edited(t) => { Api.filter-fields(t); } }
+        HorizontalLayout {
+            spacing: 16px;
+            vertical-stretch: 1;
+            Card {
+                horizontal-stretch: 3;
+                ListView {
+                    for f in Api.fields: Rectangle {
+                        height: 40px;
+                        background: f.index == root.selected ? Palette.selection-background.transparentize(0.75) : f.changed ? Palette.accent-background.transparentize(0.9) : ta.has-hover ? Palette.foreground.transparentize(0.95) : transparent;
+                        ta := TouchArea { clicked => { root.selected = f.index; Api.select-field(f.index); } }
+                        HorizontalLayout {
+                            padding-left: 10px;
+                            padding-right: 10px;
+                            spacing: 10px;
+                            Dot { level: f.confidence; y: 16px; }
+                            Text { text: f.offset; width: 80px; vertical-alignment: center; font-family: "monospace"; font-size: 12px; }
+                            Text { text: f.size; width: 60px; vertical-alignment: center; color: Tok.muted; font-size: 12px; }
+                            Text { text: f.owner; width: 100px; vertical-alignment: center; color: Tok.muted; font-size: 12px; overflow: elide; }
+                            Text { text: f.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; font-size: 12px; }
+                        }
+                    }
+                }
+            }
+            Card {
+                horizontal-stretch: 2;
+                VerticalLayout {
+                    padding: 12px;
+                    spacing: 8px;
+                    Text { text: Api.field-info; wrap: word-wrap; font-size: 12px; }
+                    ScrollView {
+                        Text { text: Api.hex; font-family: "monospace"; font-size: 12px; }
+                    }
+                }
+            }
+        }
+    }
+}

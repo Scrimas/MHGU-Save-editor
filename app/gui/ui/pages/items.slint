@@ -1,0 +1,163 @@
+import { LineEdit, SpinBox, ListView, Button, TabWidget, Palette, StandardButton } from "std-widgets.slint";
+import { Api, Tok, Card, Asset, Muted, ItemSlot, Chip, ConfidenceTag, Confidence } from "../common.slint";
+
+component SlotRow inherits Rectangle {
+    in property <ItemSlot> it;
+    callback edit();
+    height: 44px;
+    background: it.changed ? Palette.accent-background.transparentize(0.9) : ta.has-hover ? Palette.foreground.transparentize(0.95) : transparent;
+    ta := TouchArea { clicked => { root.edit(); } }
+    HorizontalLayout {
+        padding-left: 10px;
+        padding-right: 10px;
+        spacing: 10px;
+        Text { text: it.slot + 1; width: 44px; color: Tok.faint; vertical-alignment: center; horizontal-alignment: right; font-size: 12px; }
+        if it.id != 0: Asset { width: 28px; height: 28px; y: 8px; source: it.icon; available: it.has-icon; kind: "ITEM"; }
+        if it.id == 0: Rectangle { width: 28px; }
+        Text {
+            text: it.id == 0 ? "Empty" : it.name;
+            color: it.id == 0 ? Tok.faint : Palette.foreground;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+            font-weight: it.changed ? 600 : 400;
+        }
+        if it.id != 0: Text { text: "×" + it.count; width: 50px; vertical-alignment: center; horizontal-alignment: right; }
+    }
+    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+}
+
+export component ItemsPage inherits Rectangle {
+    property <int> edit-slot: -1;
+    property <int> edit-count: 1;
+    property <int> edit-id;
+    VerticalLayout {
+        padding: 20px;
+        spacing: 12px;
+        HorizontalLayout {
+            spacing: 12px;
+            VerticalLayout {
+                Text { text: "Items"; font-size: 22px; font-weight: 600; }
+                Muted { text: Api.item-used + " of " + Api.item-total + " slots used"; }
+            }
+            Rectangle { horizontal-stretch: 1; }
+            ConfidenceTag { level: Confidence.confirmed; }
+        }
+        HorizontalLayout {
+            spacing: 8px;
+            Chip { text: "Item box"; active: Api.item-store == 0; clicked => { Api.item-store = 0; Api.filter-items(Api.item-filter); } }
+            Chip { text: "Pouch"; active: Api.item-store == 1; clicked => { Api.item-store = 1; Api.filter-items(Api.item-filter); } }
+            Chip { text: "Loadouts"; active: Api.item-store == 2; clicked => { Api.item-store = 2; } }
+            Rectangle { horizontal-stretch: 1; }
+            if Api.item-store < 2: Button { text: "Sort & merge"; clicked => { Api.item-bulk("sort"); } }
+            if Api.item-store < 2: Button { text: "Max counts"; clicked => { Api.item-bulk("max"); } }
+            if Api.item-store < 2: Button { text: "Clear all"; clicked => { Api.item-bulk("clear"); } }
+        }
+        if Api.item-store < 2: LineEdit {
+            placeholder-text: "Search the item box";
+            text <=> Api.item-filter;
+            edited(t) => { Api.filter-items(t); }
+        }
+        if Api.item-store < 2: Card {
+            vertical-stretch: 1;
+            ListView {
+                for it in Api.item-slots: SlotRow {
+                    it: it;
+                    edit => {
+                        root.edit-slot = it.slot;
+                        root.edit-id = it.id;
+                        root.edit-count = it.id == 0 ? 1 : it.count;
+                        Api.search-picker(it.id == 0 ? "" : it.name);
+                        picker.show();
+                    }
+                }
+            }
+        }
+        if Api.item-store == 2: Card {
+            vertical-stretch: 1;
+            ListView {
+                for l in Api.loadouts: Rectangle {
+                    height: 52px;
+                    HorizontalLayout {
+                        padding-left: 12px;
+                        padding-right: 12px;
+                        spacing: 10px;
+                        Text { text: l.index + 1; width: 28px; color: Tok.faint; vertical-alignment: center; }
+                        VerticalLayout {
+                            alignment: center;
+                            Text { text: l.used ? l.name : "Empty"; color: l.used ? Palette.foreground : Tok.faint; }
+                            if l.used: Muted { text: l.summary; font-size: 11px; wrap: no-wrap; overflow: elide; }
+                        }
+                    }
+                    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+                }
+            }
+        }
+    }
+    picker := PopupWindow {
+        x: (root.width - min(520px, root.width - 32px)) / 2;
+        y: 40px;
+        width: min(520px, root.width - 32px);
+        height: min(560px, root.height - 80px);
+        close-policy: close-on-click-outside;
+        Card {
+            background: Palette.background;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #0006;
+            VerticalLayout {
+                padding: 16px;
+                spacing: 10px;
+                Text { text: "Slot " + (root.edit-slot + 1); font-size: 16px; font-weight: 600; }
+                HorizontalLayout {
+                    spacing: 8px;
+                    Text { text: "Count"; vertical-alignment: center; }
+                    SpinBox { width: 110px; minimum: 1; maximum: 99; value <=> root.edit-count; }
+                    Muted { text: "Set it first, then pick an item."; vertical-alignment: center; }
+                }
+                LineEdit {
+                    placeholder-text: "Search items";
+                    edited(t) => { Api.search-picker(t); }
+                }
+                ListView {
+                    vertical-stretch: 1;
+                    for p in Api.pick-items: Rectangle {
+                        height: 36px;
+                        background: p.id == root.edit-id ? Palette.selection-background.transparentize(0.7) : pa.has-hover ? Palette.foreground.transparentize(0.94) : transparent;
+                        border-radius: 4px;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            spacing: 10px;
+                            Asset { width: 24px; height: 24px; y: 6px; source: p.icon; available: p.has-icon; kind: "ITEM"; }
+                            Text { text: p.name; vertical-alignment: center; overflow: elide; }
+                        }
+                        pa := TouchArea {
+                            clicked => {
+                                Api.set-item(root.edit-slot, p.id, root.edit-count);
+                                picker.close();
+                            }
+                        }
+                    }
+                }
+                HorizontalLayout {
+                    spacing: 8px;
+                    Button {
+                        text: "Empty this slot";
+                        clicked => {
+                            Api.set-item(root.edit-slot, 0, 0);
+                            picker.close();
+                        }
+                    }
+                    Rectangle { horizontal-stretch: 1; }
+                    if root.edit-id != 0: Button {
+                        text: "Set count only";
+                        clicked => {
+                            Api.set-item(root.edit-slot, root.edit-id, root.edit-count);
+                            picker.close();
+                        }
+                    }
+                    Button { text: "Cancel"; clicked => { picker.close(); } }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,63 @@
+import { ListView, CheckBox, Palette } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, Chip, ConfidenceTag, Confidence } from "../common.slint";
+
+export component RequestsPage inherits Rectangle {
+    VerticalLayout {
+        padding: 20px;
+        spacing: 12px;
+        HorizontalLayout {
+            Text { text: "Villager requests"; font-size: 22px; font-weight: 600; }
+            Rectangle { horizontal-stretch: 1; }
+            ConfidenceTag { level: Confidence.derived; }
+        }
+        HorizontalLayout {
+            spacing: 6px;
+            for f in [{k: "open", t: "Open"}, {k: "done", t: "Completed"}, {k: "all", t: "All"}]: Chip {
+                text: f.t;
+                active: Api.request-filter == f.k;
+                clicked => { Api.request-filter = f.k; Api.filter-requests(f.k); }
+            }
+            Rectangle { horizontal-stretch: 1; }
+        }
+        Card {
+            vertical-stretch: 1;
+            ListView {
+                for r in Api.requests: Rectangle {
+                    height: 52px;
+                    background: r.changed ? Palette.accent-background.transparentize(0.9) : transparent;
+                    HorizontalLayout {
+                        padding-left: 12px;
+                        padding-right: 12px;
+                        spacing: 10px;
+                        Rectangle {
+                            width: 28px;
+                            height: 28px;
+                            y: 12px;
+                            border-radius: 14px;
+                            background: Palette.accent-background.transparentize(0.8);
+                            Text { text: r.initial; font-size: 12px; font-weight: 600; }
+                        }
+                        VerticalLayout {
+                            alignment: center;
+                            horizontal-stretch: 1;
+                            Text { text: r.name; overflow: elide; font-weight: r.changed ? 600 : 400; }
+                            Text {
+                                text: r.village + " · #" + r.index + (r.waiting != "" ? " · waits for: " + r.waiting : "");
+                                color: Tok.muted;
+                                font-size: 11px;
+                                overflow: elide;
+                            }
+                        }
+                        if r.has-flags: CheckBox { width: 100px; text: "Accepted"; checked: r.accepted; toggled => { Api.set-request(r.index, "accepted", self.checked); } }
+                        if r.has-flags: CheckBox { width: 110px; text: "Completed"; checked: r.completed; toggled => { Api.set-request(r.index, "completed", self.checked); } }
+                    }
+                    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+                }
+            }
+        }
+        Muted {
+            text: "Accepted = posted on the quest board (also writes the other flags of the NPC's offer). Completed skips the villager's report line, so the reward is not handed over in the game.";
+            font-size: 11px;
+        }
+    }
+}

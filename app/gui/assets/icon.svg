@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0703a"/>
+      <stop offset="1" stop-color="#9c3a1b"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="48" fill="url(#g)"/>
+  <!-- three claw marks -->
+  <path d="M78 196 C 96 150, 110 108, 150 60 C 128 112, 116 150, 104 198 Z" fill="#fff6ec"/>
+  <path d="M118 202 C 134 158, 150 118, 188 74 C 168 124, 156 160, 144 204 Z" fill="#fff6ec" opacity="0.9"/>
+  <path d="M60 172 C 70 140, 80 116, 104 84 C 92 118, 86 144, 80 176 Z" fill="#fff6ec" opacity="0.75"/>
+</svg>

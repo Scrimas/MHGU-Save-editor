@@ -1,0 +1,121 @@
+import { LineEdit, SpinBox, ScrollView, GroupBox, Palette } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle } from "../common.slint";
+
+component Field inherits VerticalLayout {
+    in property <string> label;
+    in property <Confidence> level: Confidence.derived;
+    in property <string> hint;
+    spacing: 4px;
+    alignment: start;
+    vertical-stretch: 0;
+    HorizontalLayout {
+        spacing: 8px;
+        Text { text: root.label; font-size: 12px; vertical-alignment: center; }
+        ConfidenceTag { level: root.level; }
+    }
+    @children
+    if hint != "": Muted { text: root.hint; font-size: 11px; }
+}
+
+component NumField inherits Field {
+    level: Confidence.confirmed;
+    in property <int> value;
+    in property <int> maximum: 2147483647;
+    in property <int> minimum: 0;
+    in property <string> key;
+    SpinBox {
+        value: root.value;
+        minimum: root.minimum;
+        maximum: root.maximum;
+        accessible-label: root.label;
+        edited(v) => { Api.set-character(root.key, v); }
+    }
+}
+
+export component CharacterPage inherits Rectangle {
+    ScrollView {
+        VerticalLayout {
+            padding: 20px;
+            spacing: 16px;
+            alignment: start;
+            Text { text: "Character"; font-size: 22px; font-weight: 600; }
+            Card {
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 14px;
+                    SectionTitle { text: "Hunter"; }
+                    HorizontalLayout {
+                        spacing: 16px;
+                        Field {
+                            label: "Name";
+                            hint: "Written to the save, the player record and the Guild Card.";
+                            LineEdit {
+                                text: Api.character.name;
+                                accessible-label: "Hunter name";
+                                accepted(t) => { Api.set-name(t); }
+                            }
+                        }
+                        NumField { label: "Hunter Rank"; key: "hr"; value: Api.character.hr; minimum: 1; maximum: 999; }
+                        NumField { label: "HR points"; key: "hr-points"; value: Api.character.hr-points; }
+                    }
+                    HorizontalLayout {
+                        spacing: 16px;
+                        NumField { label: "Zenny"; key: "funds"; value: Api.character.funds; maximum: 9999999; }
+                        NumField { label: "Wycademy points"; key: "wycademy"; value: Api.character.wycademy; maximum: 9999999; }
+                        Field {
+                            label: "Play time";
+                            level: Confidence.confirmed;
+                            HorizontalLayout {
+                                spacing: 6px;
+                                SpinBox { value: Api.character.playtime-h; maximum: 9999; accessible-label: "Hours played"; edited(v) => { Api.set-character("play-h", v); } }
+                                Text { text: "h"; vertical-alignment: center; }
+                                SpinBox { value: Api.character.playtime-m; maximum: 59; accessible-label: "Minutes played"; edited(v) => { Api.set-character("play-m", v); } }
+                                Text { text: "min"; vertical-alignment: center; }
+                            }
+                        }
+                    }
+                }
+            }
+            Card {
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 14px;
+                    SectionTitle { text: "Progress"; }
+                    HorizontalLayout {
+                        spacing: 16px;
+                        NumField {
+                            label: "Village ★";
+                            key: "village-star";
+                            level: Confidence.confirmed;
+                            value: Api.character.village-star;
+                            minimum: 1;
+                            maximum: 10;
+                            hint: "The game raises it when every urgent quest of a level is cleared.";
+                        }
+                        NumField { label: "Hub ★"; key: "hub-star"; level: Confidence.confirmed; value: Api.character.hub-star; maximum: 13; }
+                        Field {
+                            label: "Body";
+                            level: Confidence.unresolved;
+                            Text { text: Api.character.gender; vertical-alignment: center; height: 32px; color: Tok.muted; }
+                        }
+                    }
+                }
+            }
+            Card {
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 14px;
+                    SectionTitle { text: "Village points"; }
+                    Muted { text: "Low rank and G rank are kept apart; the villages read their sum, capped at 20,000."; }
+                    for v[i] in ["Bherna", "Kokoto", "Pokke", "Yukumo"]: HorizontalLayout {
+                        spacing: 16px;
+                        Text { text: v; width: 80px; vertical-alignment: center; }
+                        NumField { label: "Low rank"; key: "lr" + i; value: Api.character.points-lr[i]; maximum: 99999; }
+                        NumField { label: "G rank"; key: "g" + i; value: Api.character.points-g[i]; maximum: 99999; }
+                    }
+                }
+            }
+            Muted { text: "Appearance is not mapped yet and is not shown."; font-size: 11px; }
+        }
+    }
+}

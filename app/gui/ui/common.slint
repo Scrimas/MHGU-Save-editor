@@ -1,0 +1,344 @@
+// Shared structs, the Rust bridge and small widgets.
+import { Palette } from "std-widgets.slint";
+
+export enum Confidence { confirmed, derived, unresolved }
+
+export struct SlotInfo { slot: int, used: bool, name: string, hr: int, playtime: string }
+
+export struct ChangeRow { id: int, title: string, detail: string, confidence: Confidence }
+
+export struct MonsterRow {
+    index: int, name: string, icon: image, has-icon: bool, large: bool, has-size: bool,
+    hunts: int, captures: int, min: int, max: int, sub: string, mini: bool, crown: int, notes: bool, has-notes: bool, changed: bool,
+}
+
+export struct ItemSlot { slot: int, id: int, name: string, count: int, icon: image, has-icon: bool, changed: bool }
+
+export struct PickItem { id: int, name: string, icon: image, has-icon: bool, sub: string }
+
+export struct LoadoutRow { index: int, name: string, summary: string, used: bool }
+
+export struct EquipRow {
+    slot: int, kind: string, kind-code: int, name: string, level: int, detail: string,
+    icon: image, has-icon: bool, rarity: color, changed: bool,
+}
+
+export struct EquipDetail {
+    slot: int, kind: string, kind-code: int, name: string, id: int, level: int,
+    deco1: string, deco2: string, deco3: string, transmog: string, transmog-id: int,
+    is-talisman: bool, skill1: int, points1: int, skill2: int, points2: int, slots: int, tier: string,
+    raw: string,
+    // worn / My Sets referring to this box slot (then it can't be replaced or removed)
+    uses: string,
+    category: int,  // index in Api.equip-categories, -1 for none
+}
+
+export struct PalicoRow { index: int, name: string, level: int, bias: string, changed: bool }
+
+export struct PalicoDetail {
+    index: int, name: string, level: int, exp: int, bias: int, target: int, greeting: string, owner: string,
+    moves: string, learned: string,
+}
+
+export struct QuestRow {
+    index: int, id: int, name: string, rank: string, cleared: bool, seen: bool, failed: bool,
+    lock: string, locked: bool, prowler: bool, changed: bool, header: bool,
+}
+
+export struct RequestRow {
+    index: int, village: string, initial: string, name: string, accepted: bool, completed: bool, waiting: string,
+    has-flags: bool, changed: bool,
+}
+
+export struct CheckRow { key: int, name: string, group: string, on: bool, changed: bool, icon: image, has-icon: bool }
+
+export struct DeviantRow { index: int, name: string, permits: int, levels: int, total: int, icon: image, has-icon: bool, changed: bool }
+
+export struct FieldRow { index: int, offset: string, size: string, owner: string, label: string, confidence: Confidence, changed: bool }
+
+export struct StatCard { title: string, value: string, sub: string, progress: float }
+
+export struct Goal { id: string, title: string, detail: string, edits: int }
+
+export struct CharacterInfo {
+    name: string, hr: int, hr-points: int, funds: int, wycademy: int, playtime-h: int, playtime-m: int,
+    village-star: int, hub-star: int, gender: string,
+    points-lr: [int], points-g: [int],
+}
+
+export global Api {
+    // shell
+    in-out property <string> page: "open";
+    in property <bool> loaded;
+    in property <string> file-path;
+    in property <string> build-info;
+    in property <[SlotInfo]> slots;
+    in-out property <int> slot;
+    in property <[ChangeRow]> changes;
+    in property <int> change-count;
+    in-out property <bool> review-open;
+    in property <string> toast;
+    in property <bool> toast-error;
+    in property <string> warning;
+    in property <bool> assets-ok;
+    callback open-dialog();
+    callback open-path(string);
+    in property <[string]> detected;
+    callback select-slot(int);
+    callback undo(int);
+    callback undo-all();
+    // write flow
+    in-out property <bool> write-open;
+    in property <string> write-step-info;
+    in property <bool> emulator-running;
+    in property <string> snapshot-dir;
+    in property <[string]> write-targets;
+    callback check-emulator();
+    callback write(bool /* snapshot */) -> bool;
+    callback open-snapshots();
+
+    // overview
+    in property <[StatCard]> stats;
+    in property <[Goal]> goals;
+    callback preview-goal(string) -> [string];
+    callback apply-goal(string);
+
+    // character
+    in property <CharacterInfo> character;
+    callback set-character(string /* field */, int);
+    callback set-name(string);
+
+    // items
+    in property <[ItemSlot]> item-slots;
+    in-out property <int> item-store: 0;   // 0 box, 1 pouch
+    in-out property <string> item-filter;
+    in property <int> item-used;
+    in property <int> item-total;
+    in property <[PickItem]> pick-items;
+    callback filter-items(string);
+    callback search-picker(string);
+    callback set-item(int /* slot */, int /* id */, int /* count */);
+    callback item-bulk(string);
+    in property <[LoadoutRow]> loadouts;
+
+    // equipment
+    in property <[EquipRow]> equip-rows;
+    in-out property <int> equip-owner: 0;  // 0 hunter, 1 Palico
+    in-out property <string> equip-filter: "all";
+    in property <EquipDetail> equip-detail;
+    in property <[string]> skill-names;
+    callback filter-equip(string);
+    callback select-equip(int);
+    callback set-equip(string /* field */, int);
+    // adding: categories are weapon classes, armor parts and talismans
+    in property <[string]> equip-categories;
+    in-out property <int> equip-category: 0;
+    in property <[PickItem]> pick-equip;
+    in property <int> equip-free;          // first free box slot, -1 when full
+    callback search-equip(string);         // fills pick-equip for equip-category
+    callback put-equip(int /* slot, -1 = first free */, int /* id, 0 = empty the slot */);
+    // set to a slot (-1 = first free) to open the picker from Rust (screenshots); -2 = idle
+    in-out property <int> equip-picker-request: -2;
+
+    // palicoes
+    in property <[PalicoRow]> palicoes;
+    in property <PalicoDetail> palico;
+    in property <[string]> biases;
+    callback select-palico(int);
+    callback set-palico(string, int);
+    callback set-palico-text(string, string);
+
+    // quests
+    in property <[string]> quest-tabs;
+    in-out property <int> quest-tab;
+    in property <[QuestRow]> quests;
+    in property <string> quest-summary;
+    callback select-quest-tab(int);
+    callback set-quest(int /* index */, string /* bit */, bool);
+    callback quest-bulk(string /* rank or "" */, string /* action */);
+
+    // requests
+    in property <[RequestRow]> requests;
+    in-out property <string> request-filter: "open";
+    callback filter-requests(string);
+    callback set-request(int, string, bool);
+
+    // collections
+    in-out property <int> collection-tab;
+    in property <[CheckRow]> checks;
+    in property <string> checks-summary;
+    callback select-collection(int);
+    callback set-check(int, bool);
+    callback checks-all(bool);
+    in property <[DeviantRow]> deviants;
+    callback set-deviant(int, string, int);
+
+    // monsters
+    in property <[MonsterRow]> monsters;
+    in-out property <string> monster-filter;
+    in-out property <bool> monster-large-only;
+    in property <string> monster-summary;
+    callback filter-monsters(string, bool);
+    callback set-monster(int /* index */, string /* field */, int);
+    callback monsters-bulk(string);
+
+    // advanced
+    in property <[FieldRow]> fields;
+    in property <string> hex;
+    in property <string> field-info;
+    callback filter-fields(string);
+    callback select-field(int);
+}
+
+// --- small widgets -------------------------------------------------------------------
+
+export global Tok {
+    out property <color> muted: Palette.foreground.transparentize(0.4);
+    out property <color> faint: Palette.foreground.transparentize(0.7);
+    out property <color> line: Palette.border;
+    out property <color> card: Palette.alternate-background;
+    out property <color> ok: Palette.color-scheme == ColorScheme.dark ? #6ccb5f : #0f7b0f;
+    out property <color> warn: Palette.color-scheme == ColorScheme.dark ? #fce100 : #9d5d00;
+    out property <color> bad: Palette.color-scheme == ColorScheme.dark ? #ff99a4 : #c42b1c;
+    out property <length> radius: 6px;
+    out property <length> gap: 12px;
+}
+
+export component Dot inherits Rectangle {
+    in property <Confidence> level;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: level == Confidence.confirmed ? Tok.ok : level == Confidence.derived ? Tok.warn : Tok.faint;
+}
+
+export component ConfidenceTag inherits HorizontalLayout {
+    in property <Confidence> level;
+    spacing: 5px;
+    alignment: start;
+    horizontal-stretch: 0;
+    Dot { level: root.level; y: (parent.height - self.height) / 2; }
+    Text {
+        text: level == Confidence.confirmed ? "Confirmed" : level == Confidence.derived ? "Derived" : "Unresolved";
+        font-size: 11px;
+        color: Tok.muted;
+        vertical-alignment: center;
+    }
+}
+
+export component Card inherits Rectangle {
+    background: Tok.card;
+    border-radius: Tok.radius;
+    border-width: 1px;
+    border-color: Tok.line;
+}
+
+/// Game asset when available, otherwise a dashed placeholder box.
+export component Asset inherits Rectangle {
+    in property <image> source;
+    in property <bool> available;
+    in property <string> kind: "ICON";
+    in property <string> label;
+    in property <color> tint: transparent;
+    border-radius: 4px;
+    clip: true;
+    if available: Image {
+        source: root.source;
+        width: 100%;
+        height: 100%;
+        image-rendering: smooth;
+        colorize: root.tint;
+    }
+    if !available: Rectangle {
+        border-width: 1px;
+        border-color: Tok.faint;
+        border-radius: 4px;
+        Text { text: root.label != "" ? root.label : root.kind; font-size: 9px; color: Tok.muted; }
+    }
+}
+
+export component SectionTitle inherits Text {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+export component Muted inherits Text {
+    color: Tok.muted;
+    font-size: 12px;
+    wrap: word-wrap;
+}
+
+export component NavButton inherits Rectangle {
+    in property <string> text;
+    in property <string> badge;
+    in property <bool> active;
+    in property <bool> enabled: true;
+    callback clicked;
+    height: 34px;
+    border-radius: 5px;
+    background: active ? Palette.selection-background.transparentize(0.75) : ta.has-hover && enabled ? Palette.foreground.transparentize(0.94) : transparent;
+    accessible-role: button;
+    accessible-label: text;
+    Rectangle {
+        x: 0;
+        width: 3px;
+        height: active ? 16px : 0px;
+        border-radius: 2px;
+        background: Palette.accent-background;
+        animate height { duration: 120ms; }
+    }
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 8px;
+        Text {
+            text: root.text;
+            vertical-alignment: center;
+            color: enabled ? Palette.foreground : Tok.faint;
+            font-weight: active ? 600 : 400;
+        }
+        if badge != "": Text { text: root.badge; vertical-alignment: center; color: Tok.muted; font-size: 11px; }
+    }
+    ta := TouchArea {
+        enabled: root.enabled;
+        clicked => { root.clicked(); }
+    }
+}
+
+export component Chip inherits Rectangle {
+    in property <string> text;
+    in property <bool> active;
+    callback clicked;
+    height: 28px;
+    min-width: t.preferred-width + 20px;
+    border-radius: 14px;
+    border-width: 1px;
+    border-color: active ? Palette.accent-background : Tok.line;
+    background: active ? Palette.accent-background.transparentize(0.85) : ta.has-hover ? Palette.foreground.transparentize(0.94) : transparent;
+    accessible-role: button;
+    accessible-label: text;
+    t := Text { text: root.text; font-size: 12px; horizontal-alignment: center; vertical-alignment: center; }
+    ta := TouchArea { clicked => { root.clicked(); } }
+}
+
+export component StatTile inherits Card {
+    in property <StatCard> card;
+    min-height: 92px;
+    VerticalLayout {
+        padding: 14px;
+        spacing: 4px;
+        Text { text: card.title; color: Tok.muted; font-size: 12px; }
+        Text { text: card.value; font-size: 22px; font-weight: 600; }
+        Rectangle {
+            height: 4px;
+            border-radius: 2px;
+            background: Tok.line;
+            Rectangle {
+                x: 0;
+                width: parent.width * clamp(card.progress, 0, 1);
+                border-radius: 2px;
+                background: card.progress >= 1 ? Tok.ok : Palette.accent-background;
+            }
+        }
+        Text { text: card.sub; color: Tok.muted; font-size: 11px; }
+    }
+}

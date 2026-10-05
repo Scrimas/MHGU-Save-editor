@@ -1,0 +1,265 @@
+import { ListView, SpinBox, ComboBox, Button, ScrollView, Palette, LineEdit } from "std-widgets.slint";
+import { Api, Tok, Card, Asset, Muted, Chip, EquipRow, ConfidenceTag, Confidence, SectionTitle } from "../common.slint";
+
+component EquipLine inherits Rectangle {
+    in property <EquipRow> e;
+    in property <bool> selected;
+    callback pick();
+    height: 46px;
+    background: selected ? Palette.selection-background.transparentize(0.75) : e.changed ? Palette.accent-background.transparentize(0.9) : ta.has-hover ? Palette.foreground.transparentize(0.95) : transparent;
+    ta := TouchArea { clicked => { root.pick(); } }
+    HorizontalLayout {
+        padding-left: 10px;
+        padding-right: 10px;
+        spacing: 10px;
+        Text { text: e.slot + 1; width: 40px; color: Tok.faint; vertical-alignment: center; horizontal-alignment: right; font-size: 12px; }
+        Asset { width: 30px; height: 30px; y: 8px; source: e.icon; available: e.has-icon; kind: "EQ"; }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: e.name; overflow: elide; font-weight: e.changed ? 600 : 400; }
+            Text { text: e.kind + (e.detail != "" ? " · " + e.detail : ""); color: Tok.muted; font-size: 11px; overflow: elide; }
+        }
+    }
+    Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+}
+
+export component EquipmentPage inherits Rectangle {
+    property <bool> wide: root.width > 900px;
+    property <length> list-w: wide ? root.width * 0.48 : root.width;
+    // picker target: box slot (-1 = first free) and the piece it holds (0 = none)
+    property <int> target-slot: -1;
+    property <int> target-id: 0;
+    function open-picker(slot: int, id: int, category: int) {
+        root.target-slot = slot;
+        root.target-id = id;
+        if category >= 0 {
+            Api.equip-category = category;
+        }
+        Api.search-equip("");
+        picker.show();
+    }
+    property <int> request: Api.equip-picker-request;
+    changed request => {
+        if request >= -1 {
+            root.open-picker(request, 0, -1);
+            Api.equip-picker-request = -2;
+        }
+    }
+    VerticalLayout {
+        padding: 20px;
+        spacing: 12px;
+        HorizontalLayout {
+            spacing: 12px;
+            Text { text: "Equipment"; font-size: 22px; font-weight: 600; }
+            Rectangle { horizontal-stretch: 1; }
+            if Api.equip-owner == 0: Button {
+                text: "Add equipment";
+                enabled: Api.equip-free >= 0;
+                clicked => { root.open-picker(-1, 0, -1); }
+            }
+            Chip { text: "Hunter"; active: Api.equip-owner == 0; clicked => { Api.equip-owner = 0; Api.filter-equip(Api.equip-filter); } }
+            Chip { text: "Palico"; active: Api.equip-owner == 1; clicked => { Api.equip-owner = 1; Api.filter-equip(Api.equip-filter); } }
+        }
+        HorizontalLayout {
+            spacing: 6px;
+            alignment: start;
+            for f in [{k: "all", t: "All"}, {k: "weapon", t: "Weapons"}, {k: "armor", t: "Armor"}, {k: "talisman", t: "Talismans"}, {k: "empty", t: "Empty"}]: Chip {
+                text: f.t;
+                active: Api.equip-filter == f.k;
+                clicked => { Api.equip-filter = f.k; Api.filter-equip(f.k); }
+            }
+        }
+        HorizontalLayout {
+            spacing: 16px;
+            vertical-stretch: 1;
+            Card {
+                horizontal-stretch: 1;
+                ListView {
+                    for e in Api.equip-rows: EquipLine {
+                        e: e;
+                        selected: e.slot == Api.equip-detail.slot;
+                        pick => {
+                            Api.select-equip(e.slot);
+                            // no detail panel: an empty slot opens the picker, like the item box
+                            if !root.wide && e.kind-code == 0 && Api.equip-owner == 0 {
+                                root.open-picker(e.slot, 0, -1);
+                            }
+                        }
+                    }
+                }
+            }
+            if wide: Card {
+                width: root.width * 0.42;
+                ScrollView {
+                    VerticalLayout {
+                        padding: 16px;
+                        spacing: 12px;
+                        alignment: start;
+                        if Api.equip-detail.slot < 0: Muted { text: "Select a piece to edit it."; }
+                        if Api.equip-detail.slot >= 0: VerticalLayout {
+                            spacing: 12px;
+                            alignment: start;
+                            Text { text: Api.equip-detail.name; font-size: 18px; font-weight: 600; wrap: word-wrap; }
+                            Muted { text: Api.equip-detail.kind + " · box slot " + (Api.equip-detail.slot + 1) + " · ID " + Api.equip-detail.id; }
+                            if Api.equip-owner == 0 && Api.equip-detail.kind-code == 0: HorizontalLayout {
+                                alignment: start;
+                                Button {
+                                    text: "Add equipment here";
+                                    enabled: Api.equip-detail.uses == "";
+                                    clicked => { root.open-picker(Api.equip-detail.slot, 0, -1); }
+                                }
+                            }
+                            if Api.equip-owner == 0 && Api.equip-detail.kind-code != 0: HorizontalLayout {
+                                alignment: start;
+                                spacing: 8px;
+                                Button {
+                                    text: "Replace…";
+                                    enabled: Api.equip-detail.uses == "";
+                                    clicked => { root.open-picker(Api.equip-detail.slot, Api.equip-detail.id, Api.equip-detail.category); }
+                                }
+                                Button {
+                                    text: "Remove";
+                                    enabled: Api.equip-detail.uses == "";
+                                    clicked => { Api.put-equip(Api.equip-detail.slot, 0); }
+                                }
+                            }
+                            if Api.equip-owner == 0 && Api.equip-detail.uses != "": Muted {
+                                text: "Used by " + Api.equip-detail.uses + ". Change that in game before replacing or removing this slot.";
+                                wrap: word-wrap;
+                            }
+                            if Api.equip-detail.kind-code != 0 && !Api.equip-detail.is-talisman: HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: "Level"; vertical-alignment: center; width: 90px; }
+                                SpinBox {
+                                    minimum: 1;
+                                    maximum: 32;
+                                    value: Api.equip-detail.level;
+                                    edited(v) => { Api.set-equip("level", v); }
+                                }
+                                ConfidenceTag { level: Confidence.confirmed; }
+                            }
+                            if Api.equip-detail.kind-code != 0: VerticalLayout {
+                                spacing: 6px;
+                                HorizontalLayout { spacing: 8px; SectionTitle { text: "Decorations"; } ConfidenceTag { level: Confidence.confirmed; } }
+                                for d[i] in [Api.equip-detail.deco1, Api.equip-detail.deco2, Api.equip-detail.deco3]: HorizontalLayout {
+                                    spacing: 8px;
+                                    Text { text: "Slot " + (i + 1); width: 60px; vertical-alignment: center; color: Tok.muted; }
+                                    Text { text: d == "" ? "—" : d; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                                    if d != "": Button { text: "Remove"; clicked => { Api.set-equip("deco" + i, 0); } }
+                                }
+                            }
+                            if Api.equip-detail.kind-code >= 1 && Api.equip-detail.kind-code <= 5: VerticalLayout {
+                                spacing: 6px;
+                                HorizontalLayout { spacing: 8px; SectionTitle { text: "Transmog"; } ConfidenceTag { level: Confidence.confirmed; } }
+                                Text { text: Api.equip-detail.transmog == "" ? "Own look" : Api.equip-detail.transmog; }
+                                if Api.equip-detail.transmog-id != 0: HorizontalLayout {
+                                    alignment: start;
+                                    Button { text: "Restore own look"; clicked => { Api.set-equip("transmog", 0); } }
+                                }
+                            }
+                            if Api.equip-detail.is-talisman: VerticalLayout {
+                                spacing: 8px;
+                                HorizontalLayout { spacing: 8px; SectionTitle { text: "Talisman"; } ConfidenceTag { level: Confidence.confirmed; } }
+                                Muted { text: Api.equip-detail.tier; }
+                                for k in 2: HorizontalLayout {
+                                    spacing: 8px;
+                                    Text { text: "Skill " + (k + 1); width: 60px; vertical-alignment: center; }
+                                    ComboBox {
+                                        horizontal-stretch: 1;
+                                        model: Api.skill-names;
+                                        current-index: k == 0 ? Api.equip-detail.skill1 : Api.equip-detail.skill2;
+                                        selected => { Api.set-equip("skill" + k, self.current-index); }
+                                    }
+                                    SpinBox {
+                                        width: 100px;
+                                        minimum: -10;
+                                        maximum: 20;
+                                        value: k == 0 ? Api.equip-detail.points1 : Api.equip-detail.points2;
+                                        edited(v) => { Api.set-equip("points" + k, v); }
+                                    }
+                                }
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    Text { text: "Slots"; width: 60px; vertical-alignment: center; }
+                                    SpinBox { width: 100px; minimum: 0; maximum: 3; value: Api.equip-detail.slots; edited(v) => { Api.set-equip("slots", v); } }
+                                }
+                            }
+                            Muted { text: "Raw: " + Api.equip-detail.raw; font-size: 10px; }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    picker := PopupWindow {
+        x: (root.width - min(560px, root.width - 32px)) / 2;
+        y: 40px;
+        width: min(560px, root.width - 32px);
+        height: min(600px, root.height - 80px);
+        close-policy: close-on-click-outside;
+        Card {
+            background: Palette.background;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #0006;
+            VerticalLayout {
+                padding: 16px;
+                spacing: 10px;
+                Text {
+                    text: (root.target-id != 0 ? "Replace box slot " : "Add to box slot ") + ((root.target-slot >= 0 ? root.target-slot : Api.equip-free) + 1);
+                    font-size: 16px;
+                    font-weight: 600;
+                }
+                Muted { text: "New pieces start at level 1 with no decorations; edit them afterwards."; wrap: word-wrap; }
+                HorizontalLayout {
+                    spacing: 8px;
+                    ComboBox {
+                        width: 190px;
+                        model: Api.equip-categories;
+                        current-index: Api.equip-category;
+                        selected => {
+                            Api.equip-category = self.current-index;
+                            Api.search-equip(search.text);
+                        }
+                    }
+                    search := LineEdit {
+                        horizontal-stretch: 1;
+                        placeholder-text: "Search";
+                        edited(t) => { Api.search-equip(t); }
+                    }
+                }
+                ListView {
+                    vertical-stretch: 1;
+                    for p in Api.pick-equip: Rectangle {
+                        height: 44px;
+                        background: p.id == root.target-id ? Palette.selection-background.transparentize(0.7) : pa.has-hover ? Palette.foreground.transparentize(0.94) : transparent;
+                        border-radius: 4px;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 10px;
+                            Asset { width: 28px; height: 28px; y: 8px; source: p.icon; available: p.has-icon; kind: "EQ"; }
+                            VerticalLayout {
+                                alignment: center;
+                                horizontal-stretch: 1;
+                                Text { text: p.name; overflow: elide; }
+                                Text { text: p.sub; color: Tok.muted; font-size: 11px; overflow: elide; }
+                            }
+                        }
+                        pa := TouchArea {
+                            clicked => {
+                                Api.put-equip(root.target-slot, p.id);
+                                picker.close();
+                            }
+                        }
+                    }
+                }
+                HorizontalLayout {
+                    spacing: 8px;
+                    Rectangle { horizontal-stretch: 1; }
+                    Button { text: "Cancel"; clicked => { picker.close(); } }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,88 @@
+import { ListView, SpinBox, ComboBox, LineEdit, ScrollView, Palette } from "std-widgets.slint";
+import { Api, Tok, Card, Asset, Muted, ConfidenceTag, Confidence, SectionTitle } from "../common.slint";
+
+export component PalicoesPage inherits Rectangle {
+    VerticalLayout {
+        padding: 20px;
+        spacing: 12px;
+        HorizontalLayout {
+            Text { text: "Palicoes"; font-size: 22px; font-weight: 600; }
+            Rectangle { horizontal-stretch: 1; }
+            ConfidenceTag { level: Confidence.derived; }
+        }
+        HorizontalLayout {
+            spacing: 16px;
+            vertical-stretch: 1;
+            Card {
+                width: min(320px, root.width * 0.4);
+                ListView {
+                    for p in Api.palicoes: Rectangle {
+                        height: 48px;
+                        background: p.index == Api.palico.index ? Palette.selection-background.transparentize(0.75) : ta.has-hover ? Palette.foreground.transparentize(0.95) : transparent;
+                        ta := TouchArea { clicked => { Api.select-palico(p.index); } }
+                        HorizontalLayout {
+                            padding-left: 10px;
+                            spacing: 10px;
+                            Asset { width: 32px; height: 32px; y: 8px; kind: "CAT"; available: false; }
+                            VerticalLayout {
+                                alignment: center;
+                                Text { text: p.name; overflow: elide; font-weight: p.changed ? 600 : 400; }
+                                Text { text: "Lv " + p.level + " · " + p.bias; color: Tok.muted; font-size: 11px; }
+                            }
+                        }
+                        Rectangle { y: parent.height - 1px; height: 1px; background: Tok.line; }
+                    }
+                }
+            }
+            Card {
+                horizontal-stretch: 1;
+                ScrollView {
+                    VerticalLayout {
+                        padding: 16px;
+                        spacing: 12px;
+                        alignment: start;
+                        if Api.palico.index < 0: Muted { text: "Select a Palico."; }
+                        if Api.palico.index >= 0: VerticalLayout {
+                            spacing: 12px;
+                            alignment: start;
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: "Name"; width: 110px; vertical-alignment: center; }
+                                LineEdit { text: Api.palico.name; accepted(t) => { Api.set-palico-text("name", t); } }
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: "Level"; width: 110px; vertical-alignment: center; }
+                                SpinBox { minimum: 1; maximum: 50; value: Api.palico.level; edited(v) => { Api.set-palico("level", v); } }
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: "Experience"; width: 110px; vertical-alignment: center; }
+                                SpinBox { minimum: 0; maximum: 9999999; value: Api.palico.exp; edited(v) => { Api.set-palico("exp", v); } }
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: "Forte (bias)"; width: 110px; vertical-alignment: center; }
+                                ComboBox { model: Api.biases; current-index: Api.palico.bias; selected => { Api.set-palico("bias", self.current-index); } }
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: "Greeting"; width: 110px; vertical-alignment: center; }
+                                LineEdit { text: Api.palico.greeting; accepted(t) => { Api.set-palico-text("greeting", t); } }
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Text { text: "Original owner"; width: 110px; vertical-alignment: center; }
+                                LineEdit { text: Api.palico.owner; accepted(t) => { Api.set-palico-text("owner", t); } }
+                            }
+                            SectionTitle { text: "Support moves"; }
+                            Muted { text: "Equipped: " + Api.palico.moves; }
+                            Muted { text: "Learned: " + Api.palico.learned; }
+                            Muted { text: "Level and experience are separate fields; the game does not recompute one from the other. Press Enter to apply text fields."; font-size: 11px; }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

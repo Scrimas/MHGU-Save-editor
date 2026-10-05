@@ -1,0 +1,48 @@
+import { Button, ListView, Palette } from "std-widgets.slint";
+import { Api, Tok, Card, Muted } from "../common.slint";
+
+export component OpenPage inherits Rectangle {
+    VerticalLayout {
+        alignment: center;
+        HorizontalLayout {
+            alignment: center;
+            VerticalLayout {
+                width: min(560px, root.width - 32px);
+                spacing: 16px;
+                Text { text: "Open a save"; font-size: 24px; font-weight: 600; }
+                Muted {
+                    text: "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit.";
+                }
+                HorizontalLayout {
+                    alignment: start;
+                    Button {
+                        text: "Open save…";
+                        primary: true;
+                        clicked => { Api.open-dialog(); }
+                    }
+                }
+                if Api.detected.length > 0: VerticalLayout {
+                    spacing: 6px;
+                    Text { text: "Found on this computer"; font-weight: 600; }
+                    Card {
+                        height: min(Api.detected.length, 6) * 40px + 8px;
+                        ListView {
+                            for p in Api.detected: Rectangle {
+                                height: 40px;
+                                background: ta.has-hover ? Palette.foreground.transparentize(0.94) : transparent;
+                                HorizontalLayout {
+                                    padding-left: 12px;
+                                    padding-right: 12px;
+                                    Text { text: p; vertical-alignment: center; overflow: elide; }
+                                }
+                                ta := TouchArea { clicked => { Api.open-path(p); } }
+                            }
+                        }
+                    }
+                }
+                if Api.warning != "": Text { text: Api.warning; color: Tok.bad; wrap: word-wrap; }
+                Muted { text: Api.build-info; font-size: 11px; }
+            }
+        }
+    }
+}
