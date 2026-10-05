@@ -18,17 +18,18 @@ pub struct Def {
 }
 
 /// The Overview's goals (titles and copy come from `plan`). Confirmed: tested in game
-/// (arts and canteen as written, quests by the bulk completion of 2026-09-19); the rest
-/// is derived from the game's code.
+/// (arts and canteen as written, quests by the bulk completion of 2026-09-19, crowns by
+/// the game's award check after the 2026-10-04 write) or every field written is CONFIRMED
+/// by the save timeline (awards, money; tools/evidence); the rest is derived from the code.
 pub const GOALS: [Def; 8] = [
     Def { id: "quests", conf: Conf::Confirmed },
     Def { id: "arts", conf: Conf::Confirmed },
     Def { id: "canteen", conf: Conf::Confirmed },
-    Def { id: "awards", conf: Conf::Derived },
+    Def { id: "awards", conf: Conf::Confirmed },
     Def { id: "notes", conf: Conf::Derived },
-    Def { id: "crowns", conf: Conf::Derived },
+    Def { id: "crowns", conf: Conf::Confirmed },
     Def { id: "hr999", conf: Conf::Derived },
-    Def { id: "money", conf: Conf::Derived },
+    Def { id: "money", conf: Conf::Confirmed },
 ];
 
 /// What a goal or bulk action would do to this save.

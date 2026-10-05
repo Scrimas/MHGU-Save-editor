@@ -1820,7 +1820,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         }
     });
     on!(ui, st, on_set_name, |ui, s, name: SharedString| {
-        s.edit(Edit::one(Target::Name, "Name".into(), Conf::Derived).note("Written to the save, the player record and the Guild Card"), |sv, base| {
+        s.edit(Edit::one(Target::Name, "Name".into(), Conf::Confirmed).note("Written to the save, the player record and the Guild Card"), |sv, base| {
             character::set_name(sv, base, &name);
             vec![]
         });

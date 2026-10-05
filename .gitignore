@@ -1,5 +1,6 @@
 # Never commit save data — these files contain personal save state
 *.bin
+.claude/
 system
 system_backup
 snapshots/
