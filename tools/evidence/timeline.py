@@ -47,7 +47,11 @@ NOTES = {
  'app-2026-10-05_173839': 'app wrote funds 9999999 (Zenny)',
  'app-2026-10-05_173848': 'app sorted/merged item box',
  'app-2026-10-05_180822': 'app item box every stack x99',
- 'LIVE': 'app wrote play time 1651859 (not yet loaded by the game)',
+ 'confirm-0-before-tests': 'identical to app-2026-10-05_180822 + the play-time write (snapshot before the 2026-10-05 in-game tests)',
+ 'confirm-1-test-write': 'editor core code wrote on Scrimas: Rathian Notes page locked, HR 500, Hunter\'s Knife in box slot 557',
+ 'confirm-2-after-game': 'GAME SESSION: seen in game: Rathian gone from the Notes, HR 500, the knife in the box and equippable; saved',
+ 'confirm-3-restore-write': 'editor core code wrote HR 999 (goal hr999) and Rathian\'s Notes page (goal notes); knife kept',
+ 'LIVE': 'latest live save',
 }
 
 def saves():

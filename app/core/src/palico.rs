@@ -1,7 +1,7 @@
 //! Palico records, 324 B (docs/11-save-map.md "Palico records", DERIVED from the loader).
 //!
 //!   +0x00 char[32] name
-//!   +0x20 224 B parameter block: exp u32 +0, level u8 +4, support bias +5, +6 UNRESOLVED,
+//!   +0x20 224 B parameter block: exp u32 +0, level - 1 u8 +4, support bias +5, +6 UNRESOLVED,
 //!         target +7, 8 equipped support moves +8, 16 learned move slots +0x18 (57 = none)
 //!   +0x60 char[60] greeting
 //!   +0x9C char[32] original owner
@@ -17,7 +17,10 @@ pub const NAME: usize = 32;
 pub const GREETING: (usize, usize) = (0x60, 60);
 pub const OWNER: (usize, usize) = (0x9C, 32);
 pub const EXP: usize = 0x20;
+/// The byte holds the shown level - 1: 63 is Lv 64 in game; the level-up code (`0x262e1c`)
+/// counts byte 49 as level 50 and byte 98 as the top level, 99.
 pub const LEVEL: usize = 0x24;
+pub const MAX_LEVEL: u8 = 99;
 pub const BIAS: usize = 0x25;
 pub const TARGET: usize = 0x27;
 pub const MOVES: usize = 0x28;
@@ -52,7 +55,7 @@ pub fn get(s: &Save, base: usize, i: usize) -> Palico {
     Palico {
         name: s.str(o, NAME),
         exp: s.u32(o + EXP),
-        level: s.u8(o + LEVEL),
+        level: s.u8(o + LEVEL).saturating_add(1),
         bias: s.u8(o + BIAS),
         target: s.u8(o + TARGET),
         moves: s.get(o + MOVES, 8).try_into().unwrap(),
@@ -70,7 +73,7 @@ pub fn set(s: &mut Save, base: usize, i: usize, p: &Palico) {
         s.set_str(o, NAME, &p.name);
     }
     s.set_u32(o + EXP, p.exp);
-    s.set_u8(o + LEVEL, p.level);
+    s.set_u8(o + LEVEL, p.level.clamp(1, MAX_LEVEL) - 1);
     s.set_u8(o + BIAS, p.bias.min(7));
     s.set_u8(o + TARGET, p.target);
     s.put(o + MOVES, &p.moves);

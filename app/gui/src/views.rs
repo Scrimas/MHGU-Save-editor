@@ -1939,7 +1939,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         };
         let name = equip_name(Owner::Hunter, &e);
         let t = Target::Equip(Owner::Hunter, slot);
-        let mut ed = Edit::one(t, t.label(s.save(), s.slot), Conf::Derived);
+        let mut ed = Edit::one(t, t.label(s.save(), s.slot), Conf::Confirmed);
         ed.key = format!("{}:piece", t.key());
         if !e.is_empty() {
             ed.note = "New box entry at level 1, shaped like the game's own".into();
@@ -1993,10 +1993,10 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let i = i as usize;
         let t = Target::Palico(i, targets::pal_of(&f));
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
-                "level" => p.level = v.clamp(1, 50) as u8,
+                "level" => p.level = v.clamp(1, palico::MAX_LEVEL as i32) as u8,
                 "exp" => p.exp = v.max(0) as u32,
                 "bias" => p.bias = v.clamp(0, 7) as u8,
                 _ => {}
@@ -2014,7 +2014,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let i = i as usize;
         let tg = Target::Palico(i, targets::pal_of(&f));
         let title = tg.label(s.save(), s.slot);
-        s.edit(Edit::one(tg, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(tg, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
                 "name" => p.name = t.to_string(),
@@ -2215,10 +2215,9 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             "max" => Mon::Max,
             _ => Mon::Notes,
         };
-        let conf = if m == Mon::Notes { Conf::Derived } else { Conf::Confirmed };
         let t = Target::Monster(i, m);
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, conf).note("Also rebuilds the Guild Card monster log"), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed).note("Also rebuilds the Guild Card monster log"), |sv, base| {
             if m == Mon::Notes {
                 monsters::set_notes(sv, base, i, v != 0);
                 return vec![];

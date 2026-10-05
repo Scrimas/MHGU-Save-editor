@@ -29,7 +29,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18CF14,0,5463,char1,0x278,sItemBox,2300,19,12b 7b,0x19a518,obj100+0x18d1a,"item box: 2300 x (u12 item ID, u7 count), bit stream",CONFIRMED
 0x18E46B,0,4080,char1,0x17CF,sItemBox,1,,4080B,0x3e77c8,obj100+0x1eff4,"item loadouts: 24 x 170 B (name char[42], 32 x (u16 item, u16 count))",CONFIRMED
 0x18F45B,0,76,char1,0x27BF,sItemPouch,32,19,12b 7b,0x19e0d4,obj100+0x18b1a,"item pouch: 32 x (u12 item ID, u7 count), bit stream",CONFIRMED
-0x18F4A7,0,4,char1,0x280B,sUserInfo,1,,4B,0x51dbd0,obj17+0x20,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
+0x18F4A7,0,4,char1,0x280B,sUserInfo,1,,4B,0x51dbd0,obj17+0x20,HR points: HR follows from them (slot header +0x28 and Guild Card +0x16 copies),CONFIRMED
 0x18F4AB,0,4,char1,0x280F,sUserInfo,1,,4B,0x51dbd0,obj17+0x24,"funds (zenny), at most 9999999; slot header +0x24 copy",CONFIRMED
 0x18F4AF,0,4,char1,0x2813,sUserInfo,1,,4B,0x51dbd0,obj17+0x28,"S+0x20..0x41f in object order: HR points +0, funds +4, Wycademy points +0xC, contribution points +0x10/+0x20, permits held +0x31, style use counts +0xFA, Arena Latest Updates +0x108/+0x3E4, Arena best times 57 x 12 B +0x114, daily picks +0x3EC, Jukebox song +0x3F8, transferred HR +0x3FA (docs/11 S+0x20 block)",DERIVED
 0x18F4B3,0,4,char1,0x2817,sUserInfo,1,,4B,0x51dbd0,obj17+0x2c,"Wycademy points, added per quest",CONFIRMED
@@ -94,7 +94,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FF47,0,4,char1,0x32AB,sUserInfo,1,,4B,0x51e06c,obj17+0x35a4,Trader delivery requests offered NEW (S+0x35a4),DERIVED
 0x18FF4B,0,4,char1,0x32AF,sUserInfo,1,,4B,0x51e080,obj17+0x35a8,"delivery requests delivered: bit b = kind-1 request b, 0-12 (S+0x35a8; talk condition 41)",CONFIRMED
 0x18FF4F,0,4,char1,0x32B3,sUserInfo,1,,4B,0x51e094,obj17+0x35ac,Hunter's Notes tips read: clear bit = NEW (S+0x35ac),DERIVED
-0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,"Hunter's Notes, large monsters: 123 bits (S+0x35b0)",DERIVED
+0x18FF53,0,16,char1,0x32B7,sUserInfo,1,,16B,0x51e0a8,obj17+0x35b0,"Hunter's Notes, large monsters: 123 bits, bit = notes_bit of data/monster-sizes.csv (S+0x35b0)",CONFIRMED
 0x18FF63,0,16,char1,0x32C7,sUserInfo,1,,16B,0x51e0b8,obj17+0x35c0,"Hunter's Notes, large monsters NEW (S+0x35c0)",DERIVED
 0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,"Hunter's Notes, second list: 30 bits (S+0x35d0)",DERIVED
 0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,"DLC item packs taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)",CONFIRMED
@@ -393,7 +393,8 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B06FD,0,216,char1,0x23A61,sPlayer,1,,216B,0x27562c,obj100+0x3c4,"player 224-byte block (header +0x2C): 3 x u16 equipped Hunter Arts, u16 SP Art bits per art slot; bytes 8-223 unused by a hunter (Palico parameters)",DERIVED
 0x1B07D5,0,14,char1,0x23B39,sPlayer,1,,14B,0x275644,obj100+0x184,"equipped gear: 7 x u16 equipment box index (weapon, head, chest, arms, waist, legs, talisman), 0xFFFF = none",CONFIRMED
 0x1B07E3,0,1,char1,0x23B47,sPlayer,1,,1B,0x275740,obj100+0x650,weapon class: equipped weapon type - 7 (15 = Prowler),CONFIRMED
-0x1B07E4,0,4,char1,0x23B48,sPlayer,1,,4B,0x275740,obj100+0x651,"weapon class (+0; 15 = Prowler), gender (+4), hunting style (+5)",DERIVED
+0x1B07E4,0,3,char1,0x23B48,sPlayer,1,,3B,0x275740,obj100+0x651,"weapon class (+0; 15 = Prowler), gender (+4), hunting style (+5)",DERIVED
+0x1B07E7,0,1,char1,0x23B4B,sPlayer,1,,1B,0x275740,obj100+0x654,"body type (gender): 0 male, 1 female (read by the Smithy, the Armory and talk conditions 26/27)",CONFIRMED
 0x1B07E8,0,1,char1,0x23B4C,sPlayer,1,,1B,0x275740,obj100+0x655,"hunting style: 0 Guild, 1 Striker, 2 Aerial, 3 Adept, 4 Alchemy, 5 Valor",CONFIRMED
 0x1B07E9,0,6,char1,0x23B4D,sPlayer,1,,6B,0x275740,obj100+0x656,"weapon class (+0; 15 = Prowler), gender (+4), hunting style (+5)",DERIVED
 0x1B07EF,0,20,char1,0x23B53,sPlayer,1,,20B,0x275754,obj100+0x65c,current pigment: 5 x RGBA,CONFIRMED
@@ -418,7 +419,7 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B0845,5,5,char1,0x23BA9,sOtomo,1,,32b,0x263b50,obj20+0x13904,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
 0x1B0849,5,5,char1,0x23BAD,sOtomo,1,,32b,0x263b68,obj20+0x13908,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
 0x1B084D,5,5,char1,0x23BB1,sOtomo,1,,32b,0x263b80,obj20+0x1390c,"Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)",DERIVED
-0x1B0852,0,27216,char1,0x23BB6,sOtomo,84,2592,32B 224B 14B 12B 36B 4B 2B,0x263390,obj20+0x13e4c,"Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level byte +0x24 (seen up to 63), greeting +0x60, owner +0x9C)",CONFIRMED
+0x1B0852,0,27216,char1,0x23BB6,sOtomo,84,2592,32B 224B 14B 12B 36B 4B 2B,0x263390,obj20+0x13e4c,"Palicoes: 84 x 324 B (name char[32] +0, exp u32 +0x20, level - 1 u8 +0x24 (Lv 1-99), support bias +0x25, target +0x27, greeting +0x60, owner +0x9C)",CONFIRMED
 0x1B72A2,0,7776,char1,0x2A606,sOtomo,24,2592,32B 224B 14B 12B 36B 4B 2B,0x263bf0,obj20+0x301cc,"Palicoes for hire: 24 x 324 B, same record, rerolled after each counted quest",CONFIRMED
 0x1B9102,0,40,char1,0x2C466,sOtomo,1,,40B,0x263c70,obj20+0x13910,Palicoes that reached level 50: 5 x 8 B ID; award 50 (sOtomo +0x13910),DERIVED
 0x1B912A,0,16,char1,0x2C48E,sOtomo,1,,16B,0x263c88,obj20+0x48a78,"Palico Dojo teaching session: 4 indices, kind, skill/move, u16 in progress, two u32 (sOtomo +0x48a78)",DERIVED

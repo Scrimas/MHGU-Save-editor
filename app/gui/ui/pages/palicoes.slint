@@ -52,7 +52,6 @@ export component PalicoesPage inherits Rectangle {
         PageHeader {
             title: "Palicoes";
             subtitle: Api.palico-summary;
-            derived: true;
             staged: Api.page-counts[4];
         }
         HorizontalLayout {
@@ -93,7 +92,7 @@ export component PalicoesPage inherits Rectangle {
                             label: "Level";
                             was: Api.palico.was-level;
                             key: root.key + "level";
-                            NumberBox { width: 110px; minimum: 1; maximum: 50; value: Api.palico.level; label: "Level"; edited(v) => { Api.set-palico("level", v); } }
+                            NumberBox { width: 110px; minimum: 1; maximum: 99; value: Api.palico.level; label: "Level"; edited(v) => { Api.set-palico("level", v); } }
                             Rectangle { horizontal-stretch: 1; }
                         }
                         Row {

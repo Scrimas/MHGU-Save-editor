@@ -104,6 +104,8 @@ their edges, so each field carries its own tag.
 | Guild Card list 1 | Both cards inflate to 6328 B; trailer HR, name and ID match the card |
 | chat phrases | 3 × 24 shortcut phrases and 3 × 9 auto-chat lines, decoded |
 | block A / B: DLC lists, Palico pool, challenge records | Bitmaps, lists and pool agree entry for entry |
+| HR points, Hunter's Notes map, a new box entry | Controlled write of 2026-10-05 through the editor's code (HR 999 → 500, Rathian's Notes bit cleared, a Hunter's Knife added). In game: HR 500, Rathian gone from the Notes, the knife in the box and equippable; the game's next save kept all three |
+| Palico level, bias, target, greeting, hunting buddy; body type | Read off in game: Suds' Palico Info (Lv 64 = byte 63, Gathering = 6, Large First = 4, the comment, "Palico 1"); all three hunters male = 0 |
 
 The same pass corrected labels the data contradicts:
 - the two DLC bitmaps were swapped, and `base + 0x32DB` holds item packs;
@@ -314,17 +316,18 @@ The block A bytes of `sGameControl` are in [Block A header](#block-a-header-and-
 
 **CONFIRMED** from the loader (`0x263390`: 32 + 224 + 14 + 12 + 36 + 4 + 2 bytes per
 record) and the [save timeline](#confirmed-by-the-save-timeline): after each of four quests
-only the hunting buddy's record gained experience. The level byte rises with experience
-but reaches 59–63 in the save, so it is kept as a raw value.
+only the hunting buddy's record gained experience. Checked in game (2026-10-05, Palico
+Info of Suds): Lv 64, bias Gathering, the comment and "Palico 1" match level byte 63,
+bias 6, the greeting and buddy 1 = its index.
 
 | Offset | Size | Field |
 |---|---|---|
 | `+0x00` | char[32] | name |
 | `+0x20` | u32 | experience |
-| `+0x24` | u8 | level (raw; ordering matches experience) |
-| `+0x25` | u8 | support bias (parameter block `+5`, see [StreetPass Palico record](#streetpass-palico-record-276-b)) |
-| `+0x26` | u8 | parameter block `+6`, a 0–99 value capped per entry, UNRESOLVED (55–99 seen; 55 in all but eight records of slot 1) |
-| `+0x27` | u8 | target (1–5 seen) |
+| `+0x24` | u8 | **level − 1** (Lv 64 in game = 63). The level-up code `0x262e1c` counts 49 as level 50 (the level-50 list, award 50) and 98 as the top level, 99 (milestone bit of `S+0xd8c`) |
+| `+0x25` | u8 | support bias (parameter block `+5`, see [StreetPass Palico record](#streetpass-palico-record-276-b)): 6 = Gathering in game |
+| `+0x26` | u8 | parameter block `+6`, a 0–99 value capped per entry, UNRESOLVED (55–99 seen; 55 in all but eight records of slot 1). Suds: 89 with 4 of 5 Enthusiasm marks, so possibly Enthusiasm |
+| `+0x27` | u8 | target (1–5 seen): 4 = Large First in game |
 | `+0x60` | char[60] | greeting |
 | `+0x9C` | char[32] | original owner name |
 
@@ -546,7 +549,7 @@ transfer).
 
 | `base +` | S field | Content |
 |---|---|---|
-| `0x280B` | `+0x20` | u32 HR points ([05](05-quests.md)). The transfer sets it to the points of HR min(HR, 7) (table `0x15973bc`) |
+| `0x280B` | `+0x20` | u32 HR points ([05](05-quests.md)). The transfer sets it to the points of HR min(HR, 7) (table `0x15973bc`). CONFIRMED by write: 2,001,420 points showed HR 500 in game and the game kept them |
 | `0x280F` | `+0x24` | u32 funds (zenny); the adder `0x523150` keeps it within 0 … 9,999,999. CONFIRMED: a quest reward took it to exactly 9,999,999, a game session spent 960, and the slot header copy `+0x24` matched in all 36 saves |
 | `0x2813` | `+0x28` | u32, a copy of sItem `+0x69`: the quest result (`0x195758`) draws it at random below n = 1, 2 or 3, n growing with the Village and Hub star levels. Meaning UNRESOLVED |
 | `0x2817` | `+0x2c` | u32 Wycademy points, 0 … 9,999,999 (`0x523194`). CONFIRMED: +4110, +540, +3720, +1200, +2640 at the five counted quests, no change at talks, tool writes or the Harvest Tour |
@@ -607,7 +610,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x31EF` … `0x32AB` | `+0x3488` … `+0x35a4` | the Trader (`uUITradeCenter`): seven maps, each followed by its N1 and N2. U at `+0x3488` (32 bits) and `+0x3494` (32): entries of the Trader's two item lists (UI byte `+0x3c` = 0 / 1), set by `0x7a9abc` once the entry's progress condition (`0x561b28`) holds. `+0x34a0` (448): Guild Card title words for sale (`tradeLimitedHonorList`, 442), `+0x3548` (160): Guild Card scenes for sale (`tradeLimitedPaperList`, 131), `+0x3584` (32): pet costumes for sale, the three set by the tabs of [block B's download test](#downloads-held--block-b-header). `+0x3590` (32): the coin-ticket trades (`rTradeCoinTicketList`, paid in *Horns Coin*); only the transfer converter sets it, the Cross ticket screen and the Trader read its N2 as NEW. `+0x359c` (32): delivery requests offered at the Trader, bit = `rTradeDeliveryList` entry, set by `0x79da8c` once the request's event flag is raised (`0x1971f0`); `0xff5` in the analysed save |
 | `0x32AF` | `+0x35a8` | delivery requests delivered: bit *b* for kind-1 request *b* in [`request-index.csv`](../data/request-index.csv) order, 0–12 (CONFIRMED: bits 0, 4, 5, 7 = the done flags of those requests), tested by `0x524db8` for talk condition 41 ([10](10-npc-talk.md)), the Trader and the Start Menu |
 | `0x32B3` | `+0x35ac` | Hunter's Notes tips read: a clear bit shows NEW (`cUIOHunterNoteTips`) |
-| `0x32B7`, `0x32C7` | `+0x35b0`, `+0x35c0` | **Hunter's Notes, large monsters**: 123 bits and their NEW copy. Talk action 6 sets both (`0x247ae4`); condition 44 tests them (`0x245848`) |
+| `0x32B7`, `0x32C7` | `+0x35b0`, `+0x35c0` | **Hunter's Notes, large monsters**: 123 bits and their NEW copy. Talk action 6 sets both (`0x247ae4`); condition 44 tests them (`0x245848`). The map is CONFIRMED by write: clearing bit 79 removed Rathian from the Notes in game (the NEW copy stays DERIVED) |
 | `0x32D7` | `+0x35d0` | **Hunter's Notes, second list**: 30 bits, talk action 7 and condition 45 |
 | `0x32DB` | `+0x35dc` | 64 bits: DLC item packs this character has taken from the Room Service (CONFIRMED; earlier revisions said Palicoes). Bit *b* pairs with bit *b* of sPrivilege `+0xf3c` (DLC item packs held). `uUIRoomService` sets it after the hand-over (`0x78ccb0`), buzzes on a second try (`0x78d01c`) and shows a notice while a held one is not taken (`0x78a39c`). `0x1ffff` (17) in the analysed save, the same as the held map; 0 in a fresh slot |
 | `0x32E3` | `+0x3668` | u32 flags. Bit 0: a network-mode switch mirrored to sFestaNetwork `+0x1624e` (`0x228310`, set by `uUILobbyStartMenu`, copied back by the title menu; read by the room list and menu bar), probably local vs online, UNRESOLVED. Bit 1: today's quest-counter daily bonus received (set by `0x3bb96c` after the bonus is paid, cleared when new daily picks `+0x40c` are rolled, `0x3babf4`; read for the board icon). No other bit is used. `+0x366c` is a runtime field of the lobby code, not saved. 0 in all three slots |

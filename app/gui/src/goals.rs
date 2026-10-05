@@ -17,18 +17,19 @@ pub struct Def {
     pub conf: Conf,
 }
 
-/// The Overview's goals (titles and copy come from `plan`). Confirmed: tested in game
+/// The Overview's goals (titles and copy come from `plan`). All confirmed: tested in game
 /// (arts and canteen as written, quests by the bulk completion of 2026-09-19, crowns by
-/// the game's award check after the 2026-10-04 write) or every field written is CONFIRMED
-/// by the save timeline (awards, money; tools/evidence); the rest is derived from the code.
+/// the game's award check after the 2026-10-04 write, notes and HR by the controlled
+/// write of 2026-10-05) or every field written is CONFIRMED by the save timeline
+/// (awards, money; tools/evidence).
 pub const GOALS: [Def; 8] = [
     Def { id: "quests", conf: Conf::Confirmed },
     Def { id: "arts", conf: Conf::Confirmed },
     Def { id: "canteen", conf: Conf::Confirmed },
     Def { id: "awards", conf: Conf::Confirmed },
-    Def { id: "notes", conf: Conf::Derived },
+    Def { id: "notes", conf: Conf::Confirmed },
     Def { id: "crowns", conf: Conf::Confirmed },
-    Def { id: "hr999", conf: Conf::Derived },
+    Def { id: "hr999", conf: Conf::Confirmed },
     Def { id: "money", conf: Conf::Confirmed },
 ];
 

@@ -33,11 +33,12 @@ def _myset(b, s=1):
     return None
 def _qc(b): return u32(b, base(b) + 0x5E4E)          # quest counter (S+0x44..), CONFIRMED
 def _slots(b): return [s for s in (1, 2, 3) if b[base(b, s) + 0x23B7D]]   # slots holding a character
+PT_WRITES = ('app-2026-10-04_235015', 'confirm-0-before-tests')   # saves right after the app wrote play time
 def _game_pairs(S):
     """consecutive pairs (a, b, nameb) where the game ran (play time moved, not by an app write)"""
     out = []
     for (t0, n0, a), (t1, n1, b) in zip(S, S[1:]):
-        if n1 in ('app-2026-10-04_235015', 'LIVE'): continue   # app wrote play time
+        if n1 in PT_WRITES: continue
         if u32(a, base(a) + 0x2248B) != u32(b, base(b) + 0x2248B): out.append((a, b, n1))
     return out
 import csv as _csv
@@ -56,7 +57,7 @@ def chk_play_time(S):
         i = _names(S).index(n); ok &= u32(S[i - 1][2], B + 0x2248B) == u32(S[i][2], B + 0x2248B)
     steps = 0
     for (t0, n0, a), (t1, n1, b) in zip(S, S[1:]):
-        if n1 in ('app-2026-10-04_235015', 'LIVE'): continue
+        if n1 in PT_WRITES: continue
         d = u32(b, B + 0x2248B) - u32(a, B + 0x2248B)
         ok &= 0 <= d <= (t1 - t0) + 1
         steps += d > 0
@@ -71,7 +72,7 @@ def chk_play_rem(S):
         B = base(b)
         ra, rb = f32(a, B + 0x2248F), f32(b, B + 0x2248F)
         sa, sb = u32(a, B + 0x2248B), u32(b, B + 0x2248B)
-        if n1 in ('app-2026-10-04_235015', 'LIVE'): ok &= ra == rb; continue
+        if n1 in PT_WRITES: ok &= ra == rb; continue
         ok &= (ra != rb) == (sa != sb)
     for t, n, b in S:
         r = f32(b, base(b) + 0x2248F); vals.add(r); ok &= 0 <= r < 60
