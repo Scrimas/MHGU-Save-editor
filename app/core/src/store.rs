@@ -103,6 +103,47 @@ pub fn snapshot(loc: &Location, dest_root: &Path, stamp: &str) -> std::io::Resul
     Ok(dest)
 }
 
+/// Copies a snapshot made by `snapshot` back over the save: every file it holds goes back
+/// to its place, whole (headers too), through a temporary file and a rename. Files of
+/// the wrong size are refused before anything is written. Returns the files restored.
+pub fn restore(loc: &Location, snap: &Path) -> std::io::Result<Vec<PathBuf>> {
+    let mut pairs = vec![];
+    for p in &loc.copies {
+        let rel = match &loc.save_dir {
+            Some(d) => p.strip_prefix(d).unwrap_or(p).to_path_buf(),
+            None => PathBuf::from(p.file_name().unwrap()),
+        };
+        let from = snap.join(rel);
+        if !from.is_file() {
+            continue;
+        }
+        let n = fs::metadata(&from)?.len() as usize;
+        if n != FILE_SIZE {
+            return Err(std::io::Error::other(format!("{} is {n} bytes, not a save", from.display())));
+        }
+        pairs.push((from, p.clone()));
+    }
+    if pairs.is_empty() {
+        return Err(std::io::Error::other(format!("no save files in {}", snap.display())));
+    }
+    let mut done = vec![];
+    for (from, to) in pairs {
+        let b = fs::read(&from)?;
+        let tmp = to.with_extension("mhgu-editor-tmp");
+        {
+            let mut f = fs::File::create(&tmp)?;
+            f.write_all(&b)?;
+            f.sync_all()?;
+        }
+        fs::rename(&tmp, &to)?;
+        if fs::read(&to)? != b {
+            return Err(std::io::Error::other(format!("read-back mismatch in {}", to.display())));
+        }
+        done.push(to);
+    }
+    Ok(done)
+}
+
 /// Writes the edited body into every copy, keeping each file's own header, through a
 /// temporary file and a rename. Returns the files written.
 pub fn write_all(save: &mut Save, loc: &Location) -> Result<Vec<PathBuf>, Error> {
@@ -166,6 +207,14 @@ mod tests {
             assert_eq!(&b[0x18CC9C + 0x28..0x18CC9C + 0x2A], &[0x34, 0x12]);
         }
         assert!(!s.is_dirty());
+        // the snapshot puts every file back, headers included
+        let r = restore(&loc, &snap).unwrap();
+        assert_eq!(r.len(), 4);
+        for (k, f) in FILES.iter().enumerate() {
+            let b = fs::read(dir.join("1").join(f)).unwrap();
+            assert_eq!(b[0x14], 7 + k as u8);
+            assert_eq!(&b[0x18CC9C + 0x28..0x18CC9C + 0x2A], &[0, 0]);
+        }
         fs::remove_dir_all(&dir).unwrap();
     }
 }
