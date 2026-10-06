@@ -17,7 +17,12 @@ fn ryujinx_roots() -> Vec<PathBuf> {
     v
 }
 
-/// `bis/user/save/<id>/0/system` files of the right size.
+fn is_save(p: &std::path::Path) -> bool {
+    p.metadata().is_ok_and(|m| m.is_file() && m.len() == FILE_SIZE as u64)
+}
+
+/// `bis/user/save/<id>/0/system` files of the right size, then the `system` files found
+/// in the folders added in Settings.
 pub fn detect_saves() -> Vec<PathBuf> {
     let mut out = vec![];
     for r in ryujinx_roots() {
@@ -26,7 +31,14 @@ pub fn detect_saves() -> Vec<PathBuf> {
         ids.sort();
         for id in ids {
             let p = id.join("0").join("system");
-            if p.metadata().is_ok_and(|m| m.len() == FILE_SIZE as u64) {
+            if is_save(&p) {
+                out.push(p);
+            }
+        }
+    }
+    for f in crate::settings::get().save_folders {
+        for p in find_saves(&f) {
+            if !out.contains(&p) {
                 out.push(p);
             }
         }
@@ -34,18 +46,54 @@ pub fn detect_saves() -> Vec<PathBuf> {
     out
 }
 
-const EMULATORS: [&str; 8] = ["ryujinx", "ryubing", "yuzu", "suyu", "sudachi", "citron", "eden", "torzu"];
+/// `system` files of the right size under `root`, at most 8 folders down (the yuzu
+/// family keeps `nand/user/save/<0…0>/<user>/<title>/system`). A save in a `1/` commit
+/// folder is left out when its `0/` sibling is there: both are the same save.
+fn find_saves(root: &std::path::Path) -> Vec<PathBuf> {
+    let mut out = vec![];
+    let mut stack = vec![(root.to_path_buf(), 0)];
+    let mut seen = 0;
+    while let Some((dir, depth)) = stack.pop() {
+        let Ok(rd) = std::fs::read_dir(&dir) else { continue };
+        let mut subs = vec![];
+        for e in rd.flatten() {
+            seen += 1;
+            let Ok(t) = e.file_type() else { continue };
+            if t.is_dir() && depth < 8 {
+                subs.push(e.path());
+            } else if t.is_file() && e.file_name() == "system" && is_save(&e.path()) {
+                out.push(e.path());
+            }
+        }
+        // a folder like the home folder is not walked whole
+        if seen > 50_000 {
+            break;
+        }
+        subs.sort();
+        stack.extend(subs.into_iter().rev().map(|p| (p, depth + 1)));
+    }
+    out.retain(|p| {
+        let commit = p.parent().and_then(|d| d.file_name()).is_some_and(|n| n == "1");
+        !(commit && p.parent().and_then(|d| d.parent()).is_some_and(|d| is_save(&d.join("0").join("system"))))
+    });
+    out.sort();
+    out
+}
 
-/// Names of running Switch emulators.
+pub const EMULATORS: [&str; 8] = ["ryujinx", "ryubing", "yuzu", "suyu", "sudachi", "citron", "eden", "torzu"];
+
+/// Names of running Switch emulators: the built-in ones and those added in Settings.
 pub fn running_emulators() -> Vec<String> {
     use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, RefreshKind, System};
+    let extra: Vec<String> = crate::settings::get().emulators.iter().map(|e| e.to_lowercase()).collect();
     let sys = System::new_with_specifics(RefreshKind::nothing().with_processes(ProcessRefreshKind::nothing()));
     let mut found: Vec<String> = sys
         .processes()
         .values()
         .filter_map(|p| {
             let n = p.name().to_string_lossy().to_lowercase();
-            EMULATORS.iter().any(|e| n.starts_with(e)).then(|| p.name().to_string_lossy().into_owned())
+            let known = EMULATORS.iter().any(|e| n.starts_with(e)) || extra.iter().any(|e| n.starts_with(e.as_str()));
+            known.then(|| p.name().to_string_lossy().into_owned())
         })
         .collect();
     let _ = ProcessesToUpdate::All;
@@ -54,9 +102,29 @@ pub fn running_emulators() -> Vec<String> {
     found
 }
 
-pub fn snapshot_root() -> PathBuf {
+pub fn default_snapshot_root() -> PathBuf {
     dirs::data_dir().unwrap_or_else(std::env::temp_dir).join("mhgu-save-editor").join("snapshots")
 }
+
+/// The folder chosen in Settings, else the default.
+pub fn snapshot_root() -> PathBuf {
+    crate::settings::get().snapshot_dir.unwrap_or_else(default_snapshot_root)
+}
+
+/// Removes the oldest snapshots of one save beyond the number kept in Settings, never
+/// `keep` (the one just taken). Only folders named like a snapshot are touched.
+pub fn prune_snapshots(root: &std::path::Path, keep: &std::path::Path) -> usize {
+    let n = crate::settings::get().keep_snapshots as usize;
+    if n == 0 {
+        return 0;
+    }
+    let named = |s: &Snapshot| s.dir.file_name().and_then(|n| n.to_str()).is_some_and(|n| chrono::NaiveDateTime::parse_from_str(n, STAMP).is_ok());
+    let old = snapshots(root).into_iter().filter(|s| s.dir != keep && named(s)).skip(n.saturating_sub(1));
+    old.filter(|s| std::fs::remove_dir_all(&s.dir).is_ok()).count()
+}
+
+/// Snapshot folder names.
+pub const STAMP: &str = "%Y-%m-%d_%H%M%S";
 
 /// "Ryujinx" when the save sits in a Ryujinx folder, else a generic name.
 pub fn emulator_name(save: &std::path::Path) -> &'static str {
@@ -86,7 +154,7 @@ pub fn snapshots(root: &std::path::Path) -> Vec<Snapshot> {
         .map(|e| {
             let dir = e.path();
             let name = e.file_name().to_string_lossy().into_owned();
-            let time = chrono::NaiveDateTime::parse_from_str(&name, "%Y-%m-%d_%H%M%S")
+            let time = chrono::NaiveDateTime::parse_from_str(&name, STAMP)
                 .ok()
                 .and_then(|t| t.and_local_timezone(chrono::Local).single())
                 .or_else(|| e.metadata().and_then(|m| m.modified()).ok().map(chrono::DateTime::<chrono::Local>::from))
@@ -120,6 +188,50 @@ pub fn save_info(p: &std::path::Path) -> Option<SaveInfo> {
         .collect();
     let modified = p.metadata().and_then(|m| m.modified()).ok().map(chrono::DateTime::<chrono::Local>::from);
     Some(SaveInfo { names, modified })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn save_at(p: &std::path::Path) {
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(p, vec![0u8; FILE_SIZE]).unwrap();
+    }
+
+    #[test]
+    fn finds_saves_in_added_folders() {
+        let d = std::env::temp_dir().join(format!("mhgu-find-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        let yuzu = d.join("nand/user/save/0000000000000000/AB/0100770008DD8000/system");
+        save_at(&yuzu);
+        save_at(&d.join("ryu/0/system"));
+        save_at(&d.join("ryu/1/system"));
+        save_at(&d.join("other/1/system"));
+        std::fs::create_dir_all(d.join("small")).unwrap();
+        std::fs::write(d.join("small/system"), b"x").unwrap();
+        let found = find_saves(&d);
+        assert_eq!(found, vec![yuzu, d.join("other/1/system"), d.join("ryu/0/system")]);
+        std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    #[test]
+    fn prune_keeps_the_newest_and_foreign_folders() {
+        let d = std::env::temp_dir().join(format!("mhgu-prune-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        let names = ["2026-01-01_000000", "2026-01-02_000000", "2026-01-03_000000", "2026-01-04_000000"];
+        for n in names {
+            std::fs::create_dir_all(d.join(n)).unwrap();
+        }
+        std::fs::create_dir_all(d.join("mine")).unwrap();
+        crate::settings::update(|s| s.keep_snapshots = 2);
+        assert_eq!(prune_snapshots(&d, &d.join(names[3])), 2);
+        crate::settings::update(|s| s.keep_snapshots = 0);
+        let mut left: Vec<String> = std::fs::read_dir(&d).unwrap().flatten().map(|e| e.file_name().to_string_lossy().into_owned()).collect();
+        left.sort();
+        assert_eq!(left, ["2026-01-03_000000", "2026-01-04_000000", "mine"]);
+        std::fs::remove_dir_all(&d).unwrap();
+    }
 }
 
 pub fn open_folder(p: &std::path::Path) {

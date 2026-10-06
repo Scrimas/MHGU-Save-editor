@@ -3,6 +3,7 @@
 use crate::assets;
 use crate::fmt::{self, count, num};
 use crate::goals;
+use crate::settings;
 use crate::state::{Conf, Edit, State};
 use crate::system;
 use crate::targets::{self, Mon, Target, PAGES};
@@ -10,14 +11,14 @@ use crate::{model, strings, Shared};
 use crate::{
     Api, AppWindow, ArtRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
     EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, PalicoDetail, PalicoRow, PickItem, Preview, PreviewLine,
-    QuestRow, RequestRow, SlotInfo, SnapRow, StatCard, ValueLine, WriteRow,
+    QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, ValueLine, WriteRow,
 };
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Kind, Owner};
 use mhgu_save::items::{self, Stack, Store};
 use mhgu_save::progress::{Char, Lock, QuestBit, DEVIANTS};
 use mhgu_save::{character, monsters, palico, store};
-use slint::{ComponentHandle, Image, SharedString, Weak};
+use slint::{ComponentHandle, Image, Model, SharedString, Weak};
 use std::path::{Path, PathBuf};
 
 fn conf(c: Conf) -> Confidence {
@@ -1287,35 +1288,177 @@ fn fields_page(ui: &AppWindow, st: &State) {
     }
 }
 
-/// The Open screen's list: each detected save with its characters (R12).
-pub fn detected(ui: &AppWindow) {
-    let rows: Vec<DetectedSave> = system::detect_saves()
-        .into_iter()
-        .map(|p| {
-            let info = system::save_info(&p);
-            let (title, sub) = match &info {
-                Some(i) if !i.names.is_empty() => {
-                    let (n, hr, t) = &i.names[0];
-                    let more = if i.names.len() > 1 {
-                        format!(" · also {}", i.names[1..].iter().map(|x| x.0.clone()).collect::<Vec<_>>().join(", "))
-                    } else {
-                        String::new()
-                    };
-                    (n.clone(), format!("HR {} · {}{more}", num(*hr), fmt::playtime(*t)))
-                }
-                Some(_) => ("No characters yet".to_string(), String::new()),
-                None => ("Unreadable save".to_string(), String::new()),
+/// A save on the Open screen: its characters (R12).
+fn save_row(p: &Path) -> DetectedSave {
+    let info = system::save_info(p);
+    let (title, sub) = match &info {
+        Some(i) if !i.names.is_empty() => {
+            let (n, hr, t) = &i.names[0];
+            let more = if i.names.len() > 1 {
+                format!(" · also {}", i.names[1..].iter().map(|x| x.0.clone()).collect::<Vec<_>>().join(", "))
+            } else {
+                String::new()
             };
-            DetectedSave {
-                path: p.display().to_string().into(),
-                title: title.into(),
-                sub: sub.into(),
-                when: info.and_then(|i| i.modified).map(fmt::when).unwrap_or_default().into(),
-                short: fmt::elide_path(&p.display().to_string(), 70).into(),
+            (n.clone(), format!("HR {} · {}{more}", num(*hr), fmt::playtime(*t)))
+        }
+        Some(_) => ("No characters yet".to_string(), String::new()),
+        None => ("Unreadable save".to_string(), String::new()),
+    };
+    DetectedSave {
+        path: p.display().to_string().into(),
+        title: title.into(),
+        sub: sub.into(),
+        when: info.and_then(|i| i.modified).map(fmt::when).unwrap_or_default().into(),
+        short: fmt::elide_path(&p.display().to_string(), 70).into(),
+    }
+}
+
+/// The Open screen's lists: recent saves still on disk, then the saves found on this
+/// computer that are not among them.
+pub fn detected(ui: &AppWindow) {
+    let recent: Vec<PathBuf> = settings::get().recent.into_iter().filter(|p| p.is_file()).collect();
+    let found: Vec<PathBuf> = system::detect_saves().into_iter().filter(|p| !recent.contains(p)).collect();
+    let api = ui.global::<Api>();
+    api.set_recent(model(recent.iter().map(|p| save_row(p)).collect()));
+    api.set_detected(model(found.iter().map(|p| save_row(p)).collect()));
+}
+
+/// The Settings dialog's values.
+fn settings_ui(ui: &AppWindow) {
+    let s = settings::get();
+    let pos = |v: &[u32], x: u32| v.iter().position(|&y| y == x).unwrap_or(0) as i32;
+    let scale_now = match settings::scale_started() {
+        None => "Set by SLINT_SCALE_FACTOR in the environment".to_string(),
+        Some(n) if n != s.scale => "Applies the next time the editor starts".to_string(),
+        Some(_) => String::new(),
+    };
+    let dir = system::snapshot_root();
+    ui.global::<Api>().set_settings(SettingsInfo {
+        theme: settings::THEMES.iter().position(|t| *t == s.theme).unwrap_or(0) as i32,
+        scale: pos(&settings::SCALES, s.scale),
+        scale_now: scale_now.into(),
+        snapshot_dir: fmt::elide_path(&dir.display().to_string(), 56).into(),
+        snapshot_custom: s.snapshot_dir.is_some(),
+        keep: pos(&settings::KEEPS, s.keep_snapshots),
+        snapshot_first: s.snapshot_first,
+        folders: strings(s.save_folders.iter().map(|p| p.display().to_string())),
+        emulators: strings(s.emulators.clone()),
+        builtin: system::EMULATORS.join(", ").into(),
+        reopen: s.reopen_last,
+        recent: s.recent.len() as i32,
+        confirmed_only: s.confirmed_only,
+    });
+}
+
+/// Confirmed only (Settings) refuses edits not checked in game, and says so.
+fn refused(ui: &AppWindow, c: Conf) -> bool {
+    let r = c != Conf::Confirmed && settings::get().confirmed_only;
+    if r {
+        toast_full(ui, "Not changed: this change is Derived", "Confirmed changes only is on in Settings", "", ToastAct::None, true);
+    }
+    r
+}
+
+/// Snapshot folder of the open save (`<root>/<save id>`).
+fn snapshot_dir(st: &State) -> Option<PathBuf> {
+    let doc = st.doc.as_ref()?;
+    let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
+    Some(system::snapshot_root().join(id))
+}
+
+fn wire_settings(ui: &AppWindow) {
+    let api = ui.global::<Api>();
+    settings_ui(ui);
+    let theme = settings::get().theme;
+    if theme != "system" {
+        api.set_force_scheme(theme.into());
+    }
+    let w = ui.as_weak();
+    api.on_set_setting(move |key, v| {
+        let Some(ui) = w.upgrade() else { return };
+        let on = v != 0;
+        let at = |list: &[u32]| list.get(v as usize).copied().unwrap_or(0);
+        settings::update(|s| match key.as_str() {
+            "theme" => s.theme = settings::THEMES.get(v as usize).unwrap_or(&"system").to_string(),
+            "scale" => s.scale = at(&settings::SCALES),
+            "keep" => s.keep_snapshots = at(&settings::KEEPS),
+            "snapshot-default-dir" => s.snapshot_dir = None,
+            "snapshot-first" => s.snapshot_first = on,
+            "reopen" => s.reopen_last = on,
+            "confirmed-only" => s.confirmed_only = on,
+            _ => eprintln!("unknown setting {key:?}"),
+        });
+        if key == "theme" {
+            ui.global::<Api>().set_force_scheme(settings::get().theme.into());
+        }
+        settings_ui(&ui);
+    });
+    let w = ui.as_weak();
+    api.on_pick_snapshot_dir(move || {
+        let Some(ui) = w.upgrade() else { return };
+        if let Some(p) = rfd::FileDialog::new().set_title("Snapshot folder").set_directory(system::snapshot_root()).pick_folder() {
+            settings::update(|s| s.snapshot_dir = Some(p));
+            settings_ui(&ui);
+            toast(&ui, "New snapshots go to the new folder; earlier ones stay where they are", false);
+        }
+    });
+    let w = ui.as_weak();
+    api.on_add_save_folder(move || {
+        let Some(ui) = w.upgrade() else { return };
+        let Some(p) = rfd::FileDialog::new().set_title("Folder with MHGU saves").pick_folder() else { return };
+        settings::update(|s| {
+            if !s.save_folders.contains(&p) {
+                s.save_folders.push(p.clone());
             }
-        })
-        .collect();
-    ui.global::<Api>().set_detected(model(rows));
+        });
+        let before = ui.global::<Api>().get_detected().row_count();
+        detected(&ui);
+        settings_ui(&ui);
+        let n = ui.global::<Api>().get_detected().row_count().saturating_sub(before);
+        toast(&ui, if n == 0 { "No new save found in that folder".to_string() } else { format!("Found {}", count(n, "new save", "new saves")) }, false);
+    });
+    let w = ui.as_weak();
+    api.on_remove_save_folder(move |i| {
+        let Some(ui) = w.upgrade() else { return };
+        settings::update(|s| {
+            if (i as usize) < s.save_folders.len() {
+                s.save_folders.remove(i as usize);
+            }
+        });
+        detected(&ui);
+        settings_ui(&ui);
+    });
+    let w = ui.as_weak();
+    api.on_add_emulator(move |name| {
+        let Some(ui) = w.upgrade() else { return };
+        let name = name.trim().to_string();
+        if name.is_empty() {
+            return;
+        }
+        settings::update(|s| {
+            if !s.emulators.iter().any(|e| e.eq_ignore_ascii_case(&name)) {
+                s.emulators.push(name);
+            }
+        });
+        settings_ui(&ui);
+    });
+    let w = ui.as_weak();
+    api.on_remove_emulator(move |i| {
+        let Some(ui) = w.upgrade() else { return };
+        settings::update(|s| {
+            if (i as usize) < s.emulators.len() {
+                s.emulators.remove(i as usize);
+            }
+        });
+        settings_ui(&ui);
+    });
+    let w = ui.as_weak();
+    api.on_clear_recent(move || {
+        let Some(ui) = w.upgrade() else { return };
+        settings::update(|s| s.recent.clear());
+        detected(&ui);
+        settings_ui(&ui);
+    });
 }
 
 // --- actions --------------------------------------------------------------------------
@@ -1331,6 +1474,10 @@ pub fn open(ui: &AppWindow, st: &Shared, p: &Path) {
                 v.palico_sel = -1;
                 v.field_sel = -1;
             });
+            let abs = std::path::absolute(p).unwrap_or_else(|_| p.to_path_buf());
+            settings::update(|s| s.add_recent(abs));
+            detected(ui);
+            settings_ui(ui);
             refresh(ui, &st.borrow());
             let n = st.borrow().doc.as_ref().map(|d| (0..3).filter(|&k| d.save.slot_used(k)).count()).unwrap_or(0);
             toast(ui, format!("Save opened: {}", count(n, "character", "characters")), false);
@@ -1480,6 +1627,9 @@ fn apply_plan(ui: &AppWindow, s: &mut State, id: &str) {
         conf: p.conf.unwrap_or(Conf::Confirmed),
         targets: vec![],
     };
+    if refused(ui, e.conf) {
+        return;
+    }
     let id2 = id.to_string();
     s.edit(e, |sv, _| {
         let pre = sv.clone();
@@ -1491,6 +1641,7 @@ fn apply_plan(ui: &AppWindow, s: &mut State, id: &str) {
 pub fn wire(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
     detected(ui);
+    wire_settings(ui);
 
     // page switches refresh their model
     {
@@ -1640,7 +1791,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         if snapshot {
             let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
             let now = chrono::Local::now();
-            let stamp = now.format("%Y-%m-%d_%H%M%S").to_string();
+            let stamp = now.format(system::STAMP).to_string();
             match store::snapshot(&doc.loc, &system::snapshot_root().join(id), &stamp) {
                 Ok(p) => {
                     system::write_note(&p, &format!("Before: {}", fmt::list(&titles, 3)));
@@ -1655,6 +1806,9 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         match store::write_all(&mut doc.save, &doc.loc) {
             Ok(_) => {
                 s.written();
+                if let Some((p, _)) = &kept {
+                    system::prune_snapshots(p.parent().unwrap(), p);
+                }
                 // after writing: a toast with Restore (02.5, S8)
                 match kept {
                     Some((p, when)) => {
@@ -1699,13 +1853,18 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let Some(doc) = s.doc.as_ref() else { return };
         let loc = doc.loc.clone();
         let id = loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
-        let stamp = chrono::Local::now().format("%Y-%m-%d_%H%M%S").to_string();
-        match store::snapshot(&loc, &system::snapshot_root().join(id), &stamp) {
-            Ok(p) => system::write_note(&p, &format!("Before restoring the snapshot from {when}")),
+        let stamp = chrono::Local::now().format(system::STAMP).to_string();
+        let kept = match store::snapshot(&loc, &system::snapshot_root().join(id), &stamp) {
+            Ok(p) => {
+                system::write_note(&p, &format!("Before restoring the snapshot from {when}"));
+                p
+            }
             Err(e) => return toast(&ui, format!("Snapshot failed, nothing restored: {e}"), true),
-        }
+        };
         match store::restore(&loc, &dir) {
             Ok(_) => {
+                // after the restore: the snapshot it came from may be among the oldest
+                system::prune_snapshots(kept.parent().unwrap(), &kept);
                 let opened = loc.opened.clone();
                 let slot = s.slot;
                 if let Err(e) = s.open(&opened) {
@@ -2099,6 +2258,9 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let _ = &s;
     });
     on!(ui, st, on_set_request, |ui, s, index: i32, what: SharedString, on: bool| {
+        if refused(&ui, Conf::Derived) {
+            return;
+        }
         let r = tables().requests.iter().find(|r| r.index == index as usize).unwrap().clone();
         let slot = s.slot;
         let t = Target::Request(r.index);
@@ -2261,9 +2423,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
 }
 
 fn list_snapshots(ui: &AppWindow, st: &State) {
-    let Some(doc) = st.doc.as_ref() else { return };
-    let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
-    let root = system::snapshot_root().join(&id);
+    let Some(root) = snapshot_dir(st) else { return };
     let rows: Vec<SnapRow> = system::snapshots(&root)
         .into_iter()
         .map(|x| SnapRow {

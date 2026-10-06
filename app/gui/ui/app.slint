@@ -1,7 +1,7 @@
-import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint } from "std-widgets.slint";
+import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit } from "std-widgets.slint";
 import {
     Api, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
-    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal,
+    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo,
 } from "common.slint";
 import { OpenPage } from "pages/open.slint";
 import { OverviewPage } from "pages/overview.slint";
@@ -133,7 +133,7 @@ component ReviewPanel inherits Rectangle {
 
 // Write dialog (mockup A2): what changes, then the checks, then the files.
 component WriteDialog inherits Modal {
-    property <bool> snapshot: true;
+    property <bool> snapshot: Api.settings.snapshot-first;
     property <bool> paths;
     card-width: 560px;
     dismiss => { Api.write-open = false; }
@@ -363,6 +363,158 @@ component SnapshotsDialog inherits Modal {
     }
 }
 
+// One setting: what it is on the left, its controls on the right.
+component SettingRow inherits HorizontalLayout {
+    in property <string> title;
+    in property <string> hint;
+    spacing: Tok.tight;
+    VerticalLayout {
+        alignment: center;
+        horizontal-stretch: 1;
+        Text { text: root.title; wrap: word-wrap; }
+        Reveal {
+            shown: root.hint != "";
+            gap: 2px;
+            Muted { text: root.hint; }
+        }
+    }
+    // controls keep their own height beside a two-line hint
+    VerticalLayout {
+        alignment: center;
+        HorizontalLayout {
+            spacing: Tok.tight;
+            @children
+        }
+    }
+}
+
+// A path or name that can be taken out of a list.
+component RemovableRow inherits HorizontalLayout {
+    in property <string> text;
+    callback remove();
+    spacing: Tok.tight;
+    padding-left: 12px;
+    Text { text: root.text; font-size: Tok.small; font-family: "monospace"; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
+    Button { text: "Remove"; clicked => { root.remove(); } }
+}
+
+component SettingsDialog inherits Modal {
+    property <SettingsInfo> s: Api.settings;
+    property <string> emulator;
+    card-width: 600px;
+    dismiss => { Api.settings-open = false; }
+    Text { text: "Settings"; font-size: 20px; font-weight: 600; }
+    Flickable {
+        height: min(body.preferred-height, Win.height - 190px);
+        content-height: body.preferred-height;
+        body := VerticalLayout {
+            spacing: Tok.gap;
+            SectionTitle { text: "Appearance"; }
+            SettingRow {
+                title: "Theme";
+                ComboBox {
+                    width: 170px;
+                    model: ["System", "Light", "Dark"];
+                    current-index: s.theme;
+                    selected => { Api.set-setting("theme", self.current-index); }
+                }
+            }
+            SettingRow {
+                title: "Interface size";
+                hint: s.scale-now;
+                ComboBox {
+                    width: 170px;
+                    model: ["System", "100 %", "125 %", "150 %", "175 %", "200 %"];
+                    current-index: s.scale;
+                    selected => { Api.set-setting("scale", self.current-index); }
+                }
+            }
+            Hairline { }
+            SectionTitle { text: "Snapshots"; }
+            SettingRow {
+                title: "Snapshot folder";
+                hint: s.snapshot-dir;
+                Button { text: "Change…"; clicked => { Api.pick-snapshot-dir(); } }
+                Button { text: "Default"; enabled: s.snapshot-custom; clicked => { Api.set-setting("snapshot-default-dir", 0); } }
+            }
+            SettingRow {
+                title: "Keep per save";
+                hint: "After each new snapshot, the oldest beyond this number are deleted.";
+                ComboBox {
+                    width: 170px;
+                    model: ["All", "Last 5", "Last 10", "Last 20", "Last 50"];
+                    current-index: s.keep;
+                    selected => { Api.set-setting("keep", self.current-index); }
+                }
+            }
+            CheckBox {
+                text: "Tick \"Take a snapshot first\" in the Write dialog";
+                checked: s.snapshot-first;
+                toggled => { Api.set-setting("snapshot-first", self.checked ? 1 : 0); }
+            }
+            Hairline { }
+            SectionTitle { text: "Saves"; }
+            CheckBox {
+                text: "Open the last save on start";
+                checked: s.reopen;
+                toggled => { Api.set-setting("reopen", self.checked ? 1 : 0); }
+            }
+            SettingRow {
+                title: "Recent saves";
+                hint: s.recent == 0 ? "None yet" : s.recent == 1 ? "1 save listed on the Open page" : s.recent + " saves listed on the Open page";
+                Button { text: "Clear"; enabled: s.recent > 0; clicked => { Api.clear-recent(); } }
+            }
+            SettingRow {
+                title: "Save folders";
+                hint: "Searched for saves besides Ryujinx's: yuzu, Eden, Citron or portable installs.";
+                Button { text: "Add folder…"; clicked => { Api.add-save-folder(); } }
+            }
+            for f[i] in s.folders: RemovableRow {
+                text: f;
+                remove => { Api.remove-save-folder(i); }
+            }
+            Hairline { }
+            SectionTitle { text: "Emulator check"; }
+            Muted { text: "Write and Restore wait while an emulator runs, since it overwrites the save when it exits. Always checked: " + s.builtin + "."; }
+            HorizontalLayout {
+                spacing: Tok.tight;
+                LineEdit {
+                    placeholder-text: "Another process name";
+                    text <=> root.emulator;
+                    accepted => {
+                        Api.add-emulator(root.emulator);
+                        root.emulator = "";
+                    }
+                }
+                Button {
+                    text: "Add";
+                    enabled: root.emulator != "";
+                    clicked => {
+                        Api.add-emulator(root.emulator);
+                        root.emulator = "";
+                    }
+                }
+            }
+            for e[i] in s.emulators: RemovableRow {
+                text: e;
+                remove => { Api.remove-emulator(i); }
+            }
+            Hairline { }
+            SectionTitle { text: "Safety"; }
+            CheckBox {
+                text: "Confirmed changes only";
+                checked: s.confirmed-only;
+                toggled => { Api.set-setting("confirmed-only", self.checked ? 1 : 0); }
+            }
+            Muted { text: "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."; }
+        }
+    }
+    HorizontalLayout {
+        alignment: end;
+        Button { text: "Close"; primary: true; clicked => { Api.settings-open = false; } }
+    }
+}
+
 export component AppWindow inherits Window {
     title: Api.loaded ? "MHGU Save Editor — " + Api.file-path : "MHGU Save Editor";
     icon: @image-url("../assets/icon.svg");
@@ -390,6 +542,9 @@ export component AppWindow inherits Window {
         } else if popup-request == "path" {
             Api.snapshot-popup = "";
             path-pop.show();
+        } else if popup-request == "settings" {
+            Api.snapshot-popup = "";
+            Api.settings-open = true;
         }
     }
     property <string> scheme: Api.force-scheme;
@@ -398,6 +553,8 @@ export component AppWindow inherits Window {
             Palette.color-scheme = ColorScheme.light;
         } else if scheme == "dark" {
             Palette.color-scheme = ColorScheme.dark;
+        } else if scheme == "system" {
+            Palette.color-scheme = ColorScheme.unknown;
         }
     }
     property <length> review-w: Api.review-open && dock ? 380px : 0px;
@@ -442,6 +599,7 @@ export component AppWindow inherits Window {
                     }
                 }
                 NavButton { text: "Open save…"; clicked => { Api.open-dialog(); } }
+                NavButton { text: "Settings…"; clicked => { Api.settings-open = true; } }
                 NavButton { text: "About"; clicked => { root.about-open = true; } }
             }
         }
@@ -575,6 +733,7 @@ export component AppWindow inherits Window {
     }
     if Api.write-open: WriteDialog { }
     if Api.snapshots-open: SnapshotsDialog { }
+    if Api.settings-open: SettingsDialog { }
     if Api.quit-open: Modal {
         card-width: 460px;
         dismiss => { Api.quit-open = false; }

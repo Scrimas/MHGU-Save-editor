@@ -51,6 +51,15 @@ All three character slots are supported.
 
 Keep your own backup anyway. This is an unofficial tool.
 
+## Settings
+
+**Settings…** in the sidebar: theme and interface size; snapshot folder, how many
+snapshots to keep per save, and whether Write takes one by default; extra folders to
+search for saves (yuzu, Eden, Citron, portable installs); recent saves and reopening the
+last one; extra emulator process names for the running check; and **Confirmed changes
+only**, which refuses every Derived change. They are kept in
+`~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
+
 ## Building from source
 
 Needs a stable Rust toolchain (edition 2024).

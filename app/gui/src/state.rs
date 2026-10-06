@@ -99,8 +99,12 @@ impl State {
     }
 
     /// Run `f` on the save and record what it changed as one edit; `f` returns the values
-    /// it changed beyond `e.targets`. Returns whether an edit holds it afterwards.
+    /// it changed beyond `e.targets`. Returns whether an edit holds it afterwards. With
+    /// Confirmed only on (Settings), edits not confirmed in game are refused.
     pub fn edit(&mut self, e: Edit, f: impl FnOnce(&mut Save, usize) -> Vec<Target>) -> bool {
+        if e.conf != Conf::Confirmed && crate::settings::get().confirmed_only {
+            return false;
+        }
         let slot = self.slot;
         let Some(doc) = self.doc.as_mut() else { return false };
         let before = doc.save.bytes().to_vec();

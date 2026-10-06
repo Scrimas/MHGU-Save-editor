@@ -5,6 +5,7 @@ mod fmt;
 mod goals;
 #[cfg(target_os = "linux")]
 mod scroll;
+mod settings;
 mod state;
 mod system;
 mod targets;
@@ -28,6 +29,8 @@ pub fn strings(v: impl IntoIterator<Item = String>) -> ModelRc<SharedString> {
 }
 
 fn main() -> Result<(), slint::PlatformError> {
+    // the interface size is read when the window is made
+    settings::apply_scale();
     // Wayland app id / X11 class, so the desktop can match the window to its icon and
     // rules: it needs the platform to exist and no window yet.
     slint::BackendSelector::new().select()?;
@@ -66,6 +69,10 @@ fn main() -> Result<(), slint::PlatformError> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if let Some(p) = args.first().filter(|p| *p != "-") {
         views::open(&ui, &st, std::path::Path::new(p));
+    } else if args.is_empty() && settings::get().reopen_last {
+        if let Some(p) = settings::get().recent.first().filter(|p| p.is_file()) {
+            views::open(&ui, &st, p);
+        }
     }
     if let Some(page) = args.get(1) {
         api.set_page(page.as_str().into());
@@ -334,6 +341,19 @@ mod tests {
             // after the write the file's values are the new "was" values: nothing staged
             assert_eq!(api.get_value_count(), 0);
         }
+
+        // Confirmed only refuses a Derived edit (requests); off again, it goes through
+        api.set_page("requests".into());
+        api.set_request_filter("all".into());
+        api.invoke_filter_requests();
+        let r = api.get_requests().iter().find(|r| r.has_flags).unwrap();
+        let before = api.get_change_count();
+        settings::update(|s| s.confirmed_only = true);
+        api.invoke_set_request(r.index, "accepted".into(), !r.accepted);
+        assert_eq!(api.get_change_count(), before);
+        settings::update(|s| s.confirmed_only = false);
+        api.invoke_set_request(r.index, "accepted".into(), !r.accepted);
+        assert_eq!(api.get_change_count(), before + 1);
         std::fs::remove_dir_all(&dir).unwrap();
     }
 }

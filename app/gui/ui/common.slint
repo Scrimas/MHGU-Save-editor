@@ -24,6 +24,21 @@ export struct SnapRow { dir: string, when: string, before: string }
 
 export struct DetectedSave { path: string, title: string, sub: string, when: string, short: string }
 
+// Settings as the dialog shows them; indexes into its option lists.
+export struct SettingsInfo {
+    theme: int,            // 0 system, 1 light, 2 dark
+    scale: int,            // System, 100 % … 200 %
+    scale-now: string,     // the size in use, when a new one waits for a restart
+    snapshot-dir: string, snapshot-custom: bool,
+    keep: int,             // All, 5, 10, 20, 50
+    snapshot-first: bool,
+    folders: [string],
+    emulators: [string],   // added ones
+    builtin: string,       // the names always checked
+    reopen: bool, recent: int,
+    confirmed-only: bool,
+}
+
 export struct MonsterRow {
     index: int, name: string, icon: image, has-icon: bool, large: bool, has-size: bool, sub: string,
     hunts: int, captures: int, min: int, max: int, mini: bool, crown: int, notes: bool, has-notes: bool,
@@ -222,9 +237,22 @@ export global Api {
     callback put-equip(int /* slot, -1 = first free */, int /* id, 0 = empty the slot */);
 
     // screenshots (MHGU_SNAPSHOT): the popup to open ("equip-picker", "item-picker",
-    // "goal", "about", …; the owner clears it) and a forced "light" / "dark" scheme
+    // "goal", "about", "settings", …; the owner clears it)
     in-out property <string> snapshot-popup;
+    // "light" / "dark" (Settings, or a screenshot step), "system" to follow the desktop
     in property <string> force-scheme;
+
+    // settings
+    in-out property <bool> settings-open;
+    in property <SettingsInfo> settings;
+    in property <[DetectedSave]> recent;
+    callback set-setting(string /* key */, int);
+    callback pick-snapshot-dir();
+    callback add-save-folder();
+    callback remove-save-folder(int);
+    callback add-emulator(string);
+    callback remove-emulator(int);
+    callback clear-recent();
 
     // palicoes
     in property <[PalicoRow]> palicoes;
@@ -313,7 +341,8 @@ export global Fmt {
 // Design tokens. Type scale and spacing from the UI review (C5, C6); in light the page
 // sits below white cards and every divider is one 8 % hairline (L2–L4).
 export global Tok {
-    out property <bool> dark: Palette.color-scheme == ColorScheme.dark;
+    // from the style's own background, so "system" (scheme unknown) follows the desktop
+    out property <bool> dark: Palette.background.to-hsv().value < 0.5;
     out property <color> page: dark ? #1c1c1c : #f3f3f3;
     out property <color> side: dark ? #262626 : #ebebeb;
     out property <color> card: dark ? #2c2c2c : #fdfdfd;

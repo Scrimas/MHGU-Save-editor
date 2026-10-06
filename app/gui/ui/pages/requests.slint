@@ -15,6 +15,10 @@ export component RequestsPage inherits Rectangle {
             derived: true;
             staged: Api.page-counts[6];
         }
+        if Api.settings.confirmed-only: Muted {
+            text: "Read only: Confirmed changes only is on in Settings, and requests are Derived.";
+            color: Tok.warn;
+        }
         HorizontalLayout {
             spacing: Tok.tight;
             LineEdit {
@@ -106,13 +110,14 @@ export component RequestsPage inherits Rectangle {
                                 }
                                 Rectangle {
                                     width: 110px;
-                                    if r.has-flags: CheckBox { x: 0; checked: r.accepted; accessible-label: "Accepted: " + r.name; toggled => { Api.set-request(r.index, "accepted", self.checked); } }
+                                    if r.has-flags: CheckBox { x: 0; checked: r.accepted; enabled: !Api.settings.confirmed-only; accessible-label: "Accepted: " + r.name; toggled => { Api.set-request(r.index, "accepted", self.checked); } }
                                 }
                                 Rectangle {
                                     width: 120px;
                                     if r.has-flags: CheckBox {
                                         x: 0;
                                         checked: r.completed;
+                                        enabled: !Api.settings.confirmed-only;
                                         accessible-label: "Completed: " + r.name;
                                         toggled => {
                                             if self.checked {

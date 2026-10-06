@@ -1,5 +1,41 @@
 import { Button, ListView, Palette } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, Hairline } from "../common.slint";
+import { Api, Tok, Card, Muted, Hairline, DetectedSave } from "../common.slint";
+
+// Saves with their characters, not bare paths (R12); a click opens one.
+component SaveList inherits VerticalLayout {
+    in property <string> title;
+    in property <[DetectedSave]> saves;
+    in property <int> rows: 5;
+    spacing: Tok.tight;
+    Text { text: root.title; font-weight: 600; }
+    Card {
+        height: min(root.saves.length, root.rows) * 72px + 2px;
+        ListView {
+            for p[i] in root.saves: Rectangle {
+                height: 72px;
+                background: ta.has-hover ? Tok.hover : transparent;
+                accessible-role: button;
+                accessible-label: p.title;
+                if i > 0: Hairline { y: 0; width: parent.width; }
+                HorizontalLayout {
+                    padding-left: 14px;
+                    padding-right: 14px;
+                    spacing: Tok.gap;
+                    VerticalLayout {
+                        alignment: center;
+                        horizontal-stretch: 1;
+                        spacing: 2px;
+                        Text { text: p.title; font-weight: 600; overflow: elide; }
+                        Text { text: p.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+                        Text { text: p.short; color: Tok.muted; font-size: Tok.small; font-family: "monospace"; overflow: elide; }
+                    }
+                    Text { text: p.when; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                }
+                ta := TouchArea { clicked => { Api.open-path(p.path); } }
+            }
+        }
+    }
+}
 
 export component OpenPage inherits Rectangle {
     VerticalLayout {
@@ -21,37 +57,11 @@ export component OpenPage inherits Rectangle {
                         clicked => { Api.open-dialog(); }
                     }
                 }
-                // each detected save with its characters, not a bare path (R12)
-                if Api.detected.length > 0: VerticalLayout {
-                    spacing: Tok.tight;
-                    Text { text: "Found on this computer"; font-weight: 600; }
-                    Card {
-                        height: min(Api.detected.length, 5) * 72px + 2px;
-                        ListView {
-                            for p[i] in Api.detected: Rectangle {
-                                height: 72px;
-                                background: ta.has-hover ? Tok.hover : transparent;
-                                accessible-role: button;
-                                accessible-label: p.title;
-                                if i > 0: Hairline { y: 0; width: parent.width; }
-                                HorizontalLayout {
-                                    padding-left: 14px;
-                                    padding-right: 14px;
-                                    spacing: Tok.gap;
-                                    VerticalLayout {
-                                        alignment: center;
-                                        horizontal-stretch: 1;
-                                        spacing: 2px;
-                                        Text { text: p.title; font-weight: 600; overflow: elide; }
-                                        Text { text: p.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
-                                        Text { text: p.short; color: Tok.muted; font-size: Tok.small; font-family: "monospace"; overflow: elide; }
-                                    }
-                                    Text { text: p.when; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
-                                }
-                                ta := TouchArea { clicked => { Api.open-path(p.path); } }
-                            }
-                        }
-                    }
+                if Api.recent.length > 0: SaveList { title: "Recent"; saves: Api.recent; rows: 3; }
+                if Api.detected.length > 0: SaveList {
+                    title: Api.recent.length > 0 ? "Also on this computer" : "Found on this computer";
+                    saves: Api.detected;
+                    rows: Api.recent.length > 0 ? 3 : 5;
                 }
                 if Api.warning != "": Text { text: Api.warning; color: Tok.bad; wrap: word-wrap; }
                 Muted { text: Api.build-info; }
