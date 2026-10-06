@@ -113,6 +113,10 @@ fn scheme(c: &[Color; 9], dark: bool) -> Scheme {
 }
 
 /// Sets the accent the Fluent widgets derive theirs from; None gives back the desktop's.
+/// Linux only, as matugen (i-slint-core is a Linux dependency).
+#[cfg(not(target_os = "linux"))]
+pub fn set_accent(_: &slint::Window, _: Option<Color>) {}
+#[cfg(target_os = "linux")]
 pub fn set_accent(w: &slint::Window, c: Option<Color>) {
     thread_local! {
         static DESKTOP: std::cell::Cell<Option<Color>> = const { std::cell::Cell::new(None) };
