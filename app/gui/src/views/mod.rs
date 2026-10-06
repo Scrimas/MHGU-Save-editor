@@ -368,8 +368,10 @@ fn review(ui: &AppWindow, st: &State) {
     api.set_derived_count(st.ops.iter().filter(|o| o.conf != Conf::Confirmed).count() as i32);
 }
 
-/// Confirmed only (Settings) refuses edits not checked in game, and says so.
-fn refused(ui: &AppWindow, c: Conf) -> bool {
+/// Confirmed only (Settings) refuses edits not checked in game, and says so. Every edit
+/// was checked in game by 1.0; kept for the next one that is not.
+#[allow(dead_code)]
+pub(crate) fn refused(ui: &AppWindow, c: Conf) -> bool {
     let r = c != Conf::Confirmed && settings::get().confirmed_only;
     if r {
         toast_full(ui, tr("Not changed: this change is Derived"), tr("Confirmed changes only is on in Settings"), "", ToastAct::None, true);

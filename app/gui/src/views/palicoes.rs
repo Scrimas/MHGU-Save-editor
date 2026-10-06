@@ -82,12 +82,7 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         let i = i as usize;
         let t = Target::Palico(i, targets::pal_of(&f));
         let title = t.label(s.save(), s.slot);
-        // only Large First of the targets was read off in game
-        let c = if f == "target" { Conf::Derived } else { Conf::Confirmed };
-        if refused(&ui, c) {
-            return;
-        }
-        s.edit(Edit::one(t, title, c), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
                 "level" => p.level = v.clamp(1, palico::MAX_LEVEL as i32) as u8,

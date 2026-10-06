@@ -63,14 +63,17 @@ Type codes seen: 1 head, 2 chest, 3 arms, 4 waist, 5 legs, 6 talisman, 7–21 we
 classes (18 = Dual Blades). The level field stores the in-game level minus one.
 Writing max level produced the right raw and element values on the status screen.
 
-**DERIVED — bits 10–14 of `+0x00`: level − 1 of the transmog source.** When a look
+**CONFIRMED by write — bits 10–14 of `+0x00`: level − 1 of the transmog source.** When a look
 is applied, the transmog screen (`uUICoordinate`, `0x148f00`) writes the source
 piece's equipment ID to `+0x04` and its level field (bits 5–9) to bits 10–14. The
 equipment detail window (`0x56e810`) reads the pair together: with the appearance
 shown it swaps (ID, level) for (`+0x04`, bits 10–14). The Guild Card keeps the field
 as a byte of its own (card equipment entry `+0x2A`). So 0 means the source piece was
 at level 1, which fits every transmogged entry of the analysed save. The MHXX notes'
-name, "transmog level", is right.
+name, "transmog level", is right. Written by the editor on 2026-10-06 (a Maccao Helm
+Lv 5 given the look of Leather Headgear, ID 1, bits 10–14 = 0): in game the helm wore
+the Leather look, kept its own defense and skills and could be equipped; the game's next
+save kept the field.
 
 **UNRESOLVED — bit 15.** The equipped cache copy of one transmogged helm had it set
 when its box source did not. It is a declared one-bit field: the entry clear and
@@ -183,7 +186,12 @@ changes the slot-select screen until the next save, so an editor can leave it al
 ## Decorations, slots and armor classes (game tables)
 
 **DERIVED** from the game's tables (`resident.arc`, read by `tools/build_assets.py`) and
-checked against every equipment box entry of 79 saves; not yet written in game.
+checked against every equipment box entry of 79 saves. **CONFIRMED by write** on
+2026-10-06: an Antidote Jwl 1 added to the one free slot of a Bherna Turban sat in that
+slot in game and the piece could be equipped; a transmog (see
+[above](#equipment-box)) and a Palico weapon, F Bone Wedge (box type 22, ID 1),
+added to an empty Palico box slot, showed under that name and could be equipped. The
+game's next save kept all three.
 
 - **Decoration fields are packed.** A decoration takes one of the three `+0x06` fields
   whatever its size, filled from the first: a 3-slot Attack Jwl 3 is `[id, 0, 0]`.

@@ -536,7 +536,9 @@ request record names two bits in the first map:
 
 - **accepted** (`record + 0x33`): the NPC's request is active. For kind 0 this is
   what **posts the quest on the village board**.
-- **completed** (`record + 0x35`): reported back to the NPC, reward given.
+- **completed** (`record + 0x35`): reported back to the NPC, reward given. CONFIRMED
+  by write (2026-10-06): clearing it on a cleared request (0, *On the Rebound*, flag
+  301) made the game ask for the report again; reporting set it back.
 
 The indices are not regular (`300 + 2·record` holds only for the first 17 records),
 so take them from [`data/request-index.csv`](../data/request-index.csv).

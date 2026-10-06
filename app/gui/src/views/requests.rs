@@ -48,7 +48,7 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
             })
         })
         .collect();
-    api.set_request_summary(trf("{} open · {} completed", &[&num(open), &num(done_n)]).into());
+    api.set_request_summary(trf("{} open · {} reported",&[&num(open), &num(done_n)]).into());
     api.set_requests(model(rows));
 }
 
@@ -63,14 +63,11 @@ pub(super) fn wire_requests(ui: &AppWindow, st: &Shared) {
         let _ = &s;
     });
     on!(ui, st, on_set_request, |ui, s, index: i32, what: SharedString, on: bool| {
-        if refused(&ui, Conf::Derived) {
-            return;
-        }
         let r = tables().requests.iter().find(|r| r.index == index as usize).unwrap().clone();
         let slot = s.slot;
         let t = Target::Request(r.index);
         let title = t.label(s.save(), slot);
-        let mut e = Edit::one(t, title, Conf::Derived);
+        let mut e = Edit::one(t, title, Conf::Confirmed);
         e.key = format!("{}:{what}", t.key());
         if what == "completed" && on {
             e.note = tr("The villager's reward is not handed over in game").into();

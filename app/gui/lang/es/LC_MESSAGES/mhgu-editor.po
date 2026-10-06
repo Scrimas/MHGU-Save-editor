@@ -337,8 +337,8 @@ msgid "Confirmed changes only"
 msgstr "Solo cambios confirmados"
 
 #: app/gui/ui/app.slint
-msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."
-msgstr "Se rechazan los cambios marcados como Deducido (obtenidos del código del juego, aún sin comprobar en el juego), como las Peticiones. Los cambios que ya están en Revisión se mantienen."
+msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."
+msgstr "Se rechazan los cambios marcados como Deducido (obtenidos del código del juego, aún sin comprobar en el juego). Los cambios que ya están en Revisión se mantienen."
 
 #: app/gui/ui/app.slint
 msgid "Updates"
@@ -1474,10 +1474,6 @@ msgid "No quest matches the search."
 msgstr "Ninguna misión coincide con la búsqueda."
 
 #: app/gui/ui/pages/requests.slint
-msgid "Read only: Confirmed changes only is on in Settings, and requests are Derived."
-msgstr "Solo lectura: «Solo cambios confirmados» está activado en Ajustes y las peticiones están marcadas como Deducido."
-
-#: app/gui/ui/pages/requests.slint
 msgid "Search requests or villages"
 msgstr "Buscar peticiones o aldeas"
 
@@ -1486,12 +1482,12 @@ msgid "Open"
 msgstr "Abierta"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Completed"
-msgstr "Completada"
+msgid "Reported"
+msgstr "Informada"
 
 #: app/gui/ui/pages/requests.slint
-msgid "Completed skips the villager's report, so the game never hands over that reward. Leave it unticked to get the reward in game."
-msgstr "Completada se salta el informe al aldeano, así que el juego nunca entrega esa recompensa. Déjala sin marcar para recibir la recompensa en el juego."
+msgid "Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward."
+msgstr "Informada se salta la conversación con el aldeano, así que el juego nunca entrega esa recompensa. Déjala sin marcar e informa en el juego para recibir la recompensa."
 
 #: app/gui/ui/pages/requests.slint
 msgid "Request"
@@ -1506,20 +1502,20 @@ msgid "Accepted posts the request's quest on the board, as talking to the villag
 msgstr "Aceptada publica la misión de la petición en el tablón, como al hablar con el aldeano."
 
 #: app/gui/ui/pages/requests.slint
-msgid "Completed marks the request as reported. The game hands out the reward only when you report to the villager yourself, so ticking it here loses that reward."
-msgstr "Completada marca la petición como informada. El juego solo entrega la recompensa cuando informas tú mismo al aldeano, así que marcarla aquí hace perder esa recompensa."
+msgid "Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward."
+msgstr "Informada: la misión completada se informó al aldeano. Sin marcar, el juego te pide que informes. El juego solo entrega la recompensa cuando informas tú mismo al aldeano, así que marcarla aquí hace perder esa recompensa."
 
 #: app/gui/ui/pages/requests.slint
 msgid "No request matches the search."
 msgstr "Ninguna petición coincide con la búsqueda."
 
 #: app/gui/ui/pages/requests.slint
-msgid "Every request is completed."
-msgstr "Todas las peticiones están completadas."
+msgid "Every request is reported."
+msgstr "Todas las peticiones están informadas."
 
 #: app/gui/ui/pages/requests.slint
-msgid "No request is completed yet."
-msgstr "Aún no hay ninguna petición completada."
+msgid "No request is reported yet."
+msgstr "Aún no hay ninguna petición informada."
 
 #: app/gui/ui/pages/requests.slint
 msgid "No requests."
@@ -1532,8 +1528,8 @@ msgstr "Aceptada: {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/requests.slint
-msgid "Completed: {}"
-msgstr "Completada: {}"
+msgid "Reported: {}"
+msgstr "Informada: {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/assets.rs
@@ -2520,8 +2516,8 @@ msgstr "Caja del cazador: {} / {} espacios usados · confirmado en el juego salv
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/equipment_page.rs
-msgid "Palico box: {} / {} slots used · gear names from the game's tables (Derived)"
-msgstr "Caja de camarada: {} / {} espacios usados · nombres del equipo según las tablas del juego (Deducido)"
+msgid "Palico box: {} / {} slots used · confirmed in game"
+msgstr "Caja de camarada: {} / {} espacios usados · confirmado en el juego"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/equipment_page.rs app/gui/src/views/names.rs
@@ -3113,8 +3109,8 @@ msgstr "{} · #{} · espera: {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/requests.rs
-msgid "{} open · {} completed"
-msgstr "{} abiertas · {} completadas"
+msgid "{} open · {} reported"
+msgstr "{} abiertas · {} informadas"
 
 #: app/gui/src/views/requests.rs
 msgid "The villager's reward is not handed over in game"

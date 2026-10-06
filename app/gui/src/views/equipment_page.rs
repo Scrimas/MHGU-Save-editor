@@ -158,7 +158,7 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
         if owner == Owner::Hunter {
             trf("Hunter box: {} / {} slots used · confirmed in game except where marked", &[&num(used as i64), &num(owner.len() as i64)])
         } else {
-            trf("Palico box: {} / {} slots used · gear names from the game's tables (Derived)", &[&num(used as i64), &num(owner.len() as i64)])
+            trf("Palico box: {} / {} slots used · confirmed in game", &[&num(used as i64), &num(owner.len() as i64)])
         }
         .into(),
     );
@@ -279,14 +279,7 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
         }
         let t = Target::Equip(owner, i);
         let title = t.label(s.save(), s.slot);
-        // slot sizes, transmog classes and the transmog level field are read from the
-        // game's tables, not checked in game
-        let derived = f == "deco-add" || (f == "transmog" && v != 0);
-        let c = if derived { Conf::Derived } else { Conf::Confirmed };
-        if refused(&ui, c) {
-            return;
-        }
-        let mut e = Edit::one(t, title, c);
+        let mut e = Edit::one(t, title, Conf::Confirmed);
         // adding and removing decorations merge, so taking one back out undoes it
         e.key = format!("{}:{}", t.key(), if f.starts_with("deco") { "decos" } else { f });
         s.edit(e, |sv, base| {
@@ -353,12 +346,7 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
         };
         let name = equip_name(owner, &e);
         let t = Target::Equip(owner, slot);
-        // Palico gear IDs come from the game's tables by name, not checked in game
-        let c = if owner == Owner::Palico && !e.is_empty() { Conf::Derived } else { Conf::Confirmed };
-        if refused(&ui, c) {
-            return;
-        }
-        let mut ed = Edit::one(t, t.label(s.save(), s.slot), c);
+        let mut ed = Edit::one(t, t.label(s.save(), s.slot), Conf::Confirmed);
         ed.key = format!("{}:piece", t.key());
         if !e.is_empty() {
             ed.note = tr("New box entry at level 1, shaped like the game's own").into();

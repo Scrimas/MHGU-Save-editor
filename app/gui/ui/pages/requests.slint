@@ -2,7 +2,7 @@ import { ListView, CheckBox, Palette, LineEdit } from "std-widgets.slint";
 import { Api, Tok, Card, Muted, Chip, PageHeader, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField } from "../common.slint";
 
 export component RequestsPage inherits Rectangle {
-    // the first tick of Completed in this session shows what it costs (05.2)
+    // the first tick of Reported in this session shows what it costs (05.2)
     property <bool> warned;
     VerticalLayout {
         padding: Tok.margin;
@@ -12,12 +12,7 @@ export component RequestsPage inherits Rectangle {
         PageHeader {
             title: @tr("Requests");
             subtitle: Api.request-summary;
-            derived: true;
             staged: Api.page-counts[6];
-        }
-        if Api.settings.confirmed-only: Muted {
-            text: @tr("Read only: Confirmed changes only is on in Settings, and requests are Derived.");
-            color: Tok.warn;
         }
         HorizontalLayout {
             spacing: Tok.tight;
@@ -26,7 +21,7 @@ export component RequestsPage inherits Rectangle {
                 text <=> Api.request-search;
                 edited => { Api.filter-requests(); }
             }
-            for f in [{k: "open", t: @tr("Open")}, {k: "done", t: @tr("Completed")}, {k: "all", t: @tr("All")}]: Chip {
+            for f in [{k: "open", t: @tr("Open")}, {k: "done", t: @tr("Reported")}, {k: "all", t: @tr("All")}]: Chip {
                 y: 2px;
                 text: f.t;
                 active: Api.request-filter == f.k;
@@ -36,7 +31,7 @@ export component RequestsPage inherits Rectangle {
                 }
             }
         }
-        // said before the first tick, and outlined once Completed was ticked; wraps in a
+        // said before the first tick, and outlined once Reported was ticked; wraps in a
         // narrow window rather than cutting the sentence (not an `if`: see Reveal)
         Rectangle {
             height: banner.preferred-height;
@@ -49,7 +44,7 @@ export component RequestsPage inherits Rectangle {
                 padding-left: 14px;
                 padding-right: 14px;
                 Text {
-                    text: @tr("Completed skips the villager's report, so the game never hands over that reward. Leave it unticked to get the reward in game.");
+                    text: @tr("Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward.");
                     color: Tok.warn;
                     font-size: Tok.small;
                     vertical-alignment: center;
@@ -82,18 +77,18 @@ export component RequestsPage inherits Rectangle {
                                 width: 120px;
                                 spacing: 6px;
                                 alignment: start;
-                                ColHead { text: @tr("Completed"); }
+                                ColHead { text: @tr("Reported"); }
                                 InfoTip {
                                     y: 9px;
                                     tint: Tok.warn;
-                                    text: @tr("Completed marks the request as reported. The game hands out the reward only when you report to the villager yourself, so ticking it here loses that reward.");
+                                    text: @tr("Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward.");
                                 }
                             }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
                     if Api.requests.length == 0: EmptyState {
-                        text: Api.request-search != "" ? @tr("No request matches the search.") : Api.request-filter == "open" ? @tr("Every request is completed.") : Api.request-filter == "done" ? @tr("No request is completed yet.") : @tr("No requests.");
+                        text: Api.request-search != "" ? @tr("No request matches the search.") : Api.request-filter == "open" ? @tr("Every request is reported.") : Api.request-filter == "done" ? @tr("No request is reported yet.") : @tr("No requests.");
                     }
                     ListView {
                         for r in Api.requests: ListRow {
@@ -115,15 +110,14 @@ export component RequestsPage inherits Rectangle {
                                 }
                                 Rectangle {
                                     width: 110px;
-                                    if r.has-flags: CheckBox { x: 0; checked: r.accepted; enabled: !Api.settings.confirmed-only; accessible-label: @tr("Accepted: {}", r.name); toggled => { Api.set-request(r.index, "accepted", self.checked); } }
+                                    if r.has-flags: CheckBox { x: 0; checked: r.accepted; accessible-label: @tr("Accepted: {}", r.name); toggled => { Api.set-request(r.index, "accepted", self.checked); } }
                                 }
                                 Rectangle {
                                     width: 120px;
                                     if r.has-flags: CheckBox {
                                         x: 0;
                                         checked: r.completed;
-                                        enabled: !Api.settings.confirmed-only;
-                                        accessible-label: @tr("Completed: {}", r.name);
+                                        accessible-label: @tr("Reported: {}", r.name);
                                         toggled => {
                                             if self.checked {
                                                 root.warned = true;

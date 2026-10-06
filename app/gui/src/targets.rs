@@ -53,7 +53,7 @@ pub enum Target {
     Palico(usize, Pal),
     /// Quest index: its cleared, seen and failed bits.
     Quest(usize),
-    /// Request index: accepted and completed flags.
+    /// Request index: accepted and reported flags.
     Request(usize),
     Art(u32),
     Dish(usize),
@@ -330,7 +330,7 @@ impl Target {
                 let r = tables().requests.iter().find(|r| r.index == i);
                 let flag = |f: Option<usize>| f.is_some_and(|f| on(pg::FLAGS, f));
                 match r {
-                    Some(r) if flag(r.done_flag) => tr("Completed").into(),
+                    Some(r) if flag(r.done_flag) => tr("Reported").into(),
                     Some(r) if flag(r.accept_flag) => tr("Accepted").into(),
                     _ => tr("Open").into(),
                 }

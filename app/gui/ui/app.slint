@@ -559,7 +559,7 @@ component SettingsDialog inherits Modal {
                 checked: s.confirmed-only;
                 toggled => { Api.set-setting("confirmed-only", self.checked ? 1 : 0); }
             }
-            Muted { text: @tr("Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."); }
+            Muted { text: @tr("Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."); }
             Hairline { }
             SectionTitle { text: @tr("Updates"); }
             CheckBox {

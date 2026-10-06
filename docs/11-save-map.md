@@ -106,6 +106,7 @@ their edges, so each field carries its own tag.
 | block A / B: DLC lists, Palico pool, challenge records | Bitmaps, lists and pool agree entry for entry |
 | HR points, Hunter's Notes map, a new box entry | Controlled write of 2026-10-05 through the editor's code (HR 999 → 500, Rathian's Notes bit cleared, a Hunter's Knife added). In game: HR 500, Rathian gone from the Notes, the knife in the box and equippable; the game's next save kept all three |
 | Palico level, bias, target, greeting, hunting buddy; body type | Read off in game: Suds' Palico Info (Lv 64 = byte 63, Gathering = 6, Large First = 4, the comment, "Palico 1"); all three hunters male = 0 |
+| decoration, transmog, Palico gear, Palico target, request report, loadout gap | Controlled write of 2026-10-06 through the editor's code: Antidote Jwl 1 in a Bherna Turban, a Maccao Helm with the Leather look, F Bone Wedge in the Palico box, Pawlie's target 4 → 2, request 0's completed flag cleared, loadout 2 with its second position empty. In game: all six as written (target Small First, the request waiting for its report, the gap kept); the game's next save kept them |
 
 The same pass corrected labels the data contradicts:
 - the two DLC bitmaps were swapped, and `base + 0x32DB` holds item packs;
@@ -327,7 +328,7 @@ bias 6, the greeting and buddy 1 = its index.
 | `+0x24` | u8 | **level − 1** (Lv 64 in game = 63). The level-up code `0x262e1c` counts 49 as level 50 (the level-50 list, award 50) and 98 as the top level, 99 (milestone bit of `S+0xd8c`) |
 | `+0x25` | u8 | support bias (parameter block `+5`, see [StreetPass Palico record](#streetpass-palico-record-276-b)): 6 = Gathering in game |
 | `+0x26` | u8 | parameter block `+6`, a 0–99 value capped per entry, UNRESOLVED (55–99 seen; 55 in all but eight records of slot 1). Suds: 89 with 4 of 5 Enthusiasm marks, so possibly Enthusiasm |
-| `+0x27` | u8 | target (1–5 seen): 4 = Large First in game |
+| `+0x27` | u8 | target (1–5 seen): 4 = Large First in game, 2 = Small First by write |
 | `+0x60` | char[60] | greeting |
 | `+0x9C` | char[32] | original owner name |
 

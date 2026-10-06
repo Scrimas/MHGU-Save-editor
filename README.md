@@ -43,7 +43,7 @@ Flatpak folders). For another emulator, use **Open save…** on its
 | Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (only those that fit the free slots), transmog, talismans |
 | Palicoes | Name, level and experience, forte, target, greeting, original owner |
 | Quests | Every quest cleared or not (seen and quest sets follow, as in game); says what unlocks a quest that is not on the board yet |
-| Requests | Villager requests: accepted (quest posted on the board) and completed |
+| Requests | Villager requests: accepted (quest posted on the board) and reported |
 | Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt) |
 | Monsters | Hunted and captured counts, smallest and largest sizes, Hunter's Notes |
 | Save map | Every byte range of the save, named from the game's own loader (read-only) |

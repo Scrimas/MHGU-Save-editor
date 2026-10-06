@@ -330,7 +330,7 @@ msgid "Confirmed changes only"
 msgstr ""
 
 #: app/gui/ui/app.slint
-msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."
+msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."
 msgstr ""
 
 #: app/gui/ui/app.slint
@@ -1455,10 +1455,6 @@ msgid "No quest matches the search."
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
-msgid "Read only: Confirmed changes only is on in Settings, and requests are Derived."
-msgstr ""
-
-#: app/gui/ui/pages/requests.slint
 msgid "Search requests or villages"
 msgstr ""
 
@@ -1467,11 +1463,11 @@ msgid "Open"
 msgstr ""
 
 #: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Completed"
+msgid "Reported"
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
-msgid "Completed skips the villager's report, so the game never hands over that reward. Leave it unticked to get the reward in game."
+msgid "Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward."
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
@@ -1487,7 +1483,7 @@ msgid "Accepted posts the request's quest on the board, as talking to the villag
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
-msgid "Completed marks the request as reported. The game hands out the reward only when you report to the villager yourself, so ticking it here loses that reward."
+msgid "Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward."
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
@@ -1495,11 +1491,11 @@ msgid "No request matches the search."
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
-msgid "Every request is completed."
+msgid "Every request is reported."
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
-msgid "No request is completed yet."
+msgid "No request is reported yet."
 msgstr ""
 
 #: app/gui/ui/pages/requests.slint
@@ -1513,7 +1509,7 @@ msgstr ""
 
 #: app/gui/ui/pages/requests.slint
 #. placeholders: {} in order, {0} {1} by position
-msgid "Completed: {}"
+msgid "Reported: {}"
 msgstr ""
 
 #: app/gui/src/assets.rs
@@ -2501,7 +2497,7 @@ msgstr ""
 
 #: app/gui/src/views/equipment_page.rs
 #. placeholders: {} in order, {0} {1} by position
-msgid "Palico box: {} / {} slots used · gear names from the game's tables (Derived)"
+msgid "Palico box: {} / {} slots used · confirmed in game"
 msgstr ""
 
 #: app/gui/src/views/equipment_page.rs app/gui/src/views/names.rs
@@ -3094,7 +3090,7 @@ msgstr ""
 
 #: app/gui/src/views/requests.rs
 #. placeholders: {} in order, {0} {1} by position
-msgid "{} open · {} completed"
+msgid "{} open · {} reported"
 msgstr ""
 
 #: app/gui/src/views/requests.rs
