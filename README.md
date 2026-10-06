@@ -8,6 +8,11 @@ described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") be
 anything touches the file. Fields are marked **Confirmed** (checked in game) or
 **Derived** (from the format notes, not yet checked in game).
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/01-overview-dark.png">
+  <img alt="Overview: progress of the character and one-click goals, two of them staged for Review" src="docs/screenshots/01-overview-light.png">
+</picture>
+
 ## Download
 
 Single-file builds are attached to each [release](https://github.com/Scrimas/MHGU-Save-editor/releases):
@@ -38,6 +43,37 @@ Flatpak folders). For another emulator, use **Open save…** on its
 
 All three character slots are supported.
 
+<table>
+  <tr>
+    <td width="50%"><picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/02-items-dark.png">
+      <img alt="Items: the item box with game icons" src="docs/screenshots/02-items-light.png">
+    </picture></td>
+    <td width="50%"><picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/03-equipment-dark.png">
+      <img alt="Equipment: the hunter box and the selected piece" src="docs/screenshots/03-equipment-light.png">
+    </picture></td>
+  </tr>
+  <tr>
+    <td align="center">Items</td>
+    <td align="center">Equipment</td>
+  </tr>
+  <tr>
+    <td><picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/04-monsters-dark.png">
+      <img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-light.png">
+    </picture></td>
+    <td><picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/05-quests-dark.png">
+      <img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-light.png">
+    </picture></td>
+  </tr>
+  <tr>
+    <td align="center">Monsters</td>
+    <td align="center">Quests</td>
+  </tr>
+</table>
+
 ## Keeping your save safe
 
 - **Nothing is written until you press Write.** Edits are staged; Review lists them
@@ -51,6 +87,11 @@ All three character slots are supported.
 
 Keep your own backup anyway. This is an unofficial tool.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/06-write-dark.png">
+  <img alt="Write dialog: the changes in game terms, the emulator check and the snapshot" src="docs/screenshots/06-write-light.png">
+</picture>
+
 ## Settings
 
 **Settings…** in the sidebar: theme and interface size; snapshot folder, how many
@@ -59,6 +100,11 @@ search for saves (yuzu, Eden, Citron, portable installs); recent saves and reope
 last one; extra emulator process names for the running check; and **Confirmed changes
 only**, which refuses every Derived change. They are kept in
 `~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/07-settings-dark.png">
+  <img alt="Settings dialog" src="docs/screenshots/07-settings-light.png">
+</picture>
 
 ## Building from source
 
@@ -92,6 +138,7 @@ builds get them.
 | [`app/gui`](app/gui) | The editor (Rust + [Slint](https://slint.dev)) |
 | [`app/packaging`](app/packaging) | Release builds, asset pack sealing |
 | [`docs/`](docs/README.md) | **The save format notes**: container, quests, monsters, equipment, items, awards, NPC talk, a whole-file map |
+| [`docs/screenshots`](docs/screenshots) | The editor's screenshots in this README, light and dark |
 | [`data/`](data) | Machine-readable tables: quest, request, monster and NPC indexes, unlock rules, the whole-file map |
 | [`tools/`](tools) | Python scripts the notes use: readers, the quest unlock evaluator, the asset builder, the loader emulation |
 
