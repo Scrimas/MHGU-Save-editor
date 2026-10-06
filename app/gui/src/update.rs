@@ -296,6 +296,50 @@ mod tests {
         std::fs::remove_dir_all(&d).unwrap();
     }
 
+    /// What an update does to the running .exe on Windows: a copy of this test binary
+    /// runs (the test below, waiting) while swap renames it aside; it cannot be deleted
+    /// until it exits, then cleanup can.
+    #[test]
+    #[cfg(windows)]
+    fn swap_replaces_a_running_exe() {
+        let d = std::env::temp_dir().join(format!("mhgu-running-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        std::fs::create_dir_all(&d).unwrap();
+        let (old, part, new) = (d.join("a-1.exe"), d.join("a-2.exe.part"), d.join("a-2.exe"));
+        std::fs::copy(std::env::current_exe().unwrap(), &old).unwrap();
+        let mut child = std::process::Command::new(&old)
+            .args(["update::tests::waits_when_asked", "--exact"])
+            .env("MHGU_TEST_WAIT", "1")
+            .stdout(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        std::fs::write(&part, "new").unwrap();
+        let aside = swap(&old, &part, &new);
+        let running = aside.as_ref().ok().and_then(|a| a.as_ref()).map(|a| (a.exists(), std::fs::remove_file(a).is_err()));
+        child.kill().unwrap();
+        child.wait().unwrap();
+        let aside = aside.unwrap().expect("a running .exe is set aside");
+        assert_eq!(running, Some((true, true)), "set aside, and not deletable while it runs");
+        assert!(!old.exists());
+        assert_eq!(std::fs::read_to_string(&new).unwrap(), "new");
+        // Windows may release the image a moment after the process is gone
+        let mut tries = 0;
+        while std::fs::remove_file(&aside).is_err() {
+            tries += 1;
+            assert!(tries < 50, "deletable once it exited");
+            std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+        std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    /// Run by swap_replaces_a_running_exe; returns at once otherwise.
+    #[test]
+    fn waits_when_asked() {
+        if std::env::var_os("MHGU_TEST_WAIT").is_some() {
+            std::thread::sleep(std::time::Duration::from_secs(60));
+        }
+    }
+
     /// Downloads v0.5.0 from GitHub: `cargo test -- --ignored`.
     #[test]
     #[ignore]

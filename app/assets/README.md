@@ -31,3 +31,14 @@ placeholder icons and `#ID` instead of names. With your own dump of the game:
 After rebuilding `gen/`, reseal it and refresh the secret, then commit the new blob:
 
     app/packaging/seal-assets.sh
+
+## `test-save.tar.xz.gpg`
+
+A frozen copy of a played save folder (`0/` and `1/`, each `system` and `system_backup`),
+sealed with the same passphrase. CI (`.github/workflows/ci.yml`) unpacks it and points
+`MHGU_TEST_SAVE` at it, so the tests that need a real save run on every push; without the
+secret (a fork's pull request) they are skipped. It holds the maintainer's character, so
+it is encrypted like the pack. The tests check values of this save: reseal it only on
+purpose, from a save folder:
+
+    app/packaging/seal-test-save.sh path/to/save/0000000000000001

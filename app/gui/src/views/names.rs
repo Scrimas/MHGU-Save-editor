@@ -126,13 +126,21 @@ pub(super) fn talisman_skills(e: &equipment::Entry) -> String {
     d.join(" · ")
 }
 
-/// A box entry as a value in Review: "Elder Rod Lv 3", "Fire Res +1 · 0 slots", "Empty".
+/// A box entry as a value in Review: "Elder Rod Lv 3", "Fire Res +1 · 0 slots", "Empty",
+/// followed by its decorations and transmog look, so that editing those shows too.
 pub fn equip_value(owner: Owner, e: &equipment::Entry) -> String {
-    match e.kind() {
-        Kind::Empty => tr("Empty").into(),
+    let k = e.kind();
+    let mut v = vec![match k {
+        Kind::Empty => return tr("Empty").into(),
         Kind::Talisman => talisman_skills(e),
         _ => trf("{} Lv {}", &[&equip_name(owner, e), &e.level()]),
+    }];
+    v.extend(e.decos().iter().filter(|&&d| d != 0).map(|&d| assets::item_name(d)));
+    if e.transmog() != 0 {
+        let look = piece(owner, k, e.transmog()).map(|p| p.name.clone()).unwrap_or_else(|| format!("#{}", e.transmog()));
+        v.push(trf("Transmog: {}", &[&look]));
     }
+    v.join(" · ")
 }
 
 pub(super) fn piece_rarity(owner: Owner, e: &equipment::Entry) -> u32 {
@@ -162,4 +170,23 @@ pub(super) fn skill_name(id: u8) -> String {
 /// "2 slots", decoration slots.
 pub(super) fn slots(n: usize) -> String {
     trn("{n} slot", "{n} slots", n as i64, &[])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn review_shows_decorations_and_transmog() {
+        let mut e = equipment::Entry::new(Kind::Head, 1);
+        let plain = equip_value(Owner::Hunter, &e);
+        // any item shows by name (or #ID without the asset pack)
+        assert!(e.add_deco(1));
+        let deco = equip_value(Owner::Hunter, &e);
+        assert_ne!(deco, plain);
+        e.set_transmog(2, 1);
+        let look = equip_value(Owner::Hunter, &e);
+        assert_ne!(look, deco);
+        assert!(look.starts_with(&deco), "{look}");
+    }
 }

@@ -8,8 +8,9 @@ emulator saves), and the reverse-engineering notes and data it is built on.
 
 Every value it shows is read where the game itself keeps it, and every change is
 described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") before
-anything touches the file. Fields are marked **Confirmed** (checked in game) or
-**Derived** (from the format notes, not yet checked in game).
+anything touches the file. Every edit the editor makes has been checked in game
+(**Confirmed**); an edit added later that has not been yet is marked **Derived** (from
+the format notes) until it is.
 
 ## Download
 
@@ -110,7 +111,8 @@ Keep your own backup anyway. This is an unofficial tool.
 snapshots to keep per save, and whether Write takes one by default; extra folders to
 search for saves (yuzu, Eden, Citron, portable installs); recent saves and reopening the
 last one; extra emulator process names for the running check; and **Confirmed changes
-only**, which refuses every Derived change. They are kept in
+only**, which refuses every Derived change (none today; it guards edits added later).
+They are kept in
 `~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
 
 **Language**: English, French, German, Italian or Spanish, the game's own languages; by

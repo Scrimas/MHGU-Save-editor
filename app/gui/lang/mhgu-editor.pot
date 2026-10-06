@@ -2916,6 +2916,11 @@ msgid "{} Lv {}"
 msgstr ""
 
 #: app/gui/src/views/names.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Transmog: {}"
+msgstr ""
+
+#: app/gui/src/views/names.rs
 msgid "Mystery Talisman"
 msgstr ""
 

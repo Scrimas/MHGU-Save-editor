@@ -1,9 +1,11 @@
 name: CI
 
 # Tests and clippy on every push and pull request, in the Arch Linux container the release
-# builds use. Without the game-asset pack (only release.yml decrypts it): the editor then
-# builds with placeholders, which the tests don't need. Tests that need a real save
-# (MHGU_TEST_SAVE) or the network are #[ignore] and don't run here.
+# builds use, and the tests again on Windows (the .exe's file and update handling). Without
+# the game-asset pack (only release.yml decrypts it): the editor then builds with
+# placeholders, which the tests don't need. The tests that need a real save get the sealed
+# copy app/assets/test-save.tar.xz.gpg (see app/assets/README.md); without the secret (a
+# fork's pull request) they stay #[ignore]d. The one that downloads a release never runs here.
 
 on:
   push:
@@ -39,10 +41,50 @@ jobs:
       - name: Translations
         run: python3 tools/i18n.py --check
 
+      - name: Test save
+        env:
+          ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
+        run: &unseal |
+          if [ -z "$ASSETS_PASSPHRASE" ]; then
+            echo "::warning::no ASSETS_PASSPHRASE: the tests that need a real save are skipped"
+            exit 0
+          fi
+          mkdir -p "$RUNNER_TEMP/save"
+          printf '%s' "$ASSETS_PASSPHRASE" |
+            gpg --batch --pinentry-mode loopback --passphrase-fd 0 --decrypt app/assets/test-save.tar.xz.gpg |
+            tar -xJ -C "$RUNNER_TEMP/save"
+          echo "MHGU_TEST_SAVE=$RUNNER_TEMP/save/0/system" >> "$GITHUB_ENV"
+
       - name: Tests
         working-directory: app
-        run: cargo test --workspace
+        run: &test |
+          if [ -n "$MHGU_TEST_SAVE" ]; then
+            cargo test --workspace -- --include-ignored --skip installs_a_published_release
+          else
+            cargo test --workspace
+          fi
 
       - name: Clippy
         working-directory: app
         run: cargo clippy --workspace --all-targets -- -D warnings
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Toolchain
+        run: rustup update stable --no-self-update && rustup default stable
+
+      - uses: actions/checkout@v7
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app
+
+      - name: Test save
+        env:
+          ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
+        run: *unseal
+
+      - name: Tests
+        working-directory: app
+        run: *test

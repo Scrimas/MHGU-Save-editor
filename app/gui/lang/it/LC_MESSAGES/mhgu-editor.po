@@ -2934,6 +2934,11 @@ msgstr "Nessuna abilità"
 msgid "{} Lv {}"
 msgstr "{} Lv {}"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/names.rs
+msgid "Transmog: {}"
+msgstr "Cambio aspetto: {}"
+
 #: app/gui/src/views/names.rs
 msgid "Mystery Talisman"
 msgstr "Talismano misterioso"
