@@ -10,7 +10,10 @@
 #   APPIMAGE_RUNTIME=path  AppImage type 2 runtime (github.com/AppImage/type2-runtime);
 #                          or appimagetool in PATH
 # The game-asset pack is rebuilt from scratch/base_romfs.bin when it is missing.
+# --appimage: the AppImage only (no Windows toolchain needed).
 set -euo pipefail
+appimage_only=false
+[ "${1:-}" = "--appimage" ] && appimage_only=true
 here=$(cd "$(dirname "$0")" && pwd)
 app=$(dirname "$here")
 repo=$(dirname "$app")
@@ -24,9 +27,11 @@ if [ ! -f assets/gen/names.json ]; then
     python3 "$repo/tools/build_assets.py"
 fi
 
-echo "== Windows"
-cargo build --release -p mhgu-editor --target x86_64-pc-windows-gnu
-cp target/x86_64-pc-windows-gnu/release/mhgu-editor.exe "$dist/MHGU-Save-Editor-$ver-x86_64.exe"
+if ! $appimage_only; then
+    echo "== Windows"
+    cargo build --release -p mhgu-editor --target x86_64-pc-windows-gnu
+    cp target/x86_64-pc-windows-gnu/release/mhgu-editor.exe "$dist/MHGU-Save-Editor-$ver-x86_64.exe"
+fi
 
 echo "== Linux"
 # cargo finds subcommands in ~/.cargo/bin even when it is not on PATH
