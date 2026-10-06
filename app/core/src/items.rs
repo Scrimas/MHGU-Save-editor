@@ -42,6 +42,8 @@ impl Store {
             Store::Pouch => (POUCH, POUCH_N),
         }
     }
+    // the number of slots of a store, never empty
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(self) -> usize {
         self.at().1
     }

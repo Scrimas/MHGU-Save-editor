@@ -95,7 +95,10 @@ pub enum CopyState {
     WrongSize(usize),
 }
 
-pub fn open(path: &Path) -> Result<(Save, Location, Vec<(PathBuf, CopyState)>), Error> {
+/// Each copy of a save and how it relates to the opened one.
+pub type Copies = Vec<(PathBuf, CopyState)>;
+
+pub fn open(path: &Path) -> Result<(Save, Location, Copies), Error> {
     let save = Save::from_bytes(fs::read(path).map_err(|e| Error::File(path.to_path_buf(), e))?)?;
     let mut loc = Location::of(path);
     let mut states = vec![];

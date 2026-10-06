@@ -1,0 +1,44 @@
+name: CI
+
+# Tests and clippy on every push and pull request, in the Arch Linux container the release
+# builds use. Without the game-asset pack (only release.yml decrypts it): the editor then
+# builds with placeholders, which the tests don't need. Tests that need a real save
+# (MHGU_TEST_SAVE) or the network are #[ignore] and don't run here.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Toolchain
+        run: |
+          pacman -Syu --noconfirm --needed git rustup fontconfig
+          rustup default stable
+          rustup component add clippy
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/checkout@v7
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app
+
+      - name: Tests
+        working-directory: app
+        run: cargo test --workspace
+
+      - name: Clippy
+        working-directory: app
+        run: cargo clippy --workspace --all-targets -- -D warnings

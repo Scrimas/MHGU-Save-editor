@@ -97,7 +97,7 @@ pub(super) fn list_snapshots(ui: &AppWindow, st: &State) {
     let mut all = system::snapshots(&root);
     if let Some(old) = system::legacy_snapshot_dir(&doc.loc) {
         all.extend(system::snapshots(&old).into_iter().filter(|x| system::snapshot_of(x, &doc.loc)));
-        all.sort_by(|a, b| b.time.cmp(&a.time));
+        all.sort_by_key(|s| std::cmp::Reverse(s.time));
     }
     let rows: Vec<SnapRow> = all
         .into_iter()

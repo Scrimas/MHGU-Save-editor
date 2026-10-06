@@ -163,10 +163,10 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
         .into(),
     );
     // after selecting or adding, the row is scrolled into view (10.1)
-    if let Some(slot) = view(|v| v.equip_jump.take()) {
-        if let Some(row) = rows.iter().position(|r| r.slot == slot) {
-            jump(ui, Some(row), "");
-        }
+    if let Some(slot) = view(|v| v.equip_jump.take())
+        && let Some(row) = rows.iter().position(|r| r.slot == slot)
+    {
+        jump(ui, Some(row), "");
     }
     api.set_equip_rows(model(rows));
     let sel = view(|v| v.equip_sel);

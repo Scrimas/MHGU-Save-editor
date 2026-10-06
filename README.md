@@ -26,6 +26,8 @@ the newest version on disk keeps the entry, and menus hide it once that AppImage
 Both builds update themselves: on start they ask GitHub for a newer release (Settings →
 Updates turns this off, or checks now). Nothing is downloaded until you choose to; the new
 file is checked against the release's SHA-256 sums and takes the place of the old one.
+The sums come from the same release, so they catch a broken download, not a release
+published by someone else; a download can be cancelled.
 
 Ryujinx saves are found automatically (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
 Flatpak folders). For another emulator, use **Open save…** on its
@@ -36,13 +38,13 @@ Flatpak folders). For another emulator, use **Open save…** on its
 | Page | |
 |---|---|
 | Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points |
-| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time |
-| Items | Item box, pouch and loadouts; sort and merge, max counts. Pouch stacks stop at each item's carry limit |
-| Equipment | Hunter and Palico equipment boxes: add pieces, levels, decorations, talismans |
-| Palicoes | Name, level and experience, forte, greeting, original owner |
+| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, Guild Card weapon usage |
+| Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts. Pouch stacks stop at each item's carry limit |
+| Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (only those that fit the free slots), transmog, talismans |
+| Palicoes | Name, level and experience, forte, target, greeting, original owner |
 | Quests | Every quest cleared or not (seen and quest sets follow, as in game); says what unlocks a quest that is not on the board yet |
 | Requests | Villager requests: accepted (quest posted on the board) and completed |
-| Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards |
+| Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt) |
 | Monsters | Hunted and captured counts, smallest and largest sizes, Hunter's Notes |
 | Save map | Every byte range of the save, named from the game's own loader (read-only) |
 
@@ -85,10 +87,17 @@ All three character slots are supported.
   in game terms, each one can be undone, and the page shows what each value was.
 - **Write refuses while an emulator is running**: Ryujinx (and others) overwrite the
   save when they exit.
+- **Write refuses a save the game saved again after it was opened**, so that play is
+  not lost; Reload reads it again and keeps the staged changes.
 - **A snapshot is taken before every write** (and before every restore). Snapshots
-  restores the whole save folder from any of them.
+  restores the whole save folder from any of them, and only into the save it was
+  taken of.
 - The emulator keeps two copies of the save, each with a backup; all four files get
-  the same bytes and keep their own headers. Each write is checked by reading it back.
+  the same bytes and keep their own headers. Every copy is checked before any is
+  written, and each write is checked by reading it back.
+
+Keyboard: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page, Ctrl+O
+open a save, Escape closes a dialog or Review.
 
 Keep your own backup anyway. This is an unofficial tool.
 

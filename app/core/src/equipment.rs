@@ -213,6 +213,8 @@ impl Owner {
             Owner::Palico => (PALICO_BOX, PALICO_BOX_N),
         }
     }
+    // the number of entries of a box, never empty
+    #[allow(clippy::len_without_is_empty)]
     pub fn len(self) -> usize {
         self.at().1
     }

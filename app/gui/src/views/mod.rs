@@ -76,10 +76,10 @@ fn toast_full(ui: &AppWindow, msg: impl Into<SharedString>, sub: &str, action: &
     let w = ui.as_weak();
     let ms = if !action.is_empty() { 9000 } else if error { 6000 } else { 3000 };
     slint::Timer::single_shot(std::time::Duration::from_millis(ms), move || {
-        if let Some(ui) = w.upgrade() {
-            if view(|v| v.toast_seq) == seq {
-                ui.global::<Api>().set_toast("".into());
-            }
+        if let Some(ui) = w.upgrade()
+            && view(|v| v.toast_seq) == seq
+        {
+            ui.global::<Api>().set_toast("".into());
         }
     });
 }
@@ -187,12 +187,12 @@ fn jump(ui: &AppWindow, row: Option<usize>, key: &str) {
     api.set_highlight(key.into());
     let w = ui.as_weak();
     slint::Timer::single_shot(std::time::Duration::from_millis(1800), move || {
-        if let Some(ui) = w.upgrade() {
-            if view(|v| v.jump_seq) == seq {
-                let api = ui.global::<Api>();
-                api.set_highlight("".into());
-                api.set_jump_row(-1);
-            }
+        if let Some(ui) = w.upgrade()
+            && view(|v| v.jump_seq) == seq
+        {
+            let api = ui.global::<Api>();
+            api.set_highlight("".into());
+            api.set_jump_row(-1);
         }
     });
 }

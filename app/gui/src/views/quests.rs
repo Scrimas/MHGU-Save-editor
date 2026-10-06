@@ -126,10 +126,10 @@ pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {
             }
             vec![]
         });
-        if !sets.is_empty() {
-            if let Some(o) = s.ops.last_mut() {
-                o.note = "Also completes its quest set, as the game does".into();
-            }
+        if !sets.is_empty()
+            && let Some(o) = s.ops.last_mut()
+        {
+            o.note = "Also completes its quest set, as the game does".into();
         }
         let _ = &ui;
     });

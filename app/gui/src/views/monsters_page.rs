@@ -21,7 +21,7 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
         .monsters
         .iter()
         .filter(|m| !m.name.is_empty() && !m.name.starts_with("dummy"))
-        .filter(|m| (106..=112).contains(&m.index).then_some(false).unwrap_or(true))
+        .filter(|m| !(106..=112).contains(&m.index))
         .filter_map(|m| {
             let meta = monsters::meta(m.index);
             let r = monsters::get(s, base, m.index);

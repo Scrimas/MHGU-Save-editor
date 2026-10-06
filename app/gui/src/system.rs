@@ -55,10 +55,13 @@ pub fn forget_folder(f: &std::path::Path) {
     WALKED.with_borrow_mut(|m| m.remove(f));
 }
 
+/// A save file's characters and the modification time they were read at.
+type Info = (Option<std::time::SystemTime>, std::rc::Rc<SaveInfo>);
+
 thread_local! {
     static WALKED: std::cell::RefCell<std::collections::HashMap<PathBuf, Vec<PathBuf>>> = Default::default();
-    /// Characters of a save file by (path, size, modified): read again only when it changed.
-    static INFOS: std::cell::RefCell<std::collections::HashMap<PathBuf, (Option<std::time::SystemTime>, std::rc::Rc<SaveInfo>)>> = Default::default();
+    /// Characters of a save file by path: read again only when it changed.
+    static INFOS: std::cell::RefCell<std::collections::HashMap<PathBuf, Info>> = Default::default();
 }
 
 /// `system` files of the right size under `root`, at most 8 folders down (the yuzu
@@ -220,7 +223,7 @@ pub fn snapshots(root: &std::path::Path) -> Vec<Snapshot> {
             Snapshot { dir, time, before, source }
         })
         .collect();
-    v.sort_by(|a, b| b.time.cmp(&a.time));
+    v.sort_by_key(|s| std::cmp::Reverse(s.time));
     v
 }
 
@@ -252,6 +255,21 @@ fn read_info(p: &std::path::Path) -> Option<SaveInfo> {
         .collect();
     let modified = p.metadata().and_then(|m| m.modified()).ok().map(chrono::DateTime::<chrono::Local>::from);
     Some(SaveInfo { names, modified })
+}
+
+pub fn open_url(url: &str) {
+    #[cfg(windows)]
+    let _ = std::process::Command::new("explorer").arg(url).spawn();
+    #[cfg(not(windows))]
+    let _ = std::process::Command::new("xdg-open").arg(url).spawn();
+}
+
+pub fn open_folder(p: &std::path::Path) {
+    let _ = std::fs::create_dir_all(p);
+    #[cfg(windows)]
+    let _ = std::process::Command::new("explorer").arg(p).spawn();
+    #[cfg(not(windows))]
+    let _ = std::process::Command::new("xdg-open").arg(p).spawn();
 }
 
 #[cfg(test)]
@@ -312,19 +330,4 @@ mod tests {
         assert_eq!(left, ["2026-01-03_000000", "2026-01-04_000000", "mine"]);
         std::fs::remove_dir_all(&d).unwrap();
     }
-}
-
-pub fn open_url(url: &str) {
-    #[cfg(windows)]
-    let _ = std::process::Command::new("explorer").arg(url).spawn();
-    #[cfg(not(windows))]
-    let _ = std::process::Command::new("xdg-open").arg(url).spawn();
-}
-
-pub fn open_folder(p: &std::path::Path) {
-    let _ = std::fs::create_dir_all(p);
-    #[cfg(windows)]
-    let _ = std::process::Command::new("explorer").arg(p).spawn();
-    #[cfg(not(windows))]
-    let _ = std::process::Command::new("xdg-open").arg(p).spawn();
 }

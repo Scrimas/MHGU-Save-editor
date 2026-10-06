@@ -75,10 +75,11 @@ fn main() -> Result<(), slint::PlatformError> {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if let Some(p) = args.first().filter(|p| *p != "-") {
         views::open(&ui, &st, std::path::Path::new(p));
-    } else if args.is_empty() && settings::get().reopen_last {
-        if let Some(p) = settings::get().recent.first().filter(|p| p.is_file()) {
-            views::open(&ui, &st, p);
-        }
+    } else if args.is_empty()
+        && settings::get().reopen_last
+        && let Some(p) = settings::get().recent.first().filter(|p| p.is_file())
+    {
+        views::open(&ui, &st, p);
     }
     if let Some(page) = args.get(1) {
         api.set_page(page.as_str().into());

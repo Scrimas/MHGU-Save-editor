@@ -251,10 +251,10 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             let r = n - q;
             let mut by_cat = std::collections::BTreeMap::<String, usize>::new();
             for t in &p.targets {
-                if let Target::Quest(i) = t {
-                    if let Some(x) = tables().quests.iter().find(|x| x.index == *i) {
-                        *by_cat.entry(x.category.clone()).or_default() += 1;
-                    }
+                if let Target::Quest(i) = t
+                    && let Some(x) = tables().quests.iter().find(|x| x.index == *i)
+                {
+                    *by_cat.entry(x.category.clone()).or_default() += 1;
                 }
             }
             let cats = by_cat.iter().map(|(k, v)| format!("{k} {v}")).collect::<Vec<_>>().join(", ");

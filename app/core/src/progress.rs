@@ -132,7 +132,7 @@ impl<S: Deref<Target = Save>> Char<S> {
     }
     /// HR as the game computes it on load (the slot header copy is only a summary).
     pub fn hr(&self) -> u16 {
-        crate::character::get(&*self.s, self.base).hr
+        crate::character::get(&self.s, self.base).hr
     }
     pub fn village_star(&self) -> u16 {
         self.u16(VIL_STAR)
@@ -151,7 +151,7 @@ impl<S: Deref<Target = Save>> Char<S> {
     where
         S: DerefMut,
     {
-        crate::character::set_hub_star(&mut *self.s, self.base, v)
+        crate::character::set_hub_star(&mut self.s, self.base, v)
     }
 
     /// The unlock rule of `script\check_quest_unlocked` for this quest (quest-unlock.csv).
