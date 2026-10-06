@@ -8,10 +8,8 @@ described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") be
 anything touches the file. Fields are marked **Confirmed** (checked in game) or
 **Derived** (from the format notes, not yet checked in game).
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/01-overview-dark.png">
-  <img alt="Overview: progress of the character and one-click goals, two of them staged for Review" src="docs/screenshots/01-overview-light.png">
-</picture>
+![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-dark.png#gh-dark-mode-only)
+![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-light.png#gh-light-mode-only)
 
 ## Download
 
@@ -45,28 +43,28 @@ All three character slots are supported.
 
 <table>
   <tr>
-    <td width="50%"><picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/02-items-dark.png">
-      <img alt="Items: the item box with game icons" src="docs/screenshots/02-items-light.png">
-    </picture></td>
-    <td width="50%"><picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/03-equipment-dark.png">
-      <img alt="Equipment: the hunter box and the selected piece" src="docs/screenshots/03-equipment-light.png">
-    </picture></td>
+    <td width="50%">
+      <img alt="Items: the item box with game icons" src="docs/screenshots/02-items-dark.png#gh-dark-mode-only">
+      <img alt="Items: the item box with game icons" src="docs/screenshots/02-items-light.png#gh-light-mode-only">
+    </td>
+    <td width="50%">
+      <img alt="Equipment: the hunter box and the selected piece" src="docs/screenshots/03-equipment-dark.png#gh-dark-mode-only">
+      <img alt="Equipment: the hunter box and the selected piece" src="docs/screenshots/03-equipment-light.png#gh-light-mode-only">
+    </td>
   </tr>
   <tr>
     <td align="center">Items</td>
     <td align="center">Equipment</td>
   </tr>
   <tr>
-    <td><picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/04-monsters-dark.png">
-      <img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-light.png">
-    </picture></td>
-    <td><picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/05-quests-dark.png">
-      <img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-light.png">
-    </picture></td>
+    <td>
+      <img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-dark.png#gh-dark-mode-only">
+      <img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-light.png#gh-light-mode-only">
+    </td>
+    <td>
+      <img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-dark.png#gh-dark-mode-only">
+      <img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-light.png#gh-light-mode-only">
+    </td>
   </tr>
   <tr>
     <td align="center">Monsters</td>
@@ -87,10 +85,8 @@ All three character slots are supported.
 
 Keep your own backup anyway. This is an unofficial tool.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/06-write-dark.png">
-  <img alt="Write dialog: the changes in game terms, the emulator check and the snapshot" src="docs/screenshots/06-write-light.png">
-</picture>
+![Write dialog: the changes in game terms, the emulator check and the snapshot](docs/screenshots/06-write-dark.png#gh-dark-mode-only)
+![Write dialog: the changes in game terms, the emulator check and the snapshot](docs/screenshots/06-write-light.png#gh-light-mode-only)
 
 ## Settings
 
@@ -101,10 +97,8 @@ last one; extra emulator process names for the running check; and **Confirmed ch
 only**, which refuses every Derived change. They are kept in
 `~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/07-settings-dark.png">
-  <img alt="Settings dialog" src="docs/screenshots/07-settings-light.png">
-</picture>
+![Settings dialog](docs/screenshots/07-settings-dark.png#gh-dark-mode-only)
+![Settings dialog](docs/screenshots/07-settings-light.png#gh-light-mode-only)
 
 ## Building from source
 
