@@ -4,6 +4,7 @@
 //! crate are relative to a character base unless named `abs`.
 
 use std::fmt;
+use std::path::PathBuf;
 
 pub const FILE_SIZE: usize = 5_159_100;
 /// u32 changed on every in-game save; not a checksum. Never written by the editor.
@@ -15,12 +16,20 @@ const SLOT_PTR: usize = 0x34;
 const SLOT_PTR_BASE: usize = 0x24;
 /// Slot 1 base; the absolute offsets quoted in the docs are slot 1's.
 pub const SLOT1_BASE: usize = 0x18CC9C;
+/// Bytes of one character slot (the stride between slot bases, docs/11).
+pub const SLOT_SIZE: usize = 0x11F8C4;
 
 #[derive(Debug)]
 pub enum Error {
     Size(usize),
     SlotPointer(usize),
     Io(std::io::Error),
+    /// An I/O error on one file of the save.
+    File(PathBuf, std::io::Error),
+    /// A copy of the save that is not save-sized.
+    CopySize(PathBuf, usize),
+    /// A copy changed on disk since the save was opened (the game saved meanwhile).
+    ChangedOnDisk(PathBuf),
 }
 
 impl fmt::Display for Error {
@@ -29,6 +38,9 @@ impl fmt::Display for Error {
             Error::Size(n) => write!(f, "not an MHGU Switch save: {n} bytes, expected {FILE_SIZE}"),
             Error::SlotPointer(s) => write!(f, "character slot {} has an invalid pointer", s + 1),
             Error::Io(e) => write!(f, "{e}"),
+            Error::File(p, e) => write!(f, "{}: {e}", p.display()),
+            Error::CopySize(p, n) => write!(f, "{} is {n} bytes, not a save copy", p.display()),
+            Error::ChangedOnDisk(p) => write!(f, "{} changed on disk since it was opened", p.display()),
         }
     }
 }
@@ -58,7 +70,8 @@ impl Save {
         for (s, b) in bases.iter_mut().enumerate() {
             let p = u32::from_le_bytes(bytes[SLOT_PTR + 4 * s..SLOT_PTR + 4 * s + 4].try_into().unwrap());
             *b = SLOT_PTR_BASE + p as usize;
-            if *b >= FILE_SIZE {
+            // the whole slot must fit, or reading it would run past the end
+            if *b + SLOT_SIZE > FILE_SIZE {
                 return Err(Error::SlotPointer(s));
             }
         }
@@ -184,23 +197,34 @@ impl Save {
     }
 }
 
+/// An all-zero save with the three slot pointers of a real one, for tests.
+#[cfg(test)]
+pub(crate) fn blank() -> Save {
+    let mut v = vec![0u8; FILE_SIZE];
+    for (s, b) in [0x18CC9C, 0x2AC560, 0x3CBE24].iter().enumerate() {
+        v[SLOT_PTR + 4 * s..SLOT_PTR + 4 * s + 4].copy_from_slice(&((b - SLOT_PTR_BASE) as u32).to_le_bytes());
+    }
+    Save::from_bytes(v).unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn blank() -> Save {
-        let mut v = vec![0u8; FILE_SIZE];
-        for (s, b) in [0x18CC9C, 0x2AC560, 0x3CBE24].iter().enumerate() {
-            v[SLOT_PTR + 4 * s..SLOT_PTR + 4 * s + 4].copy_from_slice(&((b - SLOT_PTR_BASE) as u32).to_le_bytes());
-        }
-        Save::from_bytes(v).unwrap()
-    }
 
     #[test]
     fn slot_bases_follow_pointers() {
         let s = blank();
         assert_eq!(s.base(0), SLOT1_BASE);
         assert_eq!(s.base(1) - s.base(0), 0x11F8C4);
+    }
+
+    #[test]
+    fn slot_past_the_end_is_refused() {
+        let mut v = blank().bytes().to_vec();
+        let p = (FILE_SIZE - SLOT_SIZE + 1 - SLOT_PTR_BASE) as u32;
+        v[SLOT_PTR + 8..SLOT_PTR + 12].copy_from_slice(&p.to_le_bytes());
+        assert!(matches!(Save::from_bytes(v), Err(Error::SlotPointer(2))));
+        assert!(matches!(Save::from_bytes(vec![0; 10]), Err(Error::Size(10))));
     }
 
     #[test]

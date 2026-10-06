@@ -65,6 +65,15 @@ pub struct Doc {
     pub copies: Vec<(PathBuf, CopyState)>,
 }
 
+/// The byte at each address as edit `k` found it: the file's, or the last earlier edit's.
+fn before_op<'a>(ops: &[Op], k: usize, orig: &'a [u8]) -> impl Fn(usize) -> u8 + 'a {
+    let mut m = std::collections::HashMap::new();
+    for op in &ops[..k] {
+        m.extend(op.bytes.iter().copied());
+    }
+    move |a| m.get(&a).copied().unwrap_or(orig[a])
+}
+
 #[derive(Default)]
 pub struct State {
     pub doc: Option<Doc>,
@@ -84,6 +93,28 @@ impl State {
         self.ops.clear();
         self.redo.clear();
         Ok(())
+    }
+
+    /// Read the save again (the game saved meanwhile) and replay the staged edits on it.
+    /// Bytes an edit wrote that no longer change anything are dropped, and with them
+    /// edits left empty. Returns the edits kept.
+    pub fn reload_keep(&mut self) -> Result<usize, String> {
+        let Some(path) = self.path() else { return Ok(0) };
+        let (slot, ops) = (self.slot, std::mem::take(&mut self.ops));
+        self.open(&path)?;
+        let orig = self.save().original().to_vec();
+        self.ops = ops;
+        for k in 0..self.ops.len() {
+            let prev = before_op(&self.ops, k, &orig);
+            let keep: Vec<(usize, u8)> = self.ops[k].bytes.iter().copied().filter(|&(a, v)| prev(a) != v).collect();
+            self.ops[k].bytes = keep;
+        }
+        self.ops.retain(|o| !o.bytes.is_empty());
+        if self.save().slot_used(slot) {
+            self.slot = slot;
+        }
+        self.replay();
+        Ok(self.ops.len())
     }
 
     pub fn save(&self) -> &Save {
@@ -107,6 +138,10 @@ impl State {
         }
         let slot = self.slot;
         let Some(doc) = self.doc.as_mut() else { return false };
+        // an empty slot has no character: its bytes are not a character's yet
+        if slot > 2 || !doc.save.slot_used(slot) {
+            return false;
+        }
         let before = doc.save.bytes().to_vec();
         let base = doc.save.base(slot);
         let mut targets = e.targets;
@@ -124,16 +159,18 @@ impl State {
         self.redo.clear();
         let values: Vec<(Target, String)> = targets.iter().map(|t| (*t, t.read(&doc.save, slot))).collect();
         if merge {
-            let last = self.ops.last_mut().unwrap();
+            let k = self.ops.len() - 1;
+            let prev = before_op(&self.ops, k, doc.save.original());
+            let last = &mut self.ops[k];
             for (a, v) in bytes {
                 match last.bytes.iter_mut().find(|(x, _)| *x == a) {
                     Some(b) => b.1 = v,
                     None => last.bytes.push((a, v)),
                 }
             }
-            // an edit that went back to the original value disappears
-            let orig = doc.save.original();
-            last.bytes.retain(|&(a, v)| orig[a] != v);
+            // an edit that went back to the value before it disappears
+            last.bytes.retain(|&(a, v)| prev(a) != v);
+            drop(prev);
             last.title = e.title;
             last.detail = e.detail;
             last.note = e.note;
@@ -202,6 +239,7 @@ impl State {
         let t = self.ops[k].values.iter().find(|(t, _)| t.key() == key).unwrap().0;
         let before = doc.save.bytes().to_vec();
         t.restore(&mut doc.save, &doc.orig, slot);
+        let prev = before_op(&self.ops, k, doc.save.original());
         let op = &mut self.ops[k];
         for (a, (b, n)) in before.iter().zip(doc.save.bytes()).enumerate() {
             if b != n {
@@ -211,13 +249,18 @@ impl State {
                 }
             }
         }
-        let orig = doc.save.original();
-        op.bytes.retain(|&(a, v)| orig[a] != v);
+        op.bytes.retain(|&(a, v)| prev(a) != v);
+        drop(prev);
         op.values.retain(|(x, _)| x.key() != key);
         if op.bytes.is_empty() || op.values.is_empty() {
             self.ops.remove(k);
         }
         self.replay();
+    }
+
+    /// The file the save was read from, if one is open.
+    pub fn path(&self) -> Option<PathBuf> {
+        self.doc.as_ref().map(|d| d.loc.opened.clone())
     }
 
     /// After a write the written bytes are the new original.
@@ -249,13 +292,97 @@ impl State {
     pub fn staged(&self) -> Vec<(usize, Target)> {
         let Some(doc) = self.doc.as_ref() else { return vec![] };
         let mut out: Vec<(usize, Target)> = vec![];
+        let mut seen = std::collections::HashSet::new();
         for op in &self.ops {
             for (t, _) in &op.values {
-                if !out.contains(&(op.slot, *t)) && t.read(&doc.orig, op.slot) != t.read(&doc.save, op.slot) {
+                if seen.insert((op.slot, t.key())) && t.read(&doc.orig, op.slot) != t.read(&doc.save, op.slot) {
                     out.push((op.slot, *t));
                 }
             }
         }
         out
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mhgu_save::character::{self, FUNDS};
+    use mhgu_save::save::FILE_SIZE;
+
+    /// A save folder with characters in slots 1 and 2, slot 3 empty.
+    fn fake(name: &str) -> PathBuf {
+        let d = std::env::temp_dir().join(format!("mhgu-state-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        let mut v = vec![0u8; FILE_SIZE];
+        v[0x28..0x2B].copy_from_slice(&[1, 1, 0]);
+        v[0x34..0x40].copy_from_slice(&[0x78, 0xCC, 0x18, 0, 0x3C, 0xC5, 0x2A, 0, 0x00, 0xBE, 0x3C, 0]);
+        for c in ["0", "1"] {
+            std::fs::create_dir_all(d.join(c)).unwrap();
+            for f in store::FILES {
+                std::fs::write(d.join(c).join(f), &v).unwrap();
+            }
+        }
+        d
+    }
+
+    fn funds(st: &mut State, v: u32) -> bool {
+        st.edit(Edit::one(Target::Funds, "Zenny".into(), Conf::Confirmed), |sv, base| {
+            character::set_funds(sv, base, v);
+            vec![]
+        })
+    }
+
+    #[test]
+    fn empty_slot_is_not_edited() {
+        let d = fake("empty");
+        let mut st = State::default();
+        st.open(&d.join("0/system")).unwrap();
+        st.slot = 2;
+        assert!(!funds(&mut st, 500));
+        assert!(st.ops.is_empty() && !st.save().is_dirty());
+        std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    #[test]
+    fn merged_edit_back_to_the_previous_edit_disappears() {
+        let d = fake("merge");
+        let mut st = State::default();
+        st.open(&d.join("0/system")).unwrap();
+        let base = st.base();
+        // a goal sets zenny; then a spin box goes +1 and back: the goal's value stays
+        st.edit(Edit { key: "goal:money".into(), title: "Max zenny".into(), detail: String::new(), note: String::new(), conf: Conf::Confirmed, targets: vec![Target::Funds] }, |sv, base| {
+            character::set_funds(sv, base, 9_000);
+            vec![]
+        });
+        assert!(funds(&mut st, 9_001));
+        assert!(!funds(&mut st, 9_000));
+        assert_eq!(st.ops.len(), 1);
+        assert_eq!(st.save().u32(base + FUNDS), 9_000);
+        std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    #[test]
+    fn reload_keeps_staged_edits_on_the_new_file() {
+        let d = fake("reload");
+        let mut st = State::default();
+        st.open(&d.join("0/system")).unwrap();
+        let base = st.base();
+        funds(&mut st, 777);
+        // the game saves meanwhile: play time changed in every copy
+        for c in ["0", "1"] {
+            for f in store::FILES {
+                let p = d.join(c).join(f);
+                let mut b = std::fs::read(&p).unwrap();
+                b[base + character::PLAYTIME] = 42;
+                std::fs::write(&p, b).unwrap();
+            }
+        }
+        assert!(store::changed_on_disk(&st.doc.as_ref().unwrap().loc).is_some());
+        assert_eq!(st.reload_keep().unwrap(), 1);
+        assert_eq!(st.save().u32(base + FUNDS), 777);
+        assert_eq!(st.save().u8(base + character::PLAYTIME), 42, "the game's save is the new original");
+        assert!(store::changed_on_disk(&st.doc.as_ref().unwrap().loc).is_none());
+        std::fs::remove_dir_all(&d).unwrap();
     }
 }

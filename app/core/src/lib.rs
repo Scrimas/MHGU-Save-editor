@@ -18,17 +18,22 @@ pub use save::{Error, Save};
 
 #[cfg(test)]
 mod real_save {
-    //! Read-only checks against a real save. Set MHGU_TEST_SAVE to a copy of `0/system`.
+    //! Checks against a real save, ignored by default: set MHGU_TEST_SAVE to a copy of
+    //! `0/system` and run `cargo test -- --ignored`.
     use super::*;
 
-    fn load() -> Option<Save> {
-        let p = std::env::var_os("MHGU_TEST_SAVE")?;
-        Some(Save::from_bytes(std::fs::read(p).unwrap()).unwrap())
+    fn path() -> std::ffi::OsString {
+        std::env::var_os("MHGU_TEST_SAVE").expect("set MHGU_TEST_SAVE to a copy of 0/system")
+    }
+
+    fn load() -> Save {
+        Save::from_bytes(std::fs::read(path()).unwrap()).unwrap()
     }
 
     #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
     fn documented_values() {
-        let Some(mut s) = load() else { return };
+        let mut s = load();
         assert_eq!(s.base(0), save::SLOT1_BASE);
         assert!(s.slot_used(0));
         let base = s.base(0);
@@ -75,9 +80,10 @@ mod real_save {
     /// New entries look like the game's own; worn and My Set pieces are found; the free
     /// slot is empty and unreferenced.
     #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
     fn equipment_box() {
         use equipment::{Entry, Kind, Owner, Use};
-        let Some(s) = load() else { return };
+        let s = load();
         let base = s.base(0);
         for i in 0..Owner::Hunter.len() {
             let e = equipment::get(&s, base, Owner::Hunter, i);
@@ -109,8 +115,9 @@ mod real_save {
     /// Edit a copy of the whole save folder and write it: all four files get the body,
     /// each keeps its header, and nothing but the edited bytes moves.
     #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
     fn write_copy_of_real_save() {
-        let Some(p) = std::env::var_os("MHGU_TEST_SAVE") else { return };
+        let p = path();
         let src = std::path::Path::new(&p).parent().unwrap().parent().unwrap();
         let dir = std::env::temp_dir().join(format!("mhgu-write-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
@@ -121,14 +128,14 @@ mod real_save {
             }
         }
         let before: Vec<Vec<u8>> = ["0/system", "0/system_backup", "1/system", "1/system_backup"].iter().map(|f| std::fs::read(dir.join(f)).unwrap()).collect();
-        let (mut s, loc, _) = store::open(&dir.join("0/system")).unwrap();
+        let (mut s, mut loc, _) = store::open(&dir.join("0/system")).unwrap();
         let base = s.base(0);
         let mut r = monsters::get(&s, base, 48);
         r.hunts = 1234;
         monsters::set(&mut s, base, 48, r);
         let edited: Vec<usize> = s.diff().iter().map(|d| d.0).collect();
         assert!(!edited.is_empty());
-        store::write_all(&mut s, &loc).unwrap();
+        store::write_all(&mut s, &mut loc).unwrap();
         for (k, f) in ["0/system", "0/system_backup", "1/system", "1/system_backup"].iter().enumerate() {
             let after = std::fs::read(dir.join(f)).unwrap();
             assert_eq!(after[..store::HEADER], before[k][..store::HEADER], "{f}: header kept");
@@ -140,8 +147,9 @@ mod real_save {
     }
 
     #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
     fn quest_logic_runs() {
-        let Some(mut s) = load() else { return };
+        let mut s = load();
         let c = progress::Char::new(&mut s, 0);
         let mut locked = 0;
         for q in progress::Char::real_quests(true) {

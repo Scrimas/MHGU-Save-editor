@@ -56,8 +56,9 @@ pub fn get(s: &Save, base: usize, store: Store, i: usize) -> Stack {
 pub fn set(s: &mut Save, base: usize, store: Store, i: usize, st: Stack) {
     let (off, n) = store.at();
     assert!(i < n);
-    let st = if st.id == 0 || st.count == 0 { Stack::default() } else { st };
-    s.set_bits(base + off, 19 * i, 12, (st.id & MAX_ID) as u32);
+    // an ID that does not fit the 12-bit field would become another item: empty instead
+    let st = if st.id == 0 || st.id > MAX_ID || st.count == 0 { Stack::default() } else { st };
+    s.set_bits(base + off, 19 * i, 12, st.id as u32);
     s.set_bits(base + off, 19 * i + 12, 7, st.count.min(MAX_COUNT) as u32);
 }
 
@@ -107,8 +108,13 @@ pub struct Loadout {
     pub items: Vec<(u16, u16)>,
 }
 
+fn loadout_at(base: usize, k: usize) -> usize {
+    assert!(k < LOADOUT_N, "loadout {k} out of range");
+    base + LOADOUTS + LOADOUT_SZ * k
+}
+
 pub fn loadout(s: &Save, base: usize, k: usize) -> Loadout {
-    let o = base + LOADOUTS + LOADOUT_SZ * k;
+    let o = loadout_at(base, k);
     Loadout {
         name: s.str(o, LOADOUT_NAME),
         items: (0..LOADOUT_ITEMS).map(|j| (s.u16(o + LOADOUT_NAME + 4 * j), s.u16(o + LOADOUT_NAME + 4 * j + 2))).collect(),
@@ -116,11 +122,11 @@ pub fn loadout(s: &Save, base: usize, k: usize) -> Loadout {
 }
 
 pub fn set_loadout(s: &mut Save, base: usize, k: usize, l: &Loadout) {
-    let o = base + LOADOUTS + LOADOUT_SZ * k;
+    let o = loadout_at(base, k);
     s.set_str(o, LOADOUT_NAME, &l.name);
     for j in 0..LOADOUT_ITEMS {
         let (id, c) = l.items.get(j).copied().unwrap_or((0, 0));
-        let (id, c) = if id == 0 || c == 0 { (0, 0) } else { (id, c.min(MAX_COUNT as u16)) };
+        let (id, c) = if id == 0 || id > MAX_ID || c == 0 { (0, 0) } else { (id, c.min(MAX_COUNT as u16)) };
         s.set_u16(o + LOADOUT_NAME + 4 * j, id);
         s.set_u16(o + LOADOUT_NAME + 4 * j + 2, c);
     }
@@ -129,6 +135,33 @@ pub fn set_loadout(s: &mut Save, base: usize, k: usize, l: &Loadout) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::save::{blank, SLOT1_BASE};
+
+    #[test]
+    fn slots_pack_at_the_field_limits() {
+        let mut s = blank();
+        set(&mut s, SLOT1_BASE, Store::Box, 1, Stack { id: MAX_ID, count: 127 });
+        assert_eq!(get(&s, SLOT1_BASE, Store::Box, 1), Stack { id: MAX_ID, count: MAX_COUNT });
+        assert_eq!(get(&s, SLOT1_BASE, Store::Box, 0), Stack::default());
+        assert_eq!(get(&s, SLOT1_BASE, Store::Box, 2), Stack::default());
+        // too big for 12 bits: the slot is emptied, not turned into item ID & 0xFFF
+        set(&mut s, SLOT1_BASE, Store::Box, 1, Stack { id: MAX_ID + 2, count: 5 });
+        assert_eq!(get(&s, SLOT1_BASE, Store::Box, 1), Stack::default());
+        set(&mut s, SLOT1_BASE, Store::Pouch, POUCH_N - 1, Stack { id: 7, count: 3 });
+        assert_eq!(all(&s, SLOT1_BASE, Store::Box).iter().filter(|x| !x.is_empty()).count(), 0, "pouch apart from the box");
+    }
+
+    #[test]
+    fn loadout_round_trip_and_bounds() {
+        let mut s = blank();
+        let l = Loadout { name: "Hunt".into(), items: vec![(1, 5), (0x1000, 3), (2, 200)] };
+        set_loadout(&mut s, SLOT1_BASE, LOADOUT_N - 1, &l);
+        let r = loadout(&s, SLOT1_BASE, LOADOUT_N - 1);
+        assert_eq!(r.name, "Hunt");
+        assert_eq!(&r.items[..3], &[(1, 5), (0, 0), (2, 99)]);
+        assert_eq!(get(&s, SLOT1_BASE, Store::Pouch, 0), Stack::default(), "the last loadout ends before the pouch");
+        assert!(std::panic::catch_unwind(|| loadout(&blank(), SLOT1_BASE, LOADOUT_N)).is_err());
+    }
 
     #[test]
     fn compact_merges_and_sorts() {

@@ -43,6 +43,8 @@ pub struct Palico {
 }
 
 fn at(base: usize, list: usize, i: usize) -> usize {
+    let n = if list == HIRE_LIST { HIRE_N } else { LIST_N };
+    assert!(i < n, "Palico {i} out of range");
     base + list + RECORD * i
 }
 
@@ -65,23 +67,82 @@ pub fn get(s: &Save, base: usize, i: usize) -> Palico {
     }
 }
 
-/// Writes the edited fields only; appearance, equipment and the unresolved bytes stay.
+/// Writes the edited fields only; appearance, equipment, the unresolved bytes and fields
+/// left as read stay byte for byte. An empty name is refused: a record without a name
+/// is an empty slot.
 pub fn set(s: &mut Save, base: usize, i: usize, p: &Palico) {
     let o = at(base, LIST, i);
     let old = get(s, base, i);
-    if old.name != p.name {
+    if old.name != p.name && !p.name.trim().is_empty() {
         s.set_str(o, NAME, &p.name);
     }
-    s.set_u32(o + EXP, p.exp);
-    s.set_u8(o + LEVEL, p.level.clamp(1, MAX_LEVEL) - 1);
-    s.set_u8(o + BIAS, p.bias.min(7));
-    s.set_u8(o + TARGET, p.target);
-    s.put(o + MOVES, &p.moves);
-    s.put(o + LEARNED, &p.learned);
+    if old.exp != p.exp {
+        s.set_u32(o + EXP, p.exp);
+    }
+    if old.level != p.level {
+        s.set_u8(o + LEVEL, p.level.clamp(1, MAX_LEVEL) - 1);
+    }
+    if old.bias != p.bias {
+        s.set_u8(o + BIAS, p.bias.min(7));
+    }
+    if old.target != p.target {
+        s.set_u8(o + TARGET, p.target);
+    }
+    if old.moves != p.moves {
+        s.put(o + MOVES, &p.moves);
+    }
+    if old.learned != p.learned {
+        s.put(o + LEARNED, &p.learned);
+    }
     if old.greeting != p.greeting {
         s.set_str(o + GREETING.0, GREETING.1, &p.greeting);
     }
     if old.owner != p.owner {
         s.set_str(o + OWNER.0, OWNER.1, &p.owner);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::save::{blank, SLOT1_BASE};
+
+    #[test]
+    fn set_writes_only_what_changed() {
+        let mut s = blank();
+        let o = SLOT1_BASE + LIST;
+        s.set_str(o, NAME, "Felyne");
+        s.set_u8(o + LEVEL, 200);
+        s.set_u8(o + BIAS, 9);
+        s.set_u8(o + 6, 0xAB);
+        let mut p = get(&s, SLOT1_BASE, 0);
+        assert_eq!((p.level, p.bias), (201, 9));
+        p.exp = 1234;
+        set(&mut s, SLOT1_BASE, 0, &p);
+        // out-of-range bytes nobody edited are left alone
+        assert_eq!((s.u8(o + LEVEL), s.u8(o + BIAS), s.u8(o + 6)), (200, 9, 0xAB));
+        assert_eq!(get(&s, SLOT1_BASE, 0).exp, 1234);
+        p.level = 120;
+        set(&mut s, SLOT1_BASE, 0, &p);
+        assert_eq!(get(&s, SLOT1_BASE, 0).level, MAX_LEVEL);
+    }
+
+    #[test]
+    fn empty_name_keeps_the_palico() {
+        let mut s = blank();
+        s.set_str(SLOT1_BASE + LIST + RECORD, NAME, "Tama");
+        let mut p = get(&s, SLOT1_BASE, 1);
+        p.name = "  ".into();
+        p.greeting = "Meow".into();
+        set(&mut s, SLOT1_BASE, 1, &p);
+        assert!(!is_empty(&s, SLOT1_BASE, 1));
+        assert_eq!(get(&s, SLOT1_BASE, 1).name, "Tama");
+        assert_eq!(get(&s, SLOT1_BASE, 1).greeting, "Meow");
+    }
+
+    #[test]
+    #[should_panic]
+    fn index_past_the_list_panics() {
+        get(&blank(), SLOT1_BASE, LIST_N);
     }
 }

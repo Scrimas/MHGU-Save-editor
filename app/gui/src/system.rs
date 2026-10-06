@@ -1,6 +1,7 @@
 //! Platform bits: finding saves, the running-emulator check, snapshot folder.
 
 use mhgu_save::save::FILE_SIZE;
+use mhgu_save::store::Location;
 use std::path::PathBuf;
 
 /// Ryujinx keeps its data in `<config>/Ryujinx` (Linux ~/.config, Windows %APPDATA%),
@@ -111,6 +112,42 @@ pub fn snapshot_root() -> PathBuf {
     crate::settings::get().snapshot_dir.unwrap_or_else(default_snapshot_root)
 }
 
+/// What identifies a save: its folder (`<id>` holding `0/` and `1/`), else the opened
+/// file, made absolute.
+fn save_key(loc: &Location) -> PathBuf {
+    let p = loc.save_dir.as_ref().unwrap_or(&loc.opened);
+    std::fs::canonicalize(p).or_else(|_| std::path::absolute(p)).unwrap_or_else(|_| p.clone())
+}
+
+/// Snapshot folder of a save: `<root>/<folder name>-<8 hex digits of its path>`, so two
+/// saves with the same folder name (two Ryujinx installs, every yuzu-style save) never
+/// share one.
+pub fn snapshot_dir(loc: &Location) -> PathBuf {
+    use sha2::{Digest, Sha256};
+    let key = save_key(loc);
+    let name = match &loc.save_dir {
+        Some(d) => d.file_name(),
+        None => loc.opened.parent().and_then(|d| d.file_name()),
+    };
+    let name = name.map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
+    let h = Sha256::digest(key.to_string_lossy().as_bytes());
+    let hex: String = h[..4].iter().map(|b| format!("{b:02x}")).collect();
+    snapshot_root().join(format!("{name}-{hex}"))
+}
+
+/// The folder earlier versions used for a Ryujinx-layout save (`<root>/<save id>`);
+/// its snapshots are listed too, but never pruned.
+pub fn legacy_snapshot_dir(loc: &Location) -> Option<PathBuf> {
+    let d = snapshot_root().join(loc.save_dir.as_ref()?.file_name()?);
+    d.is_dir().then_some(d)
+}
+
+/// Whether a snapshot may be restored over this save: it was taken of it, or it is
+/// from an earlier version that did not record the save.
+pub fn snapshot_of(s: &Snapshot, loc: &Location) -> bool {
+    s.source.as_ref().is_none_or(|p| p.to_string_lossy() == save_key(loc).to_string_lossy())
+}
+
 /// Removes the oldest snapshots of one save beyond the number kept in Settings, never
 /// `keep` (the one just taken). Only folders named like a snapshot are touched.
 pub fn prune_snapshots(root: &std::path::Path, keep: &std::path::Path) -> usize {
@@ -134,8 +171,9 @@ pub fn emulator_name(save: &std::path::Path) -> &'static str {
 /// What a snapshot was taken before, kept next to its files.
 const NOTE: &str = "snapshot.json";
 
-pub fn write_note(dir: &std::path::Path, before: &str) {
-    let v = serde_json::json!({ "before": before });
+/// The note of a snapshot of `loc`: what it was taken before and which save it is of.
+pub fn write_note(dir: &std::path::Path, before: &str, loc: &Location) {
+    let v = serde_json::json!({ "before": before, "source": save_key(loc).to_string_lossy() });
     let _ = std::fs::write(dir.join(NOTE), v.to_string());
 }
 
@@ -143,6 +181,8 @@ pub struct Snapshot {
     pub dir: PathBuf,
     pub time: chrono::DateTime<chrono::Local>,
     pub before: String,
+    /// The save it was taken of (None before this was recorded).
+    pub source: Option<PathBuf>,
 }
 
 /// Snapshots of one save folder (`root/<save id>/<stamp>`), newest first.
@@ -159,12 +199,11 @@ pub fn snapshots(root: &std::path::Path) -> Vec<Snapshot> {
                 .and_then(|t| t.and_local_timezone(chrono::Local).single())
                 .or_else(|| e.metadata().and_then(|m| m.modified()).ok().map(chrono::DateTime::<chrono::Local>::from))
                 .unwrap_or_else(chrono::Local::now);
-            let before = std::fs::read(dir.join(NOTE))
-                .ok()
-                .and_then(|b| serde_json::from_slice::<serde_json::Value>(&b).ok())
-                .and_then(|j| j.get("before").and_then(|s| s.as_str()).map(String::from))
-                .unwrap_or_default();
-            Snapshot { dir, time, before }
+            let note = std::fs::read(dir.join(NOTE)).ok().and_then(|b| serde_json::from_slice::<serde_json::Value>(&b).ok());
+            let field = |k: &str| note.as_ref().and_then(|j| j.get(k)).and_then(|s| s.as_str()).map(String::from);
+            let before = field("before").unwrap_or_default();
+            let source = field("source").map(PathBuf::from);
+            Snapshot { dir, time, before, source }
         })
         .collect();
     v.sort_by(|a, b| b.time.cmp(&a.time));
@@ -213,6 +252,22 @@ mod tests {
         let found = find_saves(&d);
         assert_eq!(found, vec![yuzu, d.join("other/1/system"), d.join("ryu/0/system")]);
         std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    #[test]
+    fn snapshots_are_kept_per_save() {
+        let d = std::env::temp_dir().join(format!("mhgu-snapid-{}", std::process::id()));
+        let (a, b) = (Location::of(&d.join("a/0001/0/system")), Location::of(&d.join("b/0001/0/system")));
+        let (da, db) = (snapshot_dir(&a), snapshot_dir(&b));
+        assert_ne!(da, db);
+        assert!(da.file_name().unwrap().to_string_lossy().starts_with("0001-"));
+        assert_eq!(da, snapshot_dir(&Location::of(&d.join("a/0001/1/system_backup"))), "one save, one folder");
+        // yuzu-style saves (no 0/ and 1/) differ by their own path
+        assert_ne!(snapshot_dir(&Location::of(&d.join("y/A/system"))), snapshot_dir(&Location::of(&d.join("y/B/system"))));
+        let snap = |source: Option<&Location>| Snapshot { dir: d.clone(), time: chrono::Local::now(), before: String::new(), source: source.map(save_key) };
+        assert!(snapshot_of(&snap(Some(&a)), &a));
+        assert!(!snapshot_of(&snap(Some(&a)), &b));
+        assert!(snapshot_of(&snap(None), &b), "older snapshots did not record their save");
     }
 
     #[test]

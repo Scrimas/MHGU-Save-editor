@@ -235,14 +235,15 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
 
 #[cfg(test)]
 mod tests {
-    //! Drive the real UI callbacks headless. Needs MHGU_TEST_SAVE (a copy of `0/system`);
-    //! writes only to a temporary copy of its folder.
+    //! Drive the real UI callbacks headless. Needs MHGU_TEST_SAVE (a copy of `0/system`)
+    //! and `cargo test -- --ignored`; writes only to a temporary copy of its folder.
     use super::*;
     use slint::Model;
 
     #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
     fn edit_review_undo_write() {
-        let Some(p) = std::env::var_os("MHGU_TEST_SAVE") else { return };
+        let p = std::env::var_os("MHGU_TEST_SAVE").expect("set MHGU_TEST_SAVE to a copy of 0/system");
         i_slint_backend_testing::init_no_event_loop();
         let src = std::path::Path::new(&p).parent().unwrap().parent().unwrap();
         let dir = std::env::temp_dir().join(format!("mhgu-ui-{}", std::process::id()));

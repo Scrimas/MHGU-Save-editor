@@ -730,18 +730,23 @@ export component AppWindow inherits Window {
             Rectangle {
                 y: Api.loaded ? 52px : 0px;
                 height: parent.height - self.y;
+                // an empty character slot has no pages: nothing there can be edited
+                property <bool> char-ok: !Api.loaded || Api.slots[Api.slot].used;
                 Rectangle {
                     if Api.page == "open": OpenPage { }
-                    if Api.page == "overview": OverviewPage { }
-                    if Api.page == "character": CharacterPage { }
-                    if Api.page == "items": ItemsPage { }
-                    if Api.page == "equipment": EquipmentPage { }
-                    if Api.page == "palicoes": PalicoesPage { }
-                    if Api.page == "quests": QuestsPage { }
-                    if Api.page == "requests": RequestsPage { }
-                    if Api.page == "collections": CollectionsPage { }
-                    if Api.page == "monsters": MonstersPage { }
-                    if Api.page == "advanced": AdvancedPage { }
+                    if !char-ok && Api.page != "open": EmptyState {
+                        text: "Character slot " + (Api.slot + 1) + " is empty. Pick a character in the sidebar; a new one is made in game.";
+                    }
+                    if char-ok && Api.page == "overview": OverviewPage { }
+                    if char-ok && Api.page == "character": CharacterPage { }
+                    if char-ok && Api.page == "items": ItemsPage { }
+                    if char-ok && Api.page == "equipment": EquipmentPage { }
+                    if char-ok && Api.page == "palicoes": PalicoesPage { }
+                    if char-ok && Api.page == "quests": QuestsPage { }
+                    if char-ok && Api.page == "requests": RequestsPage { }
+                    if char-ok && Api.page == "collections": CollectionsPage { }
+                    if char-ok && Api.page == "monsters": MonstersPage { }
+                    if char-ok && Api.page == "advanced": AdvancedPage { }
                 }
             }
         }
@@ -819,6 +824,29 @@ export component AppWindow inherits Window {
                 primary: true;
                 clicked => {
                     Api.quit-open = false;
+                    Api.check-emulator();
+                    Api.write-open = true;
+                }
+            }
+        }
+    }
+    if Api.open-ask != "": Modal {
+        card-width: 460px;
+        dismiss => { Api.open-ask = ""; }
+        Text { text: "Open another save without writing?"; font-size: 20px; font-weight: 600; }
+        Muted {
+            text: (Api.change-count == 1 ? "1 change" : Api.change-count + " changes") + " (" + Fmt.num(Api.value-count) + (Api.value-count == 1 ? " value" : " values") + (Api.change-count == 1 ? ") is" : ") are") + " not written to the save and will be lost.";
+        }
+        HorizontalLayout {
+            alignment: end;
+            spacing: Tok.tight;
+            Button { text: "Cancel"; clicked => { Api.open-ask = ""; } }
+            Button { text: "Open without writing"; clicked => { Api.open-confirmed(); } }
+            Button {
+                text: "Write…";
+                primary: true;
+                clicked => {
+                    Api.open-ask = "";
                     Api.check-emulator();
                     Api.write-open = true;
                 }

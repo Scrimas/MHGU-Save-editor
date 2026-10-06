@@ -14,9 +14,13 @@ fn rows(src: &'static str) -> Vec<HashMap<String, String>> {
         .collect()
 }
 
+/// A number cell; empty is 0. A typo in a table fails debug builds (and `tables_load`)
+/// instead of reading flag or bit 0.
 fn num(s: &str) -> i64 {
     let s = s.trim();
-    if let Some(h) = s.strip_prefix("0x") { i64::from_str_radix(h, 16).unwrap_or(0) } else { s.parse().unwrap_or(0) }
+    let v = if let Some(h) = s.strip_prefix("0x") { i64::from_str_radix(h, 16).ok() } else { s.parse().ok() };
+    debug_assert!(v.is_some() || s.is_empty(), "not a number in data/*.csv: {s:?}");
+    v.unwrap_or(0)
 }
 
 #[derive(Debug, Clone)]

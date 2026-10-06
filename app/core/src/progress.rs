@@ -98,8 +98,9 @@ impl<'a> Char<'a> {
     fn cleared_id(&self, id: u32) -> bool {
         tables().quest_index(id).is_some_and(|i| self.quest(QuestBit::Cleared, i))
     }
+    /// HR as the game computes it on load (the slot header copy is only a summary).
     pub fn hr(&self) -> u16 {
-        self.u16(HR)
+        crate::character::get(&*self.s, self.base).hr
     }
     pub fn village_star(&self) -> u16 {
         self.u16(VIL_STAR)
@@ -110,8 +111,9 @@ impl<'a> Char<'a> {
     pub fn set_village_star(&mut self, v: u16) {
         self.s.set_u16(self.base + VIL_STAR, v.clamp(1, 10))
     }
+    /// Also refreshes the HR copies, which follow the Hub star below HR 13.
     pub fn set_hub_star(&mut self, v: u16) {
-        self.s.set_u16(self.base + HUB_STAR, v.min(13))
+        crate::character::set_hub_star(self.s, self.base, v)
     }
 
     /// The unlock rule of `script\check_quest_unlocked` for this quest (quest-unlock.csv).
@@ -278,7 +280,7 @@ impl<'a> Char<'a> {
             "points" => {
                 let (name, need) = arg.split_once(':')?;
                 let v = VILLAGES.iter().position(|x| *x == name)?;
-                let have = (self.u32(POINTS + 4 * v) + self.u32(POINTS + 16 + 4 * v)).min(20000);
+                let have = self.u32(POINTS + 4 * v).saturating_add(self.u32(POINTS + 16 + 4 * v)).min(20000);
                 (have < need.parse().unwrap_or(0)).then(|| format!("{name} points {have}/{need}"))
             }
             "requests_done" => {

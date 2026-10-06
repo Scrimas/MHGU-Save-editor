@@ -22,6 +22,16 @@ pub struct Location {
     pub copies: Vec<PathBuf>,
     /// Folder holding `0/` and `1/`, when the opened file sits in that layout.
     pub save_dir: Option<PathBuf>,
+    /// Fingerprint of each copy (None: missing) when it was opened or last written. A
+    /// write refuses when one changed: the game saved meanwhile. Empty: not checked.
+    seen: Vec<Option<u64>>,
+}
+
+fn fingerprint(b: &[u8]) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    b.hash(&mut h);
+    h.finish()
 }
 
 impl Location {
@@ -46,8 +56,13 @@ impl Location {
             }
             None => {
                 copies.push(opened.clone());
-                if let Some(dir) = opened.parent() {
-                    let other = if opened.file_name().is_some_and(|n| n == "system_backup") { "system" } else { "system_backup" };
+                // the sibling is a copy only when the opened file is one of the pair
+                let other = match opened.file_name().and_then(|n| n.to_str()) {
+                    Some("system") => Some("system_backup"),
+                    Some("system_backup") => Some("system"),
+                    _ => None,
+                };
+                if let (Some(dir), Some(other)) = (opened.parent(), other) {
                     let p = dir.join(other);
                     if p.is_file() {
                         copies.push(p);
@@ -58,7 +73,15 @@ impl Location {
         if !copies.contains(&opened) {
             copies.insert(0, opened.clone());
         }
-        Location { opened, copies, save_dir }
+        Location { opened, copies, save_dir, seen: vec![] }
+    }
+
+    /// Where `p` sits relative to the save: `0/system`, or the bare file name.
+    fn rel(&self, p: &Path) -> PathBuf {
+        match &self.save_dir {
+            Some(d) => p.strip_prefix(d).unwrap_or(p).to_path_buf(),
+            None => PathBuf::from(p.file_name().unwrap_or(p.as_os_str())),
+        }
     }
 }
 
@@ -73,102 +96,123 @@ pub enum CopyState {
 }
 
 pub fn open(path: &Path) -> Result<(Save, Location, Vec<(PathBuf, CopyState)>), Error> {
-    let save = Save::from_bytes(fs::read(path)?)?;
-    let loc = Location::of(path);
-    let states = loc.copies.iter().map(|p| (p.clone(), copy_state(&save, p))).collect();
+    let save = Save::from_bytes(fs::read(path).map_err(|e| Error::File(path.to_path_buf(), e))?)?;
+    let mut loc = Location::of(path);
+    let mut states = vec![];
+    for p in &loc.copies {
+        let b = fs::read(p).ok();
+        loc.seen.push(b.as_deref().map(fingerprint));
+        states.push((p.clone(), copy_state(&save, b.as_deref())));
+    }
     Ok((save, loc, states))
 }
 
-fn copy_state(save: &Save, p: &Path) -> CopyState {
-    match fs::read(p) {
-        Err(_) => CopyState::Missing,
-        Ok(b) if b.len() != FILE_SIZE => CopyState::WrongSize(b.len()),
-        Ok(b) if b[HEADER..] == save.original()[HEADER..] => CopyState::Same,
-        Ok(_) => CopyState::Differs,
+fn copy_state(save: &Save, b: Option<&[u8]>) -> CopyState {
+    match b {
+        None => CopyState::Missing,
+        Some(b) if b.len() != FILE_SIZE => CopyState::WrongSize(b.len()),
+        Some(b) if b[HEADER..] == save.original()[HEADER..] => CopyState::Same,
+        Some(_) => CopyState::Differs,
     }
+}
+
+/// The first copy that changed on disk since it was opened or last written.
+pub fn changed_on_disk(loc: &Location) -> Option<PathBuf> {
+    if loc.seen.len() != loc.copies.len() {
+        return None;
+    }
+    loc.copies.iter().zip(&loc.seen).find(|(p, s)| fs::read(p).ok().as_deref().map(fingerprint) != **s).map(|(p, _)| p.clone())
 }
 
 /// Copies every file of the save (both commit folders) into `dest/<timestamp>/`.
 pub fn snapshot(loc: &Location, dest_root: &Path, stamp: &str) -> std::io::Result<PathBuf> {
     let dest = dest_root.join(stamp);
     for p in &loc.copies {
-        let rel = match &loc.save_dir {
-            Some(d) => p.strip_prefix(d).unwrap_or(p).to_path_buf(),
-            None => PathBuf::from(p.file_name().unwrap()),
-        };
-        let to = dest.join(rel);
+        let to = dest.join(loc.rel(p));
         fs::create_dir_all(to.parent().unwrap())?;
         fs::copy(p, &to)?;
     }
     Ok(dest)
 }
 
+/// Writes every (file, bytes) pair through a temporary file each, then renames them all
+/// and reads each back: nothing is renamed until every temporary file is on disk, and
+/// the temporary files are removed when that fails.
+fn replace_all(files: &[(PathBuf, Vec<u8>)], body_from: usize) -> Result<(), Error> {
+    let tmp = |p: &Path| p.with_extension("mhgu-editor-tmp");
+    let mut made = vec![];
+    for (p, b) in files {
+        let t = tmp(p);
+        made.push(t.clone());
+        let r = fs::File::create(&t).and_then(|mut f| {
+            f.write_all(b)?;
+            f.sync_all()
+        });
+        if let Err(e) = r {
+            for t in &made {
+                let _ = fs::remove_file(t);
+            }
+            return Err(Error::File(t, e));
+        }
+    }
+    for (p, b) in files {
+        fs::rename(tmp(p), p).map_err(|e| Error::File(p.clone(), e))?;
+        if fs::read(p).map_err(|e| Error::File(p.clone(), e))?[body_from..] != b[body_from..] {
+            return Err(Error::File(p.clone(), std::io::Error::other("read-back mismatch")));
+        }
+    }
+    // the renames themselves are durable once the folder is synced (not on Windows)
+    #[cfg(unix)]
+    for d in files.iter().filter_map(|(p, _)| p.parent()) {
+        let _ = fs::File::open(d).and_then(|f| f.sync_all());
+    }
+    Ok(())
+}
+
 /// Copies a snapshot made by `snapshot` back over the save: every file it holds goes back
 /// to its place, whole (headers too), through a temporary file and a rename. Files of
 /// the wrong size are refused before anything is written. Returns the files restored.
-pub fn restore(loc: &Location, snap: &Path) -> std::io::Result<Vec<PathBuf>> {
-    let mut pairs = vec![];
+pub fn restore(loc: &Location, snap: &Path) -> Result<Vec<PathBuf>, Error> {
+    let mut files = vec![];
     for p in &loc.copies {
-        let rel = match &loc.save_dir {
-            Some(d) => p.strip_prefix(d).unwrap_or(p).to_path_buf(),
-            None => PathBuf::from(p.file_name().unwrap()),
-        };
-        let from = snap.join(rel);
+        let from = snap.join(loc.rel(p));
         if !from.is_file() {
             continue;
         }
-        let n = fs::metadata(&from)?.len() as usize;
-        if n != FILE_SIZE {
-            return Err(std::io::Error::other(format!("{} is {n} bytes, not a save", from.display())));
+        let b = fs::read(&from).map_err(|e| Error::File(from.clone(), e))?;
+        if b.len() != FILE_SIZE {
+            return Err(Error::CopySize(from, b.len()));
         }
-        pairs.push((from, p.clone()));
+        files.push((p.clone(), b));
     }
-    if pairs.is_empty() {
-        return Err(std::io::Error::other(format!("no save files in {}", snap.display())));
+    if files.is_empty() {
+        return Err(Error::File(snap.to_path_buf(), std::io::Error::other("no save files in this snapshot")));
     }
-    let mut done = vec![];
-    for (from, to) in pairs {
-        let b = fs::read(&from)?;
-        let tmp = to.with_extension("mhgu-editor-tmp");
-        {
-            let mut f = fs::File::create(&tmp)?;
-            f.write_all(&b)?;
-            f.sync_all()?;
-        }
-        fs::rename(&tmp, &to)?;
-        if fs::read(&to)? != b {
-            return Err(std::io::Error::other(format!("read-back mismatch in {}", to.display())));
-        }
-        done.push(to);
-    }
-    Ok(done)
+    replace_all(&files, 0)?;
+    Ok(files.into_iter().map(|(p, _)| p).collect())
 }
 
-/// Writes the edited body into every copy, keeping each file's own header, through a
-/// temporary file and a rename. Returns the files written.
-pub fn write_all(save: &mut Save, loc: &Location) -> Result<Vec<PathBuf>, Error> {
-    let mut done = vec![];
-    for p in &loc.copies {
-        let mut b = fs::read(p)?;
+/// Writes the edited body into every copy, keeping each file's own header. Every copy is
+/// read and checked first (size, unchanged since open); then all are written together
+/// (`replace_all`). Returns the files written.
+pub fn write_all(save: &mut Save, loc: &mut Location) -> Result<Vec<PathBuf>, Error> {
+    let check = loc.seen.len() == loc.copies.len();
+    let mut files = vec![];
+    for (k, p) in loc.copies.iter().enumerate() {
+        let mut b = fs::read(p).map_err(|e| Error::File(p.clone(), e))?;
+        if check && Some(fingerprint(&b)) != loc.seen[k] {
+            return Err(Error::ChangedOnDisk(p.clone()));
+        }
         if b.len() != FILE_SIZE {
-            return Err(Error::Size(b.len()));
+            return Err(Error::CopySize(p.clone(), b.len()));
         }
         b[HEADER..].copy_from_slice(&save.bytes()[HEADER..]);
-        let tmp = p.with_extension("mhgu-editor-tmp");
-        {
-            let mut f = fs::File::create(&tmp)?;
-            f.write_all(&b)?;
-            f.sync_all()?;
-        }
-        fs::rename(&tmp, p)?;
-        // read back
-        if fs::read(p)?[HEADER..] != save.bytes()[HEADER..] {
-            return Err(Error::Io(std::io::Error::other(format!("read-back mismatch in {}", p.display()))));
-        }
-        done.push(p.clone());
+        files.push((p.clone(), b));
     }
+    replace_all(&files, HEADER)?;
+    loc.seen = files.iter().map(|(_, b)| Some(fingerprint(b))).collect();
     save.commit();
-    Ok(done)
+    Ok(files.into_iter().map(|(p, _)| p).collect())
 }
 
 #[cfg(test)]
@@ -193,13 +237,13 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("mhgu-store-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         fake(&dir, 7, 0);
-        let (mut s, loc, states) = open(&dir.join("0/system")).unwrap();
+        let (mut s, mut loc, states) = open(&dir.join("0/system")).unwrap();
         assert_eq!(loc.copies.len(), 4);
         assert!(states.iter().all(|(_, st)| *st == CopyState::Same));
         let snap = snapshot(&loc, &dir.join("snap"), "t").unwrap();
         assert!(snap.join("1/system_backup").is_file());
         s.set_u16(0x18CC9C + 0x28, 0x1234);
-        let w = write_all(&mut s, &loc).unwrap();
+        let w = write_all(&mut s, &mut loc).unwrap();
         assert_eq!(w.len(), 4);
         for (k, f) in FILES.iter().enumerate() {
             let b = fs::read(dir.join("1").join(f)).unwrap();
@@ -215,6 +259,64 @@ mod tests {
             assert_eq!(b[0x14], 7 + k as u8);
             assert_eq!(&b[0x18CC9C + 0x28..0x18CC9C + 0x2A], &[0, 0]);
         }
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    fn tmp_dir(name: &str) -> PathBuf {
+        let d = std::env::temp_dir().join(format!("mhgu-store-{name}-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&d);
+        d
+    }
+
+    #[test]
+    fn write_refuses_a_save_changed_on_disk() {
+        let dir = tmp_dir("changed");
+        fake(&dir, 1, 0);
+        let (mut s, mut loc, _) = open(&dir.join("0/system")).unwrap();
+        // the game saves meanwhile: a new nonce in one copy
+        let mut b = fs::read(dir.join("1/system")).unwrap();
+        b[0x14] = 0x55;
+        fs::write(dir.join("1/system"), &b).unwrap();
+        assert_eq!(changed_on_disk(&loc), Some(dir.join("1/system")));
+        s.set_u8(0x18CC9C + 0x28, 9);
+        assert!(matches!(write_all(&mut s, &mut loc), Err(Error::ChangedOnDisk(p)) if p == dir.join("1/system")));
+        assert_eq!(fs::read(dir.join("0/system")).unwrap()[0x18CC9C + 0x28], 0, "nothing written");
+        // after a write the new bytes are what the next write expects
+        let (mut s, mut loc, _) = open(&dir.join("0/system")).unwrap();
+        s.set_u8(0x18CC9C + 0x28, 9);
+        write_all(&mut s, &mut loc).unwrap();
+        s.set_u8(0x18CC9C + 0x28, 10);
+        write_all(&mut s, &mut loc).unwrap();
+        assert_eq!(changed_on_disk(&loc), None);
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn write_checks_every_copy_before_writing_any() {
+        let dir = tmp_dir("size");
+        fake(&dir, 1, 0);
+        let mut loc = Location::of(&dir.join("0/system"));
+        let mut s = Save::from_bytes(fs::read(dir.join("0/system")).unwrap()).unwrap();
+        fs::write(dir.join("1/system_backup"), b"short").unwrap();
+        s.set_u8(0x18CC9C + 0x28, 9);
+        assert!(matches!(write_all(&mut s, &mut loc), Err(Error::CopySize(p, 5)) if p == dir.join("1/system_backup")));
+        for f in ["0/system", "0/system_backup", "1/system"] {
+            assert_eq!(fs::read(dir.join(f)).unwrap()[0x18CC9C + 0x28], 0, "{f} untouched");
+        }
+        assert!(!dir.join("0/system.mhgu-editor-tmp").exists());
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn sibling_backup_only_for_the_pair() {
+        let dir = tmp_dir("sibling");
+        fs::create_dir_all(&dir).unwrap();
+        for f in ["system", "system_backup", "old.bin"] {
+            fs::write(dir.join(f), b"x").unwrap();
+        }
+        assert_eq!(Location::of(&dir.join("old.bin")).copies, vec![dir.join("old.bin")]);
+        assert_eq!(Location::of(&dir.join("system")).copies, vec![dir.join("system"), dir.join("system_backup")]);
+        assert_eq!(Location::of(&dir.join("system_backup")).copies, vec![dir.join("system_backup"), dir.join("system")]);
         fs::remove_dir_all(&dir).unwrap();
     }
 }

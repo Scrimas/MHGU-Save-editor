@@ -71,8 +71,14 @@ impl Kind {
             Kind::Waist => 4,
             Kind::Legs => 5,
             Kind::Talisman => 6,
-            Kind::Weapon(w) => 7 + w,
-            Kind::Other(c) => c,
+            Kind::Weapon(w) => {
+                assert!(w < 15, "weapon class {w}");
+                7 + w
+            }
+            Kind::Other(c) => {
+                assert!(c < 32, "box type {c} does not fit 5 bits");
+                c
+            }
         }
     }
     pub fn is_armor(self) -> bool {
@@ -135,6 +141,7 @@ impl Entry {
         [self.w(6), self.w(8), self.w(10)]
     }
     pub fn set_deco(&mut self, k: usize, item: u16) {
+        assert!(k < 3, "decoration slot {k}");
         self.set_w(6 + 2 * k, item);
     }
     pub fn talisman(&self) -> Option<Talisman> {

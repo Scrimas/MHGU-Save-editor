@@ -78,8 +78,12 @@ pub fn set(s: &mut Save, base: usize, i: usize, r: Record) {
     s.set_u16(base + HUNTS + 2 * i, r.hunts.min(MAX_COUNT));
     s.set_u16(base + CAPTURES + 2 * i, r.captures.min(MAX_COUNT));
     if meta(i).size_record {
-        let (mut lo, mut hi) = (r.min, r.max);
-        if lo > hi && hi != 0 {
+        // the game fills both on the first hunt: one size alone stands for both
+        let (mut lo, mut hi) = match (r.min, r.max) {
+            (0, x) | (x, 0) => (x, x),
+            p => p,
+        };
+        if lo > hi {
             std::mem::swap(&mut lo, &mut hi);
         }
         s.set_u16(base + SIZES + 4 * i, lo);
@@ -153,5 +157,49 @@ pub fn sync_card(s: &mut Save, base: usize, i: usize) {
     if let Some(pos) = meta(head).card_pos {
         let e = card_entry(s, base, head);
         s.put(base + CARD_LOG + 8 * pos, &e);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::save::{blank, SLOT1_BASE as B};
+
+    #[test]
+    fn size_record_is_whole_and_ordered() {
+        let mut s = blank();
+        set(&mut s, B, 1, Record { min: 0, max: 110, ..Default::default() });
+        assert_eq!((get(&s, B, 1).min, get(&s, B, 1).max), (110, 110));
+        set(&mut s, B, 1, Record { min: 120, max: 95, ..Default::default() });
+        assert_eq!((get(&s, B, 1).min, get(&s, B, 1).max), (95, 120));
+        set(&mut s, B, 1, Record::default());
+        assert_eq!((get(&s, B, 1).min, get(&s, B, 1).max), (0, 0));
+        set(&mut s, B, 1, Record { hunts: 60000, ..Default::default() });
+        assert_eq!(get(&s, B, 1).hunts, MAX_COUNT);
+    }
+
+    #[test]
+    fn crowns_follow_the_thresholds() {
+        let m = meta(1);
+        let r = |min, max| Record { min, max, ..Default::default() };
+        assert_eq!(crowns(1, r(m.mini_le, m.gold_ge)), Crowns { mini: true, large: 2 });
+        assert_eq!(crowns(1, r(m.mini_le + 1, m.silver_ge)), Crowns { mini: false, large: 1 });
+        assert_eq!(crowns(1, r(100, m.silver_ge - 1)), Crowns::default());
+        let (lo, hi) = crown_sizes(1).unwrap();
+        assert_eq!(crowns(1, r(lo, hi)), Crowns { mini: true, large: 2 });
+    }
+
+    #[test]
+    fn card_entry_sums_the_family() {
+        let head = tables().monster_meta.iter().find(|m| m.family_of.is_some()).and_then(|m| m.family_of).unwrap();
+        let member = tables().monster_meta.iter().find(|m| m.family_of == Some(head)).unwrap().index;
+        let mut s = blank();
+        set(&mut s, B, head, Record { hunts: 5, captures: 1, ..Default::default() });
+        set(&mut s, B, member, Record { hunts: 7, captures: 2, ..Default::default() });
+        let w = u32::from_le_bytes(card_entry(&s, B, head)[4..8].try_into().unwrap());
+        assert_eq!((w & 0x3FFF, w >> 14 & 0x3FFF), (12, 3));
+        if let Some(pos) = meta(head).card_pos {
+            assert_eq!(s.get(B + CARD_LOG + 8 * pos, 8), card_entry(&s, B, head));
+        }
     }
 }

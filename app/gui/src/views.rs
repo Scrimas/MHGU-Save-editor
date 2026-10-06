@@ -55,6 +55,8 @@ enum ToastAct {
     Redo,
     Restore(PathBuf, String),
     Update,
+    /// Read the save again keeping the staged edits (it changed on disk).
+    Reload,
 }
 
 /// Toast with an optional second line and button; it stays longer when it has one.
@@ -82,6 +84,12 @@ fn toast_full(ui: &AppWindow, msg: impl Into<SharedString>, sub: &str, action: &
 
 fn toast(ui: &AppWindow, msg: impl Into<SharedString>, error: bool) {
     toast_full(ui, msg, "", "", ToastAct::None, error);
+}
+
+/// The game saved after the save was read: nothing written, Reload keeps the edits.
+fn changed_on_disk(ui: &AppWindow, p: &Path) {
+    let sub = format!("{} was saved again after it was opened. Nothing was written.", p.display());
+    toast_full(ui, "The save changed on disk", &sub, "Reload", ToastAct::Reload, true);
 }
 
 // --- names ----------------------------------------------------------------------------
@@ -1366,11 +1374,9 @@ fn refused(ui: &AppWindow, c: Conf) -> bool {
     r
 }
 
-/// Snapshot folder of the open save (`<root>/<save id>`).
+/// Snapshot folder of the open save.
 fn snapshot_dir(st: &State) -> Option<PathBuf> {
-    let doc = st.doc.as_ref()?;
-    let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
-    Some(system::snapshot_root().join(id))
+    Some(system::snapshot_dir(&st.doc.as_ref()?.loc))
 }
 
 // --- updates --------------------------------------------------------------------------
@@ -1589,16 +1595,28 @@ fn wire_settings(ui: &AppWindow) {
 
 // --- actions --------------------------------------------------------------------------
 
+/// Open a save; with staged changes it asks first (they would be lost).
 pub fn open(ui: &AppWindow, st: &Shared, p: &Path) {
+    if !st.borrow().ops.is_empty() {
+        ui.global::<Api>().set_open_ask(p.display().to_string().into());
+        return;
+    }
+    open_now(ui, st, p);
+}
+
+fn open_now(ui: &AppWindow, st: &Shared, p: &Path) {
     let r = st.borrow_mut().open(p);
     match r {
         Ok(()) => {
             let api = ui.global::<Api>();
             api.set_page("overview".into());
+            api.set_toast("".into());
             view(|v| {
                 v.equip_sel = -1;
                 v.palico_sel = -1;
                 v.field_sel = -1;
+                // a toast's button acts on the save it was shown for
+                v.toast_act = ToastAct::None;
             });
             let abs = std::path::absolute(p).unwrap_or_else(|_| p.to_path_buf());
             settings::update(|s| s.add_recent(abs));
@@ -1811,6 +1829,16 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         });
     }
     {
+        let w = ui.as_weak();
+        let st = st.clone();
+        api.on_open_confirmed(move || {
+            let Some(ui) = w.upgrade() else { return };
+            let p = ui.global::<Api>().get_open_ask();
+            ui.global::<Api>().set_open_ask("".into());
+            open_now(&ui, &st, Path::new(p.as_str()));
+        });
+    }
+    {
         let st = st.clone();
         api.on_open_folder(move || {
             if let Some(d) = st.borrow().doc.as_ref().and_then(|d| d.loc.opened.parent().map(Path::to_path_buf)) {
@@ -1827,7 +1855,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         });
     }
     on!(ui, st, on_select_slot, |ui, s, k: i32| {
-        if s.doc.is_some() {
+        if s.doc.is_some() && (0..3).contains(&k) {
             s.slot = k as usize;
         }
         view(|v| {
@@ -1875,6 +1903,14 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     api.set_snapshots_open(true);
                 }
                 ToastAct::Update => ui.global::<Api>().set_update_open(true),
+                ToastAct::Reload => {
+                    let r = st.borrow_mut().reload_keep();
+                    refresh(&ui, &st.borrow());
+                    match r {
+                        Ok(n) => toast_full(&ui, "Read the save again", &format!("{} kept", count(n, "staged change", "staged changes")), "", ToastAct::None, false),
+                        Err(e) => toast(&ui, format!("Could not read the save again: {e}"), true),
+                    }
+                }
                 ToastAct::None => {}
             }
         });
@@ -1915,14 +1951,18 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let titles: Vec<String> = s.ops.iter().map(|o| if o.values.len() == 1 { o.values[0].0.label(s.save(), o.slot) } else { o.title.clone() }).collect();
         let n = s.ops.len();
         let Some(doc) = s.doc.as_mut() else { return false };
+        // the game saved since the save was read: writing would undo that play
+        if let Some(p) = store::changed_on_disk(&doc.loc) {
+            changed_on_disk(&ui, &p);
+            return false;
+        }
         let mut kept = None;
         if snapshot {
-            let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
             let now = chrono::Local::now();
             let stamp = now.format(system::STAMP).to_string();
-            match store::snapshot(&doc.loc, &system::snapshot_root().join(id), &stamp) {
+            match store::snapshot(&doc.loc, &system::snapshot_dir(&doc.loc), &stamp) {
                 Ok(p) => {
-                    system::write_note(&p, &format!("Before: {}", fmt::list(&titles, 3)));
+                    system::write_note(&p, &format!("Before: {}", fmt::list(&titles, 3)), &doc.loc);
                     kept = Some((p, fmt::when(now)));
                 }
                 Err(e) => {
@@ -1931,7 +1971,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                 }
             }
         }
-        match store::write_all(&mut doc.save, &doc.loc) {
+        match store::write_all(&mut doc.save, &mut doc.loc) {
             Ok(_) => {
                 s.written();
                 if let Some((p, _)) = &kept {
@@ -1947,8 +1987,17 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                 }
                 true
             }
+            Err(mhgu_save::Error::ChangedOnDisk(p)) => {
+                changed_on_disk(&ui, &p);
+                false
+            }
+            // the copies are checked before any is written, so a failure here is rare;
+            // the snapshot just taken puts every file back
             Err(e) => {
-                toast(&ui, format!("Write failed: {e}"), true);
+                match kept {
+                    Some((p, when)) => toast_full(&ui, format!("Write failed: {e}"), "The snapshot taken first restores the save", "Restore…", ToastAct::Restore(p, when), true),
+                    None => toast(&ui, format!("Write failed: {e}"), true),
+                }
                 false
             }
         }
@@ -1956,13 +2005,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     {
         let st = st.clone();
         api.on_open_snapshots(move || {
-            let dir = st
-                .borrow()
-                .doc
-                .as_ref()
-                .and_then(|d| d.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| system::snapshot_root().join(n)))
-                .filter(|p| p.is_dir())
-                .unwrap_or_else(system::snapshot_root);
+            let dir = snapshot_dir(&st.borrow()).filter(|p| p.is_dir()).unwrap_or_else(system::snapshot_root);
             system::open_folder(&dir);
         });
     }
@@ -1977,14 +2020,21 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             return;
         }
         let dir = PathBuf::from(dir.as_str());
-        let when = system::snapshots(dir.parent().unwrap_or(&dir)).into_iter().find(|x| x.dir == dir).map(|x| fmt::when(x.time)).unwrap_or_default();
         let Some(doc) = s.doc.as_ref() else { return };
         let loc = doc.loc.clone();
-        let id = loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
+        let Some(snap) = system::snapshots(dir.parent().unwrap_or(&dir)).into_iter().find(|x| x.dir == dir) else {
+            return toast(&ui, format!("No snapshot at {}", dir.display()), true);
+        };
+        // a snapshot of another save never goes over this one
+        if !system::snapshot_of(&snap, &loc) {
+            let sub = snap.source.map(|p| format!("It was taken of {}", p.display())).unwrap_or_default();
+            return toast_full(&ui, "Not restored: this snapshot is of another save", &sub, "", ToastAct::None, true);
+        }
+        let when = fmt::when(snap.time);
         let stamp = chrono::Local::now().format(system::STAMP).to_string();
-        let kept = match store::snapshot(&loc, &system::snapshot_root().join(id), &stamp) {
+        let kept = match store::snapshot(&loc, &system::snapshot_dir(&loc), &stamp) {
             Ok(p) => {
-                system::write_note(&p, &format!("Before restoring the snapshot from {when}"));
+                system::write_note(&p, &format!("Before restoring the snapshot from {when}"), &loc);
                 p
             }
             Err(e) => return toast(&ui, format!("Snapshot failed, nothing restored: {e}"), true),
@@ -2177,7 +2227,11 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             match f {
                 "level" => e.set_level(v as u8),
                 "transmog" => e.set_transmog(0, 1),
-                d if d.starts_with("deco") => e.set_deco(d[4..].parse().unwrap_or(0), v as u16),
+                d if d.starts_with("deco") => {
+                    if let Some(k) = d[4..].parse::<usize>().ok().filter(|k| *k < 3) {
+                        e.set_deco(k, v as u16);
+                    }
+                }
                 t if e.talisman().is_some() => {
                     let mut tl = e.talisman().unwrap();
                     match t {
@@ -2297,6 +2351,10 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let i = view(|v| v.palico_sel);
         if i < 0 {
             return;
+        }
+        // a Palico without a name is an empty slot to the game
+        if f == "name" && t.trim().is_empty() {
+            return toast(&ui, "A Palico needs a name", true);
         }
         let i = i as usize;
         let tg = Target::Palico(i, targets::pal_of(&f));
@@ -2551,8 +2609,15 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
 }
 
 fn list_snapshots(ui: &AppWindow, st: &State) {
-    let Some(root) = snapshot_dir(st) else { return };
-    let rows: Vec<SnapRow> = system::snapshots(&root)
+    let Some(doc) = st.doc.as_ref() else { return };
+    let root = system::snapshot_dir(&doc.loc);
+    // with the ones earlier versions kept in the save id's folder, if of this save
+    let mut all = system::snapshots(&root);
+    if let Some(old) = system::legacy_snapshot_dir(&doc.loc) {
+        all.extend(system::snapshots(&old).into_iter().filter(|x| system::snapshot_of(x, &doc.loc)));
+        all.sort_by(|a, b| b.time.cmp(&a.time));
+    }
+    let rows: Vec<SnapRow> = all
         .into_iter()
         .map(|x| SnapRow {
             dir: x.dir.display().to_string().into(),

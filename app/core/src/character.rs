@@ -173,6 +173,7 @@ pub fn set_wycademy(s: &mut Save, base: usize, v: u32) {
 
 /// Village points of village `v` (Bherna, Kokoto, Pokke, Yukumo), low or G rank.
 pub fn set_village_points(s: &mut Save, base: usize, v: usize, g: bool, pts: u32) {
+    assert!(v < 4, "village {v} out of range");
     let o = if g { POINTS_G } else { POINTS_LR };
     s.set_u32(base + o + 4 * v, pts.min(MAX_VILLAGE_POINTS));
 }

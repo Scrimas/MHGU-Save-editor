@@ -198,6 +198,9 @@ export global Api {
     // quitting with staged changes
     in-out property <bool> quit-open;
     callback quit();
+    // opening a save with staged changes: the file waiting for the confirmation ("" none)
+    in-out property <string> open-ask;
+    callback open-confirmed();
 
     // overview
     in property <[StatCard]> stats;
