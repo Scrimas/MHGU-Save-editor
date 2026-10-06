@@ -21,6 +21,8 @@ Single-file builds are attached to each [release](https://github.com/Scrimas/MHG
 | `MHGU-Save-Editor-<version>-x86_64.AppImage` | Linux x86-64, glibc 2.28 or newer (distros from 2019 on) |
 | `MHGU-Save-Editor-<version>-x86_64.exe` | Windows 10 / 11, nothing to install |
 
+The `.exe` is not code-signed, so Windows SmartScreen warns the first time: **More info → Run anyway**.
+
 The AppImage adds itself to the application menu when started (`~/.local/share/applications`);
 the newest version on disk keeps the entry, and menus hide it once that AppImage is deleted.
 

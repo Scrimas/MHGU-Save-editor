@@ -4,7 +4,9 @@ name: Release builds
 # script in an Arch Linux container (the toolchain it was written for):
 #   MHGU-Save-Editor-<version>-x86_64.exe        mingw-w64 (UCRT) cross build
 #   MHGU-Save-Editor-<version>-x86_64.AppImage   zig, glibc 2.28, type 2 runtime
-# A v* tag drafts a GitHub Release with them; a manual run keeps them as workflow artifacts.
+# The .exe is then started on Windows with the sealed test save (it must open the save and
+# draw its window). A v* tag drafts a GitHub Release with them once that passes; a manual
+# run keeps them as workflow artifacts.
 # The game-asset pack comes from app/assets/gen.tar.gz.gpg (see app/assets/README.md).
 
 on:
@@ -23,6 +25,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: archlinux:base-devel
+    outputs:
+      ver: ${{ steps.ver.outputs.ver }}
     env:
       # AppImage type 2 runtime, pinned by release and checksum
       RUNTIME_URL: https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64
@@ -79,13 +83,61 @@ jobs:
           path: app/dist/*${{ steps.ver.outputs.ver }}*
           if-no-files-found: error
 
+  # The shipped .exe (the mingw build, not the MSVC one ci.yml tests) on a real Windows:
+  # MHGU_SNAPSHOT draws the window into a PNG and quits. A crash, a hang or no picture fails.
+  windows:
+    needs: build
+    runs-on: windows-latest
+    env:
+      VER: ${{ needs.build.outputs.ver }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: MHGU-Save-Editor-${{ needs.build.outputs.ver }}
+          path: dist
+
+      - name: Test save
+        env:
+          ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
+        run: |
+          mkdir save
+          printf '%s' "$ASSETS_PASSPHRASE" |
+            gpg --batch --pinentry-mode loopback --passphrase-fd 0 --decrypt app/assets/test-save.tar.xz.gpg |
+            tar -xJ -C save
+          test -f save/0/system
+
+      - name: Start the .exe
+        run: |
+          MHGU_SNAPSHOT=overview.png timeout 180 "dist/MHGU-Save-Editor-$VER-x86_64.exe" \
+            "$(cygpath -m "$PWD")/save/0/system" overview
+          test -s overview.png
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-overview-${{ needs.build.outputs.ver }}
+          path: overview.png
+          if-no-files-found: ignore
+
+  release:
+    needs: [build, windows]
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    env:
+      VER: ${{ needs.build.outputs.ver }}
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: MHGU-Save-Editor-${{ needs.build.outputs.ver }}
+          path: dist
+
       - name: Draft release
-        if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
-          VER: ${{ steps.ver.outputs.ver }}
         # the checksums also as plain SHA256SUMS: the 0.8.0 updater looks for that name only
         run: |
-          cp "app/dist/SHA256SUMS-$VER" "$RUNNER_TEMP/SHA256SUMS"
+          cp "dist/SHA256SUMS-$VER" "$RUNNER_TEMP/SHA256SUMS"
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
-            --title "MHGU Save Editor $VER" --generate-notes app/dist/*"$VER"* "$RUNNER_TEMP/SHA256SUMS"
+            --title "MHGU Save Editor $VER" --generate-notes dist/*"$VER"* "$RUNNER_TEMP/SHA256SUMS"
