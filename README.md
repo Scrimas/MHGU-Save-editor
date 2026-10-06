@@ -113,6 +113,23 @@ last one; extra emulator process names for the running check; and **Confirmed ch
 only**, which refuses every Derived change. They are kept in
 `~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
 
+**Colours from [matugen](https://github.com/InioX/matugen)** (Linux): the editor follows
+the wallpaper's palette when `~/.config/mhgu-save-editor/matugen.json` exists, and picks
+up a new one within two seconds of matugen writing it. **Save template** in Settings puts
+the template next to it; then add to `~/.config/matugen/config.toml`:
+
+```toml
+[templates.mhgu-save-editor]
+input_path = '~/.config/mhgu-save-editor/matugen-template.json'
+output_path = '~/.config/mhgu-save-editor/matugen.json'
+```
+
+Any template or tool will do that writes the same file: a `dark` and a `light` object,
+each with the Material roles `primary`, `on_surface`, `on_surface_variant`,
+`surface_container_lowest` … `surface_container_highest` and `error` as `#rrggbb`
+([`app/packaging/matugen`](app/packaging/matugen/mhgu-save-editor.json)). Light, Dark
+and System still choose which of the two is shown.
+
 ![Settings dialog](docs/screenshots/07-settings-dark.png#gh-dark-mode-only)
 ![Settings dialog](docs/screenshots/07-settings-light.png#gh-light-mode-only)
 

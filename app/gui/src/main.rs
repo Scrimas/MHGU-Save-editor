@@ -11,6 +11,7 @@ mod settings;
 mod state;
 mod system;
 mod targets;
+mod theme;
 mod update;
 mod views;
 

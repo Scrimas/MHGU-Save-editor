@@ -424,6 +424,44 @@ component SettingsDialog inherits Modal {
                     selected => { Api.set-setting("theme", self.current-index); }
                 }
             }
+            if s.matugen-offered: VerticalLayout {
+                spacing: Tok.tight;
+                CheckBox {
+                    text: "Colours from matugen (the wallpaper's palette)";
+                    checked: s.matugen;
+                    toggled => { Api.set-setting("matugen", self.checked ? 1 : 0); }
+                }
+                if s.matugen && s.matugen-hint != "": Muted { text: s.matugen-hint; }
+                if s.matugen && !Api.colors-on: HorizontalLayout {
+                    spacing: Tok.tight;
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        background: Tok.input;
+                        border-radius: Tok.radius;
+                        border-width: 1px;
+                        border-color: Tok.input-border;
+                        height: snippet.preferred-height + 16px;
+                        // selectable, to copy into config.toml
+                        snippet := TextInput {
+                            x: 10px;
+                            y: 8px;
+                            width: parent.width - 20px;
+                            text: s.matugen-snippet;
+                            read-only: true;
+                            single-line: false;
+                            wrap: char-wrap;
+                            font-size: Tok.small;
+                            font-family: "monospace";
+                            color: Palette.foreground;
+                        }
+                    }
+                    Button {
+                        text: s.matugen-template ? "Template saved" : "Save template";
+                        enabled: !s.matugen-template;
+                        clicked => { Api.save-matugen-template(); }
+                    }
+                }
+            }
             SettingRow {
                 title: "Interface size";
                 hint: s.scale-now;

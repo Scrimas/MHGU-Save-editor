@@ -19,6 +19,8 @@ const RECENT: usize = 5;
 pub struct Settings {
     /// "system", "light" or "dark"
     pub theme: String,
+    /// Colours from matugen when its file is there (Linux; theme.rs).
+    pub matugen: bool,
     /// Interface size in percent (SLINT_SCALE_FACTOR); 0 leaves it to the system.
     pub scale: u32,
     /// Snapshot folder; None for the default in the data folder.
@@ -47,6 +49,7 @@ impl Default for Settings {
     fn default() -> Settings {
         Settings {
             theme: "system".into(),
+            matugen: true,
             scale: 0,
             snapshot_dir: None,
             keep_snapshots: 0,
