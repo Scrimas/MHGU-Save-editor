@@ -12,7 +12,7 @@ use crate::{model, strings, Shared};
 use crate::{
     Api, AppWindow, ArtRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
     EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, PalicoDetail, PalicoRow, PickItem, Preview, PreviewLine,
-    QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WriteRow,
+    QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
 };
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Kind, Owner};
@@ -219,6 +219,8 @@ fn skill_name(id: u8) -> String {
 struct View {
     item_filter: String,
     picker_filter: String,
+    /// item loadout being edited (-1 none)
+    loadout_sel: i32,
     equip_filter: String,
     equip_search: String,
     equip_list_search: String,
@@ -226,6 +228,7 @@ struct View {
     /// box slot to scroll to on the next refresh
     equip_jump: Option<i32>,
     palico_sel: i32,
+    palico_search: String,
     quest_tab: usize,
     quest_search: String,
     quest_missing: bool,
@@ -256,7 +259,7 @@ struct View {
 
 thread_local! {
     static VIEW: std::cell::RefCell<View> = std::cell::RefCell::new(View {
-        equip_filter: "all".into(), request_filter: "open".into(), equip_sel: -1, palico_sel: -1, field_sel: -1, ..Default::default()
+        equip_filter: "all".into(), request_filter: "open".into(), equip_sel: -1, palico_sel: -1, field_sel: -1, loadout_sel: -1, ..Default::default()
     });
 }
 
@@ -578,7 +581,28 @@ fn character_page(ui: &AppWindow, st: &State) {
         was_hub_star: was(Target::HubStar),
         was_lr: model((0..4).map(|v| was(Target::Points(v, false))).collect()),
         was_g: model((0..4).map(|v| was(Target::Points(v, true))).collect()),
+        weapon_use: model(weapon_use_rows(st)),
     });
+}
+
+/// The Guild Card weapon usage table in the card's order; the main weapon is the
+/// largest total (the first one on a tie, as drawn).
+fn weapon_use_rows(st: &State) -> Vec<WeaponUseRow> {
+    let (s, base) = (st.save(), st.base());
+    let total = |w: usize| (0..3).map(|v| character::weapon_use(s, base, v, w) as i32).sum::<i32>();
+    let top = character::USE_SHOWN.iter().map(|&w| total(w)).max().unwrap_or(0);
+    let main = character::USE_SHOWN.iter().copied().find(|&w| top > 0 && total(w) == top);
+    character::USE_SHOWN
+        .iter()
+        .map(|&w| WeaponUseRow {
+            index: w as i32,
+            name: character::USE_WEAPONS[w].into(),
+            counts: model((0..3).map(|v| character::weapon_use(s, base, v, w) as i32).collect()),
+            was: model((0..3).map(|v| SharedString::from(st.was(Target::WeaponUse(v, w)))).collect()),
+            total: total(w),
+            main: main == Some(w),
+        })
+        .collect()
 }
 
 fn store_of(ui: &AppWindow) -> Store {
@@ -616,6 +640,7 @@ fn items_page(ui: &AppWindow, st: &State) {
         .collect();
     api.set_item_used(all.iter().filter(|x| !x.is_empty()).count() as i32);
     api.set_item_total(all.len() as i32);
+    api.set_item_free(all.iter().position(|x| x.is_empty()).map_or(-1, |i| i as i32));
     api.set_item_slots(model(rows));
     // runs of empty loadouts collapse into one row (C8)
     let mut lrows: Vec<LoadoutRow> = vec![];
@@ -623,7 +648,7 @@ fn items_page(ui: &AppWindow, st: &State) {
     let flush = |run: &mut Option<(usize, usize)>, lrows: &mut Vec<LoadoutRow>| {
         if let Some((a, b)) = run.take() {
             let name = if a == b { format!("Loadout {} · empty", a + 1) } else { format!("Loadouts {}–{} · empty", a + 1, b + 1) };
-            lrows.push(LoadoutRow { index: -1, name: name.into(), summary: "".into(), used: false });
+            lrows.push(LoadoutRow { index: -1, first: a as i32, last: b as i32, name: name.into(), summary: "".into(), used: false });
         }
     };
     for k in 0..items::LOADOUT_N {
@@ -634,17 +659,56 @@ fn items_page(ui: &AppWindow, st: &State) {
             continue;
         }
         flush(&mut run, &mut lrows);
-        lrows.push(LoadoutRow { index: k as i32, name: l.name.into(), used: true, summary: used.join(", ").into() });
+        lrows.push(LoadoutRow { index: k as i32, first: k as i32, last: k as i32, name: l.name.into(), used: true, summary: used.join(", ").into() });
     }
     flush(&mut run, &mut lrows);
     api.set_loadouts(model(lrows));
+    // the loadout being edited: its 32 pouch positions
+    let sel = view(|v| v.loadout_sel);
+    api.set_loadout_sel(sel);
+    if (0..items::LOADOUT_N as i32).contains(&sel) {
+        let k = sel as usize;
+        let l = items::loadout(s, base, k);
+        let lo = base + items::LOADOUTS + items::LOADOUT_SZ * k;
+        api.set_loadout_name(l.name.clone().into());
+        api.set_loadout_was(st.was(Target::Loadout(k)).into());
+        let slots: Vec<ItemSlot> = l
+            .items
+            .iter()
+            .enumerate()
+            .map(|(j, &(id, n))| {
+                let (img, has) = if id == 0 { (Image::default(), false) } else { icon(assets::item_icon(id)) };
+                let o = lo + items::LOADOUT_NAME + 4 * j;
+                let changed = st.changed(o, 4);
+                let was = if changed {
+                    let (oid, on) = items::loadout(st.orig(), base, k).items[j];
+                    if oid == 0 { "Empty".to_string() } else { format!("{} ×{on}", assets::item_name(oid)) }
+                } else {
+                    String::new()
+                };
+                ItemSlot {
+                    slot: j as i32,
+                    id: id as i32,
+                    name: if id == 0 { "".into() } else { assets::item_name(id).into() },
+                    count: n as i32,
+                    max: if id == 0 { 0 } else { assets::item_max(id, Store::Pouch) as i32 },
+                    icon: img,
+                    has_icon: has,
+                    changed,
+                    was: was.into(),
+                }
+            })
+            .collect();
+        api.set_loadout_slots(model(slots));
+    }
     picker(ui);
 }
 
 fn picker(ui: &AppWindow) {
     let f = view(|v| v.picker_filter.to_lowercase());
     let n = assets::names();
-    let store = store_of(ui);
+    // loadouts fill the pouch: its carry limits apply
+    let store = if ui.global::<Api>().get_item_store() == 2 { Store::Pouch } else { store_of(ui) };
     let mut v: Vec<PickItem> = vec![];
     let count = if n.items.is_empty() { 1900 } else { n.items.len() };
     for id in 1..count.min(items::MAX_ID as usize + 1) {
@@ -858,10 +922,13 @@ fn palico_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let s = st.save();
     let base = st.base();
+    let q = view(|v| v.palico_search.to_lowercase());
+    let all = (0..palico::LIST_N).filter(|&i| !palico::is_empty(s, base, i)).count();
     let rows: Vec<PalicoRow> = (0..palico::LIST_N)
         .filter(|&i| !palico::is_empty(s, base, i))
-        .map(|i| {
-            let p = palico::get(s, base, i);
+        .map(|i| (i, palico::get(s, base, i)))
+        .filter(|(_, p)| q.is_empty() || p.name.to_lowercase().contains(&q))
+        .map(|(i, p)| {
             PalicoRow {
                 index: i as i32,
                 name: p.name.into(),
@@ -875,9 +942,10 @@ fn palico_page(ui: &AppWindow, st: &State) {
         sel = rows.first().map(|r| r.index).unwrap_or(-1);
         view(|v| v.palico_sel = sel);
     }
-    api.set_palico_summary(count(rows.len(), "Palico", "Palicoes").into());
+    api.set_palico_summary(count(all, "Palico", "Palicoes").into());
     api.set_palicoes(model(rows));
     api.set_biases(strings(palico::BIASES.iter().map(|s| s.to_string())));
+    api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|s| s.to_string())));
     let mv = |m: &[u8]| {
         let n = &assets::names().support_moves;
         // 0 is "(No Move)", 57 an empty learned slot
@@ -905,6 +973,7 @@ fn palico_page(ui: &AppWindow, st: &State) {
             was_bias: was(targets::Pal::Bias),
             was_greeting: was(targets::Pal::Greeting),
             was_owner: was(targets::Pal::Owner),
+            was_target: was(targets::Pal::Target),
         }
     } else {
         PalicoDetail { index: -1, ..Default::default() }
@@ -1071,12 +1140,17 @@ fn collections_page(ui: &AppWindow, st: &State) {
     let dishes_on = (0..99).filter(|&b| c.dish(b)).count();
     let ingr_on = (0..45).filter(|&b| c.ingredient(b)).count();
     let awards_on = t.awards.iter().filter(|a| c.award(a.0)).count();
+    let dev_levels = |d: usize| {
+        let (q0, n) = Char::deviant_levels(d);
+        ((0..n).filter(|&k| c.quest(QuestBit::Cleared, q0 + k)).count(), n)
+    };
+    let devs_done = (0..DEVIANTS.len()).filter(|&d| dev_levels(d).0 == dev_levels(d).1).count();
     api.set_collection_tabs(strings([
         format!("Hunter Arts {} / {}", arts_on, t.arts.len()),
         format!("Canteen dishes {dishes_on} / 99"),
         format!("Canteen ingredients {ingr_on} / 45"),
         format!("Awards {} / {}", awards_on, t.awards.len()),
-        "Deviants".to_string(),
+        format!("Deviants {devs_done} / {}", DEVIANTS.len()),
     ]));
     let rows: Vec<CheckRow> = match tab {
         1 | 2 => t
@@ -1125,7 +1199,7 @@ fn collections_page(ui: &AppWindow, st: &State) {
         1 => format!("Canteen dishes: {dishes_on} / 99"),
         2 => format!("Canteen ingredients: {ingr_on} / 45"),
         3 => format!("Awards: {} / {}", awards_on, t.awards.len()),
-        _ => "18 deviants".into(),
+        _ => format!("Deviants with every level cleared: {devs_done} / {}", DEVIANTS.len()),
     };
     api.set_checks_summary(format!("{summary} · confirmed in game except where marked").into());
     api.set_checks(model(rows));
@@ -1133,11 +1207,23 @@ fn collections_page(ui: &AppWindow, st: &State) {
     let devs: Vec<DeviantRow> = DEVIANTS
         .iter()
         .enumerate()
+        .filter(|&(d, name)| keep(name, dev_levels(d).0 == dev_levels(d).1))
         .map(|(d, name)| {
-            let (q0, n) = Char::deviant_levels(d);
-            let lv = (0..n).filter(|&k| c.quest(QuestBit::Cleared, q0 + k)).count();
+            let (lv, n) = dev_levels(d);
             let mi = t.monsters.iter().find(|m| m.name == *name).map(|m| m.index);
             let (img, has) = icon(mi.and_then(assets::monster_icon));
+            // G-rank levels cleared by an edit stay off the board until the gate opens
+            let gate = if lv > Char::deviant_g1(d) && !c.deviant_gate_open(d) {
+                if d == 17 {
+                    "G-rank levels appear in game only once the game releases them (event flag 1226).".to_string()
+                } else {
+                    let ids: Vec<String> = mhgu_save::progress::DEVIANT_GATE[d].iter().map(|i| i.to_string()).collect();
+                    let base = name.split_once(' ').map_or(*name, |x| x.1);
+                    format!("G-rank levels appear in game once a G-rank {base} quest is cleared ({}).", fmt::list(&ids, 3))
+                }
+            } else {
+                String::new()
+            };
             DeviantRow {
                 index: d as i32,
                 name: (*name).into(),
@@ -1148,6 +1234,7 @@ fn collections_page(ui: &AppWindow, st: &State) {
                 has_icon: has,
                 was_permits: st.was(Target::Permits(d)).into(),
                 was_levels: st.was(Target::Levels(d)).into(),
+                gate: gate.into(),
             }
         })
         .collect();
@@ -2160,6 +2247,14 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             "village-star" => Target::VillageStar,
             "hub-star" => Target::HubStar,
             "play-h" | "play-m" => Target::Playtime,
+            // "use:<venue>:<weapon>"
+            _ if k.starts_with("use:") => {
+                let mut p = k[4..].split(':').map(|x| x.parse::<usize>().ok());
+                match (p.next().flatten(), p.next().flatten()) {
+                    (Some(v), Some(w)) if v < 3 && w < 15 => Target::WeaponUse(v, w),
+                    _ => return,
+                }
+            }
             _ => match k.trim_start_matches(|c: char| c.is_alphabetic()).parse::<usize>() {
                 Ok(i) if i < 4 => Target::Points(i, k.starts_with('g')),
                 _ => return,
@@ -2185,11 +2280,11 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     let secs = if k == "play-h" { v * 3600 + m * 60 } else { h * 3600 + v.min(59) * 60 };
                     character::set_playtime(sv, base, secs + cur % 60);
                 }
-                _ => {
-                    if let Target::Points(i, g) = t {
-                        character::set_village_points(sv, base, i, g, v);
-                    }
-                }
+                _ => match t {
+                    Target::Points(i, g) => character::set_village_points(sv, base, i, g, v),
+                    Target::WeaponUse(venue, w) => character::set_weapon_use(sv, base, venue, w, v.min(u16::MAX as u32) as u16),
+                    _ => {}
+                },
             }
             vec![]
         });
@@ -2228,6 +2323,47 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
             items::set(sv, base, store, slot as usize, Stack { id: id as u16, count: count.clamp(0, max) as u8 });
             vec![]
         });
+    });
+    on!(ui, st, on_select_loadout, |ui, s, k: i32| {
+        view(|v| v.loadout_sel = k);
+        let _ = (&ui, &s);
+    });
+    // a loadout is one value: its edits merge, its name follows the game's "Set NN"
+    on!(ui, st, on_set_loadout_item, |ui, s, j: i32, id: i32, count: i32| {
+        let k = view(|v| v.loadout_sel);
+        if !(0..items::LOADOUT_N as i32).contains(&k) || !(0..items::LOADOUT_ITEMS as i32).contains(&j) {
+            return;
+        }
+        let (k, j) = (k as usize, j as usize);
+        let t = Target::Loadout(k);
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+            let mut l = items::loadout(sv, base, k);
+            let max = assets::item_max(id as u16, Store::Pouch) as i32;
+            l.items[j] = if id <= 0 || count <= 0 { (0, 0) } else { (id as u16, count.clamp(1, max) as u16) };
+            if l.name.is_empty() && l.items.iter().any(|x| x.0 != 0) {
+                l.name = format!("Set {:02}", k + 1);
+            }
+            items::set_loadout(sv, base, k, &l);
+            vec![]
+        });
+        let _ = &ui;
+    });
+    on!(ui, st, on_set_loadout_name, |ui, s, name: SharedString| {
+        let k = view(|v| v.loadout_sel);
+        if !(0..items::LOADOUT_N as i32).contains(&k) {
+            return;
+        }
+        let k = k as usize;
+        let t = Target::Loadout(k);
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+            let mut l = items::loadout(sv, base, k);
+            l.name = name.trim().to_string();
+            items::set_loadout(sv, base, k, &l);
+            vec![]
+        });
+        let _ = &ui;
     });
     on!(ui, st, on_item_bulk, |ui, s, what: SharedString| {
         let id = bulk_id(&ui, &format!("items:{what}"));
@@ -2363,6 +2499,10 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     }
 
     // palicoes
+    on!(ui, st, on_filter_palicoes, |ui, s, q: SharedString| {
+        view(|v| v.palico_search = q.to_string());
+        let _ = (&ui, &s);
+    });
     on!(ui, st, on_select_palico, |ui, s, i: i32| {
         view(|v| v.palico_sel = i);
         let _ = (&ui, &s);
@@ -2375,12 +2515,18 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let i = i as usize;
         let t = Target::Palico(i, targets::pal_of(&f));
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+        // only Large First of the targets was read off in game
+        let c = if f == "target" { Conf::Derived } else { Conf::Confirmed };
+        if refused(&ui, c) {
+            return;
+        }
+        s.edit(Edit::one(t, title, c), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
                 "level" => p.level = v.clamp(1, palico::MAX_LEVEL as i32) as u8,
                 "exp" => p.exp = v.max(0) as u32,
                 "bias" => p.bias = v.clamp(0, 7) as u8,
+                "target" => p.target = v.clamp(1, palico::TARGETS.len() as i32 - 1) as u8,
                 _ => {}
             }
             palico::set(sv, base, i, &p);

@@ -65,7 +65,8 @@ export struct ItemSlot { slot: int, id: int, name: string, count: int, max: int,
 
 export struct PickItem { id: int, name: string, icon: image, has-icon: bool, sub: string, max: int }
 
-export struct LoadoutRow { index: int, name: string, summary: string, used: bool }
+// A loadout, or a run of empty ones (index -1, loadouts first to last).
+export struct LoadoutRow { index: int, first: int, last: int, name: string, summary: string, used: bool }
 
 export struct EquipRow {
     slot: int, kind-code: int, title: string, sub: string,
@@ -91,6 +92,7 @@ export struct PalicoDetail {
     index: int, name: string, level: int, exp: int, bias: int, target: int, greeting: string, owner: string,
     moves: string, learned: string,
     was-name: string, was-level: string, was-exp: string, was-bias: string, was-greeting: string, was-owner: string,
+    was-target: string,
 }
 
 export struct QuestRow {
@@ -110,6 +112,8 @@ export struct ArtRow { name: string, ids: [int], on: [bool], changed: bool }
 export struct DeviantRow {
     index: int, name: string, permits: int, levels: int, total: int, icon: image, has-icon: bool,
     was-permits: string, was-levels: string,
+    // why G-rank levels are not offered in game yet ("" none)
+    gate: string,
 }
 
 export struct FieldRow { index: int, offset: string, size: string, owner: string, label: string, confidence: Confidence, changed: bool }
@@ -126,12 +130,16 @@ export struct Preview {
     lines: [PreviewLine], more: int, note: string, tech: string, empty: bool, action: string,
 }
 
+// Guild Card weapon usage of one weapon: quests per venue (Village, Hub, Arena).
+export struct WeaponUseRow { index: int, name: string, counts: [int], was: [string], total: int, main: bool }
+
 export struct CharacterInfo {
     name: string, hr: int, hr-points: int, funds: int, wycademy: int, playtime-h: int, playtime-m: int,
     village-star: int, hub-star: int, gender: string,
     points-lr: [int], points-g: [int],
     was-name: string, was-hr: string, was-hr-points: string, was-funds: string, was-wycademy: string,
     was-playtime: string, was-village-star: string, was-hub-star: string, was-lr: [string], was-g: [string],
+    weapon-use: [WeaponUseRow],
 }
 
 export global Api {
@@ -227,7 +235,17 @@ export global Api {
     callback search-picker(string);
     callback set-item(int /* slot */, int /* id */, int /* count */);
     callback item-bulk(string);
+    // first empty slot of the box or pouch shown (-1: full)
+    in property <int> item-free;
     in property <[LoadoutRow]> loadouts;
+    // the loadout being edited (-1 none): its name, 32 pouch positions, staged value
+    in property <int> loadout-sel: -1;
+    in property <string> loadout-name;
+    in property <[ItemSlot]> loadout-slots;
+    in property <string> loadout-was;
+    callback select-loadout(int);
+    callback set-loadout-item(int /* position */, int /* id */, int /* count */);
+    callback set-loadout-name(string);
 
     // equipment
     in property <[EquipRow]> equip-rows;
@@ -281,7 +299,11 @@ export global Api {
     in property <[PalicoRow]> palicoes;
     in property <PalicoDetail> palico;
     in property <[string]> biases;
+    // target 1-5 by name (index + 1)
+    in property <[string]> palico-targets;
     in property <string> palico-summary;
+    in-out property <string> palico-search;
+    callback filter-palicoes(string);
     callback select-palico(int);
     callback set-palico(string, int);
     callback set-palico-text(string, string);

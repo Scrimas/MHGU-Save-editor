@@ -1,5 +1,8 @@
 import { ListView, ComboBox, LineEdit, ScrollView, Palette } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow } from "../common.slint";
+import {
+    Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
+    Confidence,
+} from "../common.slint";
 
 // Label, control, "was … Undo" under it when staged.
 component Row inherits Rectangle {
@@ -57,8 +60,17 @@ export component PalicoesPage inherits Rectangle {
         HorizontalLayout {
             spacing: Tok.pad;
             vertical-stretch: 1;
-            Card {
+            VerticalLayout {
                 width: min(320px, root.width * 0.38);
+                spacing: Tok.tight;
+                LineEdit {
+                    placeholder-text: "Search Palicoes";
+                    text <=> Api.palico-search;
+                    edited(t) => { Api.filter-palicoes(t); }
+                }
+            Card {
+                vertical-stretch: 1;
+                if Api.palicoes.length == 0: EmptyState { text: Api.palico-search == "" ? "No Palicoes in this save." : "No Palico matches the search."; }
                 ListView {
                     for p in Api.palicoes: ListRow {
                         height: 50px;
@@ -76,6 +88,7 @@ export component PalicoesPage inherits Rectangle {
                         }
                     }
                 }
+            }
             }
             Card {
                 horizontal-stretch: 1;
@@ -108,6 +121,14 @@ export component PalicoesPage inherits Rectangle {
                             key: root.key + "bias";
                             ComboBox { width: 200px; model: Api.biases; current-index: Api.palico.bias; selected => { Api.set-palico("bias", self.current-index); } }
                             Rectangle { horizontal-stretch: 1; }
+                        }
+                        Row {
+                            label: "Target";
+                            was: Api.palico.was-target;
+                            key: root.key + "target";
+                            ComboBox { width: 200px; model: Api.palico-targets; current-index: Api.palico.target - 1; selected => { Api.set-palico("target", self.current-index + 1); } }
+                            ConfidenceTag { level: Confidence.derived; y: 5px; }
+                            Muted { text: "Large First is checked in game; the others follow the game's menu order."; vertical-alignment: center; horizontal-stretch: 1; }
                         }
                         TextRow { label: "Greeting"; field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }
                         TextRow { label: "Original owner"; field: "owner"; value: Api.palico.owner; was: Api.palico.was-owner; key: root.key + "owner"; field-width: 260px; }

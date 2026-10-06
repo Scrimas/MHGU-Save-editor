@@ -47,10 +47,18 @@ export component CollectionsPage inherits Rectangle {
                 items: ["Uncheck all…"];
                 activated => { pv.open("checks:none", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
+            if !root.checks: Button {
+                text: "All levels…";
+                clicked => { pv.open("deviants:levels", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
+            }
+            if !root.checks: Button {
+                text: "Max permits…";
+                clicked => { pv.open("deviants:permits", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
+            }
         }
         // the count in each tab (H5.1)
         TabBar { tabs: Api.collection-tabs; current: Api.collection-tab; select(i) => { Api.select-collection(i); } }
-        if root.checks: HorizontalLayout {
+        HorizontalLayout {
             spacing: Tok.tight;
             LineEdit {
                 placeholder-text: "Search";
@@ -160,9 +168,10 @@ export component CollectionsPage inherits Rectangle {
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
+                    if Api.deviants.length == 0: EmptyState { text: Api.check-missing ? "Every deviant has every level cleared." : "No deviant matches the search."; }
                     ListView {
                         for d in Api.deviants: Rectangle {
-                            height: 60px;
+                            height: d.gate != "" ? 76px : 60px;
                             if d.was-permits != "" || d.was-levels != "": StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
                             HorizontalLayout {
                                 padding-left: 14px;
@@ -172,7 +181,12 @@ export component CollectionsPage inherits Rectangle {
                                     width: Api.assets-ok ? 40px : 0px;
                                     Asset { y: 10px; width: 40px; height: 40px; source: d.icon; available: d.has-icon; }
                                 }
-                                Text { text: d.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                                VerticalLayout {
+                                    alignment: center;
+                                    horizontal-stretch: 1;
+                                    Text { text: d.name; overflow: elide; }
+                                    if d.gate != "": Text { text: d.gate; color: Tok.warn; font-size: Tok.small; wrap: word-wrap; }
+                                }
                                 VerticalLayout {
                                     width: 220px;
                                     alignment: center;

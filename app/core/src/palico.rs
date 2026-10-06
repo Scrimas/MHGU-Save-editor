@@ -27,7 +27,11 @@ pub const MOVES: usize = 0x28;
 pub const LEARNED: usize = 0x38;
 pub const NO_MOVE: u8 = 57;
 
-pub const BIASES: [&str; 8] = ["Charisma", "Fighting", "Protection", "Assisting", "Healing", "Bombing", "Gathering", "Beast"];
+/// Target byte -> the game's menu text (OtMenuMsg 56-61, in this order). 4 = Large First
+/// was read off in game; the rest follow the menu order (DERIVED). 0 is not offered.
+pub const TARGETS: [&str; 6] = ["None", "Small Only", "Small First", "Balanced", "Large First", "Large Only"];
+
+pub const BIASES: [&str; 8] =["Charisma", "Fighting", "Protection", "Assisting", "Healing", "Bombing", "Gathering", "Beast"];
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Palico {

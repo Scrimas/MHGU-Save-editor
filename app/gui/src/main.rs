@@ -127,7 +127,7 @@ fn main() -> Result<(), slint::PlatformError> {
 }
 
 /// Put the UI in a given state for a screenshot: comma-separated steps run in order.
-///   slot:N  tab:N  sel:N  store:N  owner:N  filter:F  large  missing  search:S  add:<category>:<id>
+///   slot:N  tab:N  sel:N  store:N  loadout:N  owner:N  filter:F  large  missing  search:S  add:<category>:<id>
 ///   goal:<id>  char:<field>:<value>  monster:<index>:<field>:<value>  item:<slot>:<id>:<count>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
 ///   theme:light|dark  update (asks GitHub, as Settings' Check now)
@@ -147,6 +147,7 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                 api.set_item_store(num(n));
                 api.invoke_filter_items("".into());
             }
+            (_, &["loadout", n]) => api.invoke_select_loadout(num(n)),
             (_, &["owner", n]) => {
                 api.set_equip_owner(num(n));
                 api.invoke_filter_equip(api.get_equip_filter());

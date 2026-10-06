@@ -1,7 +1,7 @@
 import { LineEdit, ListView, Button, Palette } from "std-widgets.slint";
 import {
     Api, Tok, Fmt, Card, Asset, Muted, ItemSlot, PageHeader, TabBar, NumberBox, StagedBar, WasLine, PreviewPopup,
-    MoreButton, ListRow,
+    MoreButton, ListRow, EmptyState,
 } from "../common.slint";
 
 // One slot of the box grid: number, icon, name, count; staged slots show what they held.
@@ -53,19 +53,40 @@ export component ItemsPage inherits Rectangle {
     property <length> pick-y;
     property <length> pick-w: min(440px, root.width - 16px);
     property <length> pick-h: min(540px, root.height - 16px);
+    // the editor fills a loadout position instead of a box or pouch slot
+    property <bool> loadout-mode;
     function open-editor(it: ItemSlot, x: length, y: length) {
-        root.edit-slot = it.slot;
-        root.edit-id = it.id;
-        root.held-id = it.id;
-        root.edit-max = it.id == 0 ? 99 : it.max;
-        root.edit-count = it.id == 0 ? 1 : min(it.count, it.max);
-        root.held =it.id == 0 ? "Empty" : it.name + " ×" + it.count;
-        root.edit-was = it.was;
+        root.open-at(it.slot, it.id, it.count, it.max, it.name, it.was, x, y);
+    }
+    function open-at(slot: int, id: int, count: int, max: int, name: string, was: string, x: length, y: length) {
+        root.loadout-mode = Api.item-store == 2;
+        root.edit-slot = slot;
+        root.edit-id = id;
+        root.held-id = id;
+        root.edit-max = id == 0 ? 99 : max;
+        root.edit-count = id == 0 ? 1 : min(count, max);
+        root.held = id == 0 ? "Empty" : name + " ×" + count;
+        root.edit-was = was;
         Api.search-picker("");
         root.pick-search = "";
         root.pick-x = clamp(x, 8px, root.width - root.pick-w - 8px);
         root.pick-y = clamp(y, 8px, root.height - root.pick-h - 8px);
         picker.show();
+    }
+    function commit(id: int, count: int) {
+        if root.loadout-mode {
+            Api.set-loadout-item(root.edit-slot, id, count);
+        } else {
+            Api.set-item(root.edit-slot, id, count);
+        }
+        picker.close();
+    }
+    function pick(id: int, max: int) {
+        if root.edit-id != id {
+            root.edit-id = id;
+            root.edit-max = max;
+            root.edit-count = id == root.held-id ? min(root.edit-count, max) : 1;
+        }
     }
     function bulk(id: string, b: length, r: length) {
         pv.open(id, r, b);
@@ -85,6 +106,12 @@ export component ItemsPage inherits Rectangle {
             title: "Items";
             subtitle: Api.item-store == 2 ? "Item loadouts · confirmed in game except where marked" : Fmt.num(Api.item-used) + " / " + Fmt.num(Api.item-total) + " slots used · confirmed in game except where marked";
             staged: Api.page-counts[2];
+            // the first empty slot, like the Equipment page's Add
+            if Api.item-store < 2: Button {
+                text: "Add item";
+                enabled: Api.item-free >= 0;
+                clicked => { root.open-at(Api.item-free, 0, 0, 99, "", "", self.absolute-position.x - root.absolute-position.x + self.width - root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
+            }
             if Api.item-store < 2: Button {
                 text: "Sort & merge…";
                 clicked => { root.bulk("items:sort", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width); }
@@ -147,13 +174,13 @@ export component ItemsPage inherits Rectangle {
         if Api.item-store < 2 && Api.item-slots.length == 0: Muted { text: "No slot matches the search."; }
         // at most 24 rows (runs of empty loadouts collapse into one), so no virtualized
         // ListView: the card hugs its rows and scrolls only when the window is shorter
-        if Api.item-store == 2: VerticalLayout {
+        if Api.item-store == 2: HorizontalLayout {
           vertical-stretch: 1;
-          alignment: start;
-          HorizontalLayout {
+          spacing: Tok.pad;
+          VerticalLayout {
+          width: min(420px, root.width * 0.4);
           alignment: start;
           Card {
-            width: min(root.width - 2 * Tok.margin, Tok.row-max);
             max-height: loadouts.preferred-height + 2px;
             Flickable {
               // the width of the card, so long summaries elide instead of scrolling sideways
@@ -162,6 +189,10 @@ export component ItemsPage inherits Rectangle {
               loadouts := VerticalLayout {
                 for l in Api.loadouts: ListRow {
                     two-line: l.used;
+                    selected: l.first == Api.loadout-sel || (l.index < 0 && Api.loadout-sel >= l.first && Api.loadout-sel <= l.last);
+                    accessible-role: list-item;
+                    accessible-label: l.name;
+                    clicked => { Api.select-loadout(l.first); }
                     HorizontalLayout {
                         padding-left: 14px;
                         padding-right: 14px;
@@ -177,6 +208,51 @@ export component ItemsPage inherits Rectangle {
               }
             }
           }
+          }
+          Card {
+            horizontal-stretch: 1;
+            if Api.loadout-sel < 0: EmptyState { text: "Pick a loadout to edit its name and items."; }
+            if Api.loadout-sel >= 0: VerticalLayout {
+                padding: Tok.pad;
+                spacing: 10px;
+                HorizontalLayout {
+                    spacing: Tok.gap;
+                    Text { text: "Loadout " + (Api.loadout-sel + 1); font-size: 18px; font-weight: 600; vertical-alignment: center; }
+                    name-ed := LineEdit {
+                        // follows the loadout picked, once typed into too
+                        property <string> cur: Api.loadout-name;
+                        changed cur => { self.text = self.cur; }
+                        width: 240px;
+                        text: Api.loadout-name;
+                        placeholder-text: "Name";
+                        accessible-label: "Loadout name";
+                        accepted(t) => { Api.set-loadout-name(t); }
+                        changed has-focus => {
+                            if !self.has-focus && self.text != Api.loadout-name {
+                                Api.set-loadout-name(self.text);
+                            }
+                        }
+                    }
+                    Rectangle { horizontal-stretch: 1; }
+                }
+                if Api.loadout-was != "": WasLine { was: Api.loadout-was; key: "loadout:" + Api.loadout-sel; }
+                Muted { text: "The 32 pouch positions the loadout fills, with the counts it takes from the box."; }
+                // two columns like the box grid
+                lv := ListView {
+                    vertical-stretch: 1;
+                    for r in 16: HorizontalLayout {
+                        spacing: 6px;
+                        height: 44px;
+                        for c in 2: Rectangle {
+                            width: (lv.visible-width - 6px) / 2;
+                            SlotCell {
+                                it: Api.loadout-slots[r * 2 + c];
+                                edit => { root.open-editor(self.it, self.absolute-position.x - root.absolute-position.x, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
+                            }
+                        }
+                    }
+                }
+            }
           }
         }
     }
@@ -200,14 +276,25 @@ export component ItemsPage inherits Rectangle {
                 spacing: 10px;
                 HorizontalLayout {
                     spacing: Tok.tight;
-                    Text { text: (Api.item-store == 0 ? "Item box slot " : "Pouch slot ") + (root.edit-slot + 1); font-size: Tok.section; font-weight: 600; horizontal-stretch: 1; }
+                    Text {
+                        text: (root.loadout-mode ? "Loadout " + (Api.loadout-sel + 1) + " · position " : Api.item-store == 0 ? "Item box slot " : "Pouch slot ") + (root.edit-slot + 1);
+                        font-size: Tok.section;
+                        font-weight: 600;
+                        horizontal-stretch: 1;
+                    }
                     Text { text: root.held; color: Tok.muted; vertical-alignment: center; overflow: elide; }
                 }
-                if root.edit-was != "": WasLine { was: root.edit-was; key: (Api.item-store == 0 ? "item:box:" : "item:pouch:") + root.edit-slot; }
+                if root.edit-was != "" && !root.loadout-mode: WasLine { was: root.edit-was; key: (Api.item-store == 0 ? "item:box:" : "item:pouch:") + root.edit-slot; }
                 LineEdit {
                     text <=> root.pick-search;
                     placeholder-text: "Search items";
                     edited(t) => { Api.search-picker(t); }
+                    // Enter takes the first match
+                    accepted => {
+                        if Api.pick-items.length > 0 {
+                            root.pick(Api.pick-items[0].id, Api.pick-items[0].max);
+                        }
+                    }
                 }
                 ListView {
                     vertical-stretch: 1;
@@ -224,19 +311,10 @@ export component ItemsPage inherits Rectangle {
                             Text { text: p.name; vertical-alignment: center; overflow: elide; font-weight: p.id == root.edit-id ? 600 : 400; }
                         }
                         pa := TouchArea {
-                            clicked => {
-                                if root.edit-id != p.id {
-                                    root.edit-id = p.id;
-                                    root.edit-max = p.max;
-                                    root.edit-count = p.id == root.held-id ? min(root.edit-count, p.max) : 1;
-                                }
-                            }
+                            clicked => { root.pick(p.id, p.max); }
                             double-clicked => {
-                                root.edit-id = p.id;
-                                root.edit-max = p.max;
-                                root.edit-count = min(root.edit-count, p.max);
-                                Api.set-item(root.edit-slot, root.edit-id, root.edit-count);
-                                picker.close();
+                                root.pick(p.id, p.max);
+                                root.commit(p.id, min(root.edit-count, p.max));
                             }
                         }
                     }
@@ -254,16 +332,13 @@ export component ItemsPage inherits Rectangle {
                         enabled: root.edit-id != 0;
                         edited(v) => { root.edit-count = v; }
                     }
-                    Text { text: Api.item-store == 0 ? "of 99" : "of " + root.edit-max + " (carry limit)"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                    Text { text: Api.item-store == 0 && !root.loadout-mode ? "of 99" : "of " + root.edit-max + " (carry limit)"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
                 }
                 HorizontalLayout {
                     spacing: Tok.tight;
                     if root.held-id != 0: Button {
-                        text: "Empty slot";
-                        clicked => {
-                            Api.set-item(root.edit-slot, 0, 0);
-                            picker.close();
-                        }
+                        text: root.loadout-mode ? "Empty position" : "Empty slot";
+                        clicked => { root.commit(0, 0); }
                     }
                     Rectangle { horizontal-stretch: 1; }
                     Button { text: "Cancel"; clicked => { picker.close(); } }
@@ -271,10 +346,7 @@ export component ItemsPage inherits Rectangle {
                         text: "Done";
                         primary: true;
                         enabled: root.edit-id != 0;
-                        clicked => {
-                            Api.set-item(root.edit-slot, root.edit-id, root.edit-count);
-                            picker.close();
-                        }
+                        clicked => { root.commit(root.edit-id, root.edit-count); }
                     }
                 }
             }

@@ -8,7 +8,7 @@ use crate::targets::{Mon, Target};
 use mhgu_save::character as ch;
 use mhgu_save::data::tables;
 use mhgu_save::items::{self, Stack, Store};
-use mhgu_save::progress::{Char, QuestBit, VILLAGES};
+use mhgu_save::progress::{Char, QuestBit, DEVIANTS, VILLAGES};
 use mhgu_save::save::Save;
 use mhgu_save::monsters;
 
@@ -184,6 +184,30 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
                     ch::set_village_points(s, base, v, g, ch::MAX_VILLAGE_POINTS);
                     out.push(Target::Points(v, g));
                 }
+            }
+        }
+        ["deviants", "permits"] => {
+            let mut c = Char::new(s, slot);
+            for d in 0..DEVIANTS.len() {
+                if c.permits(d) < 99 {
+                    c.set_permits(d, 99);
+                    out.push(Target::Permits(d));
+                }
+            }
+        }
+        // every level cleared and seen, as one deviant's "Levels cleared" does
+        ["deviants", "levels"] => {
+            let mut c = Char::new(s, slot);
+            for d in 0..DEVIANTS.len() {
+                let (q0, n) = Char::deviant_levels(d);
+                if (0..n).all(|k| c.quest(QuestBit::Cleared, q0 + k)) {
+                    continue;
+                }
+                for k in 0..n {
+                    c.set_quest(QuestBit::Cleared, q0 + k, true);
+                    c.set_quest(QuestBit::Seen, q0 + k, true);
+                }
+                out.push(Target::Levels(d));
             }
         }
         ["items", what, _] => {
@@ -391,6 +415,21 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             }
             p.count = count(n, "slot", "slots");
             p.detail = cap(place);
+        }
+        ["deviants", "permits"] => {
+            p.title = "Max Special Permits".into();
+            p.summary = if n == 0 { "Every deviant has 99 Special Permits.".into() } else { format!("Sets Special Permits to 99 for the {} below it.", count(n, "deviant", "deviants")) };
+            p.count = count(n, "deviant", "deviants");
+            p.review = "Every deviant: 99 Special Permits".into();
+            p.detail = "Collections".into();
+        }
+        ["deviants", "levels"] => {
+            p.title = "Every deviant level".into();
+            p.summary = if n == 0 { "Every deviant has every level cleared.".into() } else { format!("Marks every level of the {} cleared: {}.", count(n, "deviant", "deviants"), list(&names(&|_| true), 3)) };
+            p.count = count(n, "deviant", "deviants");
+            p.note = "G-rank levels appear in game only once a G-rank quest against the base monster is cleared; each row says which.".into();
+            p.review = "Every deviant level cleared".into();
+            p.detail = "Collections".into();
         }
         ["checks", on, tab] => {
             let what = match tab {

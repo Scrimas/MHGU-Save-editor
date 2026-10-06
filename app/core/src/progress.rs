@@ -34,6 +34,30 @@ pub const DEVIANTS: [&str; 18] = [
 ];
 /// First quest index of the deviant level bits (Special Permit quests 947-1174).
 pub const DEVIANT_QUEST0: usize = 947;
+/// The G-rank quests (IDs) that release a deviant's G1, any one cleared (docs/03 "Unlock
+/// gating", from the unlock script; the gate itself is CONFIRMED in game). Bloodbath is
+/// released by event flag `BLOODBATH_FLAG` instead.
+pub const DEVIANT_GATE: [&[u32]; 18] = [
+    &[11125, 11104],
+    &[11108],
+    &[11113, 11111],
+    &[11248, 11210, 11226, 11352, 11306],
+    &[11128, 11110],
+    &[11216, 11234],
+    &[11303],
+    &[11302, 11347],
+    &[11352, 11306, 11357, 11359],
+    &[11308, 11355],
+    &[11405, 11462],
+    &[11467],
+    &[11206, 11235, 11348],
+    &[11214, 11250],
+    &[11310, 11356],
+    &[11311, 11358],
+    &[11312, 11354],
+    &[],
+];
+pub const BLOODBATH_FLAG: usize = 1226;
 
 /// Read and write access to one character.
 pub struct Char<'a> {
@@ -350,5 +374,16 @@ impl<'a> Char<'a> {
     /// (first quest index, number of levels) of deviant `d`: 16 for the first 12, 6 after.
     pub fn deviant_levels(d: usize) -> (usize, usize) {
         if d < 12 { (DEVIANT_QUEST0 + 16 * d, 16) } else { (DEVIANT_QUEST0 + 192 + 6 * (d - 12), 6) }
+    }
+    /// Level number of G1 among `deviant_levels` (after Lv1-10, or the first).
+    pub fn deviant_g1(d: usize) -> usize {
+        if d < 12 { 10 } else { 0 }
+    }
+    /// Whether the board offers G1 and up: the base monster's G-rank gate is open.
+    pub fn deviant_gate_open(&self, d: usize) -> bool {
+        if d == 17 {
+            return self.flag(BLOODBATH_FLAG);
+        }
+        DEVIANT_GATE[d].iter().any(|&id| self.cleared_id(id))
     }
 }

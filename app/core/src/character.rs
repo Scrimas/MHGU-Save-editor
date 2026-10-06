@@ -178,6 +178,33 @@ pub fn set_village_points(s: &mut Save, base: usize, v: usize, g: bool, pts: u32
     s.set_u32(base + o + 4 * v, pts.min(MAX_VILLAGE_POINTS));
 }
 
+/// Guild Card weapon usage (docs/04, CONFIRMED): quests completed with each weapon, one
+/// array of 15 u16 per venue. The game shows their sums and picks the main weapon from
+/// them; nothing else depends on them.
+pub const WEAPON_USE: usize = CARD + 0x8BA;
+pub const VENUES: [&str; 3] = ["Village", "Hub", "Arena"];
+/// Storage order (the classic internal one).
+pub const USE_WEAPONS: [&str; 15] = [
+    "Great Sword", "Sword and Shield", "Hammer", "Lance", "Heavy Bowgun", "Light Bowgun", "Long Sword", "Switch Axe",
+    "Gunlance", "Bow", "Dual Blades", "Hunting Horn", "Insect Glaive", "Charge Blade", "Prowler",
+];
+/// The order the Guild Card draws them in, as storage indices.
+pub const USE_SHOWN: [usize; 15] = [0, 6, 1, 10, 2, 11, 3, 8, 7, 13, 12, 5, 4, 9, 14];
+pub const MAX_USE: u16 = 9999;
+
+fn use_at(base: usize, venue: usize, w: usize) -> usize {
+    assert!(venue < 3 && w < 15, "weapon usage {venue}/{w}");
+    base + WEAPON_USE + 2 * (15 * venue + w)
+}
+
+pub fn weapon_use(s: &Save, base: usize, venue: usize, w: usize) -> u16 {
+    s.u16(use_at(base, venue, w))
+}
+
+pub fn set_weapon_use(s: &mut Save, base: usize, venue: usize, w: usize, v: u16) {
+    s.set_u16(use_at(base, venue, w), v.min(MAX_USE));
+}
+
 pub fn set_playtime(s: &mut Save, base: usize, secs: u32) {
     let secs = secs.min(MAX_PLAYTIME);
     s.set_u32(base + PLAYTIME, secs);
@@ -188,6 +215,20 @@ pub fn set_playtime(s: &mut Save, base: usize, secs: u32) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::save::{blank, SLOT1_BASE};
+
+    #[test]
+    fn weapon_usage_at_the_documented_offsets() {
+        let mut s = blank();
+        // docs/04 worked example: Charge Blade, Hub = 0x25474B for slot 1
+        set_weapon_use(&mut s, SLOT1_BASE, 1, 13, 12_000);
+        assert_eq!(s.u16(0x25474B), MAX_USE);
+        assert_eq!(weapon_use(&s, SLOT1_BASE, 1, 13), MAX_USE);
+        assert_eq!(use_at(SLOT1_BASE, 2, 0), 0x25474F);
+        let mut shown = USE_SHOWN;
+        shown.sort();
+        assert_eq!(shown, std::array::from_fn(|i| i), "every weapon once");
+    }
 
     #[test]
     fn hr_table() {

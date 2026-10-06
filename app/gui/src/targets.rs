@@ -28,6 +28,7 @@ pub enum Pal {
     Bias,
     Greeting,
     Owner,
+    Target,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -42,7 +43,11 @@ pub enum Target {
     HubStar,
     /// Village, G rank.
     Points(usize, bool),
+    /// Guild Card weapon usage: venue, weapon (storage order).
+    WeaponUse(usize, usize),
     Item(Store, usize),
+    /// An item loadout: its name and items.
+    Loadout(usize),
     Equip(Owner, usize),
     Palico(usize, Pal),
     /// Quest index: its cleared, seen and failed bits.
@@ -95,6 +100,7 @@ fn pal_field(f: Pal) -> &'static str {
         Pal::Bias => "bias",
         Pal::Greeting => "greeting",
         Pal::Owner => "owner",
+        Pal::Target => "target",
     }
 }
 
@@ -105,6 +111,7 @@ pub fn pal_of(field: &str) -> Pal {
         "exp" => Pal::Exp,
         "bias" => Pal::Bias,
         "greeting" => Pal::Greeting,
+        "target" => Pal::Target,
         _ => Pal::Owner,
     }
 }
@@ -145,8 +152,8 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) => "character",
-            Item(..) => "items",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) => "character",
+            Item(..) | Loadout(_) => "items",
             Equip(..) => "equipment",
             Palico(..) => "palicoes",
             Quest(_) => "quests",
@@ -169,7 +176,9 @@ impl Target {
             VillageStar => "village-star".into(),
             HubStar => "hub-star".into(),
             Points(v, g) => format!("points:{}{v}", if g { "g" } else { "lr" }),
+            WeaponUse(v, w) => format!("use:{v}:{w}"),
             Item(s, i) => format!("item:{}:{i}", store_key(s)),
+            Loadout(k) => format!("loadout:{k}"),
             Equip(o, i) => format!("equip:{}:{i}", owner_key(o)),
             Palico(i, f) => format!("palico:{i}:{}", pal_field(f)),
             Quest(i) => format!("quest:{i}"),
@@ -207,7 +216,9 @@ impl Target {
             VillageStar => "Village ★".into(),
             HubStar => "Hub ★".into(),
             Points(v, g) => format!("{} · {} points", VILLAGES[v], if g { "G rank" } else { "Low rank" }),
+            WeaponUse(v, w) => format!("{} · {} quests", ch::USE_WEAPONS[w], ch::VENUES[v]),
             Item(st, i) => format!("{} slot {}", if st == Store::Pouch { "Pouch" } else { "Item box" }, i + 1),
+            Loadout(k) => format!("Item loadout {}", k + 1),
             Equip(o, i) => format!("{} slot {}", if o == Owner::Palico { "Palico box" } else { "Box" }, i + 1),
             Palico(i, f) => {
                 let n = palico::get(s, s.base(slot), i).name;
@@ -218,6 +229,7 @@ impl Target {
                     Pal::Bias => "Forte",
                     Pal::Greeting => "Greeting",
                     Pal::Owner => "Original owner",
+                    Pal::Target => "Target",
                 };
                 format!("{n} · {what}")
             }
@@ -263,9 +275,15 @@ impl Target {
             VillageStar => num(s.u16(base + pg::VIL_STAR)),
             HubStar => num(s.u16(base + pg::HUB_STAR)),
             Points(v, g) => num(s.u32(base + if g { ch::POINTS_G } else { ch::POINTS_LR } + 4 * v)),
+            WeaponUse(v, w) => num(ch::weapon_use(s, base, v, w)),
             Item(st, i) => {
                 let x = items::get(s, base, st, i);
                 if x.is_empty() { "Empty".into() } else { format!("{} ×{}", assets::item_name(x.id), x.count) }
+            }
+            Loadout(k) => {
+                let l = items::loadout(s, base, k);
+                let n = l.items.iter().filter(|x| x.0 != 0).count();
+                if l.name.is_empty() && n == 0 { "Empty".into() } else { format!("{} · {}", l.name, crate::fmt::count(n, "item", "items")) }
             }
             Equip(o, i) => crate::views::equip_value(o, &equipment::get(s, base, o, i)),
             Palico(i, f) => {
@@ -277,6 +295,7 @@ impl Target {
                     Pal::Bias => palico::BIASES.get(p.bias as usize).copied().unwrap_or("?").into(),
                     Pal::Greeting => p.greeting,
                     Pal::Owner => p.owner,
+                    Pal::Target => palico::TARGETS.get(p.target as usize).copied().unwrap_or("?").into(),
                 }
             }
             Quest(i) => {
@@ -340,7 +359,9 @@ impl Target {
             VillageStar => range(base + pg::VIL_STAR, 2),
             HubStar => [range(base + pg::HUB_STAR, 2), hr_copies()].concat(),
             Points(v, g) => range(base + if g { ch::POINTS_G } else { ch::POINTS_LR } + 4 * v, 4),
+            WeaponUse(v, w) => range(base + ch::WEAPON_USE + 2 * (15 * v + w), 2),
             Item(st, i) => bits(base + if st == Store::Pouch { items::POUCH } else { items::BOX }, 19 * i, 19),
+            Loadout(k) => range(base + items::LOADOUTS + items::LOADOUT_SZ * k, items::LOADOUT_SZ),
             Equip(o, i) => range(base + if o == Owner::Palico { equipment::PALICO_BOX } else { equipment::BOX } + equipment::ENTRY * i, equipment::ENTRY),
             Palico(i, f) => {
                 let o = base + palico::LIST + palico::RECORD * i;
@@ -351,6 +372,7 @@ impl Target {
                     Pal::Bias => range(o + palico::BIAS, 1),
                     Pal::Greeting => range(o + palico::GREETING.0, palico::GREETING.1),
                     Pal::Owner => range(o + palico::OWNER.0, palico::OWNER.1),
+                    Pal::Target => range(o + palico::TARGET, 1),
                 }
             }
             Quest(i) => {

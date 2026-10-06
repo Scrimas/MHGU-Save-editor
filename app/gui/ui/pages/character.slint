@@ -215,6 +215,55 @@ export component CharacterPage inherits Rectangle {
                     }
                 }
             }
+            Card {
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 8px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: "Weapon usage"; vertical-alignment: center; }
+                        Text { text: "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                    }
+                    HorizontalLayout {
+                        height: 28px;
+                        alignment: start;
+                        ColHead { text: "Weapon"; width: 180px; }
+                        for v in ["Village", "Hub", "Arena"]: ColHead { text: v; width: 200px; }
+                        ColHead { text: "All"; width: 80px; }
+                    }
+                    for w in Api.character.weapon-use: VerticalLayout {
+                        Hairline { }
+                        HorizontalLayout {
+                            alignment: start;
+                            height: 44px;
+                            Text { text: w.name + (w.main ? "  ★" : ""); width: 180px; vertical-alignment: center; font-weight: w.main ? 600 : 400; }
+                            for c[v] in w.counts: Rectangle {
+                                width: 200px;
+                                if w.was[v] != "": StagedBar { x: -10px; y: 6px; height: 32px; }
+                                HorizontalLayout {
+                                    spacing: 8px;
+                                    padding-top: 6px;
+                                    padding-bottom: 6px;
+                                    NumberBox {
+                                        width: 110px;
+                                        value: c;
+                                        maximum: 9999;
+                                        label: w.name + " quests, " + ["Village", "Hub", "Arena"][v];
+                                        edited(x) => { Api.set-character("use:" + v + ":" + w.index, x); }
+                                    }
+                                    if w.was[v] != "": VerticalLayout {
+                                        alignment: center;
+                                        WasLine { was: w.was[v]; key: "use:" + v + ":" + w.index; }
+                                    }
+                                }
+                            }
+                            Text { text: w.total; width: 80px; vertical-alignment: center; color: Tok.muted; }
+                        }
+                    }
+                }
+            }
         }
     }
 }
