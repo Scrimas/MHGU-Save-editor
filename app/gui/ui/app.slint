@@ -789,9 +789,14 @@ export component AppWindow inherits Window {
             spacing: Tok.tight;
             Button { text: "Release notes"; clicked => { Api.update-page(); } }
             Button {
-                text: state == "ready" ? "Later" : "Not now";
-                enabled: state != "downloading";
-                clicked => { Api.update-open = false; }
+                text: state == "ready" ? "Later" : state == "downloading" ? "Cancel" : "Not now";
+                clicked => {
+                    if state == "downloading" {
+                        Api.cancel-update();
+                    } else {
+                        Api.update-open = false;
+                    }
+                }
             }
             if Api.update.can-install && state != "ready": Button {
                 text: state == "failed" ? "Try again" : "Download and install";

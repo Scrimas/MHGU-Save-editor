@@ -21,6 +21,8 @@ use mhgu_save::progress::{Char, Lock, QuestBit, DEVIANTS};
 use mhgu_save::{character, monsters, palico, store};
 use slint::{ComponentHandle, Image, Model, SharedString, Weak};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 fn conf(c: Conf) -> Confidence {
     match c {
@@ -248,6 +250,8 @@ struct View {
     update: Option<update::Release>,
     /// the updated file, to restart on
     update_exe: Option<PathBuf>,
+    /// set to stop the download running
+    update_cancel: Option<Arc<AtomicBool>>,
 }
 
 thread_local! {
@@ -426,7 +430,7 @@ fn review(ui: &AppWindow, st: &State) {
             lines: model(lines),
             more: o.values.len().saturating_sub(if single { 1 } else { 8 }) as i32,
             note: if single { String::new() } else { o.note.clone() }.into(),
-            key: o.values.first().map(|(t, _)| t.key()).unwrap_or_default().into(),
+            key: o.values.first().map(|(t, _)| format!("{}|{}", o.slot, t.key())).unwrap_or_default().into(),
         });
     }
     api.set_changes(model(rows));
@@ -1462,27 +1466,52 @@ fn wire_update(ui: &AppWindow, st: &Shared) {
         let (Some(r), Some(old)) = (view(|v| v.update.clone()), update::target()) else { return };
         let total = r.size().unwrap_or(0);
         set_update(&ui, "downloading", format!("downloading {}…", r.version), format!("Downloading… 0 of {}", mb(total)), 0.0);
+        let cancel = Arc::new(AtomicBool::new(false));
+        view(|v| v.update_cancel = Some(cancel.clone()));
         let w = ui.as_weak();
         std::thread::spawn(move || {
             let last = std::cell::Cell::new(u64::MAX);
-            let res = update::install(&r, &old, |done, total| {
-                let pct = done * 100 / total.max(1);
-                if pct != last.replace(pct) {
+            let progress = |done, total| {
+                let pct = done * 100 / u64::max(total, 1);
+                if pct != last.replace(pct) && !cancel.load(Ordering::Relaxed) {
                     let (v, body) = (r.version.clone(), format!("Downloading… {} of {}", mb(done), mb(total)));
                     let _ = w.upgrade_in_event_loop(move |ui| {
                         set_update(&ui, "downloading", format!("downloading {v}…"), body, pct as f32 / 100.0)
                     });
                 }
-            });
-            let _ = w.upgrade_in_event_loop(move |ui| match res {
-                Ok(p) => {
-                    let body = format!("{} is in place. Restart to use it.", file_name(&p));
-                    view(|v| v.update_exe = Some(p));
-                    set_update(&ui, "ready", format!("{} installed, restart to use it", r.version), body, 1.0);
+            };
+            let res = update::install(&r, &old, progress, &cancel);
+            let cancelled = cancel.load(Ordering::Relaxed);
+            let _ = w.upgrade_in_event_loop(move |ui| {
+                view(|v| v.update_cancel = None);
+                match res {
+                    // settings live on this (the UI) thread
+                    Ok(done) => {
+                        if let Some(aside) = done.aside {
+                            settings::update(|s| s.update_leftover = Some(aside));
+                        }
+                        #[cfg(target_os = "linux")]
+                        crate::desktop::moved(&done.file, &r.version);
+                        let body = format!("{} is in place. Restart to use it.", file_name(&done.file));
+                        view(|v| v.update_exe = Some(done.file));
+                        set_update(&ui, "ready", format!("{} installed, restart to use it", r.version), body, 1.0);
+                    }
+                    Err(_) if cancelled => update_available(&ui),
+                    Err(e) => set_update(&ui, "failed", "update failed".into(), format!("Not updated: {e}. The editor you are running is unchanged."), 0.0),
                 }
-                Err(e) => set_update(&ui, "failed", "update failed".into(), format!("Not updated: {e}. The editor you are running is unchanged."), 0.0),
             });
         });
+    });
+    let w = ui.as_weak();
+    api.on_cancel_update(move || {
+        if let Some(c) = view(|v| v.update_cancel.take()) {
+            c.store(true, Ordering::Relaxed);
+        }
+        if let Some(ui) = w.upgrade() {
+            update_available(&ui);
+            ui.global::<Api>().set_update_open(false);
+            toast(&ui, "Update cancelled", false);
+        }
     });
     let w = ui.as_weak();
     let st = st.clone();
@@ -1918,10 +1947,22 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     {
         let w = ui.as_weak();
         let st = st.clone();
+        // "<slot>|<key>" from Review: an entry of another character switches to it first
         api.on_goto(move |key| {
-            if let Some(ui) = w.upgrade() {
-                goto(&ui, &st.borrow(), &key);
+            let Some(ui) = w.upgrade() else { return };
+            let (slot, key) = match key.split_once('|') {
+                Some((s, k)) => (s.parse::<usize>().ok(), k),
+                None => (None, key.as_str()),
+            };
+            let used = |k: usize| k < 3 && st.borrow().doc.as_ref().is_some_and(|d| d.save.slot_used(k));
+            if let Some(k) = slot.filter(|&k| used(k) && k != st.borrow().slot) {
+                st.borrow_mut().slot = k;
+                view(|v| {
+                    v.equip_sel = -1;
+                    v.palico_sel = -1;
+                });
             }
+            goto(&ui, &st.borrow(), key);
         });
     }
     {

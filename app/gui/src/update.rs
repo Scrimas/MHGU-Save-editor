@@ -3,11 +3,15 @@
 //! .exe is downloaded, checked against the release's SHA256SUMS and put in place of the
 //! running file, renamed to the new version when the old name held the old one.
 //! Windows cannot delete a running .exe: it is renamed aside and deleted on the next start.
+//!
+//! The checksums come from the same release as the file: they catch a broken download,
+//! not a release published by someone else (there is no signature).
 
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 const LATEST: &str = "https://api.github.com/repos/Scrimas/MHGU-Save-editor/releases/latest";
@@ -48,15 +52,31 @@ impl Release {
     }
 }
 
-/// "1.10.2" -> [1, 10, 2], for comparing.
-pub fn version(v: &str) -> Vec<u32> {
-    v.trim().trim_start_matches('v').split('.').map(|n| n.parse().unwrap_or(0)).collect()
+/// "v1.10.2" -> (1, 10, 2, true), for comparing; "1.0" is 1.0.0 and a pre-release
+/// ("1.0.0-rc.1") comes before its release. Anything else is None, older than all.
+pub fn version(v: &str) -> Option<(u32, u32, u32, bool)> {
+    let v = v.trim().trim_start_matches('v');
+    let v = v.split_once('+').map_or(v, |(a, _)| a);
+    let (core, release) = match v.split_once('-') {
+        Some((c, _)) => (c, false),
+        None => (v, true),
+    };
+    let n: Vec<u32> = core.split('.').map(|x| x.parse().ok()).collect::<Option<_>>()?;
+    match n[..] {
+        [a] => Some((a, 0, 0, release)),
+        [a, b] => Some((a, b, 0, release)),
+        [a, b, c] => Some((a, b, c, release)),
+        _ => None,
+    }
 }
 
 fn agent() -> ureq::Agent {
     ureq::Agent::config_builder()
+        .https_only(true)
         .timeout_connect(Some(Duration::from_secs(15)))
         .timeout_recv_response(Some(Duration::from_secs(30)))
+        // a stalled download fails instead of waiting forever (Cancel also leaves)
+        .timeout_recv_body(Some(Duration::from_secs(15 * 60)))
         .user_agent(format!("mhgu-save-editor/{VERSION}"))
         .build()
         .into()
@@ -81,6 +101,16 @@ pub fn check() -> Result<Option<Release>, String> {
     Ok(Some(r).filter(|r| version(&r.version) > version(VERSION)))
 }
 
+/// The checksum list of a release, by its exact name (not a `.sig` beside it).
+const SUMS: &str = "SHA256SUMS";
+
+/// What `install` did: the new file, and on Windows the old .exe renamed aside (to
+/// delete on the next start).
+pub struct Installed {
+    pub file: PathBuf,
+    pub aside: Option<PathBuf>,
+}
+
 fn fetch(url: &str) -> Result<Release, String> {
     let l: Latest = serde_json::from_reader(get(url)?.into_reader()).map_err(|e| format!("Unexpected answer from GitHub ({e})"))?;
     let pick = |f: &dyn Fn(&str) -> bool| l.assets.iter().find(|a| f(&a.name)).cloned();
@@ -88,7 +118,7 @@ fn fetch(url: &str) -> Result<Release, String> {
         version: l.tag_name.trim_start_matches('v').to_string(),
         page: l.html_url.clone(),
         file: pick(&|n| n.ends_with(SUFFIX)),
-        sums: pick(&|n| n.starts_with("SHA256SUMS")),
+        sums: pick(&|n| n == SUMS),
     })
 }
 
@@ -114,8 +144,8 @@ fn sum_of(list: &str, name: &str) -> Option<String> {
 }
 
 /// Download, check and swap in the new file for `old` (the `target`);
-/// `progress(done, total)` is called as it comes. Returns the new file.
-pub fn install(r: &Release, old: &Path, progress: impl Fn(u64, u64)) -> Result<PathBuf, String> {
+/// `progress(done, total)` is called as it comes; `cancel` stops the download.
+pub fn install(r: &Release, old: &Path, progress: impl Fn(u64, u64), cancel: &AtomicBool) -> Result<Installed, String> {
     let (Some(file), Some(sums)) = (&r.file, &r.sums) else {
         return Err(format!("Release {} has no {SUFFIX} file with checksums", r.version));
     };
@@ -126,7 +156,7 @@ pub fn install(r: &Release, old: &Path, progress: impl Fn(u64, u64)) -> Result<P
     let name = old.file_name().and_then(|n| n.to_str()).ok_or("The running file has no usable name")?;
     let new = old.with_file_name(renamed(name, &r.version));
     let part = old.with_file_name(format!("{}.part", renamed(name, &r.version)));
-    let res = download(&file.browser_download_url, &part, file.size, &progress).and_then(|got| {
+    let res = download(&file.browser_download_url, &part, file.size, &progress, cancel).and_then(|got| {
         if got != want {
             return Err("The download does not match the release's checksum".into());
         }
@@ -135,10 +165,10 @@ pub fn install(r: &Release, old: &Path, progress: impl Fn(u64, u64)) -> Result<P
     if res.is_err() {
         let _ = std::fs::remove_file(&part);
     }
-    res.map(|_| new)
+    res.map(|aside| Installed { file: new, aside })
 }
 
-fn download(url: &str, to: &Path, size: u64, progress: &impl Fn(u64, u64)) -> Result<String, String> {
+fn download(url: &str, to: &Path, size: u64, progress: &impl Fn(u64, u64), cancel: &AtomicBool) -> Result<String, String> {
     let err = |e: std::io::Error| format!("Could not write {} ({e})", to.display());
     let mut body = get(url)?.into_reader();
     let mut out = std::fs::File::create(to).map_err(err)?;
@@ -146,6 +176,9 @@ fn download(url: &str, to: &Path, size: u64, progress: &impl Fn(u64, u64)) -> Re
     let mut buf = vec![0; 64 * 1024];
     let mut done = 0;
     loop {
+        if cancel.load(Ordering::Relaxed) {
+            return Err("Cancelled".into());
+        }
         let n = body.read(&mut buf).map_err(|e| format!("Download failed ({e})"))?;
         if n == 0 {
             break;
@@ -165,8 +198,8 @@ fn download(url: &str, to: &Path, size: u64, progress: &impl Fn(u64, u64)) -> Re
 }
 
 /// The new file takes the old one's place. A running AppImage can be deleted (it stays
-/// mounted until it exits); a running .exe only renamed.
-fn swap(old: &Path, part: &Path, new: &Path) -> Result<(), String> {
+/// mounted until it exits); a running .exe only renamed: returned, to delete later.
+fn swap(old: &Path, part: &Path, new: &Path) -> Result<Option<PathBuf>, String> {
     let err = |e: std::io::Error| format!("Could not replace {} ({e})", old.display());
     if cfg!(windows) {
         let aside = old.with_file_name(format!("{}.old", old.file_name().unwrap().to_string_lossy()));
@@ -176,14 +209,14 @@ fn swap(old: &Path, part: &Path, new: &Path) -> Result<(), String> {
             let _ = std::fs::rename(&aside, old);
             return Err(err(e));
         }
-        crate::settings::update(|s| s.update_leftover = Some(aside));
+        Ok(Some(aside))
     } else {
         std::fs::rename(part, new).map_err(err)?;
         if new != old {
             let _ = std::fs::remove_file(old);
         }
+        Ok(None)
     }
-    Ok(())
 }
 
 /// On start: delete the .exe an update left aside.
@@ -215,6 +248,12 @@ mod tests {
         assert!(version("v0.10.0") > version("0.9.1"));
         assert!(version("1.0") < version("1.0.1"));
         assert_eq!(version("v1.2.3"), version("1.2.3"));
+        assert_eq!(version("1.0"), version("1.0.0"));
+        assert!(version("1.0.0-rc.1") < version("1.0.0"));
+        assert!(version("1.0.0-rc.1") > version("0.9.9"));
+        assert_eq!(version("1.0.0+build.5"), version("1.0.0"));
+        assert_eq!(version("latest"), None);
+        assert!(version("garbage") < version("0.0.1"), "an unreadable tag is never newer");
     }
 
     #[test]
@@ -238,7 +277,8 @@ mod tests {
         let (old, part, new) = (d.join("a-1-x"), d.join("a-2-x.part"), d.join("a-2-x"));
         std::fs::write(&old, "old").unwrap();
         std::fs::write(&part, "new").unwrap();
-        swap(&old, &part, &new).unwrap();
+        let aside = swap(&old, &part, &new).unwrap();
+        assert_eq!(aside.is_some(), cfg!(windows));
         assert_eq!(std::fs::read_to_string(&new).unwrap(), "new");
         assert!(!part.exists());
         assert!(!old.exists() || cfg!(windows));
@@ -255,11 +295,17 @@ mod tests {
         let old = d.join(format!("MHGU-Save-Editor-{VERSION}{SUFFIX}"));
         std::fs::write(&old, "old").unwrap();
         let last = std::cell::Cell::new(0);
-        let new = install(&r, &old, |done, total| {
-            assert!(done > last.get() && done <= total);
-            last.set(done);
-        })
-        .unwrap();
+        let new = install(
+            &r,
+            &old,
+            |done, total| {
+                assert!(done > last.get() && done <= total);
+                last.set(done);
+            },
+            &AtomicBool::new(false),
+        )
+        .unwrap()
+        .file;
         assert_eq!(new, d.join(format!("MHGU-Save-Editor-0.5.0{SUFFIX}")));
         assert_eq!(std::fs::metadata(&new).unwrap().len(), r.size().unwrap());
         assert!(!old.exists());

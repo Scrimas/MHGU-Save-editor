@@ -81,6 +81,8 @@ fn load() -> Settings {
     path().and_then(|p| std::fs::read(p).ok()).and_then(|b| serde_json::from_slice(&b).ok()).unwrap_or_default()
 }
 
+// Per thread on purpose: only the UI thread reads and writes them (workers hand their
+// results back through the event loop), and each test thread starts from the defaults.
 thread_local! {
     static SETTINGS: RefCell<Settings> = RefCell::new(load());
 }
@@ -100,7 +102,11 @@ pub fn update(f: impl FnOnce(&mut Settings)) {
     }
     let Some(p) = path() else { return };
     let _ = std::fs::create_dir_all(p.parent().unwrap());
-    if let Err(e) = std::fs::write(&p, serde_json::to_string_pretty(&s).unwrap()) {
+    // through a temporary file: a crash mid-write must not reset every setting
+    let tmp = p.with_extension("json.tmp");
+    let r = std::fs::write(&tmp, serde_json::to_string_pretty(&s).unwrap()).and_then(|_| std::fs::rename(&tmp, &p));
+    if let Err(e) = r {
+        let _ = std::fs::remove_file(&tmp);
         eprintln!("settings: {}: {e}", p.display());
     }
 }

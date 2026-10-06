@@ -29,7 +29,7 @@ pub fn install() {
     }
     let icons = data.join("icons/hicolor");
     for (p, b) in [
-        (file, entry(path).into_bytes()),
+        (file, entry(path, VERSION).into_bytes()),
         (icons.join(format!("256x256/apps/{NAME}.png")), PNG.to_vec()),
         (icons.join(format!("scalable/apps/{NAME}.svg")), SVG.to_vec()),
     ] {
@@ -39,8 +39,24 @@ pub fn install() {
     }
 }
 
-/// The packaged entry with `Exec` on the AppImage.
-fn entry(appimage: &str) -> String {
+/// After an update replaced this AppImage with `appimage` (version `version`): the entry
+/// that named this one names the new file at once, so the menu keeps working even if
+/// the new version is not started before this one is gone.
+pub fn moved(appimage: &Path, version: &str) {
+    let (Some(old), Some(data)) = (std::env::var_os("APPIMAGE"), dirs::data_dir()) else { return };
+    let Some(path) = appimage.to_str().filter(|p| p.starts_with('/') && !p.contains('\n')) else { return };
+    let file = data.join("applications").join(format!("{NAME}.desktop"));
+    let Ok(cur) = std::fs::read_to_string(&file) else { return };
+    if field(&cur, "TryExec").map(unescape).as_deref() != old.to_str() {
+        return;
+    }
+    if let Err(e) = write(&file, entry(path, version).as_bytes()) {
+        eprintln!("desktop entry: {}: {e}", file.display());
+    }
+}
+
+/// The packaged entry with `Exec` on the AppImage of `version`.
+fn entry(appimage: &str, version: &str) -> String {
     let mut out = String::new();
     for l in ENTRY.lines() {
         if l.starts_with("Exec=") {
@@ -50,7 +66,7 @@ fn entry(appimage: &str) -> String {
             out += "\n";
         }
     }
-    out + &format!("X-AppImage-Version={VERSION}\n")
+    out + &format!("X-AppImage-Version={version}\n")
 }
 
 /// An `Exec` argument: double quotes with `"` `` ` `` `$` `\` escaped, then the string
@@ -93,7 +109,7 @@ mod tests {
 
     #[test]
     fn exec_points_at_the_appimage() {
-        let e = entry("/home/a b/MHGU 100%.AppImage");
+        let e = entry("/home/a b/MHGU 100%.AppImage", VERSION);
         assert!(e.contains("Exec=\"/home/a b/MHGU 100%%.AppImage\" %f\n"));
         assert_eq!(field(&e, "TryExec"), Some("/home/a b/MHGU 100%.AppImage"));
         assert_eq!(field(&e, "X-AppImage-Version"), Some(VERSION));
@@ -103,6 +119,6 @@ mod tests {
     #[test]
     fn reserved_characters_are_escaped() {
         assert_eq!(quote(r#"/a"$`\b"#), r#""/a\\"\\$\\`\\\\b""#);
-        assert_eq!(unescape(&entry(r"/a\b").lines().find(|l| l.starts_with("TryExec=")).unwrap()[8..]), r"/a\b");
+        assert_eq!(unescape(&entry(r"/a\b", "9.9.9").lines().find(|l| l.starts_with("TryExec=")).unwrap()[8..]), r"/a\b");
     }
 }

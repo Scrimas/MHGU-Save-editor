@@ -364,6 +364,23 @@ mod tests {
         settings::update(|s| s.confirmed_only = false);
         api.invoke_set_request(r.index, "accepted".into(), !r.accepted);
         assert_eq!(api.get_change_count(), before + 1);
+
+        // a Review entry of another character opens that character
+        if st.borrow().save().slot_used(1) {
+            api.invoke_select_slot(1);
+            api.invoke_set_monster(48, "hunts".into(), 4321);
+            api.invoke_select_slot(0);
+            let key = api.get_changes().iter().map(|c| c.key).find(|k| k.starts_with("1|")).unwrap();
+            api.invoke_goto(key);
+            assert_eq!(st.borrow().slot, 1);
+        }
+        // opening a save with staged changes asks first
+        let n = api.get_change_count();
+        views::open(&ui, &st, &dir.join("0/system"));
+        assert_eq!(api.get_open_ask().as_str(), dir.join("0/system").display().to_string());
+        assert_eq!(api.get_change_count(), n);
+        api.invoke_open_confirmed();
+        assert_eq!(api.get_change_count(), 0);
         std::fs::remove_dir_all(&dir).unwrap();
     }
 }
