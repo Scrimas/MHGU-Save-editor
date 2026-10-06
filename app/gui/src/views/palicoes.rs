@@ -16,7 +16,7 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
             PalicoRow {
                 index: i as i32,
                 name: p.name.into(),
-                sub: format!("Lv {} · {}", p.level, palico::BIASES.get(p.bias as usize).copied().unwrap_or("?")).into(),
+                sub: trf("Lv {} · {}", &[&p.level, &palico::BIASES.get(p.bias as usize).map_or("?", |&b| tr(b))]).into(),
                 changed: st.changed(base + palico::LIST + palico::RECORD * i, palico::RECORD),
             }
         })
@@ -26,15 +26,15 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
         sel = rows.first().map(|r| r.index).unwrap_or(-1);
         view(|v| v.palico_sel = sel);
     }
-    api.set_palico_summary(count(all, "Palico", "Palicoes").into());
+    api.set_palico_summary(trn("{n} Palico", "{n} Palicoes", all as i64, &[]).into());
     api.set_palicoes(model(rows));
-    api.set_biases(strings(palico::BIASES.iter().map(|s| s.to_string())));
-    api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|s| s.to_string())));
+    api.set_biases(strings(palico::BIASES.iter().map(|&s| tr(s).to_string())));
+    api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|&s| tr(s).to_string())));
     let mv = |m: &[u8]| {
         let n = &assets::names().support_moves;
         // 0 is "(No Move)", 57 an empty learned slot
         let v: Vec<String> = m.iter().filter(|&&x| x != 0 && x != palico::NO_MOVE && x != 0xFF).map(|&x| n.get(x as usize).cloned().unwrap_or_else(|| format!("#{x}"))).collect();
-        if v.is_empty() { "None".to_string() } else { v.join(", ") }
+        if v.is_empty() { tr("None").to_string() } else { v.join(", ") }
     };
     api.set_palico(if sel >= 0 {
         let i = sel as usize;
@@ -108,7 +108,7 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         }
         // a Palico without a name is an empty slot to the game
         if f == "name" && t.trim().is_empty() {
-            return toast(&ui, "A Palico needs a name", true);
+            return toast(&ui, tr("A Palico needs a name"), true);
         }
         let i = i as usize;
         let tg = Target::Palico(i, targets::pal_of(&f));

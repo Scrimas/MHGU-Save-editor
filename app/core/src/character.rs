@@ -182,8 +182,10 @@ pub fn set_village_points(s: &mut Save, base: usize, v: usize, g: bool, pts: u32
 /// array of 15 u16 per venue. The game shows their sums and picks the main weapon from
 /// them; nothing else depends on them.
 pub const WEAPON_USE: usize = CARD + 0x8BA;
+// i18n: shown through tr() in the GUI
 pub const VENUES: [&str; 3] = ["Village", "Hub", "Arena"];
 /// Storage order (the classic internal one).
+// i18n: shown through tr() in the GUI
 pub const USE_WEAPONS: [&str; 15] = [
     "Great Sword", "Sword and Shield", "Hammer", "Lance", "Heavy Bowgun", "Light Bowgun", "Long Sword", "Switch Axe",
     "Gunlance", "Bow", "Dual Blades", "Hunting Horn", "Insect Glaive", "Charge Blade", "Prowler",

@@ -1,9 +1,11 @@
 //! Numbers, dates and paths as the UI shows them.
 
+use crate::i18n::{tr, trf};
 use chrono::{DateTime, Datelike, Local};
 use std::path::Path;
 
-/// 1234567 -> "1,234,567" (07.3: separators on every number).
+/// 1234567 -> "1,234,567" (07.3: separators on every number), with the language's
+/// separator.
 pub fn num(n: impl Into<i64>) -> String {
     let n: i64 = n.into();
     let digits = n.unsigned_abs().to_string();
@@ -13,33 +15,48 @@ pub fn num(n: impl Into<i64>) -> String {
     }
     for (i, c) in digits.chars().enumerate() {
         if i > 0 && (digits.len() - i).is_multiple_of(3) {
-            out.push(',');
+            out.push_str(crate::i18n::thousands());
         }
         out.push(c);
     }
     out
 }
 
-/// "3 values", "1 value".
-pub fn count(n: usize, one: &str, many: &str) -> String {
-    format!("{} {}", num(n as i64), if n == 1 { one } else { many })
-}
-
 /// Play time in seconds as "48h 43m".
 pub fn playtime(secs: u32) -> String {
-    format!("{}h {:02}m", secs / 3600, secs / 60 % 60)
+    trf("{}h {}m", &[&(secs / 3600), &format!("{:02}", secs / 60 % 60)])
+}
+
+/// Short month name, 1 = January.
+fn month(m: u32) -> &'static str {
+    match m {
+        1 => tr("Jan"),
+        2 => tr("Feb"),
+        3 => tr("Mar"),
+        4 => tr("Apr"),
+        5 => tr("May"),
+        6 => tr("Jun"),
+        7 => tr("Jul"),
+        8 => tr("Aug"),
+        9 => tr("Sep"),
+        10 => tr("Oct"),
+        11 => tr("Nov"),
+        _ => tr("Dec"),
+    }
 }
 
 /// "Today, 14:32", "Yesterday, 21:05", "3 Oct, 18:40", "3 Oct 2025, 18:40".
 pub fn when(t: DateTime<Local>) -> String {
     let now = Local::now();
     let days = now.date_naive().signed_duration_since(t.date_naive()).num_days();
-    let time = t.format("%H:%M");
+    let time = t.format("%H:%M").to_string();
     match days {
-        0 => format!("Today, {time}"),
-        1 => format!("Yesterday, {time}"),
-        _ if t.year() == now.year() => format!("{} {}, {time}", t.day(), t.format("%b")),
-        _ => format!("{} {} {}, {time}", t.day(), t.format("%b"), t.year()),
+        0 => trf("Today, {}", &[&time]),
+        1 => trf("Yesterday, {}", &[&time]),
+        // day, month, time
+        _ if t.year() == now.year() => trf("{0} {1}, {2}", &[&t.day(), &month(t.month()), &time]),
+        // day, month, year, time
+        _ => trf("{0} {1} {2}, {3}", &[&t.day(), &month(t.month()), &t.year(), &time]),
     }
 }
 
@@ -83,8 +100,8 @@ pub fn list(names: &[String], max: usize) -> String {
     match names.len() {
         0 => String::new(),
         1 => names[0].clone(),
-        n if n <= max => format!("{} and {}", names[..n - 1].join(", "), names[n - 1]),
-        n => format!("{} and {} more", names[..max - 1].join(", "), n - (max - 1)),
+        n if n <= max => trf("{} and {}", &[&names[..n - 1].join(", "), &names[n - 1]]),
+        n => trf("{} and {} more", &[&names[..max - 1].join(", "), &num((n - (max - 1)) as i64)]),
     }
 }
 
@@ -99,8 +116,6 @@ mod tests {
         assert_eq!(num(1000), "1,000");
         assert_eq!(num(9_999_999), "9,999,999");
         assert_eq!(num(-1234), "-1,234");
-        assert_eq!(count(1, "value", "values"), "1 value");
-        assert_eq!(count(1255, "stack", "stacks"), "1,255 stacks");
     }
 
     #[test]

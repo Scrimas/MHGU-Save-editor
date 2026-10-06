@@ -1,6 +1,7 @@
 //! The Settings dialog.
 
 use super::*;
+use crate::i18n;
 use crate::theme;
 use std::cell::RefCell;
 
@@ -9,12 +10,23 @@ pub(super) fn settings_ui(ui: &AppWindow) {
     let s = settings::get();
     let pos = |v: &[u32], x: u32| v.iter().position(|&y| y == x).unwrap_or(0) as i32;
     let scale_now = match settings::scale_started() {
-        None => "Set by SLINT_SCALE_FACTOR in the environment".to_string(),
-        Some(n) if n != s.scale => "Applies the next time the editor starts".to_string(),
+        None => tr("Set by SLINT_SCALE_FACTOR in the environment").to_string(),
+        Some(n) if n != s.scale => tr("Applies the next time the editor starts").to_string(),
         Some(_) => String::new(),
     };
     let dir = system::snapshot_root();
-    ui.global::<Api>().set_settings(SettingsInfo {
+    let api = ui.global::<Api>();
+    api.set_build_info(
+        trf(
+            "Version {} · EU/western build (0100770008DD8000) · {}",
+            &[&env!("CARGO_PKG_VERSION"), &if assets::available() { tr("game assets included") } else { tr("built without game assets") }],
+        )
+        .into(),
+    );
+    let system = trf("System ({})", &[&i18n::LANGS[i18n::system()].1]);
+    api.set_settings(SettingsInfo {
+        language: i18n::LANGS.iter().position(|l| l.0 == s.language).map_or(0, |i| i + 1) as i32,
+        languages: strings(std::iter::once(system).chain(i18n::LANGS.iter().map(|l| l.1.to_string()))),
         theme: settings::THEMES.iter().position(|t| *t == s.theme).unwrap_or(0) as i32,
         scale: pos(&settings::SCALES, s.scale),
         scale_now: scale_now.into(),
@@ -64,10 +76,10 @@ fn matugen(ui: &AppWindow, force: bool) {
     let (loaded, hint) = match (on, &path, mtime) {
         (false, ..) => (None, String::new()),
         (true, Some(p), Some(_)) => match theme::load(p) {
-            Ok(t) => (Some(t), format!("Following {}, read again each time matugen writes it.", theme::tilde(p))),
-            Err(e) => (None, format!("{} could not be read ({e}); the built-in colours are shown.", theme::tilde(p))),
+            Ok(t) => (Some(t), trf("Following {}, read again each time matugen writes it.", &[&theme::tilde(p)])),
+            Err(e) => (None, trf("{} could not be read ({}); the built-in colours are shown.", &[&theme::tilde(p), &e])),
         },
-        _ => (None, "No colours from matugen yet. Save the template, add these lines to matugen's config.toml and run matugen (or change the wallpaper):".into()),
+        _ => (None, tr("No colours from matugen yet. Save the template, add these lines to matugen's config.toml and run matugen (or change the wallpaper):").into()),
     };
     let ok = loaded.is_some();
     let was = MATUGEN.with(|m| m.borrow().applied);
@@ -95,7 +107,7 @@ fn matugen(ui: &AppWindow, force: bool) {
     }
 }
 
-pub(super) fn wire_settings(ui: &AppWindow) {
+pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
     matugen(ui, true);
     settings_ui(ui);
@@ -121,17 +133,19 @@ pub(super) fn wire_settings(ui: &AppWindow) {
         let Some(p) = theme::template_path() else { return };
         let r = std::fs::create_dir_all(p.parent().unwrap()).and_then(|_| std::fs::write(&p, theme::TEMPLATE));
         match r {
-            Ok(()) => toast(&ui, format!("Template saved to {}", theme::tilde(&p)), false),
-            Err(e) => toast(&ui, format!("Could not save {}: {e}", p.display()), true),
+            Ok(()) => toast(&ui, trf("Template saved to {}", &[&theme::tilde(&p)]), false),
+            Err(e) => toast(&ui, trf("Could not save {}: {}", &[&p.display(), &e]), true),
         }
         settings_ui(&ui);
     });
     let w = ui.as_weak();
+    let st = st.clone();
     api.on_set_setting(move |key, v| {
         let Some(ui) = w.upgrade() else { return };
         let on = v != 0;
         let at = |list: &[u32]| list.get(v as usize).copied().unwrap_or(0);
         settings::update(|s| match key.as_str() {
+            "language" => s.language = (v as usize).checked_sub(1).and_then(|i| i18n::LANGS.get(i)).map_or("", |l| l.0).into(),
             "theme" => s.theme = settings::THEMES.get(v as usize).unwrap_or(&"system").to_string(),
             "matugen" => s.matugen = on,
             "scale" => s.scale = at(&settings::SCALES),
@@ -149,21 +163,29 @@ pub(super) fn wire_settings(ui: &AppWindow) {
         if key == "matugen" {
             matugen(&ui, true);
         }
+        if key == "language" {
+            // the .slint text follows at once; the text made here is made again
+            i18n::set(&ui, i18n::index(&settings::get().language));
+            matugen(&ui, true);
+            detected(&ui);
+            update_available(&ui);
+            refresh(&ui, &st.borrow());
+        }
         settings_ui(&ui);
     });
     let w = ui.as_weak();
     api.on_pick_snapshot_dir(move || {
         let Some(ui) = w.upgrade() else { return };
-        if let Some(p) = rfd::FileDialog::new().set_title("Snapshot folder").set_directory(system::snapshot_root()).pick_folder() {
+        if let Some(p) = rfd::FileDialog::new().set_title(tr("Snapshot folder")).set_directory(system::snapshot_root()).pick_folder() {
             settings::update(|s| s.snapshot_dir = Some(p));
             settings_ui(&ui);
-            toast(&ui, "New snapshots go to the new folder; earlier ones stay where they are", false);
+            toast(&ui, tr("New snapshots go to the new folder; earlier ones stay where they are"), false);
         }
     });
     let w = ui.as_weak();
     api.on_add_save_folder(move || {
         let Some(ui) = w.upgrade() else { return };
-        let Some(p) = rfd::FileDialog::new().set_title("Folder with MHGU saves").pick_folder() else { return };
+        let Some(p) = rfd::FileDialog::new().set_title(tr("Folder with MHGU saves")).pick_folder() else { return };
         settings::update(|s| {
             if !s.save_folders.contains(&p) {
                 s.save_folders.push(p.clone());
@@ -173,7 +195,7 @@ pub(super) fn wire_settings(ui: &AppWindow) {
         detected(&ui);
         settings_ui(&ui);
         let n = ui.global::<Api>().get_detected().row_count().saturating_sub(before);
-        toast(&ui, if n == 0 { "No new save found in that folder".to_string() } else { format!("Found {}", count(n, "new save", "new saves")) }, false);
+        toast(&ui, if n == 0 { tr("No new save found in that folder").to_string() } else { trn("Found {n} new save", "Found {n} new saves", n as i64, &[]) }, false);
     });
     let w = ui.as_weak();
     api.on_remove_save_folder(move |i| {

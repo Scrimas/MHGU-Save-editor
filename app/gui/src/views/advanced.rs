@@ -42,22 +42,24 @@ pub(super) fn fields_page(ui: &AppWindow, st: &State) {
             hex.push('\n');
         }
         if fl.size > n {
-            hex.push_str(&format!("… {} more bytes\n", num(fl.size as i64 - n as i64)));
+            let more = fl.size as i64 - n as i64;
+            hex.push_str(&trn("… {} more byte", "… {} more bytes", more, &[&num(more)]));
+            hex.push('\n');
         }
         api.set_hex(hex.into());
         let c = conf_of(&fl.confidence);
         let tag = match c {
-            Confidence::Confirmed => "Confirmed",
-            Confidence::Derived => "Derived",
-            _ => "Unresolved",
+            Confidence::Confirmed => tr("Confirmed"),
+            Confidence::Derived => tr("Derived"),
+            _ => tr("Unresolved"),
         };
         api.set_field_info(
             format!(
                 "{}\n{} · {} · {} · {tag}",
                 fl.label,
                 fl.manager,
-                count(fl.size, "byte", "bytes"),
-                if fl.block == "char1" { format!("base + 0x{:X}", fl.rel) } else { format!("block {}", fl.block) }
+                trn("{} byte", "{} bytes", fl.size as i64, &[&num(fl.size as i64)]),
+                if fl.block == "char1" { format!("base + 0x{:X}", fl.rel) } else { trf("block {}", &[&fl.block]) }
             )
             .into(),
         );

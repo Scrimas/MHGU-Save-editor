@@ -44,7 +44,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
     let mut run: Option<(usize, usize)> = None;
     let flush = |run: &mut Option<(usize, usize)>, lrows: &mut Vec<LoadoutRow>| {
         if let Some((a, b)) = run.take() {
-            let name = if a == b { format!("Loadout {} · empty", a + 1) } else { format!("Loadouts {}–{} · empty", a + 1, b + 1) };
+            let name = if a == b { trf("Loadout {} · empty", &[&(a + 1)]) } else { trf("Loadouts {}–{} · empty", &[&(a + 1), &(b + 1)]) };
             lrows.push(LoadoutRow { index: -1, first: a as i32, last: b as i32, name: name.into(), summary: "".into(), used: false });
         }
     };
@@ -79,7 +79,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
                 let changed = st.changed(o, 4);
                 let was = if changed {
                     let (oid, on) = items::loadout(st.orig(), base, k).items[j];
-                    if oid == 0 { "Empty".to_string() } else { format!("{} ×{on}", assets::item_name(oid)) }
+                    if oid == 0 { tr("Empty").to_string() } else { format!("{} ×{on}", assets::item_name(oid)) }
                 } else {
                     String::new()
                 };

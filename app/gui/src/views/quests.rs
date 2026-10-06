@@ -5,9 +5,12 @@ use super::*;
 pub(super) fn lock_text(l: &Lock) -> (String, bool) {
     match l {
         Lock::Unlocked => (String::new(), false),
-        Lock::Rotated => ("listed only in its rotation".into(), false),
-        Lock::Event => ("event quest: listed once downloaded".into(), false),
-        Lock::Locked(alts) => (format!("locked: needs {}", alts.iter().map(|a| a.join(" and ")).collect::<Vec<_>>().join(", or ")), true),
+        Lock::Rotated => (tr("listed only in its rotation").into(), false),
+        Lock::Event => (tr("event quest: listed once downloaded").into(), false),
+        Lock::Locked(alts) => {
+            let alts: Vec<String> = alts.iter().map(|a| a.join(tr(" and "))).collect();
+            (trf("locked: needs {}", &[&alts.join(tr(", or "))]), true)
+        }
     }
 }
 
@@ -52,9 +55,9 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
             let members: Vec<_> = qs.iter().filter(|x| quest_group(x) == g).collect();
             let open = members.iter().any(|x| !c.quest(QuestBit::Cleared, x.index));
             let (label, action) = match deviant_of(q.index) {
-                Some(d) if cat == "Special Permit" => (DEVIANTS[d].to_string(), "Mark all cleared".to_string()),
-                _ if q.rank.is_empty() => (cat.clone(), "Mark all cleared".to_string()),
-                _ => (format!("{cat} {}★", q.rank), format!("Mark {}★ cleared", q.rank)),
+                Some(d) if cat == "Special Permit" => (DEVIANTS[d].to_string(), tr("Mark all cleared").to_string()),
+                _ if q.rank.is_empty() => (cat.clone(), tr("Mark all cleared").to_string()),
+                _ => (format!("{cat} {}★", q.rank), trf("Mark {}★ cleared", &[&q.rank])),
             };
             let cleared = members.iter().filter(|x| c.quest(QuestBit::Cleared, x.index)).count();
             rows.push(QuestRow {
@@ -85,7 +88,7 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
             action: SharedString::default(),
         });
     }
-    api.set_quest_summary(format!("{cat}: {} / {} cleared · confirmed in game except where marked", num(done as i64), num(total as i64)).into());
+    api.set_quest_summary(trf("{}: {} / {} cleared · confirmed in game except where marked", &[&cat, &num(done as i64), &num(total as i64)]).into());
     api.set_quest_tabs(strings(tabs));
     api.set_quest_tab(tab as i32);
     api.set_quests(model(rows));
@@ -129,7 +132,7 @@ pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {
         if !sets.is_empty()
             && let Some(o) = s.ops.last_mut()
         {
-            o.note = "Also completes its quest set, as the game does".into();
+            o.note = tr("Also completes its quest set, as the game does").into();
         }
         let _ = &ui;
     });
@@ -139,11 +142,11 @@ pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {
         let slot = s.slot;
         let members: Vec<usize> = Char::real_quests(true).into_iter().filter(|q| q.category == cat && quest_group(q) == group.as_str()).map(|q| q.index).collect();
         let label = match group.split_once(':') {
-            Some(("dev", d)) => format!("{} quests", d.parse::<usize>().ok().and_then(|d| DEVIANTS.get(d)).copied().unwrap_or("Deviant")),
-            Some((_, r)) if !r.is_empty() => format!("{cat} {r}★ quests"),
-            _ => format!("{cat} quests"),
+            Some(("dev", d)) => trf("{} quests marked cleared", &[&d.parse::<usize>().ok().and_then(|d| DEVIANTS.get(d)).map(|&d| tr(d)).unwrap_or(tr("Deviant"))]),
+            Some((_, r)) if !r.is_empty() => trf("{} {}★ quests marked cleared", &[&cat, &r]),
+            _ => trf("{} quests marked cleared", &[&cat]),
         };
-        let e = Edit { key: String::new(), title: format!("{label} marked cleared"), detail: "Quests".into(), note: "Completed quest sets are recorded too, as the game does".into(), conf: Conf::Confirmed, targets: vec![] };
+        let e = Edit { key: String::new(), title: label, detail: tr("Quests").into(), note: tr("Completed quest sets are recorded too, as the game does").into(), conf: Conf::Confirmed, targets: vec![] };
         s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);
             let todo: Vec<usize> = members.iter().copied().filter(|&i| !c.quest(QuestBit::Cleared, i)).collect();

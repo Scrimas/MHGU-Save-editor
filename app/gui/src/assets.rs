@@ -1,6 +1,7 @@
 //! Game assets embedded at build time from app/assets/gen (made by tools/build_assets.py
 //! from a RomFS dump; not in git). Without them the UI shows placeholders and "#ID".
 
+use crate::i18n::trf;
 use mhgu_save::items::{self, Store};
 use serde::Deserialize;
 use slint::{Image, Rgba8Pixel, SharedPixelBuffer};
@@ -80,6 +81,9 @@ pub struct Names {
     /// Palico support move ID -> name (packs built before 2026-10-05 lack it: shown as IDs).
     #[serde(default)]
     pub support_moves: Vec<String>,
+    /// Monster save index - 1 -> name (packs built before 2026-10-06 lack it: data/ names).
+    #[serde(default)]
+    pub monsters: Vec<String>,
     /// Item ID -> [icon, colour, rarity].
     #[serde(default)]
     pub item_icons: HashMap<String, [u32; 3]>,
@@ -114,15 +118,86 @@ pub fn deco_size(id: u16) -> Option<u8> {
     names().decos.iter().find(|d| d[0] == id).map(|d| d[1] as u8)
 }
 
+/// The names of names.json in another of the game's languages (names.<code>.json), entry
+/// for entry: the piece lists follow names.json's.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Text {
+    items: Vec<String>,
+    skills: Vec<String>,
+    support_moves: Vec<String>,
+    monsters: Vec<String>,
+    /// Weapon class -> [base, final, ultimate] per piece.
+    weapons: HashMap<String, Vec<Vec<String>>>,
+    armor: HashMap<String, Vec<String>>,
+    palico_weapons: Vec<String>,
+    palico_armor: HashMap<String, Vec<String>>,
+    talismans: Vec<String>,
+}
+
+impl Names {
+    /// Take the names of `t`; a missing or empty one, and the tables' placeholders, stay.
+    fn translate(&mut self, t: Text) {
+        fn list(to: &mut [String], from: Vec<String>) {
+            for (a, b) in to.iter_mut().zip(from) {
+                if !a.is_empty() && !b.is_empty() {
+                    *a = b;
+                }
+            }
+        }
+        fn pieces(to: &mut [Piece], from: Vec<String>) {
+            for (p, n) in to.iter_mut().zip(from) {
+                if p.is_real() && !n.is_empty() {
+                    p.name = n;
+                }
+            }
+        }
+        list(&mut self.items, t.items);
+        list(&mut self.skills, t.skills);
+        list(&mut self.support_moves, t.support_moves);
+        list(&mut self.monsters, t.monsters);
+        for (cls, v) in t.weapons {
+            for (p, n) in self.weapons.get_mut(&cls).into_iter().flatten().zip(v) {
+                if p.is_real() && n.first().is_some_and(|s| !s.is_empty()) {
+                    p.name = n[0].clone();
+                    p.names = n;
+                }
+            }
+        }
+        for (part, v) in t.armor {
+            pieces(self.armor.get_mut(&part).map_or(&mut [], |x| x), v);
+        }
+        for (part, v) in t.palico_armor {
+            pieces(self.palico_armor.get_mut(&part).map_or(&mut [], |x| x), v);
+        }
+        pieces(&mut self.palico_weapons, t.palico_weapons);
+        pieces(&mut self.talismans, t.talismans);
+    }
+}
+
+/// The game's names in the interface language (i18n), English where the game has none.
 pub fn names() -> &'static Names {
-    static N: OnceLock<Names> = OnceLock::new();
-    N.get_or_init(|| file("names.json").and_then(|b| serde_json::from_slice(b).ok()).unwrap_or_default())
+    static N: [OnceLock<Names>; crate::i18n::LANGS.len()] = [const { OnceLock::new() }; crate::i18n::LANGS.len()];
+    let lang = crate::i18n::current();
+    N[lang].get_or_init(|| {
+        let mut n: Names = file("names.json").and_then(|b| serde_json::from_slice(b).ok()).unwrap_or_default();
+        let code = crate::i18n::LANGS[lang].0;
+        if let Some(t) = file(&format!("names.{code}.json")).and_then(|b| serde_json::from_slice::<Text>(b).ok()) {
+            n.translate(t);
+        }
+        n
+    })
+}
+
+/// Monster `i`'s name (save index 1-137) from the game, if the pack has it.
+pub fn monster_name(i: usize) -> Option<&'static str> {
+    names().monsters.get(i.wrapping_sub(1)).map(String::as_str).filter(|s| !s.is_empty())
 }
 
 pub fn item_name(id: u16) -> String {
     match names().items.get(id as usize) {
         Some(n) if !n.is_empty() => n.clone(),
-        _ => format!("Item #{id}"),
+        _ => trf("Item #{}", &[&id]),
     }
 }
 

@@ -7,11 +7,11 @@ export component AdvancedPage inherits Rectangle {
         padding-top: 16px;
         spacing: Tok.gap;
         PageHeader {
-            title: "Save map";
-            subtitle: "Every byte range of the save, named from the game's own loader · read-only, character " + (Api.slot + 1);
+            title: @tr("Save map");
+            subtitle: @tr("Every byte range of the save, named from the game's own loader · read-only, character {}", Api.slot + 1);
         }
         SearchField {
-            placeholder-text: "Filter by name, manager or offset";
+            placeholder-text: @tr("Filter by name, manager or offset");
             text <=> Api.field-filter;
             edited(t) => { Api.filter-fields(t); }
         }
@@ -27,11 +27,11 @@ export component AdvancedPage inherits Rectangle {
                             padding-left: 12px;
                             padding-right: 12px;
                             spacing: 10px;
-                            ColHead { text: "Offset"; width: 84px; }
-                            ColHead { text: "Size"; width: 64px; }
-                            ColHead { text: "Manager"; width: 110px; }
-                            ColHead { text: "Name"; horizontal-stretch: 1; }
-                            ColHead { text: "Confidence"; width: 100px; }
+                            ColHead { text: @tr("Offset"); width: 84px; }
+                            ColHead { text: @tr("Size"); width: 64px; }
+                            ColHead { text: @tr("Manager"); width: 110px; }
+                            ColHead { text: @tr("Name"); horizontal-stretch: 1; }
+                            ColHead { text: @tr("Confidence"); width: 100px; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
@@ -69,7 +69,7 @@ export component AdvancedPage inherits Rectangle {
             }
             Card {
                 horizontal-stretch: 2;
-                if Api.field-sel < 0: EmptyState { text: "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."; }
+                if Api.field-sel < 0: EmptyState { text: @tr("Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."); }
                 if Api.field-sel >= 0: VerticalLayout {
                     padding: Tok.pad;
                     spacing: 10px;

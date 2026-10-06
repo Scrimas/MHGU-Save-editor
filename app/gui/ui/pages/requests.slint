@@ -10,23 +10,23 @@ export component RequestsPage inherits Rectangle {
         spacing: Tok.gap;
         // title identical to the nav label (C1)
         PageHeader {
-            title: "Requests";
+            title: @tr("Requests");
             subtitle: Api.request-summary;
             derived: true;
             staged: Api.page-counts[6];
         }
         if Api.settings.confirmed-only: Muted {
-            text: "Read only: Confirmed changes only is on in Settings, and requests are Derived.";
+            text: @tr("Read only: Confirmed changes only is on in Settings, and requests are Derived.");
             color: Tok.warn;
         }
         HorizontalLayout {
             spacing: Tok.tight;
             SearchField {
-                placeholder-text: "Search requests or villages";
+                placeholder-text: @tr("Search requests or villages");
                 text <=> Api.request-search;
                 edited => { Api.filter-requests(); }
             }
-            for f in [{k: "open", t: "Open"}, {k: "done", t: "Completed"}, {k: "all", t: "All"}]: Chip {
+            for f in [{k: "open", t: @tr("Open")}, {k: "done", t: @tr("Completed")}, {k: "all", t: @tr("All")}]: Chip {
                 y: 2px;
                 text: f.t;
                 active: Api.request-filter == f.k;
@@ -49,7 +49,7 @@ export component RequestsPage inherits Rectangle {
                 padding-left: 14px;
                 padding-right: 14px;
                 Text {
-                    text: "Completed skips the villager's report, so the game never hands over that reward. Leave it unticked to get the reward in game.";
+                    text: @tr("Completed skips the villager's report, so the game never hands over that reward. Leave it unticked to get the reward in game.");
                     color: Tok.warn;
                     font-size: Tok.small;
                     vertical-alignment: center;
@@ -69,31 +69,31 @@ export component RequestsPage inherits Rectangle {
                             padding-left: 14px;
                             padding-right: 12px;
                             spacing: 10px;
-                            ColHead { text: "Request"; horizontal-stretch: 1; }
+                            ColHead { text: @tr("Request"); horizontal-stretch: 1; }
                             HorizontalLayout {
                                 width: 110px;
                                 spacing: 6px;
                                 alignment: start;
-                                ColHead { text: "Accepted"; }
-                                InfoTip { y: 9px; text: "Accepted posts the request's quest on the board, as talking to the villager does."; }
+                                ColHead { text: @tr("Accepted"); }
+                                InfoTip { y: 9px; text: @tr("Accepted posts the request's quest on the board, as talking to the villager does."); }
                             }
                             // the consequence at the control, not in a footnote (05.1)
                             HorizontalLayout {
                                 width: 120px;
                                 spacing: 6px;
                                 alignment: start;
-                                ColHead { text: "Completed"; }
+                                ColHead { text: @tr("Completed"); }
                                 InfoTip {
                                     y: 9px;
                                     tint: Tok.warn;
-                                    text: "Completed marks the request as reported. The game hands out the reward only when you report to the villager yourself, so ticking it here loses that reward.";
+                                    text: @tr("Completed marks the request as reported. The game hands out the reward only when you report to the villager yourself, so ticking it here loses that reward.");
                                 }
                             }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
                     if Api.requests.length == 0: EmptyState {
-                        text: Api.request-search != "" ? "No request matches the search." : Api.request-filter == "open" ? "Every request is completed." : Api.request-filter == "done" ? "No request is completed yet." : "No requests.";
+                        text: Api.request-search != "" ? @tr("No request matches the search.") : Api.request-filter == "open" ? @tr("Every request is completed.") : Api.request-filter == "done" ? @tr("No request is completed yet.") : @tr("No requests.");
                     }
                     ListView {
                         for r in Api.requests: ListRow {
@@ -109,13 +109,13 @@ export component RequestsPage inherits Rectangle {
                                     Text { text: r.name; overflow: elide; }
                                     HorizontalLayout {
                                         spacing: 6px;
-                                        if r.was != "": Text { text: "was " + r.was; color: Tok.accent-text; font-size: Tok.small; }
+                                        if r.was != "": Text { text: @tr("was {}", r.was); color: Tok.accent-text; font-size: Tok.small; }
                                         Text { text: r.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; horizontal-stretch: 1; }
                                     }
                                 }
                                 Rectangle {
                                     width: 110px;
-                                    if r.has-flags: CheckBox { x: 0; checked: r.accepted; enabled: !Api.settings.confirmed-only; accessible-label: "Accepted: " + r.name; toggled => { Api.set-request(r.index, "accepted", self.checked); } }
+                                    if r.has-flags: CheckBox { x: 0; checked: r.accepted; enabled: !Api.settings.confirmed-only; accessible-label: @tr("Accepted: {}", r.name); toggled => { Api.set-request(r.index, "accepted", self.checked); } }
                                 }
                                 Rectangle {
                                     width: 120px;
@@ -123,7 +123,7 @@ export component RequestsPage inherits Rectangle {
                                         x: 0;
                                         checked: r.completed;
                                         enabled: !Api.settings.confirmed-only;
-                                        accessible-label: "Completed: " + r.name;
+                                        accessible-label: @tr("Completed: {}", r.name);
                                         toggled => {
                                             if self.checked {
                                                 root.warned = true;

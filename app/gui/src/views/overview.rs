@@ -34,29 +34,29 @@ pub(super) fn overview(ui: &AppWindow, st: &State) {
     };
     let awards_sub = match missing.len() {
         0 => String::new(),
-        1 => format!("1 missing: {}", missing[0]),
-        n => format!("{n} missing"),
+        1 => trf("1 missing: {}", &[&missing[0]]),
+        n => trf("{} missing", &[&n]),
     };
     api.set_stats(model(vec![
-        card("Quests cleared", done, real.len(), format!("Village ★{} · Hub ★{}", c.village_star(), c.hub_star()), "quests", 0),
-        card("Hunter Arts", arts, t.arts.len(), String::new(), "collections", 0),
-        card("Canteen dishes", dishes, 99, String::new(), "collections", 1),
-        card("Awards", t.awards.len() - missing.len(), t.awards.len(), awards_sub, "collections", 3),
+        card(tr("Quests cleared"), done, real.len(), trf("Village ★{} · Hub ★{}", &[&c.village_star(), &c.hub_star()]), "quests", 0),
+        card(tr("Hunter Arts"), arts, t.arts.len(), String::new(), "collections", 0),
+        card(tr("Canteen dishes"), dishes, 99, String::new(), "collections", 1),
+        card(tr("Awards"), t.awards.len() - missing.len(), t.awards.len(), awards_sub, "collections", 3),
         // what is counted is named, so 79 here and 93 on Monsters can both be right (07.2)
-        card("Large monsters met", met, listed.len(), "Guild Card list".into(), "monsters", 0),
-        card("Gold crowns", gold, listed.len(), format!("{} mini crowns", num(mini as i64)), "monsters", 0),
+        card(tr("Large monsters met"), met, listed.len(), tr("Guild Card list").into(), "monsters", 0),
+        card(tr("Gold crowns"), gold, listed.len(), trn("{} mini crown", "{} mini crowns", mini as i64, &[&num(mini as i64)]), "monsters", 0),
         // values, not progress: no bars (H1.2)
         StatCard {
-            title: "Hunter Rank".into(),
+            title: tr("Hunter Rank").into(),
             value: num(chs.hr).into(),
-            sub: if chs.hr >= 999 { format!("Max · {} HR points", num(chs.hr_points)) } else { format!("{} HR points", num(chs.hr_points)) }.into(),
+            sub: if chs.hr >= 999 { trf("Max · {} HR points", &[&num(chs.hr_points)]) } else { trf("{} HR points", &[&num(chs.hr_points)]) }.into(),
             page: "character".into(),
             ..Default::default()
         },
         StatCard {
-            title: "Zenny".into(),
+            title: tr("Zenny").into(),
             value: num(chs.funds).into(),
-            sub: if chs.funds >= character::MAX_FUNDS { "Max" } else { "" }.into(),
+            sub: if chs.funds >= character::MAX_FUNDS { tr("Max") } else { "" }.into(),
             page: "character".into(),
             ..Default::default()
         },
@@ -91,7 +91,7 @@ pub(super) fn overview(ui: &AppWindow, st: &State) {
             op,
         };
         match staged {
-            Some(o) => cards.push(goal(1, "Its changes are in Review. Nothing is written until you press Write.".into(), String::new(), o.id)),
+            Some(o) => cards.push(goal(1, tr("Its changes are in Review. Nothing is written until you press Write.").into(), String::new(), o.id)),
             None if p.blocked => cards.push(goal(3, p.summary.clone(), p.count.clone(), 0)),
             None if p.empty => done_goals.push(goal(2, p.summary.clone(), String::new(), 0)),
             None => cards.push(goal(0, p.summary.clone(), p.count.clone(), 0)),
@@ -121,11 +121,13 @@ pub(super) fn wire_overview(ui: &AppWindow, st: &Shared) {
                 title: p.title.clone().into(),
                 // a goal's card already says what it does (C6m); a page action says it here
                 summary: if empty {
-                    format!("Nothing to change. {}", p.summary).into()
+                    trf("Nothing to change. {}", &[&p.summary]).into()
                 } else if goals::GOALS.iter().any(|g| g.id == id) {
-                    format!("{} change. Nothing is written until you press Write.", count(p.lines.len(), "value", "values")).into()
+                    let n = p.lines.len() as i64;
+                    trn("{n} value changes. Nothing is written until you press Write.", "{n} values change. Nothing is written until you press Write.", n, &[]).into()
                 } else {
-                    format!("{} {} change. Nothing is written until you press Write.", p.summary, count(p.lines.len(), "value", "values")).into()
+                    let n = p.lines.len() as i64;
+                    trn("{} {n} value changes. Nothing is written until you press Write.", "{} {n} values change. Nothing is written until you press Write.", n, &[&p.summary]).into()
                 },
                 confidence: conf(p.conf.unwrap_or(Conf::Confirmed)),
                 lines: model(lines),

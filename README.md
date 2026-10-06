@@ -106,12 +106,18 @@ Keep your own backup anyway. This is an unofficial tool.
 
 ## Settings
 
-**Settings…** in the sidebar: theme and interface size; snapshot folder, how many
+**Settings…** in the sidebar: language, theme and interface size; snapshot folder, how many
 snapshots to keep per save, and whether Write takes one by default; extra folders to
 search for saves (yuzu, Eden, Citron, portable installs); recent saves and reopening the
 last one; extra emulator process names for the running check; and **Confirmed changes
 only**, which refuses every Derived change. They are kept in
 `~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
+
+**Language**: English, French, German, Italian or Spanish, the game's own languages; by
+default the system's. Item, equipment, skill and monster names are the game's own in that
+language. The interface text is in
+[`app/gui/lang`](app/gui/lang) (gettext catalogs); after changing strings in the source,
+`python3 tools/i18n.py` updates the template and merges every catalog.
 
 **Colours from [matugen](https://github.com/InioX/matugen)** (Linux): the editor follows
 the wallpaper's palette when `~/.config/mhgu-save-editor/matugen.json` exists, and picks

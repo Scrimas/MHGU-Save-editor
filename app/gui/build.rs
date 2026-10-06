@@ -17,8 +17,13 @@ fn walk(dir: &Path, root: &Path, out: &mut Vec<(String, PathBuf)>) {
 }
 
 fn main() {
-    // Fluent on both platforms: it follows the system light/dark setting.
-    let config = slint_build::CompilerConfiguration::new().with_style("fluent".into());
+    // Fluent on both platforms: it follows the system light/dark setting. The @tr strings'
+    // translations are bundled from lang/ (tools/i18n.py), without the component name as
+    // context: src/i18n.rs reads the same catalogs.
+    let config = slint_build::CompilerConfiguration::new()
+        .with_style("fluent".into())
+        .with_bundled_translations("lang")
+        .with_default_translation_context(slint_build::DefaultTranslationContext::None);
     slint_build::compile_with_config("ui/app.slint", config).unwrap();
 
     // Embed the generated game assets (app/assets/gen, made by tools/build_assets.py).

@@ -36,23 +36,23 @@ export component CollectionsPage inherits Rectangle {
         padding-top: 16px;
         spacing: Tok.gap;
         PageHeader {
-            title: "Collections";
+            title: @tr("Collections");
             subtitle: Api.checks-summary;
             staged: Api.page-counts[7];
             if root.checks: Button {
-                text: "Check all…";
+                text: @tr("Check all…");
                 clicked => { pv.open("checks:all", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
             if root.checks: MoreButton {
-                items: ["Uncheck all…"];
+                items: [@tr("Uncheck all…")];
                 activated => { pv.open("checks:none", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
             if !root.checks: Button {
-                text: "All levels…";
+                text: @tr("All levels…");
                 clicked => { pv.open("deviants:levels", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
             if !root.checks: Button {
-                text: "Max permits…";
+                text: @tr("Max permits…");
                 clicked => { pv.open("deviants:permits", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
         }
@@ -61,13 +61,13 @@ export component CollectionsPage inherits Rectangle {
         HorizontalLayout {
             spacing: Tok.tight;
             SearchField {
-                placeholder-text: "Search";
+                placeholder-text: @tr("Search");
                 text <=> Api.check-search;
                 edited => { Api.filter-checks(); }
             }
             Chip {
                 y: 2px;
-                text: "Missing only";
+                text: @tr("Missing only");
                 active: Api.check-missing;
                 clicked => {
                     Api.check-missing = !Api.check-missing;
@@ -88,14 +88,14 @@ export component CollectionsPage inherits Rectangle {
                             padding-left: 14px;
                             padding-right: 12px;
                             spacing: 10px;
-                            ColHead { text: "Hunter Art"; horizontal-stretch: 1; }
+                            ColHead { text: @tr("Hunter Art"); horizontal-stretch: 1; }
                             ColHead { text: "I"; width: 56px; }
                             ColHead { text: "II"; width: 56px; }
                             ColHead { text: "III"; width: 56px; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
-                    if Api.arts.length == 0: EmptyState { text: Api.check-missing ? "Every Hunter Art is unlocked." : "No art matches the search."; }
+                    if Api.arts.length == 0: EmptyState { text: Api.check-missing ? @tr("Every Hunter Art is unlocked.") : @tr("No art matches the search."); }
                     ListView {
                         for a in Api.arts: Rectangle {
                             height: 44px;
@@ -123,7 +123,7 @@ export component CollectionsPage inherits Rectangle {
         }
         if Api.collection-tab >= 1 && Api.collection-tab <= 3: Card {
             vertical-stretch: 1;
-            if Api.checks.length == 0: EmptyState { text: Api.check-missing ? "Nothing is missing here." : "Nothing matches the search."; }
+            if Api.checks.length == 0: EmptyState { text: Api.check-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); }
             ListView {
                 property <int> seq: Api.jump-seq;
                 function go() {
@@ -162,13 +162,13 @@ export component CollectionsPage inherits Rectangle {
                             padding-right: 12px;
                             spacing: 12px;
                             Rectangle { width: Api.assets-ok ? 40px : 0px; }
-                            ColHead { text: "Deviant"; horizontal-stretch: 1; }
-                            ColHead { text: "Special Permits"; width: 220px; }
-                            ColHead { text: "Levels cleared"; width: 260px; }
+                            ColHead { text: @tr("Deviant"); horizontal-stretch: 1; }
+                            ColHead { text: @tr("Special Permits"); width: 220px; }
+                            ColHead { text: @tr("Levels cleared"); width: 260px; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
-                    if Api.deviants.length == 0: EmptyState { text: Api.check-missing ? "Every deviant has every level cleared." : "No deviant matches the search."; }
+                    if Api.deviants.length == 0: EmptyState { text: Api.check-missing ? @tr("Every deviant has every level cleared.") : @tr("No deviant matches the search."); }
                     ListView {
                         for d in Api.deviants: Rectangle {
                             height: d.gate != "" ? 76px : 60px;
@@ -191,7 +191,7 @@ export component CollectionsPage inherits Rectangle {
                                     width: 220px;
                                     alignment: center;
                                     spacing: 2px;
-                                    NumberBox { width: 100px; minimum: 0; maximum: 99; value: d.permits; label: "Special Permits of " + d.name; edited(v) => { Api.set-deviant(d.index, "permits", v); } }
+                                    NumberBox { width: 100px; minimum: 0; maximum: 99; value: d.permits; label: @tr("Special Permits of {}", d.name); edited(v) => { Api.set-deviant(d.index, "permits", v); } }
                                     if d.was-permits != "": WasLine { was: d.was-permits; key: "permits:" + d.index; }
                                 }
                                 VerticalLayout {
@@ -201,7 +201,7 @@ export component CollectionsPage inherits Rectangle {
                                     HorizontalLayout {
                                         spacing: 8px;
                                         alignment: start;
-                                        NumberBox { width: 100px; minimum: 0; maximum: d.total; value: d.levels; label: "Levels cleared of " + d.name; edited(v) => { Api.set-deviant(d.index, "levels", v); } }
+                                        NumberBox { width: 100px; minimum: 0; maximum: d.total; value: d.levels; label: @tr("Levels cleared of {}", d.name); edited(v) => { Api.set-deviant(d.index, "levels", v); } }
                                         Text { text: "/ " + d.total; color: Tok.muted; vertical-alignment: center; }
                                     }
                                     if d.was-levels != "": WasLine { was: d.was-levels; key: "levels:" + d.index; }

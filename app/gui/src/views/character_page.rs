@@ -18,8 +18,8 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
         village_star: p.village_star() as i32,
         hub_star: p.hub_star() as i32,
         gender: match c.gender {
-            0 => "Type 1 (male)".into(),
-            1 => "Type 2 (female)".into(),
+            0 => tr("Type 1 (male)").into(),
+            1 => tr("Type 2 (female)").into(),
             g => format!("{g}").into(),
         },
         points_lr: model(c.points_lr.iter().map(|&v| v as i32).collect()),
@@ -49,7 +49,7 @@ pub(super) fn weapon_use_rows(st: &State) -> Vec<WeaponUseRow> {
         .iter()
         .map(|&w| WeaponUseRow {
             index: w as i32,
-            name: character::USE_WEAPONS[w].into(),
+            name: tr(character::USE_WEAPONS[w]).into(),
             counts: model((0..3).map(|v| character::weapon_use(s, base, v, w) as i32).collect()),
             was: model((0..3).map(|v| SharedString::from(st.was(Target::WeaponUse(v, w)))).collect()),
             total: total(w),
@@ -90,7 +90,7 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             match k {
                 "hr" => {
                     if !character::set_hr(sv, base, v as u16) {
-                        msg = Some("HR below 13 follows the Hub star level: edit Hub ★ instead");
+                        msg = Some(tr("HR below 13 follows the Hub star level: edit Hub ★ instead"));
                     }
                 }
                 "hr-points" => character::set_hr_points(sv, base, v),
@@ -117,7 +117,7 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         }
     });
     on!(ui, st, on_set_name, |ui, s, name: SharedString| {
-        s.edit(Edit::one(Target::Name, "Name".into(), Conf::Confirmed).note("Written to the save, the player record and the Guild Card"), |sv, base| {
+        s.edit(Edit::one(Target::Name, tr("Name").into(), Conf::Confirmed).note(tr("Written to the save, the player record and the Guild Card")), |sv, base| {
             character::set_name(sv, base, &name);
             vec![]
         });

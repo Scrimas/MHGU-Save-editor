@@ -1,0 +1,3384 @@
+# Strings of the MHGU save editor, extracted by tools/i18n.py.
+msgid ""
+msgstr ""
+"Project-Id-Version: mhgu-editor\n"
+"PO-Revision-Date: 2026-10-06 00:00+0000\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "{}: {} to {}. Opens the field."
+msgstr "{}: da {} a {}. Apre il campo."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "{}. Opens the field."
+msgstr "{}. Apre il campo."
+
+#: app/gui/ui/app.slint app/gui/ui/common.slint app/gui/ui/pages/overview.slint
+msgid "Undo"
+msgstr "Annulla"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint app/gui/ui/common.slint
+msgid "and {} more"
+msgstr "e altri {}"
+
+#: app/gui/ui/app.slint
+msgid "Review"
+msgstr "Revisione"
+
+#: app/gui/ui/app.slint app/gui/ui/common.slint
+msgid "Close"
+msgstr "Chiudi"
+
+#: app/gui/ui/app.slint
+msgid "Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one."
+msgstr "Ancora nessuna modifica in sospeso. Ogni modifica appare qui con il valore che sostituisce e puoi annullarle una per una."
+
+#: app/gui/ui/app.slint
+msgid "Derived: worked out from the game's code, not yet checked in game. Untagged changes are confirmed in game."
+msgstr "Dedotto: ricavato dal codice del gioco, non ancora verificato nel gioco. Le modifiche senza etichetta sono confermate nel gioco."
+
+#: app/gui/ui/app.slint
+msgid "Undo all"
+msgstr "Annulla tutto"
+
+#: app/gui/ui/app.slint
+msgid "Write…"
+msgstr "Scrivi…"
+
+#: app/gui/ui/app.slint
+msgid "What changes"
+msgstr "Cosa cambia"
+
+#: app/gui/ui/app.slint
+msgid "Back to Review"
+msgstr "Torna a Revisione"
+
+#: app/gui/ui/app.slint
+msgid "Before writing"
+msgstr "Prima di scrivere"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "{} is running"
+msgstr "{} è in esecuzione"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "{} is not running"
+msgstr "{} non è in esecuzione"
+
+#: app/gui/ui/app.slint
+msgid "Close it first: it overwrites the save when it exits."
+msgstr "Chiudilo prima: sovrascrive il salvataggio quando esce."
+
+#: app/gui/ui/app.slint
+msgid "Check again"
+msgstr "Ricontrolla"
+
+#: app/gui/ui/app.slint
+msgid "Take a snapshot first (recommended)"
+msgstr "Crea prima un'istantanea (consigliato)"
+
+#: app/gui/ui/app.slint
+msgid "You can restore it any time from Snapshots in the sidebar."
+msgstr "Puoi ripristinarla in qualsiasi momento da Istantanee nella barra laterale."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "{n} change is Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on."
+msgid_plural "{n} changes are Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on."
+msgstr[0] "{n} modifica è di tipo Dedotto: ricavata dal codice del gioco, non ancora verificata nel gioco. Lascia attiva l'istantanea."
+msgstr[1] "{n} modifiche sono di tipo Dedotto: ricavate dal codice del gioco, non ancora verificate nel gioco. Lascia attiva l'istantanea."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "{n} change is Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back."
+msgid_plural "{n} changes are Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back."
+msgstr[0] "{n} modifica è di tipo Dedotto: ricavata dal codice del gioco, non ancora verificata nel gioco. Un'istantanea ti permette di tornare indietro."
+msgstr[1] "{n} modifiche sono di tipo Dedotto: ricavate dal codice del gioco, non ancora verificate nel gioco. Un'istantanea ti permette di tornare indietro."
+
+#: app/gui/ui/app.slint
+msgid "Files"
+msgstr "File"
+
+#: app/gui/ui/app.slint
+msgid "The data goes into the save file."
+msgstr "I dati vanno nel file di salvataggio."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "The same data goes into all {n} save file."
+msgid_plural "The same data goes into all {n} save files."
+msgstr[0] "Gli stessi dati vanno in {n} file di salvataggio."
+msgstr[1] "Gli stessi dati vanno in tutti i {n} file di salvataggio."
+
+#: app/gui/ui/app.slint
+msgid "Hide paths"
+msgstr "Nascondi percorsi"
+
+#: app/gui/ui/app.slint
+msgid "Show paths"
+msgstr "Mostra percorsi"
+
+#: app/gui/ui/app.slint
+msgid "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."
+msgstr "L'emulatore conserva due copie del salvataggio, ognuna con un backup; tutte ricevono gli stessi byte e mantengono la propria intestazione."
+
+#: app/gui/ui/app.slint app/gui/ui/common.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+msgid "Cancel"
+msgstr "Annulla"
+
+#: app/gui/ui/app.slint
+msgid "Snapshot and write"
+msgstr "Istantanea e scrivi"
+
+#: app/gui/ui/app.slint
+msgid "Write without snapshot"
+msgstr "Scrivi senza istantanea"
+
+#: app/gui/ui/app.slint
+msgid "Snapshots"
+msgstr "Istantanee"
+
+#: app/gui/ui/app.slint
+msgid "A copy of the whole save folder, taken before each write and before each restore."
+msgstr "Una copia dell'intera cartella del salvataggio, creata prima di ogni scrittura e di ogni ripristino."
+
+#: app/gui/ui/app.slint
+msgid "No snapshots of this save yet. Write takes one first unless you untick it."
+msgstr "Ancora nessuna istantanea di questo salvataggio. Scrivi ne crea una prima, a meno che tu non tolga la spunta."
+
+#: app/gui/src/views/file.rs app/gui/ui/app.slint
+msgid "Restore…"
+msgstr "Ripristina…"
+
+#: app/gui/ui/app.slint
+msgid "Open folder"
+msgstr "Apri cartella"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Restore the save from {}?"
+msgstr "Ripristinare il salvataggio da {}?"
+
+#: app/gui/ui/app.slint
+msgid "Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."
+msgstr "Ogni file di salvataggio torna a quella copia. Prima viene creata un'istantanea del salvataggio attuale, così puoi annullare da Istantanee."
+
+#: app/gui/ui/app.slint
+msgid "Your staged change is dropped."
+msgid_plural "Your {n} staged changes are dropped."
+msgstr[0] "La modifica in sospeso viene scartata."
+msgstr[1] "Le {n} modifiche in sospeso vengono scartate."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "{} is running. Close it first: it overwrites the save when it exits."
+msgstr "{} è in esecuzione. Chiudilo prima: sovrascrive il salvataggio quando esce."
+
+#: app/gui/ui/app.slint
+msgid "Restore"
+msgstr "Ripristina"
+
+#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+msgid "Remove"
+msgstr "Rimuovi"
+
+#: app/gui/ui/app.slint
+msgid "Settings"
+msgstr "Impostazioni"
+
+#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
+msgid "Appearance"
+msgstr "Aspetto"
+
+#: app/gui/ui/app.slint
+msgid "Language"
+msgstr "Lingua"
+
+#: app/gui/ui/app.slint
+msgid "Theme"
+msgstr "Tema"
+
+#: app/gui/ui/app.slint
+msgid "System"
+msgstr "Sistema"
+
+#: app/gui/ui/app.slint
+msgid "Light"
+msgstr "Chiaro"
+
+#: app/gui/ui/app.slint
+msgid "Dark"
+msgstr "Scuro"
+
+#: app/gui/ui/app.slint
+msgid "Colours from matugen (the wallpaper's palette)"
+msgstr "Colori da matugen (la palette dello sfondo)"
+
+#: app/gui/ui/app.slint
+msgid "Template saved"
+msgstr "Modello salvato"
+
+#: app/gui/ui/app.slint
+msgid "Save template"
+msgstr "Salva modello"
+
+#: app/gui/ui/app.slint
+msgid "Interface size"
+msgstr "Dimensione interfaccia"
+
+#: app/gui/src/views/settings_ui.rs app/gui/ui/app.slint
+msgid "Snapshot folder"
+msgstr "Cartella istantanee"
+
+#: app/gui/ui/app.slint
+msgid "Change…"
+msgstr "Cambia…"
+
+#: app/gui/ui/app.slint
+msgid "Default"
+msgstr "Predefinita"
+
+#: app/gui/ui/app.slint
+msgid "Keep per save"
+msgstr "Da tenere per salvataggio"
+
+#: app/gui/ui/app.slint
+msgid "After each new snapshot, the oldest beyond this number are deleted."
+msgstr "Dopo ogni nuova istantanea, le più vecchie oltre questo numero vengono eliminate."
+
+#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/requests.slint
+msgid "All"
+msgstr "Tutti"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Last {}"
+msgstr "Ultime {}"
+
+#: app/gui/ui/app.slint
+msgid "Tick \"Take a snapshot first\" in the Write dialog"
+msgstr "Spunta \"Crea prima un'istantanea\" nella finestra Scrivi"
+
+#: app/gui/ui/app.slint
+msgid "Saves"
+msgstr "Salvataggi"
+
+#: app/gui/ui/app.slint
+msgid "Open the last save on start"
+msgstr "Apri l'ultimo salvataggio all'avvio"
+
+#: app/gui/ui/app.slint
+msgid "Recent saves"
+msgstr "Salvataggi recenti"
+
+#: app/gui/ui/app.slint
+msgid "None yet"
+msgstr "Ancora nessuno"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "{n} save listed on the Open page"
+msgid_plural "{n} saves listed on the Open page"
+msgstr[0] "{n} salvataggio elencato nella pagina Apri"
+msgstr[1] "{n} salvataggi elencati nella pagina Apri"
+
+#: app/gui/ui/app.slint
+msgid "Clear"
+msgstr "Svuota"
+
+#: app/gui/ui/app.slint
+msgid "Save folders"
+msgstr "Cartelle dei salvataggi"
+
+#: app/gui/ui/app.slint
+msgid "Searched for saves besides Ryujinx's: yuzu, Eden, Citron or portable installs."
+msgstr "Vi si cercano salvataggi oltre a quelli di Ryujinx: yuzu, Eden, Citron o installazioni portatili."
+
+#: app/gui/ui/app.slint
+msgid "Add folder…"
+msgstr "Aggiungi cartella…"
+
+#: app/gui/ui/app.slint
+msgid "Emulator check"
+msgstr "Controllo emulatore"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Write and Restore wait while an emulator runs, since it overwrites the save when it exits. Always checked: {}."
+msgstr "Scrivi e Ripristina attendono finché un emulatore è in esecuzione, perché sovrascrive il salvataggio quando esce. Controllati sempre: {}."
+
+#: app/gui/ui/app.slint
+msgid "Another process name"
+msgstr "Altro nome di processo"
+
+#: app/gui/ui/app.slint
+msgid "Add"
+msgstr "Aggiungi"
+
+#: app/gui/ui/app.slint
+msgid "Safety"
+msgstr "Sicurezza"
+
+#: app/gui/ui/app.slint
+msgid "Confirmed changes only"
+msgstr "Solo modifiche confermate"
+
+#: app/gui/ui/app.slint
+msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."
+msgstr "Le modifiche di tipo Dedotto (ricavate dal codice del gioco, non ancora verificate nel gioco) vengono rifiutate, come le Richieste. Le modifiche già in Revisione restano."
+
+#: app/gui/ui/app.slint
+msgid "Updates"
+msgstr "Aggiornamenti"
+
+#: app/gui/ui/app.slint
+msgid "Check for a new version on start"
+msgstr "Cerca una nuova versione all'avvio"
+
+#: app/gui/ui/app.slint
+msgid "Version"
+msgstr "Versione"
+
+#: app/gui/ui/app.slint
+msgid "Check now"
+msgstr "Controlla ora"
+
+#: app/gui/ui/app.slint
+msgid "Restart…"
+msgstr "Riavvia…"
+
+#: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+msgid "Update…"
+msgstr "Aggiorna…"
+
+#: app/gui/ui/app.slint
+msgid "Asks GitHub for the latest release. Nothing is downloaded until you choose to update."
+msgstr "Chiede a GitHub l'ultima release. Non viene scaricato nulla finché non scegli di aggiornare."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "MHGU Save Editor — {}"
+msgstr "MHGU Save Editor — {}"
+
+#: app/gui/ui/app.slint
+msgid "MHGU Save Editor"
+msgstr "MHGU Save Editor"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/overview.slint
+msgid "Overview"
+msgstr "Panoramica"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
+msgid "Character"
+msgstr "Personaggio"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/items.slint
+msgid "Items"
+msgstr "Oggetti"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+msgid "Equipment"
+msgstr "Equipaggiamento"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/palicoes.slint
+msgid "Palicoes"
+msgstr "Compagni"
+
+#: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/app.slint
+#: app/gui/ui/pages/quests.slint
+msgid "Quests"
+msgstr "Missioni"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/requests.slint
+msgid "Requests"
+msgstr "Richieste"
+
+#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/app.slint
+#: app/gui/ui/pages/collections.slint
+msgid "Collections"
+msgstr "Collezioni"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/monsters.slint
+msgid "Monsters"
+msgstr "Mostri"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/advanced.slint
+msgid "Save map"
+msgstr "Mappa salvataggio"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "{} · empty"
+msgstr "{} · vuoto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs app/gui/ui/app.slint
+msgid "HR {} · {}"
+msgstr "GC {} · {}"
+
+#: app/gui/ui/app.slint
+msgid "No character in this slot"
+msgstr "Nessun personaggio in questo slot"
+
+#: app/gui/ui/app.slint
+msgid "Snapshots…"
+msgstr "Istantanee…"
+
+#: app/gui/ui/app.slint app/gui/ui/pages/open.slint
+msgid "Open save…"
+msgstr "Apri salvataggio…"
+
+#: app/gui/ui/app.slint
+msgid "Settings…"
+msgstr "Impostazioni…"
+
+#: app/gui/ui/app.slint
+msgid "About"
+msgstr "Informazioni"
+
+#: app/gui/ui/app.slint
+msgid "Save file"
+msgstr "File di salvataggio"
+
+#: app/gui/ui/app.slint
+msgid "Copy"
+msgstr "Copia"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "{} value not written yet"
+msgid_plural "{} values not written yet"
+msgstr[0] "{} valore non ancora scritto"
+msgstr[1] "{} valori non ancora scritti"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Review ({})"
+msgstr "Revisione ({})"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Character slot {} is empty. Pick a character in the sidebar; a new one is made in game."
+msgstr "Lo slot personaggio {} è vuoto. Scegli un personaggio nella barra laterale; uno nuovo si crea nel gioco."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Version {} is installed"
+msgstr "La versione {} è installata"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+msgid "Version {} is available"
+msgstr "È disponibile la versione {}"
+
+#: app/gui/ui/app.slint
+msgid "Write or undo the staged changes before restarting."
+msgstr "Scrivi o annulla le modifiche in sospeso prima di riavviare."
+
+#: app/gui/ui/app.slint
+msgid "Release notes"
+msgstr "Note di rilascio"
+
+#: app/gui/ui/app.slint
+msgid "Later"
+msgstr "Più tardi"
+
+#: app/gui/ui/app.slint
+msgid "Not now"
+msgstr "Non ora"
+
+#: app/gui/ui/app.slint
+msgid "Try again"
+msgstr "Riprova"
+
+#: app/gui/ui/app.slint
+msgid "Download and install"
+msgstr "Scarica e installa"
+
+#: app/gui/ui/app.slint
+msgid "Restart now"
+msgstr "Riavvia ora"
+
+#: app/gui/ui/app.slint
+msgid "Quit without writing?"
+msgstr "Uscire senza scrivere?"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "{n} change ({}) is not written to the save and will be lost."
+msgid_plural "{n} changes ({}) are not written to the save and will be lost."
+msgstr[0] "{n} modifica ({}) non è scritta nel salvataggio e andrà persa."
+msgstr[1] "{n} modifiche ({}) non sono scritte nel salvataggio e andranno perse."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs app/gui/ui/app.slint
+msgid "{} value"
+msgid_plural "{} values"
+msgstr[0] "{} valore"
+msgstr[1] "{} valori"
+
+#: app/gui/ui/app.slint
+msgid "Quit without writing"
+msgstr "Esci senza scrivere"
+
+#: app/gui/ui/app.slint
+msgid "Open another save without writing?"
+msgstr "Aprire un altro salvataggio senza scrivere?"
+
+#: app/gui/ui/app.slint
+msgid "Open without writing"
+msgstr "Apri senza scrivere"
+
+#: app/gui/ui/app.slint
+msgid "Built on the save format notes of the MHGU-Save-editor project (github.com/Scrimas/MHGU-Save-editor). Monster Hunter and its assets are © CAPCOM; this is an unofficial fan tool."
+msgstr "Basato sulle note sul formato di salvataggio del progetto MHGU-Save-editor (github.com/Scrimas/MHGU-Save-editor). Monster Hunter e le sue risorse sono © CAPCOM; questo è uno strumento amatoriale non ufficiale."
+
+#: app/gui/ui/app.slint
+msgid "Copyright © 2026 Scrimas. Free software under the GNU General Public License, version 3 or later, with ABSOLUTELY NO WARRANTY."
+msgstr "Copyright © 2026 Scrimas. Software libero distribuito sotto la GNU General Public License, versione 3 o successiva, SENZA ALCUNA GARANZIA."
+
+#: app/gui/ui/common.slint
+msgid "More information"
+msgstr "Ulteriori informazioni"
+
+#: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+msgid "Confirmed"
+msgstr "Confermato"
+
+#: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+msgid "Derived"
+msgstr "Dedotto"
+
+#: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+msgid "Unresolved"
+msgstr "Irrisolto"
+
+#: app/gui/ui/common.slint
+msgid "Confirmed: checked in game."
+msgstr "Confermato: verificato nel gioco."
+
+#: app/gui/ui/common.slint
+msgid "Derived: worked out from the game's code, not yet checked in game. A snapshot before writing lets you go back."
+msgstr "Dedotto: ricavato dal codice del gioco, non ancora verificato nel gioco. Un'istantanea prima di scrivere ti permette di tornare indietro."
+
+#: app/gui/ui/common.slint
+msgid "Unresolved: what this value means in game is not known yet, so it is shown but not edited."
+msgstr "Irrisolto: il significato di questo valore nel gioco non è ancora noto, quindi viene mostrato ma non modificato."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/common.slint
+msgid "{}, {n} value not written"
+msgid_plural "{}, {n} values not written"
+msgstr[0] "{}, {n} valore non scritto"
+msgstr[1] "{}, {n} valori non scritti"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/common.slint
+msgid "{n} value changed on this page"
+msgid_plural "{n} values changed on this page"
+msgstr[0] "{n} valore modificato in questa pagina"
+msgstr[1] "{n} valori modificati in questa pagina"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/common.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/pages/quests.slint app/gui/ui/pages/requests.slint
+msgid "was {}"
+msgstr "era {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/common.slint
+msgid "{}: {}, complete"
+msgstr "{}: {}, completo"
+
+#: app/gui/ui/common.slint
+msgid "Complete"
+msgstr "Completo"
+
+#: app/gui/ui/common.slint
+msgid "Technical details"
+msgstr "Dettagli tecnici"
+
+#: app/gui/ui/common.slint
+msgid "More…"
+msgstr "Altro…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/advanced.slint
+msgid "Every byte range of the save, named from the game's own loader · read-only, character {}"
+msgstr "Ogni intervallo di byte del salvataggio, con i nomi del caricatore del gioco · sola lettura, personaggio {}"
+
+#: app/gui/ui/pages/advanced.slint
+msgid "Filter by name, manager or offset"
+msgstr "Filtra per nome, manager o offset"
+
+#: app/gui/ui/pages/advanced.slint
+msgid "Offset"
+msgstr "Offset"
+
+#: app/gui/ui/pages/advanced.slint
+msgid "Size"
+msgstr "Dimensione"
+
+#: app/gui/ui/pages/advanced.slint
+msgid "Manager"
+msgstr "Manager"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/pages/advanced.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/items.slint app/gui/ui/pages/palicoes.slint
+msgid "Name"
+msgstr "Nome"
+
+#: app/gui/ui/pages/advanced.slint
+msgid "Confidence"
+msgstr "Affidabilità"
+
+#: app/gui/ui/pages/advanced.slint
+msgid "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."
+msgstr "Scegli una riga per vederne i byte. Un * indica i byte cambiati da modifiche non ancora scritte."
+
+#: app/gui/ui/pages/character.slint
+msgid "Confirmed in game except where marked"
+msgstr "Confermato nel gioco salvo dove indicato"
+
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
+msgid "Hunter"
+msgstr "Cacciatore"
+
+#: app/gui/ui/pages/character.slint
+msgid "Written to the save, the player record and the Guild Card."
+msgstr "Scritto nel salvataggio, nel profilo del giocatore e nella tessera Gilda."
+
+#: app/gui/ui/pages/character.slint
+msgid "Hunter name"
+msgstr "Nome cacciatore"
+
+#: app/gui/src/targets.rs app/gui/src/views/overview.rs
+#: app/gui/ui/pages/character.slint
+msgid "Hunter Rank"
+msgstr "Grado cacciatore"
+
+#: app/gui/ui/pages/character.slint
+msgid "Follows HR points"
+msgstr "Segue i punti GC"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "HR points"
+msgstr "Punti GC"
+
+#: app/gui/src/targets.rs app/gui/src/views/overview.rs
+#: app/gui/ui/pages/character.slint
+msgid "Zenny"
+msgstr "Zenny"
+
+#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Wycademy points"
+msgstr "Punti Wyccademia"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Play time"
+msgstr "Tempo di gioco"
+
+#: app/gui/ui/pages/character.slint
+msgid "Hours played"
+msgstr "Ore giocate"
+
+#: app/gui/ui/pages/character.slint
+msgid "Minutes played"
+msgstr "Minuti giocati"
+
+#: app/gui/ui/pages/character.slint
+msgid "Progress"
+msgstr "Progressi"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Village ★"
+msgstr "Villaggio ★"
+
+#: app/gui/ui/pages/character.slint
+msgid "Village star level"
+msgstr "Livello stelle villaggio"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Hub ★"
+msgstr "Base di caccia ★"
+
+#: app/gui/ui/pages/character.slint
+msgid "Hub star level"
+msgstr "Livello stelle base di caccia"
+
+#: app/gui/ui/pages/character.slint
+msgid "Body"
+msgstr "Corpo"
+
+#: app/gui/ui/pages/character.slint
+msgid "Not mapped yet"
+msgstr "Non ancora mappato"
+
+#: app/gui/ui/pages/character.slint
+msgid "The game raises star levels when every urgent quest of a level is cleared."
+msgstr "Il gioco alza il livello di stelle quando ogni missione urgente di un livello è completata."
+
+#: app/gui/ui/pages/character.slint
+msgid "Village points"
+msgstr "Punti villaggio"
+
+#: app/gui/ui/pages/character.slint
+msgid "The game adds Low rank and G rank and caps the sum at 20,000."
+msgstr "Il gioco somma basso grado e grado G e limita il totale a 20.000."
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Village"
+msgstr "Villaggio"
+
+#: app/gui/ui/pages/character.slint
+msgid "Low rank"
+msgstr "Basso grado"
+
+#: app/gui/ui/pages/character.slint
+msgid "G rank"
+msgstr "Grado G"
+
+#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+msgid "Bherna"
+msgstr "Bherna"
+
+#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+msgid "Kokoto"
+msgstr "Kokoto"
+
+#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+msgid "Pokke"
+msgstr "Pokke"
+
+#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+msgid "Yukumo"
+msgstr "Yukumo"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{} low rank points"
+msgstr "{}: punti basso grado"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{} G rank points"
+msgstr "{}: punti grado G"
+
+#: app/gui/ui/pages/character.slint
+msgid "Weapon usage"
+msgstr "Uso delle armi"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
+msgstr "Missioni completate con ciascuna arma, come le conta la tessera Gilda. Il totale più alto è l'arma principale."
+
+#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
+msgid "Weapon"
+msgstr "Arma"
+
+#: app/core/src/character.rs app/gui/src/views/requests.rs
+#: app/gui/ui/pages/character.slint
+msgid "Hub"
+msgstr "Base di caccia"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Arena"
+msgstr "Arena"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{} quests, {}"
+msgstr "{}: missioni, {}"
+
+#: app/gui/ui/pages/collections.slint
+msgid "Check all…"
+msgstr "Spunta tutto…"
+
+#: app/gui/ui/pages/collections.slint
+msgid "Uncheck all…"
+msgstr "Togli tutto…"
+
+#: app/gui/ui/pages/collections.slint
+msgid "All levels…"
+msgstr "Tutti i livelli…"
+
+#: app/gui/ui/pages/collections.slint
+msgid "Max permits…"
+msgstr "Licenze max…"
+
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint
+msgid "Search"
+msgstr "Cerca"
+
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
+msgid "Missing only"
+msgstr "Solo mancanti"
+
+#: app/gui/ui/pages/collections.slint
+msgid "Hunter Art"
+msgstr "Arte di caccia"
+
+#: app/gui/src/goals.rs app/gui/ui/pages/collections.slint
+msgid "Every Hunter Art is unlocked."
+msgstr "Ogni arte di caccia è sbloccata."
+
+#: app/gui/ui/pages/collections.slint
+msgid "No art matches the search."
+msgstr "Nessuna arte corrisponde alla ricerca."
+
+#: app/gui/ui/pages/collections.slint
+msgid "Nothing is missing here."
+msgstr "Qui non manca nulla."
+
+#: app/gui/ui/pages/collections.slint
+msgid "Nothing matches the search."
+msgstr "Nessun risultato per la ricerca."
+
+#: app/gui/src/views/quests.rs app/gui/ui/pages/collections.slint
+msgid "Deviant"
+msgstr "Deviante"
+
+#: app/gui/ui/pages/collections.slint
+msgid "Special Permits"
+msgstr "Licenze speciali"
+
+#: app/gui/ui/pages/collections.slint
+msgid "Levels cleared"
+msgstr "Livelli completati"
+
+#: app/gui/src/goals.rs app/gui/ui/pages/collections.slint
+msgid "Every deviant has every level cleared."
+msgstr "Ogni deviante ha tutti i livelli completati."
+
+#: app/gui/ui/pages/collections.slint
+msgid "No deviant matches the search."
+msgstr "Nessun deviante corrisponde alla ricerca."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/collections.slint
+msgid "Special Permits of {}"
+msgstr "Licenze speciali di {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/collections.slint
+msgid "Levels cleared of {}"
+msgstr "Livelli completati di {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Box slot {}: {}"
+msgstr "Casella {}: {}"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Add equipment"
+msgstr "Aggiungi equipaggiamento"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Palico"
+msgstr "Compagno"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Search name, weapon type or skill"
+msgstr "Cerca nome, tipo d'arma o abilità"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Search name or type"
+msgstr "Cerca nome o tipo"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Weapons"
+msgstr "Armi"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Armor"
+msgstr "Armature"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Talismans"
+msgstr "Talismani"
+
+#: app/gui/src/targets.rs app/gui/src/views/equipment_page.rs
+#: app/gui/src/views/items_page.rs app/gui/src/views/names.rs
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+msgid "Empty"
+msgstr "Vuoto"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Nothing in the box matches."
+msgstr "Nulla nella cassa corrisponde."
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Pick a piece, or add one to the first free slot."
+msgstr "Scegli un pezzo o aggiungine uno nella prima casella libera."
+
+#: app/gui/ui/pages/equipment.slint
+msgid "‹ Back to the box"
+msgstr "‹ Torna alla cassa"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "{} · box slot {} · ID {}"
+msgstr "{} · casella {} · ID {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "{} · box slot {}"
+msgstr "{} · casella {}"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Add equipment here"
+msgstr "Aggiungi equipaggiamento qui"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Replace…"
+msgstr "Sostituisci…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Used by {}. Change that in game before replacing or removing this piece."
+msgstr "Usato da {}. Cambialo nel gioco prima di sostituire o rimuovere questo pezzo."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Level"
+msgstr "Livello"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Decorations"
+msgstr "Decorazioni"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/pages/equipment.slint
+msgid "{} of {n} slot used"
+msgid_plural "{} of {n} slots used"
+msgstr[0] "{} di {n} spazio usato"
+msgstr[1] "{} di {n} spazi usati"
+
+#: app/core/src/palico.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/pages/equipment.slint
+msgid "None"
+msgstr "Nessuno"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
+msgid "{n} slot"
+msgid_plural "{n} slots"
+msgstr[0] "{n} spazio"
+msgstr[1] "{n} spazi"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Add decoration…"
+msgstr "Aggiungi decorazione…"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "This build's game data has no slot counts: decorations can only be removed."
+msgstr "I dati di gioco di questa build non hanno il numero di spazi: le decorazioni si possono solo rimuovere."
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Transmog"
+msgstr "Cambio aspetto"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Own look"
+msgstr "Aspetto originale"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Change look…"
+msgstr "Cambia aspetto…"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Restore own look"
+msgstr "Ripristina aspetto originale"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Looks of the same part that this piece's class and your body type can wear. Skills, slots and defense stay."
+msgstr "Aspetti della stessa parte indossabili con la classe di questo pezzo e il tuo tipo di corpo. Abilità, spazi e difesa restano."
+
+#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
+msgid "Talisman"
+msgstr "Talismano"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Skill {}"
+msgstr "Abilità {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Points of skill {}"
+msgstr "Punti dell'abilità {}"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Slots"
+msgstr "Spazi"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Decoration slots"
+msgstr "Spazi decorazione"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Advanced"
+msgstr "Avanzate"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "The 36 bytes of this box entry. Select to copy."
+msgstr "I 36 byte di questa voce della cassa. Seleziona per copiare."
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Show in Save map"
+msgstr "Mostra nella mappa salvataggio"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Look for {}"
+msgstr "Aspetto per {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Replace box slot {}"
+msgstr "Sostituisci casella {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Add to box slot {}"
+msgstr "Aggiungi alla casella {}"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "The piece keeps its skills, slots and defense; only its look changes."
+msgstr "Il pezzo mantiene abilità, spazi e difesa; cambia solo l'aspetto."
+
+#: app/gui/ui/pages/equipment.slint
+msgid "New pieces start at level 1 with no decorations; edit them afterwards."
+msgstr "I nuovi pezzi partono dal livello 1 senza decorazioni; modificali in seguito."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/equipment.slint
+msgid "Decoration for {}"
+msgstr "Decorazione per {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/pages/equipment.slint
+msgid "{n} slot free: only decorations that fit are listed."
+msgid_plural "{n} slots free: only decorations that fit are listed."
+msgstr[0] "{n} spazio libero: sono elencate solo le decorazioni che ci stanno."
+msgstr[1] "{n} spazi liberi: sono elencate solo le decorazioni che ci stanno."
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Search decorations"
+msgstr "Cerca decorazioni"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "Slot {}: empty"
+msgstr "Casella {}: vuota"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "Slot {}: {} ×{}"
+msgstr "Casella {}: {} ×{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "over the limit of {}"
+msgstr "oltre il limite di {}"
+
+#: app/gui/ui/pages/items.slint
+msgid "Item loadouts · confirmed in game except where marked"
+msgstr "Set di oggetti · confermato nel gioco salvo dove indicato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "{} / {} slots used · confirmed in game except where marked"
+msgstr "{} / {} caselle usate · confermato nel gioco salvo dove indicato"
+
+#: app/gui/ui/pages/items.slint
+msgid "Add item"
+msgstr "Aggiungi oggetto"
+
+#: app/gui/ui/pages/items.slint
+msgid "Sort & merge…"
+msgstr "Ordina e unisci…"
+
+#: app/gui/ui/pages/items.slint
+msgid "Max counts…"
+msgstr "Quantità max…"
+
+#: app/gui/ui/pages/items.slint
+msgid "Empty box…"
+msgstr "Svuota cassa…"
+
+#: app/gui/ui/pages/items.slint
+msgid "Empty pouch…"
+msgstr "Svuota borsa…"
+
+#: app/gui/src/goals.rs app/gui/ui/pages/items.slint
+msgid "Item box"
+msgstr "Cassa oggetti"
+
+#: app/gui/src/goals.rs app/gui/ui/pages/items.slint
+msgid "Pouch"
+msgstr "Borsa"
+
+#: app/gui/ui/pages/items.slint
+msgid "Loadouts"
+msgstr "Set di oggetti"
+
+#: app/gui/ui/pages/items.slint
+msgid "Search the item box"
+msgstr "Cerca nella cassa oggetti"
+
+#: app/gui/ui/pages/items.slint
+msgid "Search the pouch"
+msgstr "Cerca nella borsa"
+
+#: app/gui/ui/pages/items.slint
+msgid "No slot matches the search."
+msgstr "Nessuna casella corrisponde alla ricerca."
+
+#: app/gui/ui/pages/items.slint
+msgid "Pick a loadout to edit its name and items."
+msgstr "Scegli un set per modificarne nome e oggetti."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "Loadout {}"
+msgstr "Set {}"
+
+#: app/gui/ui/pages/items.slint
+msgid "Loadout name"
+msgstr "Nome del set"
+
+#: app/gui/ui/pages/items.slint
+msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
+msgstr "Le 32 posizioni della borsa che il set riempie, con le quantità che prende dalla cassa."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "Loadout {} · position {}"
+msgstr "Set {} · posizione {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/pages/items.slint
+msgid "Item box slot {}"
+msgstr "Casella {} della cassa oggetti"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/pages/items.slint
+msgid "Pouch slot {}"
+msgstr "Casella {} della borsa"
+
+#: app/gui/ui/pages/items.slint
+msgid "Search items"
+msgstr "Cerca oggetti"
+
+#: app/gui/ui/pages/items.slint
+msgid "Count"
+msgstr "Quantità"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "of {}"
+msgstr "di {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "of {} (carry limit)"
+msgstr "di {} (limite trasportabile)"
+
+#: app/gui/ui/pages/items.slint
+msgid "Empty position"
+msgstr "Posizione vuota"
+
+#: app/gui/ui/pages/items.slint
+msgid "Empty slot"
+msgstr "Casella vuota"
+
+#: app/gui/ui/pages/items.slint
+msgid "Done"
+msgstr "Fatto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/monsters.slint
+msgid "Hunted {}"
+msgstr "{}: cacciati"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/monsters.slint
+msgid "Captured {}"
+msgstr "{}: catturati"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/monsters.slint
+msgid "Smallest size of {}"
+msgstr "Taglia minima di {}"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Mini"
+msgstr "Mini"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/monsters.slint
+msgid "Largest size of {}"
+msgstr "Taglia massima di {}"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Gold"
+msgstr "Oro"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Silver"
+msgstr "Argento"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "No size record"
+msgstr "Nessun record di taglia"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/monsters.slint
+msgid "Hunter's Notes page of {}"
+msgstr "Pagina delle note di caccia di {}"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Max hunts…"
+msgstr "Cacce max…"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Every crown…"
+msgstr "Tutte le corone…"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Search monsters"
+msgstr "Cerca mostri"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Large only"
+msgstr "Solo grandi"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Missing a crown"
+msgstr "Senza una corona"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Monster"
+msgstr "Mostro"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
+msgid "Hunted"
+msgstr "Cacciati"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."
+msgstr "Cacciati conta solo le uccisioni; la lista mostri del gioco mostra cacciati più catturati. Ogni modifica ricostruisce anche il registro mostri della tessera Gilda."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
+msgid "Captured"
+msgstr "Catturati"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
+msgid "Smallest"
+msgstr "Minima"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
+msgid "Largest"
+msgstr "Massima"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Sizes are % of the monster's base size. At or below its mini size it has the mini crown; at or above its silver or gold size, that crown. Click a size to see the monster's own sizes. The crown awards read the Guild Card's monster log, which every edit rebuilds."
+msgstr "Le taglie sono in % della taglia base del mostro. Pari o sotto la sua taglia mini ha la corona mini; pari o sopra la taglia d'argento o d'oro, quella corona. Clicca una taglia per vedere le taglie del mostro. I premi delle corone leggono il registro mostri della tessera Gilda, che ogni modifica ricostruisce."
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Notes"
+msgstr "Note"
+
+#: app/gui/ui/pages/monsters.slint
+msgid "Every monster shown has its crowns."
+msgstr "Ogni mostro mostrato ha le sue corone."
+
+#: app/gui/ui/pages/monsters.slint
+msgid "No monster matches the search."
+msgstr "Nessun mostro corrisponde alla ricerca."
+
+#: app/gui/ui/pages/open.slint
+msgid "Open a save"
+msgstr "Apri un salvataggio"
+
+#: app/gui/ui/pages/open.slint
+msgid "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit."
+msgstr "Scegli il file system di Monster Hunter Generations Ultimate (Switch). In Ryujinx si trova in bis/user/save/<id>/0/. Chiudi l'emulatore prima di scrivere: sovrascrive il salvataggio all'uscita."
+
+#: app/gui/ui/pages/open.slint
+msgid "Recent"
+msgstr "Recenti"
+
+#: app/gui/ui/pages/open.slint
+msgid "Also on this computer"
+msgstr "Anche su questo computer"
+
+#: app/gui/ui/pages/open.slint
+msgid "Found on this computer"
+msgstr "Trovati su questo computer"
+
+#: app/gui/ui/pages/overview.slint
+msgid "In Review"
+msgstr "In Revisione"
+
+#: app/gui/ui/pages/overview.slint
+msgid "Preview…"
+msgstr "Anteprima…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/overview.slint
+msgid "Character {}, {} · confirmed in game except where marked"
+msgstr "Personaggio {}, {} · confermato nel gioco salvo dove indicato"
+
+#: app/gui/ui/pages/overview.slint
+msgid "Quick goals"
+msgstr "Obiettivi rapidi"
+
+#: app/gui/ui/pages/overview.slint
+msgid "Each goal adds its changes to Review. Nothing is written until you press Write."
+msgstr "Ogni obiettivo aggiunge le sue modifiche a Revisione. Non viene scritto nulla finché non premi Scrivi."
+
+#: app/gui/ui/pages/overview.slint
+msgid "Every goal is already in this save."
+msgstr "Ogni obiettivo è già in questo salvataggio."
+
+#: app/gui/ui/pages/overview.slint
+msgid "Already in your save"
+msgstr "Già nel tuo salvataggio"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Search Palicoes"
+msgstr "Cerca compagni"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "No Palicoes in this save."
+msgstr "Nessun compagno in questo salvataggio."
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "No Palico matches the search."
+msgstr "Nessun compagno corrisponde alla ricerca."
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Pick a Palico to edit it."
+msgstr "Scegli un compagno da modificare."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Experience"
+msgstr "Esperienza"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Separate from the level: the game does not recompute one from the other."
+msgstr "Separata dal livello: il gioco non ricalcola l'uno dall'altra."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Forte"
+msgstr "Tendenza"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Target"
+msgstr "Obiettivo"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Large First is checked in game; the others follow the game's menu order."
+msgstr "Prima grandi è verificato nel gioco; gli altri seguono l'ordine del menu del gioco."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "Messaggio"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Original owner"
+msgstr "Proprietario originale"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Support moves"
+msgstr "Mosse di supporto"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Equipped"
+msgstr "Equipaggiate"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Learned"
+msgstr "Apprese"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Support moves are shown, not edited: which moves a Palico may equip is not mapped yet."
+msgstr "Le mosse di supporto sono mostrate, non modificate: quali mosse un compagno può equipaggiare non è ancora mappato."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/quests.slint
+msgid "Cleared: {}"
+msgstr "Completata: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/quests.slint
+msgid "{}  (Prowler)"
+msgstr "{}  (Cacciamiao)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/quests.slint
+msgid "Seen: {}"
+msgstr "Vista: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/quests.slint
+msgid "Failed: {}"
+msgstr "Fallita: {}"
+
+#: app/gui/ui/pages/quests.slint
+msgid "Search quests by name or number"
+msgstr "Cerca missioni per nome o numero"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
+msgid "Cleared"
+msgstr "Completata"
+
+#: app/gui/ui/pages/quests.slint
+msgid "Quest"
+msgstr "Missione"
+
+#: app/gui/ui/pages/quests.slint
+msgid "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."
+msgstr "Una riga rossa indica che la missione non è ancora in bacheca e dice cosa la sblocca. Completare una missione la segna anche come vista e completa i suoi set di missioni, come fa il gioco."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
+msgid "Seen"
+msgstr "Vista"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
+msgid "Failed"
+msgstr "Fallita"
+
+#: app/gui/ui/pages/quests.slint
+msgid "Every quest here is cleared."
+msgstr "Ogni missione qui è completata."
+
+#: app/gui/ui/pages/quests.slint
+msgid "No quest matches the search."
+msgstr "Nessuna missione corrisponde alla ricerca."
+
+#: app/gui/ui/pages/requests.slint
+msgid "Read only: Confirmed changes only is on in Settings, and requests are Derived."
+msgstr "Sola lettura: Solo modifiche confermate è attivo nelle Impostazioni e le richieste sono di tipo Dedotto."
+
+#: app/gui/ui/pages/requests.slint
+msgid "Search requests or villages"
+msgstr "Cerca richieste o villaggi"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
+msgid "Open"
+msgstr "Aperta"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
+msgid "Completed"
+msgstr "Completata"
+
+#: app/gui/ui/pages/requests.slint
+msgid "Completed skips the villager's report, so the game never hands over that reward. Leave it unticked to get the reward in game."
+msgstr "Completata salta il resoconto al paesano, quindi il gioco non consegna mai quella ricompensa. Lasciala senza spunta per ottenere la ricompensa nel gioco."
+
+#: app/gui/ui/pages/requests.slint
+msgid "Request"
+msgstr "Richiesta"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
+msgid "Accepted"
+msgstr "Accettata"
+
+#: app/gui/ui/pages/requests.slint
+msgid "Accepted posts the request's quest on the board, as talking to the villager does."
+msgstr "Accettata mette in bacheca la missione della richiesta, come parlare con il paesano."
+
+#: app/gui/ui/pages/requests.slint
+msgid "Completed marks the request as reported. The game hands out the reward only when you report to the villager yourself, so ticking it here loses that reward."
+msgstr "Completata segna la richiesta come riferita. Il gioco consegna la ricompensa solo quando riferisci tu stesso al paesano, quindi spuntarla qui fa perdere quella ricompensa."
+
+#: app/gui/ui/pages/requests.slint
+msgid "No request matches the search."
+msgstr "Nessuna richiesta corrisponde alla ricerca."
+
+#: app/gui/ui/pages/requests.slint
+msgid "Every request is completed."
+msgstr "Ogni richiesta è completata."
+
+#: app/gui/ui/pages/requests.slint
+msgid "No request is completed yet."
+msgstr "Ancora nessuna richiesta completata."
+
+#: app/gui/ui/pages/requests.slint
+msgid "No requests."
+msgstr "Nessuna richiesta."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/requests.slint
+msgid "Accepted: {}"
+msgstr "Accettata: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/requests.slint
+msgid "Completed: {}"
+msgstr "Completata: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/assets.rs
+msgid "Item #{}"
+msgstr "Oggetto #{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "{}h {}m"
+msgstr "{} h {} min"
+
+#: app/gui/src/fmt.rs
+msgid "Jan"
+msgstr "gen"
+
+#: app/gui/src/fmt.rs
+msgid "Feb"
+msgstr "feb"
+
+#: app/gui/src/fmt.rs
+msgid "Mar"
+msgstr "mar"
+
+#: app/gui/src/fmt.rs
+msgid "Apr"
+msgstr "apr"
+
+#: app/gui/src/fmt.rs
+msgid "May"
+msgstr "mag"
+
+#: app/gui/src/fmt.rs
+msgid "Jun"
+msgstr "giu"
+
+#: app/gui/src/fmt.rs
+msgid "Jul"
+msgstr "lug"
+
+#: app/gui/src/fmt.rs
+msgid "Aug"
+msgstr "ago"
+
+#: app/gui/src/fmt.rs
+msgid "Sep"
+msgstr "set"
+
+#: app/gui/src/fmt.rs
+msgid "Oct"
+msgstr "ott"
+
+#: app/gui/src/fmt.rs
+msgid "Nov"
+msgstr "nov"
+
+#: app/gui/src/fmt.rs
+msgid "Dec"
+msgstr "dic"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "Today, {}"
+msgstr "Oggi, {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "Yesterday, {}"
+msgstr "Ieri, {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "{0} {1}, {2}"
+msgstr "{0} {1}, {2}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "{0} {1} {2}, {3}"
+msgstr "{0} {1} {2}, {3}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "{} and {}"
+msgstr "{} e {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "{} and {} more"
+msgstr "{} e altri {}"
+
+#: app/gui/src/goals.rs
+msgid "Add to Review"
+msgstr "Aggiungi a Revisione"
+
+#: app/gui/src/goals.rs
+msgid "Quick goal"
+msgstr "Obiettivo rapido"
+
+#: app/gui/src/goals.rs
+msgid "Complete every quest"
+msgstr "Completa ogni missione"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} quest"
+msgid_plural "{} quests"
+msgstr[0] "{} missione"
+msgstr[1] "{} missioni"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} villager request"
+msgid_plural "{} villager requests"
+msgstr[0] "{} richiesta dei paesani"
+msgstr[1] "{} richieste dei paesani"
+
+#: app/gui/src/goals.rs
+msgid "Every quest is cleared."
+msgstr "Ogni missione è completata."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Every quest is cleared. Posts the {} their villagers would offer."
+msgstr "Ogni missione è completata. Pubblica {}, come farebbero i paesani."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Clears the {} not cleared yet ({}) and posts the {} their villagers would offer."
+msgstr "Completa {} ancora da completare ({}) e pubblica {}, come farebbero i paesani."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Clears the {} not cleared yet ({})."
+msgstr "Completa {} ancora da completare ({})."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} request"
+msgid_plural "{} requests"
+msgstr[0] "{} richiesta"
+msgstr[1] "{} richieste"
+
+#: app/gui/src/goals.rs
+msgid "Star levels and story events stay to the game: they follow after your next quest. Completed quest sets are recorded too."
+msgstr "Livelli di stelle ed eventi della storia restano al gioco: seguono dopo la tua prossima missione. Vengono registrati anche i set di missioni completati."
+
+#: app/gui/src/goals.rs
+msgid "Unlock all Hunter Arts"
+msgstr "Sblocca tutte le arti di caccia"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} you're missing: {}."
+msgstr "Sblocca ciò che manca ({}): {}."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} Hunter Art"
+msgid_plural "{} Hunter Arts"
+msgstr[0] "{} arte di caccia"
+msgstr[1] "{} arti di caccia"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} art"
+msgid_plural "{} arts"
+msgstr[0] "{} arte"
+msgstr[1] "{} arti"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} dish"
+msgid_plural "{} dishes"
+msgstr[0] "{} ricetta"
+msgstr[1] "{} ricette"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} ingredient"
+msgid_plural "{} ingredients"
+msgstr[0] "{} ingrediente"
+msgstr[1] "{} ingredienti"
+
+#: app/gui/src/goals.rs
+msgid "Canteen dishes and ingredients"
+msgstr "Ricette e ingredienti della mensa"
+
+#: app/gui/src/goals.rs
+msgid "Every Canteen dish and ingredient is unlocked."
+msgstr "Ogni ricetta e ingrediente della mensa è sbloccato."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} you're missing in the Canteen."
+msgstr "Sblocca ciò che manca nella mensa ({})."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} and {} you're missing in the Canteen."
+msgstr "Sblocca ciò che manca nella mensa ({} e {})."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} entry"
+msgid_plural "{} entries"
+msgstr[0] "{} voce"
+msgstr[1] "{} voci"
+
+#: app/gui/src/goals.rs
+msgid "All Guild Card awards"
+msgstr "Tutti i premi della tessera Gilda"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} award"
+msgid_plural "{} awards"
+msgstr[0] "{} premio"
+msgstr[1] "{} premi"
+
+#: app/gui/src/goals.rs
+msgid "Your Guild Card has every award an edit can give."
+msgstr "La tua tessera Gilda ha ogni premio che una modifica può dare."
+
+#: app/gui/src/goals.rs
+msgid "Veteran Hunter's Prize comes only from a save transfer and stays as it is. Both of the game's award lists are written, as the game does."
+msgstr "L'Attestato cacciatore veterano arriva solo da un trasferimento dei dati e resta com'è. Vengono scritte entrambe le liste dei premi, come fa il gioco."
+
+#: app/gui/src/goals.rs app/gui/src/targets.rs
+msgid "Hunter's Notes"
+msgstr "Note di caccia"
+
+#: app/gui/src/goals.rs
+msgid "Every Hunter's Notes page is unlocked."
+msgstr "Ogni pagina delle note di caccia è sbloccata."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} Hunter's Notes page"
+msgid_plural "{} Hunter's Notes pages"
+msgstr[0] "{} pagina delle note di caccia"
+msgstr[1] "{} pagine delle note di caccia"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} page"
+msgid_plural "{} pages"
+msgstr[0] "{} pagina"
+msgstr[1] "{} pagine"
+
+#: app/gui/src/goals.rs
+msgid "Each page gets its NEW mark, as the game's own unlock does."
+msgstr "Ogni pagina riceve il segno NEW, come fa lo sblocco del gioco."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} monster"
+msgid_plural "{} monsters"
+msgstr[0] "{} mostro"
+msgstr[1] "{} mostri"
+
+#: app/gui/src/goals.rs
+msgid "Every crown"
+msgstr "Tutte le corone"
+
+#: app/gui/src/goals.rs
+msgid "Every large monster has its mini and gold crown."
+msgstr "Ogni mostro grande ha la corona mini e quella d'oro."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Gold crown records for the {} without one. Also rebuilds the Guild Card monster log."
+msgstr "Record da corona d'oro dove manca ({}). Ricostruisce anche il registro mostri della tessera Gilda."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Mini crown records for the {} without one. Also rebuilds the Guild Card monster log."
+msgstr "Record da corona mini dove manca ({}). Ricostruisce anche il registro mostri della tessera Gilda."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Gold crown records for the {} without one, and mini crown records for the {} without one. Also rebuilds the Guild Card monster log."
+msgstr "Record da corona d'oro dove manca ({}) e da corona mini dove manca ({}). Ricostruisce anche il registro mostri della tessera Gilda."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} record"
+msgid_plural "{} records"
+msgstr[0] "{} record"
+msgstr[1] "{} record"
+
+#: app/gui/src/goals.rs
+msgid "The crown awards follow after your next quest in game."
+msgstr "I premi delle corone arrivano dopo la tua prossima missione nel gioco."
+
+#: app/gui/src/goals.rs
+msgid "Quick goal · also rebuilds the Guild Card monster log"
+msgstr "Obiettivo rapido · ricostruisce anche il registro mostri della tessera Gilda"
+
+#: app/gui/src/goals.rs
+msgid "HR 999"
+msgstr "GC 999"
+
+#: app/gui/src/goals.rs
+msgid "Join the Hub in game first: until then HR follows the Hub's star level."
+msgstr "Prima entra nella base di caccia nel gioco: fino ad allora il GC segue il livello di stelle della base di caccia."
+
+#: app/gui/src/goals.rs
+msgid "Not available yet"
+msgstr "Non ancora disponibile"
+
+#: app/gui/src/goals.rs
+msgid "HR is already 999."
+msgstr "Il GC è già 999."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Raises HR {} to 999 and releases the HR limit, as the game does at 4,246,430 HR points."
+msgstr "Porta il GC da {} a 999 e rimuove il limite del GC, come fa il gioco a 4.246.430 punti GC."
+
+#: app/gui/src/goals.rs
+msgid "Max zenny and points"
+msgstr "Zenny e punti al massimo"
+
+#: app/gui/src/goals.rs
+msgid "zenny to 9,999,999"
+msgstr "zenny a 9.999.999"
+
+#: app/gui/src/goals.rs
+msgid "zenny"
+msgstr "zenny"
+
+#: app/gui/src/goals.rs
+msgid "Wycademy points to 9,999,999"
+msgstr "punti Wyccademia a 9.999.999"
+
+#: app/gui/src/goals.rs
+msgid "G rank points"
+msgstr "punti grado G"
+
+#: app/gui/src/goals.rs
+msgid "G rank village points to 20,000 in all four villages"
+msgstr "punti villaggio di grado G a 20.000 in tutti e quattro i villaggi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "G rank points to 20,000 in {}"
+msgstr "punti grado G a 20.000 a {}"
+
+#: app/gui/src/goals.rs
+msgid "Low rank points"
+msgstr "punti basso grado"
+
+#: app/gui/src/goals.rs
+msgid "Low rank village points to 20,000 in all four villages"
+msgstr "punti villaggio di basso grado a 20.000 in tutti e quattro i villaggi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Low rank points to 20,000 in {}"
+msgstr "punti basso grado a 20.000 a {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "{} is already at the max"
+msgstr "{} è già al massimo"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "{} are already at the max"
+msgstr "{} sono già al massimo"
+
+#: app/gui/src/goals.rs
+msgid "Zenny and every point total are at the max."
+msgstr "Zenny e tutti i totali di punti sono al massimo."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "{}."
+msgstr "{}."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "{}. {}."
+msgstr "{}. {}."
+
+#: app/gui/src/goals.rs
+msgid "Totals already at the max stay as they are."
+msgstr "I totali già al massimo restano invariati."
+
+#: app/gui/src/goals.rs
+msgid "Max hunts"
+msgstr "Cacce al massimo"
+
+#: app/gui/src/goals.rs
+msgid "Every monster is hunted 9,999 times."
+msgstr "Ogni mostro è cacciato 9.999 volte."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Sets Hunted to 9,999 for the {} below it. Also rebuilds the Guild Card monster log."
+msgstr "Porta Cacciati a 9.999 dove è inferiore ({}). Ricostruisce anche il registro mostri della tessera Gilda."
+
+#: app/gui/src/goals.rs
+msgid "Every monster hunted 9,999 times"
+msgstr "Ogni mostro cacciato 9.999 volte"
+
+#: app/gui/src/goals.rs
+msgid "Monsters · also rebuilds the Guild Card monster log"
+msgstr "Mostri · ricostruisce anche il registro mostri della tessera Gilda"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} slot"
+msgid_plural "{} slots"
+msgstr[0] "{} casella"
+msgstr[1] "{} caselle"
+
+#: app/gui/src/goals.rs
+msgid "Sort the pouch"
+msgstr "Ordina la borsa"
+
+#: app/gui/src/goals.rs
+msgid "Sort the item box"
+msgstr "Ordina la cassa oggetti"
+
+#: app/gui/src/goals.rs
+msgid "The pouch is already sorted."
+msgstr "La borsa è già ordinata."
+
+#: app/gui/src/goals.rs
+msgid "The item box is already sorted."
+msgstr "La cassa oggetti è già ordinata."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Sorts the pouch by item and merges stacks of the same item into one, up to its carry limit (the rest is dropped); {} change."
+msgstr "Ordina la borsa per oggetto e unisce le pile dello stesso oggetto in una, fino al limite trasportabile (il resto viene scartato); interessa {}."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Sorts the item box by item and merges stacks of the same item; {} change."
+msgstr "Ordina la cassa oggetti per oggetto e unisce le pile dello stesso oggetto; interessa {}."
+
+#: app/gui/src/goals.rs
+msgid "Pouch: sorted and merged"
+msgstr "Borsa: ordinata e unita"
+
+#: app/gui/src/goals.rs
+msgid "Item box: sorted and merged"
+msgstr "Cassa oggetti: ordinata e unita"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} stack"
+msgid_plural "{} stacks"
+msgstr[0] "{} pila"
+msgstr[1] "{} pile"
+
+#: app/gui/src/goals.rs
+msgid "Max counts"
+msgstr "Quantità massime"
+
+#: app/gui/src/goals.rs
+msgid "Every stack in the pouch is at its carry limit."
+msgstr "Ogni pila nella borsa è al limite trasportabile."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Sets the {} in the pouch to the most the game lets you carry (Potion 10, Max Potion 2, Ancient Potion 1…)."
+msgstr "Porta {} nella borsa al massimo che il gioco ti lascia trasportare (Pozione 10, Pozione max 2, Antica pozione 1…)."
+
+#: app/gui/src/goals.rs
+msgid "Pouch: every stack at its carry limit"
+msgstr "Borsa: ogni pila al limite trasportabile"
+
+#: app/gui/src/goals.rs
+msgid "Every stack in the item box is at 99."
+msgstr "Ogni pila nella cassa oggetti è a 99."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Raises the {} below 99 in the item box to 99."
+msgstr "Porta a 99 nella cassa oggetti ciò che è sotto 99 ({})."
+
+#: app/gui/src/goals.rs
+msgid "Item box: every stack ×99"
+msgstr "Cassa oggetti: ogni pila ×99"
+
+#: app/gui/src/goals.rs
+msgid "Empty the pouch"
+msgstr "Svuota la borsa"
+
+#: app/gui/src/goals.rs
+msgid "Empty the item box"
+msgstr "Svuota la cassa oggetti"
+
+#: app/gui/src/goals.rs
+msgid "The pouch is already empty."
+msgstr "La borsa è già vuota."
+
+#: app/gui/src/goals.rs
+msgid "The item box is already empty."
+msgstr "La cassa oggetti è già vuota."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Removes all {} from the pouch. You can undo it in Review until you write."
+msgstr "Rimuove tutto dalla borsa ({}). Puoi annullare in Revisione finché non scrivi."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Removes all {} from the item box. You can undo it in Review until you write."
+msgstr "Rimuove tutto dalla cassa oggetti ({}). Puoi annullare in Revisione finché non scrivi."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Pouch emptied: {}"
+msgstr "Borsa svuotata: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Item box emptied: {}"
+msgstr "Cassa oggetti svuotata: {}"
+
+#: app/gui/src/goals.rs
+msgid "Empty pouch"
+msgstr "Svuota borsa"
+
+#: app/gui/src/goals.rs
+msgid "Empty box"
+msgstr "Svuota cassa"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} deviant"
+msgid_plural "{} deviants"
+msgstr[0] "{} deviante"
+msgstr[1] "{} devianti"
+
+#: app/gui/src/goals.rs
+msgid "Max Special Permits"
+msgstr "Licenze speciali al massimo"
+
+#: app/gui/src/goals.rs
+msgid "Every deviant has 99 Special Permits."
+msgstr "Ogni deviante ha 99 licenze speciali."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Sets Special Permits to 99 for the {} below it."
+msgstr "Porta le licenze speciali a 99 dove sono meno ({})."
+
+#: app/gui/src/goals.rs
+msgid "Every deviant: 99 Special Permits"
+msgstr "Ogni deviante: 99 licenze speciali"
+
+#: app/gui/src/goals.rs
+msgid "Every deviant level"
+msgstr "Ogni livello deviante"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Marks every level of the {} cleared: {}."
+msgstr "Segna come completati tutti i livelli ({}): {}."
+
+#: app/gui/src/goals.rs
+msgid "G-rank levels appear in game only once a G-rank quest against the base monster is cleared; each row says which."
+msgstr "I livelli di grado G compaiono nel gioco solo dopo aver completato una missione di grado G contro il mostro base; ogni riga indica quale."
+
+#: app/gui/src/goals.rs
+msgid "Every deviant level cleared"
+msgstr "Ogni livello deviante completato"
+
+#: app/gui/src/goals.rs app/gui/src/views/overview.rs
+msgid "Hunter Arts"
+msgstr "Arti di caccia"
+
+#: app/gui/src/goals.rs
+msgid "Check every Hunter Art"
+msgstr "Spunta tutte le arti di caccia"
+
+#: app/gui/src/goals.rs
+msgid "Uncheck every Hunter Art"
+msgstr "Togli la spunta a tutte le arti di caccia"
+
+#: app/gui/src/goals.rs app/gui/src/views/overview.rs
+msgid "Canteen dishes"
+msgstr "Ricette della mensa"
+
+#: app/gui/src/goals.rs
+msgid "Check every Canteen dish"
+msgstr "Spunta tutte le ricette della mensa"
+
+#: app/gui/src/goals.rs
+msgid "Uncheck every Canteen dish"
+msgstr "Togli la spunta a tutte le ricette della mensa"
+
+#: app/gui/src/goals.rs
+msgid "Canteen ingredients"
+msgstr "Ingredienti della mensa"
+
+#: app/gui/src/goals.rs
+msgid "Check every Canteen ingredient"
+msgstr "Spunta tutti gli ingredienti della mensa"
+
+#: app/gui/src/goals.rs
+msgid "Uncheck every Canteen ingredient"
+msgstr "Togli la spunta a tutti gli ingredienti della mensa"
+
+#: app/gui/src/goals.rs
+msgid "awards"
+msgstr "premi"
+
+#: app/gui/src/goals.rs
+msgid "Check every award"
+msgstr "Spunta tutti i premi"
+
+#: app/gui/src/goals.rs
+msgid "Uncheck every award"
+msgstr "Togli la spunta a tutti i premi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Every one of the {} is already checked."
+msgstr "Ogni voce ({}) è già spuntata."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "None of the {} is checked."
+msgstr "Nessuna voce ({}) è spuntata."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} you're missing."
+msgstr "Sblocca ciò che manca ({})."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Locks all {} that are checked now."
+msgstr "Blocca tutte le voci spuntate ora ({})."
+
+#: app/gui/src/goals.rs
+msgid "Both of the game's award lists are written, as the game does."
+msgstr "Vengono scritte entrambe le liste dei premi, come fa il gioco."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "{}: all checked"
+msgstr "{}: tutto spuntato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "{}: all unchecked"
+msgstr "{}: nessuna spunta"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid ", and {} more range"
+msgid_plural ", and {} more ranges"
+msgstr[0] ", e {} altro intervallo"
+msgstr[1] ", e altri {} intervalli"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs app/gui/src/views/advanced.rs
+msgid "{} byte"
+msgid_plural "{} bytes"
+msgstr[0] "{} byte"
+msgstr[1] "{} byte"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "{} at {}{}. The Save map names every range."
+msgstr "{} a {}{}. La mappa salvataggio dà un nome a ogni intervallo."
+
+#: app/gui/src/system.rs
+msgid "The emulator"
+msgstr "L'emulatore"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · G rank points"
+msgstr "{} · punti grado G"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · Low rank points"
+msgstr "{} · punti basso grado"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · {} quests"
+msgstr "{} · missioni {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Item loadout {}"
+msgstr "Set di oggetti {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Palico box slot {}"
+msgstr "Casella {} della cassa compagni"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Box slot {}"
+msgstr "Casella {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Quest {}"
+msgstr "Missione {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Delivery request {}"
+msgstr "Richiesta di consegna {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Request {}"
+msgstr "Richiesta {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · Special Permits"
+msgstr "{} · licenze speciali"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · levels cleared"
+msgstr "{} · livelli completati"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/targets.rs
+msgid "{} item"
+msgid_plural "{} items"
+msgstr[0] "{} oggetto"
+msgstr[1] "{} oggetti"
+
+#: app/gui/src/targets.rs
+msgid "Not seen"
+msgstr "Non vista"
+
+#: app/gui/src/targets.rs
+msgid "Unlocked"
+msgstr "Sbloccato"
+
+#: app/gui/src/targets.rs
+msgid "Locked"
+msgstr "Bloccato"
+
+#: app/gui/src/targets.rs
+msgid "Earned"
+msgstr "Ottenuto"
+
+#: app/gui/src/targets.rs
+msgid "Not earned"
+msgstr "Non ottenuto"
+
+#: app/gui/src/update.rs
+msgid "GitHub refused the request (too many in the last hour), try later"
+msgstr "GitHub ha rifiutato la richiesta (troppe nell'ultima ora), riprova più tardi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "GitHub answered HTTP {}"
+msgstr "GitHub ha risposto HTTP {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "Could not reach GitHub ({})"
+msgstr "Impossibile raggiungere GitHub ({})"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "Unexpected answer from GitHub ({})"
+msgstr "Risposta inattesa da GitHub ({})"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "Release {} has no {} file with checksums"
+msgstr "La release {} non ha un file {} con i checksum"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "Download failed ({})"
+msgstr "Download non riuscito ({})"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "{} is not in {}"
+msgstr "{} non è in {}"
+
+#: app/gui/src/update.rs
+msgid "The running file has no usable name"
+msgstr "Il file in esecuzione non ha un nome utilizzabile"
+
+#: app/gui/src/update.rs
+msgid "The download does not match the release's checksum"
+msgstr "Il download non corrisponde al checksum della release"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "Could not write {} ({})"
+msgstr "Impossibile scrivere {} ({})"
+
+#: app/gui/src/update.rs
+msgid "Cancelled"
+msgstr "Annullato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/update.rs
+msgid "Could not replace {} ({})"
+msgstr "Impossibile sostituire {} ({})"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/advanced.rs
+msgid "… {} more byte"
+msgid_plural "… {} more bytes"
+msgstr[0] "… altro {} byte"
+msgstr[1] "… altri {} byte"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/advanced.rs
+msgid "block {}"
+msgstr "blocco {}"
+
+#: app/gui/src/views/character_page.rs
+msgid "Type 1 (male)"
+msgstr "Tipo 1 (maschile)"
+
+#: app/gui/src/views/character_page.rs
+msgid "Type 2 (female)"
+msgstr "Tipo 2 (femminile)"
+
+#: app/gui/src/views/character_page.rs
+msgid "HR below 13 follows the Hub star level: edit Hub ★ instead"
+msgstr "Il GC sotto 13 segue il livello di stelle della base di caccia: modifica invece Base di caccia ★"
+
+#: app/gui/src/views/character_page.rs
+msgid "Written to the save, the player record and the Guild Card"
+msgstr "Scritto nel salvataggio, nel profilo del giocatore e nella tessera Gilda"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Hunter Arts {} / {}"
+msgstr "Arti di caccia {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Canteen dishes {} / {}"
+msgstr "Ricette della mensa {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Canteen ingredients {} / {}"
+msgstr "Ingredienti della mensa {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Awards {} / {}"
+msgstr "Premi {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Deviants {} / {}"
+msgstr "Devianti {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Hunter Arts: {} / {}"
+msgstr "Arti di caccia: {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Canteen dishes: {} / {}"
+msgstr "Ricette della mensa: {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Canteen ingredients: {} / {}"
+msgstr "Ingredienti della mensa: {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Awards: {} / {}"
+msgstr "Premi: {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "Deviants with every level cleared: {} / {}"
+msgstr "Devianti con tutti i livelli completati: {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "{} · confirmed in game except where marked"
+msgstr "{} · confermato nel gioco salvo dove indicato"
+
+#: app/gui/src/views/collections.rs
+msgid "G-rank levels appear in game only once the game releases them (event flag 1226)."
+msgstr "I livelli di grado G compaiono nel gioco solo quando il gioco li sblocca (flag evento 1226)."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/collections.rs
+msgid "G-rank levels appear in game once a G-rank {} quest is cleared ({})."
+msgstr "I livelli di grado G compaiono nel gioco dopo aver completato una missione di grado G contro {} ({})."
+
+#: app/gui/src/views/collections.rs
+msgid "Written to both of the game's award lists"
+msgstr "Scritto in entrambe le liste dei premi del gioco"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "your current gear"
+msgstr "il tuo equipaggiamento attuale"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "My Set {} “{}”"
+msgstr "Set equipaggiamento {} “{}”"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "Rare {}"
+msgstr "Rarità {}"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "Blademaster"
+msgstr "Spadaccino"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "Gunner"
+msgstr "Artigliere"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "then {}"
+msgstr "poi {}"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "type 1 (male) only"
+msgstr "solo tipo 1 (maschile)"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "type 2 (female) only"
+msgstr "solo tipo 2 (femminile)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "{} · Talisman"
+msgstr "{} · Talismano"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "Lv {}"
+msgstr "Lv {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/equipment_page.rs
+msgid "{n} decoration"
+msgid_plural "{n} decorations"
+msgstr[0] "{n} decorazione"
+msgstr[1] "{n} decorazioni"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "transmog"
+msgstr "cambio aspetto"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "New · in Review"
+msgstr "Nuovo · in Revisione"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "Removed · in Review"
+msgstr "Rimosso · in Revisione"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "Changed · in Review"
+msgstr "Modificato · in Revisione"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "Hunter box: {} / {} slots used · confirmed in game except where marked"
+msgstr "Cassa cacciatore: {} / {} caselle usate · confermato nel gioco salvo dove indicato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "Palico box: {} / {} slots used · gear names from the game's tables (Derived)"
+msgstr "Cassa compagni: {} / {} caselle usate · nomi dell'equipaggiamento dalle tabelle del gioco (Dedotto)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs app/gui/src/views/names.rs
+msgid "Skill #{}"
+msgstr "Abilità #{}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/equipment_page.rs
+msgid "{} needs {n} free slot; this piece has {}"
+msgid_plural "{} needs {n} free slots; this piece has {}"
+msgstr[0] "{} richiede {n} spazio libero; questo pezzo ne ha {}"
+msgstr[1] "{} richiede {n} spazi liberi; questo pezzo ne ha {}"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "The equipment box is full"
+msgstr "La cassa equipaggiamento è piena"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "Box slot {} is used by {}"
+msgstr "La casella {} è usata da {}"
+
+#: app/gui/src/views/equipment_page.rs
+msgid "New box entry at level 1, shaped like the game's own"
+msgstr "Nuova voce nella cassa al livello 1, strutturata come quelle del gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "{} added to box slot {}"
+msgstr "{} aggiunto alla casella {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Close {} first"
+msgstr "Chiudi prima {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "HR {} · {} · also {}"
+msgstr "GC {} · {} · anche {}"
+
+#: app/gui/src/views/file.rs
+msgid "No characters yet"
+msgstr "Ancora nessun personaggio"
+
+#: app/gui/src/views/file.rs
+msgid "Unreadable save"
+msgstr "Salvataggio illeggibile"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/file.rs
+msgid "Save opened: {n} character"
+msgid_plural "Save opened: {n} characters"
+msgstr[0] "Salvataggio aperto: {n} personaggio"
+msgstr[1] "Salvataggio aperto: {n} personaggi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Could not open {}: {}"
+msgstr "Impossibile aprire {}: {}"
+
+#: app/gui/src/views/file.rs
+msgid "Before a write"
+msgstr "Prima di una scrittura"
+
+#: app/gui/src/views/file.rs
+msgid "Open MHGU save (system)"
+msgstr "Apri salvataggio MHGU (system)"
+
+#: app/gui/src/views/file.rs
+msgid "Path copied"
+msgstr "Percorso copiato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Snapshot failed, nothing written: {}"
+msgstr "Istantanea non riuscita, niente scritto: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Snapshot from {} kept"
+msgstr "Istantanea di {} conservata"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/file.rs
+msgid "Wrote {n} change"
+msgid_plural "Wrote {n} changes"
+msgstr[0] "{n} modifica scritta"
+msgstr[1] "{n} modifiche scritte"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/file.rs
+msgid "Wrote {n} change (no snapshot)"
+msgid_plural "Wrote {n} changes (no snapshot)"
+msgstr[0] "{n} modifica scritta (senza istantanea)"
+msgstr[1] "{n} modifiche scritte (senza istantanea)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Write failed: {}"
+msgstr "Scrittura non riuscita: {}"
+
+#: app/gui/src/views/file.rs
+msgid "The snapshot taken first restores the save"
+msgstr "L'istantanea creata prima ripristina il salvataggio"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "No snapshot at {}"
+msgstr "Nessuna istantanea in {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "It was taken of {}"
+msgstr "È stata creata da {}"
+
+#: app/gui/src/views/file.rs
+msgid "Not restored: this snapshot is of another save"
+msgstr "Non ripristinato: questa istantanea è di un altro salvataggio"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Snapshot failed, nothing restored: {}"
+msgstr "Istantanea non riuscita, niente ripristinato: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Restored, but reading it back failed: {}"
+msgstr "Ripristinato, ma la rilettura non è riuscita: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Restored the save from {}"
+msgstr "Salvataggio ripristinato da {}"
+
+#: app/gui/src/views/file.rs
+msgid "The save before restoring is kept as a snapshot"
+msgstr "Il salvataggio precedente al ripristino è conservato come istantanea"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Restore failed: {}"
+msgstr "Ripristino non riuscito: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/items_page.rs
+msgid "Loadout {} · empty"
+msgstr "Set {} · vuoto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/items_page.rs
+msgid "Loadouts {}–{} · empty"
+msgstr "Set {}–{} · vuoti"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/mod.rs
+msgid "{n} change"
+msgid_plural "{n} changes"
+msgstr[0] "{n} modifica"
+msgstr[1] "{n} modifiche"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/mod.rs
+msgid "{n} value"
+msgid_plural "{n} values"
+msgstr[0] "{n} valore"
+msgstr[1] "{n} valori"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "{} was saved again after it was opened. Nothing was written."
+msgstr "{} è stato salvato di nuovo dopo l'apertura. Non è stato scritto nulla."
+
+#: app/gui/src/views/mod.rs
+msgid "The save changed on disk"
+msgstr "Il salvataggio è cambiato sul disco"
+
+#: app/gui/src/views/mod.rs
+msgid "Reload"
+msgstr "Ricarica"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "These copies differ from the opened file and will be overwritten: {}"
+msgstr "Queste copie differiscono dal file aperto e verranno sovrascritte: {}"
+
+#: app/gui/src/views/mod.rs
+msgid "Nothing staged"
+msgstr "Nessuna modifica in sospeso"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "{} · {} · not written yet"
+msgstr "{} · {} · ancora da scrivere"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "Character {} · {}"
+msgstr "Personaggio {} · {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "character {}, {}"
+msgstr "personaggio {}, {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/mod.rs
+msgid "Write {n} change to the save"
+msgid_plural "Write {n} changes to the save"
+msgstr[0] "Scrivi {n} modifica nel salvataggio"
+msgstr[1] "Scrivi {n} modifiche nel salvataggio"
+
+#: app/gui/src/views/mod.rs
+msgid "Not changed: this change is Derived"
+msgstr "Non modificato: questa modifica è di tipo Dedotto"
+
+#: app/gui/src/views/mod.rs
+msgid "Confirmed changes only is on in Settings"
+msgstr "Solo modifiche confermate è attivo nelle Impostazioni"
+
+#: app/gui/src/views/mod.rs
+msgid "Added to Review"
+msgstr "Aggiunto a Revisione"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "Undid {}"
+msgstr "Annullato: {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/mod.rs
+msgid "Undid {n} change"
+msgid_plural "Undid {n} changes"
+msgstr[0] "{n} modifica annullata"
+msgstr[1] "{n} modifiche annullate"
+
+#: app/gui/src/views/mod.rs
+msgid "Redo"
+msgstr "Ripeti"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/mod.rs
+msgid "Redid {n} change"
+msgid_plural "Redid {n} changes"
+msgstr[0] "{n} modifica ripetuta"
+msgstr[1] "{n} modifiche ripetute"
+
+#: app/gui/src/views/mod.rs
+msgid "Read the save again"
+msgstr "Rileggi il salvataggio"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/mod.rs
+msgid "{n} staged change kept"
+msgid_plural "{n} staged changes kept"
+msgstr[0] "{n} modifica in sospeso mantenuta"
+msgstr[1] "{n} modifiche in sospeso mantenute"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "Could not read the save again: {}"
+msgstr "Impossibile rileggere il salvataggio: {}"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "Bird Wyvern"
+msgstr "Wyvern rapace"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "Brute Wyvern"
+msgstr "Wyvern brutale"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "Elder Dragon"
+msgstr "Drago anziano"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "Fanged Beast"
+msgstr "Belva zannuta"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "Flying Wyvern"
+msgstr "Wyvern volante"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "Leviathan"
+msgstr "Leviathan"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "small monster"
+msgstr "mostro piccolo"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/monsters_page.rs
+msgid "size kept by {}"
+msgstr "taglia registrata da {}"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "fixed size: any record is gold"
+msgstr "taglia fissa: ogni record è d'oro"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/monsters_page.rs
+msgid "mini ≤ {} % · silver ≥ {} % · gold ≥ {} %"
+msgstr "mini ≤ {} % · argento ≥ {} % · oro ≥ {} %"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/monsters_page.rs
+msgid "{} large monsters, {} of them on the Guild Card list · {} shown · confirmed in game except where marked"
+msgstr "{} mostri grandi, di cui {} nella lista della tessera Gilda · {} mostrati · confermato nel gioco salvo dove indicato"
+
+#: app/gui/src/views/monsters_page.rs
+msgid "Also rebuilds the Guild Card monster log"
+msgstr "Ricostruisce anche il registro mostri della tessera Gilda"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Great Sword"
+msgstr "Spadone"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Sword and Shield"
+msgstr "Spada e scudo"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Hammer"
+msgstr "Martello"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Lance"
+msgstr "Lancia"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Heavy Bowgun"
+msgstr "Balestra pesante"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Light Bowgun"
+msgstr "Balestra leggera"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Long Sword"
+msgstr "Spada lunga"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Switch Axe"
+msgstr "Spad-ascia"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Gunlance"
+msgstr "Lancia-fucile"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Bow"
+msgstr "Arco"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Dual Blades"
+msgstr "Doppie lame"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Hunting Horn"
+msgstr "Corno da caccia"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Insect Glaive"
+msgstr "Falcione insetto"
+
+#: app/core/src/character.rs app/gui/src/views/names.rs
+msgid "Charge Blade"
+msgstr "Spad-ascia caricata"
+
+#: app/gui/src/views/names.rs
+msgid "Head"
+msgstr "Testa"
+
+#: app/gui/src/views/names.rs
+msgid "Chest"
+msgstr "Torso"
+
+#: app/gui/src/views/names.rs
+msgid "Arms"
+msgstr "Braccia"
+
+#: app/gui/src/views/names.rs
+msgid "Waist"
+msgstr "Vita"
+
+#: app/gui/src/views/names.rs
+msgid "Legs"
+msgstr "Gambe"
+
+#: app/gui/src/views/names.rs
+msgid "Palico weapon"
+msgstr "Arma compagno"
+
+#: app/gui/src/views/names.rs
+msgid "Palico head"
+msgstr "Testa compagno"
+
+#: app/gui/src/views/names.rs
+msgid "Palico body"
+msgstr "Corpo compagno"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/names.rs
+msgid "Type {}"
+msgstr "Tipo {}"
+
+#: app/gui/src/views/names.rs
+msgid "No skills"
+msgstr "Nessuna abilità"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/names.rs
+msgid "{} Lv {}"
+msgstr "{} Lv {}"
+
+#: app/gui/src/views/names.rs
+msgid "Mystery Talisman"
+msgstr "Talismano misterioso"
+
+#: app/gui/src/views/names.rs
+msgid "Shining Talisman"
+msgstr "Talismano lucente"
+
+#: app/gui/src/views/names.rs
+msgid "Timeworn Talisman"
+msgstr "Talismano consunto"
+
+#: app/gui/src/views/names.rs
+msgid "Enduring Talisman"
+msgstr "Talismano antico"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/overview.rs
+msgid "1 missing: {}"
+msgstr "1 mancante: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/overview.rs
+msgid "{} missing"
+msgstr "{} mancanti"
+
+#: app/gui/src/views/overview.rs
+msgid "Quests cleared"
+msgstr "Missioni completate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/overview.rs
+msgid "Village ★{} · Hub ★{}"
+msgstr "Villaggio ★{} · Base di caccia ★{}"
+
+#: app/gui/src/views/overview.rs
+msgid "Awards"
+msgstr "Premi"
+
+#: app/gui/src/views/overview.rs
+msgid "Large monsters met"
+msgstr "Mostri grandi incontrati"
+
+#: app/gui/src/views/overview.rs
+msgid "Guild Card list"
+msgstr "Lista tessera Gilda"
+
+#: app/gui/src/views/overview.rs
+msgid "Gold crowns"
+msgstr "Corone d'oro"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/overview.rs
+msgid "{} mini crown"
+msgid_plural "{} mini crowns"
+msgstr[0] "{} corona mini"
+msgstr[1] "{} corone mini"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/overview.rs
+msgid "Max · {} HR points"
+msgstr "Max · {} punti GC"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/overview.rs
+msgid "{} HR points"
+msgstr "{} punti GC"
+
+#: app/gui/src/views/overview.rs
+msgid "Max"
+msgstr "Max"
+
+#: app/gui/src/views/overview.rs
+msgid "Its changes are in Review. Nothing is written until you press Write."
+msgstr "Le sue modifiche sono in Revisione. Non viene scritto nulla finché non premi Scrivi."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/overview.rs
+msgid "Nothing to change. {}"
+msgstr "Niente da cambiare. {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/overview.rs
+msgid "{n} value changes. Nothing is written until you press Write."
+msgid_plural "{n} values change. Nothing is written until you press Write."
+msgstr[0] "Cambia {n} valore. Non viene scritto nulla finché non premi Scrivi."
+msgstr[1] "Cambiano {n} valori. Non viene scritto nulla finché non premi Scrivi."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/overview.rs
+msgid "{} {n} value changes. Nothing is written until you press Write."
+msgid_plural "{} {n} values change. Nothing is written until you press Write."
+msgstr[0] "{} Cambia {n} valore. Non viene scritto nulla finché non premi Scrivi."
+msgstr[1] "{} Cambiano {n} valori. Non viene scritto nulla finché non premi Scrivi."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Lv {} · {}"
+msgstr "Lv {} · {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/palicoes.rs
+msgid "{n} Palico"
+msgid_plural "{n} Palicoes"
+msgstr[0] "{n} compagno"
+msgstr[1] "{n} compagni"
+
+#: app/gui/src/views/palicoes.rs
+msgid "A Palico needs a name"
+msgstr "Un compagno deve avere un nome"
+
+#: app/gui/src/views/quests.rs
+msgid "listed only in its rotation"
+msgstr "elencata solo nella sua rotazione"
+
+#: app/gui/src/views/quests.rs
+msgid "event quest: listed once downloaded"
+msgstr "missione evento: elencata una volta scaricata"
+
+#: app/gui/src/views/quests.rs
+msgid " and "
+msgstr " e "
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "locked: needs {}"
+msgstr "bloccata: richiede {}"
+
+#: app/gui/src/views/quests.rs
+msgid ", or "
+msgstr ", oppure "
+
+#: app/gui/src/views/quests.rs
+msgid "Mark all cleared"
+msgstr "Segna tutte come completate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "Mark {}★ cleared"
+msgstr "Segna {}★ come completate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "{}: {} / {} cleared · confirmed in game except where marked"
+msgstr "{}: {} / {} completate · confermato nel gioco salvo dove indicato"
+
+#: app/gui/src/views/quests.rs
+msgid "Also completes its quest set, as the game does"
+msgstr "Completa anche il suo set di missioni, come fa il gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "{} quests marked cleared"
+msgstr "{} missioni segnate come completate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "{} {}★ quests marked cleared"
+msgstr "{} missioni {}★ segnate come completate"
+
+#: app/gui/src/views/quests.rs
+msgid "Completed quest sets are recorded too, as the game does"
+msgstr "Vengono registrati anche i set di missioni completati, come fa il gioco"
+
+#: app/gui/src/views/requests.rs
+msgid "Delivery request"
+msgstr "Richiesta di consegna"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/requests.rs
+msgid "{} · #{} · waits for: {}"
+msgstr "{} · #{} · in attesa di: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/requests.rs
+msgid "{} open · {} completed"
+msgstr "{} aperte · {} completate"
+
+#: app/gui/src/views/requests.rs
+msgid "The villager's reward is not handed over in game"
+msgstr "Il paesano non consegna la ricompensa nel gioco"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "Set by SLINT_SCALE_FACTOR in the environment"
+msgstr "Impostato da SLINT_SCALE_FACTOR nell'ambiente"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "Applies the next time the editor starts"
+msgstr "Si applica al prossimo avvio dell'editor"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/settings_ui.rs
+msgid "Version {} · EU/western build (0100770008DD8000) · {}"
+msgstr "Versione {} · build EU/occidentale (0100770008DD8000) · {}"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "game assets included"
+msgstr "risorse di gioco incluse"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "built without game assets"
+msgstr "compilato senza risorse di gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/settings_ui.rs
+msgid "System ({})"
+msgstr "Sistema ({})"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/settings_ui.rs
+msgid "Following {}, read again each time matugen writes it."
+msgstr "Segue {}, riletto ogni volta che matugen lo scrive."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/settings_ui.rs
+msgid "{} could not be read ({}); the built-in colours are shown."
+msgstr "Impossibile leggere {} ({}); vengono mostrati i colori integrati."
+
+#: app/gui/src/views/settings_ui.rs
+msgid "No colours from matugen yet. Save the template, add these lines to matugen's config.toml and run matugen (or change the wallpaper):"
+msgstr "Ancora nessun colore da matugen. Salva il modello, aggiungi queste righe al config.toml di matugen ed esegui matugen (o cambia lo sfondo):"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/settings_ui.rs
+msgid "Template saved to {}"
+msgstr "Modello salvato in {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/settings_ui.rs
+msgid "Could not save {}: {}"
+msgstr "Impossibile salvare {}: {}"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "New snapshots go to the new folder; earlier ones stay where they are"
+msgstr "Le nuove istantanee vanno nella nuova cartella; quelle precedenti restano dove sono"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "Folder with MHGU saves"
+msgstr "Cartella con salvataggi MHGU"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "No new save found in that folder"
+msgstr "Nessun nuovo salvataggio trovato in quella cartella"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/settings_ui.rs
+msgid "Found {n} new save"
+msgid_plural "Found {n} new saves"
+msgstr[0] "Trovato {n} nuovo salvataggio"
+msgstr[1] "Trovati {n} nuovi salvataggi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "You have {}. The new version ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves, snapshots and settings are not touched."
+msgstr "Versione attuale: {}. La nuova versione ({}) viene scaricata da GitHub, verificata con i checksum SHA-256 della release e sostituisce {}. Salvataggi, istantanee e impostazioni non vengono toccati."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "You have {}. This release has no file for this system: see its page."
+msgstr "Versione attuale: {}. Questa release non ha un file per questo sistema: vedi la sua pagina."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "You have {}. Only the AppImage and the Windows .exe replace themselves: download the new version from the release page."
+msgstr "Versione attuale: {}. Solo l'AppImage e l'.exe di Windows si sostituiscono da soli: scarica la nuova versione dalla pagina della release."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "{} is available"
+msgstr "{} è disponibile"
+
+#: app/gui/src/views/update_ui.rs
+msgid "checking…"
+msgstr "controllo…"
+
+#: app/gui/src/views/update_ui.rs
+msgid "up to date"
+msgstr "aggiornato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "downloading {}…"
+msgstr "download di {}…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "Downloading… {} of {}"
+msgstr "Download… {} di {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "{} is in place. Restart to use it."
+msgstr "{} è installato. Riavvia per usarlo."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "{} installed, restart to use it"
+msgstr "{} installato, riavvia per usarlo"
+
+#: app/gui/src/views/update_ui.rs
+msgid "update failed"
+msgstr "aggiornamento non riuscito"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "Not updated: {}. The editor you are running is unchanged."
+msgstr "Non aggiornato: {}. L'editor in esecuzione non è cambiato."
+
+#: app/gui/src/views/update_ui.rs
+msgid "Update cancelled"
+msgstr "Aggiornamento annullato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "Could not start {}: {}"
+msgstr "Impossibile avviare {}: {}"
+
+#: app/core/src/character.rs
+msgid "Prowler"
+msgstr "Cacciamiao"
+
+#: app/core/src/palico.rs
+msgid "Small Only"
+msgstr "Solo piccoli"
+
+#: app/core/src/palico.rs
+msgid "Small First"
+msgstr "Prima piccoli"
+
+#: app/core/src/palico.rs
+msgid "Balanced"
+msgstr "Bilanciato"
+
+#: app/core/src/palico.rs
+msgid "Large First"
+msgstr "Prima grandi"
+
+#: app/core/src/palico.rs
+msgid "Large Only"
+msgstr "Solo grandi"
+
+#: app/core/src/palico.rs
+msgid "Charisma"
+msgstr "Comando"
+
+#: app/core/src/palico.rs
+msgid "Fighting"
+msgstr "Combattimento"
+
+#: app/core/src/palico.rs
+msgid "Protection"
+msgstr "Protezione"
+
+#: app/core/src/palico.rs
+msgid "Assisting"
+msgstr "Assistenza"
+
+#: app/core/src/palico.rs
+msgid "Healing"
+msgstr "Cura"
+
+#: app/core/src/palico.rs
+msgid "Bombing"
+msgstr "Bombardiere"
+
+#: app/core/src/palico.rs
+msgid "Gathering"
+msgstr "Raccolta"
+
+#: app/core/src/palico.rs
+msgid "Beast"
+msgstr "Belva"
+
+#: app/core/src/progress.rs
+msgid "Redhelm Arzuros"
+msgstr "Sanguis Arzuros"
+
+#: app/core/src/progress.rs
+msgid "Snowbaron Lagombi"
+msgstr "Nix Lagombi"
+
+#: app/core/src/progress.rs
+msgid "Stonefist Hermitaur"
+msgstr "Marmor Hermitaur"
+
+#: app/core/src/progress.rs
+msgid "Dreadqueen Rathian"
+msgstr "Imperatrix Rathian"
+
+#: app/core/src/progress.rs
+msgid "Drilltusk Tetsucabra"
+msgstr "Vis Tetsucabra"
+
+#: app/core/src/progress.rs
+msgid "Silverwind Nargacuga"
+msgstr "Ventus Nargacuga"
+
+#: app/core/src/progress.rs
+msgid "Crystalbeard Uragaan"
+msgstr "Adamas Uragaan"
+
+#: app/core/src/progress.rs
+msgid "Deadeye Yian Garuga"
+msgstr "Caecus Yian Garuga"
+
+#: app/core/src/progress.rs
+msgid "Dreadking Rathalos"
+msgstr "Rex Rathalos"
+
+#: app/core/src/progress.rs
+msgid "Thunderlord Zinogre"
+msgstr "Fulgur Zinogre"
+
+#: app/core/src/progress.rs
+msgid "Grimclaw Tigrex"
+msgstr "Furor Tigrex"
+
+#: app/core/src/progress.rs
+msgid "Hellblade Glavenus"
+msgstr "Ignis Glavenus"
+
+#: app/core/src/progress.rs
+msgid "Nightcloak Malfestio"
+msgstr "Occultus Malfestio"
+
+#: app/core/src/progress.rs
+msgid "Rustrazor Ceanataur"
+msgstr "Acutus Ceanataur"
+
+#: app/core/src/progress.rs
+msgid "Soulseer Mizutsune"
+msgstr "Arcanum Mizutsune"
+
+#: app/core/src/progress.rs
+msgid "Boltreaver Astalos"
+msgstr "Fulmen Astalos"
+
+#: app/core/src/progress.rs
+msgid "Elderfrost Gammoth"
+msgstr "Glacialis Gammoth"
+
+#: app/core/src/progress.rs
+msgid "Bloodbath Diablos"
+msgstr "Cruor Diablos"

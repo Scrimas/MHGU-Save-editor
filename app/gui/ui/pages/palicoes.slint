@@ -53,7 +53,7 @@ export component PalicoesPage inherits Rectangle {
         padding-top: 16px;
         spacing: Tok.gap;
         PageHeader {
-            title: "Palicoes";
+            title: @tr("Palicoes");
             subtitle: Api.palico-summary;
             staged: Api.page-counts[4];
         }
@@ -64,13 +64,13 @@ export component PalicoesPage inherits Rectangle {
                 width: min(320px, root.width * 0.38);
                 spacing: Tok.tight;
                 SearchField {
-                    placeholder-text: "Search Palicoes";
+                    placeholder-text: @tr("Search Palicoes");
                     text <=> Api.palico-search;
                     edited(t) => { Api.filter-palicoes(t); }
                 }
             Card {
                 vertical-stretch: 1;
-                if Api.palicoes.length == 0: EmptyState { text: Api.palico-search == "" ? "No Palicoes in this save." : "No Palico matches the search."; }
+                if Api.palicoes.length == 0: EmptyState { text: Api.palico-search == "" ? @tr("No Palicoes in this save.") : @tr("No Palico matches the search."); }
                 ListView {
                     for p in Api.palicoes: ListRow {
                         height: 50px;
@@ -92,7 +92,7 @@ export component PalicoesPage inherits Rectangle {
             }
             Card {
                 horizontal-stretch: 1;
-                if Api.palico.index < 0: EmptyState { text: "Pick a Palico to edit it."; }
+                if Api.palico.index < 0: EmptyState { text: @tr("Pick a Palico to edit it."); }
                 if Api.palico.index >= 0: ScrollView {
                     VerticalLayout {
                         padding: Tok.pad;
@@ -100,51 +100,51 @@ export component PalicoesPage inherits Rectangle {
                         spacing: 14px;
                         alignment: start;
                         Text { text: Api.palico.name; font-size: 18px; font-weight: 600; }
-                        TextRow { label: "Name"; field: "name"; value: Api.palico.name; was: Api.palico.was-name; key: root.key + "name"; field-width: 260px; }
+                        TextRow { label: @tr("Name"); field: "name"; value: Api.palico.name; was: Api.palico.was-name; key: root.key + "name"; field-width: 260px; }
                         Row {
-                            label: "Level";
+                            label: @tr("Level");
                             was: Api.palico.was-level;
                             key: root.key + "level";
-                            NumberBox { width: 110px; minimum: 1; maximum: 99; value: Api.palico.level; label: "Level"; edited(v) => { Api.set-palico("level", v); } }
+                            NumberBox { width: 110px; minimum: 1; maximum: 99; value: Api.palico.level; label: @tr("Level"); edited(v) => { Api.set-palico("level", v); } }
                             Rectangle { horizontal-stretch: 1; }
                         }
                         Row {
-                            label: "Experience";
+                            label: @tr("Experience");
                             was: Api.palico.was-exp;
                             key: root.key + "exp";
-                            NumberBox { width: 160px; maximum: 9999999; value: Api.palico.exp; label: "Experience"; edited(v) => { Api.set-palico("exp", v); } }
-                            Muted { text: "Separate from the level: the game does not recompute one from the other."; vertical-alignment: center; horizontal-stretch: 1; }
+                            NumberBox { width: 160px; maximum: 9999999; value: Api.palico.exp; label: @tr("Experience"); edited(v) => { Api.set-palico("exp", v); } }
+                            Muted { text: @tr("Separate from the level: the game does not recompute one from the other."); vertical-alignment: center; horizontal-stretch: 1; }
                         }
                         Row {
-                            label: "Forte";
+                            label: @tr("Forte");
                             was: Api.palico.was-bias;
                             key: root.key + "bias";
                             ComboBox { width: 200px; model: Api.biases; current-index: Api.palico.bias; selected => { Api.set-palico("bias", self.current-index); } }
                             Rectangle { horizontal-stretch: 1; }
                         }
                         Row {
-                            label: "Target";
+                            label: @tr("Target");
                             was: Api.palico.was-target;
                             key: root.key + "target";
                             ComboBox { width: 200px; model: Api.palico-targets; current-index: Api.palico.target - 1; selected => { Api.set-palico("target", self.current-index + 1); } }
                             ConfidenceTag { level: Confidence.derived; y: 5px; }
-                            Muted { text: "Large First is checked in game; the others follow the game's menu order."; vertical-alignment: center; horizontal-stretch: 1; }
+                            Muted { text: @tr("Large First is checked in game; the others follow the game's menu order."); vertical-alignment: center; horizontal-stretch: 1; }
                         }
-                        TextRow { label: "Greeting"; field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }
-                        TextRow { label: "Original owner"; field: "owner"; value: Api.palico.owner; was: Api.palico.was-owner; key: root.key + "owner"; field-width: 260px; }
+                        TextRow { label: @tr("Greeting"); field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }
+                        TextRow { label: @tr("Original owner"); field: "owner"; value: Api.palico.owner; was: Api.palico.was-owner; key: root.key + "owner"; field-width: 260px; }
                         Hairline { }
-                        SectionTitle { text: "Support moves"; }
+                        SectionTitle { text: @tr("Support moves"); }
                         HorizontalLayout {
                             spacing: Tok.gap;
-                            Text { text: "Equipped"; width: 130px; color: Tok.muted; }
+                            Text { text: @tr("Equipped"); width: 130px; color: Tok.muted; }
                             Text { text: Api.palico.moves; wrap: word-wrap; horizontal-stretch: 1; }
                         }
                         HorizontalLayout {
                             spacing: Tok.gap;
-                            Text { text: "Learned"; width: 130px; color: Tok.muted; }
+                            Text { text: @tr("Learned"); width: 130px; color: Tok.muted; }
                             Text { text: Api.palico.learned; wrap: word-wrap; horizontal-stretch: 1; }
                         }
-                        Muted { text: "Support moves are shown, not edited: which moves a Palico may equip is not mapped yet."; }
+                        Muted { text: @tr("Support moves are shown, not edited: which moves a Palico may equip is not mapped yet."); }
                     }
                 }
             }

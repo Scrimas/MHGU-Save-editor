@@ -17,6 +17,8 @@ const RECENT: usize = 5;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Settings {
+    /// Interface language, a code of i18n::LANGS; "" for the system's.
+    pub language: String,
     /// "system", "light" or "dark"
     pub theme: String,
     /// Colours from matugen when its file is there (Linux; theme.rs).
@@ -48,6 +50,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Settings {
         Settings {
+            language: String::new(),
             theme: "system".into(),
             matugen: true,
             scale: 0,

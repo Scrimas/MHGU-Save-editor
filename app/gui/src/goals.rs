@@ -2,7 +2,8 @@
 //! written, planned on a copy of the save and described in game terms (03, R3, R4).
 
 use crate::assets;
-use crate::fmt::{count, list, num};
+use crate::fmt::{list, num};
+use crate::i18n::{tr, trf, trn};
 use crate::state::Conf;
 use crate::targets::{Mon, Target};
 use mhgu_save::character as ch;
@@ -230,7 +231,7 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
 pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
     let mut c = s.clone();
     let targets = apply(id, &mut c, slot);
-    let mut p = Plan { action: "Add to Review".into(), detail: "Quick goal".into(), ..Default::default() };
+    let mut p = Plan { action: tr("Add to Review").into(), detail: tr("Quick goal").into(), ..Default::default() };
     for t in &targets {
         let (a, b) = (t.read(s, slot), t.read(&c, slot));
         if a != b {
@@ -258,201 +259,227 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 }
             }
             let cats = by_cat.iter().map(|(k, v)| format!("{k} {v}")).collect::<Vec<_>>().join(", ");
-            p.title = "Complete every quest".into();
+            p.title = tr("Complete every quest").into();
+            let quests = trn("{} quest", "{} quests", q as i64, &[&num(q as i64)]);
+            let requests = trn("{} villager request", "{} villager requests", r as i64, &[&num(r as i64)]);
             p.summary = if q == 0 && r == 0 {
-                "Every quest is cleared.".into()
+                tr("Every quest is cleared.").into()
             } else if q == 0 {
-                format!("Every quest is cleared. Posts the {} their villagers would offer.", count(r, "villager request", "villager requests"))
+                trf("Every quest is cleared. Posts the {} their villagers would offer.", &[&requests])
+            } else if r > 0 {
+                trf("Clears the {} not cleared yet ({}) and posts the {} their villagers would offer.", &[&quests, &cats, &requests])
             } else {
-                format!(
-                    "Clears the {} not cleared yet ({cats}){}.",
-                    count(q, "quest", "quests"),
-                    if r > 0 { format!(" and posts the {} their villagers would offer", count(r, "villager request", "villager requests")) } else { String::new() }
-                )
+                trf("Clears the {} not cleared yet ({}).", &[&quests, &cats])
             };
-            p.count = count(q.max(r), if q > 0 { "quest" } else { "request" }, if q > 0 { "quests" } else { "requests" });
-            p.note = "Star levels and story events stay to the game: they follow after your next quest. Completed quest sets are recorded too.".into();
+            let k = q.max(r);
+            p.count = if q > 0 { trn("{} quest", "{} quests", k as i64, &[&num(k as i64)]) } else { trn("{} request", "{} requests", k as i64, &[&num(k as i64)]) };
+            p.note = tr("Star levels and story events stay to the game: they follow after your next quest. Completed quest sets are recorded too.").into();
         }
         ["arts"] => {
-            p.title = "Unlock all Hunter Arts".into();
-            p.summary = if n == 0 { "Every Hunter Art is unlocked.".into() } else { format!("Unlocks the {} you're missing: {}.", count(n, "Hunter Art", "Hunter Arts"), list(&names(&|_| true), 3)) };
-            p.count = count(n, "art", "arts");
+            p.title = tr("Unlock all Hunter Arts").into();
+            p.summary = if n == 0 {
+                tr("Every Hunter Art is unlocked.").into()
+            } else {
+                trf("Unlocks the {} you're missing: {}.", &[&trn("{} Hunter Art", "{} Hunter Arts", n as i64, &[&num(n as i64)]), &list(&names(&|_| true), 3)])
+            };
+            p.count = trn("{} art", "{} arts", n as i64, &[&num(n as i64)]);
         }
         ["canteen"] => {
             let d = p.targets.iter().filter(|t| matches!(t, Target::Dish(_))).count();
             let i = n - d;
-            p.title = "Canteen dishes and ingredients".into();
+            let dishes = trn("{} dish", "{} dishes", d as i64, &[&num(d as i64)]);
+            let ingredients = trn("{} ingredient", "{} ingredients", i as i64, &[&num(i as i64)]);
+            p.title = tr("Canteen dishes and ingredients").into();
             p.summary = match (d, i) {
-                (0, 0) => "Every Canteen dish and ingredient is unlocked.".into(),
-                (d, 0) => format!("Unlocks the {} you're missing in the Canteen.", count(d, "dish", "dishes")),
-                (0, i) => format!("Unlocks the {} you're missing in the Canteen.", count(i, "ingredient", "ingredients")),
-                (d, i) => format!("Unlocks the {} and {} you're missing in the Canteen.", count(d, "dish", "dishes"), count(i, "ingredient", "ingredients")),
+                (0, 0) => tr("Every Canteen dish and ingredient is unlocked.").into(),
+                (_, 0) => trf("Unlocks the {} you're missing in the Canteen.", &[&dishes]),
+                (0, _) => trf("Unlocks the {} you're missing in the Canteen.", &[&ingredients]),
+                _ => trf("Unlocks the {} and {} you're missing in the Canteen.", &[&dishes, &ingredients]),
             };
-            p.count = count(n, "entry", "entries");
+            p.count = trn("{} entry", "{} entries", n as i64, &[&num(n as i64)]);
         }
         ["awards"] => {
-            p.title = "All Guild Card awards".into();
+            p.title = tr("All Guild Card awards").into();
+            let awards = trn("{} award", "{} awards", n as i64, &[&num(n as i64)]);
             p.summary = if n == 0 {
-                "Your Guild Card has every award an edit can give.".into()
+                tr("Your Guild Card has every award an edit can give.").into()
             } else {
-                format!("Unlocks the {} you're missing: {}.", count(n, "award", "awards"), list(&names(&|_| true), 3))
+                trf("Unlocks the {} you're missing: {}.", &[&awards, &list(&names(&|_| true), 3)])
             };
-            p.count = count(n, "award", "awards");
-            p.note = "Veteran Hunter's Prize comes only from a save transfer and stays as it is. Both of the game's award lists are written, as the game does.".into();
+            p.count = awards;
+            p.note = tr("Veteran Hunter's Prize comes only from a save transfer and stays as it is. Both of the game's award lists are written, as the game does.").into();
         }
         ["notes"] => {
-            p.title = "Hunter's Notes".into();
+            p.title = tr("Hunter's Notes").into();
             let mons: Vec<String> = p.targets.iter().filter_map(|t| if let Target::Monster(i, _) = t { Some(tables().monsters[i - 1].name.clone()) } else { None }).collect();
-            p.summary = if n == 0 { "Every Hunter's Notes page is unlocked.".into() } else { format!("Unlocks the {} you're missing: {}.", count(n, "Hunter's Notes page", "Hunter's Notes pages"), list(&mons, 3)) };
-            p.count = count(n, "page", "pages");
-            p.note = "Each page gets its NEW mark, as the game's own unlock does.".into();
+            p.summary = if n == 0 {
+                tr("Every Hunter's Notes page is unlocked.").into()
+            } else {
+                trf("Unlocks the {} you're missing: {}.", &[&trn("{} Hunter's Notes page", "{} Hunter's Notes pages", n as i64, &[&num(n as i64)]), &list(&mons, 3)])
+            };
+            p.count = trn("{} page", "{} pages", n as i64, &[&num(n as i64)]);
+            p.note = tr("Each page gets its NEW mark, as the game's own unlock does.").into();
         }
         ["crowns"] => {
             let gold = p.targets.iter().filter(|t| matches!(t, Target::Monster(_, Mon::Max))).count();
             let mini = p.targets.iter().filter(|t| matches!(t, Target::Monster(_, Mon::Min))).count();
-            p.title = "Every crown".into();
-            p.summary = if n == 0 {
-                "Every large monster has its mini and gold crown.".into()
-            } else {
-                let mut parts = vec![];
-                if gold > 0 {
-                    parts.push(format!("Gold crown records for the {} without one", count(gold, "monster", "monsters")));
-                }
-                if mini > 0 {
-                    parts.push(format!("{} records for the {mini} without one", if gold > 0 { "mini crown" } else { "Mini crown" }));
-                }
-                format!("{}. Also rebuilds the Guild Card monster log.", parts.join(", and "))
+            let mons = |k: usize| trn("{} monster", "{} monsters", k as i64, &[&num(k as i64)]);
+            p.title = tr("Every crown").into();
+            p.summary = match (gold, mini) {
+                (0, 0) => tr("Every large monster has its mini and gold crown.").into(),
+                (_, 0) => trf("Gold crown records for the {} without one. Also rebuilds the Guild Card monster log.", &[&mons(gold)]),
+                (0, _) => trf("Mini crown records for the {} without one. Also rebuilds the Guild Card monster log.", &[&mons(mini)]),
+                _ => trf(
+                    "Gold crown records for the {} without one, and mini crown records for the {} without one. Also rebuilds the Guild Card monster log.",
+                    &[&mons(gold), &mons(mini)],
+                ),
             };
-            p.count = count(n, "record", "records");
-            p.note = "The crown awards follow after your next quest in game.".into();
-            p.detail = "Quick goal · also rebuilds the Guild Card monster log".into();
+            p.count = trn("{} record", "{} records", n as i64, &[&num(n as i64)]);
+            p.note = tr("The crown awards follow after your next quest in game.").into();
+            p.detail = tr("Quick goal · also rebuilds the Guild Card monster log").into();
         }
         ["hr999"] => {
-            p.title = "HR 999".into();
+            p.title = tr("HR 999").into();
             let st = ch::get(s, base);
             if s.u16(base + ch::HUB_STAR) == 0 {
                 p.blocked = true;
-                p.summary = "Join the Hub in game first: until then HR follows the Hub's star level.".into();
-                p.count = "Not available yet".into();
+                p.summary = tr("Join the Hub in game first: until then HR follows the Hub's star level.").into();
+                p.count = tr("Not available yet").into();
             } else if n == 0 {
-                p.summary = "HR is already 999.".into();
+                p.summary = tr("HR is already 999.").into();
             } else {
-                p.summary = format!("Raises HR {} to 999 and releases the HR limit, as the game does at 4,246,430 HR points.", num(st.hr));
-                p.count = "HR 999".into();
+                p.summary = trf("Raises HR {} to 999 and releases the HR limit, as the game does at 4,246,430 HR points.", &[&num(st.hr)]);
+                p.count = tr("HR 999").into();
             }
         }
         ["money"] => {
-            p.title = "Max zenny and points".into();
+            p.title = tr("Max zenny and points").into();
             let has = |t: Target| p.targets.contains(&t);
-            let vills = |g: bool| -> Vec<String> { (0..4).filter(|&v| has(Target::Points(v, g))).map(|v| VILLAGES[v].to_string()).collect() };
+            let vills = |g: bool| -> Vec<String> { (0..4).filter(|&v| has(Target::Points(v, g))).map(|v| tr(VILLAGES[v]).to_string()).collect() };
             let (lr, g) = (vills(false), vills(true));
             let mut doing = vec![];
             let mut done = vec![];
-            for (t, what) in [(Target::Funds, "zenny"), (Target::Wycademy, "Wycademy points")] {
-                if has(t) { doing.push(format!("{what} to 9,999,999")) } else { done.push(what.to_string()) }
+            if has(Target::Funds) { doing.push(tr("zenny to 9,999,999").to_string()) } else { done.push(tr("zenny").to_string()) }
+            if has(Target::Wycademy) { doing.push(tr("Wycademy points to 9,999,999").to_string()) } else { done.push(tr("Wycademy points").to_string()) }
+            match g.len() {
+                0 => done.push(tr("G rank points").into()),
+                4 => doing.push(tr("G rank village points to 20,000 in all four villages").into()),
+                _ => doing.push(trf("G rank points to 20,000 in {}", &[&list(&g, 4)])),
             }
-            for (v, rank) in [(&g, "G rank"), (&lr, "Low rank")] {
-                match v.len() {
-                    0 => done.push(format!("{rank} points")),
-                    4 => doing.push(format!("{rank} village points to 20,000 in all four villages")),
-                    _ => doing.push(format!("{rank} points to 20,000 in {}", list(v, 4))),
-                }
+            match lr.len() {
+                0 => done.push(tr("Low rank points").into()),
+                4 => doing.push(tr("Low rank village points to 20,000 in all four villages").into()),
+                _ => doing.push(trf("Low rank points to 20,000 in {}", &[&list(&lr, 4)])),
             }
-            let mut first = list(&doing, 4);
-            if let Some(c0) = first.get(0..1) {
-                first = c0.to_uppercase() + &first[1..];
-            }
+            let first = cap(&list(&doing, 4));
             let done_txt = match done.len() {
                 0 => String::new(),
-                1 => format!("{} is already at the max", cap(&done[0])),
-                _ => format!("{} are already at the max", cap(&list(&done, 4))),
+                1 => trf("{} is already at the max", &[&cap(&done[0])]),
+                _ => trf("{} are already at the max", &[&cap(&list(&done, 4))]),
             };
-            p.summary = if doing.is_empty() { "Zenny and every point total are at the max.".into() } else if done.is_empty() { format!("{first}.") } else { format!("{first}. {done_txt}.") };
+            p.summary = if doing.is_empty() {
+                tr("Zenny and every point total are at the max.").into()
+            } else if done.is_empty() {
+                trf("{}.", &[&first])
+            } else {
+                trf("{}. {}.", &[&first, &done_txt])
+            };
             if !done_txt.is_empty() && !doing.is_empty() {
-                p.note = format!("{done_txt} and stay as they are.");
+                p.note = tr("Totals already at the max stay as they are.").into();
             }
-            p.count = count(n, "value", "values");
+            p.count = trn("{} value", "{} values", n as i64, &[&num(n as i64)]);
         }
         ["monsters", "hunts"] => {
-            p.title = "Max hunts".into();
-            p.summary = if n == 0 { "Every monster is hunted 9,999 times.".into() } else { format!("Sets Hunted to 9,999 for the {} below it. Also rebuilds the Guild Card monster log.", count(n, "monster", "monsters")) };
-            p.count = count(n, "monster", "monsters");
-            p.review = "Every monster hunted 9,999 times".into();
-            p.detail = "Monsters · also rebuilds the Guild Card monster log".into();
+            let mons = trn("{} monster", "{} monsters", n as i64, &[&num(n as i64)]);
+            p.title = tr("Max hunts").into();
+            p.summary = if n == 0 { tr("Every monster is hunted 9,999 times.").into() } else { trf("Sets Hunted to 9,999 for the {} below it. Also rebuilds the Guild Card monster log.", &[&mons]) };
+            p.count = mons;
+            p.review = tr("Every monster hunted 9,999 times").into();
+            p.detail = tr("Monsters · also rebuilds the Guild Card monster log").into();
         }
         ["items", what, _] => {
             let st = store(id);
-            let place = if st == Store::Pouch { "pouch" } else { "item box" };
+            let pouch = st == Store::Pouch;
             let stacks = items::all(s, base, st).iter().filter(|x| !x.is_empty()).count();
+            let slots = trn("{} slot", "{} slots", n as i64, &[&num(n as i64)]);
             match what {
                 "sort" => {
-                    p.title = format!("Sort the {place}");
-                    p.summary = if n == 0 {
-                        format!("The {place} is already sorted.")
-                    } else if st == Store::Pouch {
-                        format!("Sorts the pouch by item and merges stacks of the same item into one, up to its carry limit (the rest is dropped); {} change.", count(n, "slot", "slots"))
-                    } else {
-                        format!("Sorts the {place} by item and merges stacks of the same item; {} change.", count(n, "slot", "slots"))
+                    p.title = if pouch { tr("Sort the pouch") } else { tr("Sort the item box") }.into();
+                    p.summary = match (n, pouch) {
+                        (0, true) => tr("The pouch is already sorted.").into(),
+                        (0, false) => tr("The item box is already sorted.").into(),
+                        (_, true) => trf("Sorts the pouch by item and merges stacks of the same item into one, up to its carry limit (the rest is dropped); {} change.", &[&slots]),
+                        (_, false) => trf("Sorts the item box by item and merges stacks of the same item; {} change.", &[&slots]),
                     };
-                    p.review = format!("{}: sorted and merged", cap(place));
+                    p.review = if pouch { tr("Pouch: sorted and merged") } else { tr("Item box: sorted and merged") }.into();
                 }
                 "max" => {
-                    p.title = "Max counts".into();
-                    if st == Store::Pouch {
-                        p.summary = if n == 0 { "Every stack in the pouch is at its carry limit.".into() } else { format!("Sets the {} in the pouch to the most the game lets you carry (Potion 10, Max Potion 2, Ancient Potion 1…).", count(n, "stack", "stacks")) };
-                        p.review = "Pouch: every stack at its carry limit".into();
+                    let k = trn("{} stack", "{} stacks", n as i64, &[&num(n as i64)]);
+                    p.title = tr("Max counts").into();
+                    if pouch {
+                        p.summary = if n == 0 { tr("Every stack in the pouch is at its carry limit.").into() } else { trf("Sets the {} in the pouch to the most the game lets you carry (Potion 10, Max Potion 2, Ancient Potion 1…).", &[&k]) };
+                        p.review = tr("Pouch: every stack at its carry limit").into();
                     } else {
-                        p.summary = if n == 0 { format!("Every stack in the {place} is at 99.") } else { format!("Raises the {} below 99 in the {place} to 99.", count(n, "stack", "stacks")) };
-                        p.review = format!("{}: every stack ×99", cap(place));
+                        p.summary = if n == 0 { tr("Every stack in the item box is at 99.").into() } else { trf("Raises the {} below 99 in the item box to 99.", &[&k]) };
+                        p.review = tr("Item box: every stack ×99").into();
                     }
                 }
                 _ => {
-                    p.title = format!("Empty the {place}");
-                    p.summary = if stacks == 0 { format!("The {place} is already empty.") } else { format!("Removes all {} from the {place}. You can undo it in Review until you write.", count(stacks, "stack", "stacks")) };
-                    p.review = format!("{} emptied: {}", cap(place), count(stacks, "stack", "stacks"));
-                    p.action = if st == Store::Pouch { "Empty pouch".into() } else { "Empty box".into() };
+                    let k = trn("{} stack", "{} stacks", stacks as i64, &[&num(stacks as i64)]);
+                    p.title = if pouch { tr("Empty the pouch") } else { tr("Empty the item box") }.into();
+                    p.summary = match (stacks, pouch) {
+                        (0, true) => tr("The pouch is already empty.").into(),
+                        (0, false) => tr("The item box is already empty.").into(),
+                        (_, true) => trf("Removes all {} from the pouch. You can undo it in Review until you write.", &[&k]),
+                        (_, false) => trf("Removes all {} from the item box. You can undo it in Review until you write.", &[&k]),
+                    };
+                    p.review = if pouch { trf("Pouch emptied: {}", &[&k]) } else { trf("Item box emptied: {}", &[&k]) };
+                    p.action = if pouch { tr("Empty pouch") } else { tr("Empty box") }.into();
                 }
             }
-            p.count = count(n, "slot", "slots");
-            p.detail = cap(place);
+            p.count = slots;
+            p.detail = if pouch { tr("Pouch") } else { tr("Item box") }.into();
         }
         ["deviants", "permits"] => {
-            p.title = "Max Special Permits".into();
-            p.summary = if n == 0 { "Every deviant has 99 Special Permits.".into() } else { format!("Sets Special Permits to 99 for the {} below it.", count(n, "deviant", "deviants")) };
-            p.count = count(n, "deviant", "deviants");
-            p.review = "Every deviant: 99 Special Permits".into();
-            p.detail = "Collections".into();
+            let devs = trn("{} deviant", "{} deviants", n as i64, &[&num(n as i64)]);
+            p.title = tr("Max Special Permits").into();
+            p.summary = if n == 0 { tr("Every deviant has 99 Special Permits.").into() } else { trf("Sets Special Permits to 99 for the {} below it.", &[&devs]) };
+            p.count = devs;
+            p.review = tr("Every deviant: 99 Special Permits").into();
+            p.detail = tr("Collections").into();
         }
         ["deviants", "levels"] => {
-            p.title = "Every deviant level".into();
-            p.summary = if n == 0 { "Every deviant has every level cleared.".into() } else { format!("Marks every level of the {} cleared: {}.", count(n, "deviant", "deviants"), list(&names(&|_| true), 3)) };
-            p.count = count(n, "deviant", "deviants");
-            p.note = "G-rank levels appear in game only once a G-rank quest against the base monster is cleared; each row says which.".into();
-            p.review = "Every deviant level cleared".into();
-            p.detail = "Collections".into();
+            let devs = trn("{} deviant", "{} deviants", n as i64, &[&num(n as i64)]);
+            p.title = tr("Every deviant level").into();
+            p.summary = if n == 0 { tr("Every deviant has every level cleared.").into() } else { trf("Marks every level of the {} cleared: {}.", &[&devs, &list(&names(&|_| true), 3)]) };
+            p.count = devs;
+            p.note = tr("G-rank levels appear in game only once a G-rank quest against the base monster is cleared; each row says which.").into();
+            p.review = tr("Every deviant level cleared").into();
+            p.detail = tr("Collections").into();
         }
         ["checks", on, tab] => {
-            let what = match tab {
-                "0" => "Hunter Arts",
-                "1" => "Canteen dishes",
-                "2" => "Canteen ingredients",
-                _ => "awards",
-            };
             let all = on == "all";
-            p.title = format!("{} every {}", if all { "Check" } else { "Uncheck" }, what.trim_end_matches('s'));
+            let (what, check, uncheck) = match tab {
+                "0" => (tr("Hunter Arts"), tr("Check every Hunter Art"), tr("Uncheck every Hunter Art")),
+                "1" => (tr("Canteen dishes"), tr("Check every Canteen dish"), tr("Uncheck every Canteen dish")),
+                "2" => (tr("Canteen ingredients"), tr("Check every Canteen ingredient"), tr("Uncheck every Canteen ingredient")),
+                _ => (tr("awards"), tr("Check every award"), tr("Uncheck every award")),
+            };
+            let entries = trn("{} entry", "{} entries", n as i64, &[&num(n as i64)]);
+            p.title = if all { check } else { uncheck }.into();
             p.summary = match (all, n) {
-                (true, 0) => format!("Every one of the {what} is already checked."),
-                (false, 0) => format!("None of the {what} is checked."),
-                (true, n) if n <= 3 => format!("Unlocks the {} you're missing: {}.", count(n, "entry", "entries"), list(&names(&|_| true), 3)),
-                (true, n) => format!("Unlocks the {} you're missing.", count(n, "entry", "entries")),
-                (false, n) => format!("Locks all {} that are checked now.", count(n, "entry", "entries")),
+                (true, 0) => trf("Every one of the {} is already checked.", &[&what]),
+                (false, 0) => trf("None of the {} is checked.", &[&what]),
+                (true, n) if n <= 3 => trf("Unlocks the {} you're missing: {}.", &[&entries, &list(&names(&|_| true), 3)]),
+                (true, _) => trf("Unlocks the {} you're missing.", &[&entries]),
+                (false, _) => trf("Locks all {} that are checked now.", &[&entries]),
             };
             if tab == "3" {
-                p.note = "Both of the game's award lists are written, as the game does.".into();
+                p.note = tr("Both of the game's award lists are written, as the game does.").into();
             }
-            p.review = format!("{}: all {}", cap(what), if all { "checked" } else { "unchecked" });
-            p.count = count(n, "entry", "entries");
-            p.detail = "Collections".into();
+            p.review = if all { trf("{}: all checked", &[&cap(what)]) } else { trf("{}: all unchecked", &[&cap(what)]) };
+            p.count = entries;
+            p.detail = tr("Collections").into();
         }
         _ => {}
     }
@@ -484,10 +511,12 @@ fn tech(changed: &[usize], base: usize) -> String {
     }
     let at = |a: usize| if a >= base && a < base + 0x11F8C4 { format!("base + 0x{:X}", a - base) } else { format!("0x{a:06X}") };
     let shown: Vec<String> = ranges.iter().take(6).map(|&(a, n)| format!("{} ({n})", at(a))).collect();
-    let more = if ranges.len() > 6 { format!(", and {} more ranges", ranges.len() - 6) } else { String::new() };
+    let rest = ranges.len().saturating_sub(6);
+    let more = if rest > 0 { trn(", and {} more range", ", and {} more ranges", rest as i64, &[&num(rest as i64)]) } else { String::new() };
     if changed.is_empty() {
         String::new()
     } else {
-        format!("{} at {}{more}. The Save map names every range.", count(changed.len(), "byte", "bytes"), shown.join(", "))
+        let bytes = trn("{} byte", "{} bytes", changed.len() as i64, &[&num(changed.len() as i64)]);
+        trf("{} at {}{}. The Save map names every range.", &[&bytes, &shown.join(", "), &more])
     }
 }

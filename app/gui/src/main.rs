@@ -5,6 +5,7 @@ mod assets;
 mod desktop;
 mod fmt;
 mod goals;
+mod i18n;
 #[cfg(target_os = "linux")]
 mod scroll;
 mod settings;
@@ -44,18 +45,12 @@ fn main() -> Result<(), slint::PlatformError> {
     #[cfg(all(unix, not(target_os = "macos")))]
     slint::set_xdg_app_id("mhgu-save-editor")?;
     let ui = AppWindow::new()?;
+    // the language set, else the system's (Slint picks the same one for the window)
+    i18n::set(&ui, i18n::index(&settings::get().language));
     #[cfg(target_os = "linux")]
     scroll::install(ui.window());
     let st: Shared = Rc::new(RefCell::new(State::default()));
     let api = ui.global::<Api>();
-    api.set_build_info(
-        format!(
-            "Version {} · EU/western build (0100770008DD8000) · {}",
-            env!("CARGO_PKG_VERSION"),
-            if assets::available() { "game assets included" } else { "built without game assets" }
-        )
-        .into(),
-    );
     api.set_assets_ok(assets::available());
     views::wire(&ui, &st);
     // quitting with staged changes asks first (S11)

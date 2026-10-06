@@ -8,6 +8,19 @@ pub(super) fn misses_crown(i: usize, r: monsters::Record) -> bool {
     monsters::meta(i).size_record && monsters::meta(i).family_of.is_none() && (!c.mini && !monsters::meta(i).fixed_size || c.large < 2)
 }
 
+/// A class of data/monster-sizes.csv in the interface language.
+fn class_name(c: &str) -> &str {
+    match c {
+        "Bird Wyvern" => tr("Bird Wyvern"),
+        "Brute Wyvern" => tr("Brute Wyvern"),
+        "Elder Dragon" => tr("Elder Dragon"),
+        "Fanged Beast" => tr("Fanged Beast"),
+        "Flying Wyvern" => tr("Flying Wyvern"),
+        "Leviathan" => tr("Leviathan"),
+        _ => c,
+    }
+}
+
 pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let s = st.save();
@@ -30,26 +43,27 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
             if (large && !m.large) || (missing && !misses_crown(m.index, r)) {
                 return None;
             }
-            if !f.is_empty() && !m.name.to_lowercase().contains(&f) {
+            let name = assets::monster_name(m.index).unwrap_or(&m.name);
+            if !f.is_empty() && !name.to_lowercase().contains(&f) {
                 return None;
             }
             let (img, has) = icon(assets::monster_icon(m.index));
             let crown = monsters::crowns(m.index, r);
             let mut sub = vec![format!("#{}", m.index)];
             if !meta.class.is_empty() {
-                sub.push(meta.class.clone());
+                sub.push(class_name(&meta.class).to_string());
             } else if !m.large {
-                sub.push("small monster".into());
+                sub.push(tr("small monster").into());
             }
             if let Some(h) = meta.family_of {
-                sub.push(format!("size kept by {}", t.monsters[h - 1].name));
+                sub.push(trf("size kept by {}", &[&t.monsters[h - 1].name]));
             } else if let Some(b) = meta.base_cm.filter(|_| meta.size_record && r.max > 0 && r.min > 0) {
                 sub.push(format!("{:.0}–{:.0} cm", b * r.min as f32 / 100.0, b * r.max as f32 / 100.0));
             }
             let thresholds = if meta.fixed_size {
-                "fixed size: any record is gold".to_string()
+                tr("fixed size: any record is gold").to_string()
             } else {
-                format!("mini ≤ {} % · silver ≥ {} % · gold ≥ {} %", meta.mini_le, meta.silver_ge, meta.gold_ge)
+                trf("mini ≤ {} % · silver ≥ {} % · gold ≥ {} %", &[&meta.mini_le, &meta.silver_ge, &meta.gold_ge])
             };
             let notes = monsters::notes(s, base, m.index);
             let changed = st.changed(base + monsters::HUNTS + 2 * m.index, 2)
@@ -59,7 +73,7 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
             let w = |f: Mon| if changed { was(m.index, f) } else { SharedString::default() };
             Some(MonsterRow {
                 index: m.index as i32,
-                name: m.name.clone().into(),
+                name: name.into(),
                 icon: img,
                 has_icon: has,
                 large: m.large,
@@ -84,7 +98,7 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
         })
         .collect();
     api.set_monster_summary(
-        format!("{} large monsters, {} of them on the Guild Card list · {} shown · confirmed in game except where marked", n_large, listed, rows.len()).into(),
+        trf("{} large monsters, {} of them on the Guild Card list · {} shown · confirmed in game except where marked", &[&n_large, &listed, &rows.len()]).into(),
     );
     api.set_monsters(model(rows));
 }
@@ -112,7 +126,7 @@ pub(super) fn wire_monsters(ui: &AppWindow, st: &Shared) {
         };
         let t = Target::Monster(i, m);
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Confirmed).note("Also rebuilds the Guild Card monster log"), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed).note(tr("Also rebuilds the Guild Card monster log")), |sv, base| {
             if m == Mon::Notes {
                 monsters::set_notes(sv, base, i, v != 0);
                 return vec![];

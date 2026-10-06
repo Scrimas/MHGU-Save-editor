@@ -31,11 +31,11 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
     };
     let devs_done = (0..DEVIANTS.len()).filter(|&d| dev_levels(d).0 == dev_levels(d).1).count();
     api.set_collection_tabs(strings([
-        format!("Hunter Arts {} / {}", arts_on, t.arts.len()),
-        format!("Canteen dishes {dishes_on} / 99"),
-        format!("Canteen ingredients {ingr_on} / 45"),
-        format!("Awards {} / {}", awards_on, t.awards.len()),
-        format!("Deviants {devs_done} / {}", DEVIANTS.len()),
+        trf("Hunter Arts {} / {}", &[&arts_on, &t.arts.len()]),
+        trf("Canteen dishes {} / {}", &[&dishes_on, &99]),
+        trf("Canteen ingredients {} / {}", &[&ingr_on, &45]),
+        trf("Awards {} / {}", &[&awards_on, &t.awards.len()]),
+        trf("Deviants {} / {}", &[&devs_done, &DEVIANTS.len()]),
     ]));
     let rows: Vec<CheckRow> = match tab {
         1 | 2 => t
@@ -80,13 +80,13 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
         })
         .collect();
     let summary = match tab {
-        0 => format!("Hunter Arts: {} / {}", arts_on, t.arts.len()),
-        1 => format!("Canteen dishes: {dishes_on} / 99"),
-        2 => format!("Canteen ingredients: {ingr_on} / 45"),
-        3 => format!("Awards: {} / {}", awards_on, t.awards.len()),
-        _ => format!("Deviants with every level cleared: {devs_done} / {}", DEVIANTS.len()),
+        0 => trf("Hunter Arts: {} / {}", &[&arts_on, &t.arts.len()]),
+        1 => trf("Canteen dishes: {} / {}", &[&dishes_on, &99]),
+        2 => trf("Canteen ingredients: {} / {}", &[&ingr_on, &45]),
+        3 => trf("Awards: {} / {}", &[&awards_on, &t.awards.len()]),
+        _ => trf("Deviants with every level cleared: {} / {}", &[&devs_done, &DEVIANTS.len()]),
     };
-    api.set_checks_summary(format!("{summary} · confirmed in game except where marked").into());
+    api.set_checks_summary(trf("{} · confirmed in game except where marked", &[&summary]).into());
     api.set_checks(model(rows));
     api.set_arts(model(art_rows));
     let devs: Vec<DeviantRow> = DEVIANTS
@@ -100,11 +100,11 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
             // G-rank levels cleared by an edit stay off the board until the gate opens
             let gate = if lv > Char::deviant_g1(d) && !c.deviant_gate_open(d) {
                 if d == 17 {
-                    "G-rank levels appear in game only once the game releases them (event flag 1226).".to_string()
+                    tr("G-rank levels appear in game only once the game releases them (event flag 1226).").to_string()
                 } else {
                     let ids: Vec<String> = mhgu_save::progress::DEVIANT_GATE[d].iter().map(|i| i.to_string()).collect();
                     let base = name.split_once(' ').map_or(*name, |x| x.1);
-                    format!("G-rank levels appear in game once a G-rank {base} quest is cleared ({}).", fmt::list(&ids, 3))
+                    trf("G-rank levels appear in game once a G-rank {} quest is cleared ({}).", &[&base, &fmt::list(&ids, 3)])
                 }
             } else {
                 String::new()
@@ -153,7 +153,7 @@ pub(super) fn wire_collections(ui: &AppWindow, st: &Shared) {
         let title = t.label(s.save(), slot);
         let mut e = Edit::one(t, title, Conf::Confirmed);
         if tab == 3 {
-            e.note = "Written to both of the game's award lists".into();
+            e.note = tr("Written to both of the game's award lists").into();
         }
         s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);

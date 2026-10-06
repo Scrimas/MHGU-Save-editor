@@ -29,8 +29,10 @@ pub const NO_MOVE: u8 = 57;
 
 /// Target byte -> the game's menu text (OtMenuMsg 56-61, in this order). 4 = Large First
 /// was read off in game; the rest follow the menu order (DERIVED). 0 is not offered.
+// i18n: shown through tr() in the GUI
 pub const TARGETS: [&str; 6] = ["None", "Small Only", "Small First", "Balanced", "Large First", "Large Only"];
 
+// i18n: shown through tr() in the GUI
 pub const BIASES: [&str; 8] =["Charisma", "Fighting", "Protection", "Assisting", "Healing", "Bombing", "Gathering", "Beast"];
 
 #[derive(Debug, Clone, PartialEq)]

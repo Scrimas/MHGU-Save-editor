@@ -13,7 +13,7 @@ component SlotCell inherits Rectangle {
     border-radius: 4px;
     background: root.flash ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
     accessible-role: button;
-    accessible-label: "Slot " + (it.slot + 1) + ": " + (it.id == 0 ? "empty" : it.name + " ×" + it.count);
+    accessible-label: it.id == 0 ? @tr("Slot {}: empty", it.slot + 1) : @tr("Slot {}: {} ×{}", it.slot + 1, it.name, it.count);
     accessible-action-default => { root.edit(); }
     fk := KeyActivate { activated => { root.edit(); } }
     FocusRing { shown: fk.has-focus; border-radius: 4px; }
@@ -32,10 +32,10 @@ component SlotCell inherits Rectangle {
         VerticalLayout {
             alignment: center;
             horizontal-stretch: 1;
-            Text { text: it.id == 0 ? "Empty" : it.name; color: it.id == 0 ? Tok.faint : Palette.foreground; overflow: elide; }
-            if it.was != "": Text { text: "was " + it.was; color: Tok.accent-text; font-size: Tok.small; overflow: elide; }
+            Text { text: it.id == 0 ? @tr("Empty") : it.name; color: it.id == 0 ? Tok.faint : Palette.foreground; overflow: elide; }
+            if it.was != "": Text { text: @tr("was {}", it.was); color: Tok.accent-text; font-size: Tok.small; overflow: elide; }
             // stacks above the item's carry limit (written by older versions or other tools)
-            if it.was == "" && it.id != 0 && it.count > it.max: Text { text: "over the limit of " + it.max; color: Tok.bad; font-size: Tok.small; overflow: elide; }
+            if it.was == "" && it.id != 0 && it.count > it.max: Text { text: @tr("over the limit of {}", it.max);color: Tok.bad; font-size: Tok.small; overflow: elide; }
         }
         Text { text: it.id == 0 ? "" : "×" + it.count; color: it.id != 0 && it.count > it.max ? Tok.bad : Palette.foreground; width: 36px; vertical-alignment: center; horizontal-alignment: right; }
     }
@@ -68,7 +68,7 @@ export component ItemsPage inherits Rectangle {
         root.held-id = id;
         root.edit-max = id == 0 ? 99 : max;
         root.edit-count = id == 0 ? 1 : min(count, max);
-        root.held = id == 0 ? "Empty" : name + " ×" + count;
+        root.held = id == 0 ? @tr("Empty") : name + " ×" + count;
         root.edit-was = was;
         Api.search-picker("");
         root.pick-search = "";
@@ -106,31 +106,31 @@ export component ItemsPage inherits Rectangle {
         padding-top: 16px;
         spacing: Tok.gap;
         PageHeader {
-            title: "Items";
-            subtitle: Api.item-store == 2 ? "Item loadouts · confirmed in game except where marked" : Fmt.num(Api.item-used) + " / " + Fmt.num(Api.item-total) + " slots used · confirmed in game except where marked";
+            title: @tr("Items");
+            subtitle: Api.item-store == 2 ? @tr("Item loadouts · confirmed in game except where marked") : @tr("{} / {} slots used · confirmed in game except where marked", Fmt.num(Api.item-used), Fmt.num(Api.item-total));
             staged: Api.page-counts[2];
             // the first empty slot, like the Equipment page's Add
             if Api.item-store < 2: Button {
-                text: "Add item";
+                text: @tr("Add item");
                 enabled: Api.item-free >= 0;
                 clicked => { root.open-at(Api.item-free, 0, 0, 99, "", "", self.absolute-position.x - root.absolute-position.x + self.width - root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
             }
             if Api.item-store < 2: Button {
-                text: "Sort & merge…";
+                text: @tr("Sort & merge…");
                 clicked => { root.bulk("items:sort", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width); }
             }
             if Api.item-store < 2: Button {
-                text: "Max counts…";
+                text: @tr("Max counts…");
                 clicked => { root.bulk("items:max", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width); }
             }
             // the most destructive action of the app sits behind More… (04)
             if Api.item-store < 2: MoreButton {
-                items: [Api.item-store == 0 ? "Empty box…" : "Empty pouch…"];
+                items: [Api.item-store == 0 ? @tr("Empty box…") : @tr("Empty pouch…")];
                 activated => { root.bulk("items:empty", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width); }
             }
         }
         TabBar {
-            tabs: ["Item box", "Pouch", "Loadouts"];
+            tabs: [@tr("Item box"), @tr("Pouch"), @tr("Loadouts")];
             current: Api.item-store;
             select(i) => {
                 Api.item-store = i;
@@ -138,7 +138,7 @@ export component ItemsPage inherits Rectangle {
             }
         }
         if Api.item-store < 2: SearchField {
-            placeholder-text: Api.item-store == 0 ? "Search the item box" : "Search the pouch";
+            placeholder-text: Api.item-store == 0 ? @tr("Search the item box") : @tr("Search the pouch");
             text <=> Api.item-filter;
             edited(t) => { Api.filter-items(t); }
         }
@@ -148,7 +148,7 @@ export component ItemsPage inherits Rectangle {
           alignment: start;
           Card {
             width: min(root.width - 2 * Tok.margin, 1180px);
-            if Api.item-slots.length == 0: EmptyState { text: "No slot matches the search."; }
+            if Api.item-slots.length == 0: EmptyState { text: @tr("No slot matches the search."); }
             list := ListView {
                 property <int> seq: Api.jump-seq;
                 function go() {
@@ -214,21 +214,21 @@ export component ItemsPage inherits Rectangle {
           }
           Card {
             horizontal-stretch: 1;
-            if Api.loadout-sel < 0: EmptyState { text: "Pick a loadout to edit its name and items."; }
+            if Api.loadout-sel < 0: EmptyState { text: @tr("Pick a loadout to edit its name and items."); }
             if Api.loadout-sel >= 0: VerticalLayout {
                 padding: Tok.pad;
                 spacing: 10px;
                 HorizontalLayout {
                     spacing: Tok.gap;
-                    Text { text: "Loadout " + (Api.loadout-sel + 1); font-size: 18px; font-weight: 600; vertical-alignment: center; }
+                    Text { text: @tr("Loadout {}", Api.loadout-sel + 1);font-size: 18px; font-weight: 600; vertical-alignment: center; }
                     name-ed := LineEdit {
                         // follows the loadout picked, once typed into too
                         property <string> cur: Api.loadout-name;
                         changed cur => { self.text = self.cur; }
                         width: 240px;
                         text: Api.loadout-name;
-                        placeholder-text: "Name";
-                        accessible-label: "Loadout name";
+                        placeholder-text: @tr("Name");
+                        accessible-label: @tr("Loadout name");
                         accepted(t) => { Api.set-loadout-name(t); }
                         changed has-focus => {
                             if !self.has-focus && self.text != Api.loadout-name {
@@ -239,7 +239,7 @@ export component ItemsPage inherits Rectangle {
                     Rectangle { horizontal-stretch: 1; }
                 }
                 if Api.loadout-was != "": WasLine { was: Api.loadout-was; key: "loadout:" + Api.loadout-sel; }
-                Muted { text: "The 32 pouch positions the loadout fills, with the counts it takes from the box."; }
+                Muted { text: @tr("The 32 pouch positions the loadout fills, with the counts it takes from the box."); }
                 // two columns like the box grid
                 lv := ListView {
                     vertical-stretch: 1;
@@ -280,7 +280,7 @@ export component ItemsPage inherits Rectangle {
                 HorizontalLayout {
                     spacing: Tok.tight;
                     Text {
-                        text: (root.loadout-mode ? "Loadout " + (Api.loadout-sel + 1) + " · position " : Api.item-store == 0 ? "Item box slot " : "Pouch slot ") + (root.edit-slot + 1);
+                        text: root.loadout-mode ? @tr("Loadout {} · position {}", Api.loadout-sel + 1, root.edit-slot + 1) : Api.item-store == 0 ? @tr("Item box slot {}", root.edit-slot + 1) : @tr("Pouch slot {}", root.edit-slot + 1);
                         font-size: Tok.section;
                         font-weight: 600;
                         horizontal-stretch: 1;
@@ -290,7 +290,7 @@ export component ItemsPage inherits Rectangle {
                 if root.edit-was != "" && !root.loadout-mode: WasLine { was: root.edit-was; key: (Api.item-store == 0 ? "item:box:" : "item:pouch:") + root.edit-slot; }
                 LineEdit {
                     text <=> root.pick-search;
-                    placeholder-text: "Search items";
+                    placeholder-text: @tr("Search items");
                     edited(t) => { Api.search-picker(t); }
                     // Enter takes the first match
                     accepted => {
@@ -343,28 +343,28 @@ export component ItemsPage inherits Rectangle {
                 HorizontalLayout {
                     spacing: 10px;
                     alignment: start;
-                    Text { text: "Count"; vertical-alignment: center; }
+                    Text { text: @tr("Count"); vertical-alignment: center; }
                     NumberBox {
                         width: 120px;
                         value: root.edit-count;
                         minimum: 1;
                         maximum: root.edit-max;
-                        label: "Count";
+                        label: @tr("Count");
                         enabled: root.edit-id != 0;
                         edited(v) => { root.edit-count = v; }
                     }
-                    Text { text: Api.item-store == 0 && !root.loadout-mode ? "of 99" : "of " + root.edit-max + " (carry limit)"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                    Text { text: Api.item-store == 0 && !root.loadout-mode ? @tr("of {}", 99) : @tr("of {} (carry limit)", root.edit-max);color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
                 }
                 HorizontalLayout {
                     spacing: Tok.tight;
                     if root.held-id != 0: Button {
-                        text: root.loadout-mode ? "Empty position" : "Empty slot";
+                        text: root.loadout-mode ? @tr("Empty position") : @tr("Empty slot");
                         clicked => { root.commit(0, 0); }
                     }
                     Rectangle { horizontal-stretch: 1; }
-                    Button { text: "Cancel"; clicked => { picker.close(); } }
+                    Button { text: @tr("Cancel"); clicked => { picker.close(); } }
                     Button {
-                        text: "Done";
+                        text: @tr("Done");
                         primary: true;
                         enabled: root.edit-id != 0;
                         clicked => { root.commit(root.edit-id, root.edit-count); }

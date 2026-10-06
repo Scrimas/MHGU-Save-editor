@@ -11,8 +11,8 @@ pub(super) fn uses_label(s: &mhgu_save::Save, base: usize, i: usize) -> String {
     equipment::uses(s, base, i)
         .into_iter()
         .map(|u| match u {
-            equipment::Use::Worn => "your current gear".to_string(),
-            equipment::Use::MySet(n, name) => format!("My Set {n} “{name}”"),
+            equipment::Use::Worn => tr("your current gear").to_string(),
+            equipment::Use::MySet(n, name) => trf("My Set {} “{}”", &[&n, &name]),
         })
         .collect::<Vec<_>>()
         .join(", ")
@@ -44,21 +44,21 @@ pub(super) fn equip_picker(ui: &AppWindow, st: &State) {
         .filter(|p| f.is_empty() || p.id.to_string() == f || [&p.name].into_iter().chain(&p.names).any(|n| n.to_lowercase().contains(&f)))
         .map(|p| {
             // Palico gear has no rarity in the pack
-            let mut sub: Vec<String> = if p.rarity > 0 { vec![format!("Rare {}", p.rarity)] } else { vec![] };
+            let mut sub: Vec<String> = if p.rarity > 0 { vec![trf("Rare {}", &[&p.rarity])] } else { vec![] };
             match (p.blade, p.gunner) {
-                (Some(1), Some(0)) => sub.push("Blademaster".into()),
-                (Some(0), Some(1)) => sub.push("Gunner".into()),
+                (Some(1), Some(0)) => sub.push(tr("Blademaster").into()),
+                (Some(0), Some(1)) => sub.push(tr("Gunner").into()),
                 _ => {}
             }
             match k {
                 Kind::Talisman => sub.push(tier_name(equipment::talisman_tier(p.id as u16)).into()),
                 // upgrade names past the max level and the limit break
-                Kind::Weapon(_) if p.names.len() == 3 && p.names[1] != p.name => sub.push(format!("then {}", p.names[1..].join(", "))),
+                Kind::Weapon(_) if p.names.len() == 3 && p.names[1] != p.name => sub.push(trf("then {}", &[&p.names[1..].join(", ")])),
                 _ => {}
             }
             match (p.male, p.female) {
-                (Some(1), Some(0)) => sub.push("type 1 (male) only".into()),
-                (Some(0), Some(1)) => sub.push("type 2 (female) only".into()),
+                (Some(1), Some(0)) => sub.push(tr("type 1 (male) only").into()),
+                (Some(0), Some(1)) => sub.push(tr("type 2 (female) only").into()),
                 _ => {}
             }
             let (img, has) = icon(assets::equip_icon(k.code(), p.rarity));
@@ -88,7 +88,7 @@ pub(super) fn deco_picker(ui: &AppWindow, st: &State, search: &str) {
         .filter(|(_, _, n)| f.is_empty() || n.to_lowercase().contains(&f))
         .map(|(id, size, name)| {
             let (img, has) = icon(assets::item_icon(id));
-            PickItem { id: id as i32, name: name.into(), icon: img, has_icon: has, sub: count(size as usize, "slot", "slots").into(), max: size as i32 }
+            PickItem { id: id as i32, name: name.into(), icon: img, has_icon: has, sub: slots(size as usize).into(), max: size as i32 }
         })
         .collect();
     api.set_pick_decos(model(v));
@@ -112,8 +112,8 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
                 return None;
             }
             let (title, sub) = match k {
-                Kind::Empty => ("Empty".to_string(), String::new()),
-                Kind::Talisman => (talisman_skills(&e), format!("{} · Talisman", equip_name(owner, &e))),
+                Kind::Empty => (tr("Empty").to_string(), String::new()),
+                Kind::Talisman => (talisman_skills(&e), trf("{} · Talisman", &[&equip_name(owner, &e)])),
                 // Palico gear has no level or decorations; its type only when the name doesn't say it (K3)
                 _ if owner == Owner::Palico => {
                     let (name, kind) = (equip_name(owner, &e), kind_label(k));
@@ -122,12 +122,12 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
                 }
                 _ => {
                     let decos = e.decos().iter().filter(|&&d| d != 0).count();
-                    let mut sub = vec![kind_label(k), format!("Lv {}", e.level())];
+                    let mut sub = vec![kind_label(k), trf("Lv {}", &[&e.level()])];
                     if decos > 0 {
-                        sub.push(count(decos, "decoration", "decorations"));
+                        sub.push(trn("{n} decoration", "{n} decorations", decos as i64, &[]));
                     }
                     if e.transmog() != 0 {
-                        sub.push("transmog".into());
+                        sub.push(tr("transmog").into());
                     }
                     (equip_name(owner, &e), sub.join(" · "))
                 }
@@ -144,11 +144,11 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
             } else {
                 let was = equipment::get(orig, base, owner, i);
                 if was.is_empty() && !e.is_empty() {
-                    "New · in Review"
+                    tr("New · in Review")
                 } else if e.is_empty() {
-                    "Removed · in Review"
+                    tr("Removed · in Review")
                 } else {
-                    "Changed · in Review"
+                    tr("Changed · in Review")
                 }
             };
             Some(EquipRow { slot: i as i32, kind_code: k.code() as i32, title: title.into(), sub: sub.into(), icon: img, has_icon: has, changed, status: status.into() })
@@ -156,9 +156,9 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
         .collect();
     api.set_equip_summary(
         if owner == Owner::Hunter {
-            format!("Hunter box: {} / {} slots used · confirmed in game except where marked", num(used as i64), num(owner.len() as i64))
+            trf("Hunter box: {} / {} slots used · confirmed in game except where marked", &[&num(used as i64), &num(owner.len() as i64)])
         } else {
-            format!("Palico box: {} / {} slots used · gear names from the game's tables (Derived)", num(used as i64), num(owner.len() as i64))
+            trf("Palico box: {} / {} slots used · gear names from the game's tables (Derived)", &[&num(used as i64), &num(owner.len() as i64)])
         }
         .into(),
     );
@@ -233,7 +233,7 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
         _ => -1,
     });
     let skills: Vec<String> = if assets::names().skills.is_empty() {
-        (0..160).map(|i| if i == 0 { "—".to_string() } else { format!("Skill #{i}") }).collect()
+        (0..160).map(|i| if i == 0 { "—".to_string() } else { trf("Skill #{}", &[&i]) }).collect()
     } else {
         assets::names().skills.iter().enumerate().map(|(i, n)| if i == 0 { "—".into() } else { n.clone() }).collect()
     };
@@ -273,7 +273,8 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
             let size = assets::deco_size(v as u16).unwrap_or(u8::MAX);
             let free = deco_slots(owner, &cur).unwrap_or(0).saturating_sub(deco_used(&cur));
             if size > free || !cur.decos().contains(&0) {
-                return toast(&ui, format!("{} needs {} free; this piece has {free}", assets::item_name(v as u16), count(size as usize, "slot", "slots")), true);
+                let need = trn("{} needs {n} free slot; this piece has {}", "{} needs {n} free slots; this piece has {}", size as i64, &[&assets::item_name(v as u16), &free]);
+                return toast(&ui, need, true);
             }
         }
         let t = Target::Equip(owner, i);
@@ -339,11 +340,11 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
         let base = s.base();
         let slot = match usize::try_from(slot).ok().or_else(|| equipment::free_slot(s.save(), base, owner)) {
             Some(i) if i < owner.len() => i,
-            _ => return toast(&ui, "The equipment box is full", true),
+            _ => return toast(&ui, tr("The equipment box is full"), true),
         };
         let used = if owner == Owner::Hunter { uses_label(s.save(), base, slot) } else { String::new() };
         if !used.is_empty() {
-            return toast(&ui, format!("Box slot {} is used by {used}", slot + 1), true);
+            return toast(&ui, trf("Box slot {} is used by {}", &[&(slot + 1), &used]), true);
         }
         let api = ui.global::<Api>();
         let e = match usize::try_from(api.get_equip_category()).ok().and_then(|c| equip_categories(owner).get(c).copied()) {
@@ -360,7 +361,7 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
         let mut ed = Edit::one(t, t.label(s.save(), s.slot), c);
         ed.key = format!("{}:piece", t.key());
         if !e.is_empty() {
-            ed.note = "New box entry at level 1, shaped like the game's own".into();
+            ed.note = tr("New box entry at level 1, shaped like the game's own").into();
         }
         s.edit(ed, |sv, base| {
             equipment::set(sv, base, owner, slot, &e);
@@ -377,7 +378,7 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
             api.set_equip_search("".into());
         });
         if !e.is_empty() {
-            toast(&ui, format!("{name} added to box slot {}", slot + 1), false);
+            toast(&ui, trf("{} added to box slot {}", &[&name, &(slot + 1)]), false);
         }
     });
     {

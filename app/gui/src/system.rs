@@ -1,5 +1,6 @@
 //! Platform bits: finding saves, the running-emulator check, snapshot folder.
 
+use crate::i18n::tr;
 use mhgu_save::save::FILE_SIZE;
 use mhgu_save::store::Location;
 use std::path::PathBuf;
@@ -182,7 +183,7 @@ pub const STAMP: &str = "%Y-%m-%d_%H%M%S";
 
 /// "Ryujinx" when the save sits in a Ryujinx folder, else a generic name.
 pub fn emulator_name(save: &std::path::Path) -> &'static str {
-    if save.to_string_lossy().to_lowercase().contains("ryujinx") { "Ryujinx" } else { "The emulator" }
+    if save.to_string_lossy().to_lowercase().contains("ryujinx") { "Ryujinx" } else { tr("The emulator") }
 }
 
 /// What a snapshot was taken before, kept next to its files.

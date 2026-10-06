@@ -18,9 +18,9 @@ component GoalCard inherits Card {
             height: 32px;
             if goal.state == 0: Text { text: goal.count; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; horizontal-stretch: 1; }
             // a staged goal is not "Already done": it is in Review until written (01.5)
-            if goal.state == 1: Text { text: "In Review"; color: Tok.accent-text; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; }
-            if goal.state == 0: Button { text: "Preview…"; clicked => { root.preview(); } }
-            if goal.state == 1: Button { text: "Undo"; clicked => { Api.undo(goal.op); } }
+            if goal.state == 1: Text { text: @tr("In Review"); color: Tok.accent-text; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; }
+            if goal.state == 0: Button { text: @tr("Preview…"); clicked => { root.preview(); } }
+            if goal.state == 1: Button { text: @tr("Undo"); clicked => { Api.undo(goal.op); } }
         }
     }
 }
@@ -45,8 +45,8 @@ export component OverviewPage inherits Rectangle {
             spacing: Tok.gap;
             alignment: start;
             PageHeader {
-                title: "Overview";
-                subtitle: Api.slots[Api.slot].used ? "Character " + (Api.slot + 1) + ", " + Api.slots[Api.slot].name + " · confirmed in game except where marked" : "";
+                title: @tr("Overview");
+                subtitle: Api.slots[Api.slot].used ? @tr("Character {}, {} · confirmed in game except where marked", Api.slot + 1, Api.slots[Api.slot].name) : "";
             }
             // stat tiles on a fixed 4-column grid, so the gutters line up (C1m); each
             // opens its page (H1.4)
@@ -70,9 +70,9 @@ export component OverviewPage inherits Rectangle {
             HorizontalLayout {
                 spacing: Tok.gap;
                 padding-top: 12px;
-                SectionTitle { text: "Quick goals"; vertical-alignment: center; }
+                SectionTitle { text: @tr("Quick goals"); vertical-alignment: center; }
                 Text {
-                    text: "Each goal adds its changes to Review. Nothing is written until you press Write.";
+                    text: @tr("Each goal adds its changes to Review. Nothing is written until you press Write.");
                     color: Tok.muted;
                     font-size: Tok.small;
                     vertical-alignment: center;
@@ -82,7 +82,7 @@ export component OverviewPage inherits Rectangle {
             }
             // only goals that can still change something get a card, in equal columns
             // (C3m, K1)
-            if Api.goals.length == 0: Card { EmptyState { text: "Every goal is already in this save."; } }
+            if Api.goals.length == 0: Card { EmptyState { text: @tr("Every goal is already in this save."); } }
             for r in (Api.goals.length + root.cols - 1) / root.cols: HorizontalLayout {
                 spacing: Tok.gap;
                 alignment: start;
@@ -104,7 +104,7 @@ export component OverviewPage inherits Rectangle {
             if Api.goals-done.length > 0: VerticalLayout {
                 spacing: Tok.tight;
                 padding-top: 4px;
-                Text { text: "Already in your save"; font-size: Tok.small; font-weight: 600; color: Tok.muted; }
+                Text { text: @tr("Already in your save"); font-size: Tok.small; font-weight: 600; color: Tok.muted; }
                 for r in (Api.goals-done.length + 2) / 3: HorizontalLayout {
                     spacing: Tok.tight;
                     alignment: start;

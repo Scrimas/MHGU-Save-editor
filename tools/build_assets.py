@@ -7,9 +7,11 @@
            it holds Capcom's icons and text)
 
 Writes:
-  names.json       item, equipment, skill and Palico support move names; item icon /
-                   colour / rarity and pouch carry limit; palettes; equipment type icons;
-                   icon cell positions on items.png
+  names.json       item, equipment, skill, monster and Palico support move names; item
+                   icon / colour / rarity and pouch carry limit; palettes; equipment type
+                   icons; icon cell positions on items.png
+  names.<code>.json  the same names in French, German, Italian and Spanish (fr de it es),
+                   from the game's own text
   items.png        the grayscale item icon sheet (HD_cmn_icon_GSM); the editor tints it
   monsters/<i>.png 72x72 icon per save monster index 1-137
   awards/<b>.png   48x48 Guild Card award icon per award bit
@@ -17,7 +19,8 @@ Writes:
 Where things are (all CONFIRMED visually or against a real save unless noted):
   textures   eng/GUI/99_texture/*.tex, TEX v0xA0, Tegra block-linear; RGBA8 / BC1 / BC3 / BC4
   tables     loc/arc/resident.arc table\\* (f32 version, u32 count, packed records)
-  text       eng/arc/resident_eng.arc eng\\table\\*_eng (GMD, names at even indices)
+  text       eng/arc/resident_eng.arc eng\\table\\*_eng (GMD, names at even indices);
+             fre ger ita spa the same; monster names eng\\GUI\\06_msg\\monsterName_eng
 Tables the game builds in code (EXE, v1.4 main) are copied below with their addresses.
 """
 import json, os, struct, sys, zlib
@@ -273,8 +276,45 @@ def main(romfs, out):
         s, c = divmod(i, 100)
         aw[s].crop((c % 10) * 48, (c // 10) * 48, 48, 48).save(P('awards', '%d.png' % i))
 
+    names['monsters'] = text(reng, 'eng')['monsters']
     json.dump(names, open(P('names.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+    # the same names in the game's other languages, in the same order
+    for code, lang in LANGS.items():
+        rl = arc(R.read('/nativeNX/%s/arc/resident_%s.arc' % (lang, lang)))
+        json.dump(text(rl, lang, names), open(P('names.%s.json' % code), 'w'), ensure_ascii=False, separators=(',', ':'))
     print('asset pack ->', out)
+
+
+# Interface language code (app/gui/src/i18n.rs) -> the game's language folder.
+LANGS = {'fr': 'fre', 'de': 'ger', 'it': 'ita', 'es': 'spa'}
+
+
+def text(r, lang, eng=None):
+    """The names of one language from its resident_<lang>.arc `r`, entry for entry like the
+    English names.json `eng` (the piece lists keep only the real IDs, so they follow it):
+      items, skills, support_moves, monsters   lists by ID (monsters: save index - 1)
+      weapons     class -> [[base, final, ultimate] per English piece]
+      armor, palico_armor   part -> [name per English piece]
+      palico_weapons, talismans   [name per English piece]"""
+    g = lambda n: gmd(r['%s\\%s_%s' % (lang, n, lang)])
+    out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
+           'support_moves': g('otomo\\support\\spt_act_base')[0::2],
+           'monsters': g('GUI\\06_msg\\monsterName')[:137]}
+    if eng is None:
+        return out
+    out['items'] = [out['items'][i] if i < len(out['items']) else '' for i in range(len(eng['items']))]
+    out['weapons'] = {}
+    for cls, pieces in eng['weapons'].items():
+        nm = g('table\\weapon%02dMsgData' % int(cls))[0::2]
+        out['weapons'][cls] = [nm[3 * p['id']:3 * p['id'] + 3] for p in pieces]
+    an = g('table\\armorSeriesData')
+    out['armor'] = {part: [an[10 * p['id'] + int(part) - 1] for p in pieces] for part, pieces in eng['armor'].items()}
+    wn, on = g('table\\otWeaponData'), g('table\\otArmorData')
+    out['palico_weapons'] = [wn[2 * p['id']] for p in eng['palico_weapons']]
+    out['palico_armor'] = {part: [on[4 * p['id'] + int(part) - 23] for p in pieces] for part, pieces in eng['palico_armor'].items()}
+    amn = g('table\\amuletData')[0::2]
+    out['talismans'] = [amn[p['id']] for p in eng['talismans']]
+    return out
 
 
 if __name__ == '__main__':

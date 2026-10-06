@@ -15,7 +15,7 @@ import { CollectionsPage } from "pages/collections.slint";
 import { MonstersPage } from "pages/monsters.slint";
 import { AdvancedPage } from "pages/advanced.slint";
 
-export { Api }
+export { Api, Fmt }
 
 // One Review entry (mockup A1): old → new per value, Undo, a click opens the field.
 component ReviewEntry inherits VerticalLayout {
@@ -36,7 +36,7 @@ component ReviewEntry inherits VerticalLayout {
         background: ta.has-hover ? Tok.hover : transparent;
         height: body.preferred-height;
         accessible-role: button;
-        accessible-label: c.title + (c.single ? ": " + c.old + " to " + c.new : "") + ". Opens the field.";
+        accessible-label: c.single ? @tr("{}: {} to {}. Opens the field.", c.title, c.old, c.new) : @tr("{}. Opens the field.", c.title);
         accessible-action-default => { Api.goto(c.key); }
         fk := KeyActivate { activated => { Api.goto(c.key); } }
         FocusRing { shown: fk.has-focus; border-radius: Tok.radius; }
@@ -64,7 +64,7 @@ component ReviewEntry inherits VerticalLayout {
                 if c.single: Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
                 if c.single: Text { text: c.new; font-weight: 600; vertical-alignment: center; }
                 if c.confidence != Confidence.confirmed: ConfidenceTag { level: c.confidence; info: false; }
-                Button { text: "Undo"; clicked => { Api.undo(c.id); } }
+                Button { text: @tr("Undo"); clicked => { Api.undo(c.id); } }
             }
             for l in c.lines: HorizontalLayout {
                 spacing: Tok.tight;
@@ -78,7 +78,7 @@ component ReviewEntry inherits VerticalLayout {
             Reveal {
                 shown: c.more > 0;
                 gap: 4px;
-                Muted { text: "and " + Fmt.num(c.more) + " more"; }
+                Muted { text: @tr("and {} more", Fmt.num(c.more)); }
             }
             Reveal {
                 shown: c.note != "";
@@ -100,14 +100,14 @@ component ReviewPanel inherits Rectangle {
             spacing: Tok.tight;
             VerticalLayout {
                 horizontal-stretch: 1;
-                Text { text: "Review"; font-size: Tok.section; font-weight: 600; }
+                Text { text: @tr("Review"); font-size: Tok.section; font-weight: 600; }
                 Muted { text: Api.review-summary; }
             }
-            Button { text: "Close"; clicked => { Api.review-open = false; } }
+            Button { text: @tr("Close"); clicked => { Api.review-open = false; } }
         }
         if Api.change-count == 0: EmptyState {
             vertical-stretch: 1;
-            text: "Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one.";
+            text: @tr("Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one.");
         }
         if Api.change-count > 0: ListView {
             vertical-stretch: 1;
@@ -118,16 +118,16 @@ component ReviewPanel inherits Rectangle {
             spacing: 6px;
             Dot { level: Confidence.derived; y: 5px; }
             Muted {
-                text: "Derived: worked out from the game's code, not yet checked in game. Untagged changes are confirmed in game.";
+                text: @tr("Derived: worked out from the game's code, not yet checked in game. Untagged changes are confirmed in game.");
                 horizontal-stretch: 1;
             }
         }
         HorizontalLayout {
             spacing: Tok.tight;
-            Button { text: "Undo all"; enabled: Api.change-count > 0; clicked => { Api.undo-all(); } }
+            Button { text: @tr("Undo all"); enabled: Api.change-count > 0; clicked => { Api.undo-all(); } }
             Rectangle { horizontal-stretch: 1; }
             Button {
-                text: "Write…";
+                text: @tr("Write…");
                 primary: true;
                 enabled: Api.change-count > 0;
                 clicked => { Api.check-emulator(); Api.write-open = true; }
@@ -144,7 +144,7 @@ component WriteDialog inherits Modal {
     dismiss => { Api.write-open = false; }
     Text { text: Api.write-title; font-size: 20px; font-weight: 600; wrap: word-wrap; }
     Muted { text: Api.write-sub; }
-    SectionTitle { text: "What changes"; font-size: Tok.small; color: Tok.muted; }
+    SectionTitle { text: @tr("What changes"); font-size: Tok.small; color: Tok.muted; }
     Rectangle {
         border-radius: Tok.radius;
         border-width: 1px;
@@ -172,37 +172,37 @@ component WriteDialog inherits Modal {
         }
     }
     TextLink {
-        text: "Back to Review";
+        text: @tr("Back to Review");
         font-weight: 400;
         clicked => {
             Api.write-open = false;
             Api.review-open = true;
         }
     }
-    SectionTitle { text: "Before writing"; font-size: Tok.small; color: Tok.muted; }
+    SectionTitle { text: @tr("Before writing"); font-size: Tok.small; color: Tok.muted; }
     HorizontalLayout {
         spacing: 10px;
         Dot { level: Api.emulator-running ? Confidence.unresolved : Confidence.confirmed; y: 7px; background: Api.emulator-running ? Tok.bad : Tok.ok; }
         VerticalLayout {
             horizontal-stretch: 1;
             Text {
-                text: Api.emulator-name + (Api.emulator-running ? " is running" : " is not running");
+                text: Api.emulator-running ? @tr("{} is running", Api.emulator-name) : @tr("{} is not running", Api.emulator-name);
                 font-weight: Api.emulator-running ? 600 : 400;
                 wrap: word-wrap;
             }
             Reveal {
                 shown: Api.emulator-running;
-                Muted { text: "Close it first: it overwrites the save when it exits."; }
+                Muted { text: @tr("Close it first: it overwrites the save when it exits."); }
             }
         }
-        if Api.emulator-running: Button { text: "Check again"; clicked => { Api.check-emulator(); } }
+        if Api.emulator-running: Button { text: @tr("Check again"); clicked => { Api.check-emulator(); } }
     }
     VerticalLayout {
-        CheckBox { text: "Take a snapshot first (recommended)"; checked <=> root.snapshot; }
+        CheckBox { text: @tr("Take a snapshot first (recommended)"); checked <=> root.snapshot; }
         VerticalLayout {
             padding-top: 2px;
             padding-left: 28px;
-            Muted { text: "You can restore it any time from Snapshots in the sidebar."; }
+            Muted { text: @tr("You can restore it any time from Snapshots in the sidebar."); }
         }
         Reveal {
             shown: Api.derived-count > 0;
@@ -211,8 +211,9 @@ component WriteDialog inherits Modal {
                 spacing: 10px;
                 Dot { level: Confidence.derived; y: 6px; }
                 Text {
-                    text: (Api.derived-count == 1 ? "1 change is" : Api.derived-count + " changes are")
-                        + " Derived: worked out from the game's code, not yet checked in game." + (root.snapshot ? " Keep the snapshot on." : " A snapshot lets you go back.");
+                    text: root.snapshot
+                        ? @tr("{n} change is Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on." | "{n} changes are Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on." % Api.derived-count)
+                        : @tr("{n} change is Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back." | "{n} changes are Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back." % Api.derived-count);
                     color: Tok.warn;
                     font-size: Tok.small;
                     wrap: word-wrap;
@@ -221,19 +222,19 @@ component WriteDialog inherits Modal {
             }
         }
     }
-    SectionTitle { text: "Files"; font-size: Tok.small; color: Tok.muted; }
+    SectionTitle { text: @tr("Files"); font-size: Tok.small; color: Tok.muted; }
     VerticalLayout {
         HorizontalLayout {
             spacing: Tok.tight;
             Text {
-                text: Api.write-targets.length == 1 ? "The data goes into the save file." : "The same data goes into all " + Api.write-targets.length + " save files.";
+                text: Api.write-targets.length == 1 ? @tr("The data goes into the save file.") : @tr("The same data goes into all {n} save file." | "The same data goes into all {n} save files." % Api.write-targets.length);
                 horizontal-stretch: 1;
                 wrap: word-wrap;
             }
             HorizontalLayout {
                 spacing: 4px;
                 TextLink {
-                    text: root.paths ? "Hide paths" : "Show paths";
+                    text: root.paths ? @tr("Hide paths") : @tr("Show paths");
                     font-weight: 400;
                     y: (parent.height - self.height) / 2;
                     clicked => { root.paths = !root.paths; }
@@ -245,16 +246,16 @@ component WriteDialog inherits Modal {
             shown: root.paths;
             gap: Tok.gap;
             spacing: 2px;
-            Muted { text: "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."; }
+            Muted { text: @tr("The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."); }
             for t in Api.write-targets: Text { text: t; font-size: Tok.small; color: Tok.muted; font-family: "monospace"; overflow: elide; }
         }
     }
     HorizontalLayout {
         alignment: end;
         spacing: Tok.tight;
-        Button { text: "Cancel"; clicked => { Api.write-open = false; } }
+        Button { text: @tr("Cancel"); clicked => { Api.write-open = false; } }
         Button {
-            text: root.snapshot ? "Snapshot and write" : "Write without snapshot";
+            text: root.snapshot ? @tr("Snapshot and write") : @tr("Write without snapshot");
             primary: true;
             enabled: !Api.emulator-running;
             clicked => {
@@ -278,12 +279,12 @@ component SnapshotsDialog inherits Modal {
         Reveal {
             shown: Api.restore-ask == "";
             spacing: Tok.gap;
-            Text { text: "Snapshots"; font-size: 20px; font-weight: 600; }
-            Muted { text: "A copy of the whole save folder, taken before each write and before each restore."; }
+            Text { text: @tr("Snapshots"); font-size: 20px; font-weight: 600; }
+            Muted { text: @tr("A copy of the whole save folder, taken before each write and before each restore."); }
             VerticalLayout {
                 Reveal {
                     shown: Api.snapshots.length == 0;
-                    EmptyState { text: "No snapshots of this save yet. Write takes one first unless you untick it."; }
+                    EmptyState { text: @tr("No snapshots of this save yet. Write takes one first unless you untick it."); }
                 }
                 if Api.snapshots.length > 0: Rectangle {
                     border-radius: Tok.radius;
@@ -309,7 +310,7 @@ component SnapshotsDialog inherits Modal {
                                     Button {
                                         y: (parent.height - 32px) / 2;
                                         height: 32px;
-                                        text: "Restore…";
+                                        text: @tr("Restore…");
                                         clicked => {
                                             Api.restore-ask = s.dir;
                                             Api.restore-when = s.when;
@@ -324,21 +325,21 @@ component SnapshotsDialog inherits Modal {
             HorizontalLayout {
                 spacing: Tok.tight;
                 Text { text: Api.snapshot-dir; color: Tok.muted; font-size: Tok.small; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
-                Button { text: "Open folder"; clicked => { Api.open-snapshots(); } }
-                Button { text: "Close"; clicked => { Api.snapshots-open = false; } }
+                Button { text: @tr("Open folder"); clicked => { Api.open-snapshots(); } }
+                Button { text: @tr("Close"); clicked => { Api.snapshots-open = false; } }
             }
         }
         Reveal {
             shown: Api.restore-ask != "";
             spacing: Tok.gap;
-            Text { text: "Restore the save from " + Api.restore-when + "?"; font-size: 20px; font-weight: 600; wrap: word-wrap; }
+            Text { text: @tr("Restore the save from {}?", Api.restore-when); font-size: 20px; font-weight: 600; wrap: word-wrap; }
             VerticalLayout {
-                Muted { text: "Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."; }
+                Muted { text: @tr("Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."); }
                 Reveal {
                     shown: Api.change-count > 0;
                     gap: Tok.gap;
                     Text {
-                        text: (Api.change-count == 1 ? "Your staged change is" : "Your " + Api.change-count + " staged changes are") + " dropped.";
+                        text: @tr("Your staged change is dropped." | "Your {n} staged changes are dropped." % Api.change-count);
                         color: Tok.warn;
                         font-size: Tok.small;
                         wrap: word-wrap;
@@ -347,15 +348,15 @@ component SnapshotsDialog inherits Modal {
                 Reveal {
                     shown: Api.emulator-running;
                     gap: Tok.gap;
-                    Text { text: Api.emulator-name + " is running. Close it first: it overwrites the save when it exits."; color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+                    Text { text: @tr("{} is running. Close it first: it overwrites the save when it exits.", Api.emulator-name); color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
                 }
             }
             HorizontalLayout {
                 alignment: end;
                 spacing: Tok.tight;
-                Button { text: "Cancel"; clicked => { Api.restore-ask = ""; } }
+                Button { text: @tr("Cancel"); clicked => { Api.restore-ask = ""; } }
                 Button {
-                    text: "Restore";
+                    text: @tr("Restore");
                     primary: true;
                     enabled: !Api.emulator-running;
                     clicked => {
@@ -400,7 +401,7 @@ component RemovableRow inherits HorizontalLayout {
     spacing: Tok.tight;
     padding-left: 12px;
     Text { text: root.text; font-size: Tok.small; font-family: "monospace"; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
-    Button { text: "Remove"; clicked => { root.remove(); } }
+    Button { text: @tr("Remove"); clicked => { root.remove(); } }
 }
 
 component SettingsDialog inherits Modal {
@@ -408,18 +409,27 @@ component SettingsDialog inherits Modal {
     property <string> emulator;
     card-width: 600px;
     dismiss => { Api.settings-open = false; }
-    Text { text: "Settings"; font-size: 20px; font-weight: 600; }
+    Text { text: @tr("Settings"); font-size: 20px; font-weight: 600; }
     Flickable {
         height: min(body.preferred-height, Win.height - 190px);
         content-height: body.preferred-height;
         body := VerticalLayout {
             spacing: Tok.gap;
-            SectionTitle { text: "Appearance"; }
+            SectionTitle { text: @tr("Appearance"); }
             SettingRow {
-                title: "Theme";
+                title: @tr("Language");
+                ComboBox {
+                    width: 210px;
+                    model: s.languages;
+                    current-index: s.language;
+                    selected => { Api.set-setting("language", self.current-index); }
+                }
+            }
+            SettingRow {
+                title: @tr("Theme");
                 ComboBox {
                     width: 170px;
-                    model: ["System", "Light", "Dark"];
+                    model: [@tr("System"), @tr("Light"), @tr("Dark")];
                     current-index: s.theme;
                     selected => { Api.set-setting("theme", self.current-index); }
                 }
@@ -427,7 +437,7 @@ component SettingsDialog inherits Modal {
             if s.matugen-offered: VerticalLayout {
                 spacing: Tok.tight;
                 CheckBox {
-                    text: "Colours from matugen (the wallpaper's palette)";
+                    text: @tr("Colours from matugen (the wallpaper's palette)");
                     checked: s.matugen;
                     toggled => { Api.set-setting("matugen", self.checked ? 1 : 0); }
                 }
@@ -456,73 +466,73 @@ component SettingsDialog inherits Modal {
                         }
                     }
                     Button {
-                        text: s.matugen-template ? "Template saved" : "Save template";
+                        text: s.matugen-template ? @tr("Template saved") : @tr("Save template");
                         enabled: !s.matugen-template;
                         clicked => { Api.save-matugen-template(); }
                     }
                 }
             }
             SettingRow {
-                title: "Interface size";
+                title: @tr("Interface size");
                 hint: s.scale-now;
                 ComboBox {
                     width: 170px;
-                    model: ["System", "100 %", "125 %", "150 %", "175 %", "200 %"];
+                    model: [@tr("System"), "100 %", "125 %", "150 %", "175 %", "200 %"];
                     current-index: s.scale;
                     selected => { Api.set-setting("scale", self.current-index); }
                 }
             }
             Hairline { }
-            SectionTitle { text: "Snapshots"; }
+            SectionTitle { text: @tr("Snapshots"); }
             SettingRow {
-                title: "Snapshot folder";
+                title: @tr("Snapshot folder");
                 hint: s.snapshot-dir;
-                Button { text: "Change…"; clicked => { Api.pick-snapshot-dir(); } }
-                Button { text: "Default"; enabled: s.snapshot-custom; clicked => { Api.set-setting("snapshot-default-dir", 0); } }
+                Button { text: @tr("Change…"); clicked => { Api.pick-snapshot-dir(); } }
+                Button { text: @tr("Default"); enabled: s.snapshot-custom; clicked => { Api.set-setting("snapshot-default-dir", 0); } }
             }
             SettingRow {
-                title: "Keep per save";
-                hint: "After each new snapshot, the oldest beyond this number are deleted.";
+                title: @tr("Keep per save");
+                hint: @tr("After each new snapshot, the oldest beyond this number are deleted.");
                 ComboBox {
                     width: 170px;
-                    model: ["All", "Last 5", "Last 10", "Last 20", "Last 50"];
+                    model: [@tr("All"), @tr("Last {}", 5), @tr("Last {}", 10), @tr("Last {}", 20), @tr("Last {}", 50)];
                     current-index: s.keep;
                     selected => { Api.set-setting("keep", self.current-index); }
                 }
             }
             CheckBox {
-                text: "Tick \"Take a snapshot first\" in the Write dialog";
+                text: @tr("Tick \"Take a snapshot first\" in the Write dialog");
                 checked: s.snapshot-first;
                 toggled => { Api.set-setting("snapshot-first", self.checked ? 1 : 0); }
             }
             Hairline { }
-            SectionTitle { text: "Saves"; }
+            SectionTitle { text: @tr("Saves"); }
             CheckBox {
-                text: "Open the last save on start";
+                text: @tr("Open the last save on start");
                 checked: s.reopen;
                 toggled => { Api.set-setting("reopen", self.checked ? 1 : 0); }
             }
             SettingRow {
-                title: "Recent saves";
-                hint: s.recent == 0 ? "None yet" : s.recent == 1 ? "1 save listed on the Open page" : s.recent + " saves listed on the Open page";
-                Button { text: "Clear"; enabled: s.recent > 0; clicked => { Api.clear-recent(); } }
+                title: @tr("Recent saves");
+                hint: s.recent == 0 ? @tr("None yet") : @tr("{n} save listed on the Open page" | "{n} saves listed on the Open page" % s.recent);
+                Button { text: @tr("Clear"); enabled: s.recent > 0; clicked => { Api.clear-recent(); } }
             }
             SettingRow {
-                title: "Save folders";
-                hint: "Searched for saves besides Ryujinx's: yuzu, Eden, Citron or portable installs.";
-                Button { text: "Add folder…"; clicked => { Api.add-save-folder(); } }
+                title: @tr("Save folders");
+                hint: @tr("Searched for saves besides Ryujinx's: yuzu, Eden, Citron or portable installs.");
+                Button { text: @tr("Add folder…"); clicked => { Api.add-save-folder(); } }
             }
             for f[i] in s.folders: RemovableRow {
                 text: f;
                 remove => { Api.remove-save-folder(i); }
             }
             Hairline { }
-            SectionTitle { text: "Emulator check"; }
-            Muted { text: "Write and Restore wait while an emulator runs, since it overwrites the save when it exits. Always checked: " + s.builtin + "."; }
+            SectionTitle { text: @tr("Emulator check"); }
+            Muted { text: @tr("Write and Restore wait while an emulator runs, since it overwrites the save when it exits. Always checked: {}.", s.builtin); }
             HorizontalLayout {
                 spacing: Tok.tight;
                 LineEdit {
-                    placeholder-text: "Another process name";
+                    placeholder-text: @tr("Another process name");
                     text <=> root.emulator;
                     accepted => {
                         Api.add-emulator(root.emulator);
@@ -530,7 +540,7 @@ component SettingsDialog inherits Modal {
                     }
                 }
                 Button {
-                    text: "Add";
+                    text: @tr("Add");
                     enabled: root.emulator != "";
                     clicked => {
                         Api.add-emulator(root.emulator);
@@ -543,44 +553,44 @@ component SettingsDialog inherits Modal {
                 remove => { Api.remove-emulator(i); }
             }
             Hairline { }
-            SectionTitle { text: "Safety"; }
+            SectionTitle { text: @tr("Safety"); }
             CheckBox {
-                text: "Confirmed changes only";
+                text: @tr("Confirmed changes only");
                 checked: s.confirmed-only;
                 toggled => { Api.set-setting("confirmed-only", self.checked ? 1 : 0); }
             }
-            Muted { text: "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."; }
+            Muted { text: @tr("Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."); }
             Hairline { }
-            SectionTitle { text: "Updates"; }
+            SectionTitle { text: @tr("Updates"); }
             CheckBox {
-                text: "Check for a new version on start";
+                text: @tr("Check for a new version on start");
                 checked: s.check-updates;
                 toggled => { Api.set-setting("check-updates", self.checked ? 1 : 0); }
             }
             SettingRow {
-                title: "Version";
+                title: @tr("Version");
                 hint: Api.update.status;
                 Button {
-                    text: "Check now";
+                    text: @tr("Check now");
                     enabled: Api.update.state != "checking" && Api.update.state != "downloading" && Api.update.state != "ready";
                     clicked => { Api.check-update(); }
                 }
                 if Api.update.state == "available" || Api.update.state == "failed" || Api.update.state == "ready": Button {
-                    text: Api.update.state == "ready" ? "Restart…" : "Update…";
+                    text: Api.update.state == "ready" ? @tr("Restart…") : @tr("Update…");
                     clicked => { Api.update-open = true; }
                 }
             }
-            Muted { text: "Asks GitHub for the latest release. Nothing is downloaded until you choose to update."; }
+            Muted { text: @tr("Asks GitHub for the latest release. Nothing is downloaded until you choose to update."); }
         }
     }
     HorizontalLayout {
         alignment: end;
-        Button { text: "Close"; primary: true; clicked => { Api.settings-open = false; } }
+        Button { text: @tr("Close"); primary: true; clicked => { Api.settings-open = false; } }
     }
 }
 
 export component AppWindow inherits Window {
-    title: Api.loaded ? "MHGU Save Editor — " + Api.file-path : "MHGU Save Editor";
+    title: Api.loaded ? @tr("MHGU Save Editor — {}", Api.file-path) : @tr("MHGU Save Editor");
     icon: @image-url("../assets/icon.svg");
     preferred-width: 1280px;
     preferred-height: 820px;
@@ -623,7 +633,7 @@ export component AppWindow inherits Window {
     }
     property <length> review-w: Api.review-open && dock ? 380px : 0px;
     property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "monsters", "advanced"];
-    property <[string]> nav-titles: ["Overview", "Character", "Items", "Equipment", "Palicoes", "Quests", "Requests", "Collections", "Monsters", "Save map"];
+    property <[string]> nav-titles: [@tr("Overview"), @tr("Character"), @tr("Items"), @tr("Equipment"), @tr("Palicoes"), @tr("Quests"), @tr("Requests"), @tr("Collections"), @tr("Monsters"), @tr("Save map")];
     // Shortcuts: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page,
     // Ctrl+O open a save, Escape closes Review. Dialogs take the keyboard while open
     // (Modal); when the last one closes the window takes it back.
@@ -678,16 +688,16 @@ export component AppWindow inherits Window {
             VerticalLayout {
                 padding: 10px;
                 spacing: 2px;
-                Text { text: "MHGU Save Editor"; font-size: 15px; font-weight: 700; height: 36px; vertical-alignment: center; x: 10px; }
+                Text { text: @tr("MHGU Save Editor"); font-size: 15px; font-weight: 700; height: 36px; vertical-alignment: center; x: 10px; }
                 if Api.loaded: VerticalLayout {
                     spacing: 6px;
                     padding-bottom: 8px;
                     ComboBox {
-                        model: [Api.slots[0].used ? "1 · " + Api.slots[0].name : "1 · empty", Api.slots[1].used ? "2 · " + Api.slots[1].name : "2 · empty", Api.slots[2].used ? "3 · " + Api.slots[2].name : "3 · empty"];
+                        model: [Api.slots[0].used ? "1 · " + Api.slots[0].name : @tr("{} · empty", 1), Api.slots[1].used ? "2 · " + Api.slots[1].name : @tr("{} · empty", 2), Api.slots[2].used ? "3 · " + Api.slots[2].name : @tr("{} · empty", 3)];
                         current-index: Api.slot;
                         selected => { Api.select-slot(self.current-index); }
                     }
-                    Muted { text: Api.slots[Api.slot].used ? "HR " + Api.slots[Api.slot].hr + " · " + Api.slots[Api.slot].playtime : "No character in this slot"; x: 6px; }
+                    Muted { text: Api.slots[Api.slot].used ? @tr("HR {} · {}", Api.slots[Api.slot].hr, Api.slots[Api.slot].playtime) : @tr("No character in this slot"); x: 6px; }
                 }
                 for id[i] in root.nav-ids: NavButton {
                     text: root.nav-titles[i];
@@ -698,16 +708,16 @@ export component AppWindow inherits Window {
                 }
                 Rectangle { vertical-stretch: 1; }
                 NavButton {
-                    text: "Snapshots…";
+                    text: @tr("Snapshots…");
                     enabled: Api.loaded;
                     clicked => {
                         Api.list-snapshots();
                         Api.snapshots-open = true;
                     }
                 }
-                NavButton { text: "Open save…"; clicked => { Api.open-dialog(); } }
-                NavButton { text: "Settings…"; clicked => { Api.settings-open = true; } }
-                NavButton { text: "About"; clicked => { root.about-open = true; } }
+                NavButton { text: @tr("Open save…"); clicked => { Api.open-dialog(); } }
+                NavButton { text: @tr("Settings…"); clicked => { Api.settings-open = true; } }
+                NavButton { text: @tr("About"); clicked => { root.about-open = true; } }
             }
         }
         Rectangle {
@@ -757,7 +767,7 @@ export component AppWindow inherits Window {
                                 VerticalLayout {
                                     padding: 14px;
                                     spacing: 10px;
-                                    Text { text: "Save file"; font-weight: 600; }
+                                    Text { text: @tr("Save file"); font-weight: 600; }
                                     path-text := TextInput {
                                         text: Api.file-path;
                                         read-only: true;
@@ -769,9 +779,9 @@ export component AppWindow inherits Window {
                                     HorizontalLayout {
                                         alignment: end;
                                         spacing: Tok.tight;
-                                        Button { text: "Open folder"; clicked => { Api.open-folder(); path-pop.close(); } }
+                                        Button { text: @tr("Open folder"); clicked => { Api.open-folder(); path-pop.close(); } }
                                         Button {
-                                            text: "Copy";
+                                            text: @tr("Copy");
                                             clicked => {
                                                 path-text.select-all();
                                                 path-text.copy();
@@ -789,7 +799,7 @@ export component AppWindow inherits Window {
                         horizontal-stretch: 0;
                         Rectangle { width: 7px; height: 7px; border-radius: 3.5px; background: Tok.accent; y: (parent.height - self.height) / 2; }
                         Text {
-                            text: Fmt.num(Api.value-count) + (Api.value-count == 1 ? " value not written yet" : " values not written yet");
+                            text: @tr("{} value not written yet" | "{} values not written yet" % Api.value-count, Fmt.num(Api.value-count));
                             color: Tok.accent-text;
                             font-size: Tok.small;
                             vertical-alignment: center;
@@ -799,13 +809,13 @@ export component AppWindow inherits Window {
                     Button {
                         y: 10px;
                         height: 32px;
-                        text: Api.change-count == 0 ? "Review" : "Review (" + Api.change-count + ")";
+                        text: Api.change-count == 0 ? @tr("Review") : @tr("Review ({})", Api.change-count);
                         clicked => { Api.review-open = !Api.review-open; }
                     }
                     Button {
                         y: 10px;
                         height: 32px;
-                        text: "Write…";
+                        text: @tr("Write…");
                         primary: Api.change-count > 0;
                         enabled: Api.change-count > 0;
                         clicked => { Api.check-emulator(); Api.write-open = true; }
@@ -821,7 +831,7 @@ export component AppWindow inherits Window {
                 Rectangle {
                     if Api.page == "open": OpenPage { }
                     if !char-ok && Api.page != "open": EmptyState {
-                        text: "Character slot " + (Api.slot + 1) + " is empty. Pick a character in the sidebar; a new one is made in game.";
+                        text: @tr("Character slot {} is empty. Pick a character in the sidebar; a new one is made in game.", Api.slot + 1);
                     }
                     if char-ok && Api.page == "overview": OverviewPage { }
                     if char-ok && Api.page == "character": CharacterPage { }
@@ -853,7 +863,7 @@ export component AppWindow inherits Window {
             if state != "downloading" { Api.update-open = false; }
         }
         Text {
-            text: state == "ready" ? "Version " + Api.update.version + " is installed" : "Version " + Api.update.version + " is available";
+            text: state == "ready" ? @tr("Version {} is installed", Api.update.version) : @tr("Version {} is available", Api.update.version);
             font-size: 20px;
             font-weight: 600;
         }
@@ -867,15 +877,15 @@ export component AppWindow inherits Window {
             Reveal {
                 shown: state == "ready" && Api.change-count > 0;
                 gap: Tok.gap;
-                Muted { text: "Write or undo the staged changes before restarting."; }
+                Muted { text: @tr("Write or undo the staged changes before restarting."); }
             }
         }
         HorizontalLayout {
             alignment: end;
             spacing: Tok.tight;
-            Button { text: "Release notes"; clicked => { Api.update-page(); } }
+            Button { text: @tr("Release notes"); clicked => { Api.update-page(); } }
             Button {
-                text: state == "ready" ? "Later" : state == "downloading" ? "Cancel" : "Not now";
+                text: state == "ready" ? @tr("Later") : state == "downloading" ? @tr("Cancel") : @tr("Not now");
                 clicked => {
                     if state == "downloading" {
                         Api.cancel-update();
@@ -885,13 +895,13 @@ export component AppWindow inherits Window {
                 }
             }
             if Api.update.can-install && state != "ready": Button {
-                text: state == "failed" ? "Try again" : "Download and install";
+                text: state == "failed" ? @tr("Try again") : @tr("Download and install");
                 primary: true;
                 enabled: state != "downloading";
                 clicked => { Api.install-update(); }
             }
             if state == "ready": Button {
-                text: "Restart now";
+                text: @tr("Restart now");
                 primary: true;
                 enabled: Api.change-count == 0;
                 clicked => { Api.restart-update(); }
@@ -901,17 +911,17 @@ export component AppWindow inherits Window {
     if Api.quit-open: Modal {
         card-width: 460px;
         dismiss => { Api.quit-open = false; }
-        Text { text: "Quit without writing?"; font-size: 20px; font-weight: 600; }
+        Text { text: @tr("Quit without writing?"); font-size: 20px; font-weight: 600; }
         Muted {
-            text: (Api.change-count == 1 ? "1 change" : Api.change-count + " changes") + " (" + Fmt.num(Api.value-count) + (Api.value-count == 1 ? " value" : " values") + (Api.change-count == 1 ? ") is" : ") are") + " not written to the save and will be lost.";
+            text: @tr("{n} change ({}) is not written to the save and will be lost." | "{n} changes ({}) are not written to the save and will be lost." % Api.change-count, @tr("{} value" | "{} values" % Api.value-count, Fmt.num(Api.value-count)));
         }
         HorizontalLayout {
             alignment: end;
             spacing: Tok.tight;
-            Button { text: "Cancel"; clicked => { Api.quit-open = false; } }
-            Button { text: "Quit without writing"; clicked => { Api.quit(); } }
+            Button { text: @tr("Cancel"); clicked => { Api.quit-open = false; } }
+            Button { text: @tr("Quit without writing"); clicked => { Api.quit(); } }
             Button {
-                text: "Write…";
+                text: @tr("Write…");
                 primary: true;
                 clicked => {
                     Api.quit-open = false;
@@ -924,17 +934,17 @@ export component AppWindow inherits Window {
     if Api.open-ask != "": Modal {
         card-width: 460px;
         dismiss => { Api.open-ask = ""; }
-        Text { text: "Open another save without writing?"; font-size: 20px; font-weight: 600; }
+        Text { text: @tr("Open another save without writing?"); font-size: 20px; font-weight: 600; }
         Muted {
-            text: (Api.change-count == 1 ? "1 change" : Api.change-count + " changes") + " (" + Fmt.num(Api.value-count) + (Api.value-count == 1 ? " value" : " values") + (Api.change-count == 1 ? ") is" : ") are") + " not written to the save and will be lost.";
+            text: @tr("{n} change ({}) is not written to the save and will be lost." | "{n} changes ({}) are not written to the save and will be lost." % Api.change-count, @tr("{} value" | "{} values" % Api.value-count, Fmt.num(Api.value-count)));
         }
         HorizontalLayout {
             alignment: end;
             spacing: Tok.tight;
-            Button { text: "Cancel"; clicked => { Api.open-ask = ""; } }
-            Button { text: "Open without writing"; clicked => { Api.open-confirmed(); } }
+            Button { text: @tr("Cancel"); clicked => { Api.open-ask = ""; } }
+            Button { text: @tr("Open without writing"); clicked => { Api.open-confirmed(); } }
             Button {
-                text: "Write…";
+                text: @tr("Write…");
                 primary: true;
                 clicked => {
                     Api.open-ask = "";
@@ -947,11 +957,11 @@ export component AppWindow inherits Window {
     if root.about-open: Modal {
         card-width: 440px;
         dismiss => { root.about-open = false; }
-        Text { text: "MHGU Save Editor"; font-size: 20px; font-weight: 600; }
+        Text { text: @tr("MHGU Save Editor"); font-size: 20px; font-weight: 600; }
         Muted { text: Api.build-info; }
-        Muted { text: "Built on the save format notes of the MHGU-Save-editor project (github.com/Scrimas/MHGU-Save-editor). Monster Hunter and its assets are © CAPCOM; this is an unofficial fan tool."; }
+        Muted { text: @tr("Built on the save format notes of the MHGU-Save-editor project (github.com/Scrimas/MHGU-Save-editor). Monster Hunter and its assets are © CAPCOM; this is an unofficial fan tool."); }
         // the notices GPL section 5(d) asks an interactive program to show
-        Muted { text: "Copyright © 2026 Scrimas. Free software under the GNU General Public License, version 3 or later, with ABSOLUTELY NO WARRANTY."; }
+        Muted { text: @tr("Copyright © 2026 Scrimas. Free software under the GNU General Public License, version 3 or later, with ABSOLUTELY NO WARRANTY."); }
         // the badge stays small: it was the largest, brightest element on screen (Q15)
         HorizontalLayout {
             alignment: start;
@@ -959,7 +969,7 @@ export component AppWindow inherits Window {
         }
         HorizontalLayout {
             alignment: end;
-            Button { text: "Close"; clicked => { root.about-open = false; } }
+            Button { text: @tr("Close"); clicked => { root.about-open = false; } }
         }
     }
     if Api.toast != "": Rectangle {

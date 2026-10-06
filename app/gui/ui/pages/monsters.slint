@@ -74,7 +74,7 @@ component MonsterLine inherits ListRow {
             value: m.hunts;
             was: m.was-hunts;
             key: root.k + "hunts";
-            label: "Hunted " + m.name;
+            label: @tr("Hunted {}", m.name);
             edited(v) => { Api.set-monster(m.index, "hunts", v); }
         }
         Cell {
@@ -82,7 +82,7 @@ component MonsterLine inherits ListRow {
             value: m.captures;
             was: m.was-captures;
             key: root.k + "captures";
-            label: "Captured " + m.name;
+            label: @tr("Captured {}", m.name);
             edited(v) => { Api.set-monster(m.index, "captures", v); }
         }
         // crowns sit in the cells that earn them (H4.1)
@@ -93,8 +93,8 @@ component MonsterLine inherits ListRow {
             suffix: " %";
             was: m.was-min;
             key: root.k + "min";
-            label: "Smallest size of " + m.name;
-            crown: m.mini ? "Mini" : "";
+            label: @tr("Smallest size of {}", m.name);
+            crown: m.mini ? @tr("Mini") : "";
             crown-tint: Tok.accent-text;
             thresholds: m.thresholds;
             edited(v) => { Api.set-monster(m.index, "min", v); }
@@ -106,19 +106,19 @@ component MonsterLine inherits ListRow {
             suffix: " %";
             was: m.was-max;
             key: root.k + "max";
-            label: "Largest size of " + m.name;
-            crown: m.crown == 2 ? "Gold" : m.crown == 1 ? "Silver" : "";
+            label: @tr("Largest size of {}", m.name);
+            crown: m.crown == 2 ? @tr("Gold") : m.crown == 1 ? @tr("Silver") : "";
             crown-tint: m.crown == 2 ? (Tok.dark ? #e2b93b : #8a6100) : (Tok.dark ? #c3ccd4 : #4f5b66);
             thresholds: m.thresholds;
             edited(v) => { Api.set-monster(m.index, "max", v); }
         }
-        if !m.has-size: Text { width: 2 * Cols.size + 10px; text: "No size record"; color: Tok.faint; vertical-alignment: center; font-size: Tok.small; }
+        if !m.has-size: Text { width: 2 * Cols.size + 10px; text: @tr("No size record"); color: Tok.faint; vertical-alignment: center; font-size: Tok.small; }
         Rectangle {
             width: 52px;
             if m.has-notes: CheckBox {
                 x: 0;
                 checked: m.notes;
-                accessible-label: "Hunter's Notes page of " + m.name;
+                accessible-label: @tr("Hunter's Notes page of {}", m.name);
                 toggled => { Api.set-monster(m.index, "notes", self.checked ? 1 : 0); }
             }
         }
@@ -134,29 +134,29 @@ export component MonstersPage inherits Rectangle {
         padding-top: 16px;
         spacing: Tok.gap;
         PageHeader {
-            title: "Monsters";
+            title: @tr("Monsters");
             subtitle: Api.monster-summary;
             staged: Api.page-counts[8];
             Button {
-                text: "Max hunts…";
+                text: @tr("Max hunts…");
                 clicked => { root.bulk("monsters:hunts", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
             Button {
-                text: "Every crown…";
+                text: @tr("Every crown…");
                 clicked => { root.bulk("crowns", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
             }
         }
         HorizontalLayout {
             spacing: Tok.tight;
             SearchField {
-                placeholder-text: "Search monsters";
+                placeholder-text: @tr("Search monsters");
                 text <=> Api.monster-filter;
                 edited => { Api.filter-monsters(); }
             }
             // "Large monsters only" as a filter chip (C3)
             Chip {
                 y: 2px;
-                text: "Large only";
+                text: @tr("Large only");
                 active: Api.monster-large-only;
                 clicked => {
                     Api.monster-large-only = !Api.monster-large-only;
@@ -165,7 +165,7 @@ export component MonstersPage inherits Rectangle {
             }
             Chip {
                 y: 2px;
-                text: "Missing a crown";
+                text: @tr("Missing a crown");
                 active: Api.monster-missing;
                 clicked => {
                     Api.monster-missing = !Api.monster-missing;
@@ -186,37 +186,37 @@ export component MonstersPage inherits Rectangle {
                             padding-right: 12px;
                             spacing: 10px;
                             Rectangle { width: Api.assets-ok ? 44px : 0px; }
-                            ColHead { text: "Monster"; horizontal-stretch: 1; min-width: 120px; }
+                            ColHead { text: @tr("Monster");horizontal-stretch: 1; min-width: 120px; }
                             HorizontalLayout {
                                 width: Cols.hunted;
                                 spacing: 6px;
                                 padding-left: 10px;
                                 alignment: start;
-                                ColHead { text: "Hunted"; }
-                                InfoTip { y: 9px; text: "Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."; }
+                                ColHead { text: @tr("Hunted"); }
+                                InfoTip { y: 9px; text: @tr("Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."); }
                             }
                             HorizontalLayout {
                                 width: Cols.hunted;
                                 padding-left: 10px;
-                                ColHead { text: "Captured"; }
+                                ColHead { text: @tr("Captured"); }
                             }
                             HorizontalLayout {
                                 width: 2 * Cols.size + 10px;
                                 spacing: 6px;
                                 padding-left: 10px;
                                 alignment: start;
-                                ColHead { text: "Smallest"; width: Cols.size - 10px; }
-                                ColHead { text: "Largest"; }
+                                ColHead { text: @tr("Smallest"); width: Cols.size - 10px; }
+                                ColHead { text: @tr("Largest"); }
                                 InfoTip {
                                     y: 9px;
-                                    text: "Sizes are % of the monster's base size. At or below its mini size it has the mini crown; at or above its silver or gold size, that crown. Click a size to see the monster's own sizes. The crown awards read the Guild Card's monster log, which every edit rebuilds.";
+                                    text: @tr("Sizes are % of the monster's base size. At or below its mini size it has the mini crown; at or above its silver or gold size, that crown. Click a size to see the monster's own sizes. The crown awards read the Guild Card's monster log, which every edit rebuilds.");
                                 }
                             }
-                            ColHead { text: "Notes"; width: 52px; }
+                            ColHead { text: @tr("Notes"); width: 52px; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
-                    if Api.monsters.length == 0: EmptyState { text: Api.monster-missing ? "Every monster shown has its crowns." : "No monster matches the search."; }
+                    if Api.monsters.length == 0: EmptyState { text: Api.monster-missing ? @tr("Every monster shown has its crowns.") : @tr("No monster matches the search."); }
                     ListView {
                         property <int> seq: Api.jump-seq;
                         function go() {

@@ -1,8 +1,9 @@
 //! Models for each page and the callbacks that edit the save.
 
 use crate::assets;
-use crate::fmt::{self, count, num};
+use crate::fmt::{self, num};
 use crate::goals;
+use crate::i18n::{tr, trf, trn};
 use crate::settings;
 use crate::state::{Conf, Edit, State};
 use crate::system;
@@ -88,10 +89,20 @@ fn toast(ui: &AppWindow, msg: impl Into<SharedString>, error: bool) {
     toast_full(ui, msg, "", "", ToastAct::None, error);
 }
 
+/// "3 changes", the count of staged edits.
+fn changes(n: usize) -> String {
+    trn("{n} change", "{n} changes", n as i64, &[])
+}
+
+/// "12 values", the count of values staged edits set.
+fn values(n: usize) -> String {
+    trn("{n} value", "{n} values", n as i64, &[])
+}
+
 /// The game saved after the save was read: nothing written, Reload keeps the edits.
 fn changed_on_disk(ui: &AppWindow, p: &Path) {
-    let sub = format!("{} was saved again after it was opened. Nothing was written.", p.display());
-    toast_full(ui, "The save changed on disk", &sub, "Reload", ToastAct::Reload, true);
+    let sub = trf("{} was saved again after it was opened. Nothing was written.", &[&p.display()]);
+    toast_full(ui, tr("The save changed on disk"), &sub, tr("Reload"), ToastAct::Reload, true);
 }
 
 // --- page state ---------------------------------------------------------------------
@@ -233,7 +244,7 @@ pub fn refresh(ui: &AppWindow, st: &State) {
         .filter(|(_, c)| *c != store::CopyState::Same)
         .map(|(p, c)| format!("{}: {:?}", p.display(), c))
         .collect();
-    api.set_warning(if warn.is_empty() { "".into() } else { format!("These copies differ from the opened file and will be overwritten: {}", warn.join("; ")).into() });
+    api.set_warning(if warn.is_empty() { "".into() } else { trf("These copies differ from the opened file and will be overwritten: {}", &[&warn.join("; ")]).into() });
 
     if !s.slot_used(st.slot) {
         return;
@@ -275,9 +286,9 @@ fn review(ui: &AppWindow, st: &State) {
     api.set_change_count(st.ops.len() as i32);
     api.set_review_summary(
         if st.ops.is_empty() {
-            "Nothing staged".to_string()
+            tr("Nothing staged").to_string()
         } else {
-            format!("{} · {} · not written yet", count(st.ops.len(), "change", "changes"), count(staged.len(), "value", "values"))
+            trf("{} · {} · not written yet", &[&changes(st.ops.len()), &values(staged.len())])
         }
         .into(),
     );
@@ -290,7 +301,8 @@ fn review(ui: &AppWindow, st: &State) {
     let mut last_group = String::new();
     for o in ops {
         let pi = page_of(o);
-        let group = if o.slot != st.slot { format!("Character {} · {}", o.slot + 1, PAGES[pi].1) } else { PAGES[pi].1.to_string() };
+        let page = targets::page_title(pi);
+        let group = if o.slot != st.slot { trf("Character {} · {}", &[&(o.slot + 1), &page]) } else { page.to_string() };
         let first = group != last_group;
         last_group = group.clone();
         let single = o.values.len() == 1;
@@ -310,7 +322,7 @@ fn review(ui: &AppWindow, st: &State) {
             if !o.detail.is_empty() {
                 s.push(o.detail.clone());
             }
-            s.push(count(o.values.len(), "value", "values"));
+            s.push(values(o.values.len()));
             s.join(" · ")
         };
         rows.push(ChangeRow {
@@ -331,13 +343,13 @@ fn review(ui: &AppWindow, st: &State) {
     }
     api.set_changes(model(rows));
     // Write dialog: changes first, then the checks, then the files (02.3)
-    let values = staged.len();
+    let n_values = staged.len();
     let mut chars: Vec<usize> = st.ops.iter().map(|o| o.slot).collect();
     chars.sort_unstable();
     chars.dedup();
-    let who: Vec<String> = chars.iter().map(|&k| format!("character {}, {}", k + 1, character::get(&doc.save, doc.save.base(k)).name)).collect();
-    api.set_write_title(format!("Write {} to the save", count(st.ops.len(), "change", "changes")).into());
-    api.set_write_sub(format!("{} · {}", count(values, "value", "values"), who.join("; ")).into());
+    let who: Vec<String> = chars.iter().map(|&k| trf("character {}, {}", &[&(k + 1), &character::get(&doc.save, doc.save.base(k)).name])).collect();
+    api.set_write_title(trn("Write {n} change to the save", "Write {n} changes to the save", st.ops.len() as i64, &[]).into());
+    api.set_write_sub(format!("{} · {}", values(n_values), who.join("; ")).into());
     api.set_write_rows(model(
         st.ops
             .iter()
@@ -345,7 +357,7 @@ fn review(ui: &AppWindow, st: &State) {
                 let single = o.values.len() == 1;
                 WriteRow {
                     title: if single { label(&o.values[0].0, o.slot) } else { o.title.clone() }.into(),
-                    right: if single { String::new() } else { count(o.values.len(), "value", "values") }.into(),
+                    right: if single { String::new() } else { values(o.values.len()) }.into(),
                     confidence: conf(o.conf),
                     old: if single { o.values[0].0.read(&doc.orig, o.slot) } else { String::new() }.into(),
                     new: if single { o.values[0].1.clone() } else { String::new() }.into(),
@@ -360,7 +372,7 @@ fn review(ui: &AppWindow, st: &State) {
 fn refused(ui: &AppWindow, c: Conf) -> bool {
     let r = c != Conf::Confirmed && settings::get().confirmed_only;
     if r {
-        toast_full(ui, "Not changed: this change is Derived", "Confirmed changes only is on in Settings", "", ToastAct::None, true);
+        toast_full(ui, tr("Not changed: this change is Derived"), tr("Confirmed changes only is on in Settings"), "", ToastAct::None, true);
     }
     r
 }
@@ -513,13 +525,13 @@ fn apply_plan(ui: &AppWindow, s: &mut State, id: &str) {
         let pre = sv.clone();
         goals::apply(&id2, sv, slot).into_iter().filter(|t| t.read(&pre, slot) != t.read(sv, slot)).collect()
     });
-    toast_full(ui, "Added to Review", &p.review, "", ToastAct::None, false);
+    toast_full(ui, tr("Added to Review"), &p.review, "", ToastAct::None, false);
 }
 
 pub fn wire(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
     detected(ui);
-    wire_settings(ui);
+    wire_settings(ui, st);
     wire_update(ui, st);
     wire_file(ui, st);
     wire_overview(ui, st);
@@ -563,7 +575,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let Some(op) = s.ops.last() else { return };
         let (id, title) = (op.id, op.title.clone());
         s.undo(id);
-        toast(&ui, format!("Undid {title}"), false);
+        toast(&ui, trf("Undid {}", &[&title]), false);
     });
     on!(ui, st, on_undo_value, |ui, s, key: SharedString| {
         s.undo_value(&key);
@@ -573,7 +585,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_undo_all, |ui, s| {
         let n = s.undo_all();
         if n > 0 {
-            toast_full(&ui, format!("Undid {}", count(n, "change", "changes")), "", "Redo", ToastAct::Redo, false);
+            toast_full(&ui, trn("Undid {n} change", "Undid {n} changes", n as i64, &[]), "", tr("Redo"), ToastAct::Redo, false);
         }
     });
     {
@@ -588,7 +600,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     let n = st.borrow_mut().redo_all();
                     refresh(&ui, &st.borrow());
                     if n > 0 {
-                        toast(&ui, format!("Redid {}", count(n, "change", "changes")), false);
+                        toast(&ui, trn("Redid {n} change", "Redid {n} changes", n as i64, &[]), false);
                     }
                 }
                 ToastAct::Restore(dir, when) => {
@@ -604,8 +616,8 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     let r = st.borrow_mut().reload_keep();
                     refresh(&ui, &st.borrow());
                     match r {
-                        Ok(n) => toast_full(&ui, "Read the save again", &format!("{} kept", count(n, "staged change", "staged changes")), "", ToastAct::None, false),
-                        Err(e) => toast(&ui, format!("Could not read the save again: {e}"), true),
+                        Ok(n) => toast_full(&ui, tr("Read the save again"), &trn("{n} staged change kept", "{n} staged changes kept", n as i64, &[]), "", ToastAct::None, false),
+                        Err(e) => toast(&ui, trf("Could not read the save again: {}", &[&e]), true),
                     }
                 }
                 ToastAct::None => {}

@@ -11,7 +11,7 @@ component EquipLine inherits ListRow {
     staged: e.changed;
     flash: Api.highlight != "" && Api.highlight == (Api.equip-owner == 0 ? "equip:hunter:" : "equip:palico:") + e.slot;
     accessible-role: list-item;
-    accessible-label: "Box slot " + (e.slot + 1) + ": " + e.title;
+    accessible-label: @tr("Box slot {}: {}", e.slot + 1, e.title);
     HorizontalLayout {
         padding-left: 10px;
         padding-right: 12px;
@@ -103,18 +103,18 @@ export component EquipmentPage inherits Rectangle {
         padding-top: 16px;
         spacing: Tok.gap;
         PageHeader {
-            title: "Equipment";
+            title: @tr("Equipment");
             subtitle: Api.equip-summary;
             staged: Api.page-counts[3];
             Button {
-                text: "Add equipment";
+                text: @tr("Add equipment");
                 enabled: Api.equip-free >= 0;
                 clicked => { root.open-picker(-1, 0, -1, self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
             }
         }
         // Hunter / Palico as two tabs (C3)
         TabBar {
-            tabs: ["Hunter", "Palico"];
+            tabs: [@tr("Hunter"), @tr("Palico")];
             current: Api.equip-owner;
             select(i) => {
                 Api.equip-owner = i;
@@ -127,14 +127,14 @@ export component EquipmentPage inherits Rectangle {
         HorizontalLayout {
             spacing: Tok.tight;
             SearchField {
-                placeholder-text: root.hunter ? "Search name, weapon type or skill" : "Search name or type";
+                placeholder-text: root.hunter ? @tr("Search name, weapon type or skill") : @tr("Search name or type");
                 text <=> Api.equip-search;
                 edited(t) => { Api.search-equip-list(t); }
             }
             // no Talismans filter on the Palico box (10.4)
             for f in root.hunter
-                ? [{k: "all", t: "All"}, {k: "weapon", t: "Weapons"}, {k: "armor", t: "Armor"}, {k: "talisman", t: "Talismans"}, {k: "empty", t: "Empty"}]
-                : [{k: "all", t: "All"}, {k: "weapon", t: "Weapons"}, {k: "armor", t: "Armor"}, {k: "empty", t: "Empty"}]: Chip {
+                ? [{k: "all", t: @tr("All")}, {k: "weapon", t: @tr("Weapons")}, {k: "armor", t: @tr("Armor")}, {k: "talisman", t: @tr("Talismans")}, {k: "empty", t: @tr("Empty")}]
+                : [{k: "all", t: @tr("All")}, {k: "weapon", t: @tr("Weapons")}, {k: "armor", t: @tr("Armor")}, {k: "empty", t: @tr("Empty")}]: Chip {
                 y: 2px;
                 text: f.t;
                 active: Api.equip-filter == f.k;
@@ -147,7 +147,7 @@ export component EquipmentPage inherits Rectangle {
             // narrow: the detail of a picked piece takes the list's place, with Back
             if root.wide || !root.show-detail: Card {
                 horizontal-stretch: 1;
-                if Api.equip-rows.length == 0: EmptyState { text: "Nothing in the box matches."; }
+                if Api.equip-rows.length == 0: EmptyState { text: @tr("Nothing in the box matches."); }
                 ListView {
                     property <int> seq: Api.jump-seq;
                     // keep the selected or new row in view (10.1)
@@ -179,8 +179,8 @@ export component EquipmentPage inherits Rectangle {
             if root.wide || root.show-detail: Card {
                 width: root.wide ? root.detail-w : root.width - 2 * Tok.margin;
                 if Api.equip-detail.slot < 0: EmptyState {
-                    text: "Pick a piece, or add one to the first free slot.";
-                    action: Api.equip-free >= 0 ? "Add equipment" : "";
+                    text: @tr("Pick a piece, or add one to the first free slot.");
+                    action: Api.equip-free >= 0 ? @tr("Add equipment") : "";
                     act => { root.open-picker(-1, 0, -1, root.width - Tok.margin, 64px); }
                 }
                 if Api.equip-detail.slot >= 0: ScrollView {
@@ -190,36 +190,36 @@ export component EquipmentPage inherits Rectangle {
                         alignment: start;
                         if !root.wide: HorizontalLayout {
                             alignment: start;
-                            Button { text: "‹ Back to the box"; clicked => { root.show-detail = false; } }
+                            Button { text: @tr("‹ Back to the box");clicked => { root.show-detail = false; } }
                         }
                         VerticalLayout {
                             spacing: 2px;
                             Text { text: Api.equip-detail.name; font-size: 18px; font-weight: 600; wrap: word-wrap; }
-                            Muted { text: Api.equip-detail.kind + " · box slot " + (Api.equip-detail.slot + 1) + (Api.equip-detail.id > 0 ? " · ID " + Api.equip-detail.id : ""); }
+                            Muted { text: Api.equip-detail.id > 0 ? @tr("{} · box slot {} · ID {}", Api.equip-detail.kind, Api.equip-detail.slot + 1, Api.equip-detail.id) : @tr("{} · box slot {}", Api.equip-detail.kind, Api.equip-detail.slot + 1); }
                             if Api.equip-detail.was != "": WasLine { was: Api.equip-detail.was; key: (root.hunter ? "equip:hunter:" : "equip:palico:") + Api.equip-detail.slot; }
                         }
                         HorizontalLayout {
                             alignment: start;
                             spacing: Tok.tight;
                             if Api.equip-detail.kind-code == 0: Button {
-                                text: "Add equipment here";
+                                text: @tr("Add equipment here");
                                 enabled: Api.equip-detail.uses == "";
                                 clicked => { root.open-picker(Api.equip-detail.slot, 0, -1, self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
                             }
                             if Api.equip-detail.kind-code != 0: Button {
-                                text: "Replace…";
+                                text: @tr("Replace…");
                                 enabled: Api.equip-detail.uses == "";
                                 clicked => { root.open-picker(Api.equip-detail.slot, Api.equip-detail.id, Api.equip-detail.category, self.absolute-position.x - root.absolute-position.x + root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
                             }
                             if Api.equip-detail.kind-code != 0: Button {
-                                text: "Remove";
+                                text: @tr("Remove");
                                 enabled: Api.equip-detail.uses == "";
                                 clicked => { Api.put-equip(Api.equip-detail.slot, 0); }
                             }
                         }
                         // why the buttons are disabled, next to them (H3.2)
                         if root.hunter && Api.equip-detail.uses != "": Text {
-                            text: "Used by " + Api.equip-detail.uses + ". Change that in game before replacing or removing this piece.";
+                            text: @tr("Used by {}. Change that in game before replacing or removing this piece.", Api.equip-detail.uses);
                             color: Tok.warn;
                             font-size: Tok.small;
                             wrap: word-wrap;
@@ -228,12 +228,12 @@ export component EquipmentPage inherits Rectangle {
                         if root.hunter && Api.equip-detail.kind-code != 0 && !Api.equip-detail.is-talisman: HorizontalLayout {
                             spacing: 10px;
                             alignment: start;
-                            Text { text: "Level"; vertical-alignment: center; width: 90px; }
+                            Text { text: @tr("Level"); vertical-alignment: center; width: 90px; }
                             Rectangle {
                                 width: 110px;
                                 height: 32px;
                                 if Api.equip-detail.was-level != "": StagedBar { x: -8px; height: 32px; }
-                                NumberBox { minimum: 1; maximum: 32; value: Api.equip-detail.level; label: "Level"; edited(v) => { Api.set-equip("level", v); } }
+                                NumberBox { minimum: 1; maximum: 32; value: Api.equip-detail.level; label: @tr("Level"); edited(v) => { Api.set-equip("level", v); } }
                             }
                             if Api.equip-detail.was-level != "": WasLine { y: 7px; was: Api.equip-detail.was-level; key: (root.hunter ? "equip:hunter:" : "equip:palico:") + Api.equip-detail.slot; }
                         }
@@ -243,49 +243,49 @@ export component EquipmentPage inherits Rectangle {
                             HorizontalLayout {
                                 spacing: Tok.tight;
                                 alignment: start;
-                                SectionTitle { text: "Decorations"; }
-                                if Api.equip-detail.deco-slots >= 0: Muted { text: Api.equip-detail.deco-used + " of " + Api.equip-detail.deco-slots + " slots used"; vertical-alignment: center; }
+                                SectionTitle { text: @tr("Decorations"); }
+                                if Api.equip-detail.deco-slots >= 0: Muted { text: @tr("{} of {n} slot used" | "{} of {n} slots used" % Api.equip-detail.deco-slots, Api.equip-detail.deco-used); vertical-alignment: center; }
                             }
-                            if Api.equip-detail.decos.length == 0: Muted { text: "None"; }
+                            if Api.equip-detail.decos.length == 0: Muted { text: @tr("None"); }
                             for d in Api.equip-detail.decos: HorizontalLayout {
                                 spacing: Tok.tight;
                                 height: 32px;
                                 Text { text: d.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
-                                Muted { text: d.size == 1 ? "1 slot" : d.size + " slots"; vertical-alignment: center; }
-                                Button { text: "Remove"; clicked => { Api.set-equip("deco-remove", d.index); } }
+                                Muted { text: @tr("{n} slot" | "{n} slots" % d.size); vertical-alignment: center; }
+                                Button { text: @tr("Remove");clicked => { Api.set-equip("deco-remove", d.index); } }
                             }
                             if Api.equip-detail.deco-slots > Api.equip-detail.deco-used && Api.equip-detail.decos.length < 3: HorizontalLayout {
                                 spacing: Tok.tight;
                                 alignment: start;
                                 Button {
-                                    text: "Add decoration…";
+                                    text: @tr("Add decoration…");
                                     clicked => { root.open-decos(self.absolute-position.x - root.absolute-position.x + root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
                                 }
                                 ConfidenceTag { level: Confidence.derived; y: 5px; }
                             }
-                            if Api.equip-detail.deco-slots < 0: Muted { text: "This build's game data has no slot counts: decorations can only be removed."; }
+                            if Api.equip-detail.deco-slots < 0: Muted { text: @tr("This build's game data has no slot counts: decorations can only be removed."); }
                         }
                         if Api.equip-detail.kind-code >= 1 && Api.equip-detail.kind-code <= 5: VerticalLayout {
                             spacing: 6px;
-                            SectionTitle { text: "Transmog"; }
+                            SectionTitle { text: @tr("Transmog"); }
                             HorizontalLayout {
                                 spacing: Tok.tight;
-                                Text { text: Api.equip-detail.transmog == "" ? "Own look" : Api.equip-detail.transmog; vertical-alignment: center; horizontal-stretch: 1; }
+                                Text { text: Api.equip-detail.transmog == "" ? @tr("Own look") : Api.equip-detail.transmog; vertical-alignment: center; horizontal-stretch: 1; }
                                 if Api.equip-detail.can-transmog: Button {
-                                    text: "Change look…";
+                                    text: @tr("Change look…");
                                     clicked => { root.open-transmog(self.absolute-position.x - root.absolute-position.x + root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
                                 }
-                                if Api.equip-detail.transmog-id != 0: Button { text: "Restore own look"; clicked => { Api.set-equip("transmog", 0); } }
+                                if Api.equip-detail.transmog-id != 0: Button { text: @tr("Restore own look");clicked => { Api.set-equip("transmog", 0); } }
                             }
-                            if Api.equip-detail.can-transmog: Muted { text: "Looks of the same part that this piece's class and your body type can wear. Skills, slots and defense stay."; }
+                            if Api.equip-detail.can-transmog: Muted { text: @tr("Looks of the same part that this piece's class and your body type can wear. Skills, slots and defense stay."); }
                         }
                         if Api.equip-detail.is-talisman: VerticalLayout {
                             spacing: 8px;
-                            SectionTitle { text: "Talisman"; }
+                            SectionTitle { text: @tr("Talisman"); }
                             Muted { text: Api.equip-detail.tier; }
                             for k in 2: HorizontalLayout {
                                 spacing: Tok.tight;
-                                Text { text: "Skill " + (k + 1); width: 60px; vertical-alignment: center; }
+                                Text { text: @tr("Skill {}", k + 1); width: 60px; vertical-alignment: center; }
                                 ComboBox {
                                     horizontal-stretch: 1;
                                     model: Api.skill-names;
@@ -297,15 +297,15 @@ export component EquipmentPage inherits Rectangle {
                                     minimum: -10;
                                     maximum: 20;
                                     value: k == 0 ? Api.equip-detail.points1 : Api.equip-detail.points2;
-                                    label: "Points of skill " + (k + 1);
+                                    label: @tr("Points of skill {}", k + 1);
                                     edited(v) => { Api.set-equip("points" + k, v); }
                                 }
                             }
                             HorizontalLayout {
                                 spacing: Tok.tight;
                                 alignment: start;
-                                Text { text: "Slots"; width: 60px; vertical-alignment: center; }
-                                NumberBox { width: 100px; minimum: 0; maximum: 3; value: Api.equip-detail.slots; label: "Decoration slots"; edited(v) => { Api.set-equip("slots", v); } }
+                                Text { text: @tr("Slots"); width: 60px; vertical-alignment: center; }
+                                NumberBox { width: 100px; minimum: 0; maximum: 3; value: Api.equip-detail.slots; label: @tr("Decoration slots"); edited(v) => { Api.set-equip("slots", v); } }
                             }
                         }
                         // raw bytes recede into a collapsed section (K4)
@@ -315,7 +315,7 @@ export component EquipmentPage inherits Rectangle {
                             alignment: start;
                             Chevron { dir: Api.equip-advanced ? "down" : "right"; y: (parent.height - self.height) / 2; }
                             TextLink {
-                                text: "Advanced";
+                                text: @tr("Advanced");
                                 tint: Tok.muted;
                                 font-weight: 400;
                                 clicked => { Api.equip-advanced = !Api.equip-advanced; }
@@ -323,7 +323,7 @@ export component EquipmentPage inherits Rectangle {
                         }
                         if Api.equip-advanced: VerticalLayout {
                             spacing: 6px;
-                            Muted { text: "The 36 bytes of this box entry. Select to copy."; }
+                            Muted { text: @tr("The 36 bytes of this box entry. Select to copy."); }
                             TextInput {
                                 text: Api.equip-detail.raw;
                                 read-only: true;
@@ -333,7 +333,7 @@ export component EquipmentPage inherits Rectangle {
                                 color: Palette.foreground;
                             }
                             TextLink {
-                                text: "Show in Save map";
+                                text: @tr("Show in Save map");
                                 font-weight: 400;
                                 clicked => { Api.show-in-map(Api.equip-detail.field); }
                             }
@@ -360,11 +360,11 @@ export component EquipmentPage inherits Rectangle {
                 padding: Tok.pad;
                 spacing: 10px;
                 Text {
-                    text: Api.pick-mode == "transmog" ? "Look for " + Api.equip-detail.name : (root.target-id != 0 ? "Replace box slot " : "Add to box slot ") + ((root.target-slot >= 0 ? root.target-slot : Api.equip-free) + 1);
+                    text: Api.pick-mode == "transmog" ? @tr("Look for {}", Api.equip-detail.name) : root.target-id != 0 ? @tr("Replace box slot {}", (root.target-slot >= 0 ? root.target-slot : Api.equip-free) + 1) : @tr("Add to box slot {}", (root.target-slot >= 0 ? root.target-slot : Api.equip-free) + 1);
                     font-size: Tok.section;
                     font-weight: 600;
                 }
-                Muted { text: Api.pick-mode == "transmog" ? "The piece keeps its skills, slots and defense; only its look changes." : "New pieces start at level 1 with no decorations; edit them afterwards."; }
+                Muted { text: Api.pick-mode == "transmog" ? @tr("The piece keeps its skills, slots and defense; only its look changes.") : @tr("New pieces start at level 1 with no decorations; edit them afterwards."); }
                 HorizontalLayout {
                     spacing: Tok.tight;
                     if Api.pick-mode != "transmog": ComboBox {
@@ -378,7 +378,7 @@ export component EquipmentPage inherits Rectangle {
                     }
                     LineEdit {
                         horizontal-stretch: 1;
-                        placeholder-text: "Search";
+                        placeholder-text: @tr("Search");
                         text <=> root.pick-search;
                         edited(t) => { Api.search-equip(t); }
                         // Enter takes the first match
@@ -418,7 +418,7 @@ export component EquipmentPage inherits Rectangle {
                 HorizontalLayout {
                     spacing: Tok.tight;
                     Rectangle { horizontal-stretch: 1; }
-                    Button { text: "Cancel"; clicked => { picker.close(); } }
+                    Button { text: @tr("Cancel"); clicked => { picker.close(); } }
                 }
             }
         }
@@ -440,11 +440,11 @@ export component EquipmentPage inherits Rectangle {
             VerticalLayout {
                 padding: Tok.pad;
                 spacing: 10px;
-                Text { text: "Decoration for " + Api.equip-detail.name; font-size: Tok.section; font-weight: 600; overflow: elide; }
+                Text { text: @tr("Decoration for {}", Api.equip-detail.name);font-size: Tok.section; font-weight: 600; overflow: elide; }
                 property <int> free: Api.equip-detail.deco-slots - Api.equip-detail.deco-used;
-                Muted { text: (free == 1 ? "1 slot free" : free + " slots free") + ": only decorations that fit are listed."; }
+                Muted { text: @tr("{n} slot free: only decorations that fit are listed." | "{n} slots free: only decorations that fit are listed." % free); }
                 LineEdit {
-                    placeholder-text: "Search decorations";
+                    placeholder-text: @tr("Search decorations");
                     text <=> root.deco-search;
                     edited(t) => { Api.search-decos(t); }
                     accepted => {
@@ -491,7 +491,7 @@ export component EquipmentPage inherits Rectangle {
                 }
                 HorizontalLayout {
                     Rectangle { horizontal-stretch: 1; }
-                    Button { text: "Cancel"; clicked => { decos.close(); } }
+                    Button { text: @tr("Cancel"); clicked => { decos.close(); } }
                 }
             }
         }

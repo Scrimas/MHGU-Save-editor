@@ -22,9 +22,9 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
             };
             let village = match r.village.as_str() {
                 "Bherna" | "Kokoto" | "Pokke" | "Yukumo" => r.village.clone(),
-                _ => "Hub".to_string(),
+                _ => tr("Hub").to_string(),
             };
-            let name = if r.quest_name.is_empty() { "Delivery request".into() } else { r.quest_name.clone() };
+            let name = if r.quest_name.is_empty() { tr("Delivery request").into() } else { r.quest_name.clone() };
             if !keep || (!q.is_empty() && !name.to_lowercase().contains(&q) && !village.to_lowercase().contains(&q)) {
                 return None;
             }
@@ -34,7 +34,12 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
             Some(RequestRow {
                 index: r.index as i32,
                 name: name.into(),
-                sub: format!("{village} · #{}{}", r.index, if waiting.is_empty() { String::new() } else { format!(" · waits for: {waiting}") }).into(),
+                sub: if waiting.is_empty() {
+                    format!("{village} · #{}", r.index)
+                } else {
+                    trf("{} · #{} · waits for: {}", &[&village, &r.index, &waiting])
+                }
+                .into(),
                 accepted: acc,
                 completed: done,
                 has_flags: r.accept_flag.is_some(),
@@ -43,7 +48,7 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
             })
         })
         .collect();
-    api.set_request_summary(format!("{} open · {} completed", num(open), num(done_n)).into());
+    api.set_request_summary(trf("{} open · {} completed", &[&num(open), &num(done_n)]).into());
     api.set_requests(model(rows));
 }
 
@@ -68,7 +73,7 @@ pub(super) fn wire_requests(ui: &AppWindow, st: &Shared) {
         let mut e = Edit::one(t, title, Conf::Derived);
         e.key = format!("{}:{what}", t.key());
         if what == "completed" && on {
-            e.note = "The villager's reward is not handed over in game".into();
+            e.note = tr("The villager's reward is not handed over in game").into();
         }
         s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);

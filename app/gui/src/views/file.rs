@@ -6,7 +6,7 @@ use super::*;
 fn emulator_blocks(ui: &AppWindow) -> bool {
     let running = system::running_emulators();
     if !running.is_empty() {
-        toast(ui, format!("Close {} first", running.join(", ")), true);
+        toast(ui, trf("Close {} first", &[&running.join(", ")]), true);
         ui.global::<Api>().set_emulator_running(true);
     }
     !running.is_empty()
@@ -18,15 +18,17 @@ pub(super) fn save_row(p: &Path) -> DetectedSave {
     let (title, sub) = match &info {
         Some(i) if !i.names.is_empty() => {
             let (n, hr, t) = &i.names[0];
-            let more = if i.names.len() > 1 {
-                format!(" · also {}", i.names[1..].iter().map(|x| x.0.clone()).collect::<Vec<_>>().join(", "))
+            let (hr, time) = (num(*hr), fmt::playtime(*t));
+            let sub = if i.names.len() > 1 {
+                let others = i.names[1..].iter().map(|x| x.0.clone()).collect::<Vec<_>>().join(", ");
+                trf("HR {} · {} · also {}", &[&hr, &time, &others])
             } else {
-                String::new()
+                trf("HR {} · {}", &[&hr, &time])
             };
-            (n.clone(), format!("HR {} · {}{more}", num(*hr), fmt::playtime(*t)))
+            (n.clone(), sub)
         }
-        Some(_) => ("No characters yet".to_string(), String::new()),
-        None => ("Unreadable save".to_string(), String::new()),
+        Some(_) => (tr("No characters yet").to_string(), String::new()),
+        None => (tr("Unreadable save").to_string(), String::new()),
     };
     DetectedSave {
         path: p.display().to_string().into(),
@@ -81,10 +83,10 @@ pub(super) fn open_now(ui: &AppWindow, st: &Shared, p: &Path) {
             settings_ui(ui);
             refresh(ui, &st.borrow());
             let n = st.borrow().doc.as_ref().map(|d| (0..3).filter(|&k| d.save.slot_used(k)).count()).unwrap_or(0);
-            toast(ui, format!("Save opened: {}", count(n, "character", "characters")), false);
+            toast(ui, trn("Save opened: {n} character", "Save opened: {n} characters", n as i64, &[]), false);
         }
         Err(e) => {
-            ui.global::<Api>().set_warning(format!("Could not open {}: {e}", p.display()).into());
+            ui.global::<Api>().set_warning(trf("Could not open {}: {}", &[&p.display(), &e]).into());
             toast(ui, e, true);
         }
     }
@@ -104,7 +106,7 @@ pub(super) fn list_snapshots(ui: &AppWindow, st: &State) {
         .map(|x| SnapRow {
             dir: x.dir.display().to_string().into(),
             when: fmt::when(x.time).into(),
-            before: if x.before.is_empty() { "Before a write".to_string() } else { x.before }.into(),
+            before: if x.before.is_empty() { tr("Before a write").to_string() } else { x.before }.into(),
         })
         .collect();
     let api = ui.global::<Api>();
@@ -119,7 +121,7 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
         let st = st.clone();
         api.on_open_dialog(move || {
             let Some(ui) = w.upgrade() else { return };
-            let mut d = rfd::FileDialog::new().set_title("Open MHGU save (system)");
+            let mut d = rfd::FileDialog::new().set_title(tr("Open MHGU save (system)"));
             if let Some(dir) = system::detect_saves().first().and_then(|p| p.parent()) {
                 d = d.set_directory(dir);
             }
@@ -159,7 +161,7 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
         let w = ui.as_weak();
         api.on_copy_path(move || {
             if let Some(ui) = w.upgrade() {
-                toast(&ui, "Path copied", false);
+                toast(&ui, tr("Path copied"), false);
             }
         });
     }
@@ -183,10 +185,10 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
             match store::snapshot(&doc.loc, &system::snapshot_dir(&doc.loc), &stamp) {
                 Ok(p) => {
                     system::write_note(&p, &format!("Before: {}", fmt::list(&titles, 3)), &doc.loc);
-                    kept = Some((p, fmt::when(now)));
+                    kept = Some((p, fmt::when(now), now.format("%H:%M").to_string()));
                 }
                 Err(e) => {
-                    toast(&ui, format!("Snapshot failed, nothing written: {e}"), true);
+                    toast(&ui, trf("Snapshot failed, nothing written: {}", &[&e]), true);
                     return false;
                 }
             }
@@ -194,16 +196,18 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
         match store::write_all(&mut doc.save, &mut doc.loc) {
             Ok(_) => {
                 s.written();
-                if let Some((p, _)) = &kept {
+                if let Some((p, ..)) = &kept {
                     system::prune_snapshots(p.parent().unwrap(), p);
                 }
                 // after writing: a toast with Restore (02.5, S8)
                 match kept {
-                    Some((p, when)) => {
-                        let sub = format!("Snapshot from {} kept", when.trim_start_matches("Today, "));
-                        toast_full(&ui, format!("Wrote {}", count(n, "change", "changes")), &sub, "Restore…", ToastAct::Restore(p, when), false)
+                    // taken just now: its time says enough
+                    Some((p, when, time)) => {
+                        let sub = trf("Snapshot from {} kept", &[&time]);
+                        let msg = trn("Wrote {n} change", "Wrote {n} changes", n as i64, &[]);
+                        toast_full(&ui, msg, &sub, tr("Restore…"), ToastAct::Restore(p, when), false)
                     }
-                    None => toast(&ui, format!("Wrote {} (no snapshot)", count(n, "change", "changes")), false),
+                    None => toast(&ui, trn("Wrote {n} change (no snapshot)", "Wrote {n} changes (no snapshot)", n as i64, &[]), false),
                 }
                 true
             }
@@ -215,8 +219,8 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
             // the snapshot just taken puts every file back
             Err(e) => {
                 match kept {
-                    Some((p, when)) => toast_full(&ui, format!("Write failed: {e}"), "The snapshot taken first restores the save", "Restore…", ToastAct::Restore(p, when), true),
-                    None => toast(&ui, format!("Write failed: {e}"), true),
+                    Some((p, when, _)) => toast_full(&ui, trf("Write failed: {}", &[&e]), tr("The snapshot taken first restores the save"), tr("Restore…"), ToastAct::Restore(p, when), true),
+                    None => toast(&ui, trf("Write failed: {}", &[&e]), true),
                 }
                 false
             }
@@ -241,12 +245,12 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
         let Some(doc) = s.doc.as_ref() else { return };
         let loc = doc.loc.clone();
         let Some(snap) = system::snapshots(dir.parent().unwrap_or(&dir)).into_iter().find(|x| x.dir == dir) else {
-            return toast(&ui, format!("No snapshot at {}", dir.display()), true);
+            return toast(&ui, trf("No snapshot at {}", &[&dir.display()]), true);
         };
         // a snapshot of another save never goes over this one
         if !system::snapshot_of(&snap, &loc) {
-            let sub = snap.source.map(|p| format!("It was taken of {}", p.display())).unwrap_or_default();
-            return toast_full(&ui, "Not restored: this snapshot is of another save", &sub, "", ToastAct::None, true);
+            let sub = snap.source.map(|p| trf("It was taken of {}", &[&p.display()])).unwrap_or_default();
+            return toast_full(&ui, tr("Not restored: this snapshot is of another save"), &sub, "", ToastAct::None, true);
         }
         let when = fmt::when(snap.time);
         let stamp = chrono::Local::now().format(system::STAMP).to_string();
@@ -255,7 +259,7 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
                 system::write_note(&p, &format!("Before restoring the snapshot from {when}"), &loc);
                 p
             }
-            Err(e) => return toast(&ui, format!("Snapshot failed, nothing restored: {e}"), true),
+            Err(e) => return toast(&ui, trf("Snapshot failed, nothing restored: {}", &[&e]), true),
         };
         match store::restore(&loc, &dir) {
             Ok(_) => {
@@ -264,15 +268,15 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
                 let opened = loc.opened.clone();
                 let slot = s.slot;
                 if let Err(e) = s.open(&opened) {
-                    return toast(&ui, format!("Restored, but reading it back failed: {e}"), true);
+                    return toast(&ui, trf("Restored, but reading it back failed: {}", &[&e]), true);
                 }
                 if s.save().slot_used(slot) {
                     s.slot = slot;
                 }
                 ui.global::<Api>().set_snapshots_open(false);
-                toast_full(&ui, format!("Restored the save from {when}"), "The save before restoring is kept as a snapshot", "", ToastAct::None, false);
+                toast_full(&ui, trf("Restored the save from {}", &[&when]), tr("The save before restoring is kept as a snapshot"), "", ToastAct::None, false);
             }
-            Err(e) => toast(&ui, format!("Restore failed: {e}"), true),
+            Err(e) => toast(&ui, trf("Restore failed: {}", &[&e]), true),
         }
     });
     {

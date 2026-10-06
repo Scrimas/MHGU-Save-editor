@@ -4,6 +4,7 @@
 
 use crate::assets;
 use crate::fmt::{num, playtime};
+use crate::i18n::{tr, trf, trn};
 use mhgu_save::character as ch;
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Owner};
@@ -64,7 +65,8 @@ pub enum Target {
     Monster(usize, Mon),
 }
 
-/// Pages in nav order; `Target::page` returns one of these ids.
+/// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
+/// the UI shows `page_title`.
 pub const PAGES: [(&str, &str); 10] = [
     ("overview", "Overview"),
     ("character", "Character"),
@@ -80,6 +82,23 @@ pub const PAGES: [(&str, &str); 10] = [
 
 pub fn page_index(id: &str) -> usize {
     PAGES.iter().position(|p| p.0 == id).unwrap_or(0)
+}
+
+/// Title of page `i` of PAGES in the language in use.
+pub fn page_title(i: usize) -> &'static str {
+    match PAGES.get(i).map_or("", |p| p.0) {
+        "overview" => tr("Overview"),
+        "character" => tr("Character"),
+        "items" => tr("Items"),
+        "equipment" => tr("Equipment"),
+        "palicoes" => tr("Palicoes"),
+        "quests" => tr("Quests"),
+        "requests" => tr("Requests"),
+        "collections" => tr("Collections"),
+        "monsters" => tr("Monsters"),
+        "advanced" => tr("Save map"),
+        _ => "",
+    }
 }
 
 fn mon_field(f: Mon) -> &'static str {
@@ -207,54 +226,54 @@ impl Target {
         use Target::*;
         let t = tables();
         match *self {
-            Name => "Name".into(),
-            Hr => "Hunter Rank".into(),
-            HrPoints => "HR points".into(),
-            Funds => "Zenny".into(),
-            Wycademy => "Wycademy points".into(),
-            Playtime => "Play time".into(),
-            VillageStar => "Village ★".into(),
-            HubStar => "Hub ★".into(),
-            Points(v, g) => format!("{} · {} points", VILLAGES[v], if g { "G rank" } else { "Low rank" }),
-            WeaponUse(v, w) => format!("{} · {} quests", ch::USE_WEAPONS[w], ch::VENUES[v]),
-            Item(st, i) => format!("{} slot {}", if st == Store::Pouch { "Pouch" } else { "Item box" }, i + 1),
-            Loadout(k) => format!("Item loadout {}", k + 1),
-            Equip(o, i) => format!("{} slot {}", if o == Owner::Palico { "Palico box" } else { "Box" }, i + 1),
+            Name => tr("Name").into(),
+            Hr => tr("Hunter Rank").into(),
+            HrPoints => tr("HR points").into(),
+            Funds => tr("Zenny").into(),
+            Wycademy => tr("Wycademy points").into(),
+            Playtime => tr("Play time").into(),
+            VillageStar => tr("Village ★").into(),
+            HubStar => tr("Hub ★").into(),
+            Points(v, g) => if g { trf("{} · G rank points", &[&tr(VILLAGES[v])]) } else { trf("{} · Low rank points", &[&tr(VILLAGES[v])]) },
+            WeaponUse(v, w) => trf("{} · {} quests", &[&tr(ch::USE_WEAPONS[w]), &tr(ch::VENUES[v])]),
+            Item(st, i) => if st == Store::Pouch { trf("Pouch slot {}", &[&(i + 1)]) } else { trf("Item box slot {}", &[&(i + 1)]) },
+            Loadout(k) => trf("Item loadout {}", &[&(k + 1)]),
+            Equip(o, i) => if o == Owner::Palico { trf("Palico box slot {}", &[&(i + 1)]) } else { trf("Box slot {}", &[&(i + 1)]) },
             Palico(i, f) => {
                 let n = palico::get(s, s.base(slot), i).name;
                 let what = match f {
-                    Pal::Name => "Name",
-                    Pal::Level => "Level",
-                    Pal::Exp => "Experience",
-                    Pal::Bias => "Forte",
-                    Pal::Greeting => "Greeting",
-                    Pal::Owner => "Original owner",
-                    Pal::Target => "Target",
+                    Pal::Name => tr("Name"),
+                    Pal::Level => tr("Level"),
+                    Pal::Exp => tr("Experience"),
+                    Pal::Bias => tr("Forte"),
+                    Pal::Greeting => tr("Greeting"),
+                    Pal::Owner => tr("Original owner"),
+                    Pal::Target => tr("Target"),
                 };
                 format!("{n} · {what}")
             }
-            Quest(i) => t.quests.iter().find(|q| q.index == i).map(|q| q.name.clone()).unwrap_or_else(|| format!("Quest {i}")),
+            Quest(i) => t.quests.iter().find(|q| q.index == i).map(|q| q.name.clone()).unwrap_or_else(|| trf("Quest {}", &[&i])),
             Request(i) => t
                 .requests
                 .iter()
                 .find(|r| r.index == i)
-                .map(|r| if r.quest_name.is_empty() { format!("Delivery request {i}") } else { r.quest_name.clone() })
-                .unwrap_or_else(|| format!("Request {i}")),
+                .map(|r| if r.quest_name.is_empty() { trf("Delivery request {}", &[&i]) } else { r.quest_name.clone() })
+                .unwrap_or_else(|| trf("Request {}", &[&i])),
             Art(id) => t.arts.iter().find(|a| a.0 == id).map(|a| a.1.clone()).unwrap_or_default(),
             Dish(b) => t.canteen.iter().find(|c| c.0 == "dish" && c.1 == b).map(|c| c.2.clone()).unwrap_or_default(),
             Ingredient(b) => t.canteen.iter().find(|c| c.0 == "ingredient" && c.1 == b).map(|c| c.2.clone()).unwrap_or_default(),
             Award(b) => t.awards.iter().find(|a| a.0 == b).map(|a| a.2.clone()).unwrap_or_default(),
-            Permits(d) => format!("{} · Special Permits", DEVIANTS[d]),
-            Levels(d) => format!("{} · levels cleared", DEVIANTS[d]),
+            Permits(d) => trf("{} · Special Permits", &[&tr(DEVIANTS[d])]),
+            Levels(d) => trf("{} · levels cleared", &[&tr(DEVIANTS[d])]),
             Monster(i, f) => {
                 let what = match f {
-                    Mon::Hunts => "Hunted",
-                    Mon::Captures => "Captured",
-                    Mon::Min => "Smallest",
-                    Mon::Max => "Largest",
-                    Mon::Notes => "Hunter's Notes",
+                    Mon::Hunts => tr("Hunted"),
+                    Mon::Captures => tr("Captured"),
+                    Mon::Min => tr("Smallest"),
+                    Mon::Max => tr("Largest"),
+                    Mon::Notes => tr("Hunter's Notes"),
                 };
-                format!("{} · {what}", t.monsters[i - 1].name)
+                format!("{} · {what}", crate::assets::monster_name(i).unwrap_or(&t.monsters[i - 1].name))
             }
         }
     }
@@ -278,12 +297,12 @@ impl Target {
             WeaponUse(v, w) => num(ch::weapon_use(s, base, v, w)),
             Item(st, i) => {
                 let x = items::get(s, base, st, i);
-                if x.is_empty() { "Empty".into() } else { format!("{} ×{}", assets::item_name(x.id), x.count) }
+                if x.is_empty() { tr("Empty").into() } else { format!("{} ×{}", assets::item_name(x.id), x.count) }
             }
             Loadout(k) => {
                 let l = items::loadout(s, base, k);
                 let n = l.items.iter().filter(|x| x.0 != 0).count();
-                if l.name.is_empty() && n == 0 { "Empty".into() } else { format!("{} · {}", l.name, crate::fmt::count(n, "item", "items")) }
+                if l.name.is_empty() && n == 0 { tr("Empty").into() } else { format!("{} · {}", l.name, trn("{} item", "{} items", n as i64, &[&num(n as i64)])) }
             }
             Equip(o, i) => crate::views::equip_value(o, &equipment::get(s, base, o, i)),
             Palico(i, f) => {
@@ -292,34 +311,34 @@ impl Target {
                     Pal::Name => p.name,
                     Pal::Level => num(p.level),
                     Pal::Exp => num(p.exp),
-                    Pal::Bias => palico::BIASES.get(p.bias as usize).copied().unwrap_or("?").into(),
+                    Pal::Bias => tr(palico::BIASES.get(p.bias as usize).copied().unwrap_or("?")).into(),
                     Pal::Greeting => p.greeting,
                     Pal::Owner => p.owner,
-                    Pal::Target => palico::TARGETS.get(p.target as usize).copied().unwrap_or("?").into(),
+                    Pal::Target => tr(palico::TARGETS.get(p.target as usize).copied().unwrap_or("?")).into(),
                 }
             }
             Quest(i) => {
                 if on(pg::CLEARED, i) {
-                    "Cleared".into()
+                    tr("Cleared").into()
                 } else if on(pg::FAILED, i) {
-                    "Failed".into()
+                    tr("Failed").into()
                 } else {
-                    yes(on(pg::SEEN, i), "Seen", "Not seen")
+                    yes(on(pg::SEEN, i), tr("Seen"), tr("Not seen"))
                 }
             }
             Request(i) => {
                 let r = tables().requests.iter().find(|r| r.index == i);
                 let flag = |f: Option<usize>| f.is_some_and(|f| on(pg::FLAGS, f));
                 match r {
-                    Some(r) if flag(r.done_flag) => "Completed".into(),
-                    Some(r) if flag(r.accept_flag) => "Accepted".into(),
-                    _ => "Open".into(),
+                    Some(r) if flag(r.done_flag) => tr("Completed").into(),
+                    Some(r) if flag(r.accept_flag) => tr("Accepted").into(),
+                    _ => tr("Open").into(),
                 }
             }
-            Art(id) => yes(on(pg::ARTS, id as usize), "Unlocked", "Locked"),
-            Dish(b) => yes(on(pg::DISHES, b), "Unlocked", "Locked"),
-            Ingredient(b) => yes(on(pg::INGREDIENTS, b), "Unlocked", "Locked"),
-            Award(b) => yes(on(pg::AWARDS_CARD, b), "Earned", "Not earned"),
+            Art(id) => yes(on(pg::ARTS, id as usize), tr("Unlocked"), tr("Locked")),
+            Dish(b) => yes(on(pg::DISHES, b), tr("Unlocked"), tr("Locked")),
+            Ingredient(b) => yes(on(pg::INGREDIENTS, b), tr("Unlocked"), tr("Locked")),
+            Award(b) => yes(on(pg::AWARDS_CARD, b), tr("Earned"), tr("Not earned")),
             Permits(d) => num(s.u8(base + pg::PERMITS + d)),
             Levels(d) => {
                 let (q0, n) = Char::deviant_levels(d);
@@ -333,7 +352,7 @@ impl Target {
                     Mon::Captures => num(r.captures),
                     Mon::Min => pct(r.min),
                     Mon::Max => pct(r.max),
-                    Mon::Notes => yes(monsters::notes(s, base, i).unwrap_or(false), "Unlocked", "Locked"),
+                    Mon::Notes => yes(monsters::notes(s, base, i).unwrap_or(false), tr("Unlocked"), tr("Locked")),
                 }
             }
         }

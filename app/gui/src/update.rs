@@ -7,6 +7,7 @@
 //! The checksums come from the same release as the file: they catch a broken download,
 //! not a release published by someone else (there is no signature).
 
+use crate::i18n::{tr, trf};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::io::{Read, Write};
@@ -85,17 +86,17 @@ fn agent() -> ureq::Agent {
 fn get(url: &str) -> Result<ureq::Body, String> {
     match agent().get(url).call() {
         Ok(r) => Ok(r.into_body()),
-        Err(ureq::Error::StatusCode(403 | 429)) => Err("GitHub refused the request (too many in the last hour), try later".into()),
-        Err(ureq::Error::StatusCode(c)) => Err(format!("GitHub answered HTTP {c}")),
-        Err(e) => Err(format!("Could not reach GitHub ({e})")),
+        Err(ureq::Error::StatusCode(403 | 429)) => Err(tr("GitHub refused the request (too many in the last hour), try later").into()),
+        Err(ureq::Error::StatusCode(c)) => Err(trf("GitHub answered HTTP {}", &[&c])),
+        Err(e) => Err(trf("Could not reach GitHub ({})", &[&e])),
     }
 }
 
 /// The newest release when it is newer than this one.
 pub fn check() -> Result<Option<Release>, String> {
     let r = match fetch(LATEST) {
-        // no published release yet
-        Err(e) if e.ends_with("HTTP 404") => return Ok(None),
+        // no published release yet (`get`'s message for a 404, in the language in use)
+        Err(e) if e == trf("GitHub answered HTTP {}", &[&404]) => return Ok(None),
         r => r?,
     };
     Ok(Some(r).filter(|r| version(&r.version) > version(VERSION)))
@@ -118,7 +119,7 @@ pub struct Installed {
 }
 
 fn fetch(url: &str) -> Result<Release, String> {
-    let l: Latest = serde_json::from_reader(get(url)?.into_reader()).map_err(|e| format!("Unexpected answer from GitHub ({e})"))?;
+    let l: Latest = serde_json::from_reader(get(url)?.into_reader()).map_err(|e| trf("Unexpected answer from GitHub ({})", &[&e]))?;
     let pick = |f: &dyn Fn(&str) -> bool| l.assets.iter().find(|a| f(&a.name)).cloned();
     let version = l.tag_name.trim_start_matches('v').to_string();
     Ok(Release {
@@ -154,18 +155,18 @@ fn sum_of(list: &str, name: &str) -> Option<String> {
 /// `progress(done, total)` is called as it comes; `cancel` stops the download.
 pub fn install(r: &Release, old: &Path, progress: impl Fn(u64, u64), cancel: &AtomicBool) -> Result<Installed, String> {
     let (Some(file), Some(sums)) = (&r.file, &r.sums) else {
-        return Err(format!("Release {} has no {SUFFIX} file with checksums", r.version));
+        return Err(trf("Release {} has no {} file with checksums", &[&r.version, &SUFFIX]));
     };
     let mut list = String::new();
-    get(&sums.browser_download_url)?.into_reader().read_to_string(&mut list).map_err(|e| format!("Download failed ({e})"))?;
-    let want = sum_of(&list, &file.name).ok_or(format!("{} is not in {}", file.name, sums.name))?;
+    get(&sums.browser_download_url)?.into_reader().read_to_string(&mut list).map_err(|e| trf("Download failed ({})", &[&e]))?;
+    let want = sum_of(&list, &file.name).ok_or_else(|| trf("{} is not in {}", &[&file.name, &sums.name]))?;
 
-    let name = old.file_name().and_then(|n| n.to_str()).ok_or("The running file has no usable name")?;
+    let name = old.file_name().and_then(|n| n.to_str()).ok_or(tr("The running file has no usable name"))?;
     let new = old.with_file_name(renamed(name, &r.version));
     let part = old.with_file_name(format!("{}.part", renamed(name, &r.version)));
     let res = download(&file.browser_download_url, &part, file.size, &progress, cancel).and_then(|got| {
         if got != want {
-            return Err("The download does not match the release's checksum".into());
+            return Err(tr("The download does not match the release's checksum").into());
         }
         swap(old, &part, &new)
     });
@@ -176,7 +177,7 @@ pub fn install(r: &Release, old: &Path, progress: impl Fn(u64, u64), cancel: &At
 }
 
 fn download(url: &str, to: &Path, size: u64, progress: &impl Fn(u64, u64), cancel: &AtomicBool) -> Result<String, String> {
-    let err = |e: std::io::Error| format!("Could not write {} ({e})", to.display());
+    let err = |e: std::io::Error| trf("Could not write {} ({})", &[&to.display(), &e]);
     let mut body = get(url)?.into_reader();
     let mut out = std::fs::File::create(to).map_err(err)?;
     let mut hash = Sha256::new();
@@ -184,9 +185,9 @@ fn download(url: &str, to: &Path, size: u64, progress: &impl Fn(u64, u64), cance
     let mut done = 0;
     loop {
         if cancel.load(Ordering::Relaxed) {
-            return Err("Cancelled".into());
+            return Err(tr("Cancelled").into());
         }
-        let n = body.read(&mut buf).map_err(|e| format!("Download failed ({e})"))?;
+        let n = body.read(&mut buf).map_err(|e| trf("Download failed ({})", &[&e]))?;
         if n == 0 {
             break;
         }
@@ -207,7 +208,7 @@ fn download(url: &str, to: &Path, size: u64, progress: &impl Fn(u64, u64), cance
 /// The new file takes the old one's place. A running AppImage can be deleted (it stays
 /// mounted until it exits); a running .exe only renamed: returned, to delete later.
 fn swap(old: &Path, part: &Path, new: &Path) -> Result<Option<PathBuf>, String> {
-    let err = |e: std::io::Error| format!("Could not replace {} ({e})", old.display());
+    let err = |e: std::io::Error| trf("Could not replace {} ({})", &[&old.display(), &e]);
     if cfg!(windows) {
         let aside = old.with_file_name(format!("{}.old", old.file_name().unwrap().to_string_lossy()));
         let _ = std::fs::remove_file(&aside);

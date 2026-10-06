@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Toolchain
         run: |
-          pacman -Syu --noconfirm --needed git rustup fontconfig
+          pacman -Syu --noconfirm --needed git rustup fontconfig python gettext
           rustup default stable
           rustup component add clippy
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
@@ -34,6 +34,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: app
+
+      # the translation template matches the source and every catalog is valid
+      - name: Translations
+        run: python3 tools/i18n.py --check
 
       - name: Tests
         working-directory: app

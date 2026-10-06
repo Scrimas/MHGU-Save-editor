@@ -21,31 +21,33 @@ component QuestLine inherits ListRow {
         padding-right: 12px;
         spacing: 10px;
         Rectangle {
-            width: 64px;
+            // as wide as the header's longest translation ("Abgeschlossen")
+            width: 100px;
             CheckBox {
                 x: 0;
                 checked: q.cleared;
-                accessible-label: "Cleared: " + q.name;
+                accessible-label: @tr("Cleared: {}", q.name);
                 toggled => { Api.set-quest(q.index, "cleared", self.checked); }
             }
         }
         VerticalLayout {
             alignment: center;
             horizontal-stretch: 1;
-            Text { text: q.name + (q.prowler ? "  (Prowler)" : ""); overflow: elide; }
+            Text { text: q.prowler ? @tr("{}  (Prowler)", q.name) : q.name; overflow: elide; }
             HorizontalLayout {
                 spacing: 6px;
-                if q.was != "": Text { text: "was " + q.was; color: Tok.accent-text; font-size: Tok.small; }
+                if q.was != "": Text { text: @tr("was {}", q.was); color: Tok.accent-text; font-size: Tok.small; }
                 Text { text: q.sub; color: q.locked ? Tok.bad : Tok.muted; font-size: Tok.small; overflow: elide; horizontal-stretch: 1; }
             }
         }
         Rectangle {
-            width: 60px;
-            CheckBox { x: 0; checked: q.seen; accessible-label: "Seen: " + q.name; toggled => { Api.set-quest(q.index, "seen", self.checked); } }
+            width: 80px;
+            CheckBox { x: 0; checked: q.seen; accessible-label: @tr("Seen: {}", q.name); toggled => { Api.set-quest(q.index, "seen", self.checked); } }
         }
         Rectangle {
-            width: 60px;
-            CheckBox { x: 0; checked: q.failed; accessible-label: "Failed: " + q.name; toggled => { Api.set-quest(q.index, "failed", self.checked); } }
+            // as wide as the header's longest translation ("Fehlgeschlagen")
+            width: 110px;
+            CheckBox { x: 0; checked: q.failed; accessible-label: @tr("Failed: {}", q.name); toggled => { Api.set-quest(q.index, "failed", self.checked); } }
         }
     }
 }
@@ -56,7 +58,7 @@ export component QuestsPage inherits Rectangle {
         padding-top: 16px;
         spacing: Tok.gap;
         PageHeader {
-            title: "Quests";
+            title: @tr("Quests");
             subtitle: Api.quest-summary;
             staged: Api.page-counts[5];
         }
@@ -64,13 +66,13 @@ export component QuestsPage inherits Rectangle {
         HorizontalLayout {
             spacing: Tok.tight;
             SearchField {
-                placeholder-text: "Search quests by name or number";
+                placeholder-text: @tr("Search quests by name or number");
                 text <=> Api.quest-search;
                 edited => { Api.filter-quests(); }
             }
             Chip {
                 y: 2px;
-                text: "Missing only";
+                text: @tr("Missing only");
                 active: Api.quest-missing;
                 clicked => {
                     Api.quest-missing = !Api.quest-missing;
@@ -91,23 +93,23 @@ export component QuestsPage inherits Rectangle {
                             padding-left: 14px;
                             padding-right: 12px;
                             spacing: 10px;
-                            ColHead { text: "Cleared"; width: 64px; }
+                            ColHead { text: @tr("Cleared"); width: 100px; }
                             HorizontalLayout {
                                 horizontal-stretch: 1;
                                 spacing: 6px;
                                 alignment: start;
-                                ColHead { text: "Quest"; }
+                                ColHead { text: @tr("Quest"); }
                                 InfoTip {
                                     y: 9px;
-                                    text: "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does.";
+                                    text: @tr("A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does.");
                                 }
                             }
-                            ColHead { text: "Seen"; width: 60px; }
-                            ColHead { text: "Failed"; width: 60px; }
+                            ColHead { text: @tr("Seen"); width: 80px; }
+                            ColHead { text: @tr("Failed"); width: 110px; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
-                    if Api.quests.length == 0: EmptyState { text: Api.quest-missing ? "Every quest here is cleared." : "No quest matches the search."; }
+                    if Api.quests.length == 0: EmptyState { text: Api.quest-missing ? @tr("Every quest here is cleared.") : @tr("No quest matches the search."); }
                     ListView {
                         property <int> seq: Api.jump-seq;
                         function go() {

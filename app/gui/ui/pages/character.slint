@@ -69,8 +69,8 @@ export component CharacterPage inherits Rectangle {
             spacing: Tok.gap;
             alignment: start;
             PageHeader {
-                title: "Character";
-                subtitle: "Confirmed in game except where marked";
+                title: @tr("Character");
+                subtitle: @tr("Confirmed in game except where marked");
                 staged: Api.page-counts[1];
             }
             Card {
@@ -78,20 +78,20 @@ export component CharacterPage inherits Rectangle {
                     padding: Tok.pad;
                     padding-left: 22px;
                     spacing: 14px;
-                    SectionTitle { text: "Hunter"; }
+                    SectionTitle { text: @tr("Hunter"); }
                     HorizontalLayout {
                         spacing: 24px;
                         alignment: start;
                         Field {
                             width: 360px;
-                            label: "Name";
-                            hint: "Written to the save, the player record and the Guild Card.";
+                            label: @tr("Name");
+                            hint: @tr("Written to the save, the player record and the Guild Card.");
                             was: Api.character.was-name;
                             key: "name";
                             // staged when the field loses focus or on Enter (05)
                             name-edit := LineEdit {
                                 text: Api.character.name;
-                                accessible-label: "Hunter name";
+                                accessible-label: @tr("Hunter name");
                                 accepted(t) => { Api.set-name(t); }
                                 changed has-focus => {
                                     if !self.has-focus && self.text != Api.character.name {
@@ -103,18 +103,18 @@ export component CharacterPage inherits Rectangle {
                         // HR and HR points are both editable; HR follows the points (H2.5)
                         Field {
                             width: 170px;
-                            label: "Hunter Rank";
-                            hint: "Follows HR points";
+                            label: @tr("Hunter Rank");
+                            hint: @tr("Follows HR points");
                             was: Api.character.was-hr;
                             key: "hr";
-                            NumberBox { value: Api.character.hr; minimum: 1; maximum: 999; label: "Hunter Rank"; edited(v) => { Api.set-character("hr", v); } }
+                            NumberBox { value: Api.character.hr; minimum: 1; maximum: 999; label: @tr("Hunter Rank"); edited(v) => { Api.set-character("hr", v); } }
                         }
                         Field {
                             width: 220px;
-                            label: "HR points";
+                            label: @tr("HR points");
                             was: Api.character.was-hr-points;
                             key: "hr-points";
-                            NumberBox { value: Api.character.hr-points; maximum: 9999999; label: "HR points"; edited(v) => { Api.set-character("hr-points", v); } }
+                            NumberBox { value: Api.character.hr-points; maximum: 9999999; label: @tr("HR points"); edited(v) => { Api.set-character("hr-points", v); } }
                         }
                     }
                     HorizontalLayout {
@@ -122,26 +122,26 @@ export component CharacterPage inherits Rectangle {
                         alignment: start;
                         Field {
                             width: 220px;
-                            label: "Zenny";
+                            label: @tr("Zenny");
                             was: Api.character.was-funds;
                             key: "funds";
-                            NumberBox { value: Api.character.funds; maximum: 9999999; label: "Zenny"; edited(v) => { Api.set-character("funds", v); } }
+                            NumberBox { value: Api.character.funds; maximum: 9999999; label: @tr("Zenny"); edited(v) => { Api.set-character("funds", v); } }
                         }
                         Field {
                             width: 220px;
-                            label: "Wycademy points";
+                            label: @tr("Wycademy points");
                             was: Api.character.was-wycademy;
                             key: "wycademy";
-                            NumberBox { value: Api.character.wycademy; maximum: 9999999; label: "Wycademy points"; edited(v) => { Api.set-character("wycademy", v); } }
+                            NumberBox { value: Api.character.wycademy; maximum: 9999999; label: @tr("Wycademy points"); edited(v) => { Api.set-character("wycademy", v); } }
                         }
                         Field {
                             width: 300px;
-                            label: "Play time";
+                            label: @tr("Play time");
                             was: Api.character.was-playtime;
                             key: "playtime";
-                            NumberBox { width: 110px; value: Api.character.playtime-h; maximum: 9999; label: "Hours played"; edited(v) => { Api.set-character("play-h", v); } }
+                            NumberBox { width: 110px; value: Api.character.playtime-h; maximum: 9999; label: @tr("Hours played"); edited(v) => { Api.set-character("play-h", v); } }
                             Text { text: "h"; vertical-alignment: center; }
-                            NumberBox { width: 100px; value: Api.character.playtime-m; maximum: 59; label: "Minutes played"; edited(v) => { Api.set-character("play-m", v); } }
+                            NumberBox { width: 100px; value: Api.character.playtime-m; maximum: 59; label: @tr("Minutes played"); edited(v) => { Api.set-character("play-m", v); } }
                             Text { text: "min"; vertical-alignment: center; }
                         }
                     }
@@ -152,37 +152,37 @@ export component CharacterPage inherits Rectangle {
                     padding: Tok.pad;
                     padding-left: 22px;
                     spacing: 14px;
-                    SectionTitle { text: "Progress"; }
+                    SectionTitle { text: @tr("Progress"); }
                     HorizontalLayout {
                         spacing: 24px;
                         alignment: start;
                         Field {
                             width: 140px;
-                            label: "Village ★";
+                            label: @tr("Village ★");
                             was: Api.character.was-village-star;
                             key: "village-star";
-                            NumberBox { value: Api.character.village-star; minimum: 1; maximum: 10; label: "Village star level"; edited(v) => { Api.set-character("village-star", v); } }
+                            NumberBox { value: Api.character.village-star; minimum: 1; maximum: 10; label: @tr("Village star level"); edited(v) => { Api.set-character("village-star", v); } }
                         }
                         Field {
                             width: 140px;
-                            label: "Hub ★";
+                            label: @tr("Hub ★");
                             was: Api.character.was-hub-star;
                             key: "hub-star";
-                            NumberBox { value: Api.character.hub-star; maximum: 13; label: "Hub star level"; edited(v) => { Api.set-character("hub-star", v); } }
+                            NumberBox { value: Api.character.hub-star; maximum: 13; label: @tr("Hub star level"); edited(v) => { Api.set-character("hub-star", v); } }
                         }
                         Field {
                             width: 170px;
-                            label: "Body";
+                            label: @tr("Body");
                             Text { text: Api.character.gender; vertical-alignment: center; }
                         }
                         // not mapped yet: a disabled row rather than a footnote (H2.4)
                         Field {
                             width: 170px;
-                            label: "Appearance";
-                            Text { text: "Not mapped yet"; vertical-alignment: center; color: Tok.faint; }
+                            label: @tr("Appearance");
+                            Text { text: @tr("Not mapped yet");vertical-alignment: center; color: Tok.faint; }
                         }
                     }
-                    Muted { text: "The game raises star levels when every urgent quest of a level is cleared."; }
+                    Muted { text: @tr("The game raises star levels when every urgent quest of a level is cleared."); }
                 }
             }
             Card {
@@ -193,24 +193,24 @@ export component CharacterPage inherits Rectangle {
                     HorizontalLayout {
                         spacing: Tok.gap;
                         alignment: start;
-                        SectionTitle { text: "Village points"; vertical-alignment: center; }
-                        Text { text: "The game adds Low rank and G rank and caps the sum at 20,000."; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                        SectionTitle { text: @tr("Village points"); vertical-alignment: center; }
+                        Text { text: @tr("The game adds Low rank and G rank and caps the sum at 20,000.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
                     }
                     // the eight values as a 4 × 2 table (H2.2, B5)
                     HorizontalLayout {
                         height: 28px;
                         alignment: start;
-                        ColHead { text: "Village"; width: 160px; }
-                        ColHead { text: "Low rank"; width: 380px; }
-                        ColHead { text: "G rank"; width: 380px; }
+                        ColHead { text: @tr("Village"); width: 160px; }
+                        ColHead { text: @tr("Low rank"); width: 380px; }
+                        ColHead { text: @tr("G rank"); width: 380px; }
                     }
-                    for v[i] in ["Bherna", "Kokoto", "Pokke", "Yukumo"]: VerticalLayout {
+                    for v[i] in [@tr("Bherna"), @tr("Kokoto"), @tr("Pokke"), @tr("Yukumo")]: VerticalLayout {
                         Hairline { }
                         HorizontalLayout {
                             alignment: start;
                             Text { text: v; width: 160px; vertical-alignment: center; }
-                            PointsCell { value: Api.character.points-lr[i]; was: Api.character.was-lr[i]; key: "lr" + i; label: v + " low rank points"; }
-                            PointsCell { value: Api.character.points-g[i]; was: Api.character.was-g[i]; key: "g" + i; label: v + " G rank points"; }
+                            PointsCell { value: Api.character.points-lr[i]; was: Api.character.was-lr[i]; key: "lr" + i; label: @tr("{} low rank points", v); }
+                            PointsCell { value: Api.character.points-g[i]; was: Api.character.was-g[i]; key: "g" + i; label: @tr("{} G rank points", v); }
                         }
                     }
                 }
@@ -223,15 +223,15 @@ export component CharacterPage inherits Rectangle {
                     HorizontalLayout {
                         spacing: Tok.gap;
                         alignment: start;
-                        SectionTitle { text: "Weapon usage"; vertical-alignment: center; }
-                        Text { text: "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                        SectionTitle { text: @tr("Weapon usage"); vertical-alignment: center; }
+                        Text { text: @tr("Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
                     }
                     HorizontalLayout {
                         height: 28px;
                         alignment: start;
-                        ColHead { text: "Weapon"; width: 180px; }
-                        for v in ["Village", "Hub", "Arena"]: ColHead { text: v; width: 200px; }
-                        ColHead { text: "All"; width: 80px; }
+                        ColHead { text: @tr("Weapon"); width: 180px; }
+                        for v in [@tr("Village"), @tr("Hub"), @tr("Arena")]: ColHead { text: v; width: 200px; }
+                        ColHead { text: @tr("All"); width: 80px; }
                     }
                     for w in Api.character.weapon-use: VerticalLayout {
                         Hairline { }
@@ -250,7 +250,7 @@ export component CharacterPage inherits Rectangle {
                                         width: 110px;
                                         value: c;
                                         maximum: 9999;
-                                        label: w.name + " quests, " + ["Village", "Hub", "Arena"][v];
+                                        label: @tr("{} quests, {}", w.name, [@tr("Village"), @tr("Hub"), @tr("Arena")][v]);
                                         edited(x) => { Api.set-character("use:" + v + ":" + w.index, x); }
                                     }
                                     if w.was[v] != "": VerticalLayout {

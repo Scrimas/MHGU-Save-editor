@@ -26,6 +26,8 @@ export struct DetectedSave { path: string, title: string, sub: string, when: str
 
 // Settings as the dialog shows them; indexes into its option lists.
 export struct SettingsInfo {
+    language: int,         // 0 the system's, then i18n::LANGS
+    languages: [string],   // the choices, each in its own language
     theme: int,            // 0 system, 1 light, 2 dark
     scale: int,            // System, 100 % … 200 %
     scale-now: string,     // the size in use, when a new one waits for a restart
@@ -400,13 +402,15 @@ export global Win {
 
 // Numbers as the UI shows them.
 export global Fmt {
+    // the language's thousands separator (i18n.rs)
+    in property <string> sep: ",";
     // 1234567 -> "1,234,567"
     public pure function num(v: int) -> string {
         return v < 0 ? "-" + Fmt.pos(-v) : Fmt.pos(v);
     }
     public pure function pos(v: int) -> string {
-        return v >= 1000000 ? floor(v / 1000000) + "," + Fmt.pad(mod(floor(v / 1000), 1000)) + "," + Fmt.pad(mod(v, 1000))
-            : v >= 1000 ? floor(v / 1000) + "," + Fmt.pad(mod(v, 1000))
+        return v >= 1000000 ? floor(v / 1000000) + sep + Fmt.pad(mod(floor(v / 1000), 1000)) + sep + Fmt.pad(mod(v, 1000))
+            : v >= 1000 ? floor(v / 1000) + sep + Fmt.pad(mod(v, 1000))
             : "" + v;
     }
     public pure function pad(n: int) -> string {
@@ -531,7 +535,7 @@ export component InfoTip inherits Rectangle {
     border-width: 1px;
     border-color: ta.has-hover ? Tok.accent-text : tint;
     accessible-role: button;
-    accessible-label: "More information";
+    accessible-label: @tr("More information");
     accessible-description: text;
     Text {
         text: "i";
@@ -575,7 +579,7 @@ export component ConfidenceTag inherits HorizontalLayout {
     horizontal-stretch: 0;
     Dot { level: root.level; y: (parent.height - self.height) / 2; }
     Text {
-        text: level == Confidence.confirmed ? "Confirmed" : level == Confidence.derived ? "Derived" : "Unresolved";
+        text: level == Confidence.confirmed ? @tr("Confirmed") : level == Confidence.derived ? @tr("Derived") : @tr("Unresolved");
         font-size: Tok.small;
         color: level == Confidence.derived ? Tok.warn : Tok.muted;
         vertical-alignment: center;
@@ -583,9 +587,9 @@ export component ConfidenceTag inherits HorizontalLayout {
     if info: InfoTip {
         y: (parent.height - self.height) / 2;
         tint: level == Confidence.derived ? Tok.warn : Tok.muted;
-        text: level == Confidence.confirmed ? "Confirmed: checked in game."
-            : level == Confidence.derived ? "Derived: worked out from the game's code, not yet checked in game. A snapshot before writing lets you go back."
-            : "Unresolved: what this value means in game is not known yet, so it is shown but not edited.";
+        text: level == Confidence.confirmed ? @tr("Confirmed: checked in game.")
+            : level == Confidence.derived ? @tr("Derived: worked out from the game's code, not yet checked in game. A snapshot before writing lets you go back.")
+            : @tr("Unresolved: what this value means in game is not known yet, so it is shown but not edited.");
     }
 }
 
@@ -643,7 +647,7 @@ export component NavButton inherits Rectangle {
     border-radius: 5px;
     background: active ? Tok.accent-soft : ta.has-hover && enabled ? Tok.hover : transparent;
     accessible-role: button;
-    accessible-label: count > 0 ? text + ", " + count + " values not written" : text;
+    accessible-label: count > 0 ? @tr("{}, {n} value not written" | "{}, {n} values not written" % count, text) : text;
     Rectangle {
         x: 0;
         width: 3px;
@@ -785,7 +789,7 @@ export component PageHeader inherits VerticalLayout {
             overflow: elide;
         }
         if root.staged > 0: Text {
-            text: "· " + root.staged + (root.staged == 1 ? " value changed on this page" : " values changed on this page");
+            text: "· " + @tr("{n} value changed on this page" | "{n} values changed on this page" % root.staged);
             color: Tok.accent-text;
             font-size: Tok.small;
             vertical-alignment: center;
@@ -838,7 +842,7 @@ export component WasLine inherits HorizontalLayout {
     alignment: start;
     height: 18px;
     Text {
-        text: "was " + root.was;
+        text: @tr("was {}", root.was);
         font-size: Tok.small;
         color: Tok.accent-text;
         vertical-alignment: center;
@@ -846,7 +850,7 @@ export component WasLine inherits HorizontalLayout {
     }
     TextLink {
         y: (parent.height - self.height) / 2;
-        text: "Undo";
+        text: @tr("Undo");
         clicked => { Api.undo-value(root.key); }
     }
 }
@@ -999,7 +1003,7 @@ export component StatTile inherits Card {
     callback open();
     height: 108px;
     accessible-role: button;
-    accessible-label: card.title + ": " + card.value + (card.done ? ", complete" : "");
+    accessible-label: card.done ? @tr("{}: {}, complete", card.title, card.value) : card.title + ": " + card.value;
     Rectangle { border-radius: Tok.radius; background: ta.has-hover ? Tok.hover : transparent; }
     ta := TouchArea { clicked => { root.open(); } }
     VerticalLayout {
@@ -1020,7 +1024,7 @@ export component StatTile inherits Card {
         }
         HorizontalLayout {
             spacing: 4px;
-            if card.done: Text { text: "Complete"; color: Tok.ok; font-size: Tok.small; }
+            if card.done: Text { text: @tr("Complete"); color: Tok.ok; font-size: Tok.small; }
             if card.done && card.sub != "": Text { text: "·"; color: Tok.muted; font-size: Tok.small; }
             Text { text: card.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; horizontal-stretch: 1; }
         }
@@ -1127,7 +1131,7 @@ export component PreviewBody inherits VerticalLayout {
                         }
                         if i > 0: Hairline { y: 0; width: parent.width; }
                     }
-                    if p.more > 0: Text { height: 32px; text: "and " + Fmt.num(p.more) + " more"; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                    if p.more > 0: Text { height: 32px; text: @tr("and {} more", Fmt.num(p.more)); color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
                     Reveal {
                         shown: p.note != "";
                         gap: 8px;
@@ -1148,7 +1152,7 @@ export component PreviewBody inherits VerticalLayout {
             alignment: start;
             Chevron { dir: root.tech-open ? "down" : "right"; y: (parent.height - self.height) / 2; }
             TextLink {
-                text: "Technical details";
+                text: @tr("Technical details");
                 tint: Tok.muted;
                 font-weight: 400;
                 clicked => { root.tech-open = !root.tech-open; }
@@ -1200,7 +1204,7 @@ export component PreviewPopup inherits Rectangle {
                 HorizontalLayout {
                     alignment: end;
                     spacing: Tok.tight;
-                    Button { text: Api.preview.empty ? "Close" : "Cancel"; clicked => { pop.close(); } }
+                    Button { text: Api.preview.empty ? @tr("Close") : @tr("Cancel"); clicked => { pop.close(); } }
                     if !Api.preview.empty: Button {
                         text: Api.preview.action;
                         primary: true;
@@ -1221,7 +1225,7 @@ export component MoreButton inherits Rectangle {
     callback activated(int);
     width: b.preferred-width;
     height: 32px;
-    b := Button { text: "More…"; height: 32px; clicked => { menu.show(); } }
+    b := Button { text: @tr("More…"); height: 32px; clicked => { menu.show(); } }
     menu := PopupWindow {
         x: root.width - 220px;
         y: root.height + 4px;

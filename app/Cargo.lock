@@ -2732,7 +2732,7 @@ dependencies = [
 
 [[package]]
 name = "mhgu-editor"
-version = "0.8.1"
+version = "0.9.0"
 dependencies = [
  "chrono",
  "dirs",
@@ -2746,6 +2746,7 @@ dependencies = [
  "sha2",
  "slint",
  "slint-build",
+ "sys-locale",
  "sysinfo",
  "ureq",
  "winresource",
@@ -2753,7 +2754,7 @@ dependencies = [
 
 [[package]]
 name = "mhgu-save"
-version = "0.8.1"
+version = "0.9.0"
 dependencies = [
  "csv",
 ]

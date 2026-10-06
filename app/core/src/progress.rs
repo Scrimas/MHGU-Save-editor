@@ -26,7 +26,9 @@ pub const AWARDS_CARD: usize = 0xC8115;
 pub const PERMITS: usize = 0x283C;
 /// Quest sets that need Arena records and are never set by the bulk completion.
 pub const RANK_SETS: [u32; 5] = [46, 47, 53, 78, 79];
+// i18n: shown through tr() in the GUI
 pub const VILLAGES: [&str; 4] = ["Bherna", "Kokoto", "Pokke", "Yukumo"];
+// i18n: shown through tr() in the GUI
 pub const DEVIANTS: [&str; 18] = [
     "Redhelm Arzuros", "Snowbaron Lagombi", "Stonefist Hermitaur", "Dreadqueen Rathian", "Drilltusk Tetsucabra",
     "Silverwind Nargacuga", "Crystalbeard Uragaan", "Deadeye Yian Garuga", "Dreadking Rathalos", "Thunderlord Zinogre",
