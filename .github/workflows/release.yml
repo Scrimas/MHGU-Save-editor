@@ -84,6 +84,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VER: ${{ steps.ver.outputs.ver }}
+        # the checksums also as plain SHA256SUMS: the 0.8.0 updater looks for that name only
         run: |
+          cp "app/dist/SHA256SUMS-$VER" "$RUNNER_TEMP/SHA256SUMS"
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
-            --title "MHGU Save Editor $VER" --generate-notes app/dist/*"$VER"*
+            --title "MHGU Save Editor $VER" --generate-notes app/dist/*"$VER"* "$RUNNER_TEMP/SHA256SUMS"

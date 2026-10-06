@@ -101,8 +101,14 @@ pub fn check() -> Result<Option<Release>, String> {
     Ok(Some(r).filter(|r| version(&r.version) > version(VERSION)))
 }
 
-/// The checksum list of a release, by its exact name (not a `.sig` beside it).
+/// The checksum list of a release, by its exact name (not a `.sig` beside it):
+/// `SHA256SUMS-<version>` as build.sh names it, or `SHA256SUMS`, the copy releases carry
+/// for 0.8.0, which looks for that name only.
 const SUMS: &str = "SHA256SUMS";
+
+fn is_sums(name: &str, version: &str) -> bool {
+    name == SUMS || name.strip_prefix(SUMS).and_then(|r| r.strip_prefix('-')) == Some(version)
+}
 
 /// What `install` did: the new file, and on Windows the old .exe renamed aside (to
 /// delete on the next start).
@@ -114,11 +120,12 @@ pub struct Installed {
 fn fetch(url: &str) -> Result<Release, String> {
     let l: Latest = serde_json::from_reader(get(url)?.into_reader()).map_err(|e| format!("Unexpected answer from GitHub ({e})"))?;
     let pick = |f: &dyn Fn(&str) -> bool| l.assets.iter().find(|a| f(&a.name)).cloned();
+    let version = l.tag_name.trim_start_matches('v').to_string();
     Ok(Release {
-        version: l.tag_name.trim_start_matches('v').to_string(),
         page: l.html_url.clone(),
         file: pick(&|n| n.ends_with(SUFFIX)),
-        sums: pick(&|n| n == SUMS),
+        sums: pick(&|n| is_sums(n, &version)),
+        version,
     })
 }
 
@@ -268,6 +275,9 @@ mod tests {
         assert_eq!(sum_of(list, "MHGU-Save-Editor-1.0.0-x86_64.AppImage").as_deref(), Some("aaa"));
         assert_eq!(sum_of(list, "MHGU-Save-Editor-1.0.0-x86_64.exe").as_deref(), Some("bbb"));
         assert_eq!(sum_of(list, "other"), None);
+        // the list itself: as build.sh names it, or the plain copy
+        assert!(is_sums("SHA256SUMS-0.8.0", "0.8.0") && is_sums("SHA256SUMS", "0.8.0"));
+        assert!(!is_sums("SHA256SUMS-0.7.0", "0.8.0") && !is_sums("SHA256SUMS-0.8.0.sig", "0.8.0") && !is_sums("SHA256SUMS.sig", "0.8.0"));
     }
 
     #[test]
