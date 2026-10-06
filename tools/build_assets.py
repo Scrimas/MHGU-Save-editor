@@ -222,19 +222,43 @@ def main(romfs, out):
         cls = w
         b = res['table\\weapon%02dBaseData' % w]; cnt = struct.unpack_from('<I', b, 4)[0]; st = (len(b) - 8) // cnt
         nm = gmd(reng['eng\\table\\weapon%02dMsgData_eng' % w])[0::2]
+        # decoration slots per level: weaponNNLevelData records (stride per class), +4 weapon
+        # ID, +5 level, last byte slots. DERIVED: every decorated weapon of 79 saves fits,
+        # Dual Blades and Gunlance ones exactly
+        lv = res['table\\weapon%02dLevelData' % w]; lc = struct.unpack_from('<I', lv, 4)[0]; ls = (len(lv) - 8) // lc
+        slots = {}
+        for r in (lv[8 + ls * j:8 + ls * (j + 1)] for j in range(lc)):
+            slots.setdefault(r[4], {})[r[5]] = r[ls - 1]
         names['weapons'][str(cls)] = [
             {'id': k, 'name': nm[3 * k], 'names': nm[3 * k:3 * k + 3], 'rarity': b[8 + k * st + 11] + 1,
-             'max_lv': b[8 + k * st + 9], 'lim': b[8 + k * st + 10]} for k in range(cnt)]
+             'max_lv': b[8 + k * st + 9], 'lim': b[8 + k * st + 10],
+             'level_slots': [slots.get(k, {}).get(n, 0) for n in range(1, max(slots.get(k, {0: 0})) + 1)]}
+            for k in range(cnt)]
     # armor: armorSeriesData 127-B records, armor ID = series index; bytes 6-10 parts present,
-    # 13/14 male/female, 103 mRare; names entry 10k + part - 1
+    # 13/14 male/female, 103 mRare; names entry 10k + part - 1. DERIVED: 15/16 Blademaster /
+    # Gunner (Hunter's Helm 1/0, Hunter's Cap 0/1, Leather 1/1); 108 + part - 1 decoration
+    # slots (every decorated armor piece of 79 saves fills them exactly)
     a = res['table\\armorSeriesData']; cnt = struct.unpack_from('<I', a, 4)[0]
     an = gmd(reng['eng\\table\\armorSeriesData_eng'])
     names['armor'] = {}
     for p in range(5):
         names['armor'][str(p + 1)] = [
             {'id': k, 'name': an[10 * k + p], 'rarity': a[8 + k * 127 + 103] + 1,
-             'male': a[8 + k * 127 + 13], 'female': a[8 + k * 127 + 14]}
+             'male': a[8 + k * 127 + 13], 'female': a[8 + k * 127 + 14],
+             'blade': a[8 + k * 127 + 15], 'gunner': a[8 + k * 127 + 16], 'slots': a[8 + k * 127 + 108 + p]}
             for k in range(cnt) if a[8 + k * 127 + 6 + p]]
+    # decorations: decoData 5-B records [size, skill, points, skill, points], record k =
+    # item 2638 + k (sizes match every "Jwl N" name). DERIVED
+    dd = res['table\\decoData']
+    names['decos'] = [[2638 + k, dd[8 + 5 * k]] for k in range(struct.unpack_from('<I', dd, 4)[0])
+                      if names['items'][2638 + k] not in ('', 'DUMMY')]
+    # Palico gear (box types 22 weapon, 23 head, 24 body): box ID = otWeaponData /
+    # otArmorData record; names 2k (weapons), 4k head and 4k + 1 body (armor). DERIVED
+    # (the starter box of a new save reads Bone Wedge, Acorn Helm / Mail, Bherna Staff)
+    wn = gmd(reng['eng\\table\\otWeaponData_eng'])
+    names['palico_weapons'] = [{'id': k, 'name': wn[2 * k]} for k in range(1, len(wn) // 2)]
+    on = gmd(reng['eng\\table\\otArmorData_eng'])
+    names['palico_armor'] = {str(23 + p): [{'id': k, 'name': on[4 * k + p]} for k in range(1, len(on) // 4)] for p in range(2)}
     am = res['table\\amuletData']; amn = gmd(reng['eng\\table\\amuletData_eng'])[0::2]
     names['talismans'] = [{'id': k, 'name': amn[k], 'rarity': am[8 + k * 9 + 8] + 1}
                           for k in range(struct.unpack_from('<I', am, 4)[0])]

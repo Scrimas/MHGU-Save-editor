@@ -180,6 +180,28 @@ before each copy. It is a runtime vtable pointer written as is, not data
 slot header, which the loader discards and the writer rebuilds. Patching it only
 changes the slot-select screen until the next save, so an editor can leave it alone.
 
+## Decorations, slots and armor classes (game tables)
+
+**DERIVED** from the game's tables (`resident.arc`, read by `tools/build_assets.py`) and
+checked against every equipment box entry of 79 saves; not yet written in game.
+
+- **Decoration fields are packed.** A decoration takes one of the three `+0x06` fields
+  whatever its size, filled from the first: a 3-slot Attack Jwl 3 is `[id, 0, 0]`.
+- **Decoration sizes:** `table\decoData`, 5-byte records `[size, skill, points, skill,
+  points]`; record *k* is item `2638 + k`. Every "Jwl N" name has size N.
+- **Armor slots:** `armorSeriesData` byte `108 + part − 1` of the series record. All 38
+  decorated armor pieces fill exactly that many slots.
+- **Weapon slots** grow with the level: `weaponNNLevelData` records (stride per class)
+  hold the weapon ID at `+4`, the level at `+5` and the slots in their last byte. Every
+  decorated weapon fits; the Dual Blades and the Gunlance ones fill them exactly.
+- **Blademaster / Gunner:** `armorSeriesData` bytes 15 and 16 (Hunter's Helm 1/0,
+  Hunter's Cap 0/1, Leather 1/1), next to male/female at 13/14. The editor offers a
+  look only of the same part and class, wearable by the character's body type.
+- **Palico gear:** box types 22 weapon, 23 head, 24 body; the box ID is the record of
+  `otWeaponData` / `otArmorData`, named by `otWeaponData_eng` entry 2*k* and
+  `otArmorData_eng` entries 4*k* (head) and 4*k* + 1 (body). A new save's box reads
+  Bone Wedge, Acorn Helm and Mail, Bherna Staff, Hood and Mail.
+
 ## Editing checklist
 
 1. Resolve the character base through the pointer at `0x34`. Don't hard-code it.

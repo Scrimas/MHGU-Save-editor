@@ -35,6 +35,14 @@ pub struct Piece {
     /// Armor: wearable by hunter type 1 (male) / type 2 (female); absent for weapons.
     pub male: Option<u8>,
     pub female: Option<u8>,
+    /// Armor: a Blademaster / Gunner piece (both for either). DERIVED.
+    pub blade: Option<u8>,
+    pub gunner: Option<u8>,
+    /// Armor: decoration slots. DERIVED.
+    pub slots: Option<u8>,
+    /// Weapons: decoration slots at level 1, 2, … DERIVED.
+    #[serde(default)]
+    pub level_slots: Vec<u8>,
 }
 
 impl Piece {
@@ -95,6 +103,15 @@ pub struct Names {
     /// Talisman equipment ID -> name.
     #[serde(default)]
     pub talismans: Vec<Piece>,
+    /// Decorations: [item ID, slots it takes] (packs built before 2026-10-06 lack it).
+    #[serde(default)]
+    pub decos: Vec<[u16; 2]>,
+}
+
+/// Slots decoration item `id` takes; None when it is not a decoration (or the pack is
+/// older).
+pub fn deco_size(id: u16) -> Option<u8> {
+    names().decos.iter().find(|d| d[0] == id).map(|d| d[1] as u8)
 }
 
 pub fn names() -> &'static Names {

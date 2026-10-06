@@ -321,6 +321,35 @@ mod tests {
         };
         api.invoke_put_equip(worn, 0);
         assert_eq!(api.get_change_count(), 0);
+        // a decoration goes only into free slots; one that does not fit is refused
+        if !assets::names().decos.is_empty() {
+            let (s, base) = (st.borrow().save().clone(), st.borrow().base());
+            let free_of = |i: usize| {
+                let e = mhgu_save::equipment::get(&s, base, mhgu_save::equipment::Owner::Hunter, i);
+                views::deco_slots(mhgu_save::equipment::Owner::Hunter, &e).unwrap_or(0).saturating_sub(views::deco_used(&e))
+            };
+            if let Some(i) = (0..mhgu_save::equipment::BOX_N).find(|&i| free_of(i) == 1) {
+                api.invoke_select_equip(i as i32);
+                api.invoke_set_equip("deco-add".into(), 2647); // Earplug Jwl 3: 3 slots
+                assert_eq!(api.get_change_count(), 0);
+                api.invoke_set_equip("deco-add".into(), 2638); // Antidote Jwl 1
+                assert_eq!(api.get_change_count(), 1);
+                assert_eq!(api.get_equip_detail().deco_used, api.get_equip_detail().deco_slots);
+                api.invoke_set_equip("deco-remove".into(), api.get_equip_detail().decos.row_data(0).unwrap().index);
+                assert_eq!(api.get_change_count(), 0);
+            }
+            // the Palico box takes gear like the hunter's
+            api.set_equip_owner(1);
+            views::refresh(&ui, &st.borrow());
+            api.set_equip_category(0);
+            api.invoke_search_equip("".into());
+            let id = api.get_pick_equip().row_data(0).unwrap().id;
+            api.invoke_put_equip(-1, id);
+            assert_eq!(api.get_change_count(), 1);
+            api.invoke_put_equip(api.get_equip_detail().slot, 0);
+            assert_eq!(api.get_change_count(), 0);
+            api.set_equip_owner(0);
+        }
 
         // a goal is one edit of several values; one of them goes back on its own
         let money = goals::plan("money", st.borrow().save(), st.borrow().slot);

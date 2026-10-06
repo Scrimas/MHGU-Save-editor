@@ -73,7 +73,8 @@ export struct EquipRow {
     icon: image, has-icon: bool, changed: bool, status: string,
 }
 
-export struct DecoRow { index: int, name: string }
+// A decoration in a box entry: its field, name and the slots it takes.
+export struct DecoRow { index: int, name: string, size: int }
 
 export struct EquipDetail {
     slot: int, kind: string, kind-code: int, name: string, id: int, level: int, was-level: string,
@@ -84,6 +85,9 @@ export struct EquipDetail {
     uses: string,
     category: int,  // index in Api.equip-categories, -1 for none
     was: string,    // piece in the file when the slot is staged
+    deco-slots: int,  // decoration slots of the piece, -1 unknown
+    deco-used: int,   // slots its decorations take
+    can-transmog: bool,
 }
 
 export struct PalicoRow { index: int, name: string, sub: string, changed: bool }
@@ -267,6 +271,11 @@ export global Api {
     in property <[PickItem]> pick-equip;
     in property <int> equip-free;          // first free box slot, -1 when full
     callback search-equip(string);         // fills pick-equip for equip-category
+    // "" pieces of equip-category, "transmog" the looks the selected armor can take
+    in-out property <string> pick-mode;
+    // decorations that fit the selected piece's free slots
+    in property <[PickItem]> pick-decos;
+    callback search-decos(string);
     callback put-equip(int /* slot, -1 = first free */, int /* id, 0 = empty the slot */);
 
     // screenshots (MHGU_SNAPSHOT): the popup to open ("equip-picker", "item-picker",

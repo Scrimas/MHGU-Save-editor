@@ -124,8 +124,9 @@ fn pieces(owner: Owner, k: Kind) -> &'static [assets::Piece] {
         (Owner::Hunter, Kind::Weapon(w)) => n.weapons.get(&w.to_string()),
         (Owner::Hunter, Kind::Talisman) => Some(&n.talismans),
         (Owner::Hunter, k) if k.is_armor() => n.armor.get(&k.code().to_string()),
-        (Owner::Palico, Kind::Weapon(_)) => Some(&n.palico_weapons),
-        (Owner::Palico, k) if k.is_armor() => n.palico_armor.get(&k.code().to_string()),
+        // the Palico box's types 22-24 (docs/11)
+        (Owner::Palico, Kind::Other(22)) => Some(&n.palico_weapons),
+        (Owner::Palico, Kind::Other(c @ (23 | 24))) => n.palico_armor.get(&c.to_string()),
         _ => None,
     }
     .map_or(&[], Vec::as_slice)
@@ -135,13 +136,47 @@ fn piece(owner: Owner, k: Kind, id: u16) -> Option<&'static assets::Piece> {
     pieces(owner, k).iter().find(|p| p.id == id as u32)
 }
 
-/// What the equipment picker offers (hunter box): the weapon classes of the asset pack,
-/// the armor parts and talismans.
-fn equip_categories() -> Vec<Kind> {
-    let mut v: Vec<Kind> = (0..WEAPON_CLASSES.len() as u8).map(Kind::Weapon).collect();
-    v.extend([Kind::Head, Kind::Chest, Kind::Arms, Kind::Waist, Kind::Legs, Kind::Talisman]);
-    v.retain(|&k| !pieces(Owner::Hunter, k).is_empty());
+/// What the equipment picker offers: for the hunter box the weapon classes, the armor
+/// parts and talismans; for the Palico box its weapons, heads and bodies. Only kinds the
+/// asset pack names.
+fn equip_categories(owner: Owner) -> Vec<Kind> {
+    let mut v: Vec<Kind> = match owner {
+        Owner::Hunter => {
+            let mut v: Vec<Kind> = (0..WEAPON_CLASSES.len() as u8).map(Kind::Weapon).collect();
+            v.extend([Kind::Head, Kind::Chest, Kind::Arms, Kind::Waist, Kind::Legs, Kind::Talisman]);
+            v
+        }
+        Owner::Palico => vec![Kind::Other(22), Kind::Other(23), Kind::Other(24)],
+    };
+    v.retain(|&k| !pieces(owner, k).is_empty());
     v
+}
+
+/// Decoration slots of a box entry: a talisman's are in the save, armor and weapons'
+/// in the asset pack (weapons' by level). None when unknown.
+pub fn deco_slots(owner: Owner, e: &equipment::Entry) -> Option<u8> {
+    if let Some(t) = e.talisman() {
+        return Some(t.slots.min(3));
+    }
+    let p = piece(owner, e.kind(), e.id())?;
+    match e.kind() {
+        Kind::Weapon(_) => p.level_slots.get(e.level() as usize - 1).or(p.level_slots.last()).copied(),
+        k if k.is_armor() => p.slots,
+        _ => None,
+    }
+}
+
+/// Slots the decorations of an entry take (an unknown item counts as one).
+pub fn deco_used(e: &equipment::Entry) -> u8 {
+    e.decos().iter().filter(|&&d| d != 0).map(|&d| assets::deco_size(d).unwrap_or(1)).sum()
+}
+
+/// Whether armor `p` can give its look to `src` worn by a hunter of body `gender` (0
+/// type 1): same part, a class the piece's own allows, a body that can wear it. DERIVED.
+fn transmog_fits(src: &assets::Piece, p: &assets::Piece, gender: u8) -> bool {
+    let class = (src.blade == Some(1) && p.blade == Some(1)) || (src.gunner == Some(1) && p.gunner == Some(1));
+    let body = if gender == 0 { p.male != Some(0) } else { p.female != Some(0) };
+    class && body && p.is_real()
 }
 
 fn equip_keep(filter: &str, k: Kind) -> bool {
@@ -746,19 +781,37 @@ fn uses_label(s: &mhgu_save::Save, base: usize, i: usize) -> String {
 }
 
 /// The pieces of the selected category matching the picker search.
-fn equip_picker(ui: &AppWindow) {
+/// The equipment picker's list: pieces of the category picked, or with `pick-mode`
+/// "transmog" the looks the selected armor piece can take.
+fn equip_picker(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
-    let Some(&k) = equip_categories().get(api.get_equip_category().max(0) as usize) else {
-        api.set_pick_equip(model(vec![]));
-        return;
+    let owner = owner_of(ui);
+    let transmog = api.get_pick_mode() == "transmog";
+    let sel = view(|v| v.equip_sel);
+    let src = (st.doc.is_some() && sel >= 0).then(|| equipment::get(st.save(), st.base(), owner, sel as usize));
+    let k = match &src {
+        Some(e) if transmog => e.kind(),
+        _ => match equip_categories(owner).get(api.get_equip_category().max(0) as usize) {
+            Some(&k) => k,
+            None => return api.set_pick_equip(model(vec![])),
+        },
     };
+    let gender = if st.doc.is_some() { character::get(st.save(), st.base()).gender } else { 0 };
+    let own = src.as_ref().and_then(|e| piece(owner, k, e.id()));
     let f = view(|v| v.equip_search.to_lowercase());
-    let v: Vec<PickItem> = pieces(Owner::Hunter, k)
+    let v: Vec<PickItem> = pieces(owner, k)
         .iter()
         .filter(|p| p.is_real())
+        .filter(|p| !transmog || own.is_some_and(|o| transmog_fits(o, p, gender) && o.id != p.id))
         .filter(|p| f.is_empty() || p.id.to_string() == f || [&p.name].into_iter().chain(&p.names).any(|n| n.to_lowercase().contains(&f)))
         .map(|p| {
-            let mut sub = vec![format!("Rare {}", p.rarity)];
+            // Palico gear has no rarity in the pack
+            let mut sub: Vec<String> = if p.rarity > 0 { vec![format!("Rare {}", p.rarity)] } else { vec![] };
+            match (p.blade, p.gunner) {
+                (Some(1), Some(0)) => sub.push("Blademaster".into()),
+                (Some(0), Some(1)) => sub.push("Gunner".into()),
+                _ => {}
+            }
             match k {
                 Kind::Talisman => sub.push(tier_name(equipment::talisman_tier(p.id as u16)).into()),
                 // upgrade names past the max level and the limit break
@@ -775,6 +828,32 @@ fn equip_picker(ui: &AppWindow) {
         })
         .collect();
     api.set_pick_equip(model(v));
+}
+
+/// Decorations that fit the free slots of the selected hunter box entry, by name.
+fn deco_picker(ui: &AppWindow, st: &State, search: &str) {
+    let api = ui.global::<Api>();
+    let sel = view(|v| v.equip_sel);
+    let free = match (st.doc.is_some(), sel) {
+        (true, 0..) => {
+            let e = equipment::get(st.save(), st.base(), Owner::Hunter, sel as usize);
+            deco_slots(Owner::Hunter, &e).unwrap_or(0).saturating_sub(deco_used(&e))
+        }
+        _ => 0,
+    };
+    let f = search.to_lowercase();
+    let v: Vec<PickItem> = assets::names()
+        .decos
+        .iter()
+        .filter(|d| d[1] as u8 <= free)
+        .map(|d| (d[0], d[1], assets::item_name(d[0])))
+        .filter(|(_, _, n)| f.is_empty() || n.to_lowercase().contains(&f))
+        .map(|(id, size, name)| {
+            let (img, has) = icon(assets::item_icon(id));
+            PickItem { id: id as i32, name: name.into(), icon: img, has_icon: has, sub: count(size as usize, "slot", "slots").into(), max: size as i32 }
+        })
+        .collect();
+    api.set_pick_decos(model(v));
 }
 
 fn equipment_page(ui: &AppWindow, st: &State) {
@@ -841,7 +920,7 @@ fn equipment_page(ui: &AppWindow, st: &State) {
         if owner == Owner::Hunter {
             format!("Hunter box: {} / {} slots used · confirmed in game except where marked", num(used as i64), num(owner.len() as i64))
         } else {
-            format!("Palico box: {} / {} slots used · Palico gear names are not extracted from the game yet", num(used as i64), num(owner.len() as i64))
+            format!("Palico box: {} / {} slots used · gear names from the game's tables (Derived)", num(used as i64), num(owner.len() as i64))
         }
         .into(),
     );
@@ -860,12 +939,13 @@ fn equipment_page(ui: &AppWindow, st: &State) {
         let k = e.kind();
         let ds = e.decos();
         let t = e.talisman();
-        // one row per decoration slot the piece has (10.3): a talisman's slot count is in
-        // the save; for other pieces only the decorations present are known
-        let decos: Vec<DecoRow> = match t {
-            Some(t) => (0..(t.slots as usize).min(3)).map(|j| DecoRow { index: j as i32, name: if ds[j] == 0 { "".into() } else { assets::item_name(ds[j]).into() } }).collect(),
-            None => (0..3).filter(|&j| ds[j] != 0).map(|j| DecoRow { index: j as i32, name: assets::item_name(ds[j]).into() }).collect(),
-        };
+        // the decorations in it, packed from the first field, and the slots they take
+        // of the piece's (10.3)
+        let decos: Vec<DecoRow> = (0..3)
+            .filter(|&j| ds[j] != 0)
+            .map(|j| DecoRow { index: j as i32, name: assets::item_name(ds[j]).into(), size: assets::deco_size(ds[j]).unwrap_or(1) as i32 })
+            .collect();
+        let slots = deco_slots(owner, &e);
         let field = tables()
             .fields
             .iter()
@@ -899,14 +979,18 @@ fn equipment_page(ui: &AppWindow, st: &State) {
             raw: e.raw.iter().map(|b| format!("{b:02x}")).collect::<Vec<_>>().join(" ").into(),
             field: field.into(),
             uses: if owner == Owner::Hunter { uses_label(s, base, i) } else { String::new() }.into(),
-            category: equip_categories().iter().position(|&c| c == k).map_or(-1, |p| p as i32),
+            category: equip_categories(owner).iter().position(|&c| c == k).map_or(-1, |p| p as i32),
             was: if staged { equip_value(owner, &was_e) } else { String::new() }.into(),
+            deco_slots: slots.map_or(-1, |n| n as i32),
+            deco_used: deco_used(&e) as i32,
+            // the looks this piece can take (none without the pack's armor classes)
+            can_transmog: k.is_armor() && piece(owner, k, e.id()).is_some_and(|p| p.blade.is_some()),
         };
     }
     api.set_equip_detail(d);
-    let cats = equip_categories();
+    let cats = equip_categories(owner);
     api.set_equip_categories(strings(cats.iter().map(|&k| kind_label(k))));
-    api.set_equip_free(match equipment::free_slot(s, base, Owner::Hunter) {
+    api.set_equip_free(match equipment::free_slot(s, base, owner) {
         Some(i) if !cats.is_empty() => i as i32,
         _ => -1,
     });
@@ -2395,20 +2479,37 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         }
         let i = i as usize;
         let f = field.as_str();
+        let cur = equipment::get(s.save(), s.base(), owner, i);
+        // a decoration goes in only where its slots are free
+        if f == "deco-add" {
+            let size = assets::deco_size(v as u16).unwrap_or(u8::MAX);
+            let free = deco_slots(owner, &cur).unwrap_or(0).saturating_sub(deco_used(&cur));
+            if size > free || !cur.decos().contains(&0) {
+                return toast(&ui, format!("{} needs {} free; this piece has {free}", assets::item_name(v as u16), count(size as usize, "slot", "slots")), true);
+            }
+        }
         let t = Target::Equip(owner, i);
         let title = t.label(s.save(), s.slot);
-        let mut e = Edit::one(t, title, Conf::Confirmed);
-        e.key = format!("{}:{f}", t.key());
+        // slot sizes, transmog classes and the transmog level field are read from the
+        // game's tables, not checked in game
+        let derived = f == "deco-add" || (f == "transmog" && v != 0);
+        let c = if derived { Conf::Derived } else { Conf::Confirmed };
+        if refused(&ui, c) {
+            return;
+        }
+        let mut e = Edit::one(t, title, c);
+        // adding and removing decorations merge, so taking one back out undoes it
+        e.key = format!("{}:{}", t.key(), if f.starts_with("deco") { "decos" } else { f });
         s.edit(e, |sv, base| {
             let mut e = equipment::get(sv, base, owner, i);
             match f {
                 "level" => e.set_level(v as u8),
-                "transmog" => e.set_transmog(0, 1),
-                d if d.starts_with("deco") => {
-                    if let Some(k) = d[4..].parse::<usize>().ok().filter(|k| *k < 3) {
-                        e.set_deco(k, v as u16);
-                    }
+                // the look of armor piece v at level 1 (0: the own look)
+                "transmog" => e.set_transmog(v.clamp(0, u16::MAX as i32) as u16, 1),
+                "deco-add" => {
+                    e.add_deco(v as u16);
                 }
+                "deco-remove" if (0..3).contains(&v) => e.remove_deco(v as usize),
                 t if e.talisman().is_some() => {
                     let mut tl = e.talisman().unwrap();
                     match t {
@@ -2429,41 +2530,52 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     });
     {
         let w = ui.as_weak();
+        let st2 = st.clone();
         api.on_search_equip(move |t| {
             view(|v| v.equip_search = t.to_string());
             if let Some(ui) = w.upgrade() {
-                equip_picker(&ui);
+                equip_picker(&ui, &st2.borrow());
+            }
+        });
+        let w = ui.as_weak();
+        let st2 = st.clone();
+        api.on_search_decos(move |t| {
+            if let Some(ui) = w.upgrade() {
+                deco_picker(&ui, &st2.borrow(), &t);
             }
         });
     }
     // add, replace or remove a hunter box entry; never one that the worn gear or a My Set uses
     on!(ui, st, on_put_equip, |ui, s, slot: i32, id: i32| {
-        if owner_of(&ui) != Owner::Hunter {
-            return;
-        }
+        let owner = owner_of(&ui);
         let base = s.base();
-        let slot = match usize::try_from(slot).ok().or_else(|| equipment::free_slot(s.save(), base, Owner::Hunter)) {
-            Some(i) if i < Owner::Hunter.len() => i,
+        let slot = match usize::try_from(slot).ok().or_else(|| equipment::free_slot(s.save(), base, owner)) {
+            Some(i) if i < owner.len() => i,
             _ => return toast(&ui, "The equipment box is full", true),
         };
-        let used = uses_label(s.save(), base, slot);
+        let used = if owner == Owner::Hunter { uses_label(s.save(), base, slot) } else { String::new() };
         if !used.is_empty() {
             return toast(&ui, format!("Box slot {} is used by {used}", slot + 1), true);
         }
         let api = ui.global::<Api>();
-        let e = match usize::try_from(api.get_equip_category()).ok().and_then(|c| equip_categories().get(c).copied()) {
+        let e = match usize::try_from(api.get_equip_category()).ok().and_then(|c| equip_categories(owner).get(c).copied()) {
             Some(k) if id > 0 => equipment::Entry::new(k, id as u16),
             _ => equipment::Entry { raw: [0; equipment::ENTRY] },
         };
-        let name = equip_name(Owner::Hunter, &e);
-        let t = Target::Equip(Owner::Hunter, slot);
-        let mut ed = Edit::one(t, t.label(s.save(), s.slot), Conf::Confirmed);
+        let name = equip_name(owner, &e);
+        let t = Target::Equip(owner, slot);
+        // Palico gear IDs come from the game's tables by name, not checked in game
+        let c = if owner == Owner::Palico && !e.is_empty() { Conf::Derived } else { Conf::Confirmed };
+        if refused(&ui, c) {
+            return;
+        }
+        let mut ed = Edit::one(t, t.label(s.save(), s.slot), c);
         ed.key = format!("{}:piece", t.key());
         if !e.is_empty() {
             ed.note = "New box entry at level 1, shaped like the game's own".into();
         }
         s.edit(ed, |sv, base| {
-            equipment::set(sv, base, Owner::Hunter, slot, &e);
+            equipment::set(sv, base, owner, slot, &e);
             vec![]
         });
         view(|v| {

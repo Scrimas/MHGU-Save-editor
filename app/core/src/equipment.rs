@@ -144,6 +144,26 @@ impl Entry {
         assert!(k < 3, "decoration slot {k}");
         self.set_w(6 + 2 * k, item);
     }
+    /// The game keeps decorations packed from the first field, one field each whatever
+    /// its size (every decorated entry of the analysed saves). Puts `item` in the first
+    /// free field; false when all three are taken.
+    pub fn add_deco(&mut self, item: u16) -> bool {
+        match self.decos().iter().position(|&d| d == 0) {
+            Some(k) => {
+                self.set_deco(k, item);
+                true
+            }
+            None => false,
+        }
+    }
+    /// Takes out decoration field `k`; the ones after it move up, so they stay packed.
+    pub fn remove_deco(&mut self, k: usize) {
+        let mut v: Vec<u16> = self.decos().into_iter().enumerate().filter(|&(j, d)| j != k && d != 0).map(|(_, d)| d).collect();
+        v.resize(3, 0);
+        for (j, d) in v.into_iter().enumerate() {
+            self.set_deco(j, d);
+        }
+    }
     pub fn talisman(&self) -> Option<Talisman> {
         (self.kind() == Kind::Talisman).then(|| Talisman {
             skills: [self.raw[0x0C], self.raw[0x0D]],
@@ -259,5 +279,18 @@ mod tests {
         let t = Entry::new(Kind::Talisman, 6).talisman().unwrap();
         assert_eq!((t.tier, t.slots, t.skills), (99, 0, [0, 0]));
         assert_eq!(Entry::new(Kind::Weapon(INSECT_GLAIVE), 11).raw[..0x0E], [0x14, 0, 0x0b, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]);
+    }
+
+    #[test]
+    fn decorations_stay_packed() {
+        let mut e = Entry::new(Kind::Head, 1);
+        assert!(e.add_deco(2700) && e.add_deco(2701) && e.add_deco(2702));
+        assert!(!e.add_deco(2703));
+        e.remove_deco(0);
+        assert_eq!(e.decos(), [2701, 2702, 0]);
+        assert!(e.add_deco(2650));
+        assert_eq!(e.decos(), [2701, 2702, 2650]);
+        e.remove_deco(1);
+        assert_eq!(e.decos(), [2701, 2650, 0]);
     }
 }

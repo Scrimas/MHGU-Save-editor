@@ -48,17 +48,50 @@ export component EquipmentPage inherits Rectangle {
         if category >= 0 {
             Api.equip-category = category;
         }
+        Api.pick-mode = "";
+        root.show-picker(x, y);
+    }
+    // the looks the selected armor piece can take
+    function open-transmog(x: length, y: length) {
+        root.target-slot = Api.equip-detail.slot;
+        root.target-id = Api.equip-detail.transmog-id;
+        Api.pick-mode = "transmog";
+        root.show-picker(x, y);
+    }
+    function show-picker(x: length, y: length) {
         root.pick-search = "";
         Api.search-equip("");
         root.pick-x = clamp(x - root.pick-w, 8px, root.width - root.pick-w - 8px);
         root.pick-y = clamp(y, 8px, root.height - root.pick-h - 8px);
         picker.show();
     }
+    function pick(id: int) {
+        if Api.pick-mode == "transmog" {
+            Api.set-equip("transmog", id);
+        } else {
+            Api.put-equip(root.target-slot, id);
+        }
+        picker.close();
+    }
+    property <string> deco-search;
+    function open-decos(x: length, y: length) {
+        root.deco-search = "";
+        Api.search-decos("");
+        root.pick-x = clamp(x - root.pick-w, 8px, root.width - root.pick-w - 8px);
+        root.pick-y = clamp(y, 8px, root.height - root.pick-h - 8px);
+        decos.show();
+    }
     property <string> popup-request: Api.snapshot-popup;
     changed popup-request => {
         if popup-request == "equip-picker" {
             Api.snapshot-popup = "";
             root.open-picker(-1, 0, -1, root.width - Tok.margin, 64px);
+        } else if popup-request == "transmog-picker" {
+            Api.snapshot-popup = "";
+            root.open-transmog(root.width - Tok.margin, 64px);
+        } else if popup-request == "deco-picker" {
+            Api.snapshot-popup = "";
+            root.open-decos(root.width - Tok.margin, 64px);
         }
     }
     VerticalLayout {
@@ -69,7 +102,7 @@ export component EquipmentPage inherits Rectangle {
             title: "Equipment";
             subtitle: Api.equip-summary;
             staged: Api.page-counts[3];
-            if root.hunter: Button {
+            Button {
                 text: "Add equipment";
                 enabled: Api.equip-free >= 0;
                 clicked => { root.open-picker(-1, 0, -1, self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
@@ -128,7 +161,7 @@ export component EquipmentPage inherits Rectangle {
                         clicked => {
                             Api.select-equip(e.slot);
                             // no detail panel: an empty slot opens the picker, like the item box
-                            if !root.wide && e.kind-code == 0 && root.hunter {
+                            if !root.wide && e.kind-code == 0 {
                                 root.open-picker(e.slot, 0, -1, root.width - Tok.margin, 64px);
                             }
                         }
@@ -138,8 +171,8 @@ export component EquipmentPage inherits Rectangle {
             if root.wide: Card {
                 width: root.detail-w;
                 if Api.equip-detail.slot < 0: EmptyState {
-                    text: root.hunter ? "Pick a piece, or add one to the first free slot." : "Pick a piece to see it.";
-                    action: root.hunter && Api.equip-free >= 0 ? "Add equipment" : "";
+                    text: "Pick a piece, or add one to the first free slot.";
+                    action: Api.equip-free >= 0 ? "Add equipment" : "";
                     act => { root.open-picker(-1, 0, -1, root.width - Tok.margin, 64px); }
                 }
                 if Api.equip-detail.slot >= 0: ScrollView {
@@ -153,7 +186,7 @@ export component EquipmentPage inherits Rectangle {
                             Muted { text: Api.equip-detail.kind + " · box slot " + (Api.equip-detail.slot + 1) + (Api.equip-detail.id > 0 ? " · ID " + Api.equip-detail.id : ""); }
                             if Api.equip-detail.was != "": WasLine { was: Api.equip-detail.was; key: (root.hunter ? "equip:hunter:" : "equip:palico:") + Api.equip-detail.slot; }
                         }
-                        if root.hunter: HorizontalLayout {
+                        HorizontalLayout {
                             alignment: start;
                             spacing: Tok.tight;
                             if Api.equip-detail.kind-code == 0: Button {
@@ -192,17 +225,33 @@ export component EquipmentPage inherits Rectangle {
                             }
                             if Api.equip-detail.was-level != "": WasLine { y: 7px; was: Api.equip-detail.was-level; key: (root.hunter ? "equip:hunter:" : "equip:palico:") + Api.equip-detail.slot; }
                         }
-                        // one row per decoration slot the piece has (10.3)
-                        if root.hunter && Api.equip-detail.kind-code != 0 && (Api.equip-detail.decos.length > 0 || !Api.equip-detail.is-talisman): VerticalLayout {
+                        // the decorations and the slots they take of the piece's (10.3)
+                        if root.hunter && Api.equip-detail.kind-code != 0 && (Api.equip-detail.decos.length > 0 || Api.equip-detail.deco-slots != 0): VerticalLayout {
                             spacing: 6px;
-                            SectionTitle { text: "Decorations"; }
+                            HorizontalLayout {
+                                spacing: Tok.tight;
+                                alignment: start;
+                                SectionTitle { text: "Decorations"; }
+                                if Api.equip-detail.deco-slots >= 0: Muted { text: Api.equip-detail.deco-used + " of " + Api.equip-detail.deco-slots + " slots used"; vertical-alignment: center; }
+                            }
                             if Api.equip-detail.decos.length == 0: Muted { text: "None"; }
                             for d in Api.equip-detail.decos: HorizontalLayout {
                                 spacing: Tok.tight;
                                 height: 32px;
-                                Text { text: d.name == "" ? "Empty slot" : d.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; color: d.name == "" ? Tok.faint : Palette.foreground; }
-                                if d.name != "": Button { text: "Remove"; clicked => { Api.set-equip("deco" + d.index, 0); } }
+                                Text { text: d.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                                Muted { text: d.size == 1 ? "1 slot" : d.size + " slots"; vertical-alignment: center; }
+                                Button { text: "Remove"; clicked => { Api.set-equip("deco-remove", d.index); } }
                             }
+                            if Api.equip-detail.deco-slots > Api.equip-detail.deco-used && Api.equip-detail.decos.length < 3: HorizontalLayout {
+                                spacing: Tok.tight;
+                                alignment: start;
+                                Button {
+                                    text: "Add decoration…";
+                                    clicked => { root.open-decos(self.absolute-position.x - root.absolute-position.x + root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
+                                }
+                                ConfidenceTag { level: Confidence.derived; y: 5px; }
+                            }
+                            if Api.equip-detail.deco-slots < 0: Muted { text: "This build's game data has no slot counts: decorations can only be removed."; }
                         }
                         if Api.equip-detail.kind-code >= 1 && Api.equip-detail.kind-code <= 5: VerticalLayout {
                             spacing: 6px;
@@ -210,8 +259,13 @@ export component EquipmentPage inherits Rectangle {
                             HorizontalLayout {
                                 spacing: Tok.tight;
                                 Text { text: Api.equip-detail.transmog == "" ? "Own look" : Api.equip-detail.transmog; vertical-alignment: center; horizontal-stretch: 1; }
+                                if Api.equip-detail.can-transmog: Button {
+                                    text: "Change look…";
+                                    clicked => { root.open-transmog(self.absolute-position.x - root.absolute-position.x + root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
+                                }
                                 if Api.equip-detail.transmog-id != 0: Button { text: "Restore own look"; clicked => { Api.set-equip("transmog", 0); } }
                             }
+                            if Api.equip-detail.can-transmog: Muted { text: "Looks of the same part that this piece's class and your body type can wear. Skills, slots and defense stay."; }
                         }
                         if Api.equip-detail.is-talisman: VerticalLayout {
                             spacing: 8px;
@@ -294,14 +348,14 @@ export component EquipmentPage inherits Rectangle {
                 padding: Tok.pad;
                 spacing: 10px;
                 Text {
-                    text: (root.target-id != 0 ? "Replace box slot " : "Add to box slot ") + ((root.target-slot >= 0 ? root.target-slot : Api.equip-free) + 1);
+                    text: Api.pick-mode == "transmog" ? "Look for " + Api.equip-detail.name : (root.target-id != 0 ? "Replace box slot " : "Add to box slot ") + ((root.target-slot >= 0 ? root.target-slot : Api.equip-free) + 1);
                     font-size: Tok.section;
                     font-weight: 600;
                 }
-                Muted { text: "New pieces start at level 1 with no decorations; edit them afterwards."; }
+                Muted { text: Api.pick-mode == "transmog" ? "The piece keeps its skills, slots and defense; only its look changes." : "New pieces start at level 1 with no decorations; edit them afterwards."; }
                 HorizontalLayout {
                     spacing: Tok.tight;
-                    ComboBox {
+                    if Api.pick-mode != "transmog": ComboBox {
                         width: 190px;
                         model: Api.equip-categories;
                         current-index: Api.equip-category;
@@ -315,6 +369,12 @@ export component EquipmentPage inherits Rectangle {
                         placeholder-text: "Search";
                         text <=> root.pick-search;
                         edited(t) => { Api.search-equip(t); }
+                        // Enter takes the first match
+                        accepted => {
+                            if Api.pick-equip.length > 0 {
+                                root.pick(Api.pick-equip[0].id);
+                            }
+                        }
                     }
                 }
                 ListView {
@@ -337,18 +397,75 @@ export component EquipmentPage inherits Rectangle {
                                 Text { text: p.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
                             }
                         }
-                        pa := TouchArea {
-                            clicked => {
-                                Api.put-equip(root.target-slot, p.id);
-                                picker.close();
-                            }
-                        }
+                        pa := TouchArea { clicked => { root.pick(p.id); } }
                     }
                 }
                 HorizontalLayout {
                     spacing: Tok.tight;
                     Rectangle { horizontal-stretch: 1; }
                     Button { text: "Cancel"; clicked => { picker.close(); } }
+                }
+            }
+        }
+    }
+    // decorations that fit the free slots of the selected piece
+    decos := PopupWindow {
+        x: root.pick-x;
+        y: root.pick-y;
+        width: root.pick-w;
+        height: root.pick-h;
+        close-policy: close-on-click-outside;
+        Rectangle {
+            background: Tok.raised;
+            border-radius: 8px;
+            border-width: 1px;
+            border-color: Tok.line;
+            drop-shadow-blur: 24px;
+            drop-shadow-color: #0007;
+            VerticalLayout {
+                padding: Tok.pad;
+                spacing: 10px;
+                Text { text: "Decoration for " + Api.equip-detail.name; font-size: Tok.section; font-weight: 600; overflow: elide; }
+                property <int> free: Api.equip-detail.deco-slots - Api.equip-detail.deco-used;
+                Muted { text: (free == 1 ? "1 slot free" : free + " slots free") + ": only decorations that fit are listed."; }
+                LineEdit {
+                    placeholder-text: "Search decorations";
+                    text <=> root.deco-search;
+                    edited(t) => { Api.search-decos(t); }
+                    accepted => {
+                        if Api.pick-decos.length > 0 {
+                            Api.set-equip("deco-add", Api.pick-decos[0].id);
+                            decos.close();
+                        }
+                    }
+                }
+                ListView {
+                    vertical-stretch: 1;
+                    for p in Api.pick-decos: Rectangle {
+                        height: 40px;
+                        border-radius: 4px;
+                        background: da.has-hover ? Tok.hover : transparent;
+                        accessible-role: list-item;
+                        accessible-label: p.name + ", " + p.sub;
+                        HorizontalLayout {
+                            padding-left: 8px;
+                            padding-right: 8px;
+                            spacing: 10px;
+                            Asset { width: 24px; height: 24px; y: 8px; source: p.icon; available: p.has-icon; }
+                            Text { text: p.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                            Muted { text: p.sub; vertical-alignment: center; }
+                        }
+                        da := TouchArea {
+                            clicked => {
+                                Api.set-equip("deco-add", p.id);
+                                decos.close();
+                            }
+                        }
+                    }
+                }
+                HorizontalLayout {
+                    Rectangle { horizontal-stretch: 1; }
+                    Button { text: "Cancel"; clicked => { decos.close(); } }
                 }
             }
         }
