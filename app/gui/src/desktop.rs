@@ -4,13 +4,13 @@
 //! keeps the entry: an older AppImage takes it only when the one it names is gone.
 //! `TryExec` hides the entry once that AppImage is deleted.
 
+use crate::update::{version, VERSION};
 use std::path::Path;
 
 const NAME: &str = "mhgu-save-editor";
 const ENTRY: &str = include_str!("../../packaging/mhgu-save-editor.desktop");
 const PNG: &[u8] = include_bytes!("../assets/icon-256.png");
 const SVG: &[u8] = include_bytes!("../assets/icon.svg");
-const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Write or refresh the entry when started from an AppImage; nothing otherwise.
 pub fn install() {
@@ -22,7 +22,7 @@ pub fn install() {
     let file = data.join("applications").join(format!("{NAME}.desktop"));
     if let Ok(old) = std::fs::read_to_string(&file) {
         let alive = field(&old, "TryExec").is_some_and(|p| Path::new(&unescape(p)).is_file());
-        let newer = field(&old, "X-AppImage-Version").is_some_and(|v| parse(v) > parse(VERSION));
+        let newer = field(&old, "X-AppImage-Version").is_some_and(|v| version(v) > version(VERSION));
         if alive && newer {
             return;
         }
@@ -76,10 +76,6 @@ fn field<'a>(entry: &'a str, key: &str) -> Option<&'a str> {
     entry.lines().find_map(|l| l.strip_prefix(key)?.strip_prefix('='))
 }
 
-fn parse(v: &str) -> Vec<u32> {
-    v.trim().split('.').map(|n| n.parse().unwrap_or(0)).collect()
-}
-
 /// Write only when different, through a temporary file so the desktop never reads half.
 fn write(p: &Path, b: &[u8]) -> std::io::Result<()> {
     if std::fs::read(p).is_ok_and(|old| old == b) {
@@ -108,11 +104,5 @@ mod tests {
     fn reserved_characters_are_escaped() {
         assert_eq!(quote(r#"/a"$`\b"#), r#""/a\\"\\$\\`\\\\b""#);
         assert_eq!(unescape(&entry(r"/a\b").lines().find(|l| l.starts_with("TryExec=")).unwrap()[8..]), r"/a\b");
-    }
-
-    #[test]
-    fn versions_compare_by_number() {
-        assert!(parse("0.10.0") > parse("0.9.1"));
-        assert!(parse("1.0") < parse("1.0.1"));
     }
 }

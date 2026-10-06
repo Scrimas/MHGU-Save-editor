@@ -234,6 +234,13 @@ mod tests {
     }
 }
 
+pub fn open_url(url: &str) {
+    #[cfg(windows)]
+    let _ = std::process::Command::new("explorer").arg(url).spawn();
+    #[cfg(not(windows))]
+    let _ = std::process::Command::new("xdg-open").arg(url).spawn();
+}
+
 pub fn open_folder(p: &std::path::Path) {
     let _ = std::fs::create_dir_all(p);
     #[cfg(windows)]

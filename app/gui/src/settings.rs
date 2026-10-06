@@ -37,6 +37,10 @@ pub struct Settings {
     pub recent: Vec<PathBuf>,
     /// Refuse edits that are not confirmed in game.
     pub confirmed_only: bool,
+    /// Ask GitHub for a newer version on start.
+    pub check_updates: bool,
+    /// The .exe an update renamed aside (Windows), deleted on the next start.
+    pub update_leftover: Option<PathBuf>,
 }
 
 impl Default for Settings {
@@ -52,6 +56,8 @@ impl Default for Settings {
             reopen_last: false,
             recent: vec![],
             confirmed_only: false,
+            check_updates: true,
+            update_leftover: None,
         }
     }
 }

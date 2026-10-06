@@ -3,13 +3,13 @@
 A desktop save editor for **Monster Hunter Generations Ultimate** (Nintendo Switch,
 emulator saves), and the reverse-engineering notes and data it is built on.
 
+![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-dark.png#gh-dark-mode-only)
+![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-light.png#gh-light-mode-only)
+
 Every value it shows is read where the game itself keeps it, and every change is
 described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") before
 anything touches the file. Fields are marked **Confirmed** (checked in game) or
 **Derived** (from the format notes, not yet checked in game).
-
-![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-dark.png#gh-dark-mode-only)
-![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-light.png#gh-light-mode-only)
 
 ## Download
 
@@ -22,6 +22,10 @@ Single-file builds are attached to each [release](https://github.com/Scrimas/MHG
 
 The AppImage adds itself to the application menu when started (`~/.local/share/applications`);
 the newest version on disk keeps the entry, and menus hide it once that AppImage is deleted.
+
+Both builds update themselves: on start they ask GitHub for a newer release (Settings →
+Updates turns this off, or checks now). Nothing is downloaded until you choose to; the new
+file is checked against the release's SHA-256 sums and takes the place of the old one.
 
 Ryujinx saves are found automatically (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
 Flatpak folders). For another emulator, use **Open save…** on its

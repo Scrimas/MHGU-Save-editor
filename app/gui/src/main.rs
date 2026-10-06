@@ -11,6 +11,7 @@ mod settings;
 mod state;
 mod system;
 mod targets;
+mod update;
 mod views;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
@@ -35,6 +36,7 @@ fn main() -> Result<(), slint::PlatformError> {
     settings::apply_scale();
     #[cfg(target_os = "linux")]
     desktop::install();
+    update::cleanup();
     // Wayland app id / X11 class, so the desktop can match the window to its icon and
     // rules: it needs the platform to exist and no window yet.
     slint::BackendSelector::new().select()?;
@@ -84,6 +86,8 @@ fn main() -> Result<(), slint::PlatformError> {
         // the "Save opened" toast would cover the page; toasts of the steps stay
         api.set_toast("".into());
         steps(&ui, page, args.get(2).map_or("", String::as_str));
+    } else if settings::get().check_updates && std::env::var_os("MHGU_SNAPSHOT").is_none() {
+        views::check_update(&ui, false);
     }
     // MHGU_SNAPSHOT=out.png: render the window to a PNG and quit (for checking the UI
     // without capturing the screen). Waits until the compositor has sized the window:
@@ -126,7 +130,7 @@ fn main() -> Result<(), slint::PlatformError> {
 ///   slot:N  tab:N  sel:N  store:N  owner:N  filter:F  large  missing  search:S  add:<category>:<id>
 ///   goal:<id>  char:<field>:<value>  monster:<index>:<field>:<value>  item:<slot>:<id>:<count>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
-///   theme:light|dark
+///   theme:light|dark  update (asks GitHub, as Settings' Check now)
 fn steps(ui: &AppWindow, page: &str, list: &str) {
     let api = ui.global::<Api>();
     for step in list.split(',').filter(|s| !s.is_empty()) {
@@ -207,6 +211,7 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                 api.set_snapshots_open(true);
             }
             (_, &["quit"]) => api.set_quit_open(true),
+            (_, &["update"]) => views::check_update(ui, true),
             // write with a snapshot (point XDG_DATA_HOME elsewhere for tests), then press
             // the toast's button
             (_, &["dowrite"]) => {

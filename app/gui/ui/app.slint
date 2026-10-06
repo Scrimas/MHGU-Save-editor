@@ -1,4 +1,4 @@
-import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit } from "std-widgets.slint";
+import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator } from "std-widgets.slint";
 import {
     Api, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
     Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo,
@@ -507,6 +507,27 @@ component SettingsDialog inherits Modal {
                 toggled => { Api.set-setting("confirmed-only", self.checked ? 1 : 0); }
             }
             Muted { text: "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused, such as Requests. Changes already in Review stay."; }
+            Hairline { }
+            SectionTitle { text: "Updates"; }
+            CheckBox {
+                text: "Check for a new version on start";
+                checked: s.check-updates;
+                toggled => { Api.set-setting("check-updates", self.checked ? 1 : 0); }
+            }
+            SettingRow {
+                title: "Version";
+                hint: Api.update.status;
+                Button {
+                    text: "Check now";
+                    enabled: Api.update.state != "checking" && Api.update.state != "downloading" && Api.update.state != "ready";
+                    clicked => { Api.check-update(); }
+                }
+                if Api.update.state == "available" || Api.update.state == "failed" || Api.update.state == "ready": Button {
+                    text: Api.update.state == "ready" ? "Restart…" : "Update…";
+                    clicked => { Api.update-open = true; }
+                }
+            }
+            Muted { text: "Asks GitHub for the latest release. Nothing is downloaded until you choose to update."; }
         }
     }
     HorizontalLayout {
@@ -734,6 +755,53 @@ export component AppWindow inherits Window {
     if Api.write-open: WriteDialog { }
     if Api.snapshots-open: SnapshotsDialog { }
     if Api.settings-open: SettingsDialog { }
+    if Api.update-open: Modal {
+        property <string> state: Api.update.state;
+        card-width: 480px;
+        dismiss => {
+            if state != "downloading" { Api.update-open = false; }
+        }
+        Text {
+            text: state == "ready" ? "Version " + Api.update.version + " is installed" : "Version " + Api.update.version + " is available";
+            font-size: 20px;
+            font-weight: 600;
+        }
+        VerticalLayout {
+            Muted { text: Api.update.body; }
+            Reveal {
+                shown: state == "downloading";
+                gap: Tok.gap;
+                ProgressIndicator { progress: Api.update.progress; }
+            }
+            Reveal {
+                shown: state == "ready" && Api.change-count > 0;
+                gap: Tok.gap;
+                Muted { text: "Write or undo the staged changes before restarting."; }
+            }
+        }
+        HorizontalLayout {
+            alignment: end;
+            spacing: Tok.tight;
+            Button { text: "Release notes"; clicked => { Api.update-page(); } }
+            Button {
+                text: state == "ready" ? "Later" : "Not now";
+                enabled: state != "downloading";
+                clicked => { Api.update-open = false; }
+            }
+            if Api.update.can-install && state != "ready": Button {
+                text: state == "failed" ? "Try again" : "Download and install";
+                primary: true;
+                enabled: state != "downloading";
+                clicked => { Api.install-update(); }
+            }
+            if state == "ready": Button {
+                text: "Restart now";
+                primary: true;
+                enabled: Api.change-count == 0;
+                clicked => { Api.restart-update(); }
+            }
+        }
+    }
     if Api.quit-open: Modal {
         card-width: 460px;
         dismiss => { Api.quit-open = false; }

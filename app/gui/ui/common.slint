@@ -37,6 +37,18 @@ export struct SettingsInfo {
     builtin: string,       // the names always checked
     reopen: bool, recent: int,
     confirmed-only: bool,
+    check-updates: bool,
+}
+
+// Self update. state: "" idle, "checking", "current" (no newer one), "error" (check
+// failed), "available", "downloading", "failed" (install failed), "ready" (restart)
+export struct UpdateInfo {
+    state: string,
+    version: string,       // the newer one
+    status: string,        // one line for Settings
+    body: string,          // the dialog's text
+    progress: float,       // 0-1 while downloading
+    can-install: bool,     // this copy can replace itself
 }
 
 export struct MonsterRow {
@@ -253,6 +265,13 @@ export global Api {
     callback add-emulator(string);
     callback remove-emulator(int);
     callback clear-recent();
+    // updates
+    in-out property <bool> update-open;
+    in property <UpdateInfo> update;
+    callback check-update();
+    callback install-update();
+    callback restart-update();
+    callback update-page();       // the release page in the browser
 
     // palicoes
     in property <[PalicoRow]> palicoes;

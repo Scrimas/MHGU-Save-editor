@@ -7,11 +7,12 @@ use crate::settings;
 use crate::state::{Conf, Edit, State};
 use crate::system;
 use crate::targets::{self, Mon, Target, PAGES};
+use crate::update::{self, VERSION};
 use crate::{model, strings, Shared};
 use crate::{
     Api, AppWindow, ArtRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
     EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, PalicoDetail, PalicoRow, PickItem, Preview, PreviewLine,
-    QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, ValueLine, WriteRow,
+    QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WriteRow,
 };
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Kind, Owner};
@@ -53,6 +54,7 @@ enum ToastAct {
     None,
     Redo,
     Restore(PathBuf, String),
+    Update,
 }
 
 /// Toast with an optional second line and button; it stays longer when it has one.
@@ -234,6 +236,10 @@ struct View {
     jump_seq: i32,
     /// the user chose to quit with staged changes
     quitting: bool,
+    /// a newer release, once checked
+    update: Option<update::Release>,
+    /// the updated file, to restart on
+    update_exe: Option<PathBuf>,
 }
 
 thread_local! {
@@ -1347,6 +1353,7 @@ fn settings_ui(ui: &AppWindow) {
         reopen: s.reopen_last,
         recent: s.recent.len() as i32,
         confirmed_only: s.confirmed_only,
+        check_updates: s.check_updates,
     });
 }
 
@@ -1364,6 +1371,124 @@ fn snapshot_dir(st: &State) -> Option<PathBuf> {
     let doc = st.doc.as_ref()?;
     let id = doc.loc.save_dir.as_ref().and_then(|d| d.file_name()).map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| "save".into());
     Some(system::snapshot_root().join(id))
+}
+
+// --- updates --------------------------------------------------------------------------
+
+fn mb(n: u64) -> String {
+    format!("{:.1} MB", n as f64 / 1e6)
+}
+
+fn file_name(p: &Path) -> String {
+    p.file_name().map_or_else(|| p.display().to_string(), |n| n.to_string_lossy().into_owned())
+}
+
+fn set_update(ui: &AppWindow, state: &str, status: String, body: String, progress: f32) {
+    let r = view(|v| v.update.clone());
+    ui.global::<Api>().set_update(UpdateInfo {
+        state: state.into(),
+        version: r.as_ref().map_or(String::new(), |r| r.version.clone()).into(),
+        status: format!("{VERSION}{}{status}", if status.is_empty() { "" } else { " · " }).into(),
+        body: body.into(),
+        progress,
+        can_install: update::target().is_some() && r.is_some_and(|r| r.size().is_some()),
+    });
+}
+
+/// The dialog's text for the newer release found.
+fn update_available(ui: &AppWindow) {
+    let Some(r) = view(|v| v.update.clone()) else { return };
+    let body = match (update::target(), r.size()) {
+        (Some(t), Some(n)) => format!(
+            "You have {VERSION}. The new version ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves, snapshots and settings are not touched.",
+            mb(n),
+            file_name(&t)
+        ),
+        (Some(_), None) => format!("You have {VERSION}. This release has no file for this system: see its page."),
+        (None, _) => format!(
+            "You have {VERSION}. Only the AppImage and the Windows .exe replace themselves: download the new version from the release page."
+        ),
+    };
+    set_update(ui, "available", format!("{} is available", r.version), body, 0.0);
+}
+
+/// Ask GitHub for a newer version, off the UI thread. From Settings (`manual`) the result
+/// shows there and a newer version opens the dialog; on start only a newer version is
+/// told, in a toast.
+pub fn check_update(ui: &AppWindow, manual: bool) {
+    set_update(ui, "checking", "checking…".into(), String::new(), 0.0);
+    let w = ui.as_weak();
+    std::thread::spawn(move || {
+        let res = update::check();
+        let _ = w.upgrade_in_event_loop(move |ui| match res {
+            Ok(Some(r)) => {
+                let v = r.version.clone();
+                view(|s| s.update = Some(r));
+                update_available(&ui);
+                if manual {
+                    ui.global::<Api>().set_update_open(true);
+                } else {
+                    toast_full(&ui, format!("Version {v} is available"), "", "Update…", ToastAct::Update, false);
+                }
+            }
+            Ok(None) => set_update(&ui, "current", "up to date".into(), String::new(), 0.0),
+            Err(e) => set_update(&ui, "error", e, String::new(), 0.0),
+        });
+    });
+}
+
+fn wire_update(ui: &AppWindow, st: &Shared) {
+    let api = ui.global::<Api>();
+    set_update(ui, "", String::new(), String::new(), 0.0);
+    let w = ui.as_weak();
+    api.on_check_update(move || {
+        if let Some(ui) = w.upgrade() {
+            check_update(&ui, true);
+        }
+    });
+    api.on_update_page(|| {
+        let r = view(|v| v.update.clone());
+        system::open_url(r.as_ref().map_or("https://github.com/Scrimas/MHGU-Save-editor/releases", |r| &r.page));
+    });
+    let w = ui.as_weak();
+    api.on_install_update(move || {
+        let Some(ui) = w.upgrade() else { return };
+        let (Some(r), Some(old)) = (view(|v| v.update.clone()), update::target()) else { return };
+        let total = r.size().unwrap_or(0);
+        set_update(&ui, "downloading", format!("downloading {}…", r.version), format!("Downloading… 0 of {}", mb(total)), 0.0);
+        let w = ui.as_weak();
+        std::thread::spawn(move || {
+            let last = std::cell::Cell::new(u64::MAX);
+            let res = update::install(&r, &old, |done, total| {
+                let pct = done * 100 / total.max(1);
+                if pct != last.replace(pct) {
+                    let (v, body) = (r.version.clone(), format!("Downloading… {} of {}", mb(done), mb(total)));
+                    let _ = w.upgrade_in_event_loop(move |ui| {
+                        set_update(&ui, "downloading", format!("downloading {v}…"), body, pct as f32 / 100.0)
+                    });
+                }
+            });
+            let _ = w.upgrade_in_event_loop(move |ui| match res {
+                Ok(p) => {
+                    let body = format!("{} is in place. Restart to use it.", file_name(&p));
+                    view(|v| v.update_exe = Some(p));
+                    set_update(&ui, "ready", format!("{} installed, restart to use it", r.version), body, 1.0);
+                }
+                Err(e) => set_update(&ui, "failed", "update failed".into(), format!("Not updated: {e}. The editor you are running is unchanged."), 0.0),
+            });
+        });
+    });
+    let w = ui.as_weak();
+    let st = st.clone();
+    api.on_restart_update(move || {
+        let Some(ui) = w.upgrade() else { return };
+        let Some(exe) = view(|v| v.update_exe.clone()) else { return };
+        let save = st.borrow().doc.as_ref().map(|d| d.loc.opened.clone());
+        match update::restart(&exe, save.as_deref()) {
+            Ok(()) => ui.global::<Api>().invoke_quit(),
+            Err(e) => toast(&ui, format!("Could not start {}: {e}", file_name(&exe)), true),
+        }
+    });
 }
 
 fn wire_settings(ui: &AppWindow) {
@@ -1386,6 +1511,7 @@ fn wire_settings(ui: &AppWindow) {
             "snapshot-first" => s.snapshot_first = on,
             "reopen" => s.reopen_last = on,
             "confirmed-only" => s.confirmed_only = on,
+            "check-updates" => s.check_updates = on,
             _ => eprintln!("unknown setting {key:?}"),
         });
         if key == "theme" {
@@ -1642,6 +1768,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
     detected(ui);
     wire_settings(ui);
+    wire_update(ui, st);
 
     // page switches refresh their model
     {
@@ -1747,6 +1874,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     api.invoke_check_emulator();
                     api.set_snapshots_open(true);
                 }
+                ToastAct::Update => ui.global::<Api>().set_update_open(true),
                 ToastAct::None => {}
             }
         });
