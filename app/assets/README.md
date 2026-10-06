@@ -35,8 +35,9 @@ After rebuilding `gen/`, reseal it and refresh the secret, then commit the new b
 ## `test-save.tar.xz.gpg`
 
 A frozen copy of a played save folder (`0/` and `1/`, each `system` and `system_backup`),
-sealed with the same passphrase. CI (`.github/workflows/ci.yml`) unpacks it and points
-`MHGU_TEST_SAVE` at it, so the tests that need a real save run on every push; without the
+sealed with the same passphrase. CI (`.github/workflows/ci.yml`) unpacks it with the asset
+pack and points `MHGU_TEST_SAVE` at it, so the tests that need a real save run on every
+push; without the
 secret (a fork's pull request) they are skipped. It holds the maintainer's character, so
 it is encrypted like the pack. The tests check values of this save: reseal it only on
 purpose, from a save folder:

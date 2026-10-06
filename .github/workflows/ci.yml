@@ -1,11 +1,11 @@
 name: CI
 
 # Tests and clippy on every push and pull request, in the Arch Linux container the release
-# builds use, and the tests again on Windows (the .exe's file and update handling). Without
-# the game-asset pack (only release.yml decrypts it): the editor then builds with
-# placeholders, which the tests don't need. The tests that need a real save get the sealed
-# copy app/assets/test-save.tar.xz.gpg (see app/assets/README.md); without the secret (a
-# fork's pull request) they stay #[ignore]d. The one that downloads a release never runs here.
+# builds use, and the tests again on Windows (the .exe's file and update handling). The
+# tests that need a real save get the sealed copy app/assets/test-save.tar.xz.gpg and the
+# game-asset pack (the UI test picks equipment by name); see app/assets/README.md. Without
+# the secret (a fork's pull request) the editor builds with placeholders and those tests
+# stay #[ignore]d. The one that downloads a release never runs here.
 
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
       - name: Translations
         run: python3 tools/i18n.py --check
 
-      - name: Test save
+      - name: Asset pack and test save
         env:
           ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
         run: &unseal |
@@ -50,6 +50,10 @@ jobs:
             echo "::warning::no ASSETS_PASSPHRASE: the tests that need a real save are skipped"
             exit 0
           fi
+          printf '%s' "$ASSETS_PASSPHRASE" |
+            gpg --batch --pinentry-mode loopback --passphrase-fd 0 --decrypt app/assets/gen.tar.gz.gpg |
+            tar -xz -C app/assets
+          test -f app/assets/gen/names.json
           # Git Bash on Windows: its tar needs /d/a/... and the tests D:/a/...
           dir="$RUNNER_TEMP/save"
           if command -v cygpath > /dev/null; then dir=$(cygpath -u "$dir"); fi
@@ -81,11 +85,13 @@ jobs:
 
       - uses: actions/checkout@v7
 
+      # a cold MSVC build takes ~20 min: keep the cache of a failed run too
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: app
+          cache-on-failure: true
 
-      - name: Test save
+      - name: Asset pack and test save
         env:
           ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
         run: *unseal
