@@ -82,10 +82,14 @@ pub struct State {
     /// Edits removed by Undo all, until the next edit (Redo).
     pub redo: Vec<Op>,
     next_id: i32,
+    /// Changes whenever the save's bytes or its original may have: what is computed
+    /// from them (the Overview's goal plans) is kept until it moves.
+    pub version: u64,
 }
 
 impl State {
     pub fn open(&mut self, path: &Path) -> Result<(), String> {
+        self.version += 1;
         let (save, loc, copies) = store::open(path).map_err(|e| e.to_string())?;
         self.slot = (0..3).find(|&s| save.slot_used(s)).unwrap_or(0);
         let orig = save.clone();
@@ -142,6 +146,7 @@ impl State {
         if slot > 2 || !doc.save.slot_used(slot) {
             return false;
         }
+        self.version += 1;
         let before = doc.save.bytes().to_vec();
         let base = doc.save.base(slot);
         let mut targets = e.targets;
@@ -193,6 +198,7 @@ impl State {
     }
 
     fn replay(&mut self) {
+        self.version += 1;
         let Some(doc) = self.doc.as_mut() else { return };
         doc.save.revert();
         for op in &self.ops {
@@ -265,6 +271,7 @@ impl State {
 
     /// After a write the written bytes are the new original.
     pub fn written(&mut self) {
+        self.version += 1;
         self.ops.clear();
         self.redo.clear();
         if let Some(doc) = self.doc.as_mut() {

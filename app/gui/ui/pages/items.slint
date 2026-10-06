@@ -1,7 +1,7 @@
 import { LineEdit, ListView, Button, Palette } from "std-widgets.slint";
 import {
     Api, Tok, Fmt, Card, Asset, Muted, ItemSlot, PageHeader, TabBar, NumberBox, StagedBar, WasLine, PreviewPopup,
-    MoreButton, ListRow, EmptyState,
+    MoreButton, ListRow, EmptyState, SearchField, KeyActivate, FocusRing,
 } from "../common.slint";
 
 // One slot of the box grid: number, icon, name, count; staged slots show what they held.
@@ -14,6 +14,9 @@ component SlotCell inherits Rectangle {
     background: root.flash ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
     accessible-role: button;
     accessible-label: "Slot " + (it.slot + 1) + ": " + (it.id == 0 ? "empty" : it.name + " ×" + it.count);
+    accessible-action-default => { root.edit(); }
+    fk := KeyActivate { activated => { root.edit(); } }
+    FocusRing { shown: fk.has-focus; border-radius: 4px; }
     ta := TouchArea { clicked => { root.edit(); } }
     if it.changed: StagedBar { x: 0; y: 6px; height: parent.height - 12px; }
     HorizontalLayout {
@@ -134,7 +137,7 @@ export component ItemsPage inherits Rectangle {
                 Api.filter-items(Api.item-filter);
             }
         }
-        if Api.item-store < 2: LineEdit {
+        if Api.item-store < 2: SearchField {
             placeholder-text: Api.item-store == 0 ? "Search the item box" : "Search the pouch";
             text <=> Api.item-filter;
             edited(t) => { Api.filter-items(t); }
@@ -145,6 +148,7 @@ export component ItemsPage inherits Rectangle {
           alignment: start;
           Card {
             width: min(root.width - 2 * Tok.margin, 1180px);
+            if Api.item-slots.length == 0: EmptyState { text: "No slot matches the search."; }
             list := ListView {
                 property <int> seq: Api.jump-seq;
                 function go() {
@@ -171,7 +175,6 @@ export component ItemsPage inherits Rectangle {
             }
           }
         }
-        if Api.item-store < 2 && Api.item-slots.length == 0: Muted { text: "No slot matches the search."; }
         // at most 24 rows (runs of empty loadouts collapse into one), so no virtualized
         // ListView: the card hugs its rows and scrolls only when the window is shorter
         if Api.item-store == 2: HorizontalLayout {
@@ -304,12 +307,30 @@ export component ItemsPage inherits Rectangle {
                         background: p.id == root.edit-id ? Tok.accent-soft : pa.has-hover ? Tok.hover : transparent;
                         accessible-role: list-item;
                         accessible-label: p.name;
+                        accessible-item-selected: p.id == root.edit-id;
+                        accessible-action-default => { root.pick(p.id, p.max); }
                         HorizontalLayout {
                             padding-left: 8px;
                             spacing: 10px;
                             Asset { width: 24px; height: 24px; y: 6px; source: p.icon; available: p.has-icon; }
                             Text { text: p.name; vertical-alignment: center; overflow: elide; font-weight: p.id == root.edit-id ? 600 : 400; }
                         }
+                        // Space picks it, Enter picks it and is done
+                        fk := FocusScope {
+                            key-pressed(e) => {
+                                if e.text == " " {
+                                    root.pick(p.id, p.max);
+                                    return accept;
+                                }
+                                if e.text == Key.Return {
+                                    root.pick(p.id, p.max);
+                                    root.commit(p.id, min(root.edit-count, p.max));
+                                    return accept;
+                                }
+                                return reject;
+                            }
+                        }
+                        FocusRing { shown: fk.has-focus; border-radius: 4px; }
                         pa := TouchArea {
                             clicked => { root.pick(p.id, p.max); }
                             double-clicked => {

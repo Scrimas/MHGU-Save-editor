@@ -1,7 +1,7 @@
 import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator } from "std-widgets.slint";
 import {
     Api, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
-    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo,
+    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing,
 } from "common.slint";
 import { OpenPage } from "pages/open.slint";
 import { OverviewPage } from "pages/overview.slint";
@@ -35,6 +35,11 @@ component ReviewEntry inherits VerticalLayout {
         border-color: Tok.line;
         background: ta.has-hover ? Tok.hover : transparent;
         height: body.preferred-height;
+        accessible-role: button;
+        accessible-label: c.title + (c.single ? ": " + c.old + " to " + c.new : "") + ". Opens the field.";
+        accessible-action-default => { Api.goto(c.key); }
+        fk := KeyActivate { activated => { Api.goto(c.key); } }
+        FocusRing { shown: fk.has-focus; border-radius: Tok.radius; }
         ta := TouchArea {
             mouse-cursor: pointer;
             clicked => { Api.goto(c.key); }
@@ -581,6 +586,49 @@ export component AppWindow inherits Window {
     property <length> review-w: Api.review-open && dock ? 380px : 0px;
     property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "monsters", "advanced"];
     property <[string]> nav-titles: ["Overview", "Character", "Items", "Equipment", "Palicoes", "Quests", "Requests", "Collections", "Monsters", "Save map"];
+    // Shortcuts: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page,
+    // Ctrl+O open a save, Escape closes Review. Dialogs take the keyboard while open
+    // (Modal); when the last one closes the window takes it back.
+    forward-focus: keys;
+    property <string> page-now: Api.page;
+    changed page-now => { Api.page-shown(); }
+    property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
+    changed any-modal => {
+        if !any-modal {
+            keys.focus();
+        }
+    }
+    // the whole window, so keys a field does not use reach it (its children keep the
+    // indentation they had before it)
+    keys := FocusScope {
+    key-pressed(e) => {
+        if e.modifiers.control && !e.modifiers.alt {
+            if e.text == "s" || e.text == "S" {
+                if Api.change-count > 0 {
+                    Api.check-emulator();
+                    Api.write-open = true;
+                }
+                return accept;
+            }
+            if e.text == "z" || e.text == "Z" {
+                Api.undo-last();
+                return accept;
+            }
+            if e.text == "f" || e.text == "F" {
+                Api.search-seq += 1;
+                return accept;
+            }
+            if e.text == "o" || e.text == "O" {
+                Api.open-dialog();
+                return accept;
+            }
+        }
+        if e.text == Key.Escape && Api.review-open {
+            Api.review-open = false;
+            return accept;
+        }
+        return reject;
+    }
 
     Rectangle {
         // sidebar
@@ -911,9 +959,13 @@ export component AppWindow inherits Window {
                 background: tba.pressed ? (Tok.dark ? #e6e6e6 : #4a4a4a) : tba.has-hover ? (Tok.dark ? #f0f0f0 : #444444) : (Tok.dark ? #ffffff : #3a3a3a);
                 accessible-role: button;
                 accessible-label: Api.toast-action;
+                accessible-action-default => { Api.toast-act(); }
+                tk := KeyActivate { activated => { Api.toast-act(); } }
+                FocusRing { shown: tk.has-focus; border-radius: 4px; }
                 tb := Text { text: Api.toast-action; color: Tok.dark ? #1c1c1c : #ffffff; }
                 tba := TouchArea { clicked => { Api.toast-act(); } }
             }
         }
+    }
     }
 }

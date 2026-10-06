@@ -38,13 +38,27 @@ pub fn detect_saves() -> Vec<PathBuf> {
         }
     }
     for f in crate::settings::get().save_folders {
-        for p in find_saves(&f) {
+        // a folder is walked once a session (up to 50,000 entries); adding it again in
+        // Settings walks it anew
+        let found = WALKED.with_borrow_mut(|m| m.entry(f.clone()).or_insert_with(|| find_saves(&f)).clone());
+        for p in found {
             if !out.contains(&p) {
                 out.push(p);
             }
         }
     }
     out
+}
+
+/// Forget a walked folder (removed in Settings), so adding it again finds new saves.
+pub fn forget_folder(f: &std::path::Path) {
+    WALKED.with_borrow_mut(|m| m.remove(f));
+}
+
+thread_local! {
+    static WALKED: std::cell::RefCell<std::collections::HashMap<PathBuf, Vec<PathBuf>>> = Default::default();
+    /// Characters of a save file by (path, size, modified): read again only when it changed.
+    static INFOS: std::cell::RefCell<std::collections::HashMap<PathBuf, (Option<std::time::SystemTime>, std::rc::Rc<SaveInfo>)>> = Default::default();
 }
 
 /// `system` files of the right size under `root`, at most 8 folders down (the yuzu
@@ -216,7 +230,18 @@ pub struct SaveInfo {
     pub modified: Option<chrono::DateTime<chrono::Local>>,
 }
 
-pub fn save_info(p: &std::path::Path) -> Option<SaveInfo> {
+/// `read_info`, kept while the file's modification time stays the same.
+pub fn save_info(p: &std::path::Path) -> Option<std::rc::Rc<SaveInfo>> {
+    let modified = p.metadata().and_then(|m| m.modified()).ok();
+    if let Some(i) = INFOS.with_borrow(|m| m.get(p).filter(|(t, _)| *t == modified && t.is_some()).map(|(_, i)| i.clone())) {
+        return Some(i);
+    }
+    let i = std::rc::Rc::new(read_info(p)?);
+    INFOS.with_borrow_mut(|m| m.insert(p.to_path_buf(), (modified, i.clone())));
+    Some(i)
+}
+
+fn read_info(p: &std::path::Path) -> Option<SaveInfo> {
     let s = mhgu_save::Save::from_bytes(std::fs::read(p).ok()?).ok()?;
     let names = (0..3)
         .filter(|&k| s.slot_used(k))

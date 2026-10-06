@@ -1,5 +1,5 @@
 import { ListView, LineEdit, Palette, ScrollView } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, ConfidenceTag, PageHeader, ColHead, Hairline, EmptyState, ListRow } from "../common.slint";
+import { Api, Tok, Card, Muted, ConfidenceTag, PageHeader, ColHead, Hairline, EmptyState, ListRow, SearchField } from "../common.slint";
 
 export component AdvancedPage inherits Rectangle {
     VerticalLayout {
@@ -10,7 +10,7 @@ export component AdvancedPage inherits Rectangle {
             title: "Save map";
             subtitle: "Every byte range of the save, named from the game's own loader · read-only, character " + (Api.slot + 1);
         }
-        LineEdit {
+        SearchField {
             placeholder-text: "Filter by name, manager or offset";
             text <=> Api.field-filter;
             edited(t) => { Api.filter-fields(t); }

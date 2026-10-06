@@ -1,7 +1,7 @@
 import { ListView, ComboBox, LineEdit, ScrollView, Palette } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
-    Confidence,
+    Confidence, SearchField,
 } from "../common.slint";
 
 // Label, control, "was … Undo" under it when staged.
@@ -63,7 +63,7 @@ export component PalicoesPage inherits Rectangle {
             VerticalLayout {
                 width: min(320px, root.width * 0.38);
                 spacing: Tok.tight;
-                LineEdit {
+                SearchField {
                     placeholder-text: "Search Palicoes";
                     text <=> Api.palico-search;
                     edited(t) => { Api.filter-palicoes(t); }

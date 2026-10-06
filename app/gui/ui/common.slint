@@ -1,5 +1,5 @@
 // Shared structs, the Rust bridge, design tokens and small widgets.
-import { Palette, Button } from "std-widgets.slint";
+import { Palette, Button, LineEdit } from "std-widgets.slint";
 
 export enum Confidence { confirmed, derived, unresolved }
 
@@ -180,6 +180,9 @@ export global Api {
     callback undo-all();
     // the field staged under this key back to its value in the file
     callback undo-value(string);
+    callback undo-last();               // Ctrl+Z: the latest change
+    callback page-shown();              // Api.page changed: build the page's models
+    in-out property <int> search-seq;   // Ctrl+F: the page's search field takes focus
     // open the page of a Review entry at its field
     callback goto(string);
     in property <string> highlight;     // key of the field to flash
@@ -575,6 +578,26 @@ export component Asset inherits Rectangle {
     }
 }
 
+// Keyboard for a custom control: Tab reaches it, Space or Enter activates it. Fills
+// its parent; put it before the control's TouchArea.
+export component KeyActivate inherits FocusScope {
+    callback activated();
+    key-pressed(e) => {
+        if e.text == " " || e.text == Key.Return {
+            root.activated();
+            return accept;
+        }
+        return reject;
+    }
+}
+
+// The outline of a custom control that has the keyboard focus.
+export component FocusRing inherits Rectangle {
+    in property <bool> shown;
+    border-width: root.shown ? 2px : 0px;
+    border-color: Tok.accent;
+}
+
 export component NavButton inherits Rectangle {
     in property <string> text;
     in property <int> count;
@@ -614,6 +637,12 @@ export component NavButton inherits Rectangle {
             c := Text { text: root.count; font-size: Tok.small; font-weight: 600; color: Tok.accent-text; }
         }
     }
+    accessible-action-default => { root.clicked(); }
+    fk := KeyActivate {
+        enabled: root.enabled;
+        activated => { root.clicked(); }
+    }
+    FocusRing { shown: fk.has-focus; border-radius: 5px; }
     ta := TouchArea {
         enabled: root.enabled;
         clicked => { root.clicked(); }
@@ -635,12 +664,15 @@ export component Chip inherits Rectangle {
     accessible-role: checkbox;
     accessible-checked: active;
     accessible-label: text;
+    accessible-action-default => { root.clicked(); }
     t := Text {
         text: (root.active ? "✓ " : "") + root.text;
         font-size: Tok.small;
         horizontal-alignment: center;
         vertical-alignment: center;
     }
+    fk := KeyActivate { activated => { root.clicked(); } }
+    FocusRing { shown: fk.has-focus; border-radius: 14px; }
     ta := TouchArea { clicked => { root.clicked(); } }
 }
 
@@ -674,6 +706,9 @@ export component TabBar inherits Rectangle {
                 border-radius: 1.5px;
                 background: i == root.current ? Tok.accent : transparent;
             }
+            accessible-action-default => { root.select(i); }
+            fk := KeyActivate { activated => { root.select(i); } }
+            FocusRing { shown: fk.has-focus; border-radius: 4px; }
             ta := TouchArea { clicked => { root.select(i); } }
         }
     }
@@ -749,6 +784,11 @@ export component ListRow inherits Rectangle {
     callback clicked;
     height: root.two-line ? 52px : 40px;
     background: root.flash || root.selected ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+    accessible-role: list-item;
+    accessible-item-selected: root.selected;
+    accessible-action-default => { root.clicked(); }
+    fk := KeyActivate { activated => { root.clicked(); } }
+    FocusRing { shown: fk.has-focus; }
     ta := TouchArea { clicked => { root.clicked(); } }
     if root.staged: StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
     @children
@@ -954,29 +994,46 @@ export component StatTile inherits Card {
 
 // A modal dialog: scrim over everything, the card centred (C11: anything that confirms
 // or commits). Fills its parent: the window, or a PopupWindow the size of the window.
+// A page's search field: Ctrl+F puts the cursor in it.
+export component SearchField inherits LineEdit {
+    property <int> seq: Api.search-seq;
+    changed seq => { self.focus(); }
+}
+
 export component Modal inherits Rectangle {
     in property <length> card-width: 520px;
-    callback dismiss();  // click on the scrim
+    callback dismiss();  // click on the scrim, or Escape
     background: #00000080;
-    TouchArea { clicked => { root.dismiss(); } }
-    Rectangle {
-        width: min(root.card-width, root.width - 32px);
-        height: min(lay.preferred-height, root.height - 48px);
-        x: (root.width - self.width) / 2;
-        y: max(24px, (root.height - self.height) / 3);
-        background: Tok.raised;
-        border-radius: 8px;
-        border-width: 1px;
-        border-color: Tok.line;
-        drop-shadow-blur: 30px;
-        drop-shadow-color: #0008;
-        TouchArea { }
-        lay := VerticalLayout {
-            padding: 20px;
-            spacing: Tok.gap;
-            @children
+    // takes the keyboard while open: Escape closes it, keys of its fields bubble here
+    fs := FocusScope {
+        key-pressed(e) => {
+            if e.text == Key.Escape {
+                root.dismiss();
+                return accept;
+            }
+            return reject;
+        }
+        TouchArea { clicked => { root.dismiss(); } }
+        Rectangle {
+            width: min(root.card-width, root.width - 32px);
+            height: min(lay.preferred-height, root.height - 48px);
+            x: (root.width - self.width) / 2;
+            y: max(24px, (root.height - self.height) / 3);
+            background: Tok.raised;
+            border-radius: 8px;
+            border-width: 1px;
+            border-color: Tok.line;
+            drop-shadow-blur: 30px;
+            drop-shadow-color: #0008;
+            TouchArea { }
+            lay := VerticalLayout {
+                padding: 20px;
+                spacing: Tok.gap;
+                @children
+            }
         }
     }
+    init => { fs.focus(); }
 }
 
 // Shown or collapsed to nothing, for blocks with wrapped text in a layout that sizes a
@@ -1148,7 +1205,20 @@ export component MoreButton inherits Rectangle {
                     height: 34px;
                     border-radius: 4px;
                     background: ta.has-hover ? Tok.hover : transparent;
+                    accessible-role: button;
+                    accessible-label: it;
+                    accessible-action-default => {
+                        menu.close();
+                        root.activated(i);
+                    }
                     Text { text: it; x: 12px; vertical-alignment: center; }
+                    fk := KeyActivate {
+                        activated => {
+                            menu.close();
+                            root.activated(i);
+                        }
+                    }
+                    FocusRing { shown: fk.has-focus; border-radius: 4px; }
                     ta := TouchArea {
                         clicked => {
                             menu.close();

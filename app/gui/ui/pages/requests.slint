@@ -1,5 +1,5 @@
 import { ListView, CheckBox, Palette, LineEdit } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, Chip, PageHeader, ColHead, InfoTip, Hairline, EmptyState, ListRow } from "../common.slint";
+import { Api, Tok, Card, Muted, Chip, PageHeader, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField } from "../common.slint";
 
 export component RequestsPage inherits Rectangle {
     // the first tick of Completed in this session shows what it costs (05.2)
@@ -21,7 +21,7 @@ export component RequestsPage inherits Rectangle {
         }
         HorizontalLayout {
             spacing: Tok.tight;
-            LineEdit {
+            SearchField {
                 placeholder-text: "Search requests or villages";
                 text <=> Api.request-search;
                 edited => { Api.filter-requests(); }
@@ -36,13 +36,16 @@ export component RequestsPage inherits Rectangle {
                 }
             }
         }
-        if root.warned: Rectangle {
-            height: 40px;
+        // said before the first tick, and outlined once Completed was ticked; wraps in a
+        // narrow window rather than cutting the sentence (not an `if`: see Reveal)
+        Rectangle {
+            height: banner.preferred-height;
             border-radius: Tok.radius;
-            background: Tok.warn.transparentize(0.88);
+            background: Tok.warn.transparentize(root.warned ? 0.82 : 0.92);
             border-width: 1px;
-            border-color: Tok.warn.transparentize(0.5);
-            HorizontalLayout {
+            border-color: Tok.warn.transparentize(root.warned ? 0.3 : 0.7);
+            banner := HorizontalLayout {
+                padding: 10px;
                 padding-left: 14px;
                 padding-right: 14px;
                 Text {
@@ -50,7 +53,7 @@ export component RequestsPage inherits Rectangle {
                     color: Tok.warn;
                     font-size: Tok.small;
                     vertical-alignment: center;
-                    overflow: elide;
+                    wrap: word-wrap;
                 }
             }
         }
@@ -89,7 +92,9 @@ export component RequestsPage inherits Rectangle {
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }
-                    if Api.requests.length == 0: EmptyState { text: "No request matches."; }
+                    if Api.requests.length == 0: EmptyState {
+                        text: Api.request-search != "" ? "No request matches the search." : Api.request-filter == "open" ? "Every request is completed." : Api.request-filter == "done" ? "No request is completed yet." : "No requests.";
+                    }
                     ListView {
                         for r in Api.requests: ListRow {
                             staged: r.changed;

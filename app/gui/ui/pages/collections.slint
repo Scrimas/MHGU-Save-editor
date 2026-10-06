@@ -1,7 +1,7 @@
 import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, Chip, Asset, PageHeader, TabBar, ColHead, NumberBox, StagedBar, WasLine, Hairline,
-    EmptyState, PreviewPopup, MoreButton, CheckRow,
+    EmptyState, PreviewPopup, MoreButton, CheckRow, SearchField,
 } from "../common.slint";
 
 // Checkbox, icon, name: the order of the in-game lists (H5.4); long names elide (H5.2).
@@ -60,7 +60,7 @@ export component CollectionsPage inherits Rectangle {
         TabBar { tabs: Api.collection-tabs; current: Api.collection-tab; select(i) => { Api.select-collection(i); } }
         HorizontalLayout {
             spacing: Tok.tight;
-            LineEdit {
+            SearchField {
                 placeholder-text: "Search";
                 text <=> Api.check-search;
                 edited => { Api.filter-checks(); }

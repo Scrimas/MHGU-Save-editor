@@ -1,5 +1,5 @@
 import { Button, ScrollView, Palette } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, StatTile, SectionTitle, Goal, PageHeader, ConfidenceTag, Confidence, PreviewPopup } from "../common.slint";
+import { Api, Tok, Card, Muted, StatTile, SectionTitle, Goal, PageHeader, ConfidenceTag, Confidence, PreviewPopup, EmptyState } from "../common.slint";
 
 component GoalCard inherits Card {
     in property <Goal> goal;
@@ -82,7 +82,7 @@ export component OverviewPage inherits Rectangle {
             }
             // only goals that can still change something get a card, in equal columns
             // (C3m, K1)
-            if Api.goals.length == 0: Muted { text: "Every goal is already in this save."; }
+            if Api.goals.length == 0: Card { EmptyState { text: "Every goal is already in this save."; } }
             for r in (Api.goals.length + root.cols - 1) / root.cols: HorizontalLayout {
                 spacing: Tok.gap;
                 alignment: start;

@@ -1,7 +1,7 @@
 import { LineEdit, CheckBox, ListView, Button, Palette } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, MonsterRow, PageHeader, Chip, ColHead, InfoTip, NumberBox, WasLine,
-    Hairline, EmptyState, PreviewPopup, Pill, ListRow,
+    Hairline, EmptyState, PreviewPopup, Pill, ListRow, SearchField,
 } from "../common.slint";
 
 global Cols {
@@ -148,7 +148,7 @@ export component MonstersPage inherits Rectangle {
         }
         HorizontalLayout {
             spacing: Tok.tight;
-            LineEdit {
+            SearchField {
                 placeholder-text: "Search monsters";
                 text <=> Api.monster-filter;
                 edited => { Api.filter-monsters(); }

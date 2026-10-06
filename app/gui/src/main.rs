@@ -404,6 +404,18 @@ mod tests {
             api.invoke_goto(key);
             assert_eq!(st.borrow().slot, 1);
         }
+        // Ctrl+Z takes back the latest change
+        {
+            use slint::platform::{Key, WindowEvent};
+            let n = api.get_change_count();
+            ui.show().unwrap();
+            let w = ui.window();
+            w.dispatch_event(WindowEvent::KeyPressed { text: Key::Control.into() });
+            w.dispatch_event(WindowEvent::KeyPressed { text: "z".into() });
+            w.dispatch_event(WindowEvent::KeyReleased { text: "z".into() });
+            w.dispatch_event(WindowEvent::KeyReleased { text: Key::Control.into() });
+            assert_eq!(api.get_change_count(), n - 1);
+        }
         // opening a save with staged changes asks first
         let n = api.get_change_count();
         views::open(&ui, &st, &dir.join("0/system"));

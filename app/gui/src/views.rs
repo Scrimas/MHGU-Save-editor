@@ -290,6 +290,18 @@ struct View {
     update_exe: Option<PathBuf>,
     /// set to stop the download running
     update_cancel: Option<Arc<AtomicBool>>,
+    /// the Overview's goals as planned for (save state, character)
+    goal_plans: Option<((u64, usize), Vec<GoalView>)>,
+}
+
+/// What the Overview shows of a goal's plan.
+#[derive(Clone)]
+struct GoalView {
+    title: String,
+    summary: String,
+    count: String,
+    blocked: bool,
+    empty: bool,
 }
 
 thread_local! {
@@ -560,9 +572,24 @@ fn overview(ui: &AppWindow, st: &State) {
     ]));
     let mut cards = vec![];
     let mut done_goals = vec![];
-    for g in &goals::GOALS {
+    // each plan copies and diffs the whole save: planned again only once it changed
+    let key = (st.version, st.slot);
+    let plans = match view(|v| v.goal_plans.clone()) {
+        Some((k, p)) if k == key => p,
+        _ => {
+            let p: Vec<GoalView> = goals::GOALS
+                .iter()
+                .map(|g| {
+                    let p = goals::plan(g.id, s, st.slot);
+                    GoalView { title: p.title, summary: p.summary, count: p.count, blocked: p.blocked, empty: p.lines.is_empty() }
+                })
+                .collect();
+            view(|v| v.goal_plans = Some((key, p.clone())));
+            p
+        }
+    };
+    for (g, p) in goals::GOALS.iter().zip(&plans) {
         let staged = st.ops.iter().find(|o| o.slot == st.slot && o.key == format!("goal:{}", g.id));
-        let p = goals::plan(g.id, s, st.slot);
         let goal = |state: i32, detail: String, cnt: String, op: i32| Goal {
             id: g.id.into(),
             title: p.title.clone().into(),
@@ -575,7 +602,7 @@ fn overview(ui: &AppWindow, st: &State) {
         match staged {
             Some(o) => cards.push(goal(1, "Its changes are in Review. Nothing is written until you press Write.".into(), String::new(), o.id)),
             None if p.blocked => cards.push(goal(3, p.summary.clone(), p.count.clone(), 0)),
-            None if p.lines.is_empty() => done_goals.push(goal(2, p.summary.clone(), String::new(), 0)),
+            None if p.empty => done_goals.push(goal(2, p.summary.clone(), String::new(), 0)),
             None => cards.push(goal(0, p.summary.clone(), p.count.clone(), 0)),
         }
     }
@@ -1754,7 +1781,7 @@ fn wire_settings(ui: &AppWindow) {
         let Some(ui) = w.upgrade() else { return };
         settings::update(|s| {
             if (i as usize) < s.save_folders.len() {
-                s.save_folders.remove(i as usize);
+                system::forget_folder(&s.save_folders.remove(i as usize));
             }
         });
         detected(&ui);
@@ -1903,7 +1930,7 @@ fn goto(ui: &AppWindow, st: &State, key: &str) {
     if api.get_page().as_str() == t.page() {
         refresh(ui, st);
     } else {
-        // the page timer refreshes the new page, which then takes the goto
+        // page-shown refreshes the new page, which then takes the goto
         api.set_page(t.page().into());
     }
 }
@@ -1988,21 +2015,15 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_settings(ui);
     wire_update(ui, st);
 
-    // page switches refresh their model
+    // page switches refresh their model (the window calls this when Api.page changes)
     {
         let w = ui.as_weak();
         let st2 = st.clone();
-        let page = std::rc::Rc::new(std::cell::RefCell::new(String::new()));
-        let t = slint::Timer::default();
-        t.start(slint::TimerMode::Repeated, std::time::Duration::from_millis(100), move || {
-            let Some(ui) = w.upgrade() else { return };
-            let p = ui.global::<Api>().get_page().to_string();
-            if *page.borrow() != p {
-                *page.borrow_mut() = p;
+        api.on_page_shown(move || {
+            if let Some(ui) = w.upgrade() {
                 refresh(&ui, &st2.borrow());
             }
         });
-        std::mem::forget(t);
     }
 
     {
@@ -2067,6 +2088,13 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_undo, |ui, s, id: i32| {
         s.undo(id);
         let _ = &ui;
+    });
+    // Ctrl+Z: the latest change, said in a toast
+    on!(ui, st, on_undo_last, |ui, s| {
+        let Some(op) = s.ops.last() else { return };
+        let (id, title) = (op.id, op.title.clone());
+        s.undo(id);
+        toast(&ui, format!("Undid {title}"), false);
     });
     on!(ui, st, on_undo_value, |ui, s, key: SharedString| {
         s.undo_value(&key);

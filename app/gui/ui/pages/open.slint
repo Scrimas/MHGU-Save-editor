@@ -1,5 +1,5 @@
 import { Button, ListView, Palette } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, Hairline, DetectedSave } from "../common.slint";
+import { Api, Tok, Card, Muted, Hairline, DetectedSave, KeyActivate, FocusRing } from "../common.slint";
 
 // Saves with their characters, not bare paths (R12); a click opens one.
 component SaveList inherits VerticalLayout {
@@ -16,6 +16,9 @@ component SaveList inherits VerticalLayout {
                 background: ta.has-hover ? Tok.hover : transparent;
                 accessible-role: button;
                 accessible-label: p.title;
+                accessible-action-default => { Api.open-path(p.path); }
+                fk := KeyActivate { activated => { Api.open-path(p.path); } }
+                FocusRing { shown: fk.has-focus; }
                 if i > 0: Hairline { y: 0; width: parent.width; }
                 HorizontalLayout {
                     padding-left: 14px;

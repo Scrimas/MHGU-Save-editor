@@ -1,5 +1,7 @@
 import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow } from "../common.slint";
+import {
+    Api, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField,
+} from "../common.slint";
 
 component QuestLine inherits ListRow {
     in property <QuestRow> q;
@@ -61,7 +63,7 @@ export component QuestsPage inherits Rectangle {
         TabBar { tabs: Api.quest-tabs; current: Api.quest-tab; select(i) => { Api.select-quest-tab(i); } }
         HorizontalLayout {
             spacing: Tok.tight;
-            LineEdit {
+            SearchField {
                 placeholder-text: "Search quests by name or number";
                 text <=> Api.quest-search;
                 edited => { Api.filter-quests(); }

@@ -145,6 +145,7 @@ fn to_slint(img: &image::RgbaImage) -> Image {
 
 thread_local! {
     static MONSTERS: RefCell<HashMap<usize, Option<Image>>> = RefCell::new(HashMap::new());
+    static AWARDS: RefCell<HashMap<usize, Option<Image>>> = RefCell::new(HashMap::new());
     static ITEMS: RefCell<HashMap<(u32, u32), Option<Image>>> = RefCell::new(HashMap::new());
     static SHEET: RefCell<Option<Option<image::RgbaImage>>> = const { RefCell::new(None) };
 }
@@ -192,7 +193,7 @@ pub fn rarity_rgb(r: u32) -> [u8; 3] {
 }
 
 pub fn award_icon(bit: usize) -> Option<Image> {
-    file(&format!("awards/{bit}.png")).and_then(decode).map(|i| to_slint(&i))
+    AWARDS.with_borrow_mut(|m| m.entry(bit).or_insert_with(|| file(&format!("awards/{bit}.png")).and_then(decode).map(|i| to_slint(&i))).clone())
 }
 
 pub fn equip_icon(type_code: u8, rarity: u32) -> Option<Image> {

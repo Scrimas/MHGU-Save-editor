@@ -1,7 +1,8 @@
 import { ListView, ComboBox, Button, ScrollView, Palette, LineEdit } from "std-widgets.slint";
 import {
     Api, Tok, Fmt, Card, Asset, Muted, Chip, EquipRow, ConfidenceTag, Confidence, SectionTitle, PageHeader, TabBar,
-    NumberBox, StagedBar, WasLine, EmptyState, Pill, Hairline, TextLink, Chevron, ListRow,
+    NumberBox, StagedBar, WasLine, EmptyState, Pill, Hairline, TextLink, Chevron, ListRow, SearchField, KeyActivate,
+    FocusRing,
 } from "../common.slint";
 
 component EquipLine inherits ListRow {
@@ -34,6 +35,9 @@ export component EquipmentPage inherits Rectangle {
     property <bool> wide: root.width > 900px;
     property <length> detail-w: root.width > 1100px ? 480px : root.width * 0.44;
     property <bool> hunter: Api.equip-owner == 0;
+    // narrow window: the selected piece's detail is shown instead of the list
+    property <bool> show-detail;
+    changed wide => { root.show-detail = false; }
     // picker target: box slot (-1 = first free) and the piece it holds (0 = none)
     property <int> target-slot: -1;
     property <int> target-id: 0;
@@ -122,7 +126,7 @@ export component EquipmentPage inherits Rectangle {
         }
         HorizontalLayout {
             spacing: Tok.tight;
-            LineEdit {
+            SearchField {
                 placeholder-text: root.hunter ? "Search name, weapon type or skill" : "Search name or type";
                 text <=> Api.equip-search;
                 edited(t) => { Api.search-equip-list(t); }
@@ -140,7 +144,8 @@ export component EquipmentPage inherits Rectangle {
         HorizontalLayout {
             spacing: Tok.pad;
             vertical-stretch: 1;
-            Card {
+            // narrow: the detail of a picked piece takes the list's place, with Back
+            if root.wide || !root.show-detail: Card {
                 horizontal-stretch: 1;
                 if Api.equip-rows.length == 0: EmptyState { text: "Nothing in the box matches."; }
                 ListView {
@@ -160,16 +165,19 @@ export component EquipmentPage inherits Rectangle {
                         selected: e.slot == Api.equip-detail.slot;
                         clicked => {
                             Api.select-equip(e.slot);
-                            // no detail panel: an empty slot opens the picker, like the item box
+                            // no detail panel: an empty slot opens the picker, like the
+                            // item box; a piece shows its detail in the list's place
                             if !root.wide && e.kind-code == 0 {
                                 root.open-picker(e.slot, 0, -1, root.width - Tok.margin, 64px);
+                            } else if !root.wide {
+                                root.show-detail = true;
                             }
                         }
                     }
                 }
             }
-            if root.wide: Card {
-                width: root.detail-w;
+            if root.wide || root.show-detail: Card {
+                width: root.wide ? root.detail-w : root.width - 2 * Tok.margin;
                 if Api.equip-detail.slot < 0: EmptyState {
                     text: "Pick a piece, or add one to the first free slot.";
                     action: Api.equip-free >= 0 ? "Add equipment" : "";
@@ -180,6 +188,10 @@ export component EquipmentPage inherits Rectangle {
                         padding: Tok.pad;
                         spacing: 14px;
                         alignment: start;
+                        if !root.wide: HorizontalLayout {
+                            alignment: start;
+                            Button { text: "‹ Back to the box"; clicked => { root.show-detail = false; } }
+                        }
                         VerticalLayout {
                             spacing: 2px;
                             Text { text: Api.equip-detail.name; font-size: 18px; font-weight: 600; wrap: word-wrap; }
@@ -385,6 +397,9 @@ export component EquipmentPage inherits Rectangle {
                         background: p.id == root.target-id ? Tok.accent-soft : pa.has-hover ? Tok.hover : transparent;
                         accessible-role: list-item;
                         accessible-label: p.name;
+                        accessible-action-default => { root.pick(p.id); }
+                        fk := KeyActivate { activated => { root.pick(p.id); } }
+                        FocusRing { shown: fk.has-focus; border-radius: 4px; }
                         HorizontalLayout {
                             padding-left: 8px;
                             padding-right: 8px;
@@ -447,6 +462,17 @@ export component EquipmentPage inherits Rectangle {
                         background: da.has-hover ? Tok.hover : transparent;
                         accessible-role: list-item;
                         accessible-label: p.name + ", " + p.sub;
+                        accessible-action-default => {
+                            Api.set-equip("deco-add", p.id);
+                            decos.close();
+                        }
+                        dk := KeyActivate {
+                            activated => {
+                                Api.set-equip("deco-add", p.id);
+                                decos.close();
+                            }
+                        }
+                        FocusRing { shown: dk.has-focus; border-radius: 4px; }
                         HorizontalLayout {
                             padding-left: 8px;
                             padding-right: 8px;
