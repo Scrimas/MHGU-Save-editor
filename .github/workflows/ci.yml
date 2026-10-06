@@ -26,7 +26,8 @@ jobs:
     steps:
       - name: Toolchain
         run: |
-          pacman -Syu --noconfirm --needed git rustup fontconfig python gettext
+          # a font: the headless UI test lays out text (fontconfig finds none otherwise)
+          pacman -Syu --noconfirm --needed git rustup fontconfig ttf-dejavu python gettext
           rustup default stable
           rustup component add clippy
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
@@ -49,11 +50,15 @@ jobs:
             echo "::warning::no ASSETS_PASSPHRASE: the tests that need a real save are skipped"
             exit 0
           fi
-          mkdir -p "$RUNNER_TEMP/save"
+          # Git Bash on Windows: its tar needs /d/a/... and the tests D:/a/...
+          dir="$RUNNER_TEMP/save"
+          if command -v cygpath > /dev/null; then dir=$(cygpath -u "$dir"); fi
+          mkdir -p "$dir"
           printf '%s' "$ASSETS_PASSPHRASE" |
             gpg --batch --pinentry-mode loopback --passphrase-fd 0 --decrypt app/assets/test-save.tar.xz.gpg |
-            tar -xJ -C "$RUNNER_TEMP/save"
-          echo "MHGU_TEST_SAVE=$RUNNER_TEMP/save/0/system" >> "$GITHUB_ENV"
+            tar -xJ -C "$dir"
+          if command -v cygpath > /dev/null; then dir=$(cygpath -m "$dir"); fi
+          echo "MHGU_TEST_SAVE=$dir/0/system" >> "$GITHUB_ENV"
 
       - name: Tests
         working-directory: app
