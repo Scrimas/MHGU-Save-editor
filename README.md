@@ -20,6 +20,9 @@ Single-file builds are attached to each [release](https://github.com/Scrimas/MHG
 | `MHGU-Save-Editor-<version>-x86_64.AppImage` | Linux x86-64, glibc 2.28 or newer (distros from 2019 on) |
 | `MHGU-Save-Editor-<version>-x86_64.exe` | Windows 10 / 11, nothing to install |
 
+The AppImage adds itself to the application menu when started (`~/.local/share/applications`);
+the newest version on disk keeps the entry, and menus hide it once that AppImage is deleted.
+
 Ryujinx saves are found automatically (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
 Flatpak folders). For another emulator, use **Open save…** on its
 `…/save/<id>/0/system` file. Title ID `0100770008DD8000` (EU / western release).

@@ -1,6 +1,8 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
 mod assets;
+#[cfg(target_os = "linux")]
+mod desktop;
 mod fmt;
 mod goals;
 #[cfg(target_os = "linux")]
@@ -31,6 +33,8 @@ pub fn strings(v: impl IntoIterator<Item = String>) -> ModelRc<SharedString> {
 fn main() -> Result<(), slint::PlatformError> {
     // the interface size is read when the window is made
     settings::apply_scale();
+    #[cfg(target_os = "linux")]
+    desktop::install();
     // Wayland app id / X11 class, so the desktop can match the window to its icon and
     // rules: it needs the platform to exist and no window yet.
     slint::BackendSelector::new().select()?;
