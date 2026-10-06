@@ -4,6 +4,7 @@
 
 use crate::data::{tables, Quest};
 use crate::save::Save;
+use std::ops::{Deref, DerefMut};
 
 pub const HR: usize = 0x28;
 pub const CLEARED: usize = 0x2C77;
@@ -59,9 +60,10 @@ pub const DEVIANT_GATE: [&[u32]; 18] = [
 ];
 pub const BLOODBATH_FLAG: usize = 1226;
 
-/// Read and write access to one character.
-pub struct Char<'a> {
-    pub s: &'a mut Save,
+/// Access to one character: read through `&Save`, read and write through `&mut Save`
+/// (the setters need the latter).
+pub struct Char<S> {
+    pub s: S,
     pub base: usize,
 }
 
@@ -93,15 +95,18 @@ pub enum Lock {
     Locked(Vec<Vec<String>>),
 }
 
-impl<'a> Char<'a> {
-    pub fn new(s: &'a mut Save, slot: usize) -> Self {
+impl<S: Deref<Target = Save>> Char<S> {
+    pub fn new(s: S, slot: usize) -> Self {
         let base = s.base(slot);
         Char { s, base }
     }
     pub fn bit(&self, off: usize, i: usize) -> bool {
         self.s.bit(self.base + off, i)
     }
-    pub fn set_bit(&mut self, off: usize, i: usize, v: bool) {
+    pub fn set_bit(&mut self, off: usize, i: usize, v: bool)
+    where
+        S: DerefMut,
+    {
         self.s.set_bit(self.base + off, i, v)
     }
     pub fn u16(&self, off: usize) -> u16 {
@@ -116,7 +121,10 @@ impl<'a> Char<'a> {
     pub fn quest(&self, which: QuestBit, index: usize) -> bool {
         self.bit(which.off(), index)
     }
-    pub fn set_quest(&mut self, which: QuestBit, index: usize, v: bool) {
+    pub fn set_quest(&mut self, which: QuestBit, index: usize, v: bool)
+    where
+        S: DerefMut,
+    {
         self.set_bit(which.off(), index, v)
     }
     fn cleared_id(&self, id: u32) -> bool {
@@ -132,12 +140,18 @@ impl<'a> Char<'a> {
     pub fn hub_star(&self) -> u16 {
         self.u16(HUB_STAR)
     }
-    pub fn set_village_star(&mut self, v: u16) {
+    pub fn set_village_star(&mut self, v: u16)
+    where
+        S: DerefMut,
+    {
         self.s.set_u16(self.base + VIL_STAR, v.clamp(1, 10))
     }
     /// Also refreshes the HR copies, which follow the Hub star below HR 13.
-    pub fn set_hub_star(&mut self, v: u16) {
-        crate::character::set_hub_star(self.s, self.base, v)
+    pub fn set_hub_star(&mut self, v: u16)
+    where
+        S: DerefMut,
+    {
+        crate::character::set_hub_star(&mut *self.s, self.base, v)
     }
 
     /// The unlock rule of `script\check_quest_unlocked` for this quest (quest-unlock.csv).
@@ -184,20 +198,8 @@ impl<'a> Char<'a> {
         }
     }
 
-    /// Quest sets whose members are all cleared (first occurrence of a repeated ID).
-    pub fn set_members(set: u32) -> Vec<usize> {
-        let t = tables();
-        let mut seen = std::collections::HashSet::new();
-        t.quests
-            .iter()
-            .filter(|q| seen.insert(q.id))
-            .filter(|q| q.sets.contains(&set))
-            .map(|q| q.index)
-            .collect()
-    }
-
     pub fn set_complete(&self, set: u32) -> bool {
-        let m = Self::set_members(set);
+        let m = Char::set_members(set);
         !m.is_empty() && m.iter().all(|&i| self.quest(QuestBit::Cleared, i))
     }
 
@@ -205,7 +207,10 @@ impl<'a> Char<'a> {
     /// set bits of every set that is now complete (not the Arena rank sets). Returns the
     /// sets that were set. Star levels are raised only if `stars` (the game raises them
     /// when all urgents of a level are cleared; see docs/05).
-    pub fn clear_quests(&mut self, indices: &[usize]) -> Vec<u32> {
+    pub fn clear_quests(&mut self, indices: &[usize]) -> Vec<u32>
+    where
+        S: DerefMut,
+    {
         for &i in indices {
             self.set_quest(QuestBit::Cleared, i, true);
             self.set_quest(QuestBit::Seen, i, true);
@@ -223,29 +228,24 @@ impl<'a> Char<'a> {
         done
     }
 
-    /// Real quests of the board (placeholders, unused event slots and repeated IDs skipped).
-    pub fn real_quests(events: bool) -> Vec<&'static Quest> {
-        let mut seen = std::collections::HashSet::new();
-        tables()
-            .quests
-            .iter()
-            .filter(|q| q.is_real() && seen.insert(q.id))
-            .filter(|q| events || !q.category.starts_with("Event"))
-            .collect()
-    }
-
     // --- villager requests --------------------------------------------------------
 
     pub fn flag(&self, f: usize) -> bool {
         self.bit(FLAGS, f)
     }
-    pub fn set_flag(&mut self, f: usize, v: bool) {
+    pub fn set_flag(&mut self, f: usize, v: bool)
+    where
+        S: DerefMut,
+    {
         self.set_bit(FLAGS, f, v)
     }
 
     /// Accept a request the way its NPC does: the accepted flag plus the other flags of
     /// its first offer block (request-offer.csv `also`).
-    pub fn accept_request(&mut self, index: usize) {
+    pub fn accept_request(&mut self, index: usize)
+    where
+        S: DerefMut,
+    {
         let t = tables();
         if let Some(o) = t.offers.iter().find(|o| o.index == index) {
             self.set_flag(o.accept_flag, true);
@@ -332,21 +332,30 @@ impl<'a> Char<'a> {
     pub fn art(&self, id: u32) -> bool {
         self.bit(ARTS, id as usize)
     }
-    pub fn set_art(&mut self, id: u32, v: bool) {
+    pub fn set_art(&mut self, id: u32, v: bool)
+    where
+        S: DerefMut,
+    {
         assert!((1..=70).contains(&id) || (83..=190).contains(&id), "not a Hunter Art ID");
         self.set_bit(ARTS, id as usize, v)
     }
     pub fn ingredient(&self, b: usize) -> bool {
         self.bit(INGREDIENTS, b)
     }
-    pub fn set_ingredient(&mut self, b: usize, v: bool) {
+    pub fn set_ingredient(&mut self, b: usize, v: bool)
+    where
+        S: DerefMut,
+    {
         assert!(b < 45);
         self.set_bit(INGREDIENTS, b, v)
     }
     pub fn dish(&self, b: usize) -> bool {
         self.bit(DISHES, b)
     }
-    pub fn set_dish(&mut self, b: usize, v: bool) {
+    pub fn set_dish(&mut self, b: usize, v: bool)
+    where
+        S: DerefMut,
+    {
         assert!(b < 99);
         self.set_bit(DISHES, b, v)
     }
@@ -356,7 +365,10 @@ impl<'a> Char<'a> {
     }
     /// Awards live in two maps: the card ORs the game-side map back in after every
     /// quest, so a cleared award must be cleared in both (docs/09).
-    pub fn set_award(&mut self, b: usize, v: bool) {
+    pub fn set_award(&mut self, b: usize, v: bool)
+    where
+        S: DerefMut,
+    {
         assert!(b < 132);
         self.set_bit(AWARDS_CARD, b, v);
         self.set_bit(AWARDS_GAME, b, v);
@@ -367,17 +379,12 @@ impl<'a> Char<'a> {
     pub fn permits(&self, d: usize) -> u8 {
         self.s.u8(self.base + PERMITS + d)
     }
-    pub fn set_permits(&mut self, d: usize, v: u8) {
+    pub fn set_permits(&mut self, d: usize, v: u8)
+    where
+        S: DerefMut,
+    {
         assert!(d < 18);
         self.s.set_u8(self.base + PERMITS + d, v.min(99))
-    }
-    /// (first quest index, number of levels) of deviant `d`: 16 for the first 12, 6 after.
-    pub fn deviant_levels(d: usize) -> (usize, usize) {
-        if d < 12 { (DEVIANT_QUEST0 + 16 * d, 16) } else { (DEVIANT_QUEST0 + 192 + 6 * (d - 12), 6) }
-    }
-    /// Level number of G1 among `deviant_levels` (after Lv1-10, or the first).
-    pub fn deviant_g1(d: usize) -> usize {
-        if d < 12 { 10 } else { 0 }
     }
     /// Whether the board offers G1 and up: the base monster's G-rank gate is open.
     pub fn deviant_gate_open(&self, d: usize) -> bool {
@@ -385,5 +392,41 @@ impl<'a> Char<'a> {
             return self.flag(BLOODBATH_FLAG);
         }
         DEVIANT_GATE[d].iter().any(|&id| self.cleared_id(id))
+    }
+}
+
+/// What depends on the tables only (called as `Char::real_quests` and so on).
+impl Char<&Save> {
+    /// Quest sets whose members are all cleared (first occurrence of a repeated ID).
+    pub fn set_members(set: u32) -> Vec<usize> {
+        let t = tables();
+        let mut seen = std::collections::HashSet::new();
+        t.quests
+            .iter()
+            .filter(|q| seen.insert(q.id))
+            .filter(|q| q.sets.contains(&set))
+            .map(|q| q.index)
+            .collect()
+    }
+
+    /// Real quests of the board (placeholders, unused event slots and repeated IDs skipped).
+    pub fn real_quests(events: bool) -> Vec<&'static Quest> {
+        let mut seen = std::collections::HashSet::new();
+        tables()
+            .quests
+            .iter()
+            .filter(|q| q.is_real() && seen.insert(q.id))
+            .filter(|q| events || !q.category.starts_with("Event"))
+            .collect()
+    }
+
+    /// (first quest index, number of levels) of deviant `d`: 16 for the first 12, 6 after.
+    pub fn deviant_levels(d: usize) -> (usize, usize) {
+        if d < 12 { (DEVIANT_QUEST0 + 16 * d, 16) } else { (DEVIANT_QUEST0 + 192 + 6 * (d - 12), 6) }
+    }
+
+    /// Level number of G1 among `deviant_levels` (after Lv1-10, or the first).
+    pub fn deviant_g1(d: usize) -> usize {
+        if d < 12 { 10 } else { 0 }
     }
 }
