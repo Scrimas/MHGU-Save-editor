@@ -248,7 +248,7 @@ accumulator and staged counter 0.
 
 | `base +` | sItem | Size | Content |
 |---|---|---|---|
-| `0x22497` | `+0x9c` | 94 × u32 | items obtained: bit = item ID. 1173 of the 1177 item IDs in the analysed item box have their bit set; the four without it (485, 503, 1246, 1841) were already in the oldest snapshot, probably put there by a tool. Every item that entered the box or pouch in game got its bit in the same save |
+| `0x22497` | `+0x9c` | 94 × u32 | items obtained: bit = item ID. 1173 of the 1177 item IDs in the analysed item box have their bit set; the four without it (485, 503, 1246, 1841) were already in the oldest snapshot, probably put there by a tool. Every item that entered the box or pouch in game got its bit in the same save. Setter `0x1943d4` (IDs 1–2990), clear `0x194408` (only the title menu), test `0x19443c`. Read by the Smithy (key materials of a create entry, `0x6fa928`; a material group with nothing obtained is drawn as unknown, `0x6ffd40`), the Palico smithy (`uUIOtomoArms`), the shop (`uUIGuildShop`), the Trader (`uUITradeCenter`), the Palico training (`uUIOtomoExercise`) and the talk conditions (`0x2451c8`) |
 | `0x2260F` | `+0xea4` | 3 × 136 | the Trader's three cargo orders (`cUIOTradeCenterCargo`, `cUIOTradeCenterBox`) |
 | `0x227A7` | `+0x103c` | 10 × 420 | Alchemy requests (`uUIAlchemy`, `cUIOAlchemyRequest`): u8, u8 (255 = empty), u16, three 36-byte equipment entries, then seven of (u32, u32, 36-byte equipment entry). All ten are empty in the analysed save. Stride in memory 500 |
 | `0x2380F` | `+0x8c` | 10 | village tier bytes ([10](10-npc-talk.md)) |
@@ -441,9 +441,9 @@ not identified.
 | `+0x04C` | 4 × u16 | first 8 bytes of the 224-byte block | sPlayer `+0x240` |
 | `+0x054` | 7 × 44 | equipment, weapon … talisman (entry table below) | equipped gear |
 | `+0x188` | 3 × 580 | Palicoes: main, buddy 1, buddy 2. Name UTF-16 `+0`, then the hunter-section layout | sOtomo |
-| `+0x854` | 3 × u16 | title: the card editor's fields 0–2, word, connector (`GC_Title_2`), word. The own card has 140, 0 (none), 502 | cUIOGuildCardEdit |
-| `+0x85A` | u8 | scene (editor field 4): 35 on the own card, of 136 | cUIOGuildCardEdit |
-| `+0x85B` | u8 | pose (editor field 3; a change calls `0x1605b8`): 3, of 22 | cUIOGuildCardEdit |
+| `+0x854` | 3 × u16 | title: the card editor's fields 0–2, word (`GC_Title_1`: 1309 words, then their descriptions), connector (`GC_Title_2`: 121 words, 0 = none), word. The own card has 140, 0 (none), 502: *Titan Slayer* | cUIOGuildCardEdit |
+| `+0x85A` | u8 | scene (editor field 4): 35 on the own card, of 136 (`GC_background`, *Gammoth*) | cUIOGuildCardEdit |
+| `+0x85B` | u8 | pose (editor field 3; a change calls `0x1605b8`): 3, of 22 (`GuildCardMsg` 235–256, *Stand* … *Beam Fire*) | cUIOGuildCardEdit |
 | `+0x85C` | u16 | HR of a transferred save, 0xFFFF = none; copied from `S+0x41a` | `0x161ac8` |
 | `+0x86C` | u32 | copied from `sGameControl +0x3c` | `0x161ac8` |
 | `+0x878` | | greeting, UTF-16 | |
@@ -607,7 +607,7 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x310F`, `0x311F` | `+0xbbc`, `+0xbdc` | title words, second part: 121 words of `GC_Title_2`, 117 from the start |
 | `0x312F`, `0x3143` | `+0xbec`, `+0xc14` | Guild Card scenes, the 136 backgrounds of `GC_background` |
 | `0x317F`, `0x3183` | `+0xc64`, `+0xc6c` | Guild Card poses: 22 (Stand … Beam Fire). 17 from the start, bits 17–21 from the DLC map at sPrivilege `+0xf44` |
-| `0x31A7`, `0x31CB` | `+0x2a0c`, `+0x2a54` | Smithy decorations listed / NEW, bit = `rDecoCreateData` entry |
+| `0x31A7`, `0x31CB` | `+0x2a0c`, `+0x2a54` | Smithy decorations listed / NEW, bit = `decoCreate` record (275) |
 | `0x31EF` … `0x32AB` | `+0x3488` … `+0x35a4` | the Trader (`uUITradeCenter`): seven maps, each followed by its N1 and N2. U at `+0x3488` (32 bits) and `+0x3494` (32): entries of the Trader's two item lists (UI byte `+0x3c` = 0 / 1), set by `0x7a9abc` once the entry's progress condition (`0x561b28`) holds. `+0x34a0` (448): Guild Card title words for sale (`tradeLimitedHonorList`, 442), `+0x3548` (160): Guild Card scenes for sale (`tradeLimitedPaperList`, 131), `+0x3584` (32): pet costumes for sale, the three set by the tabs of [block B's download test](#downloads-held--block-b-header). `+0x3590` (32): the coin-ticket trades (`rTradeCoinTicketList`, paid in *Horns Coin*); only the transfer converter sets it, the Cross ticket screen and the Trader read its N2 as NEW. `+0x359c` (32): delivery requests offered at the Trader, bit = `rTradeDeliveryList` entry, set by `0x79da8c` once the request's event flag is raised (`0x1971f0`); `0xff5` in the analysed save |
 | `0x32AF` | `+0x35a8` | delivery requests delivered: bit *b* for kind-1 request *b* in [`request-index.csv`](../data/request-index.csv) order, 0–12 (CONFIRMED: bits 0, 4, 5, 7 = the done flags of those requests), tested by `0x524db8` for talk condition 41 ([10](10-npc-talk.md)), the Trader and the Start Menu |
 | `0x32B3` | `+0x35ac` | Hunter's Notes tips read: a clear bit shows NEW (`cUIOHunterNoteTips`) |
@@ -617,10 +617,19 @@ something should set U and N2 (the game then shows it as NEW), or U only (no NEW
 | `0x32E3` | `+0x3668` | u32 flags. Bit 0: a network-mode switch mirrored to sFestaNetwork `+0x1624e` (`0x228310`, set by `uUILobbyStartMenu`, copied back by the title menu; read by the room list and menu bar), probably local vs online, UNRESOLVED. Bit 1: today's quest-counter daily bonus received (set by `0x3bb96c` after the bonus is paid, cleared when new daily picks `+0x40c` are rolled, `0x3babf4`; read for the board icon). No other bit is used. `+0x366c` is a runtime field of the lobby code, not saved. 0 in all three slots |
 | `0x32E7` … `0x3347` | `+0xd98` … `+0xe38` | two shop lists (`uUIGuildShop`, list index at UI `+0x8c`): 256 bits listed + NEW each, stride 96 |
 | `0x3367` | `+0xe58` | Armory (equipment shop): 21 equipment types × (20 B listed, 20 B NEW), stride 60 with the N1 copy between. Bit = shop entry of the type |
-| `0x36AF` | `+0x1344` | Smithy weapon lists, types 7–21: 15 × (20 B listed, 20 B NEW), stride 60 |
-| `0x3907` … `0x4327` | `+0x16c8` … | Smithy armor lists, head … legs: 5 × (288 B listed, 288 B NEW), stride 864. The list builder `0x6f9438` sets an entry when it first lists it; the cursor clears NEW (`0x524a38`) |
-| `0x4447` … `0x459B` | `+0x27a8` … | Palico smithy, weapons / helms / mail: 3 × (68 B listed, 68 B NEW), stride 204 |
+| `0x36AF` | `+0x1344` | Smithy weapon lists, types 7–21: 15 × (20 B listed, 20 B NEW), stride 40 in the file (60 in the object, which keeps a runtime copy between the two). Bit = `weaponCreateWNN` record of class NN (63–98 records). In the analysed save every set bit is below its table's record count |
+| `0x3907` … `0x4327` | `+0x16c8` … | Smithy armor lists, head … legs: 5 × (288 B listed, 288 B NEW), stride 576 in the file (864 in the object). Bit = 4 × `armorCreateANN` record + armor ID slot: a record holds one armor ID, a Blademaster / Gunner pair, or four (type 1 Blademaster, type 1 Gunner, type 2 Blademaster, type 2 Gunner). All 2,547 set bits of the analysed save fall on a filled slot, and of the four-ID records a type 1 hunter has only slots 0–1. The list builder `0x6f9438` sets an entry when it first lists it (`0x524980`: listed, the runtime copy and NEW); the cursor clears NEW (`0x524a38`) |
+| `0x4447` … `0x459B` | `+0x27a8` … | Palico smithy, weapons / helms / mail: 3 × (68 B listed, 68 B NEW), stride 136 in the file (204 in the object). Bit = `otWeaponCreate` record (508) for weapons, `otArmorCreate` record (526) for helms and mail |
 | `0x45DF` … `0x4CDF` | `+0x2a78` … | 15 weapon types × 1024 bits, by weapon ID. Set by the Smithy list builder `0x6ffd40` for the entries it shows |
+
+The Smithy shows a create entry when its listed bit is set, whatever its other
+conditions; otherwise it lists it when its progress conditions (`0x5615bc`, `0x561838`)
+hold and each of its up to four key materials is in the items-obtained map
+(`0x6fa928`, which reads the bit through `0x5248c0` for weapons and `0x5249f4` for
+armor). The editor's *List every Smithy entry* goal sets listed and NEW for every entry
+of [`smithy-lists.csv`](../data/smithy-lists.csv) (`tools/smithy_lists.py`, from
+`arc/facility/blacksmith.arc`), only the hunter's own type of the four-ID armor records.
+DERIVED.
 | `0x4D5F` | `+0x31f8` | the same for armor, 5248 bits by armor ID |
 | `0x4FFB`, `0x5023` | `+0xca0`, `+0xcf0` | Arena: bit 5 × quest + set = the Arena quest was cleared with that of its five equipment sets (`0x3b13c8`, read by `uUIArenaCounter`) |
 | `0x505B`, `0x505F` | `+0x35e4`, `+0x35ec` | Jukebox songs. `0x523b9c` unlocks the default ones |

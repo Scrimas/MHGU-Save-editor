@@ -94,6 +94,27 @@ at zero is safe.
 | `+0x12` | u8 | tier code: 97 Mystery, 98 Shining, 99 Timeworn, 100 Enduring |
 | `+0x13` | u8 | 1 on every talisman observed |
 
+### Charm tables
+
+**DERIVED.** What a talisman can roll comes from `loc/arc/resident.arc`:
+`amuletSkillDataNN` (4-byte records: u16 skill tree, i8 min and max points) and
+`amuletSlotDataNN` (4-byte records: a key, then the chances of 1, 2 and 3 slots). Tier
+*t* uses skill table 2(*t* − 97) for the first skill, 2(*t* − 97) + 1 for the second,
+and slot table *t* − 97:
+
+| Tier | First skill | Second skill | Most slots |
+|---|---|---|---|
+| 97 Mystery | 59 skills | none (table 01 is empty) | 1 |
+| 98 Shining | 71 | 74 | 2 |
+| 99 Timeworn | 56 | 105 | 3 |
+| 100 Enduring | 62 | 94 | 3 |
+
+All 390 talismans of the analysed saves, every one appraised in game, fit these tables;
+the same tables shifted by one tier break 282–368 of them. The full tables are
+[`talisman-tables.csv`](../data/talisman-tables.csv) (`tools/talisman_tables.py`); the
+editor warns about a talisman outside them. How the slot chances depend on the points
+is not worked out: the editor checks the most slots only.
+
 ## Transmog
 
 **CONFIRMED.** Transmog is per box entry: bytes `+0x04..+0x05` hold the armor ID whose

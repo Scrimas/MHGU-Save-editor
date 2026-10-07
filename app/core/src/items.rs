@@ -16,6 +16,23 @@ pub const LOADOUT_NAME: usize = 42;
 pub const LOADOUT_ITEMS: usize = 32;
 pub const MAX_ID: u16 = 0xFFF;
 pub const MAX_COUNT: u8 = 99;
+/// Items obtained, bit = item ID (sItem `+0x9c`, 94 x u32; CONFIRMED by the save
+/// timeline). The game sets a bit when the item first enters the box or pouch, for IDs
+/// 1-2990 (`0x1943d4`). The Smithy, the Palico smithy, the shop, the Trader and the talk
+/// conditions read it: a Smithy entry needs its key materials obtained, and material
+/// names show only once obtained (`0x6fa928`, `0x6ffd40`).
+pub const OBTAINED: usize = 0x22497;
+pub const OBTAINED_MAX_ID: u16 = 2990;
+
+pub fn obtained(s: &Save, base: usize, id: u16) -> bool {
+    (1..=OBTAINED_MAX_ID).contains(&id) && s.bit(base + OBTAINED, id as usize)
+}
+
+pub fn set_obtained(s: &mut Save, base: usize, id: u16, v: bool) {
+    if (1..=OBTAINED_MAX_ID).contains(&id) {
+        s.set_bit(base + OBTAINED, id as usize, v);
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Stack {

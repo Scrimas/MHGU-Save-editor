@@ -7,9 +7,10 @@
            it holds Capcom's icons and text)
 
 Writes:
-  names.json       item, equipment, skill, monster and Palico support move names; item
-                   icon / colour / rarity and pouch carry limit; palettes; equipment type
-                   icons; icon cell positions on items.png
+  names.json       item, equipment, skill, monster and Palico support move names; Guild
+                   Card title words, scenes and poses; item icon / colour / rarity and
+                   pouch carry limit; palettes; equipment type icons; icon cell positions
+                   on items.png
   names.<code>.json  the same names in French, German, Italian and Spanish (fr de it es),
                    from the game's own text
   items.png        the grayscale item icon sheet (HD_cmn_icon_GSM); the editor tints it
@@ -21,7 +22,8 @@ Where things are (all CONFIRMED visually or against a real save unless noted):
   tables     loc/arc/resident.arc table\\* (f32 version, u32 count, packed records)
   text       eng/arc/resident_eng.arc eng\\table\\*_eng (GMD, names at even indices);
              fre ger ita spa the same; monster names eng\\GUI\\06_msg\\monsterName_eng
-             (variants named like their base: see HUB_VARIANTS, FATALIS_VARIANTS)
+             (variants named like their base: see HUB_VARIANTS, FATALIS_VARIANTS);
+             Guild Card texts loose in <lang>/table/ (guild_card)
 Tables the game builds in code (EXE, v1.4 main) are copied below with their addresses.
 """
 import json, os, struct, sys, zlib
@@ -270,6 +272,7 @@ def main(romfs, out):
     # Palico support moves: name and description pairs, move ID k -> entry 2k
     # (0 "(No Move)"; the Palico record's learned slots use 57 for none). DERIVED
     names['support_moves'] = gmd(reng['eng\\otomo\\support\\spt_act_base_eng'])[0::2]
+    names.update(guild_card(R, 'eng'))
 
     # Guild Card awards: bit i -> cell i, 10 x 48 px; 0-99 lby_deco, 100+ lby_deco2
     aw = [tex('HD_lby_deco_BM_MQ_NOMIP'), tex('HD_lby_deco2_BM_MQ_NOMIP')]
@@ -301,6 +304,17 @@ FATALIS_VARIANTS = {'eng': ('Crimson Fatalis', 'Old Fatalis'), 'fre': ('Fatalis 
                     'spa': ('Fatalis Carmesí', 'Fatalis Ancestral')}
 
 
+def guild_card(R, lang):
+    """Guild Card texts of one language, by ID: gc_words (GC_Title_1, 1309 words, then
+    their descriptions), gc_links (GC_Title_2, 121 words for the title's middle field),
+    gc_scenes (GC_background, 136, then descriptions), gc_poses (GuildCardMsg 235-256:
+    Stand … Beam Fire, 22). The counts match the unlock maps of S +0x9d0, +0xbbc, +0xbec,
+    +0xc64 (docs/11-save-map.md). DERIVED"""
+    g = lambda n: gmd(R.read('/nativeNX/%s/table/%s_%s.gmd' % (lang, n, lang)))
+    return {'gc_words': g('GC_Title_1')[:1309], 'gc_links': g('GC_Title_2')[:121],
+            'gc_scenes': g('GC_background')[:136], 'gc_poses': g('GuildCardMsg')[235:257]}
+
+
 def text(R, r, lang, eng=None):
     """The names of one language from its resident_<lang>.arc `r` (and the variant monster
     names from RomFS `R`), entry for entry like the English names.json `eng` (the piece
@@ -308,11 +322,13 @@ def text(R, r, lang, eng=None):
       items, skills, support_moves, monsters   lists by ID (monsters: save index - 1)
       weapons     class -> [[base, final, ultimate] per English piece]
       armor, palico_armor   part -> [name per English piece]
-      palico_weapons, talismans   [name per English piece]"""
+      palico_weapons, talismans   [name per English piece]
+      gc_words, gc_links, gc_scenes, gc_poses   lists by ID (guild_card)"""
     g = lambda n: gmd(r['%s\\%s_%s' % (lang, n, lang)])
     out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
            'support_moves': g('otomo\\support\\spt_act_base')[0::2],
            'monsters': g('GUI\\06_msg\\monsterName')[:137]}
+    out.update(guild_card(R, lang))
     m = out['monsters']
     hub = gmd(R.read('/nativeNX/%s/GUI/06_msg/NetworkVillage_%s.gmd' % (lang, lang)))
     for i, (e, b) in HUB_VARIANTS.items():

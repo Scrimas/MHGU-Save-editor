@@ -106,6 +106,28 @@ pub struct Field {
     pub confidence: String,
 }
 
+/// data/smithy-lists.csv: one Smithy list and the create-table records it can show.
+#[derive(Debug, Clone)]
+pub struct SmithyList {
+    /// "weapon:<class>", "armor:<part>", "deco", "palico:<weapon|helm|mail>"
+    pub list: String,
+    pub records: usize,
+    /// Armor: per record, how many armor ID slots it fills (1, 2 or 4).
+    pub ids: Vec<u8>,
+}
+
+/// data/talisman-tables.csv: a skill a talisman tier can roll, or its most slots.
+#[derive(Debug, Clone)]
+pub struct TalismanRow {
+    /// "skill1", "skill2" or "slots"
+    pub kind: String,
+    /// Talisman entry +0x12: 97 Mystery … 100 Enduring.
+    pub tier: u8,
+    pub skill: u8,
+    pub min: i8,
+    pub max: i8,
+}
+
 pub struct Tables {
     pub quests: Vec<Quest>,
     pub unlock: HashMap<u32, String>,
@@ -122,6 +144,8 @@ pub struct Tables {
     /// (bit, grid, name)
     pub awards: Vec<(usize, String, String)>,
     pub fields: Vec<Field>,
+    pub smithy: Vec<SmithyList>,
+    pub talisman: Vec<TalismanRow>,
 }
 
 impl Tables {
@@ -223,6 +247,24 @@ pub fn tables() -> &'static Tables {
                     confidence: r["confidence"].clone(),
                 })
                 .collect(),
+            smithy: rows(include_str!("../../../data/smithy-lists.csv"))
+                .iter()
+                .map(|r| SmithyList {
+                    list: r["list"].clone(),
+                    records: num(&r["records"]) as usize,
+                    ids: r["ids"].bytes().map(|b| b - b'0').collect(),
+                })
+                .collect(),
+            talisman: rows(include_str!("../../../data/talisman-tables.csv"))
+                .iter()
+                .map(|r| TalismanRow {
+                    kind: r["kind"].clone(),
+                    tier: num(&r["tier"]) as u8,
+                    skill: num(&r["skill"]) as u8,
+                    min: num(&r["min"]) as i8,
+                    max: num(&r["max"]) as i8,
+                })
+                .collect(),
         }
     })
 }
@@ -236,5 +278,8 @@ mod tests {
         assert_eq!(t.monsters.len(), 137);
         assert!(t.fields.len() > 800);
         assert_eq!(t.quest_index(101), Some(1));
+        assert_eq!(t.smithy.len(), 23);
+        assert_eq!(t.talisman.iter().filter(|r| r.kind == "slots").count(), 4);
+        assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));
     }
 }
