@@ -32,9 +32,11 @@ file is checked against the release's SHA-256 sums and takes the place of the ol
 The sums come from the same release, so they catch a broken download, not a release
 published by someone else; a download can be cancelled.
 
-Ryujinx saves are found automatically (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
-Flatpak folders). For another emulator, use **Open save…** on its
-`…/save/<id>/0/system` file. Title ID `0100770008DD8000` (EU / western release).
+Saves are found automatically for Ryujinx (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
+Flatpak folders) and for yuzu and its forks: suyu, Sudachi, Citron, Eden, torzu
+(`~/.local/share/<name>`, `%APPDATA%\<name>`, `~/.var/app/<any app>/data/<name>`).
+For a portable install or another emulator, add its folder in **Settings…** or use
+**Open save…** on its `system` file. Title ID `0100770008DD8000` (EU / western release).
 
 ## What it edits
 
@@ -111,7 +113,7 @@ Keep your own backup anyway. This is an unofficial tool.
 
 **Settings…** in the sidebar: language, theme and interface size; snapshot folder, how many
 snapshots to keep per save, and whether Write takes one by default; extra folders to
-search for saves (yuzu, Eden, Citron, portable installs); recent saves and reopening the
+search for saves (portable installs, other folders); recent saves and reopening the
 last one; extra emulator process names for the running check; and **Confirmed changes
 only**, which refuses every Derived change (none today; it guards edits added later).
 They are kept in

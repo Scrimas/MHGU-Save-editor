@@ -519,7 +519,7 @@ component SettingsDialog inherits Modal {
             }
             SettingRow {
                 title: @tr("Save folders");
-                hint: @tr("Searched for saves besides Ryujinx's: yuzu, Eden, Citron or portable installs.");
+                hint: @tr("Searched for saves besides the folders found on their own (Ryujinx, the yuzu family): portable installs or any other folder.");
                 Button { text: @tr("Add folder…"); clicked => { Api.add-save-folder(); } }
             }
             for f[i] in s.folders: RemovableRow {

@@ -220,7 +220,7 @@ pub fn refresh(ui: &AppWindow, st: &State) {
     api.set_loaded(true);
     api.set_file_path(doc.loc.opened.display().to_string().into());
     let emu = system::emulator_name(&doc.loc.opened);
-    api.set_path_label(if emu == "Ryujinx" { emu } else { "" }.into());
+    api.set_path_label(system::known_emulator(&doc.loc.opened).unwrap_or("").into());
     api.set_path_tail(fmt::path_tail(&doc.loc.opened, 4).into());
     // a running emulator names itself (check-emulator); otherwise the save's folder does
     if !api.get_emulator_running() {

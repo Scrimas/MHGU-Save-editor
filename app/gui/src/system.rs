@@ -19,21 +19,63 @@ fn ryujinx_roots() -> Vec<PathBuf> {
     v
 }
 
+/// The yuzu family: data folder name and the name shown for it.
+const YUZU_FORKS: [(&str, &str); 6] =
+    [("yuzu", "yuzu"), ("suyu", "suyu"), ("sudachi", "Sudachi"), ("citron", "Citron"), ("eden", "Eden"), ("torzu", "torzu")];
+
+/// The yuzu family keeps its data in `<data>/<name>` (Linux ~/.local/share, Windows
+/// %APPDATA%, macOS Application Support), or as a Flatpak in
+/// `~/.var/app/<app id>/data/<name>`; every Flatpak app is looked at, so no app id is
+/// needed.
+fn yuzu_roots() -> Vec<PathBuf> {
+    let mut v = vec![];
+    if let Some(d) = dirs::data_dir() {
+        v.extend(YUZU_FORKS.iter().map(|(n, _)| d.join(n)));
+    }
+    if let Some(h) = dirs::home_dir()
+        && let Ok(rd) = std::fs::read_dir(h.join(".var/app"))
+    {
+        let mut apps: Vec<PathBuf> = rd.flatten().map(|e| e.path()).collect();
+        apps.sort();
+        for a in apps {
+            v.extend(YUZU_FORKS.iter().map(|(n, _)| a.join("data").join(n)));
+        }
+    }
+    v
+}
+
 fn is_save(p: &std::path::Path) -> bool {
     p.metadata().is_ok_and(|m| m.is_file() && m.len() == FILE_SIZE as u64)
 }
 
-/// `bis/user/save/<id>/0/system` files of the right size, then the `system` files found
-/// in the folders added in Settings.
+fn sorted_dirs(p: &std::path::Path) -> Vec<PathBuf> {
+    let Ok(rd) = std::fs::read_dir(p) else { return vec![] };
+    let mut v: Vec<PathBuf> = rd.flatten().map(|e| e.path()).filter(|p| p.is_dir()).collect();
+    v.sort();
+    v
+}
+
+/// `nand/user/save/0000000000000000/<user>/<title>/system` files of the right size.
+fn yuzu_saves(root: &std::path::Path) -> Vec<PathBuf> {
+    let users = sorted_dirs(&root.join("nand/user/save/0000000000000000"));
+    users.iter().flat_map(|u| sorted_dirs(u)).map(|t| t.join("system")).filter(|p| is_save(p)).collect()
+}
+
+/// Ryujinx's `bis/user/save/<id>/0/system` and the yuzu family's saves (files of the
+/// right size), then the `system` files found in the folders added in Settings.
 pub fn detect_saves() -> Vec<PathBuf> {
     let mut out = vec![];
     for r in ryujinx_roots() {
-        let Ok(rd) = std::fs::read_dir(r.join("bis/user/save")) else { continue };
-        let mut ids: Vec<_> = rd.flatten().map(|e| e.path()).collect();
-        ids.sort();
-        for id in ids {
+        for id in sorted_dirs(&r.join("bis/user/save")) {
             let p = id.join("0").join("system");
             if is_save(&p) {
+                out.push(p);
+            }
+        }
+    }
+    for r in yuzu_roots() {
+        for p in yuzu_saves(&r) {
+            if !out.contains(&p) {
                 out.push(p);
             }
         }
@@ -181,9 +223,19 @@ pub fn prune_snapshots(root: &std::path::Path, keep: &std::path::Path) -> usize 
 /// Snapshot folder names.
 pub const STAMP: &str = "%Y-%m-%d_%H%M%S";
 
-/// "Ryujinx" when the save sits in a Ryujinx folder, else a generic name.
+/// The emulator whose folder holds the save: "Ryujinx" for a Ryujinx folder, a yuzu-family
+/// name when a folder of the path is named like that emulator's data folder.
+pub fn known_emulator(save: &std::path::Path) -> Option<&'static str> {
+    if save.to_string_lossy().to_lowercase().contains("ryujinx") {
+        return Some("Ryujinx");
+    }
+    save.components()
+        .find_map(|c| YUZU_FORKS.iter().find(|(n, _)| c.as_os_str().to_string_lossy().eq_ignore_ascii_case(n)).map(|(_, shown)| *shown))
+}
+
+/// `known_emulator`, else a generic name.
 pub fn emulator_name(save: &std::path::Path) -> &'static str {
-    if save.to_string_lossy().to_lowercase().contains("ryujinx") { "Ryujinx" } else { tr("The emulator") }
+    known_emulator(save).unwrap_or_else(|| tr("The emulator"))
 }
 
 /// What a snapshot was taken before, kept next to its files.
@@ -295,6 +347,22 @@ mod tests {
         std::fs::write(d.join("small/system"), b"x").unwrap();
         let found = find_saves(&d);
         assert_eq!(found, vec![yuzu, d.join("other/1/system"), d.join("ryu/0/system")]);
+        std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    #[test]
+    fn finds_yuzu_family_saves() {
+        let d = std::env::temp_dir().join(format!("mhgu-yuzu-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        let users = d.join("eden/nand/user/save/0000000000000000");
+        let (a, b) = (users.join("B2/0100770008DD8000/system"), users.join("A1/0100770008DD8000/system"));
+        save_at(&a);
+        save_at(&b);
+        std::fs::create_dir_all(users.join("A1/0100000000010000")).unwrap();
+        assert_eq!(yuzu_saves(&d.join("eden")), vec![b.clone(), a]);
+        assert_eq!(known_emulator(&b), Some("Eden"));
+        assert_eq!(known_emulator(std::path::Path::new("/home/edenfield/saves/system")), None, "whole folder names only");
+        assert_eq!(known_emulator(std::path::Path::new("/home/u/.config/Ryujinx/bis/user/save/1/0/system")), Some("Ryujinx"));
         std::fs::remove_dir_all(&d).unwrap();
     }
 
