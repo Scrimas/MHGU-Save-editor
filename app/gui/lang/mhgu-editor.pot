@@ -295,7 +295,7 @@ msgid_plural "{n} saves listed on the Open page"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Clear"
 msgstr ""
 
@@ -819,6 +819,45 @@ msgstr ""
 #: app/gui/ui/pages/character.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} quests, {}"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Arena records"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgstr ""
+
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/quests.slint
+msgid "Quest"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Best time"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Set"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Rank"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}, minutes"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}, seconds"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}, hundredths"
 msgstr ""
 
 #: app/gui/ui/pages/collections.slint
@@ -1460,10 +1499,6 @@ msgstr ""
 
 #: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
 msgid "Cleared"
-msgstr ""
-
-#: app/gui/ui/pages/quests.slint
-msgid "Quest"
 msgstr ""
 
 #: app/gui/ui/pages/quests.slint
@@ -2299,6 +2334,11 @@ msgstr ""
 
 #: app/gui/src/targets.rs
 #. placeholders: {} in order, {0} {1} by position
+msgid "Quest {}"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
 msgid "Smithy · {}"
 msgstr ""
 
@@ -2346,11 +2386,6 @@ msgstr ""
 #: app/gui/src/targets.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Box slot {}"
-msgstr ""
-
-#: app/gui/src/targets.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Quest {}"
 msgstr ""
 
 #: app/gui/src/targets.rs
@@ -2406,6 +2441,11 @@ msgid "Guild Card poses unlocked"
 msgstr ""
 
 #: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · Arena record"
+msgstr ""
+
+#: app/gui/src/targets.rs
 msgid "Not seen"
 msgstr ""
 
@@ -2433,6 +2473,10 @@ msgstr ""
 #: app/gui/src/targets.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} of {} unlocked"
+msgstr ""
+
+#: app/gui/src/targets.rs
+msgid "No record"
 msgstr ""
 
 #: app/gui/src/update.rs
@@ -2599,6 +2643,18 @@ msgstr ""
 
 #: app/gui/src/warnings.rs
 msgid "not unlocked in this save"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+msgid "over 30 minutes"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+msgid "a grade its time does not earn"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+msgid "a weapon the set does not have"
 msgstr ""
 
 #: app/gui/src/views/advanced.rs

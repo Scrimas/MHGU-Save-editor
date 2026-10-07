@@ -178,6 +178,14 @@ export struct CardInfo {
     warn-title: string, warn-scene: string, warn-pose: string,
 }
 
+// The card's best time on one Arena quest of the counter's table: the time split for its
+// fields, the equipment set (the choices name their weapon or Prowler support), the
+// grade it earns and the quest's grade times.
+export struct ArenaRow {
+    index: int, quest: string, has: bool, minutes: int, seconds: int, hundredths: int,
+    set: int, sets: [string], grade: string, grades: string, was: string, warning: string,
+}
+
 export global Api {
     // shell
     in-out property <string> page: "open";
@@ -272,6 +280,9 @@ export global Api {
     in property <[string]> gc-scenes;
     in property <[string]> gc-poses;
     callback set-card(string /* word1 link word2 scene pose */, int);
+    in property <[ArenaRow]> arena;
+    callback set-arena(int /* quest */, int /* set */, int /* time, 1/100 s */);
+    callback clear-arena(int);
 
     // items
     in property <[ItemSlot]> item-slots;

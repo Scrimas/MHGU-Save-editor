@@ -4,6 +4,7 @@
 //! base unless named `abs`. The editor only writes fields documented as CONFIRMED or
 //! DERIVED.
 
+pub mod arena;
 pub mod character;
 pub mod data;
 pub mod equipment;

@@ -1,6 +1,7 @@
 //! The Character page: its models and the callbacks that edit it.
 
 use super::*;
+use mhgu_save::arena;
 use mhgu_save::guildcard as gc;
 
 pub(super) fn character_page(ui: &AppWindow, st: &State) {
@@ -38,6 +39,39 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
         weapon_use: model(weapon_use_rows(st)),
     });
     guild_card(ui, st);
+    ui.global::<Api>().set_arena(model(arena_rows(st)));
+}
+
+/// The card's best time per Arena quest, with the sets to pick from and the grade times.
+fn arena_rows(st: &State) -> Vec<ArenaRow> {
+    let (s, base) = (st.save(), st.base());
+    arena::quests()
+        .iter()
+        .enumerate()
+        .map(|(q, a)| {
+            let e = arena::best(s, base, q);
+            let t = e.map_or(0, |e| e.time);
+            let set_name = |&w: &u8| -> SharedString {
+                let name = if a.prowler { palico::BIASES.get(w as usize) } else { character::USE_WEAPONS.get(w as usize) };
+                tr(name.copied().unwrap_or("?")).into()
+            };
+            let grades = a.grades.iter().enumerate().map(|(g, &secs)| format!("{} ≤ {}:{:02}", targets::arena_grade(g as u8), secs / 60, secs % 60)).collect::<Vec<_>>();
+            ArenaRow {
+                index: q as i32,
+                quest: targets::arena_quest(q).into(),
+                has: e.is_some(),
+                minutes: (t / 6000) as i32,
+                seconds: (t / 100 % 60) as i32,
+                hundredths: (t % 100) as i32,
+                set: e.map_or(0, |e| e.set as i32),
+                sets: model(a.sets.iter().map(set_name).collect()),
+                grade: e.map_or("", |e| targets::arena_grade(e.grade)).into(),
+                grades: grades.join(" · ").into(),
+                was: st.was(Target::Arena(q)).into(),
+                warning: e.and_then(|e| crate::warnings::arena_best(q, &e)).unwrap_or_default().into(),
+            }
+        })
+        .collect()
 }
 
 /// The Guild Card section: the choices of each list (locked ones marked) and the card's
@@ -175,6 +209,27 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
                 _ => {}
             }
             gc::set_title(sv, base, tl);
+            vec![]
+        });
+        let _ = &ui;
+    });
+    // an Arena best time as a solo clear with the set picked; the grade follows the time
+    on!(ui, st, on_set_arena, |ui, s, q: i32, set: i32, time: i32| {
+        let Some(q) = usize::try_from(q).ok().filter(|&q| q < arena::quests().len()) else { return };
+        let t = Target::Arena(q);
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+            arena::set_best(sv, base, q, time.max(1) as u32, set.clamp(0, 4) as u8);
+            vec![]
+        });
+        let _ = &ui;
+    });
+    on!(ui, st, on_clear_arena, |ui, s, q: i32| {
+        let Some(q) = usize::try_from(q).ok().filter(|&q| q < arena::quests().len()) else { return };
+        let t = Target::Arena(q);
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+            arena::clear(sv, base, q);
             vec![]
         });
         let _ = &ui;

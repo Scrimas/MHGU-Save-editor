@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Entry, Kind, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::data::{tables, TalismanRow};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{monsters, palico, Save};
+use mhgu_save::{arena, monsters, palico, Save};
 
 /// Why a warning matters, shown once next to the list of warnings.
 pub fn why() -> &'static str {
@@ -186,6 +186,21 @@ pub fn card(t: Target, s: &Save, base: usize) -> Option<String> {
 }
 
 /// The warning of a value of the editor, if the game cannot produce it.
+/// The card's best time on Arena quest `q`: the clear caps it at 30 minutes, grades it
+/// by the quest's times and writes the weapon of the set used.
+pub fn arena_best(q: usize, e: &arena::Entry) -> Option<String> {
+    let set_weapon = arena::quests()[q].sets.get(e.set as usize).copied();
+    if e.time > arena::MAX_TIME {
+        Some(tr("over 30 minutes").into())
+    } else if e.grade != arena::grade(q, e.time) {
+        Some(tr("a grade its time does not earn").into())
+    } else if set_weapon != Some(e.weapon) {
+        Some(tr("a weapon the set does not have").into())
+    } else {
+        None
+    }
+}
+
 pub fn of(t: Target, s: &Save, slot: usize) -> Option<String> {
     let base = s.base(slot);
     match t {
@@ -198,6 +213,7 @@ pub fn of(t: Target, s: &Save, slot: usize) -> Option<String> {
         Target::Palico(i, f) => palico(&palico::get(s, base, i), f),
         Target::Monster(i, f) => monster(i, &monsters::get(s, base, i), f),
         Target::Title | Target::Scene | Target::Pose => card(t, s, base),
+        Target::Arena(q) => arena::best(s, base, q).and_then(|e| arena_best(q, &e)),
         _ => None,
     }
 }
@@ -228,6 +244,16 @@ mod tests {
         assert!(t(97, [1, 2], [3, 1], 0).is_some(), "Mystery has no second skill");
         assert!(t(97, [1, 0], [3, 0], 2).is_some(), "slots");
         assert!(t(42, [1, 0], [3, 0], 0).is_some(), "unknown tier");
+    }
+
+    #[test]
+    fn arena_rules() {
+        // Grudge Match: Malfestio, set 3 = Gunlance (8), A within 300 s
+        let e = |time, weapon, set, grade| arena::Entry { time, weapon, partner: 14, set, grade };
+        assert_eq!(arena_best(0, &e(8485, 8, 3, 0)), None);
+        assert!(arena_best(0, &e(8485, 8, 3, 1)).is_some(), "grade");
+        assert!(arena_best(0, &e(8485, 0, 3, 0)).is_some(), "weapon");
+        assert!(arena_best(0, &e(200_000, 8, 3, 3)).is_some(), "time");
     }
 
     #[test]

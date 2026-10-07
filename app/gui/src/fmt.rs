@@ -27,6 +27,11 @@ pub fn playtime(secs: u32) -> String {
     trf("{}h {}m", &[&(secs / 3600), &format!("{:02}", secs / 60 % 60)])
 }
 
+/// An Arena time in 1/100 s as "4:05.30".
+pub fn arena_time(t: u32) -> String {
+    format!("{}:{:02}.{:02}", t / 6000, t / 100 % 60, t % 100)
+}
+
 /// Short month name, 1 = January.
 fn month(m: u32) -> &'static str {
     match m {

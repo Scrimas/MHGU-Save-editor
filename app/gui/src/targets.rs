@@ -3,7 +3,7 @@
 //! value on its own (a field's Undo, also inside a bulk edit).
 
 use crate::assets;
-use crate::fmt::{num, playtime};
+use crate::fmt::{arena_time, num, playtime};
 use crate::i18n::{tr, trf, trn};
 use mhgu_save::character as ch;
 use mhgu_save::data::tables;
@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{monsters, palico, smithy, Save};
+use mhgu_save::{arena, monsters, palico, smithy, Save};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -74,6 +74,9 @@ pub enum Target {
     Pose,
     /// A Guild Card unlock map (index in `guildcard::MAPS`) with its NEW copy.
     CardMap(usize),
+    /// An Arena quest of the counter's table: the card's times, the counter's best time
+    /// and the sets it was cleared with.
+    Arena(usize),
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -171,6 +174,22 @@ pub fn card_title(t: [u16; 3]) -> String {
     v.join(" ")
 }
 
+/// Name of Arena quest `q` of the counter's table.
+pub fn arena_quest(q: usize) -> String {
+    let id = arena::quests()[q].quest_id;
+    tables().quests.iter().find(|x| x.id == id).map(|x| x.name.clone()).unwrap_or_else(|| trf("Quest {}", &[&id]))
+}
+
+/// A grade as the Arena Counter ranks it: A, B, C, or a dash past the slowest time.
+pub fn arena_grade(g: u8) -> &'static str {
+    match g {
+        0 => "A",
+        1 => "B",
+        2 => "C",
+        _ => "—",
+    }
+}
+
 /// "Smithy · Great Sword", "Smithy · Head", "Palico smithy · Mail".
 pub fn smithy_label(i: usize) -> String {
     let l = &smithy::lists()[i].list;
@@ -216,7 +235,7 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) => "character",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Arena(_) => "character",
             Item(..) | Loadout(_) | Obtained => "items",
             Equip(..) | Smithy(_) => "equipment",
             Palico(..) => "palicoes",
@@ -260,6 +279,7 @@ impl Target {
             Scene => "card-scene".into(),
             Pose => "card-pose".into(),
             CardMap(m) => format!("card-map:{m}"),
+            Arena(q) => format!("arena:{q}"),
         }
     }
 
@@ -337,6 +357,7 @@ impl Target {
                 gc::Map::Scenes => tr("Guild Card scenes unlocked").into(),
                 gc::Map::Poses => tr("Guild Card poses unlocked").into(),
             },
+            Arena(q) => trf("{} · Arena record", &[&arena_quest(q)]),
         }
     }
 
@@ -433,6 +454,10 @@ impl Target {
                 let k = (0..n).filter(|&i| gc::unlocked(s, base, gc::MAPS[m], i)).count();
                 trf("{} of {} unlocked", &[&num(k as i64), &num(n as i64)])
             }
+            Arena(q) => match arena::best(s, base, q) {
+                Some(e) => format!("{} · {}", arena_time(e.time), arena_grade(e.grade)),
+                None => tr("No record").into(),
+            },
         }
     }
 
@@ -524,6 +549,14 @@ impl Target {
                 let (on, new, n) = gc::MAPS[m].at();
                 [bits(base + on, 0, n), bits(base + new, 0, n)].concat()
             }
+            Arena(q) => [
+                range(base + arena::LOG + 20 * q, 20),
+                range(base + arena::PARTNERS + 8 * q, 8),
+                range(base + arena::BEST + 12 * q, 12),
+                bits(base + arena::SETS, 5 * q, 5),
+                bits(base + arena::SETS_NEW, 5 * q, 5),
+            ]
+            .concat(),
         }
     }
 

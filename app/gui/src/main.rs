@@ -199,6 +199,7 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             (_, &["goal", ..]) => api.invoke_apply_preview(parts[1..].join(":").into()),
             (_, &["char", field, v]) => api.invoke_set_character(field.into(), num(v)),
             (_, &["monster", i, field, v]) => api.invoke_set_monster(num(i), field.into(), num(v)),
+            (_, &["arena", q, set, t]) => api.invoke_set_arena(num(q), num(set), num(t)),
             (_, &["item", slot, id, n]) => api.invoke_set_item(num(slot), num(id), num(n)),
             (_, &["goto", ..]) => api.invoke_goto(parts[1..].join(":").into()),
             (_, &["undo-all"]) => api.invoke_undo_all(),

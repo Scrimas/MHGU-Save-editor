@@ -302,7 +302,7 @@ msgid_plural "{n} saves listed on the Open page"
 msgstr[0] "{n} salvataggio elencato nella pagina Apri"
 msgstr[1] "{n} salvataggi elencati nella pagina Apri"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Clear"
 msgstr "Svuota"
 
@@ -836,6 +836,45 @@ msgstr "Arena"
 #: app/gui/ui/pages/character.slint
 msgid "{} quests, {}"
 msgstr "{}: missioni, {}"
+
+#: app/gui/ui/pages/character.slint
+msgid "Arena records"
+msgstr "Record dell'arena"
+
+#: app/gui/ui/pages/character.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgstr "Il tuo miglior tempo per missione dell'arena, in solitario con l'equipaggiamento scelto. Il grado segue il tempo; il miglior tempo del banco dell'arena segue il tuo."
+
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/quests.slint
+msgid "Quest"
+msgstr "Missione"
+
+#: app/gui/ui/pages/character.slint
+msgid "Best time"
+msgstr "Miglior tempo"
+
+#: app/gui/ui/pages/character.slint
+msgid "Set"
+msgstr "Equipaggiamento"
+
+#: app/gui/ui/pages/character.slint
+msgid "Rank"
+msgstr "Grado"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{}, minutes"
+msgstr "{}, minuti"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{}, seconds"
+msgstr "{}, secondi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{}, hundredths"
+msgstr "{}, centesimi"
 
 #: app/gui/ui/pages/collections.slint
 msgid "Check all…"
@@ -1481,10 +1520,6 @@ msgstr "Cerca missioni per nome o numero"
 #: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
 msgid "Cleared"
 msgstr "Completata"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Quest"
-msgstr "Missione"
 
 #: app/gui/ui/pages/quests.slint
 msgid "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."
@@ -2319,6 +2354,11 @@ msgstr "L'emulatore"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs
+msgid "Quest {}"
+msgstr "Missione {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
 msgid "Smithy · {}"
 msgstr "Fucina · {}"
 
@@ -2367,11 +2407,6 @@ msgstr "Casella {} della cassa compagni"
 #: app/gui/src/targets.rs
 msgid "Box slot {}"
 msgstr "Casella {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs
-msgid "Quest {}"
-msgstr "Missione {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs
@@ -2425,6 +2460,11 @@ msgstr "Sfondi della tessera Gilda sbloccati"
 msgid "Guild Card poses unlocked"
 msgstr "Pose della tessera Gilda sbloccate"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · Arena record"
+msgstr "{} · record dell'arena"
+
 #: app/gui/src/targets.rs
 msgid "Not seen"
 msgstr "Non vista"
@@ -2454,6 +2494,10 @@ msgstr "{} di {} elencate"
 #: app/gui/src/targets.rs
 msgid "{} of {} unlocked"
 msgstr "{} di {} sbloccati"
+
+#: app/gui/src/targets.rs
+msgid "No record"
+msgstr "Nessun record"
 
 #: app/gui/src/update.rs
 msgid "GitHub refused the request (too many in the last hour), try later"
@@ -2621,6 +2665,18 @@ msgstr "non è una voce del gioco"
 #: app/gui/src/warnings.rs
 msgid "not unlocked in this save"
 msgstr "non sbloccato in questo salvataggio"
+
+#: app/gui/src/warnings.rs
+msgid "over 30 minutes"
+msgstr "oltre 30 minuti"
+
+#: app/gui/src/warnings.rs
+msgid "a grade its time does not earn"
+msgstr "un grado che il suo tempo non dà"
+
+#: app/gui/src/warnings.rs
+msgid "a weapon the set does not have"
+msgstr "un'arma che l'equipaggiamento non ha"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/advanced.rs

@@ -524,6 +524,15 @@ It agrees with the save object's best time for that quest (`S+0x134`) and with b
 of `S+0xca0`. The rest of the card, `+0x1378 … +0x18B8` (partner IDs included), is zero
 on the own card.
 
+**Grade times and sets.** The quest loader (`0x3c1568`) looks the quest up in
+`quest/ac_equip/ac_pl_equip` (Arena) or `ac_ny_equip` (Prowler Arena) of `v00.arc` and
+copies its three grade times, in seconds, into the quest (`+0xd3c`); the clear grades a
+time 0, 1 or 2 when it is at most the first, second or third, else 3. Each record also
+holds the five equipment sets: their weapon types match the quest texts ("Weapons: …",
+"Support: …"). [`tools/arena_tables.py`](../tools/arena_tables.py) writes them to
+[`data/arena.csv`](../data/arena.csv); the editor's Arena records use it to grade a time
+and to write the set's weapon.
+
 ## The save object S
 
 S is the `sUserInfo` object (global `0x1897f78`). The character block stores its

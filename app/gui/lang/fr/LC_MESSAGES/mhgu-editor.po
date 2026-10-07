@@ -302,7 +302,7 @@ msgid_plural "{n} saves listed on the Open page"
 msgstr[0] "{n} sauvegarde listée sur la page Ouvrir"
 msgstr[1] "{n} sauvegardes listées sur la page Ouvrir"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Clear"
 msgstr "Effacer"
 
@@ -836,6 +836,45 @@ msgstr "Arène"
 #: app/gui/ui/pages/character.slint
 msgid "{} quests, {}"
 msgstr "Quêtes {}, {}"
+
+#: app/gui/ui/pages/character.slint
+msgid "Arena records"
+msgstr "Records d'arène"
+
+#: app/gui/ui/pages/character.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgstr "Votre meilleur temps par quête d'arène, en solo avec l'équipement choisi. Le rang suit le temps ; le meilleur temps du comptoir de l'arène suit le vôtre."
+
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/quests.slint
+msgid "Quest"
+msgstr "Quête"
+
+#: app/gui/ui/pages/character.slint
+msgid "Best time"
+msgstr "Meilleur temps"
+
+#: app/gui/ui/pages/character.slint
+msgid "Set"
+msgstr "Équipement"
+
+#: app/gui/ui/pages/character.slint
+msgid "Rank"
+msgstr "Rang"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{}, minutes"
+msgstr "{}, minutes"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{}, seconds"
+msgstr "{}, secondes"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{}, hundredths"
+msgstr "{}, centièmes"
 
 #: app/gui/ui/pages/collections.slint
 msgid "Check all…"
@@ -1481,10 +1520,6 @@ msgstr "Rechercher des quêtes par nom ou numéro"
 #: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
 msgid "Cleared"
 msgstr "Complétée"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Quest"
-msgstr "Quête"
 
 #: app/gui/ui/pages/quests.slint
 msgid "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."
@@ -2319,6 +2354,11 @@ msgstr "L'émulateur"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs
+msgid "Quest {}"
+msgstr "Quête {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
 msgid "Smithy · {}"
 msgstr "Forge · {}"
 
@@ -2367,11 +2407,6 @@ msgstr "Emplacement {} du coffre Palico"
 #: app/gui/src/targets.rs
 msgid "Box slot {}"
 msgstr "Emplacement {} du coffre"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs
-msgid "Quest {}"
-msgstr "Quête {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs
@@ -2425,6 +2460,11 @@ msgstr "Décors de la Carte Guilde débloqués"
 msgid "Guild Card poses unlocked"
 msgstr "Poses de la Carte Guilde débloquées"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · Arena record"
+msgstr "{} · record d'arène"
+
 #: app/gui/src/targets.rs
 msgid "Not seen"
 msgstr "Non vu"
@@ -2454,6 +2494,10 @@ msgstr "{} sur {} listées"
 #: app/gui/src/targets.rs
 msgid "{} of {} unlocked"
 msgstr "{} sur {} débloqués"
+
+#: app/gui/src/targets.rs
+msgid "No record"
+msgstr "Aucun record"
 
 #: app/gui/src/update.rs
 msgid "GitHub refused the request (too many in the last hour), try later"
@@ -2621,6 +2665,18 @@ msgstr "pas une entrée du jeu"
 #: app/gui/src/warnings.rs
 msgid "not unlocked in this save"
 msgstr "pas débloqué dans cette sauvegarde"
+
+#: app/gui/src/warnings.rs
+msgid "over 30 minutes"
+msgstr "plus de 30 minutes"
+
+#: app/gui/src/warnings.rs
+msgid "a grade its time does not earn"
+msgstr "un rang que son temps ne donne pas"
+
+#: app/gui/src/warnings.rs
+msgid "a weapon the set does not have"
+msgstr "une arme que l'équipement n'a pas"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/advanced.rs

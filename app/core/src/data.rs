@@ -95,6 +95,18 @@ pub struct MonsterMeta {
     pub class: String,
 }
 
+/// data/arena.csv: an Arena quest of the Arena Counter's table, in its order.
+#[derive(Debug, Clone)]
+pub struct ArenaQuest {
+    pub quest_id: u32,
+    pub prowler: bool,
+    /// Grade times in seconds: a time at most `grades[g]` gets grade g.
+    pub grades: [u32; 3],
+    /// The five equipment sets: Guild Card weapon (storage order), or for the Prowler
+    /// Arena the support bias.
+    pub sets: [u8; 5],
+}
+
 #[derive(Debug, Clone)]
 pub struct Field {
     pub abs: usize,
@@ -148,6 +160,7 @@ pub struct Tables {
     pub talisman: Vec<TalismanRow>,
     /// data/quest-sizes.csv: monster index -> (smallest, largest) size % its quests give.
     pub quest_sizes: HashMap<usize, (u16, u16)>,
+    pub arena: Vec<ArenaQuest>,
 }
 
 impl Tables {
@@ -270,6 +283,18 @@ pub fn tables() -> &'static Tables {
             quest_sizes: rows(include_str!("../../../data/quest-sizes.csv"))
                 .iter()
                 .map(|r| (num(&r["index"]) as usize, (num(&r["min"]) as u16, num(&r["max"]) as u16)))
+                .collect(),
+            arena: rows(include_str!("../../../data/arena.csv"))
+                .iter()
+                .map(|r| {
+                    let sets: Vec<u8> = r["sets"].split_whitespace().map(|v| num(v) as u8).collect();
+                    ArenaQuest {
+                        quest_id: num(&r["quest_id"]) as u32,
+                        prowler: r["prowler"] == "yes",
+                        grades: [num(&r["grade_a"]) as u32, num(&r["grade_b"]) as u32, num(&r["grade_c"]) as u32],
+                        sets: sets.try_into().expect("arena.csv: five sets"),
+                    }
+                })
                 .collect(),
         }
     })
