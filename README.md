@@ -46,7 +46,7 @@ For a portable install or another emulator, add its folder in **Settings…** or
 | Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, Guild Card title, scene and pose (Derived), Guild Card weapon usage, Arena records: best time and equipment set per Arena quest, ranked by the quest's times (Derived) |
 | Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts. A pouch stack above the item's carry limit is written with a warning |
 | Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables) |
-| Palicoes | Name, level and experience, forte, target, greeting, original owner |
+| Palicoes | Name, level and experience, forte, target, greeting, original owner; support moves and skills: the list and what is equipped, checked against the forte's innate entries and the level's slots (Derived) |
 | Quests | Every quest cleared or not (seen and quest sets follow, as in game); says what unlocks a quest that is not on the board yet |
 | Requests | Villager requests: accepted (quest posted on the board) and reported |
 | Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt) |

@@ -1040,7 +1040,7 @@ msgid_plural "{} of {n} slots used"
 msgstr[0] "{} de {n} espacio usado"
 msgstr[1] "{} de {n} espacios usados"
 
-#: app/core/src/palico.rs app/gui/src/views/palicoes.rs
+#: app/core/src/palico.rs app/gui/src/targets.rs
 #: app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr "Ninguno"
@@ -1433,6 +1433,19 @@ msgstr "Todos los objetivos ya están en esta partida."
 msgid "Already in your save"
 msgstr "Ya en tu partida"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/palicoes.slint
+msgid "Equip {}"
+msgstr "Equipar {}"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Innate"
+msgstr "Innato"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Taught slot"
+msgstr "Espacio enseñado"
+
 #: app/gui/ui/pages/palicoes.slint
 msgid "Search Palicoes"
 msgstr "Buscar camaradas"
@@ -1477,21 +1490,17 @@ msgstr "Mensaje"
 msgid "Original owner"
 msgstr "Dueño original"
 
-#: app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Support moves"
 msgstr "Movimientos de apoyo"
 
-#: app/gui/ui/pages/palicoes.slint
-msgid "Equipped"
-msgstr "Equipados"
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Skills"
+msgstr "Habilidades"
 
 #: app/gui/ui/pages/palicoes.slint
-msgid "Learned"
-msgstr "Aprendidos"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Support moves are shown, not edited: which moves a Palico may equip is not mapped yet."
-msgstr "Los movimientos de apoyo se muestran pero no se editan: aún no se sabe qué movimientos puede equipar cada camarada."
+msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
+msgstr "Las entradas innatas vienen con la especialidad; los espacios enseñados son los que llena el dojo de Palicos. El resto lo sortea el juego cuando nace el Palico."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/quests.slint
@@ -2645,6 +2654,39 @@ msgstr "no es una especialidad del juego"
 msgid "not a target the game offers"
 msgstr "no es un objetivo que ofrezca el juego"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} moves equipped, its level allows {}"
+msgstr "{} movimientos equipados, su nivel permite {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "skills taking {} slots, its level gives {}"
+msgstr "habilidades que ocupan {} espacios, su nivel da {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} equipped but not in its list"
+msgstr "{} equipado pero no en su lista"
+
+#: app/gui/src/warnings.rs
+msgid "innate moves that are not its forte's"
+msgstr "movimientos innatos que no son de su especialidad"
+
+#: app/gui/src/warnings.rs
+msgid "innate skills that are not its forte's"
+msgstr "habilidades innatas que no son de su especialidad"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} is a forte's innate entry"
+msgstr "{} es una entrada innata de una especialidad"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} twice"
+msgstr "{} dos veces"
+
 #: app/gui/src/warnings.rs
 msgid "this monster is always size 100"
 msgstr "este monstruo siempre tiene tamaño 100"
@@ -3387,6 +3429,16 @@ msgid "{n} Palico"
 msgid_plural "{n} Palicoes"
 msgstr[0] "{n} camarada"
 msgstr[1] "{n} camaradas"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} of {} equipped"
+msgstr "{} de {} equipados"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} of {} skill slots used"
+msgstr "{} de {} espacios de habilidad usados"
 
 #: app/gui/src/views/palicoes.rs
 msgid "A Palico needs a name"

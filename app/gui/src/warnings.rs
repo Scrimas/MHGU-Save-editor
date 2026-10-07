@@ -127,8 +127,47 @@ pub fn palico(p: &palico::Palico, f: Pal) -> Option<String> {
         Pal::Bias if p.bias as usize >= palico::BIASES.len() => Some(tr("not a forte of the game").into()),
         // target 0 is not offered by the menu
         Pal::Target if p.target == 0 || p.target as usize >= palico::TARGETS.len() => Some(tr("not a target the game offers").into()),
+        Pal::Moves => palico_list(p, true),
+        Pal::Skills => palico_list(p, false),
         _ => None,
     }
+}
+
+/// A Palico's move or skill list and what it equips (data/palico-*.csv): the forte's
+/// innate entries first, innate entries nowhere else (they cannot be taught), each entry
+/// once, and the equipped ones from the list within the level's limit.
+fn palico_list(p: &palico::Palico, moves: bool) -> Option<String> {
+    let t = tables();
+    let n = assets::names();
+    let name = |id: u8| crate::targets::palico_name(if moves { &n.support_moves } else { &n.palico_skills }, id);
+    let (list, on) = if moves { (p.move_list(), &p.moves[..]) } else { (p.skill_list(), &p.skills_on[..]) };
+    let count = on.iter().filter(|&&x| x != 0).count();
+    if moves && count > p.move_slots() {
+        return Some(trf("{} moves equipped, its level allows {}", &[&count, &p.move_slots()]));
+    }
+    if !moves && p.skills_cost() > p.skill_slots() {
+        return Some(trf("skills taking {} slots, its level gives {}", &[&p.skills_cost(), &p.skill_slots()]));
+    }
+    if let Some(&x) = on.iter().find(|&&x| x != 0 && !list.contains(&x)) {
+        return Some(trf("{} equipped but not in its list", &[&name(x)]));
+    }
+    let f = t.palico_fortes.get(p.bias as usize)?;
+    let innate: Vec<u8> = t.palico_fortes.iter().flat_map(|f| if moves { [f.moves.clone(), f.moves2.clone()].concat() } else { f.skills.to_vec() }).collect();
+    let head = if moves { p.innate_moves() } else { palico::INNATE_SKILLS };
+    let fits = |k: usize, x: u8| match (moves, k) {
+        (true, 0) => f.moves.contains(&x),
+        (true, _) => f.moves2.contains(&x),
+        (false, _) => f.skills[k] == x,
+    };
+    if list.iter().take(head).enumerate().any(|(k, &x)| !fits(k, x)) {
+        return Some(if moves { tr("innate moves that are not its forte's") } else { tr("innate skills that are not its forte's") }.into());
+    }
+    if let Some(&x) = list.iter().skip(head).find(|&&x| innate.contains(&x)) {
+        return Some(trf("{} is a forte's innate entry", &[&name(x)]));
+    }
+    let none = if moves { palico::NO_MOVE } else { palico::NO_SKILL };
+    let twice = list.iter().enumerate().find(|&(k, &x)| x != 0 && x != none && list[..k].contains(&x));
+    twice.map(|(_, &x)| trf("{} twice", &[&name(x)]))
 }
 
 /// Monster `i`'s hunt counts and size records.
@@ -244,6 +283,38 @@ mod tests {
         assert!(t(97, [1, 2], [3, 1], 0).is_some(), "Mystery has no second skill");
         assert!(t(97, [1, 0], [3, 0], 2).is_some(), "slots");
         assert!(t(42, [1, 0], [3, 0], 0).is_some(), "unknown tier");
+    }
+
+    #[test]
+    fn palico_list_rules() {
+        // Musashi of the analysed save: Gathering, Lv 7, as the game made it
+        let mut p = palico::Palico {
+            name: "Musashi".into(),
+            exp: 0,
+            level: 7,
+            bias: 6,
+            target: 3,
+            moves: [37, 27, 0, 0, 0, 0, 0, 0],
+            skills_on: [0; 8],
+            learned: [37, 27, 9, 1, 39, 44, 50, 34, 32, 14, 0, 0, 57, 57, 57, 57],
+            skills: [44, 22, 34, 15, 29, 26, 35, 1, 30, 37, 0, 0],
+            move_len: 12,
+            skill_len: 12,
+            greeting: String::new(),
+            owner: String::new(),
+        };
+        assert_eq!((palico(&p, Pal::Moves), palico(&p, Pal::Skills)), (None, None));
+        p.moves = [37, 27, 9, 1, 39, 0, 0, 0];
+        assert!(palico(&p, Pal::Moves).is_some(), "5 equipped, 4 slots");
+        p.skills_on[0] = palico::SKILL_MOVE_SLOT;
+        assert!(palico(&p, Pal::Skills).is_some(), "Support Move +1 is not in its list");
+        p.skills[10] = palico::SKILL_MOVE_SLOT;
+        assert_eq!((palico(&p, Pal::Moves), palico(&p, Pal::Skills)), (None, None));
+        p.learned[10] = 31; // Charisma's innate move in a taught slot
+        assert!(palico(&p, Pal::Moves).is_some());
+        p.learned[10] = 0;
+        p.bias = 0;
+        assert!(palico(&p, Pal::Moves).is_some(), "Gathering's innate moves on a Charisma Palico");
     }
 
     #[test]

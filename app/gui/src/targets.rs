@@ -31,6 +31,10 @@ pub enum Pal {
     Greeting,
     Owner,
     Target,
+    /// Its support move list and the moves equipped.
+    Moves,
+    /// Its skill list and the skills equipped.
+    Skills,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -134,6 +138,8 @@ fn pal_field(f: Pal) -> &'static str {
         Pal::Greeting => "greeting",
         Pal::Owner => "owner",
         Pal::Target => "target",
+        Pal::Moves => "moves",
+        Pal::Skills => "skills",
     }
 }
 
@@ -145,6 +151,8 @@ pub fn pal_of(field: &str) -> Pal {
         "bias" => Pal::Bias,
         "greeting" => Pal::Greeting,
         "target" => Pal::Target,
+        "moves" => Pal::Moves,
+        "skills" => Pal::Skills,
         _ => Pal::Owner,
     }
 }
@@ -172,6 +180,17 @@ pub fn card_title(t: [u16; 3]) -> String {
     }
     v.push(card_name(&n.gc_words, t[2] as usize));
     v.join(" ")
+}
+
+/// Name of Palico support move or skill `id`, "#id" when the asset pack lacks it.
+pub fn palico_name(names: &[String], id: u8) -> String {
+    names.get(id as usize).filter(|n| !n.is_empty()).cloned().unwrap_or_else(|| format!("#{id}"))
+}
+
+/// The equipped moves or skills of a Palico, "None" when it has none.
+pub fn palico_names(names: &[String], on: &[u8]) -> String {
+    let v: Vec<String> = on.iter().filter(|&&x| x != 0).map(|&x| palico_name(names, x)).collect();
+    if v.is_empty() { tr("None").into() } else { v.join(", ") }
 }
 
 /// Name of Arena quest `q` of the counter's table.
@@ -320,6 +339,8 @@ impl Target {
                     Pal::Greeting => tr("Greeting"),
                     Pal::Owner => tr("Original owner"),
                     Pal::Target => tr("Target"),
+                    Pal::Moves => tr("Support moves"),
+                    Pal::Skills => tr("Skills"),
                 };
                 format!("{n} · {what}")
             }
@@ -398,6 +419,8 @@ impl Target {
                     Pal::Greeting => p.greeting,
                     Pal::Owner => p.owner,
                     Pal::Target => tr(palico::TARGETS.get(p.target as usize).copied().unwrap_or("?")).into(),
+                    Pal::Moves => palico_names(&assets::names().support_moves, &p.moves),
+                    Pal::Skills => palico_names(&assets::names().palico_skills, &p.skills_on),
                 }
             }
             Quest(i) => {
@@ -495,6 +518,8 @@ impl Target {
                     Pal::Greeting => range(o + palico::GREETING.0, palico::GREETING.1),
                     Pal::Owner => range(o + palico::OWNER.0, palico::OWNER.1),
                     Pal::Target => range(o + palico::TARGET, 1),
+                    Pal::Moves => [range(o + palico::MOVES, 8), range(o + palico::LEARNED, 16)].concat(),
+                    Pal::Skills => [range(o + palico::SKILLS_ON, 8), range(o + palico::SKILLS, 12)].concat(),
                 }
             }
             Quest(i) => {

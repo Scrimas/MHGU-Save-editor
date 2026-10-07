@@ -7,7 +7,7 @@
            it holds Capcom's icons and text)
 
 Writes:
-  names.json       item, equipment, skill, monster and Palico support move names; Guild
+  names.json       item, equipment, skill, monster, Palico support move and skill names; Guild
                    Card title words, scenes and poses; item icon / colour / rarity and
                    pouch carry limit; palettes; equipment type icons; icon cell positions
                    on items.png
@@ -272,6 +272,10 @@ def main(romfs, out):
     # Palico support moves: name and description pairs, move ID k -> entry 2k
     # (0 "(No Move)"; the Palico record's learned slots use 57 for none). DERIVED
     names['support_moves'] = gmd(reng['eng\\otomo\\support\\spt_act_base_eng'])[0::2]
+    # Palico skills (rOtSkill), name and description pairs: skill ID k -> entry 2k (0 "No
+    # Skill"; the record's learned slots use 96 for none). 21 "Support Move +1" is the one
+    # the equip limit counts (0xe8478). DERIVED
+    names['palico_skills'] = gmd(reng['eng\\table\\ot_skl_eng'])[0::2]
     names.update(guild_card(R, 'eng'))
 
     # Guild Card awards: bit i -> cell i, 10 x 48 px; 0-99 lby_deco, 100+ lby_deco2
@@ -319,14 +323,14 @@ def text(R, r, lang, eng=None):
     """The names of one language from its resident_<lang>.arc `r` (and the variant monster
     names from RomFS `R`), entry for entry like the English names.json `eng` (the piece
     lists keep only the real IDs, so they follow it):
-      items, skills, support_moves, monsters   lists by ID (monsters: save index - 1)
+      items, skills, support_moves, palico_skills, monsters   lists by ID (monsters: save index - 1)
       weapons     class -> [[base, final, ultimate] per English piece]
       armor, palico_armor   part -> [name per English piece]
       palico_weapons, talismans   [name per English piece]
       gc_words, gc_links, gc_scenes, gc_poses   lists by ID (guild_card)"""
     g = lambda n: gmd(r['%s\\%s_%s' % (lang, n, lang)])
     out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
-           'support_moves': g('otomo\\support\\spt_act_base')[0::2],
+           'support_moves': g('otomo\\support\\spt_act_base')[0::2], 'palico_skills': g('table\\ot_skl')[0::2],
            'monsters': g('GUI\\06_msg\\monsterName')[:137]}
     out.update(guild_card(R, lang))
     m = out['monsters']

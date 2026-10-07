@@ -30,18 +30,40 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
     api.set_palicoes(model(rows));
     api.set_biases(strings(palico::BIASES.iter().map(|&s| tr(s).to_string())));
     api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|&s| tr(s).to_string())));
-    let mv = |m: &[u8]| {
-        let n = &assets::names().support_moves;
-        // 0 is "(No Move)", 57 an empty learned slot
-        let v: Vec<String> = m.iter().filter(|&&x| x != 0 && x != palico::NO_MOVE && x != 0xFF).map(|&x| n.get(x as usize).cloned().unwrap_or_else(|| format!("#{x}"))).collect();
-        if v.is_empty() { tr("None").to_string() } else { v.join(", ") }
+    let names = assets::names();
+    let choices = |names: &[String], n: usize| strings((0..n).map(|id| targets::palico_name(names, id as u8)));
+    api.set_palico_move_names(choices(&names.support_moves, palico::NO_MOVE as usize));
+    api.set_palico_skill_names(choices(&names.palico_skills, palico::NO_SKILL as usize));
+    // the list's slots: innate first, taught at the end, ticked when equipped
+    let rows = |list: &[u8], on: &[u8], head: usize, taught: usize, names: &[String]| -> Vec<PalicoEntry> {
+        list.iter()
+            .enumerate()
+            .map(|(k, &id)| PalicoEntry {
+                slot: k as i32,
+                id: id as i32,
+                name: targets::palico_name(names, id).into(),
+                innate: k < head,
+                taught: k + taught >= list.len(),
+                on: id != 0 && on.contains(&id),
+            })
+            .collect()
     };
     api.set_palico(if sel >= 0 {
         let i = sel as usize;
         let p = palico::get(s, base, i);
         let was = |f: targets::Pal| -> SharedString { st.was(Target::Palico(i, f)).into() };
         let warning: Vec<String> = [targets::Pal::Level, targets::Pal::Bias, targets::Pal::Target].into_iter().filter_map(|f| crate::warnings::palico(&p, f)).collect();
+        let warn = |f: targets::Pal| -> SharedString { crate::warnings::palico(&p, f).unwrap_or_default().into() };
+        let equipped = p.moves.iter().filter(|&&x| x != 0).count();
         PalicoDetail {
+            move_rows: model(rows(p.move_list(), &p.moves, p.innate_moves(), p.taught_moves(), &names.support_moves)),
+            skill_rows: model(rows(p.skill_list(), &p.skills_on, palico::INNATE_SKILLS, palico::TAUGHT_SKILLS, &names.palico_skills)),
+            moves_used: trf("{} of {} equipped", &[&equipped, &p.move_slots()]).into(),
+            skills_used: trf("{} of {} skill slots used", &[&p.skills_cost(), &p.skill_slots()]).into(),
+            was_moves: was(targets::Pal::Moves),
+            was_skills: was(targets::Pal::Skills),
+            warn_moves: warn(targets::Pal::Moves),
+            warn_skills: warn(targets::Pal::Skills),
             warning: warning.join("; ").into(),
             index: sel,
             name: p.name.into(),
@@ -51,8 +73,6 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
             target: p.target as i32,
             greeting: p.greeting.into(),
             owner: p.owner.into(),
-            moves: mv(&p.moves).into(),
-            learned: mv(&p.learned).into(),
             was_name: was(targets::Pal::Name),
             was_level: was(targets::Pal::Level),
             was_exp: was(targets::Pal::Exp),
@@ -92,6 +112,32 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
                 "bias" => p.bias = v.clamp(0, 7) as u8,
                 "target" => p.target = v.clamp(1, palico::TARGETS.len() as i32 - 1) as u8,
                 _ => {}
+            }
+            palico::set(sv, base, i, &p);
+            vec![]
+        });
+        let _ = &ui;
+    });
+    // a move or skill of the list ("moves" / "skills"): replace it, or equip / unequip it
+    on!(ui, st, on_set_palico_entry, |ui, s, kind: SharedString, slot: i32, id: i32, on: bool| {
+        let i = view(|v| v.palico_sel);
+        let (Ok(i), Ok(k)) = (usize::try_from(i), usize::try_from(slot)) else { return };
+        let moves = kind == "moves";
+        let t = Target::Palico(i, if moves { targets::Pal::Moves } else { targets::Pal::Skills });
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+            let mut p = palico::get(sv, base, i);
+            let id = id.clamp(0, if moves { palico::NO_MOVE } else { palico::NO_SKILL } as i32 - 1) as u8;
+            if moves {
+                if p.learned.get(k) != Some(&id) {
+                    palico::set_list_move(&mut p, k, id);
+                } else if id != 0 {
+                    palico::equip(&mut p.moves, id, on);
+                }
+            } else if p.skills.get(k) != Some(&id) {
+                palico::set_list_skill(&mut p, k, id);
+            } else if id != 0 {
+                palico::equip(&mut p.skills_on, id, on);
             }
             palico::set(sv, base, i, &p);
             vec![]

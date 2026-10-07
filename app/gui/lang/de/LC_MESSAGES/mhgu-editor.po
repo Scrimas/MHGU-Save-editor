@@ -1040,7 +1040,7 @@ msgid_plural "{} of {n} slots used"
 msgstr[0] "{} von {n} Slot belegt"
 msgstr[1] "{} von {n} Slots belegt"
 
-#: app/core/src/palico.rs app/gui/src/views/palicoes.rs
+#: app/core/src/palico.rs app/gui/src/targets.rs
 #: app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr "Keine"
@@ -1433,6 +1433,19 @@ msgstr "Alle Ziele sind in diesem Spielstand bereits erreicht."
 msgid "Already in your save"
 msgstr "Bereits im Spielstand"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/palicoes.slint
+msgid "Equip {}"
+msgstr "{} ausrüsten"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Innate"
+msgstr "Angeboren"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "Taught slot"
+msgstr "Lehrplatz"
+
 #: app/gui/ui/pages/palicoes.slint
 msgid "Search Palicoes"
 msgstr "Kameraden suchen"
@@ -1477,21 +1490,17 @@ msgstr "Kommentar"
 msgid "Original owner"
 msgstr "Erster Besitzer"
 
-#: app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Support moves"
 msgstr "Unterstützungsaktionen"
 
-#: app/gui/ui/pages/palicoes.slint
-msgid "Equipped"
-msgstr "Ausgerüstet"
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Skills"
+msgstr "Fertigkeiten"
 
 #: app/gui/ui/pages/palicoes.slint
-msgid "Learned"
-msgstr "Erlernt"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Support moves are shown, not edited: which moves a Palico may equip is not mapped yet."
-msgstr "Unterstützungsaktionen werden angezeigt, nicht bearbeitet: Welche Aktionen ein Kamerad ausrüsten darf, ist noch nicht erfasst."
+msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
+msgstr "Angeborene Einträge kommen mit der Ausrichtung; Lehrplätze füllt das Palico-Dojo. Den Rest lost das Spiel aus, wenn der Palico entsteht."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/quests.slint
@@ -2645,6 +2654,39 @@ msgstr "keine Ausrichtung des Spiels"
 msgid "not a target the game offers"
 msgstr "kein Ziel, das das Spiel anbietet"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} moves equipped, its level allows {}"
+msgstr "{} Aktionen ausgerüstet, die Stufe erlaubt {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "skills taking {} slots, its level gives {}"
+msgstr "Fertigkeiten mit {} Plätzen, die Stufe gibt {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} equipped but not in its list"
+msgstr "{} ausgerüstet, aber nicht in der Liste"
+
+#: app/gui/src/warnings.rs
+msgid "innate moves that are not its forte's"
+msgstr "angeborene Aktionen, die nicht zur Ausrichtung gehören"
+
+#: app/gui/src/warnings.rs
+msgid "innate skills that are not its forte's"
+msgstr "angeborene Fertigkeiten, die nicht zur Ausrichtung gehören"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} is a forte's innate entry"
+msgstr "{} ist ein angeborener Eintrag einer Ausrichtung"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} twice"
+msgstr "{} doppelt"
+
 #: app/gui/src/warnings.rs
 msgid "this monster is always size 100"
 msgstr "dieses Monster hat immer Größe 100"
@@ -3387,6 +3429,16 @@ msgid "{n} Palico"
 msgid_plural "{n} Palicoes"
 msgstr[0] "{n} Kamerad"
 msgstr[1] "{n} Kameraden"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} of {} equipped"
+msgstr "{} von {} ausgerüstet"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} of {} skill slots used"
+msgstr "{} von {} Fertigkeitsplätzen belegt"
 
 #: app/gui/src/views/palicoes.rs
 msgid "A Palico needs a name"

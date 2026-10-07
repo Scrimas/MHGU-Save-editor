@@ -1,7 +1,7 @@
-import { ListView, ComboBox, LineEdit, ScrollView, Palette } from "std-widgets.slint";
+import { ListView, ComboBox, LineEdit, ScrollView, Palette, CheckBox } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
-    Confidence, SearchField,
+    Confidence, SearchField, PalicoEntry,
 } from "../common.slint";
 
 // Label, control, "was … Undo" under it when staged.
@@ -43,6 +43,54 @@ component TextRow inherits Row {
                 Api.set-palico-text(root.field, self.text);
             }
         }
+    }
+}
+
+// A Palico's support move or skill list: a picker per slot (innate ones fixed) and a
+// tick to equip it; the equip limit and "was … Undo" above.
+component EntryList inherits VerticalLayout {
+    in property <string> title;
+    in property <string> kind;
+    in property <string> used;
+    in property <[PalicoEntry]> rows;
+    in property <[string]> names;
+    in property <string> was;
+    in property <string> key;
+    in property <string> warning;
+    spacing: 6px;
+    HorizontalLayout {
+        spacing: Tok.gap;
+        SectionTitle { text: root.title; vertical-alignment: center; }
+        ConfidenceTag { level: Confidence.derived; }
+        Text { text: root.used; color: Tok.muted; vertical-alignment: center; }
+        Rectangle { horizontal-stretch: 1; }
+    }
+    if root.was != "": WasLine { was: root.was; key: root.key; }
+    if root.warning != "": Text { text: @tr("The game cannot make this: {}.", root.warning); color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+    for r in root.rows: HorizontalLayout {
+        spacing: Tok.gap;
+        height: 34px;
+        CheckBox {
+            width: 36px;
+            checked: r.on;
+            enabled: r.id != 0;
+            accessible-label: @tr("Equip {}", r.name);
+            toggled => { Api.set-palico-entry(root.kind, r.slot, r.id, self.checked); }
+        }
+        if r.innate: Text { text: r.name; width: 260px; vertical-alignment: center; }
+        if !r.innate: ComboBox {
+            width: 260px;
+            model: root.names;
+            current-index: r.id;
+            selected => { Api.set-palico-entry(root.kind, r.slot, self.current-index, r.on); }
+        }
+        Text {
+            text: r.innate ? @tr("Innate") : r.taught ? @tr("Taught slot") : "";
+            color: Tok.muted;
+            font-size: Tok.small;
+            vertical-alignment: center;
+        }
+        Rectangle { horizontal-stretch: 1; }
     }
 }
 
@@ -139,18 +187,28 @@ export component PalicoesPage inherits Rectangle {
                         TextRow { label: @tr("Greeting"); field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }
                         TextRow { label: @tr("Original owner"); field: "owner"; value: Api.palico.owner; was: Api.palico.was-owner; key: root.key + "owner"; field-width: 260px; }
                         Hairline { }
-                        SectionTitle { text: @tr("Support moves"); }
-                        HorizontalLayout {
-                            spacing: Tok.gap;
-                            Text { text: @tr("Equipped"); width: 130px; color: Tok.muted; }
-                            Text { text: Api.palico.moves; wrap: word-wrap; horizontal-stretch: 1; }
+                        EntryList {
+                            title: @tr("Support moves");
+                            kind: "moves";
+                            used: Api.palico.moves-used;
+                            rows: Api.palico.move-rows;
+                            names: Api.palico-move-names;
+                            was: Api.palico.was-moves;
+                            key: root.key + "moves";
+                            warning: Api.palico.warn-moves;
                         }
-                        HorizontalLayout {
-                            spacing: Tok.gap;
-                            Text { text: @tr("Learned"); width: 130px; color: Tok.muted; }
-                            Text { text: Api.palico.learned; wrap: word-wrap; horizontal-stretch: 1; }
+                        Hairline { }
+                        EntryList {
+                            title: @tr("Skills");
+                            kind: "skills";
+                            used: Api.palico.skills-used;
+                            rows: Api.palico.skill-rows;
+                            names: Api.palico-skill-names;
+                            was: Api.palico.was-skills;
+                            key: root.key + "skills";
+                            warning: Api.palico.warn-skills;
                         }
-                        Muted { text: @tr("Support moves are shown, not edited: which moves a Palico may equip is not mapped yet."); }
+                        Muted { text: @tr("Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."); wrap: word-wrap; }
                     }
                 }
             }

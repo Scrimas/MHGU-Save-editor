@@ -23,6 +23,19 @@ fn num(s: &str) -> i64 {
     v.unwrap_or(0)
 }
 
+/// The rows of data/palico-actions.csv of one kind, by ID (the table lists them in order).
+fn palico_actions(kind: &str) -> Vec<PalicoAction> {
+    rows(include_str!("../../../data/palico-actions.csv"))
+        .iter()
+        .filter(|r| r["kind"] == kind)
+        .enumerate()
+        .map(|(k, r)| {
+            debug_assert_eq!(num(&r["id"]), k as i64, "palico-actions.csv: {kind} IDs in order");
+            PalicoAction { points: num(&r["points"]) as u8, cost: num(&r["cost"]) as u8 }
+        })
+        .collect()
+}
+
 #[derive(Debug, Clone)]
 pub struct Quest {
     pub index: usize,
@@ -95,6 +108,24 @@ pub struct MonsterMeta {
     pub class: String,
 }
 
+/// data/palico-fortes.csv: a forte's innate support moves and skills.
+#[derive(Debug, Clone)]
+pub struct PalicoForte {
+    pub moves: Vec<u8>,
+    /// The second innate move is one of these (empty for Charisma).
+    pub moves2: Vec<u8>,
+    pub skills: [u8; 2],
+}
+
+/// data/palico-actions.csv: a support move or skill.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct PalicoAction {
+    /// 1-3 when new Palicoes draw it at random, else 0 (innate or special only).
+    pub points: u8,
+    /// Skills: the skill slots it takes.
+    pub cost: u8,
+}
+
 /// data/arena.csv: an Arena quest of the Arena Counter's table, in its order.
 #[derive(Debug, Clone)]
 pub struct ArenaQuest {
@@ -161,6 +192,13 @@ pub struct Tables {
     /// data/quest-sizes.csv: monster index -> (smallest, largest) size % its quests give.
     pub quest_sizes: HashMap<usize, (u16, u16)>,
     pub arena: Vec<ArenaQuest>,
+    /// data/palico-levels.csv, by level - 1: (free support move slots, skill slots).
+    pub palico_levels: Vec<(u8, u8)>,
+    /// data/palico-actions.csv by ID.
+    pub palico_moves: Vec<PalicoAction>,
+    pub palico_skills: Vec<PalicoAction>,
+    /// By forte.
+    pub palico_fortes: Vec<PalicoForte>,
 }
 
 impl Tables {
@@ -294,6 +332,16 @@ pub fn tables() -> &'static Tables {
                         grades: [num(&r["grade_a"]) as u32, num(&r["grade_b"]) as u32, num(&r["grade_c"]) as u32],
                         sets: sets.try_into().expect("arena.csv: five sets"),
                     }
+                })
+                .collect(),
+            palico_levels: rows(include_str!("../../../data/palico-levels.csv")).iter().map(|r| (num(&r["support_slots"]) as u8, num(&r["skill_slots"]) as u8)).collect(),
+            palico_moves: palico_actions("move"),
+            palico_skills: palico_actions("skill"),
+            palico_fortes: rows(include_str!("../../../data/palico-fortes.csv"))
+                .iter()
+                .map(|r| {
+                    let ids = |k: &str| r[k].split_whitespace().map(|v| num(v) as u8).collect::<Vec<u8>>();
+                    PalicoForte { moves: ids("move"), moves2: ids("moves2"), skills: ids("skills").try_into().expect("palico-fortes.csv: two skills") }
                 })
                 .collect(),
         }

@@ -329,8 +329,31 @@ bias 6, the greeting and buddy 1 = its index.
 | `+0x25` | u8 | support bias (parameter block `+5`, see [StreetPass Palico record](#streetpass-palico-record-276-b)): 6 = Gathering in game |
 | `+0x26` | u8 | parameter block `+6`, a 0–99 value capped per entry, UNRESOLVED (55–99 seen; 55 in all but eight records of slot 1). Suds: 89 with 4 of 5 Enthusiasm marks, so possibly Enthusiasm |
 | `+0x27` | u8 | target (1–5 seen): 4 = Large First in game, 2 = Small First by write |
+| `+0x28` | 8 × u8 | equipped support moves, packed, 0 = none |
+| `+0x30` | 8 × u8 | equipped skills (`rOtSkill` IDs), packed, 0 = none |
+| `+0x38` | 16 × u8 | support move list, `+0x55` slots, then 57 |
+| `+0x48` | 12 × u8 | skill list, `+0x57` slots, then 96 |
+| `+0x54` / `+0x56` | u8 | the point pattern the random moves / skills were drawn with (`otSupportPoint`, `otSupportPointSp` for Charisma / `otSkillPoint`) |
+| `+0x55` / `+0x57` | u8 | the move list's / skill list's length |
+| `+0x58` | 8 | an ID per Palico (the analysed save's Palicoes of one owner differ in one byte) |
 | `+0x60` | char[60] | greeting |
 | `+0x9C` | char[32] | original owner name |
+
+**Support moves and skills**, DERIVED from the parameter class (`0xe8000`–`0xea000`,
+object `+0x23C` = record `+0x20`) and the save. A move list is the forte's innate moves
+(`otLotOwnSupport`: one for Charisma, else the first and one of the other two), Mini
+Barrel Bombay, Herb Horn, the random moves, then the slots taught moves fill (3 for
+Charisma, else 2: `0x262838` clears them). The random moves are drawn from
+`otSupportIni{1,2,3}pt` with points following the pattern, 8 points in all (9 for
+Charisma). A skill list is the two innate skills (`otLotOwnSkill`), the random skills
+(`otSkillIni*`, `otSkillPoint`), then 2 taught slots. 30 of the 32 Palicoes of the
+analysed save fit this exactly; two special Palicoes have no random part. The game allows
+`mFreeSupportSlot` (level table `ot_lvl`) + 2 equipped moves, +1 when skill 21 (Support
+Move +1) is equipped (`0xe8478`; Charisma's one innate move is made up by one more free
+slot), and equipped skills whose `mSlotCost` (`ot_skl`) add up to at most
+`mMaxOtomoSkillSlot` (`0xe9338`). [`tools/palico_tables.py`](../tools/palico_tables.py)
+writes these tables to `data/palico-*.csv`. The 57-bit map at `base + 0x2C6F`
+(`S+0xd84`) holds the moves seen on any Palico, every forte's innate moves among them.
 
 Lists: `base + 0x23BB6` 84 records (the Palicoes of the slot) and `base + 0x2A606` 24
 records (same format: the Palicoes for hire, rerolled after each counted quest and at no
