@@ -900,16 +900,21 @@ export component NumberBox inherits Rectangle {
     function show() {
         input.text = input.has-focus ? root.value : Fmt.num(root.value) + root.suffix;
     }
-    function commit() {
-        if input.text.is-float() {
-            root.step(clamp(round(input.text.to-float()), root.minimum, root.maximum) - root.value);
+    // the digits typed, else the value (only called while they are plain digits)
+    function typed() -> int {
+        return input.text.is-float() ? clamp(round(input.text.to-float()), root.minimum, root.maximum) : root.value;
+    }
+    function set(v: int) {
+        if v != root.value {
+            root.edited(v);
         }
         root.show();
     }
+    function commit() { root.set(root.typed()); }
+    // from the digits being typed, not the value before them; unfocused, the text is
+    // formatted ("1,234 %") and not read
     function step(d: int) {
-        if d != 0 && root.value + d >= root.minimum && root.value + d <= root.maximum {
-            root.edited(root.value + d);
-        }
+        root.set(clamp((input.has-focus ? root.typed() : root.value) + d, root.minimum, root.maximum));
     }
     changed value => { root.show(); }
 
