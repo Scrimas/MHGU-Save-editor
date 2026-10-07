@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Entry, Kind, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::data::{tables, TalismanRow};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, monsters, palico, Save};
+use mhgu_save::{arena, character, monsters, palico, Save};
 
 /// Why a warning matters, shown once next to the list of warnings.
 pub fn why() -> &'static str {
@@ -244,6 +244,21 @@ pub fn arena_best(q: usize, e: &arena::Entry) -> Option<String> {
     }
 }
 
+/// The hunter's creation choices: faces, hairstyles and voices the game has models for.
+fn appearance(s: &Save, base: usize) -> Option<String> {
+    use character as ch;
+    let l = |k| ch::look(s, base, k);
+    if l(ch::LOOK_FACE) >= ch::FACES {
+        Some(trf("a face past the game's {}", &[&ch::FACES]))
+    } else if l(ch::LOOK_HAIR) >= ch::HAIRSTYLES {
+        Some(trf("a hairstyle past the game's {}", &[&ch::HAIRSTYLES]))
+    } else if !(1..=ch::VOICES).contains(&l(ch::LOOK_VOICE)) {
+        Some(trf("a voice outside the game's 1–{}", &[&ch::VOICES]))
+    } else {
+        None
+    }
+}
+
 pub fn of(t: Target, s: &Save, slot: usize) -> Option<String> {
     let base = s.base(slot);
     match t {
@@ -257,6 +272,8 @@ pub fn of(t: Target, s: &Save, slot: usize) -> Option<String> {
         Target::Monster(i, f) => monster(i, &monsters::get(s, base, i), f),
         Target::Title | Target::Scene | Target::Pose => card(t, s, base),
         Target::Arena(q) => arena::best(s, base, q).and_then(|e| arena_best(q, &e)),
+        Target::Appearance => appearance(s, base),
+        Target::Gender => (character::look(s, base, character::LOOK_GENDER) > 1).then(|| tr("not a body type of the game").into()),
         _ => None,
     }
 }

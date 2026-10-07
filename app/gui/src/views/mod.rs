@@ -11,7 +11,7 @@ use crate::targets::{self, Mon, Target, PAGES};
 use crate::update::{self, VERSION};
 use crate::{model, strings, Shared};
 use crate::{
-    Api, AppWindow, ArenaRow, ArtRow, CardInfo, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
+    Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, CardInfo, ColourRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
     EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, LookRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, Preview, PreviewLine,
     QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
 };

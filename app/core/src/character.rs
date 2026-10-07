@@ -39,6 +39,53 @@ pub const MAX_POINTS: u32 = 9_999_999;
 pub const MAX_VILLAGE_POINTS: u32 = 20_000;
 pub const MAX_PLAYTIME: u32 = 35_999_999;
 
+/// The character-creation block (12 B, `BODY` in the player record, the copy the game
+/// loads; summaries in the slot header and the own Guild Card) and its 9 RGBA colours
+/// right after it. DERIVED (docs/11-save-map.md, "Hunter appearance"): +0 weapon class,
+/// +1 voice (1-20, player/com/<m|f>/vo/01-20), +2 face (18 models), +3 clothing, +4 gender,
+/// +5 hunting style, +6 hairstyle (30 models), +8 features; colours 0-4 the armour
+/// pigment, 5 skin, 6 hair, 7 features, 8 eyes.
+pub const LOOKS: [usize; 3] = [BODY, 0x240, CARD + 0x18];
+pub const LOOK_COLOURS: [usize; 3] = [BODY + 12, 0x24C, CARD + 0x24];
+pub const LOOK_VOICE: usize = 1;
+pub const LOOK_FACE: usize = 2;
+pub const LOOK_CLOTHING: usize = 3;
+pub const LOOK_GENDER: usize = 4;
+pub const LOOK_HAIR: usize = 6;
+pub const LOOK_FEATURES: usize = 8;
+pub const COLOUR_SKIN: usize = 5;
+pub const COLOUR_HAIR: usize = 6;
+pub const COLOUR_FEATURES: usize = 7;
+pub const COLOUR_EYES: usize = 8;
+pub const FACES: u8 = 18;
+pub const HAIRSTYLES: u8 = 30;
+pub const VOICES: u8 = 20;
+
+/// Byte `k` of the creation block.
+pub fn look(s: &Save, base: usize, k: usize) -> u8 {
+    s.u8(base + BODY + k)
+}
+
+/// Write byte `k` of the creation block to all three copies.
+pub fn set_look(s: &mut Save, base: usize, k: usize, v: u8) {
+    for a in LOOKS {
+        s.set_u8(base + a + k, v);
+    }
+}
+
+/// Colour slot `c` as RGB.
+pub fn look_colour(s: &Save, base: usize, c: usize) -> [u8; 3] {
+    let v = s.get(base + BODY + 12 + 4 * c, 3);
+    [v[0], v[1], v[2]]
+}
+
+/// Write colour slot `c` (alpha 0xFF) to all three copies.
+pub fn set_look_colour(s: &mut Save, base: usize, c: usize, [r, g, b]: [u8; 3]) {
+    for a in LOOK_COLOURS {
+        s.put(base + a + 4 * c, &[r, g, b, 0xFF]);
+    }
+}
+
 /// HR points for HR 1-51 (table 0x162c058).
 const NEED_LOW: [u32; 51] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32050, 33470, 34960, 36520, 38150, 39850, 41620, 43460, 45370, 47350, 49400, 51520,
@@ -218,6 +265,20 @@ pub fn set_playtime(s: &mut Save, base: usize, secs: u32) {
 mod tests {
     use super::*;
     use crate::save::{blank, SLOT1_BASE};
+
+    #[test]
+    fn looks_reach_every_copy() {
+        let mut s = blank();
+        set_look(&mut s, SLOT1_BASE, LOOK_HAIR, 26);
+        set_look_colour(&mut s, SLOT1_BASE, COLOUR_SKIN, [0xe9, 0xd6, 0xcc]);
+        for (a, c) in LOOKS.into_iter().zip(LOOK_COLOURS) {
+            assert_eq!(s.u8(SLOT1_BASE + a + LOOK_HAIR), 26);
+            assert_eq!(s.get(SLOT1_BASE + c + 4 * COLOUR_SKIN, 4), [0xe9, 0xd6, 0xcc, 0xff]);
+        }
+        assert_eq!((look(&s, SLOT1_BASE, LOOK_HAIR), look_colour(&s, SLOT1_BASE, COLOUR_SKIN)), (26, [0xe9, 0xd6, 0xcc]));
+        // the block is the player record's 12 bytes and the colours follow it
+        assert_eq!(get(&s, SLOT1_BASE).gender, 0);
+    }
 
     #[test]
     fn weapon_usage_at_the_documented_offsets() {

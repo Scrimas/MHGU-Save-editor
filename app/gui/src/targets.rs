@@ -83,6 +83,10 @@ pub enum Target {
     /// An Arena quest of the counter's table: the card's times, the counter's best time
     /// and the sets it was cleared with.
     Arena(usize),
+    /// The hunter's face, hairstyle, features, voice, clothing and colours.
+    Appearance,
+    /// The hunter's body type (gender).
+    Gender,
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -186,6 +190,15 @@ pub fn card_title(t: [u16; 3]) -> String {
     v.join(" ")
 }
 
+/// The body type as the Character page names it.
+pub fn body_type(g: u8) -> String {
+    match g {
+        0 => tr("Type 1 (male)").into(),
+        1 => tr("Type 2 (female)").into(),
+        g => format!("{g}"),
+    }
+}
+
 /// Name of Palico support move or skill `id`, "#id" when the asset pack lacks it.
 pub fn palico_name(names: &[String], id: u8) -> String {
     names.get(id as usize).filter(|n| !n.is_empty()).cloned().unwrap_or_else(|| format!("#{id}"))
@@ -258,7 +271,7 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Arena(_) => "character",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Arena(_) | Appearance | Gender => "character",
             Item(..) | Loadout(_) | Obtained => "items",
             Equip(..) | Smithy(_) => "equipment",
             Palico(..) => "palicoes",
@@ -303,6 +316,8 @@ impl Target {
             Pose => "card-pose".into(),
             CardMap(m) => format!("card-map:{m}"),
             Arena(q) => format!("arena:{q}"),
+            Appearance => "appearance".into(),
+            Gender => "gender".into(),
         }
     }
 
@@ -384,6 +399,8 @@ impl Target {
                 gc::Map::Poses => tr("Guild Card poses unlocked").into(),
             },
             Arena(q) => trf("{} · Arena record", &[&arena_quest(q)]),
+            Appearance => tr("Appearance").into(),
+            Gender => tr("Body").into(),
         }
     }
 
@@ -491,6 +508,11 @@ impl Target {
                 Some(e) => format!("{} · {}", arena_time(e.time), arena_grade(e.grade)),
                 None => tr("No record").into(),
             },
+            Appearance => {
+                let l = |k| ch::look(s, base, k) as i32;
+                trf("Face {} · Hairstyle {} · Voice {}", &[&(l(ch::LOOK_FACE) + 1), &(l(ch::LOOK_HAIR) + 1), &l(ch::LOOK_VOICE)])
+            }
+            Gender => body_type(ch::look(s, base, ch::LOOK_GENDER)),
         }
     }
 
@@ -593,6 +615,15 @@ impl Target {
                 bits(base + arena::SETS_NEW, 5 * q, 5),
             ]
             .concat(),
+            Appearance => ch::LOOKS
+                .into_iter()
+                .zip(ch::LOOK_COLOURS)
+                .flat_map(|(a, c)| {
+                    let bytes = [ch::LOOK_VOICE, ch::LOOK_FACE, ch::LOOK_CLOTHING, ch::LOOK_HAIR, ch::LOOK_FEATURES].map(|k| (base + a + k, 0xFF));
+                    [bytes.to_vec(), range(base + c + 4 * ch::COLOUR_SKIN, 16)].concat()
+                })
+                .collect(),
+            Gender => ch::LOOKS.iter().map(|&a| (base + a + ch::LOOK_GENDER, 0xFF)).collect(),
         }
     }
 

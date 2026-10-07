@@ -172,7 +172,7 @@ export struct WeaponUseRow { index: int, name: string, counts: [int], was: [stri
 
 export struct CharacterInfo {
     name: string, hr: int, hr-points: int, funds: int, wycademy: int, playtime-h: int, playtime-m: int,
-    village-star: int, hub-star: int, gender: string,
+    village-star: int, hub-star: int,
     points-lr: [int], points-g: [int],
     was-name: string, was-hr: string, was-hr-points: string, was-funds: string, was-wycademy: string,
     was-playtime: string, was-village-star: string, was-hub-star: string, was-lr: [string], was-g: [string],
@@ -185,6 +185,16 @@ export struct CardInfo {
     word1: int, link: int, word2: int, scene: int, pose: int, title: string,
     was-title: string, was-scene: string, was-pose: string,
     warn-title: string, warn-scene: string, warn-pose: string,
+}
+
+// A colour of the hunter's creation choices, as a swatch and #RRGGBB.
+export struct ColourRow { key: string, label: string, colour: color, hex: string }
+
+// The hunter's creation choices (indices into the "Type n" lists; voice 1-based) and
+// colours, with "was" and warnings for the appearance and the body type.
+export struct AppearanceInfo {
+    gender: int, face: int, hair: int, features: int, voice: int, clothing: int, colours: [ColourRow],
+    was-appearance: string, was-gender: string, warn-appearance: string, warn-gender: string,
 }
 
 // The card's best time on one Arena quest of the counter's table: the time split for its
@@ -289,6 +299,12 @@ export global Api {
     in property <[string]> gc-scenes;
     in property <[string]> gc-poses;
     callback set-card(string /* word1 link word2 scene pose */, int);
+    in property <AppearanceInfo> appearance;
+    in property <[string]> look-faces;
+    in property <[string]> look-hairstyles;
+    in property <[string]> look-voices;
+    callback set-look(string /* gender face hair features voice clothing */, int);
+    callback set-look-colour(string /* skin hair features eyes */, string /* #RRGGBB */);
     in property <[ArenaRow]> arena;
     callback set-arena(int /* quest */, int /* set */, int /* time, 1/100 s */);
     callback clear-arena(int);

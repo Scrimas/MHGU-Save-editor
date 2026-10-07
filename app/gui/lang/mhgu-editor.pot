@@ -199,7 +199,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Appearance"
 msgstr ""
 
@@ -719,15 +719,51 @@ msgid "Hub star level"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
+msgid "The game raises star levels when every urgent quest of a level is cleared."
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "As character creation sets it. Features and clothing are numbered as the game stores them."
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
 msgid "Body"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
-msgid "Not mapped yet"
+msgid "Some armour is made for one body type only: check what you wear after changing it."
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Type 1 (male)"
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Type 2 (female)"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
-msgid "The game raises star levels when every urgent quest of a level is cleared."
+msgid "Face, hairstyle, voice"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Face"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Hairstyle"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs app/gui/ui/pages/character.slint
+msgid "Voice"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Features"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs app/gui/ui/pages/character.slint
+msgid "Clothing"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
@@ -2463,7 +2499,7 @@ msgstr ""
 msgid "{} · Arena record"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/src/views/names.rs app/gui/src/views/palicoes.rs
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/src/views/names.rs app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Type {}"
 msgstr ""
@@ -2500,6 +2536,11 @@ msgstr ""
 
 #: app/gui/src/targets.rs
 msgid "No record"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Face {} · Hairstyle {} · Voice {}"
 msgstr ""
 
 #: app/gui/src/update.rs
@@ -2723,6 +2764,25 @@ msgstr ""
 msgid "a weapon the set does not have"
 msgstr ""
 
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "a face past the game's {}"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "a hairstyle past the game's {}"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "a voice outside the game's 1–{}"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+msgid "not a body type of the game"
+msgstr ""
+
 #: app/gui/src/views/advanced.rs
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 msgid "… {} more byte"
@@ -2736,11 +2796,19 @@ msgid "block {}"
 msgstr ""
 
 #: app/gui/src/views/character_page.rs
-msgid "Type 1 (male)"
+msgid "Skin Tone"
 msgstr ""
 
 #: app/gui/src/views/character_page.rs
-msgid "Type 2 (female)"
+msgid "Hair Color"
+msgstr ""
+
+#: app/gui/src/views/character_page.rs
+msgid "Feature Color"
+msgstr ""
+
+#: app/gui/src/views/character_page.rs
+msgid "Eye Color"
 msgstr ""
 
 #: app/gui/src/views/character_page.rs
@@ -2750,6 +2818,10 @@ msgstr ""
 
 #: app/gui/src/views/character_page.rs
 msgid "HR below 13 follows the Hub star level: edit Hub ★ instead"
+msgstr ""
+
+#: app/gui/src/views/character_page.rs
+msgid "A colour is six hex digits, like #E9D6CC"
 msgstr ""
 
 #: app/gui/src/views/character_page.rs
@@ -3425,10 +3497,6 @@ msgid "Coat colour"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
-msgid "Clothing"
-msgstr ""
-
-#: app/gui/src/views/palicoes.rs
 msgid "Clothing colour"
 msgstr ""
 
@@ -3450,10 +3518,6 @@ msgstr ""
 
 #: app/gui/src/views/palicoes.rs
 msgid "Tail"
-msgstr ""
-
-#: app/gui/src/views/palicoes.rs
-msgid "Voice"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs

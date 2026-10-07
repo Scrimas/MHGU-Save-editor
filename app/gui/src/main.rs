@@ -202,6 +202,8 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             (_, &["arena", q, set, t]) => api.invoke_set_arena(num(q), num(set), num(t)),
             ("palicoes", &["entry", kind, slot, id, on]) => api.invoke_set_palico_entry(kind.into(), num(slot), num(id), on == "1"),
             ("palicoes", &["look", key, v]) => api.invoke_set_palico_look(key.into(), num(v)),
+            ("character", &["look", key, v]) => api.invoke_set_look(key.into(), num(v)),
+            ("character", &["colour", key, hex]) => api.invoke_set_look_colour(key.into(), hex.into()),
             (_, &["item", slot, id, n]) => api.invoke_set_item(num(slot), num(id), num(n)),
             (_, &["goto", ..]) => api.invoke_goto(parts[1..].join(":").into()),
             (_, &["undo-all"]) => api.invoke_undo_all(),

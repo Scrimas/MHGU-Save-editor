@@ -43,7 +43,7 @@ For a portable install or another emulator, add its folder in **Settings…** or
 | Page | |
 |---|---|
 | Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points; and, Derived: every item obtained, every Smithy entry listed, every Guild Card title word, scene and pose |
-| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, Guild Card title, scene and pose (Derived), Guild Card weapon usage, Arena records: best time and equipment set per Arena quest, ranked by the quest's times (Derived) |
+| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, appearance: body type, face, hairstyle, voice, features, clothing and colours (Derived), Guild Card title, scene and pose (Derived), Guild Card weapon usage, Arena records: best time and equipment set per Arena quest, ranked by the quest's times (Derived) |
 | Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts. A pouch stack above the item's carry limit is written with a warning |
 | Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables) |
 | Palicoes | Name, level and experience, forte, target, greeting, original owner; support moves and skills: the list and what is equipped, checked against the forte's innate entries and the level's slots; looks: coat, eyes, ears, tail, voice, clothing and their colours from the game's palettes (Derived) |

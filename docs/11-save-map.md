@@ -194,6 +194,29 @@ character, and the next save overwrites it (not tested in game).
 | `0x272` | 2 | — | struct padding (stale bytes) |
 | `0x274` | u32 | sPlayer `+0x508` | five 5-bit values, bits 5*i* … 5*i*+4 for pigment slot *i* (getter `0x26f194`, read with the colour by the pigment screen `0x5f1760`). Cleared when a slot gets an explicit or the default colour (`0x26f5b0`, `0x26f440`), set to 1 by the appearance menu (`0x26f0dc`). It is a colour mode: the swatch code (`0x56f714`) draws the plain RGBA for 0, takes a separate path for 1 (`0x54700c`), and uses preset *v* − 2 of a runtime colour-pair table (`0x560900`, shared with `cUIOAppearanceColor` and character creation) for 2 and up. My Sets keep the same five values (game record `+0x78`, [07](07-equipment.md#my-sets-saved-equipment-sets)). The Guild Card copies it to card `+0x48`. 0 in all three slots |
 
+### Hunter appearance
+
+DERIVED. The 12-byte block and the 9 colours after it are kept three times: the player
+record (`base + 0x23B47`, the copy the game loads), the slot header (`+0x240`, `+0x24C`)
+and the own Guild Card (`+0x18`, `+0x24`); all three agree in the analysed save. The title
+menu (`0x68894c`) copies bytes 1–8 to the model and colours 5–8 with their colour modes;
+colours 0–4 are the armour pigment. The character-creation handler (`0x685a54` …) edits
+one byte per step and pairs three of them with a colour:
+
+| Byte | Content | Evidence |
+|---|---|---|
+| `+1` | voice, 1–20 | `player/com/<m\|f>/vo/01`–`20`; the step plays a voice preview; analysed save 1 |
+| `+2` | face, 18 | `m_face000`–`017` / `f_face…` models |
+| `+3` | clothing | the Palico block keeps clothing at the same byte |
+| `+4` | gender | read by the Smithy, the Armory and the talk conditions |
+| `+5` | hunting style | |
+| `+6` | hairstyle, 30 | `m_hair000`–`029`; edited with colour 6 (hair); analysed save 26 |
+| `+7` | edited with colour 5 (skin) | |
+| `+8` | features | edited with colour 7 (feature colour) |
+
+Colour 8 stands alone: the eye colour. The menu's own words are `CharMakeMsg` (Gender,
+Face, Skin Tone, Eye Color, Features, Voice, Hairstyle, Clothing).
+
 "sPlayer" here is the player data the getter `0x277454` returns: the loaded object
 `+0x7C`. The loader's offsets below are therefore `0x7C` higher than the header
 writer's.

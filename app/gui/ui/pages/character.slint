@@ -173,19 +173,79 @@ export component CharacterPage inherits Rectangle {
                             key: "hub-star";
                             NumberBox { value: Api.character.hub-star; maximum: 13; label: @tr("Hub star level"); edited(v) => { Api.set-character("hub-star", v); } }
                         }
-                        Field {
-                            width: 170px;
-                            label: @tr("Body");
-                            Text { text: Api.character.gender; vertical-alignment: center; }
-                        }
-                        // not mapped yet: a disabled row rather than a footnote (H2.4)
-                        Field {
-                            width: 170px;
-                            label: @tr("Appearance");
-                            Text { text: @tr("Not mapped yet");vertical-alignment: center; color: Tok.faint; }
-                        }
                     }
                     Muted { text: @tr("The game raises star levels when every urgent quest of a level is cleared."); }
+                }
+            }
+            Card {
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 14px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: @tr("Appearance"); vertical-alignment: center; }
+                        ConfidenceTag { level: Confidence.derived; }
+                        Text { text: @tr("As character creation sets it. Features and clothing are numbered as the game stores them.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                    }
+                    Field {
+                        label: @tr("Body");
+                        level: Confidence.derived;
+                        hint: @tr("Some armour is made for one body type only: check what you wear after changing it.");
+                        warning: Api.appearance.warn-gender;
+                        was: Api.appearance.was-gender;
+                        key: "gender";
+                        ComboBox { width: 200px; model: [@tr("Type 1 (male)"), @tr("Type 2 (female)")]; current-index: Api.appearance.gender; selected => { Api.set-look("gender", self.current-index); } }
+                    }
+                    Field {
+                        label: @tr("Face, hairstyle, voice");
+                        level: Confidence.derived;
+                        warning: Api.appearance.warn-appearance;
+                        was: Api.appearance.was-appearance;
+                        key: "appearance";
+                        HorizontalLayout {
+                            spacing: 10px;
+                            alignment: start;
+                            Text { text: @tr("Face"); vertical-alignment: center; color: Tok.muted; }
+                            ComboBox { width: 120px; model: Api.look-faces; current-index: Api.appearance.face; selected => { Api.set-look("face", self.current-index); } }
+                            Rectangle { width: 14px; }
+                            Text { text: @tr("Hairstyle"); vertical-alignment: center; color: Tok.muted; }
+                            ComboBox { width: 120px; model: Api.look-hairstyles; current-index: Api.appearance.hair; selected => { Api.set-look("hair", self.current-index); } }
+                            Rectangle { width: 14px; }
+                            Text { text: @tr("Voice"); vertical-alignment: center; color: Tok.muted; }
+                            ComboBox { width: 120px; model: Api.look-voices; current-index: Api.appearance.voice - 1; selected => { Api.set-look("voice", self.current-index + 1); } }
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 24px;
+                        alignment: start;
+                        Field {
+                            width: 170px;
+                            label: @tr("Features");
+                            NumberBox { width: 110px; value: Api.appearance.features; maximum: 255; label: @tr("Features"); edited(v) => { Api.set-look("features", v); } }
+                        }
+                        Field {
+                            width: 170px;
+                            label: @tr("Clothing");
+                            NumberBox { width: 110px; value: Api.appearance.clothing; maximum: 255; label: @tr("Clothing"); edited(v) => { Api.set-look("clothing", v); } }
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 24px;
+                        alignment: start;
+                        for c in Api.appearance.colours: Field {
+                            width: 190px;
+                            label: c.label;
+                            Rectangle { width: 32px; height: 32px; border-radius: 4px; background: c.colour; border-width: 1px; border-color: Tok.input-border; }
+                            LineEdit {
+                                width: 110px;
+                                text: c.hex;
+                                accessible-label: c.label;
+                                accepted(t) => { Api.set-look-colour(c.key, t); }
+                            }
+                        }
+                    }
                 }
             }
             Card {

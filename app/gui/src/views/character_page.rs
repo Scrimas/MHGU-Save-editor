@@ -19,11 +19,6 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
         playtime_m: (c.playtime / 60 % 60) as i32,
         village_star: p.village_star() as i32,
         hub_star: p.hub_star() as i32,
-        gender: match c.gender {
-            0 => tr("Type 1 (male)").into(),
-            1 => tr("Type 2 (female)").into(),
-            g => format!("{g}").into(),
-        },
         points_lr: model(c.points_lr.iter().map(|&v| v as i32).collect()),
         points_g: model(c.points_g.iter().map(|&v| v as i32).collect()),
         was_name: was(Target::Name),
@@ -40,6 +35,60 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
     });
     guild_card(ui, st);
     ui.global::<Api>().set_arena(model(arena_rows(st)));
+    appearance(ui, st);
+}
+
+/// The hunter's creation choices and colours, in the game's terms.
+const LOOK_COLOURS: [(&str, usize); 4] = [("skin", character::COLOUR_SKIN), ("hair", character::COLOUR_HAIR), ("features", character::COLOUR_FEATURES), ("eyes", character::COLOUR_EYES)];
+
+fn appearance(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let (s, base) = (st.save(), st.base());
+    let types = |n: u8, first: u8| strings((first..first + n).map(|k| trf("Type {}", &[&k])));
+    api.set_look_faces(types(character::FACES, 1));
+    api.set_look_hairstyles(types(character::HAIRSTYLES, 1));
+    api.set_look_voices(types(character::VOICES, 1));
+    let l = |k| character::look(s, base, k) as i32;
+    let warn = |t: Target| -> SharedString { crate::warnings::of(t, s, st.slot).unwrap_or_default().into() };
+    api.set_appearance(AppearanceInfo {
+        gender: l(character::LOOK_GENDER),
+        face: l(character::LOOK_FACE),
+        hair: l(character::LOOK_HAIR),
+        features: l(character::LOOK_FEATURES),
+        voice: l(character::LOOK_VOICE),
+        clothing: l(character::LOOK_CLOTHING),
+        colours: model(
+            LOOK_COLOURS
+                .iter()
+                .map(|&(key, c)| {
+                    let [r, g, b] = character::look_colour(s, base, c);
+                    ColourRow {
+                        key: key.into(),
+                        label: match key {
+                            "skin" => tr("Skin Tone"),
+                            "hair" => tr("Hair Color"),
+                            "features" => tr("Feature Color"),
+                            _ => tr("Eye Color"),
+                        }
+                        .into(),
+                        colour: slint::Color::from_rgb_u8(r, g, b),
+                        hex: format!("#{r:02X}{g:02X}{b:02X}").into(),
+                    }
+                })
+                .collect(),
+        ),
+        was_appearance: st.was(Target::Appearance).into(),
+        was_gender: st.was(Target::Gender).into(),
+        warn_appearance: warn(Target::Appearance),
+        warn_gender: warn(Target::Gender),
+    });
+}
+
+/// "#e9d6cc", "e9d6cc" -> RGB.
+fn parse_rgb(t: &str) -> Option<[u8; 3]> {
+    let h = t.trim().trim_start_matches('#');
+    let v = (h.len() == 6).then(|| u32::from_str_radix(h, 16).ok()).flatten()?;
+    Some([(v >> 16) as u8, (v >> 8) as u8, v as u8])
 }
 
 /// The card's best time per Arena quest, with the sets to pick from and the grade times.
@@ -212,6 +261,36 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             vec![]
         });
         let _ = &ui;
+    });
+    // a creation choice of the hunter: "gender", or face / hair / features / voice / clothing
+    on!(ui, st, on_set_look, |ui, s, key: SharedString, v: i32| {
+        let Ok(v) = u8::try_from(v) else { return };
+        let (t, k) = match key.as_str() {
+            "gender" => (Target::Gender, character::LOOK_GENDER),
+            "face" => (Target::Appearance, character::LOOK_FACE),
+            "hair" => (Target::Appearance, character::LOOK_HAIR),
+            "features" => (Target::Appearance, character::LOOK_FEATURES),
+            "voice" => (Target::Appearance, character::LOOK_VOICE),
+            "clothing" => (Target::Appearance, character::LOOK_CLOTHING),
+            _ => return,
+        };
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+            character::set_look(sv, base, k, v);
+            vec![]
+        });
+        let _ = &ui;
+    });
+    on!(ui, st, on_set_look_colour, |ui, s, key: SharedString, hex: SharedString| {
+        let Some(&(_, c)) = LOOK_COLOURS.iter().find(|x| x.0 == key.as_str()) else { return };
+        let Some(rgb) = parse_rgb(&hex) else {
+            return toast(&ui, tr("A colour is six hex digits, like #E9D6CC"), true);
+        };
+        let title = Target::Appearance.label(s.save(), s.slot);
+        s.edit(Edit::one(Target::Appearance, title, Conf::Derived), |sv, base| {
+            character::set_look_colour(sv, base, c, rgb);
+            vec![]
+        });
     });
     // an Arena best time as a solo clear with the set picked; the grade follows the time
     on!(ui, st, on_set_arena, |ui, s, q: i32, set: i32, time: i32| {
