@@ -88,6 +88,32 @@ gold or silver crown records. **Write indices 1–137 only.** Writing "index 0" 
 the pair into `capture[136..137]` — the analysed save carried exactly this artefact,
 Great Thunderbug and Conga reading 90 and 115 captures against 23 and 28 hunts.
 
+### Sizes the game can roll
+
+A quest names each large monster with a size % and a variation table; the monster
+spawns at that size times a scale rate drawn from the table. Taken over every quest of
+the game, this bounds what a size record can hold:
+[`data/quest-sizes.csv`](../data/quest-sizes.csv), written by
+[`tools/quest_sizes.py`](../tools/quest_sizes.py) (file layouts in its header).
+
+- Quest files (`questData_NNNNNNN.ext`): 5 boss entries of 13 B at `+0x64`, monster
+  code `+0`, size % `+9` (u16), variation table `+0xB`. Monster code to index: the
+  executable's table `0x1597ea4`.
+- Variation tables (`em_size_yure_data`): 52 tables of (scale rate, chance in 100).
+- Most monsters range 88–125 %; a few reach 130 % (Rathalos in *Paint It Gold*,
+  Deviljho and Savage Deviljho), the fixed-size ones stay at 100.
+
+**DERIVED**: every size record of the analysed save that no editor wrote falls inside
+its range, and every crown threshold too. Out of range were Bulldrome 169 % and
+Basarios 160 %, which no quest gives, and the 90 / 115 pairs written by an editor on
+monsters whose quests give 95–110 % or a fixed 100.
+
+The size table `em_size_scale_data` holds per monster `mQuestSizeMin` / `mQuestSizeMax`,
+equal to the quest bounds except for Rathalos (125 against 130), Kecha Wacha (115
+against 123) and Gravios (88 against 79 in *Gravios Backbreaker*). Whether the game clamps to it
+is not checked; the editor keeps the wider quest bounds, so it never flags a size the
+game can make.
+
 ## Capture counts — `0x192C52`
 
 u16, one per monster: the `M` in the Monster List's *Hunted (Capts)* `N(M)`.

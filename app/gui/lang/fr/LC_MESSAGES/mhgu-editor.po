@@ -2609,6 +2609,11 @@ msgstr "ce monstre fait toujours la taille 100"
 msgid "the smallest is above the largest"
 msgstr "le plus petit dépasse le plus grand"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "its quests give {}–{}"
+msgstr "ses quêtes donnent {}–{}"
+
 #: app/gui/src/warnings.rs
 msgid "not an entry of the game"
 msgstr "pas une entrée du jeu"

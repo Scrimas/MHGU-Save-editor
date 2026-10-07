@@ -146,6 +146,8 @@ pub struct Tables {
     pub fields: Vec<Field>,
     pub smithy: Vec<SmithyList>,
     pub talisman: Vec<TalismanRow>,
+    /// data/quest-sizes.csv: monster index -> (smallest, largest) size % its quests give.
+    pub quest_sizes: HashMap<usize, (u16, u16)>,
 }
 
 impl Tables {
@@ -265,6 +267,10 @@ pub fn tables() -> &'static Tables {
                     max: num(&r["max"]) as i8,
                 })
                 .collect(),
+            quest_sizes: rows(include_str!("../../../data/quest-sizes.csv"))
+                .iter()
+                .map(|r| (num(&r["index"]) as usize, (num(&r["min"]) as u16, num(&r["max"]) as u16)))
+                .collect(),
         }
     })
 }
@@ -280,6 +286,7 @@ mod tests {
         assert_eq!(t.quest_index(101), Some(1));
         assert_eq!(t.smithy.len(), 23);
         assert_eq!(t.talisman.iter().filter(|r| r.kind == "slots").count(), 4);
+        assert_eq!(t.quest_sizes.get(&1), Some(&(88, 125)));
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));
     }
 }

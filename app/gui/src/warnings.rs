@@ -145,6 +145,8 @@ pub fn monster(i: usize, r: &monsters::Record, f: Mon) -> Option<String> {
                 Some(tr("this monster is always size 100").into())
             } else if r.min > r.max {
                 Some(tr("the smallest is above the largest").into())
+            } else if let Some((lo, hi)) = monsters::quest_range(i).filter(|&(lo, hi)| v != 0 && !(lo..=hi).contains(&v)) {
+                Some(trf("its quests give {}–{}", &[&lo, &hi]))
             } else {
                 None
             }
@@ -234,6 +236,11 @@ mod tests {
         let r = |min, max| monsters::Record { hunts: 1, captures: 0, min, max };
         assert_eq!(monster(1, &r(95, 110), Mon::Min), None);
         assert!(monster(1, &r(120, 110), Mon::Max).is_some());
+        // Rathian's quests give 88-125 (data/quest-sizes.csv)
+        assert_eq!(monster(1, &r(88, 125), Mon::Max), None);
+        assert!(monster(1, &r(87, 110), Mon::Min).is_some());
+        assert!(monster(1, &r(95, 126), Mon::Max).is_some());
+        assert_eq!(monster(1, &r(87, 110), Mon::Max), None);
         assert!(monster(1, &monsters::Record { hunts: 10_000, ..r(0, 0) }, Mon::Hunts).is_some());
         let fixed = (1..=monsters::N).find(|&i| monsters::meta(i).size_record && monsters::meta(i).fixed_size);
         if let Some(i) = fixed {

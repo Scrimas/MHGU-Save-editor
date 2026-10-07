@@ -117,6 +117,17 @@ pub fn crown_sizes(i: usize) -> Option<(u16, u16)> {
     if m.fixed_size { Some((100, 100)) } else { Some((m.mini_le, m.gold_ge)) }
 }
 
+/// The smallest and largest size the game's quests give monster `i` and its folded
+/// variants (data/quest-sizes.csv); None for a monster no quest has.
+pub fn quest_range(i: usize) -> Option<(u16, u16)> {
+    check(i);
+    let t = tables();
+    std::iter::once(i)
+        .chain(t.monster_meta.iter().filter(|m| m.family_of == Some(i)).map(|m| m.index))
+        .filter_map(|j| t.quest_sizes.get(&j).copied())
+        .reduce(|(a, b), (c, d)| (a.min(c), b.max(d)))
+}
+
 pub fn notes(s: &Save, base: usize, i: usize) -> Option<bool> {
     meta(i).notes_bit.map(|b| s.bit(base + NOTES, b))
 }
@@ -187,6 +198,17 @@ mod tests {
         assert_eq!(crowns(1, r(100, m.silver_ge - 1)), Crowns::default());
         let (lo, hi) = crown_sizes(1).unwrap();
         assert_eq!(crowns(1, r(lo, hi)), Crowns { mini: true, large: 2 });
+    }
+
+    #[test]
+    fn crown_sizes_are_within_the_quests() {
+        for i in (1..=N).filter(|&i| meta(i).size_record) {
+            let (Some((lo, hi)), Some((a, b))) = (crown_sizes(i), quest_range(i)) else { continue };
+            assert!(a <= lo && hi <= b, "monster {i}: crowns {lo}-{hi}, quests {a}-{b}");
+        }
+        // Raging Brachydios (126, always 100) folds into Brachydios (53)
+        assert_eq!(quest_range(126), Some((100, 100)));
+        assert_eq!(quest_range(53), Some((88, 125)));
     }
 
     #[test]

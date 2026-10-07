@@ -2609,6 +2609,11 @@ msgstr "dieses Monster hat immer Größe 100"
 msgid "the smallest is above the largest"
 msgstr "die kleinste ist größer als die größte"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "its quests give {}–{}"
+msgstr "seine Quests ergeben {}–{}"
+
 #: app/gui/src/warnings.rs
 msgid "not an entry of the game"
 msgstr "kein Eintrag des Spiels"

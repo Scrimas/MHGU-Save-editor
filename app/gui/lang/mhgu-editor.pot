@@ -2589,6 +2589,11 @@ msgid "the smallest is above the largest"
 msgstr ""
 
 #: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "its quests give {}–{}"
+msgstr ""
+
+#: app/gui/src/warnings.rs
 msgid "not an entry of the game"
 msgstr ""
 
