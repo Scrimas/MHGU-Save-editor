@@ -4,6 +4,7 @@ mod assets;
 #[cfg(target_os = "linux")]
 mod desktop;
 mod fmt;
+mod focus;
 mod goals;
 mod i18n;
 #[cfg(target_os = "linux")]
@@ -49,6 +50,8 @@ fn main() -> Result<(), slint::PlatformError> {
     i18n::set(&ui, i18n::index(&settings::get().language));
     #[cfg(target_os = "linux")]
     scroll::install(ui.window());
+    #[cfg(not(target_os = "linux"))]
+    focus::install(ui.window());
     let st: Shared = Rc::new(RefCell::new(State::default()));
     let api = ui.global::<Api>();
     api.set_assets_ok(assets::available());

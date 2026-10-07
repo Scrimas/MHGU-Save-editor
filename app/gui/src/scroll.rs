@@ -57,6 +57,11 @@ pub fn install(window: &slint::Window) {
                 cursor.set(LogicalPoint::new(p.x, p.y));
                 EventResult::Propagate
             }
+            // Slint takes a single winit hook: the click-outside focus rule rides on this one
+            winit::event::WindowEvent::MouseInput { state: winit::event::ElementState::Pressed, .. } => {
+                crate::focus::press(w, position);
+                EventResult::Propagate
+            }
             winit::event::WindowEvent::MouseWheel { delta: winit::event::MouseScrollDelta::PixelDelta(d), phase, .. } => {
                 let d = d.to_logical::<f32>(w.scale_factor() as f64);
                 match phase {
