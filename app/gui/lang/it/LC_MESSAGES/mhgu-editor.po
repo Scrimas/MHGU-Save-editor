@@ -106,6 +106,13 @@ msgid_plural "{n} changes are Derived: worked out from the game's code, not yet 
 msgstr[0] "{n} modifica è di tipo Dedotto: ricavata dal codice del gioco, non ancora verificata nel gioco. Un'istantanea ti permette di tornare indietro."
 msgstr[1] "{n} modifiche sono di tipo Dedotto: ricavate dal codice del gioco, non ancora verificate nel gioco. Un'istantanea ti permette di tornare indietro."
 
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "{n} value the game cannot produce is written as it is."
+msgid_plural "{n} values the game cannot produce are written as they are."
+msgstr[0] "{n} valore che il gioco non può produrre viene scritto così com'è."
+msgstr[1] "{n} valori che il gioco non può produrre vengono scritti così come sono."
+
 #: app/gui/ui/app.slint
 msgid "Files"
 msgstr "File"
@@ -304,8 +311,8 @@ msgid "Save folders"
 msgstr "Cartelle dei salvataggi"
 
 #: app/gui/ui/app.slint
-msgid "Searched for saves besides Ryujinx's: yuzu, Eden, Citron or portable installs."
-msgstr "Vi si cercano salvataggi oltre a quelli di Ryujinx: yuzu, Eden, Citron o installazioni portatili."
+msgid "Searched for saves besides the folders found on their own (Ryujinx, the yuzu family): portable installs or any other folder."
+msgstr "Vi si cercano salvataggi oltre alle cartelle trovate da sole (Ryujinx, famiglia yuzu): installazioni portatili o qualsiasi altra cartella."
 
 #: app/gui/ui/app.slint
 msgid "Add folder…"
@@ -650,6 +657,12 @@ msgstr "Affidabilità"
 msgid "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."
 msgstr "Scegli una riga per vederne i byte. Un * indica i byte cambiati da modifiche non ancora scritte."
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "The game cannot make this: {}."
+msgstr "Il gioco non può produrre questo: {}."
+
 #: app/gui/ui/pages/character.slint
 msgid "Confirmed in game except where marked"
 msgstr "Confermato nel gioco salvo dove indicato"
@@ -777,6 +790,26 @@ msgstr "{}: punti basso grado"
 #: app/gui/ui/pages/character.slint
 msgid "{} G rank points"
 msgstr "{}: punti grado G"
+
+#: app/gui/ui/pages/character.slint
+msgid "Guild Card"
+msgstr "Tessera Gilda"
+
+#: app/gui/ui/pages/character.slint
+msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
+msgstr "Come li imposta l'editor della tessera nel gioco. Si possono scegliere anche voci bloccate: la tessera allora lo segnala."
+
+#: app/gui/ui/pages/character.slint
+msgid "Title"
+msgstr "Titolo"
+
+#: app/gui/ui/pages/character.slint
+msgid "Scene"
+msgstr "Sfondo"
+
+#: app/gui/ui/pages/character.slint
+msgid "Pose"
+msgstr "Posa"
 
 #: app/gui/ui/pages/character.slint
 msgid "Weapon usage"
@@ -1072,10 +1105,10 @@ msgstr "Decorazione per {}"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/ui/pages/equipment.slint
-msgid "{n} slot free: only decorations that fit are listed."
-msgid_plural "{n} slots free: only decorations that fit are listed."
-msgstr[0] "{n} spazio libero: sono elencate solo le decorazioni che ci stanno."
-msgstr[1] "{n} spazi liberi: sono elencate solo le decorazioni che ci stanno."
+msgid "{n} slot free. Decorations that do not fit come after: the game never allows them."
+msgid_plural "{n} slots free. Decorations that do not fit come after: the game never allows them."
+msgstr[0] "{n} spazio libero. Le decorazioni che non entrano vengono dopo: il gioco non le permette mai."
+msgstr[1] "{n} spazi liberi. Le decorazioni che non entrano vengono dopo: il gioco non le permette mai."
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Search decorations"
@@ -1090,11 +1123,6 @@ msgstr "Casella {}: vuota"
 #: app/gui/ui/pages/items.slint
 msgid "Slot {}: {} ×{}"
 msgstr "Casella {}: {} ×{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "over the limit of {}"
-msgstr "oltre il limite di {}"
 
 #: app/gui/ui/pages/items.slint
 msgid "Item loadouts · confirmed in game except where marked"
@@ -1193,6 +1221,11 @@ msgstr "Quantità"
 #: app/gui/ui/pages/items.slint
 msgid "of {}"
 msgstr "di {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/items.slint
+msgid "over the carry limit of {}: the game never makes this stack"
+msgstr "oltre il limite trasportabile di {}: il gioco non crea mai una pila così"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/items.slint
@@ -1919,6 +1952,83 @@ msgid "Totals already at the max stay as they are."
 msgstr "I totali già al massimo restano invariati."
 
 #: app/gui/src/goals.rs
+msgid "Every item obtained"
+msgstr "Tutti gli oggetti ottenuti"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs app/gui/src/targets.rs
+msgid "{} item"
+msgid_plural "{} items"
+msgstr[0] "{} oggetto"
+msgstr[1] "{} oggetti"
+
+#: app/gui/src/goals.rs
+msgid "Needs the game's item list, which this build does not have."
+msgstr "Serve l'elenco oggetti del gioco, che questa versione non ha."
+
+#: app/gui/src/goals.rs
+msgid "Not available"
+msgstr "Non disponibile"
+
+#: app/gui/src/goals.rs
+msgid "Every item of the game is marked obtained."
+msgstr "Tutti gli oggetti del gioco sono segnati come ottenuti."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Marks the {} you never had as obtained, as picking one up does. The Smithy then shows every material's name and the equipment those materials make."
+msgstr "Segna come ottenuti i {} che non hai mai avuto, come quando li raccogli. La fucina mostra allora il nome di ogni materiale e l'equipaggiamento che se ne ricava."
+
+#: app/gui/src/goals.rs
+msgid "A Smithy entry also needs the game's progress to allow it. Items obtained are read by the shop, the Trader and some villagers' requests too."
+msgstr "Una voce della fucina richiede anche che i progressi del gioco la permettano. Anche il negozio, il mercante e alcune richieste dei paesani leggono gli oggetti ottenuti."
+
+#: app/gui/src/goals.rs
+msgid "List every Smithy entry"
+msgstr "Elenca tutto nella fucina"
+
+#: app/gui/src/goals.rs
+msgid "The Smithy lists every weapon, armor piece, decoration and Palico item."
+msgstr "La fucina elenca ogni arma, pezzo d'armatura, decorazione e oggetto per compagni."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Lists the {} the Smithy does not show yet, in {}, each with its NEW mark, as the game does when it first lists one."
+msgstr "Elenca le {} che la fucina non mostra ancora, in {}, ognuna con il segno NEW, come fa il gioco la prima volta che ne elenca una."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} list"
+msgid_plural "{} lists"
+msgstr[0] "{} elenco"
+msgstr[1] "{} elenchi"
+
+#: app/gui/src/goals.rs
+msgid "Making them still takes their materials. Armor for the other body type stays unlisted, as in game."
+msgstr "Crearli richiede comunque i materiali. L'armatura per l'altro tipo di corpo resta fuori elenco, come nel gioco."
+
+#: app/gui/src/goals.rs
+msgid "Every Guild Card title word, scene and pose"
+msgstr "Tutte le parole del titolo, gli sfondi e le pose della tessera Gilda"
+
+#: app/gui/src/goals.rs
+msgid "Needs the game's Guild Card texts, which this build does not have."
+msgstr "Servono i testi della tessera Gilda del gioco, che questa versione non ha."
+
+#: app/gui/src/goals.rs
+msgid "Every title word, scene and pose is unlocked."
+msgstr "Tutte le parole del titolo, gli sfondi e le pose sono sbloccati."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} still locked for the Guild Card editor: title words, linking words, scenes and poses, each with its NEW mark."
+msgstr "Sblocca le {} ancora bloccate nell'editor della tessera Gilda: parole del titolo, parole di collegamento, sfondi e pose, ognuna con il segno NEW."
+
+#: app/gui/src/goals.rs
+msgid "Some come from downloads, the Trader or collaborations in game."
+msgstr "Nel gioco alcune arrivano da download, dal mercante o da collaborazioni."
+
+#: app/gui/src/goals.rs
 msgid "Max hunts"
 msgstr "Cacce al massimo"
 
@@ -2209,6 +2319,27 @@ msgstr "L'emulatore"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs
+msgid "Smithy · {}"
+msgstr "Fucina · {}"
+
+#: app/gui/src/targets.rs
+msgid "Smithy · Decorations"
+msgstr "Fucina · Decorazioni"
+
+#: app/gui/src/targets.rs
+msgid "Palico smithy · Weapons"
+msgstr "Fucina compagni · Armi"
+
+#: app/gui/src/targets.rs
+msgid "Palico smithy · Helms"
+msgstr "Fucina compagni · Elmi"
+
+#: app/gui/src/targets.rs
+msgid "Palico smithy · Mail"
+msgstr "Fucina compagni · Armature"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
 msgid "{} · G rank points"
 msgstr "{} · punti grado G"
 
@@ -2262,12 +2393,37 @@ msgstr "{} · licenze speciali"
 msgid "{} · levels cleared"
 msgstr "{} · livelli completati"
 
-#. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/targets.rs
-msgid "{} item"
-msgid_plural "{} items"
-msgstr[0] "{} oggetto"
-msgstr[1] "{} oggetti"
+msgid "Items obtained"
+msgstr "Oggetti ottenuti"
+
+#: app/gui/src/targets.rs
+msgid "Guild Card title"
+msgstr "Titolo della tessera Gilda"
+
+#: app/gui/src/targets.rs
+msgid "Guild Card scene"
+msgstr "Sfondo della tessera Gilda"
+
+#: app/gui/src/targets.rs
+msgid "Guild Card pose"
+msgstr "Posa della tessera Gilda"
+
+#: app/gui/src/targets.rs
+msgid "Title words unlocked"
+msgstr "Parole del titolo sbloccate"
+
+#: app/gui/src/targets.rs
+msgid "Title linking words unlocked"
+msgstr "Parole di collegamento sbloccate"
+
+#: app/gui/src/targets.rs
+msgid "Guild Card scenes unlocked"
+msgstr "Sfondi della tessera Gilda sbloccati"
+
+#: app/gui/src/targets.rs
+msgid "Guild Card poses unlocked"
+msgstr "Pose della tessera Gilda sbloccate"
 
 #: app/gui/src/targets.rs
 msgid "Not seen"
@@ -2288,6 +2444,16 @@ msgstr "Ottenuto"
 #: app/gui/src/targets.rs
 msgid "Not earned"
 msgstr "Non ottenuto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} of {} listed"
+msgstr "{} di {} elencate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} of {} unlocked"
+msgstr "{} di {} sbloccati"
 
 #: app/gui/src/update.rs
 msgid "GitHub refused the request (too many in the last hour), try later"
@@ -2345,6 +2511,112 @@ msgstr "Annullato"
 msgid "Could not replace {} ({})"
 msgstr "Impossibile sostituire {} ({})"
 
+#: app/gui/src/warnings.rs
+msgid "The game never makes these values. They work offline; online, other hunters see your Guild Card, gear and Palicoes and may take them for a hacked save."
+msgstr "Il gioco non produce mai questi valori. Offline funzionano; online gli altri cacciatori vedono la tua tessera Gilda, il tuo equipaggiamento e i tuoi Compagni, e possono scambiarli per un salvataggio manomesso."
+
+#: app/gui/src/warnings.rs
+msgid "not an item of the game"
+msgstr "non è un oggetto del gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "over the limit of {}"
+msgstr "oltre il limite di {}"
+
+#: app/gui/src/warnings.rs
+msgid "a talisman without a skill"
+msgstr "un talismano senza abilità"
+
+#: app/gui/src/warnings.rs
+msgid "the same skill twice"
+msgstr "la stessa abilità due volte"
+
+#: app/gui/src/warnings.rs
+msgid "a second skill without a first"
+msgstr "una seconda abilità senza la prima"
+
+#: app/gui/src/warnings.rs
+msgid "a skill with 0 points"
+msgstr "un'abilità con 0 punti"
+
+#: app/gui/src/warnings.rs
+msgid "points without a skill"
+msgstr "punti senza abilità"
+
+#: app/gui/src/warnings.rs
+msgid "not a talisman type of the game"
+msgstr "non è un tipo di talismano del gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs app/gui/src/views/names.rs
+#: app/gui/src/warnings.rs
+msgid "Skill #{}"
+msgstr "Abilità #{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} is never the first skill of this talisman type"
+msgstr "{} non è mai la prima abilità di questo tipo di talismano"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} is never the second skill of this talisman type"
+msgstr "{} non è mai la seconda abilità di questo tipo di talismano"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} takes {} to {} points on this talisman type"
+msgstr "{} ha da {} a {} punti su questo tipo di talismano"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "at most {} slots on this talisman type"
+msgstr "al massimo {} spazi su questo tipo di talismano"
+
+#: app/gui/src/warnings.rs
+msgid "not a piece of the game"
+msgstr "non è un pezzo del gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "above the top level, {}"
+msgstr "oltre il livello massimo, {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} is not a decoration"
+msgstr "{} non è una decorazione"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "decorations take {} slots; it has {}"
+msgstr "le decorazioni occupano {} spazi; il pezzo ne ha {}"
+
+#: app/gui/src/warnings.rs
+msgid "not a forte of the game"
+msgstr "non è una tendenza del gioco"
+
+#: app/gui/src/warnings.rs
+msgid "not a target the game offers"
+msgstr "non è un obiettivo offerto dal gioco"
+
+#: app/gui/src/warnings.rs
+msgid "this monster is always size 100"
+msgstr "questo mostro ha sempre taglia 100"
+
+#: app/gui/src/warnings.rs
+msgid "the smallest is above the largest"
+msgstr "la minima supera la massima"
+
+#: app/gui/src/warnings.rs
+msgid "not an entry of the game"
+msgstr "non è una voce del gioco"
+
+#: app/gui/src/warnings.rs
+msgid "not unlocked in this save"
+msgstr "non sbloccato in questo salvataggio"
+
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/advanced.rs
 msgid "… {} more byte"
@@ -2364,6 +2636,11 @@ msgstr "Tipo 1 (maschile)"
 #: app/gui/src/views/character_page.rs
 msgid "Type 2 (female)"
 msgstr "Tipo 2 (femminile)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/character_page.rs
+msgid "{} · locked"
+msgstr "{} · bloccato"
 
 #: app/gui/src/views/character_page.rs
 msgid "HR below 13 follows the Hub star level: edit Hub ★ instead"
@@ -2478,6 +2755,11 @@ msgstr "solo tipo 2 (femminile)"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/equipment_page.rs
+msgid "{} · does not fit"
+msgstr "{} · non entra"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
 msgid "{} · Talisman"
 msgstr "{} · Talismano"
 
@@ -2519,17 +2801,9 @@ msgstr "Cassa cacciatore: {} / {} caselle usate · confermato nel gioco salvo do
 msgid "Palico box: {} / {} slots used · confirmed in game"
 msgstr "Cassa compagni: {} / {} caselle usate · confermato nel gioco"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/equipment_page.rs app/gui/src/views/names.rs
-msgid "Skill #{}"
-msgstr "Abilità #{}"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/equipment_page.rs
-msgid "{} needs {n} free slot; this piece has {}"
-msgid_plural "{} needs {n} free slots; this piece has {}"
-msgstr[0] "{} richiede {n} spazio libero; questo pezzo ne ha {}"
-msgstr[1] "{} richiede {n} spazi liberi; questo pezzo ne ha {}"
+msgid "This piece already holds three decorations"
+msgstr "Questo pezzo ha già tre decorazioni"
 
 #: app/gui/src/views/equipment_page.rs
 msgid "The equipment box is full"
@@ -2712,6 +2986,13 @@ msgstr "Nessuna modifica in sospeso"
 #: app/gui/src/views/mod.rs
 msgid "{} · {} · not written yet"
 msgstr "{} · {} · ancora da scrivere"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/mod.rs
+msgid "{n} value the game cannot produce"
+msgid_plural "{n} values the game cannot produce"
+msgstr[0] "{n} valore che il gioco non può produrre"
+msgstr[1] "{n} valori che il gioco non può produrre"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/mod.rs
