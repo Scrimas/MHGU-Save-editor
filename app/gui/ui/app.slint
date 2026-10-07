@@ -59,6 +59,10 @@ component ReviewEntry inherits VerticalLayout {
                         shown: c.sub != "";
                         Muted { text: c.sub; }
                     }
+                    Reveal {
+                        shown: c.warning != "";
+                        Text { text: c.warning; color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+                    }
                 }
                 if c.single: Text { text: c.old; color: Tok.muted; vertical-alignment: center; }
                 if c.single: Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
@@ -71,6 +75,7 @@ component ReviewEntry inherits VerticalLayout {
                 padding-top: 4px;
                 height: 34px;
                 Text { text: l.label; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                if l.warning != "": Text { text: l.warning; color: Tok.bad; font-size: Tok.small; vertical-alignment: center; overflow: elide; max-width: 220px; }
                 Text { text: l.old; color: Tok.muted; vertical-alignment: center; }
                 Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
                 Text { text: l.new; font-weight: 600; vertical-alignment: center; }
@@ -122,6 +127,14 @@ component ReviewPanel inherits Rectangle {
                 horizontal-stretch: 1;
             }
         }
+        if Api.warn-count > 0: HorizontalLayout {
+            spacing: 6px;
+            Dot { level: Confidence.unresolved; y: 5px; background: Tok.bad; }
+            Muted {
+                text: Api.warn-why;
+                horizontal-stretch: 1;
+            }
+        }
         HorizontalLayout {
             spacing: Tok.tight;
             Button { text: @tr("Undo all"); enabled: Api.change-count > 0; clicked => { Api.undo-all(); } }
@@ -161,6 +174,7 @@ component WriteDialog inherits Modal {
                     HorizontalLayout {
                         spacing: Tok.tight;
                         Text { text: r.title; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        if r.warning != "": Text { text: r.warning; color: Tok.bad; font-size: Tok.small; vertical-alignment: center; overflow: elide; max-width: 200px; }
                         if r.right != "": Text { text: r.right; color: Tok.muted; vertical-alignment: center; }
                         if r.old != "": Text { text: r.old; color: Tok.muted; vertical-alignment: center; }
                         if r.old != "": Text { text: "→"; color: Tok.muted; vertical-alignment: center; }
@@ -215,6 +229,22 @@ component WriteDialog inherits Modal {
                         ? @tr("{n} change is Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on." | "{n} changes are Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on." % Api.derived-count)
                         : @tr("{n} change is Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back." | "{n} changes are Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back." % Api.derived-count);
                     color: Tok.warn;
+                    font-size: Tok.small;
+                    wrap: word-wrap;
+                    horizontal-stretch: 1;
+                }
+            }
+        }
+        // written as they are: a warning, never a refusal
+        Reveal {
+            shown: Api.warn-count > 0;
+            gap: Tok.gap;
+            HorizontalLayout {
+                spacing: 10px;
+                Dot { level: Confidence.unresolved; y: 6px; background: Tok.bad; }
+                Text {
+                    text: @tr("{n} value the game cannot produce is written as it is." | "{n} values the game cannot produce are written as they are." % Api.warn-count) + " " + Api.warn-why;
+                    color: Tok.bad;
                     font-size: Tok.small;
                     wrap: word-wrap;
                     horizontal-stretch: 1;

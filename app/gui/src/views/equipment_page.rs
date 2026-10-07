@@ -68,7 +68,8 @@ pub(super) fn equip_picker(ui: &AppWindow, st: &State) {
     api.set_pick_equip(model(v));
 }
 
-/// Decorations that fit the free slots of the selected hunter box entry, by name.
+/// Decorations by name: first those that fit the free slots of the selected hunter box
+/// entry, then the others (written with a warning).
 pub(super) fn deco_picker(ui: &AppWindow, st: &State, search: &str) {
     let api = ui.global::<Api>();
     let sel = view(|v| v.equip_sel);
@@ -80,17 +81,18 @@ pub(super) fn deco_picker(ui: &AppWindow, st: &State, search: &str) {
         _ => 0,
     };
     let f = search.to_lowercase();
-    let v: Vec<PickItem> = assets::names()
+    let mut v: Vec<PickItem> = assets::names()
         .decos
         .iter()
-        .filter(|d| d[1] as u8 <= free)
         .map(|d| (d[0], d[1], assets::item_name(d[0])))
         .filter(|(_, _, n)| f.is_empty() || n.to_lowercase().contains(&f))
         .map(|(id, size, name)| {
             let (img, has) = icon(assets::item_icon(id));
-            PickItem { id: id as i32, name: name.into(), icon: img, has_icon: has, sub: slots(size as usize).into(), max: size as i32 }
+            let sub = if size as u8 <= free { slots(size as usize) } else { trf("{} · does not fit", &[&slots(size as usize)]) };
+            PickItem { id: id as i32, name: name.into(), icon: img, has_icon: has, sub: sub.into(), max: size as i32 }
         })
         .collect();
+    v.sort_by_key(|p| p.max as u8 > free);
     api.set_pick_decos(model(v));
 }
 
@@ -151,7 +153,8 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
                     tr("Changed · in Review")
                 }
             };
-            Some(EquipRow { slot: i as i32, kind_code: k.code() as i32, title: title.into(), sub: sub.into(), icon: img, has_icon: has, changed, status: status.into() })
+            let warning = crate::warnings::equip(owner, &e).unwrap_or_default();
+            Some(EquipRow { slot: i as i32, kind_code: k.code() as i32, title: title.into(), sub: sub.into(), icon: img, has_icon: has, changed, status: status.into(), warning: warning.into() })
         })
         .collect();
     api.set_equip_summary(
@@ -219,6 +222,7 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
             uses: if owner == Owner::Hunter { uses_label(s, base, i) } else { String::new() }.into(),
             category: equip_categories(owner).iter().position(|&c| c == k).map_or(-1, |p| p as i32),
             was: if staged { equip_value(owner, &was_e) } else { String::new() }.into(),
+            warning: crate::warnings::equip(owner, &e).unwrap_or_default().into(),
             deco_slots: slots.map_or(-1, |n| n as i32),
             deco_used: deco_used(&e) as i32,
             // the looks this piece can take (none without the pack's armor classes)
@@ -268,14 +272,9 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
         let i = i as usize;
         let f = field.as_str();
         let cur = equipment::get(s.save(), s.base(), owner, i);
-        // a decoration goes in only where its slots are free
-        if f == "deco-add" {
-            let size = assets::deco_size(v as u16).unwrap_or(u8::MAX);
-            let free = deco_slots(owner, &cur).unwrap_or(0).saturating_sub(deco_used(&cur));
-            if size > free || !cur.decos().contains(&0) {
-                let need = trn("{} needs {n} free slot; this piece has {}", "{} needs {n} free slots; this piece has {}", size as i64, &[&assets::item_name(v as u16), &free]);
-                return toast(&ui, need, true);
-            }
+        // an entry holds three decorations; past its free slots they go in with a warning
+        if f == "deco-add" && !cur.decos().contains(&0) {
+            return toast(&ui, tr("This piece already holds three decorations"), true);
         }
         let t = Target::Equip(owner, i);
         let title = t.label(s.save(), s.slot);

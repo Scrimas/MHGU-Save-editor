@@ -16,6 +16,7 @@ mod targets;
 mod theme;
 mod update;
 mod views;
+mod warnings;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 use state::State;
@@ -266,6 +267,15 @@ mod tests {
         let api = ui.global::<Api>();
         assert!(api.get_loaded());
         assert_eq!(api.get_write_targets().row_count(), 4);
+        // the Derived goals find work on a played save, and after them nothing is left
+        if assets::available() {
+            let (mut s, slot) = (st.borrow().save().clone(), st.borrow().slot);
+            for g in ["obtained", "smithy", "card"] {
+                assert!(!goals::plan(g, &s, slot).targets.is_empty(), "{g}");
+                goals::apply(g, &mut s, slot);
+                assert!(goals::plan(g, &s, slot).targets.is_empty(), "{g} twice");
+            }
+        }
 
         api.set_page("monsters".into());
         views::refresh(&ui, &st.borrow());
@@ -325,7 +335,7 @@ mod tests {
         };
         api.invoke_put_equip(worn, 0);
         assert_eq!(api.get_change_count(), 0);
-        // a decoration goes only into free slots; one that does not fit is refused
+        // a decoration that does not fit the free slots goes in with a warning, and out again
         if !assets::names().decos.is_empty() {
             let (s, base) = (st.borrow().save().clone(), st.borrow().base());
             let free_of = |i: usize| {
@@ -335,6 +345,10 @@ mod tests {
             if let Some(i) = (0..mhgu_save::equipment::BOX_N).find(|&i| free_of(i) == 1) {
                 api.invoke_select_equip(i as i32);
                 api.invoke_set_equip("deco-add".into(), 2647); // Earplug Jwl 3: 3 slots
+                assert_eq!(api.get_change_count(), 1);
+                assert!(!api.get_equip_detail().warning.is_empty());
+                assert!(!api.get_changes().row_data(0).unwrap().warning.is_empty(), "Review shows it too");
+                api.invoke_set_equip("deco-remove".into(), api.get_equip_detail().decos.row_data(0).unwrap().index);
                 assert_eq!(api.get_change_count(), 0);
                 api.invoke_set_equip("deco-add".into(), 2638); // Antidote Jwl 1
                 assert_eq!(api.get_change_count(), 1);

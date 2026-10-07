@@ -25,7 +25,11 @@ component EquipLine inherits ListRow {
             alignment: center;
             horizontal-stretch: 1;
             Text { text: e.title; overflow: elide; color: e.kind-code == 0 ? Tok.faint : Palette.foreground; }
-            if e.sub != "": Text { text: e.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+            if e.sub != "" || e.warning != "": HorizontalLayout {
+                spacing: 6px;
+                if e.sub != "": Text { text: e.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+                if e.warning != "": Text { text: e.warning; color: Tok.bad; font-size: Tok.small; overflow: elide; horizontal-stretch: 1; }
+            }
         }
         if e.status != "": Pill { y: (parent.height - self.height) / 2; text: e.status; }
     }
@@ -197,6 +201,12 @@ export component EquipmentPage inherits Rectangle {
                             Text { text: Api.equip-detail.name; font-size: 18px; font-weight: 600; wrap: word-wrap; }
                             Muted { text: Api.equip-detail.id > 0 ? @tr("{} · box slot {} · ID {}", Api.equip-detail.kind, Api.equip-detail.slot + 1, Api.equip-detail.id) : @tr("{} · box slot {}", Api.equip-detail.kind, Api.equip-detail.slot + 1); }
                             if Api.equip-detail.was != "": WasLine { was: Api.equip-detail.was; key: (root.hunter ? "equip:hunter:" : "equip:palico:") + Api.equip-detail.slot; }
+                            if Api.equip-detail.warning != "": Text {
+                                text: @tr("The game cannot make this: {}.", Api.equip-detail.warning);
+                                color: Tok.bad;
+                                font-size: Tok.small;
+                                wrap: word-wrap;
+                            }
                         }
                         HorizontalLayout {
                             alignment: start;
@@ -254,7 +264,8 @@ export component EquipmentPage inherits Rectangle {
                                 Muted { text: @tr("{n} slot" | "{n} slots" % d.size); vertical-alignment: center; }
                                 Button { text: @tr("Remove");clicked => { Api.set-equip("deco-remove", d.index); } }
                             }
-                            if Api.equip-detail.deco-slots > Api.equip-detail.deco-used && Api.equip-detail.decos.length < 3: HorizontalLayout {
+                            // past the free slots too, with a warning; three fields at most
+                            if Api.equip-detail.deco-slots >= 0 && Api.equip-detail.decos.length < 3: HorizontalLayout {
                                 spacing: Tok.tight;
                                 alignment: start;
                                 Button {
@@ -442,7 +453,7 @@ export component EquipmentPage inherits Rectangle {
                 spacing: 10px;
                 Text { text: @tr("Decoration for {}", Api.equip-detail.name);font-size: Tok.section; font-weight: 600; overflow: elide; }
                 property <int> free: Api.equip-detail.deco-slots - Api.equip-detail.deco-used;
-                Muted { text: @tr("{n} slot free: only decorations that fit are listed." | "{n} slots free: only decorations that fit are listed." % free); }
+                Muted { text: @tr("{n} slot free. Decorations that do not fit come after: the game never allows them." | "{n} slots free. Decorations that do not fit come after: the game never allows them." % max(free, 0)); wrap: word-wrap; }
                 LineEdit {
                     placeholder-text: @tr("Search decorations");
                     text <=> root.deco-search;
@@ -479,7 +490,7 @@ export component EquipmentPage inherits Rectangle {
                             spacing: 10px;
                             Asset { width: 24px; height: 24px; y: 8px; source: p.icon; available: p.has-icon; }
                             Text { text: p.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
-                            Muted { text: p.sub; vertical-alignment: center; }
+                            Muted { text: p.sub; vertical-alignment: center; color: p.max > free ? Tok.bad : Tok.muted; }
                         }
                         da := TouchArea {
                             clicked => {

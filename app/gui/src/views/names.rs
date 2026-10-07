@@ -3,14 +3,14 @@
 use super::*;
 
 /// Box type 7 + NN, NN = the game's weaponNN tables (no 05).
-pub(super) fn weapon_classes() -> [&'static str; 15] {
+pub fn weapon_classes() -> [&'static str; 15] {
     [
         tr("Great Sword"), tr("Sword and Shield"), tr("Hammer"), tr("Lance"), tr("Heavy Bowgun"), tr("Weapon"), tr("Light Bowgun"),
         tr("Long Sword"), tr("Switch Axe"), tr("Gunlance"), tr("Bow"), tr("Dual Blades"), tr("Hunting Horn"), tr("Insect Glaive"),
         tr("Charge Blade"),
     ]
 }
-pub(super) fn armor_parts() -> [&'static str; 5] {
+pub fn armor_parts() -> [&'static str; 5] {
     [tr("Head"), tr("Chest"), tr("Arms"), tr("Waist"), tr("Legs")]
 }
 
@@ -43,7 +43,7 @@ pub(super) fn pieces(owner: Owner, k: Kind) -> &'static [assets::Piece] {
     .map_or(&[], Vec::as_slice)
 }
 
-pub(super) fn piece(owner: Owner, k: Kind, id: u16) -> Option<&'static assets::Piece> {
+pub fn piece(owner: Owner, k: Kind, id: u16) -> Option<&'static assets::Piece> {
     pieces(owner, k).iter().find(|p| p.id == id as u32)
 }
 

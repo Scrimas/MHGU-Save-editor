@@ -1,6 +1,7 @@
 //! The Character page: its models and the callbacks that edit it.
 
 use super::*;
+use mhgu_save::guildcard as gc;
 
 pub(super) fn character_page(ui: &AppWindow, st: &State) {
     let s = st.save();
@@ -35,6 +36,43 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
         was_lr: model((0..4).map(|v| was(Target::Points(v, false))).collect()),
         was_g: model((0..4).map(|v| was(Target::Points(v, true))).collect()),
         weapon_use: model(weapon_use_rows(st)),
+    });
+    guild_card(ui, st);
+}
+
+/// The Guild Card section: the choices of each list (locked ones marked) and the card's
+/// title, scene and pose.
+fn guild_card(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let (s, base) = (st.save(), st.base());
+    let n = assets::names();
+    let list = |m: gc::Map, names: &[String]| {
+        let (_, _, count) = m.at();
+        strings((0..count).map(|i| {
+            let name = targets::card_name(names, i);
+            // the linking word 0 is "none", always available
+            if (m == gc::Map::Links && i == 0) || gc::unlocked(s, base, m, i) { name } else { trf("{} · locked", &[&name]) }
+        }))
+    };
+    api.set_gc_words(list(gc::Map::Words, &n.gc_words));
+    api.set_gc_links(list(gc::Map::Links, &n.gc_links));
+    api.set_gc_scenes(list(gc::Map::Scenes, &n.gc_scenes));
+    api.set_gc_poses(list(gc::Map::Poses, &n.gc_poses));
+    let [w1, link, w2] = gc::title(s, base);
+    let warn = |t: Target| -> SharedString { crate::warnings::of(t, s, st.slot).unwrap_or_default().into() };
+    api.set_card(CardInfo {
+        word1: w1 as i32,
+        link: link as i32,
+        word2: w2 as i32,
+        scene: gc::scene(s, base) as i32,
+        pose: gc::pose(s, base) as i32,
+        title: Target::Title.read(s, st.slot).into(),
+        was_title: st.was(Target::Title).into(),
+        was_scene: st.was(Target::Scene).into(),
+        was_pose: st.was(Target::Pose).into(),
+        warn_title: warn(Target::Title),
+        warn_scene: warn(Target::Scene),
+        warn_pose: warn(Target::Pose),
     });
 }
 
@@ -115,6 +153,31 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         if let Some(m) = msg {
             toast(&ui, m, true);
         }
+    });
+    // the card editor's fields; any entry can be picked, a locked one with a warning
+    on!(ui, st, on_set_card, |ui, s, field: SharedString, v: i32| {
+        let Ok(v) = u16::try_from(v) else { return };
+        let f = field.as_str();
+        let t = match f {
+            "scene" => Target::Scene,
+            "pose" => Target::Pose,
+            _ => Target::Title,
+        };
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+            let mut tl = gc::title(sv, base);
+            match f {
+                "word1" => tl[0] = v,
+                "link" => tl[1] = v,
+                "word2" => tl[2] = v,
+                "scene" => gc::set_scene(sv, base, v as u8),
+                "pose" => gc::set_pose(sv, base, v as u8),
+                _ => {}
+            }
+            gc::set_title(sv, base, tl);
+            vec![]
+        });
+        let _ = &ui;
     });
     on!(ui, st, on_set_name, |ui, s, name: SharedString| {
         s.edit(Edit::one(Target::Name, tr("Name").into(), Conf::Confirmed).note(tr("Written to the save, the player record and the Guild Card")), |sv, base| {

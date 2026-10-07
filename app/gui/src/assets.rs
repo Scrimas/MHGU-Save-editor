@@ -110,6 +110,16 @@ pub struct Names {
     /// Decorations: [item ID, slots it takes] (packs built before 2026-10-06 lack it).
     #[serde(default)]
     pub decos: Vec<[u16; 2]>,
+    /// Guild Card title words, linking words, scenes and poses by ID (packs built before
+    /// 2026-10-07 lack them: shown as IDs).
+    #[serde(default)]
+    pub gc_words: Vec<String>,
+    #[serde(default)]
+    pub gc_links: Vec<String>,
+    #[serde(default)]
+    pub gc_scenes: Vec<String>,
+    #[serde(default)]
+    pub gc_poses: Vec<String>,
 }
 
 /// Slots decoration item `id` takes; None when it is not a decoration (or the pack is
@@ -133,6 +143,10 @@ struct Text {
     palico_weapons: Vec<String>,
     palico_armor: HashMap<String, Vec<String>>,
     talismans: Vec<String>,
+    gc_words: Vec<String>,
+    gc_links: Vec<String>,
+    gc_scenes: Vec<String>,
+    gc_poses: Vec<String>,
 }
 
 impl Names {
@@ -156,6 +170,10 @@ impl Names {
         list(&mut self.skills, t.skills);
         list(&mut self.support_moves, t.support_moves);
         list(&mut self.monsters, t.monsters);
+        list(&mut self.gc_words, t.gc_words);
+        list(&mut self.gc_links, t.gc_links);
+        list(&mut self.gc_scenes, t.gc_scenes);
+        list(&mut self.gc_poses, t.gc_poses);
         for (cls, v) in t.weapons {
             for (p, n) in self.weapons.get_mut(&cls).into_iter().flatten().zip(v) {
                 if p.is_real() && n.first().is_some_and(|s| !s.is_empty()) {

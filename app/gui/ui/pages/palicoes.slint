@@ -100,6 +100,12 @@ export component PalicoesPage inherits Rectangle {
                         spacing: 14px;
                         alignment: start;
                         Text { text: Api.palico.name; font-size: 18px; font-weight: 600; }
+                        if Api.palico.warning != "": Text {
+                            text: @tr("The game cannot make this: {}.", Api.palico.warning);
+                            color: Tok.bad;
+                            font-size: Tok.small;
+                            wrap: word-wrap;
+                        }
                         TextRow { label: @tr("Name"); field: "name"; value: Api.palico.name; was: Api.palico.was-name; key: root.key + "name"; field-width: 260px; }
                         Row {
                             label: @tr("Level");

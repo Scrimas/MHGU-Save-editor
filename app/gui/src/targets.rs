@@ -10,7 +10,8 @@ use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
-use mhgu_save::{monsters, palico, Save};
+use mhgu_save::guildcard as gc;
+use mhgu_save::{monsters, palico, smithy, Save};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -63,6 +64,16 @@ pub enum Target {
     /// Special Permit levels cleared of a deviant.
     Levels(usize),
     Monster(usize, Mon),
+    /// The items-obtained map, as one value.
+    Obtained,
+    /// A Smithy list, by its index in `smithy::lists()`: listed and NEW bits.
+    Smithy(usize),
+    /// The own Guild Card's title (three words), scene and pose.
+    Title,
+    Scene,
+    Pose,
+    /// A Guild Card unlock map (index in `guildcard::MAPS`) with its NEW copy.
+    CardMap(usize),
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -143,6 +154,40 @@ fn owner_key(o: Owner) -> &'static str {
     if o == Owner::Palico { "palico" } else { "hunter" }
 }
 
+/// Entry `i` of a Guild Card name list, "#i" when the asset pack lacks it.
+pub fn card_name(names: &[String], i: usize) -> String {
+    names.get(i).filter(|n| !n.is_empty()).cloned().unwrap_or_else(|| format!("#{i}"))
+}
+
+/// "Titan Slayer", "Titan of Slayer": the words in the card's order, an empty linking
+/// word (0) left out.
+pub fn card_title(t: [u16; 3]) -> String {
+    let n = assets::names();
+    let mut v = vec![card_name(&n.gc_words, t[0] as usize)];
+    if t[1] != 0 {
+        v.push(card_name(&n.gc_links, t[1] as usize));
+    }
+    v.push(card_name(&n.gc_words, t[2] as usize));
+    v.join(" ")
+}
+
+/// "Smithy · Great Sword", "Smithy · Head", "Palico smithy · Mail".
+pub fn smithy_label(i: usize) -> String {
+    let l = &smithy::lists()[i].list;
+    let (kind, n) = l.split_once(':').unwrap_or((l, ""));
+    let k: usize = n.parse().unwrap_or(0);
+    match kind {
+        "weapon" => trf("Smithy · {}", &[&crate::views::weapon_classes().get(k).copied().unwrap_or("?")]),
+        "armor" => trf("Smithy · {}", &[&crate::views::armor_parts().get(k.wrapping_sub(1)).copied().unwrap_or("?")]),
+        "deco" => tr("Smithy · Decorations").into(),
+        _ => match n {
+            "weapon" => tr("Palico smithy · Weapons").into(),
+            "helm" => tr("Palico smithy · Helms").into(),
+            _ => tr("Palico smithy · Mail").into(),
+        },
+    }
+}
+
 /// Bytes of a field and the bits of each that belong to it.
 type Footprint = Vec<(usize, u8)>;
 
@@ -171,9 +216,9 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) => "character",
-            Item(..) | Loadout(_) => "items",
-            Equip(..) => "equipment",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) => "character",
+            Item(..) | Loadout(_) | Obtained => "items",
+            Equip(..) | Smithy(_) => "equipment",
             Palico(..) => "palicoes",
             Quest(_) => "quests",
             Request(_) => "requests",
@@ -209,6 +254,12 @@ impl Target {
             Permits(d) => format!("permits:{d}"),
             Levels(d) => format!("levels:{d}"),
             Monster(i, f) => format!("mon:{i}:{}", mon_field(f)),
+            Obtained => "obtained".into(),
+            Smithy(i) => format!("smithy:{i}"),
+            Title => "card-title".into(),
+            Scene => "card-scene".into(),
+            Pose => "card-pose".into(),
+            CardMap(m) => format!("card-map:{m}"),
         }
     }
 
@@ -275,6 +326,17 @@ impl Target {
                 };
                 format!("{} · {what}", crate::assets::monster_name(i).unwrap_or(&t.monsters[i - 1].name))
             }
+            Obtained => tr("Items obtained").into(),
+            Smithy(i) => smithy_label(i),
+            Title => tr("Guild Card title").into(),
+            Scene => tr("Guild Card scene").into(),
+            Pose => tr("Guild Card pose").into(),
+            CardMap(m) => match gc::MAPS[m] {
+                gc::Map::Words => tr("Title words unlocked").into(),
+                gc::Map::Links => tr("Title linking words unlocked").into(),
+                gc::Map::Scenes => tr("Guild Card scenes unlocked").into(),
+                gc::Map::Poses => tr("Guild Card poses unlocked").into(),
+            },
         }
     }
 
@@ -355,6 +417,22 @@ impl Target {
                     Mon::Notes => yes(monsters::notes(s, base, i).unwrap_or(false), tr("Unlocked"), tr("Locked")),
                 }
             }
+            Obtained => {
+                let n = (1..=items::OBTAINED_MAX_ID).filter(|&id| items::obtained(s, base, id)).count() as i64;
+                trn("{} item", "{} items", n, &[&num(n)])
+            }
+            Smithy(i) => {
+                let (n, all) = smithy::count(s, base, &smithy::lists()[i], ch::get(s, base).gender);
+                trf("{} of {} listed", &[&num(n as i64), &num(all as i64)])
+            }
+            Title => card_title(gc::title(s, base)),
+            Scene => card_name(&assets::names().gc_scenes, gc::scene(s, base) as usize),
+            Pose => card_name(&assets::names().gc_poses, gc::pose(s, base) as usize),
+            CardMap(m) => {
+                let (_, _, n) = gc::MAPS[m].at();
+                let k = (0..n).filter(|&i| gc::unlocked(s, base, gc::MAPS[m], i)).count();
+                trf("{} of {} unlocked", &[&num(k as i64), &num(n as i64)])
+            }
         }
     }
 
@@ -434,6 +512,18 @@ impl Target {
                     None => vec![],
                 },
             },
+            Obtained => range(base + items::OBTAINED, 376),
+            Smithy(i) => match smithy::at(&smithy::lists()[i].list) {
+                Some((listed, new, n)) => [range(base + listed, n), range(base + new, n)].concat(),
+                None => vec![],
+            },
+            Title => range(base + gc::TITLE, 6),
+            Scene => range(base + gc::SCENE, 1),
+            Pose => range(base + gc::POSE, 1),
+            CardMap(m) => {
+                let (on, new, n) = gc::MAPS[m].at();
+                [bits(base + on, 0, n), bits(base + new, 0, n)].concat()
+            }
         }
     }
 

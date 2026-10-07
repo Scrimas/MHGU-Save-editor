@@ -42,10 +42,10 @@ For a portable install or another emulator, add its folder in **Settings…** or
 
 | Page | |
 |---|---|
-| Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points |
-| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, Guild Card weapon usage |
-| Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts. Pouch stacks stop at each item's carry limit |
-| Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (only those that fit the free slots), transmog, talismans |
+| Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points; and, Derived: every item obtained, every Smithy entry listed, every Guild Card title word, scene and pose |
+| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, Guild Card title, scene and pose (Derived), Guild Card weapon usage |
+| Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts. A pouch stack above the item's carry limit is written with a warning |
+| Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables) |
 | Palicoes | Name, level and experience, forte, target, greeting, original owner |
 | Quests | Every quest cleared or not (seen and quest sets follow, as in game); says what unlocks a quest that is not on the board yet |
 | Requests | Villager requests: accepted (quest posted on the board) and reported |
@@ -54,6 +54,11 @@ For a portable install or another emulator, add its folder in **Settings…** or
 | Save map | Every byte range of the save, named from the game's own loader (read-only) |
 
 All three character slots are supported.
+
+**Values the game cannot produce** (a stack above its limit, a decoration that does not
+fit, a talisman outside the charm tables, a weapon above its top level, a locked Guild
+Card title…) are never refused: they are written as they are, with a warning next to the
+value and in Review and Write. They work offline; online, other hunters can see them.
 
 <table>
   <tr>

@@ -68,6 +68,7 @@ component MonsterLine inherits ListRow {
             min-width: 120px;
             Text { text: m.name; overflow: elide; }
             Text { text: m.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+            if m.warning != "": Text { text: m.warning; color: Tok.bad; font-size: Tok.small; overflow: elide; }
         }
         Cell {
             width: Cols.hunted;

@@ -6,7 +6,8 @@ export enum Confidence { confirmed, derived, unresolved }
 export struct SlotInfo { slot: int, used: bool, name: string, hr: int, playtime: string }
 
 // One value of a change, in game terms: "Wycademy points  9,793,209 → 9,999,999".
-export struct ValueLine { label: string, old: string, new: string }
+// warning: why the game cannot produce the new value ("" when it can)
+export struct ValueLine { label: string, old: string, new: string, warning: string }
 
 // A Review entry. The first entry of a page group carries the group label.
 export struct ChangeRow {
@@ -16,9 +17,10 @@ export struct ChangeRow {
     single: bool, old: string, new: string,
     lines: [ValueLine], more: int, note: string,
     key: string,  // the field to open (first value)
+    warning: string,  // one value: why the game cannot produce it; several: how many it cannot
 }
 
-export struct WriteRow { title: string, right: string, confidence: Confidence, old: string, new: string }
+export struct WriteRow { title: string, right: string, confidence: Confidence, old: string, new: string, warning: string }
 
 export struct SnapRow { dir: string, when: string, before: string }
 
@@ -74,10 +76,13 @@ export struct MonsterRow {
     // value in the file when staged, else ""
     was-hunts: string, was-captures: string, was-min: string, was-max: string, was-notes: string,
     changed: bool,
+    warning: string,  // why the game cannot produce its counts or sizes ("" when it can)
 }
 
 // max: most of the item one slot holds (pouch: the item's carry limit)
-export struct ItemSlot { slot: int, id: int, name: string, count: int, max: int, icon: image, has-icon: bool, changed: bool, was: string }
+// max: the game's limit for the item there (pouch: its carry limit); counts above it can
+// still be written, with `warning`
+export struct ItemSlot { slot: int, id: int, name: string, count: int, max: int, icon: image, has-icon: bool, changed: bool, was: string, warning: string }
 
 export struct PickItem { id: int, name: string, icon: image, has-icon: bool, sub: string, max: int }
 
@@ -87,6 +92,7 @@ export struct LoadoutRow { index: int, first: int, last: int, name: string, summ
 export struct EquipRow {
     slot: int, kind-code: int, title: string, sub: string,
     icon: image, has-icon: bool, changed: bool, status: string,
+    warning: string,  // why the game cannot produce this entry ("" when it can)
 }
 
 // A decoration in a box entry: its field, name and the slots it takes.
@@ -101,6 +107,7 @@ export struct EquipDetail {
     uses: string,
     category: int,  // index in Api.equip-categories, -1 for none
     was: string,    // piece in the file when the slot is staged
+    warning: string,  // why the game cannot produce this entry ("" when it can)
     deco-slots: int,  // decoration slots of the piece, -1 unknown
     deco-used: int,   // slots its decorations take
     can-transmog: bool,
@@ -109,6 +116,7 @@ export struct EquipDetail {
 export struct PalicoRow { index: int, name: string, sub: string, changed: bool }
 
 export struct PalicoDetail {
+    warning: string,  // why the game cannot produce its level, forte or target ("" when it can)
     index: int, name: string, level: int, exp: int, bias: int, target: int, greeting: string, owner: string,
     moves: string, learned: string,
     was-name: string, was-level: string, was-exp: string, was-bias: string, was-greeting: string, was-owner: string,
@@ -162,6 +170,14 @@ export struct CharacterInfo {
     weapon-use: [WeaponUseRow],
 }
 
+// The own Guild Card's title (word, linking word, word), scene and pose: IDs, the title
+// as shown, the file's value when staged and why the game cannot produce a value.
+export struct CardInfo {
+    word1: int, link: int, word2: int, scene: int, pose: int, title: string,
+    was-title: string, was-scene: string, was-pose: string,
+    warn-title: string, warn-scene: string, warn-pose: string,
+}
+
 export global Api {
     // shell
     in-out property <string> page: "open";
@@ -211,6 +227,9 @@ export global Api {
     in property <string> write-sub;
     in property <[WriteRow]> write-rows;
     in property <int> derived-count;
+    // staged values the game cannot produce, and why that matters
+    in property <int> warn-count;
+    in property <string> warn-why;
     in property <bool> emulator-running;
     in property <string> emulator-name;
     in property <string> snapshot-dir;
@@ -246,6 +265,13 @@ export global Api {
     in property <CharacterInfo> character;
     callback set-character(string /* field */, int);
     callback set-name(string);
+    // Guild Card: the choices by ID (locked ones say so)
+    in property <CardInfo> card;
+    in property <[string]> gc-words;
+    in property <[string]> gc-links;
+    in property <[string]> gc-scenes;
+    in property <[string]> gc-poses;
+    callback set-card(string /* word1 link word2 scene pose */, int);
 
     // items
     in property <[ItemSlot]> item-slots;

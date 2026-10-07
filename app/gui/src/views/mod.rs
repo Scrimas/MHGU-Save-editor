@@ -11,7 +11,7 @@ use crate::targets::{self, Mon, Target, PAGES};
 use crate::update::{self, VERSION};
 use crate::{model, strings, Shared};
 use crate::{
-    Api, AppWindow, ArtRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
+    Api, AppWindow, ArtRow, CardInfo, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
     EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, PalicoDetail, PalicoRow, PickItem, Preview, PreviewLine,
     QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
 };
@@ -293,6 +293,14 @@ fn review(ui: &AppWindow, st: &State) {
         .into(),
     );
     let label = |t: &Target, slot: usize| t.label(&doc.save, slot);
+    // what Write would put in the save, not the value right after the edit
+    let warn = |t: &Target, slot: usize| crate::warnings::of(*t, &doc.save, slot).unwrap_or_default();
+    let warn_count = |o: &crate::state::Op| o.values.iter().filter(|(t, _)| !warn(t, o.slot).is_empty()).count();
+    let op_warning = |o: &crate::state::Op| match (o.values.len(), warn_count(o)) {
+        (_, 0) => String::new(),
+        (1, _) => warn(&o.values[0].0, o.slot),
+        (_, n) => trn("{n} value the game cannot produce", "{n} values the game cannot produce", n as i64, &[]),
+    };
     let page_of = |o: &crate::state::Op| o.values.first().map(|(t, _)| targets::page_index(t.page())).unwrap_or(0);
     let mut ops: Vec<&crate::state::Op> = st.ops.iter().rev().collect();
     // grouped by page in nav order, then by character; newest first within a group
@@ -313,7 +321,11 @@ fn review(ui: &AppWindow, st: &State) {
         let lines: Vec<ValueLine> = if single {
             vec![]
         } else {
-            o.values.iter().take(8).map(|(t, v)| ValueLine { label: label(t, o.slot).into(), old: t.read(&doc.orig, o.slot).into(), new: v.into() }).collect()
+            o.values
+                .iter()
+                .take(8)
+                .map(|(t, v)| ValueLine { label: label(t, o.slot).into(), old: t.read(&doc.orig, o.slot).into(), new: v.into(), warning: warn(t, o.slot).into() })
+                .collect()
         };
         let sub = if single {
             o.note.clone()
@@ -339,6 +351,7 @@ fn review(ui: &AppWindow, st: &State) {
             more: o.values.len().saturating_sub(if single { 1 } else { 8 }) as i32,
             note: if single { String::new() } else { o.note.clone() }.into(),
             key: o.values.first().map(|(t, _)| format!("{}|{}", o.slot, t.key())).unwrap_or_default().into(),
+            warning: op_warning(o).into(),
         });
     }
     api.set_changes(model(rows));
@@ -361,11 +374,14 @@ fn review(ui: &AppWindow, st: &State) {
                     confidence: conf(o.conf),
                     old: if single { o.values[0].0.read(&doc.orig, o.slot) } else { String::new() }.into(),
                     new: if single { o.values[0].1.clone() } else { String::new() }.into(),
+                    warning: op_warning(o).into(),
                 }
             })
             .collect(),
     ));
     api.set_derived_count(st.ops.iter().filter(|o| o.conf != Conf::Confirmed).count() as i32);
+    api.set_warn_count(staged.iter().filter(|(slot, t)| !warn(t, *slot).is_empty()).count() as i32);
+    api.set_warn_why(crate::warnings::why().into());
 }
 
 /// Confirmed only (Settings) refuses edits not checked in game, and says so. Every edit
@@ -688,5 +704,5 @@ use self::{
     advanced::*, character_page::*, collections::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
     palicoes::*, quests::*, requests::*, settings_ui::*,
 };
-pub use self::names::{deco_slots, deco_used, equip_value};
+pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
 pub use self::{file::*, update_ui::*};

@@ -40,7 +40,9 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
         let i = sel as usize;
         let p = palico::get(s, base, i);
         let was = |f: targets::Pal| -> SharedString { st.was(Target::Palico(i, f)).into() };
+        let warning: Vec<String> = [targets::Pal::Level, targets::Pal::Bias, targets::Pal::Target].into_iter().filter_map(|f| crate::warnings::palico(&p, f)).collect();
         PalicoDetail {
+            warning: warning.join("; ").into(),
             index: sel,
             name: p.name.into(),
             level: p.level as i32,

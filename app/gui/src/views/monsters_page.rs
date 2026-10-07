@@ -71,6 +71,12 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
                 || st.changed(base + monsters::SIZES + 4 * m.index, 4)
                 || meta.notes_bit.is_some_and(|b| st.changed(base + monsters::NOTES + b / 8, 1));
             let w = |f: Mon| if changed { was(m.index, f) } else { SharedString::default() };
+            let mut warning: Vec<String> = vec![];
+            for f in [Mon::Hunts, Mon::Captures, Mon::Min, Mon::Max] {
+                if let Some(x) = crate::warnings::monster(m.index, &r, f).filter(|x| !warning.contains(x)) {
+                    warning.push(x);
+                }
+            }
             Some(MonsterRow {
                 index: m.index as i32,
                 name: name.into(),
@@ -94,6 +100,7 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
                 was_max: w(Mon::Max),
                 was_notes: w(Mon::Notes),
                 changed,
+                warning: warning.join("; ").into(),
             })
         })
         .collect();

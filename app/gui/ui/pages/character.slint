@@ -1,4 +1,4 @@
-import { LineEdit, ScrollView, Palette } from "std-widgets.slint";
+import { LineEdit, ScrollView, Palette, ComboBox } from "std-widgets.slint";
 import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, ColHead, Hairline } from "../common.slint";
 
 // Label, control, then "was … Undo" when staged (or the hint). Only the exceptions carry
@@ -9,6 +9,8 @@ component Field inherits Rectangle {
     in property <string> hint;
     in property <string> was;
     in property <string> key;
+    // why the game cannot produce the value, shown in red
+    in property <string> warning;
     in property <bool> flash: Api.highlight != "" && Api.highlight == key;
     lay := VerticalLayout {
         spacing: 6px;
@@ -27,6 +29,7 @@ component Field inherits Rectangle {
         }
         if root.was != "": WasLine { was: root.was; key: root.key; }
         if root.hint != "" && root.was == "": Muted { text: root.hint; }
+        if root.warning != "": Text { text: @tr("The game cannot make this: {}.", root.warning); color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
     }
     if root.was != "": StagedBar { x: -10px; y: 26px; height: 32px; }
 }
@@ -211,6 +214,50 @@ export component CharacterPage inherits Rectangle {
                             Text { text: v; width: 160px; vertical-alignment: center; }
                             PointsCell { value: Api.character.points-lr[i]; was: Api.character.was-lr[i]; key: "lr" + i; label: @tr("{} low rank points", v); }
                             PointsCell { value: Api.character.points-g[i]; was: Api.character.was-g[i]; key: "g" + i; label: @tr("{} G rank points", v); }
+                        }
+                    }
+                }
+            }
+            Card {
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 14px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: @tr("Guild Card"); vertical-alignment: center; }
+                        Text { text: @tr("As the card editor in game sets them. Locked entries can be picked too: the card then says so.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                    }
+                    Field {
+                        label: @tr("Title");
+                        level: Confidence.derived;
+                        hint: Api.card.title;
+                        warning: Api.card.warn-title;
+                        was: Api.card.was-title;
+                        key: "card-title";
+                        ComboBox { width: 220px; model: Api.gc-words; current-index: Api.card.word1; selected => { Api.set-card("word1", self.current-index); } }
+                        ComboBox { width: 160px; model: Api.gc-links; current-index: Api.card.link; selected => { Api.set-card("link", self.current-index); } }
+                        ComboBox { width: 220px; model: Api.gc-words; current-index: Api.card.word2; selected => { Api.set-card("word2", self.current-index); } }
+                    }
+                    HorizontalLayout {
+                        spacing: 24px;
+                        alignment: start;
+                        Field {
+                            label: @tr("Scene");
+                            level: Confidence.derived;
+                            warning: Api.card.warn-scene;
+                            was: Api.card.was-scene;
+                            key: "card-scene";
+                            ComboBox { width: 260px; model: Api.gc-scenes; current-index: Api.card.scene; selected => { Api.set-card("scene", self.current-index); } }
+                        }
+                        Field {
+                            label: @tr("Pose");
+                            level: Confidence.derived;
+                            warning: Api.card.warn-pose;
+                            was: Api.card.was-pose;
+                            key: "card-pose";
+                            ComboBox { width: 220px; model: Api.gc-poses; current-index: Api.card.pose; selected => { Api.set-card("pose", self.current-index); } }
                         }
                     }
                 }

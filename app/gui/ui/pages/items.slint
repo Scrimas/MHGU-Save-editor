@@ -34,10 +34,10 @@ component SlotCell inherits Rectangle {
             horizontal-stretch: 1;
             Text { text: it.id == 0 ? @tr("Empty") : it.name; color: it.id == 0 ? Tok.faint : Palette.foreground; overflow: elide; }
             if it.was != "": Text { text: @tr("was {}", it.was); color: Tok.accent-text; font-size: Tok.small; overflow: elide; }
-            // stacks above the item's carry limit (written by older versions or other tools)
-            if it.was == "" && it.id != 0 && it.count > it.max: Text { text: @tr("over the limit of {}", it.max);color: Tok.bad; font-size: Tok.small; overflow: elide; }
+            // what the game cannot produce: a stack above the item's limit, an unknown item
+            if it.was == "" && it.warning != "": Text { text: it.warning; color: Tok.bad; font-size: Tok.small; overflow: elide; }
         }
-        Text { text: it.id == 0 ? "" : "×" + it.count; color: it.id != 0 && it.count > it.max ? Tok.bad : Palette.foreground; width: 36px; vertical-alignment: center; horizontal-alignment: right; }
+        Text { text: it.id == 0 ? "" : "×" + it.count; color: it.warning != "" ? Tok.bad : Palette.foreground; width: 36px; vertical-alignment: center; horizontal-alignment: right; }
     }
 }
 
@@ -67,7 +67,7 @@ export component ItemsPage inherits Rectangle {
         root.edit-id = id;
         root.held-id = id;
         root.edit-max = id == 0 ? 99 : max;
-        root.edit-count = id == 0 ? 1 : min(count, max);
+        root.edit-count = id == 0 ? 1 : count;
         root.held = id == 0 ? @tr("Empty") : name + " ×" + count;
         root.edit-was = was;
         Api.search-picker("");
@@ -88,7 +88,7 @@ export component ItemsPage inherits Rectangle {
         if root.edit-id != id {
             root.edit-id = id;
             root.edit-max = max;
-            root.edit-count = id == root.held-id ? min(root.edit-count, max) : 1;
+            root.edit-count = id == root.held-id ? root.edit-count : 1;
         }
     }
     function bulk(id: string, b: length, r: length) {
@@ -324,7 +324,7 @@ export component ItemsPage inherits Rectangle {
                                 }
                                 if e.text == Key.Return {
                                     root.pick(p.id, p.max);
-                                    root.commit(p.id, min(root.edit-count, p.max));
+                                    root.commit(p.id, root.edit-count);
                                     return accept;
                                 }
                                 return reject;
@@ -335,7 +335,7 @@ export component ItemsPage inherits Rectangle {
                             clicked => { root.pick(p.id, p.max); }
                             double-clicked => {
                                 root.pick(p.id, p.max);
-                                root.commit(p.id, min(root.edit-count, p.max));
+                                root.commit(p.id, root.edit-count);
                             }
                         }
                     }
@@ -348,12 +348,22 @@ export component ItemsPage inherits Rectangle {
                         width: 120px;
                         value: root.edit-count;
                         minimum: 1;
-                        maximum: root.edit-max;
+                        // above the carry limit only with a warning: the field holds up to 99
+                        maximum: 99;
                         label: @tr("Count");
                         enabled: root.edit-id != 0;
                         edited(v) => { root.edit-count = v; }
                     }
-                    Text { text: Api.item-store == 0 && !root.loadout-mode ? @tr("of {}", 99) : @tr("of {} (carry limit)", root.edit-max);color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                    Text {
+                        text: Api.item-store == 0 && !root.loadout-mode ? @tr("of {}", 99)
+                            : root.edit-count > root.edit-max ? @tr("over the carry limit of {}: the game never makes this stack", root.edit-max)
+                            : @tr("of {} (carry limit)", root.edit-max);
+                        color: root.edit-count > root.edit-max ? Tok.bad : Tok.muted;
+                        font-size: Tok.small;
+                        vertical-alignment: center;
+                        wrap: word-wrap;
+                        horizontal-stretch: 1;
+                    }
                 }
                 HorizontalLayout {
                     spacing: Tok.tight;

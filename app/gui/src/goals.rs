@@ -11,7 +11,8 @@ use mhgu_save::data::tables;
 use mhgu_save::items::{self, Stack, Store};
 use mhgu_save::progress::{Char, QuestBit, DEVIANTS, VILLAGES};
 use mhgu_save::save::Save;
-use mhgu_save::monsters;
+use mhgu_save::guildcard as gc;
+use mhgu_save::{monsters, smithy};
 
 pub struct Def {
     pub id: &'static str,
@@ -22,8 +23,9 @@ pub struct Def {
 /// (arts and canteen as written, quests by the bulk completion of 2026-09-19, crowns by
 /// the game's award check after the 2026-10-04 write, notes and HR by the controlled
 /// write of 2026-10-05) or every field written is CONFIRMED by the save timeline
-/// (awards, money; tools/evidence).
-pub const GOALS: [Def; 8] = [
+/// (awards, money; tools/evidence). Items obtained and the Smithy lists are Derived from
+/// the game's code until checked in game.
+pub const GOALS: [Def; 11] = [
     Def { id: "quests", conf: Conf::Confirmed },
     Def { id: "arts", conf: Conf::Confirmed },
     Def { id: "canteen", conf: Conf::Confirmed },
@@ -32,7 +34,27 @@ pub const GOALS: [Def; 8] = [
     Def { id: "crowns", conf: Conf::Confirmed },
     Def { id: "hr999", conf: Conf::Confirmed },
     Def { id: "money", conf: Conf::Confirmed },
+    Def { id: "obtained", conf: Conf::Derived },
+    Def { id: "smithy", conf: Conf::Derived },
+    Def { id: "card", conf: Conf::Derived },
 ];
+
+/// The names of a Guild Card unlock map, from the asset pack.
+fn card_names(m: gc::Map) -> &'static [String] {
+    let n = assets::names();
+    match m {
+        gc::Map::Words => &n.gc_words,
+        gc::Map::Links => &n.gc_links,
+        gc::Map::Scenes => &n.gc_scenes,
+        gc::Map::Poses => &n.gc_poses,
+    }
+}
+
+/// Item IDs the game can mark obtained and the asset pack names (none without it).
+fn real_items() -> impl Iterator<Item = u16> {
+    let n = &assets::names().items;
+    (1..=items::OBTAINED_MAX_ID).filter(|&id| n.get(id as usize).is_some_and(|x| !x.is_empty() && x != "DUMMY" && x != "(None)" && !x.starts_with('-')))
+}
 
 /// What a goal or bulk action would do to this save.
 #[derive(Default)]
@@ -184,6 +206,37 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
                 for g in [false, true] {
                     ch::set_village_points(s, base, v, g, ch::MAX_VILLAGE_POINTS);
                     out.push(Target::Points(v, g));
+                }
+            }
+        }
+        ["obtained"] => {
+            let todo: Vec<u16> = real_items().filter(|&id| !items::obtained(s, base, id)).collect();
+            for &id in &todo {
+                items::set_obtained(s, base, id, true);
+            }
+            if !todo.is_empty() {
+                out.push(Target::Obtained);
+            }
+        }
+        ["smithy"] => {
+            let gender = ch::get(s, base).gender;
+            for (i, l) in smithy::lists().iter().enumerate() {
+                if smithy::list_all(s, base, l, gender) > 0 {
+                    out.push(Target::Smithy(i));
+                }
+            }
+        }
+        // only entries the pack names, never a reserve cell (nothing without the pack)
+        ["card"] => {
+            for (k, &m) in gc::MAPS.iter().enumerate() {
+                let names = card_names(m);
+                let (_, _, n) = m.at();
+                let todo: Vec<usize> = (0..n).filter(|&i| !names.is_empty() && crate::warnings::card_entry(names, m, i) && !gc::unlocked(s, base, m, i)).collect();
+                for &i in &todo {
+                    gc::set_unlocked(s, base, m, i, true);
+                }
+                if !todo.is_empty() {
+                    out.push(Target::CardMap(k));
                 }
             }
         }
@@ -388,6 +441,60 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 p.note = tr("Totals already at the max stay as they are.").into();
             }
             p.count = trn("{} value", "{} values", n as i64, &[&num(n as i64)]);
+        }
+        ["obtained"] => {
+            p.title = tr("Every item obtained").into();
+            let k = real_items().filter(|&id| !items::obtained(s, base, id)).count() as i64;
+            let its = trn("{} item", "{} items", k, &[&num(k)]);
+            if !assets::available() {
+                p.blocked = true;
+                p.summary = tr("Needs the game's item list, which this build does not have.").into();
+                p.count = tr("Not available").into();
+            } else if k == 0 {
+                p.summary = tr("Every item of the game is marked obtained.").into();
+            } else {
+                p.summary = trf("Marks the {} you never had as obtained, as picking one up does. The Smithy then shows every material's name and the equipment those materials make.", &[&its]);
+                p.count = its;
+            }
+            p.note = tr("A Smithy entry also needs the game's progress to allow it. Items obtained are read by the shop, the Trader and some villagers' requests too.").into();
+        }
+        ["smithy"] => {
+            p.title = tr("List every Smithy entry").into();
+            let gender = ch::get(s, base).gender;
+            let k: usize = smithy::lists().iter().map(|l| {
+                let (a, b) = smithy::count(s, base, l, gender);
+                b - a
+            }).sum();
+            let entries = trn("{} entry", "{} entries", k as i64, &[&num(k as i64)]);
+            p.summary = if n == 0 {
+                tr("The Smithy lists every weapon, armor piece, decoration and Palico item.").into()
+            } else {
+                trf("Lists the {} the Smithy does not show yet, in {}, each with its NEW mark, as the game does when it first lists one.", &[&entries, &trn("{} list", "{} lists", n as i64, &[&num(n as i64)])])
+            };
+            p.count = entries;
+            p.note = tr("Making them still takes their materials. Armor for the other body type stays unlisted, as in game.").into();
+        }
+        ["card"] => {
+            p.title = tr("Every Guild Card title word, scene and pose").into();
+            let k: usize = gc::MAPS
+                .iter()
+                .map(|&m| {
+                    let (names, (_, _, n)) = (card_names(m), m.at());
+                    (0..n).filter(|&i| !names.is_empty() && crate::warnings::card_entry(names, m, i) && !gc::unlocked(s, base, m, i)).count()
+                })
+                .sum();
+            let entries = trn("{} entry", "{} entries", k as i64, &[&num(k as i64)]);
+            if assets::names().gc_words.is_empty() {
+                p.blocked = true;
+                p.summary = tr("Needs the game's Guild Card texts, which this build does not have.").into();
+                p.count = tr("Not available").into();
+            } else if k == 0 {
+                p.summary = tr("Every title word, scene and pose is unlocked.").into();
+            } else {
+                p.summary = trf("Unlocks the {} still locked for the Guild Card editor: title words, linking words, scenes and poses, each with its NEW mark.", &[&entries]);
+                p.count = entries;
+            }
+            p.note = tr("Some come from downloads, the Trader or collaborations in game.").into();
         }
         ["monsters", "hunts"] => {
             let mons = trn("{} monster", "{} monsters", n as i64, &[&num(n as i64)]);

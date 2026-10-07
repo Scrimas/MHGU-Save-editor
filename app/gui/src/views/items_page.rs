@@ -32,6 +32,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
                 has_icon: has,
                 changed,
                 was: if changed { st.was(Target::Item(store, i)) } else { String::new() }.into(),
+                warning: crate::warnings::item(x.id, x.count as u16, store).unwrap_or_default().into(),
             }
         })
         .collect();
@@ -93,6 +94,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
                     has_icon: has,
                     changed,
                     was: was.into(),
+                    warning: crate::warnings::item(id, n, Store::Pouch).unwrap_or_default().into(),
                 }
             })
             .collect();
@@ -146,9 +148,9 @@ pub(super) fn wire_items(ui: &AppWindow, st: &Shared) {
         let store = store_of(&ui);
         let t = Target::Item(store, slot as usize);
         let title = t.label(s.save(), s.slot);
+        // above the item's limit is written too, with a warning (warnings::item)
         s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
-            let max = assets::item_max(id as u16, store) as i32;
-            items::set(sv, base, store, slot as usize, Stack { id: id as u16, count: count.clamp(0, max) as u8 });
+            items::set(sv, base, store, slot as usize, Stack { id: id as u16, count: count.clamp(0, items::MAX_COUNT as i32) as u8 });
             vec![]
         });
     });
@@ -167,8 +169,7 @@ pub(super) fn wire_items(ui: &AppWindow, st: &Shared) {
         let title = t.label(s.save(), s.slot);
         s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut l = items::loadout(sv, base, k);
-            let max = assets::item_max(id as u16, Store::Pouch) as i32;
-            l.items[j] = if id <= 0 || count <= 0 { (0, 0) } else { (id as u16, count.clamp(1, max) as u16) };
+            l.items[j] = if id <= 0 || count <= 0 { (0, 0) } else { (id as u16, count.clamp(1, items::MAX_COUNT as i32) as u16) };
             if l.name.is_empty() && l.items.iter().any(|x| x.0 != 0) {
                 l.name = format!("Set {:02}", k + 1);
             }
