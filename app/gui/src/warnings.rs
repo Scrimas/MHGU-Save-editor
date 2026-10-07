@@ -129,6 +129,10 @@ pub fn palico(p: &palico::Palico, f: Pal) -> Option<String> {
         Pal::Target if p.target == 0 || p.target as usize >= palico::TARGETS.len() => Some(tr("not a target the game offers").into()),
         Pal::Moves => palico_list(p, true),
         Pal::Skills => palico_list(p, false),
+        Pal::Looks => palico::look_fields().into_iter().find(|f| !f.fits(p)).map(|f| {
+            let what = crate::views::look_label(f.key);
+            if f.colour.is_some() { trf("{}: a colour new Palicoes never get", &[&what]) } else { trf("{}: not a choice of the game", &[&what]) }
+        }),
         _ => None,
     }
 }
@@ -302,7 +306,10 @@ mod tests {
             skill_len: 12,
             greeting: String::new(),
             owner: String::new(),
+            looks: [15, 1, 4, 1, 0, 0, 1, 4, 3, 0, 0, 0],
+            colours: [[0xf0, 0xf0, 0xf0, 0xff], [0xed, 0x87, 0x40, 0xff], [0xed, 0x87, 0x40, 0xff], [0xa1, 0x76, 0x4f, 0xff], [0xff; 4], [0xff; 4], [0, 0, 0, 0xff], [0, 0, 0, 0xff], [0, 0, 0, 0xff]],
         };
+        assert_eq!(palico(&p, Pal::Looks), None);
         assert_eq!((palico(&p, Pal::Moves), palico(&p, Pal::Skills)), (None, None));
         p.moves = [37, 27, 9, 1, 39, 0, 0, 0];
         assert!(palico(&p, Pal::Moves).is_some(), "5 equipped, 4 slots");

@@ -276,6 +276,9 @@ def main(romfs, out):
     # Skill"; the record's learned slots use 96 for none). 21 "Support Move +1" is the one
     # the equip limit counts (0xe8478). DERIVED
     names['palico_skills'] = gmd(reng['eng\\table\\ot_skl_eng'])[0::2]
+    # Palico coats, byte +6 of the record's look block (Felyne, Melynx, Striped, Monotone,
+    # Two-tone, Calico, Tabby: the 7 models of otomo/mod/skin): OtMenuMsg 17-23. DERIVED
+    names['palico_coats'] = gmd(reng['eng\\table\\OtMenuMsg_eng'])[17:24]
     names.update(guild_card(R, 'eng'))
 
     # Guild Card awards: bit i -> cell i, 10 x 48 px; 0-99 lby_deco, 100+ lby_deco2
@@ -323,7 +326,8 @@ def text(R, r, lang, eng=None):
     """The names of one language from its resident_<lang>.arc `r` (and the variant monster
     names from RomFS `R`), entry for entry like the English names.json `eng` (the piece
     lists keep only the real IDs, so they follow it):
-      items, skills, support_moves, palico_skills, monsters   lists by ID (monsters: save index - 1)
+      items, skills, support_moves, palico_skills, palico_coats, monsters   lists by ID
+                  (monsters: save index - 1)
       weapons     class -> [[base, final, ultimate] per English piece]
       armor, palico_armor   part -> [name per English piece]
       palico_weapons, talismans   [name per English piece]
@@ -331,6 +335,7 @@ def text(R, r, lang, eng=None):
     g = lambda n: gmd(r['%s\\%s_%s' % (lang, n, lang)])
     out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
            'support_moves': g('otomo\\support\\spt_act_base')[0::2], 'palico_skills': g('table\\ot_skl')[0::2],
+           'palico_coats': g('table\\OtMenuMsg')[17:24],
            'monsters': g('GUI\\06_msg\\monsterName')[:137]}
     out.update(guild_card(R, lang))
     m = out['monsters']

@@ -1433,6 +1433,15 @@ msgstr "Alle Ziele sind in diesem Spielstand bereits erreicht."
 msgid "Already in your save"
 msgstr "Bereits im Spielstand"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Looks"
+msgstr "Aussehen"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/palicoes.slint
+msgid "{}, colour {}"
+msgstr "{}, Farbe {}"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/palicoes.slint
 msgid "Equip {}"
@@ -2474,6 +2483,12 @@ msgstr "Freigeschaltete Gildenkarten-Posen"
 msgid "{} · Arena record"
 msgstr "{} · Arenarekord"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/src/views/names.rs
+#: app/gui/src/views/palicoes.rs
+msgid "Type {}"
+msgstr "Typ {}"
+
 #: app/gui/src/targets.rs
 msgid "Not seen"
 msgstr "Nicht gesehen"
@@ -2653,6 +2668,16 @@ msgstr "keine Ausrichtung des Spiels"
 #: app/gui/src/warnings.rs
 msgid "not a target the game offers"
 msgstr "kein Ziel, das das Spiel anbietet"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{}: a colour new Palicoes never get"
+msgstr "{}: eine Farbe, die kein neuer Palico bekommt"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{}: not a choice of the game"
+msgstr "{}: keine Wahl des Spiels"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
@@ -3304,11 +3329,6 @@ msgstr "Kameraden-Kopf"
 msgid "Palico body"
 msgstr "Kameraden-Körper"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/names.rs
-msgid "Type {}"
-msgstr "Typ {}"
-
 #: app/gui/src/views/names.rs
 msgid "No skills"
 msgstr "Keine Fähigkeiten"
@@ -3417,6 +3437,46 @@ msgid "{} {n} value changes. Nothing is written until you press Write."
 msgid_plural "{} {n} values change. Nothing is written until you press Write."
 msgstr[0] "{} {n} Wert ändert sich. Geschrieben wird erst mit „Schreiben“."
 msgstr[1] "{} {n} Werte ändern sich. Geschrieben wird erst mit „Schreiben“."
+
+#: app/gui/src/views/palicoes.rs
+msgid "Coat"
+msgstr "Fell"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Coat colour"
+msgstr "Fellfarbe"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Clothing"
+msgstr "Kleidung"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Clothing colour"
+msgstr "Kleidungsfarbe"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Eyes"
+msgstr "Augen"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Left eye colour"
+msgstr "Farbe des linken Auges"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Right eye colour"
+msgstr "Farbe des rechten Auges"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Ears"
+msgstr "Ohren"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Tail"
+msgstr "Schwanz"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Voice"
+msgstr "Stimme"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs

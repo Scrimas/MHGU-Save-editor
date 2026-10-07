@@ -119,12 +119,17 @@ export struct PalicoRow { index: int, name: string, sub: string, changed: bool }
 // ones are the slots the Palico Dojo fills; `on` when equipped.
 export struct PalicoEntry { slot: int, id: int, name: string, innate: bool, taught: bool, on: bool }
 
+// A look: a choice (`index` into `choices`) or a colour (`index` into `swatches`, -1 when
+// the colour is none of them).
+export struct LookRow { key: string, label: string, is-colour: bool, index: int, choices: [string], swatches: [color], colour: color }
+
 export struct PalicoDetail {
     warning: string,  // why the game cannot produce its level, forte or target ("" when it can)
     index: int, name: string, level: int, exp: int, bias: int, target: int, greeting: string, owner: string,
-    move-rows: [PalicoEntry], skill-rows: [PalicoEntry], moves-used: string, skills-used: string,
+    move-rows: [PalicoEntry], skill-rows: [PalicoEntry], moves-used: string, skills-used: string, look-rows: [LookRow],
     was-name: string, was-level: string, was-exp: string, was-bias: string, was-greeting: string, was-owner: string,
     was-target: string, was-moves: string, was-skills: string, warn-moves: string, warn-skills: string,
+    was-looks: string, warn-looks: string,
 }
 
 export struct QuestRow {
@@ -387,6 +392,8 @@ export global Api {
     // "moves" / "skills", slot, ID, equipped: a new ID replaces the slot's entry, the same
     // ID equips or unequips it
     callback set-palico-entry(string, int, int, bool);
+    // look key, choice or palette index
+    callback set-palico-look(string, int);
 
     // quests
     in property <[string]> quest-tabs;

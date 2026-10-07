@@ -1433,6 +1433,15 @@ msgstr "Todos los objetivos ya están en esta partida."
 msgid "Already in your save"
 msgstr "Ya en tu partida"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Looks"
+msgstr "Aspecto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/palicoes.slint
+msgid "{}, colour {}"
+msgstr "{}, color {}"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/palicoes.slint
 msgid "Equip {}"
@@ -2474,6 +2483,12 @@ msgstr "Poses de la tarjeta del gremio desbloqueadas"
 msgid "{} · Arena record"
 msgstr "{} · récord de la arena"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/src/views/names.rs
+#: app/gui/src/views/palicoes.rs
+msgid "Type {}"
+msgstr "Tipo {}"
+
 #: app/gui/src/targets.rs
 msgid "Not seen"
 msgstr "No vista"
@@ -2653,6 +2668,16 @@ msgstr "no es una especialidad del juego"
 #: app/gui/src/warnings.rs
 msgid "not a target the game offers"
 msgstr "no es un objetivo que ofrezca el juego"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{}: a colour new Palicoes never get"
+msgstr "{}: un color que ningún Palico nuevo recibe"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{}: not a choice of the game"
+msgstr "{}: no es una opción del juego"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
@@ -3304,11 +3329,6 @@ msgstr "Cabeza de camarada"
 msgid "Palico body"
 msgstr "Cuerpo de camarada"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/names.rs
-msgid "Type {}"
-msgstr "Tipo {}"
-
 #: app/gui/src/views/names.rs
 msgid "No skills"
 msgstr "Sin habilidades"
@@ -3417,6 +3437,46 @@ msgid "{} {n} value changes. Nothing is written until you press Write."
 msgid_plural "{} {n} values change. Nothing is written until you press Write."
 msgstr[0] "{} Cambia {n} valor. No se escribe nada hasta que pulses Escribir."
 msgstr[1] "{} Cambian {n} valores. No se escribe nada hasta que pulses Escribir."
+
+#: app/gui/src/views/palicoes.rs
+msgid "Coat"
+msgstr "Pelo"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Coat colour"
+msgstr "Color de pelo"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Clothing"
+msgstr "Ropa"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Clothing colour"
+msgstr "Color de ropa"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Eyes"
+msgstr "Ojos"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Left eye colour"
+msgstr "Color del ojo izquierdo"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Right eye colour"
+msgstr "Color del ojo derecho"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Ears"
+msgstr "Orejas"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Tail"
+msgstr "Cola"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Voice"
+msgstr "Voz"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs

@@ -1,7 +1,7 @@
 import { ListView, ComboBox, LineEdit, ScrollView, Palette, CheckBox } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
-    Confidence, SearchField, PalicoEntry,
+    Confidence, SearchField, PalicoEntry, LookRow,
 } from "../common.slint";
 
 // Label, control, "was … Undo" under it when staged.
@@ -43,6 +43,61 @@ component TextRow inherits Row {
                 Api.set-palico-text(root.field, self.text);
             }
         }
+    }
+}
+
+// A Palico's looks: a picker per choice, a row of swatches per colour (the game's palette;
+// a colour outside it shows on its own at the end).
+component LookList inherits VerticalLayout {
+    in property <[LookRow]> rows;
+    in property <string> was;
+    in property <string> key;
+    in property <string> warning;
+    spacing: 6px;
+    HorizontalLayout {
+        spacing: Tok.gap;
+        SectionTitle { text: @tr("Looks"); vertical-alignment: center; }
+        ConfidenceTag { level: Confidence.derived; }
+        Rectangle { horizontal-stretch: 1; }
+    }
+    if root.was != "": WasLine { was: root.was; key: root.key; }
+    if root.warning != "": Text { text: @tr("The game cannot make this: {}.", root.warning); color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+    for r in root.rows: HorizontalLayout {
+        spacing: Tok.gap;
+        height: 34px;
+        Text { text: r.label; width: 130px; vertical-alignment: center; color: Tok.muted; }
+        if !r.is-colour: ComboBox {
+            width: 200px;
+            model: r.choices;
+            current-index: r.index;
+            selected => { Api.set-palico-look(r.key, self.current-index); }
+        }
+        if r.is-colour: HorizontalLayout {
+            spacing: 4px;
+            alignment: start;
+            for c[k] in r.swatches: Rectangle {
+                width: 26px;
+                height: 26px;
+                y: 4px;
+                border-radius: 4px;
+                background: c;
+                border-width: k == r.index ? 2px : 1px;
+                border-color: k == r.index ? Tok.accent-text : Tok.input-border;
+                accessible-role: button;
+                accessible-label: @tr("{}, colour {}", r.label, k + 1);
+                TouchArea { clicked => { Api.set-palico-look(r.key, k); } }
+            }
+            if r.index < 0: Rectangle {
+                width: 26px;
+                height: 26px;
+                y: 4px;
+                border-radius: 13px;
+                background: r.colour;
+                border-width: 2px;
+                border-color: Tok.bad;
+            }
+        }
+        Rectangle { horizontal-stretch: 1; }
     }
 }
 
@@ -186,6 +241,13 @@ export component PalicoesPage inherits Rectangle {
                         }
                         TextRow { label: @tr("Greeting"); field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }
                         TextRow { label: @tr("Original owner"); field: "owner"; value: Api.palico.owner; was: Api.palico.was-owner; key: root.key + "owner"; field-width: 260px; }
+                        Hairline { }
+                        LookList {
+                            rows: Api.palico.look-rows;
+                            was: Api.palico.was-looks;
+                            key: root.key + "looks";
+                            warning: Api.palico.warn-looks;
+                        }
                         Hairline { }
                         EntryList {
                             title: @tr("Support moves");

@@ -1,0 +1,10 @@
+look,slot,choices,palette
+coat,6,7,
+coat_colour,colour:0,13,f0f0f0 fa746a f4a024 fae96e a17345 7bfcb3 5a88e4 9dc6e7 aa96e6 f38dc0 6b6f8b e2e5d3 302e48
+clothing,3,2,
+clothing_colour,colour:3,14,f0f0f0 c93036 e1711e ffec0f 96ff46 706541 2e627d 9569e2 7d1834 ff468e a1764f fae4d9 3d363e 8ba150
+eyes,2,6,
+eye_colour,colour:1,9,71deff edd400 6a491b 73c876 0b9397 ed8740 9f79e0 df99d6 ebf5ff
+ears,7,5,
+tail,8,5,
+voice,1,3,

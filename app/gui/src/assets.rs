@@ -84,6 +84,9 @@ pub struct Names {
     /// Palico skill ID -> name (packs built before 2026-10-08 lack it: shown as IDs).
     #[serde(default)]
     pub palico_skills: Vec<String>,
+    /// Palico coat (look byte 6) -> name.
+    #[serde(default)]
+    pub palico_coats: Vec<String>,
     /// Monster save index - 1 -> name (packs built before 2026-10-06 lack it: data/ names).
     #[serde(default)]
     pub monsters: Vec<String>,
@@ -140,6 +143,7 @@ struct Text {
     skills: Vec<String>,
     support_moves: Vec<String>,
     palico_skills: Vec<String>,
+    palico_coats: Vec<String>,
     monsters: Vec<String>,
     /// Weapon class -> [base, final, ultimate] per piece.
     weapons: HashMap<String, Vec<Vec<String>>>,
@@ -174,6 +178,7 @@ impl Names {
         list(&mut self.skills, t.skills);
         list(&mut self.support_moves, t.support_moves);
         list(&mut self.palico_skills, t.palico_skills);
+        list(&mut self.palico_coats, t.palico_coats);
         list(&mut self.monsters, t.monsters);
         list(&mut self.gc_words, t.gc_words);
         list(&mut self.gc_links, t.gc_links);

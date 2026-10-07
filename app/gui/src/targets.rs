@@ -35,6 +35,8 @@ pub enum Pal {
     Moves,
     /// Its skill list and the skills equipped.
     Skills,
+    /// Coat, eyes, ears, tail, voice, clothing and their colours.
+    Looks,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -140,6 +142,7 @@ fn pal_field(f: Pal) -> &'static str {
         Pal::Target => "target",
         Pal::Moves => "moves",
         Pal::Skills => "skills",
+        Pal::Looks => "looks",
     }
 }
 
@@ -153,6 +156,7 @@ pub fn pal_of(field: &str) -> Pal {
         "target" => Pal::Target,
         "moves" => Pal::Moves,
         "skills" => Pal::Skills,
+        "looks" => Pal::Looks,
         _ => Pal::Owner,
     }
 }
@@ -341,6 +345,7 @@ impl Target {
                     Pal::Target => tr("Target"),
                     Pal::Moves => tr("Support moves"),
                     Pal::Skills => tr("Skills"),
+                    Pal::Looks => tr("Looks"),
                 };
                 format!("{n} · {what}")
             }
@@ -421,6 +426,11 @@ impl Target {
                     Pal::Target => tr(palico::TARGETS.get(p.target as usize).copied().unwrap_or("?")).into(),
                     Pal::Moves => palico_names(&assets::names().support_moves, &p.moves),
                     Pal::Skills => palico_names(&assets::names().palico_skills, &p.skills_on),
+                    Pal::Looks => {
+                        let coat = assets::names().palico_coats.get(p.looks[6] as usize).cloned().unwrap_or_else(|| trf("Type {}", &[&(p.looks[6] + 1)]));
+                        let [r, g, b, _] = p.colours[0];
+                        format!("{coat} · #{r:02x}{g:02x}{b:02x}")
+                    }
                 }
             }
             Quest(i) => {
@@ -520,6 +530,7 @@ impl Target {
                     Pal::Target => range(o + palico::TARGET, 1),
                     Pal::Moves => [range(o + palico::MOVES, 8), range(o + palico::LEARNED, 16)].concat(),
                     Pal::Skills => [range(o + palico::SKILLS_ON, 8), range(o + palico::SKILLS, 12)].concat(),
+                    Pal::Looks => [range(o + palico::LOOKS, 12), range(o + palico::COLOURS, 36)].concat(),
                 }
             }
             Quest(i) => {

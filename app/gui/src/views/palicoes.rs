@@ -2,6 +2,48 @@
 
 use super::*;
 
+/// A look's name in the interface language.
+pub fn look_label(key: &str) -> &'static str {
+    match key {
+        "coat" => tr("Coat"),
+        "coat_colour" => tr("Coat colour"),
+        "clothing" => tr("Clothing"),
+        "clothing_colour" => tr("Clothing colour"),
+        "eyes" => tr("Eyes"),
+        "eye_left" => tr("Left eye colour"),
+        "eye_right" => tr("Right eye colour"),
+        "ears" => tr("Ears"),
+        "tail" => tr("Tail"),
+        "voice" => tr("Voice"),
+        _ => "?",
+    }
+}
+
+/// The Palico's looks: a picker per choice (coats by name, the rest "Type n"), swatches
+/// for the colours.
+fn look_rows(p: &palico::Palico) -> Vec<LookRow> {
+    let coats = &assets::names().palico_coats;
+    palico::look_fields()
+        .into_iter()
+        .map(|f| {
+            let rgb = f.rgb(p);
+            let colour = |[r, g, b]: [u8; 3]| slint::Color::from_rgb_u8(r, g, b);
+            LookRow {
+                key: f.key.into(),
+                label: look_label(f.key).into(),
+                is_colour: f.colour.is_some(),
+                index: if f.colour.is_some() { f.palette.iter().position(|&c| c == rgb).map_or(-1, |k| k as i32) } else { f.get(p) as i32 - f.first as i32 },
+                choices: strings((0..f.choices).map(|k| match coats.get(k as usize) {
+                    Some(n) if f.key == "coat" => n.clone(),
+                    _ => trf("Type {}", &[&(k + 1)]),
+                })),
+                swatches: model(f.palette.iter().map(|&c| colour(c)).collect()),
+                colour: colour(rgb),
+            }
+        })
+        .collect()
+}
+
 pub(super) fn palico_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let s = st.save();
@@ -60,6 +102,9 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
             skill_rows: model(rows(p.skill_list(), &p.skills_on, palico::INNATE_SKILLS, palico::TAUGHT_SKILLS, &names.palico_skills)),
             moves_used: trf("{} of {} equipped", &[&equipped, &p.move_slots()]).into(),
             skills_used: trf("{} of {} skill slots used", &[&p.skills_cost(), &p.skill_slots()]).into(),
+            look_rows: model(look_rows(&p)),
+            was_looks: was(targets::Pal::Looks),
+            warn_looks: warn(targets::Pal::Looks),
             was_moves: was(targets::Pal::Moves),
             was_skills: was(targets::Pal::Skills),
             warn_moves: warn(targets::Pal::Moves),
@@ -139,6 +184,21 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
             } else if id != 0 {
                 palico::equip(&mut p.skills_on, id, on);
             }
+            palico::set(sv, base, i, &p);
+            vec![]
+        });
+        let _ = &ui;
+    });
+    // a look: the choice's index, or for a colour its palette entry
+    on!(ui, st, on_set_palico_look, |ui, s, key: SharedString, v: i32| {
+        let i = view(|v| v.palico_sel);
+        let (Ok(i), Ok(v)) = (usize::try_from(i), u8::try_from(v)) else { return };
+        let Some(f) = palico::look_fields().into_iter().find(|f| f.key == key.as_str()) else { return };
+        let t = Target::Palico(i, targets::Pal::Looks);
+        let title = t.label(s.save(), s.slot);
+        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+            let mut p = palico::get(sv, base, i);
+            f.set(&mut p, if f.colour.is_some() { v } else { v.saturating_add(f.first) });
             palico::set(sv, base, i, &p);
             vec![]
         });

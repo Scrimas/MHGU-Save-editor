@@ -47,6 +47,10 @@ pub const NO_SKILL: u8 = 96;
 pub const SKILL_MOVE_SLOT: u8 = 21;
 pub const INNATE_SKILLS: usize = 2;
 pub const TAUGHT_SKILLS: usize = 2;
+/// The look block (the hunter's character-creation layout, +0 = 15, Prowler) and its 9
+/// RGBA colours (data/palico-looks.csv says which byte and colour is which look).
+pub const LOOKS: usize = 0x10E;
+pub const COLOURS: usize = 0x11A;
 
 /// Target byte -> the game's menu text (OtMenuMsg 56-61, in this order). 4 = Large First
 /// was read off in game; the rest follow the menu order (DERIVED). 0 is not offered.
@@ -75,6 +79,9 @@ pub struct Palico {
     pub skill_len: u8,
     pub greeting: String,
     pub owner: String,
+    pub looks: [u8; 12],
+    /// RGBA
+    pub colours: [[u8; 4]; 9],
 }
 
 impl Palico {
@@ -116,6 +123,72 @@ impl Palico {
     pub fn skills_cost(&self) -> usize {
         self.skills_on.iter().filter(|&&k| k != 0).map(|&k| skill_cost(k) as usize).sum()
     }
+}
+
+/// One look as the editor shows it: a byte of the look block or a colour slot, and the
+/// choices new Palicoes get (data/palico-looks.csv; the eye colour is two fields).
+#[derive(Debug, Clone, Copy)]
+pub struct LookField {
+    /// coat, coat_colour, clothing, clothing_colour, eyes, eye_left, eye_right, ears, tail, voice
+    pub key: &'static str,
+    pub byte: Option<usize>,
+    pub colour: Option<usize>,
+    /// Values `first .. first + choices` (voice starts at 1).
+    pub first: u8,
+    pub choices: u8,
+    pub palette: &'static [[u8; 3]],
+}
+
+impl LookField {
+    pub fn get(&self, p: &Palico) -> u8 {
+        self.byte.map_or(0, |b| p.looks[b])
+    }
+
+    /// The colour slot's RGB.
+    pub fn rgb(&self, p: &Palico) -> [u8; 3] {
+        let [r, g, b, _] = self.colour.map_or([0; 4], |c| p.colours[c]);
+        [r, g, b]
+    }
+
+    /// Whether the game can make this value: a choice it offers, a colour of its palette.
+    pub fn fits(&self, p: &Palico) -> bool {
+        match self.colour {
+            Some(_) => self.palette.contains(&self.rgb(p)),
+            None => (self.first..self.first + self.choices).contains(&self.get(p)),
+        }
+    }
+
+    /// Set the byte to `v`, or the colour to palette entry `v` (alpha 0xFF).
+    pub fn set(&self, p: &mut Palico, v: u8) {
+        if let Some(b) = self.byte {
+            p.looks[b] = v;
+        }
+        if let (Some(c), Some(&[r, g, b])) = (self.colour, self.palette.get(v as usize)) {
+            p.colours[c] = [r, g, b, 0xFF];
+        }
+    }
+}
+
+pub fn look_fields() -> Vec<LookField> {
+    let mut v = vec![];
+    for l in &tables().palico_looks {
+        let f = |key: &'static str, colour: Option<usize>| LookField {
+            key,
+            byte: l.byte,
+            colour,
+            first: (l.look == "voice") as u8,
+            choices: l.choices,
+            palette: &l.palette,
+        };
+        match l.look.as_str() {
+            "eye_colour" => v.extend([f("eye_left", Some(1)), f("eye_right", Some(2))]),
+            k => {
+                let key = ["coat", "coat_colour", "clothing", "clothing_colour", "eyes", "ears", "tail", "voice"].into_iter().find(|&x| x == k).unwrap_or("?");
+                v.push(f(key, l.colour));
+            }
+        }
+    }
+    v
 }
 
 /// The skill slots skill `k` takes.
@@ -189,6 +262,8 @@ pub fn get(s: &Save, base: usize, i: usize) -> Palico {
         skill_len: s.u8(o + SKILL_LEN),
         greeting: s.str(o + GREETING.0, GREETING.1),
         owner: s.str(o + OWNER.0, OWNER.1),
+        looks: s.get(o + LOOKS, 12).try_into().unwrap(),
+        colours: std::array::from_fn(|k| s.get(o + COLOURS + 4 * k, 4).try_into().unwrap()),
     }
 }
 
@@ -230,6 +305,12 @@ pub fn set(s: &mut Save, base: usize, i: usize, p: &Palico) {
     }
     if old.owner != p.owner {
         s.set_str(o + OWNER.0, OWNER.1, &p.owner);
+    }
+    if old.looks != p.looks {
+        s.put(o + LOOKS, &p.looks);
+    }
+    if old.colours != p.colours {
+        s.put(o + COLOURS, p.colours.as_flattened());
     }
 }
 
@@ -295,6 +376,31 @@ mod tests {
         assert_eq!(p.move_slots(), 5);
         assert_eq!(p.skills_cost(), skill_cost(SKILL_MOVE_SLOT) as usize);
         assert_eq!(tables().palico_fortes[6].moves, vec![37]);
+    }
+
+    #[test]
+    fn looks_follow_the_tables() {
+        let mut p = musashi();
+        // Musashi: Melynx coat (1), coat colour f0f0f0, eye colour ed8740 (analysed save)
+        p.looks = [15, 1, 4, 1, 0, 0, 1, 4, 3, 0, 0, 0];
+        p.colours[0] = [0xf0, 0xf0, 0xf0, 0xff];
+        p.colours[1] = [0xed, 0x87, 0x40, 0xff];
+        p.colours[2] = p.colours[1];
+        p.colours[3] = [0xa1, 0x76, 0x4f, 0xff];
+        let f = look_fields();
+        assert_eq!(f.len(), 10);
+        assert!(f.iter().all(|x| x.fits(&p)), "{:?}", f.iter().find(|x| !x.fits(&p)));
+        let coat = f.iter().find(|x| x.key == "coat").unwrap();
+        coat.set(&mut p, 7);
+        assert!(!coat.fits(&p), "7 coats");
+        let voice = f.iter().find(|x| x.key == "voice").unwrap();
+        voice.set(&mut p, 0);
+        assert!(!voice.fits(&p), "voices are 1-3");
+        let eye = f.iter().find(|x| x.key == "eye_right").unwrap();
+        eye.set(&mut p, 8);
+        assert_eq!(p.colours[2], [0xeb, 0xf5, 0xff, 0xff]);
+        p.colours[2] = [1, 2, 3, 0xff];
+        assert!(!eye.fits(&p));
     }
 
     #[test]

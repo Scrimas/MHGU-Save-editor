@@ -12,7 +12,7 @@ use crate::update::{self, VERSION};
 use crate::{model, strings, Shared};
 use crate::{
     Api, AppWindow, ArenaRow, ArtRow, CardInfo, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
-    EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, Preview, PreviewLine,
+    EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, LookRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, Preview, PreviewLine,
     QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
 };
 use mhgu_save::data::tables;
@@ -705,4 +705,5 @@ use self::{
     palicoes::*, quests::*, requests::*, settings_ui::*,
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
+pub use self::palicoes::look_label;
 pub use self::{file::*, update_ui::*};

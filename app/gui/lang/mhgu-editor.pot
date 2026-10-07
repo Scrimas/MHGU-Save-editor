@@ -1413,6 +1413,15 @@ msgstr ""
 msgid "Already in your save"
 msgstr ""
 
+#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+msgid "Looks"
+msgstr ""
+
+#: app/gui/ui/pages/palicoes.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}, colour {}"
+msgstr ""
+
 #: app/gui/ui/pages/palicoes.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Equip {}"
@@ -2454,6 +2463,11 @@ msgstr ""
 msgid "{} · Arena record"
 msgstr ""
 
+#: app/gui/src/targets.rs app/gui/src/views/names.rs app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Type {}"
+msgstr ""
+
 #: app/gui/src/targets.rs
 msgid "Not seen"
 msgstr ""
@@ -2631,6 +2645,16 @@ msgstr ""
 
 #: app/gui/src/warnings.rs
 msgid "not a target the game offers"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}: a colour new Palicoes never get"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}: not a choice of the game"
 msgstr ""
 
 #: app/gui/src/warnings.rs
@@ -3284,11 +3308,6 @@ msgid "Palico body"
 msgstr ""
 
 #: app/gui/src/views/names.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Type {}"
-msgstr ""
-
-#: app/gui/src/views/names.rs
 msgid "No skills"
 msgstr ""
 
@@ -3396,6 +3415,46 @@ msgid "{} {n} value changes. Nothing is written until you press Write."
 msgid_plural "{} {n} values change. Nothing is written until you press Write."
 msgstr[0] ""
 msgstr[1] ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Coat"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Coat colour"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Clothing"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Clothing colour"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Eyes"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Left eye colour"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Right eye colour"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Ears"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Tail"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Voice"
+msgstr ""
 
 #: app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position

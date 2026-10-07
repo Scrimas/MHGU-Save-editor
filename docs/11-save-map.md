@@ -338,6 +338,9 @@ bias 6, the greeting and buddy 1 = its index.
 | `+0x58` | 8 | an ID per Palico (the analysed save's Palicoes of one owner differ in one byte) |
 | `+0x60` | char[60] | greeting |
 | `+0x9C` | char[32] | original owner name |
+| `+0x100` | 7 × u16 | equipment references, `0xFFFF` = none (the loader gives defaults then) |
+| `+0x10E` | 12 | look block, the hunter's character-creation layout (slot header `+0x240`): `+0` = 15 (Prowler), `+1` voice (1–3), `+2` eyes, `+3` clothing, `+6` coat, `+7` ears, `+8` tail |
+| `+0x11A` | 9 × RGBA | colours: 0 coat, 1 left eye, 2 right eye, 3 clothing; 4–8 not drawn for new Palicoes |
 
 **Support moves and skills**, DERIVED from the parameter class (`0xe8000`–`0xea000`,
 object `+0x23C` = record `+0x20`) and the save. A move list is the forte's innate moves
@@ -354,6 +357,17 @@ slot), and equipped skills whose `mSlotCost` (`ot_skl`) add up to at most
 `mMaxOtomoSkillSlot` (`0xe9338`). [`tools/palico_tables.py`](../tools/palico_tables.py)
 writes these tables to `data/palico-*.csv`. The 57-bit map at `base + 0x2C6F`
 (`S+0xd84`) holds the moves seen on any Palico, every forte's innate moves among them.
+
+**Looks**, DERIVED. The record is loaded into the same player-data class as the hunter's
+(name `+0x514`, parameter block `+0x240`, look block `+0x4D4`, colours `+0x4E0`). A new
+Palico's looks (`0x25aee0`) are drawn from the 9 rows of `otParamLot`: coat (7), coat
+colour (13), clothing (2), clothing colour (14), eyes (6), eye colour (9; the right eye
+differs 5 times in 100), ears (5), tail (5), voice (3, stored + 1). The models agree:
+`otomo/mod/skin` holds 7 coats, `otomo/mod/eye` 6 eyes, `otomo/vo` voices 01–03; the coat
+names are `OtMenuMsg` 17–23. Ears and tail follow the order of the DLC Palico fields
+(`cDLCOtomoInfo`: hair, voice, eye, ear, tail). The colour palettes are runtime tables
+filled at start-up (`0x28a668`); every colour of the analysed save's Palicoes is in them.
+`data/palico-looks.csv` holds the choices and palettes.
 
 Lists: `base + 0x23BB6` 84 records (the Palicoes of the slot) and `base + 0x2A606` 24
 records (same format: the Palicoes for hire, rerolled after each counted quest and at no

@@ -25,18 +25,41 @@ the analysed save fit this exactly; the other two are special Palicoes with no r
 part. Equip limits, from the code (0xe8478, 0xe9338): mFreeSupportSlot + 2 support moves
 (+1 with skill 21, Support Move +1); equipped skills' mSlotCost at most mMaxOtomoSkillSlot.
 
+Looks. A Palico record keeps a character-creation block at +0x10E (12 B, the hunter's
+layout: +0 weapon class 15 = Prowler) and 9 RGBA colours at +0x11A. A new Palico's looks
+(0x25aee0, the stores from 0x25b5e0) are drawn from the 9 lottery rows of
+table/lobby/otParamLot (16 weights each): coat +6, coat colour 0, clothing +3, clothing
+colour 3, eyes +2, eye colour 1 (and 2: the right eye differs 5 times in 100), ears +7,
+tail +8, voice +1 (drawn + 1). The models agree: otomo/mod/skin has 7 coats, otomo/mod/eye
+6 eyes, otomo/vo 3 voices (01-03). Ears and tail are named by the order of the DLC Palico
+fields (cDLCOtomoInfo: mOtomoHair, mOtomoVoiceType, mOtomoEye, mOtomoEar, mOtomoTail);
+both have 5 choices. The colour palettes are runtime tables filled by 0x28a668 (copied
+below, read by running it).
+
 Writes:
   data/palico-levels.csv   level, support_slots (mFreeSupportSlot), skill_slots
   data/palico-actions.csv  kind (move, skill), id, points (1-3 when drawn at random, else
                            0), cost (skills: slot cost)
   data/palico-fortes.csv   forte, move (the innate move), moves2 (the second innate move's
                            choices), skills (the two innate skills)
+  data/palico-looks.csv    look, slot (byte of the block, or colour:<n>), choices (values
+                           0..choices-1; voice 1..choices), palette (RRGGBB colours)
 """
 import csv, os, struct, sys
 
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, here)
 from build_assets import RomFS, arc
+
+
+# 0x28a668: the colours new Palicoes are drawn from (RGB; alpha always 0xFF)
+COAT_COLOURS = 'f0f0f0 fa746a f4a024 fae96e a17345 7bfcb3 5a88e4 9dc6e7 aa96e6 f38dc0 6b6f8b e2e5d3 302e48'
+CLOTHING_COLOURS = 'f0f0f0 c93036 e1711e ffec0f 96ff46 706541 2e627d 9569e2 7d1834 ff468e a1764f fae4d9 3d363e 8ba150'
+EYE_COLOURS = '71deff edd400 6a491b 73c876 0b9397 ed8740 9f79e0 df99d6 ebf5ff'
+# otParamLot row -> (look, slot, palette)
+LOOKS = [('coat', '6', ''), ('coat_colour', 'colour:0', COAT_COLOURS), ('clothing', '3', ''),
+         ('clothing_colour', 'colour:3', CLOTHING_COLOURS), ('eyes', '2', ''), ('eye_colour', 'colour:1', EYE_COLOURS),
+         ('ears', '7', ''), ('tail', '8', ''), ('voice', '1', '')]
 
 
 def records(d, size):
@@ -80,6 +103,13 @@ def main(romfs):
         assert struct.unpack_from('<H', om[f])[0] == f and struct.unpack_from('<H', os_[f])[0] == f
         rows.append((f, a, ' '.join(str(x) for x in sorted({b, c}) if x), ' '.join(map(str, struct.unpack_from('<2H', os_[f], 2)))))
     write('palico-fortes.csv', ['forte', 'move', 'moves2', 'skills'], rows)
+
+    rows = []
+    for r, (look, slot, pal) in zip(records(t['table\\lobby\\otParamLot'], 16), LOOKS):
+        n = max(k for k in range(16) if r[k]) + 1
+        assert not pal or len(pal.split()) == n, (look, n)
+        rows.append((look, slot, n, pal))
+    write('palico-looks.csv', ['look', 'slot', 'choices', 'palette'], rows)
 
 
 if __name__ == '__main__':

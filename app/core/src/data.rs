@@ -126,6 +126,19 @@ pub struct PalicoAction {
     pub cost: u8,
 }
 
+/// data/palico-looks.csv: one look of a Palico and the choices new Palicoes get.
+#[derive(Debug, Clone)]
+pub struct PalicoLook {
+    /// coat, coat_colour, clothing, clothing_colour, eyes, eye_colour, ears, tail, voice
+    pub look: String,
+    /// The byte of the look block, or for a colour the colour slot.
+    pub byte: Option<usize>,
+    pub colour: Option<usize>,
+    pub choices: u8,
+    /// Colours: RGB.
+    pub palette: Vec<[u8; 3]>,
+}
+
 /// data/arena.csv: an Arena quest of the Arena Counter's table, in its order.
 #[derive(Debug, Clone)]
 pub struct ArenaQuest {
@@ -199,6 +212,7 @@ pub struct Tables {
     pub palico_skills: Vec<PalicoAction>,
     /// By forte.
     pub palico_fortes: Vec<PalicoForte>,
+    pub palico_looks: Vec<PalicoLook>,
 }
 
 impl Tables {
@@ -342,6 +356,23 @@ pub fn tables() -> &'static Tables {
                 .map(|r| {
                     let ids = |k: &str| r[k].split_whitespace().map(|v| num(v) as u8).collect::<Vec<u8>>();
                     PalicoForte { moves: ids("move"), moves2: ids("moves2"), skills: ids("skills").try_into().expect("palico-fortes.csv: two skills") }
+                })
+                .collect(),
+            palico_looks: rows(include_str!("../../../data/palico-looks.csv"))
+                .iter()
+                .map(|r| {
+                    let slot = &r["slot"];
+                    let rgb = |h: &str| {
+                        let v = u32::from_str_radix(h, 16).expect("palico-looks.csv: RRGGBB");
+                        [(v >> 16) as u8, (v >> 8) as u8, v as u8]
+                    };
+                    PalicoLook {
+                        look: r["look"].clone(),
+                        byte: slot.parse().ok(),
+                        colour: slot.strip_prefix("colour:").map(|c| num(c) as usize),
+                        choices: num(&r["choices"]) as u8,
+                        palette: r["palette"].split_whitespace().map(rgb).collect(),
+                    }
                 })
                 .collect(),
         }
