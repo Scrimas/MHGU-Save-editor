@@ -154,6 +154,10 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                 api.invoke_filter_requests();
             }
             ("advanced", &["filter", f]) => api.invoke_filter_fields(f.into()),
+            ("monsters", &["filter", f]) => {
+                api.set_monster_filter(f.into());
+                api.invoke_filter_monsters();
+            }
             (_, &["filter", f]) => {
                 api.set_equip_filter(f.into());
                 api.invoke_filter_equip(f.into());

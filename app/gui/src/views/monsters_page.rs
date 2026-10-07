@@ -56,7 +56,7 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
                 sub.push(tr("small monster").into());
             }
             if let Some(h) = meta.family_of {
-                sub.push(trf("size kept by {}", &[&t.monsters[h - 1].name]));
+                sub.push(trf("size kept by {}", &[&assets::monster_name(h).unwrap_or(&t.monsters[h - 1].name)]));
             } else if let Some(b) = meta.base_cm.filter(|_| meta.size_record && r.max > 0 && r.min > 0) {
                 sub.push(format!("{:.0}–{:.0} cm", b * r.min as f32 / 100.0, b * r.max as f32 / 100.0));
             }

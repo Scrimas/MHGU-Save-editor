@@ -21,6 +21,7 @@ Where things are (all CONFIRMED visually or against a real save unless noted):
   tables     loc/arc/resident.arc table\\* (f32 version, u32 count, packed records)
   text       eng/arc/resident_eng.arc eng\\table\\*_eng (GMD, names at even indices);
              fre ger ita spa the same; monster names eng\\GUI\\06_msg\\monsterName_eng
+             (variants named like their base: see HUB_VARIANTS, FATALIS_VARIANTS)
 Tables the game builds in code (EXE, v1.4 main) are copied below with their addresses.
 """
 import json, os, struct, sys, zlib
@@ -276,22 +277,34 @@ def main(romfs, out):
         s, c = divmod(i, 100)
         aw[s].crop((c % 10) * 48, (c // 10) * 48, 48, 48).save(P('awards', '%d.png' % i))
 
-    names['monsters'] = text(reng, 'eng')['monsters']
+    names['monsters'] = text(R, reng, 'eng')['monsters']
     json.dump(names, open(P('names.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
     # the same names in the game's other languages, in the same order
     for code, lang in LANGS.items():
         rl = arc(R.read('/nativeNX/%s/arc/resident_%s.arc' % (lang, lang)))
-        json.dump(text(rl, lang, names), open(P('names.%s.json' % code), 'w'), ensure_ascii=False, separators=(',', ':'))
+        json.dump(text(R, rl, lang, names), open(P('names.%s.json' % code), 'w'), ensure_ascii=False, separators=(',', ':'))
     print('asset pack ->', out)
 
 
 # Interface language code (app/gui/src/i18n.rs) -> the game's language folder.
 LANGS = {'fr': 'fre', 'de': 'ger', 'it': 'ita', 'es': 'spa'}
 
+# Variants monsterName names like their base monster. Four have their own name in the
+# Hunters Hub objective list (<lang>/GUI/06_msg/NetworkVillage_<lang>.gmd), right after
+# their base: save index -> (list entry, base save index). DERIVED
+HUB_VARIANTS = {23: (159, 22), 36: (90, 35), 126: (151, 53), 128: (113, 60)}
+# Crimson and Old Fatalis (save index 119, 120) are only named in sentences (Guild Card
+# titles GC_Title_1 2411 / 2415, quest titles questData_0011457, 0090018-19); these are
+# those names in the nominative singular. DERIVED
+FATALIS_VARIANTS = {'eng': ('Crimson Fatalis', 'Old Fatalis'), 'fre': ('Fatalis rouge', 'Fatalis ancien'),
+                    'ger': ('Karmesinroter Fatalis', 'Alter Fatalis'), 'ita': ('Fatalis cremisi', 'Fatalis antico'),
+                    'spa': ('Fatalis Carmesí', 'Fatalis Ancestral')}
 
-def text(r, lang, eng=None):
-    """The names of one language from its resident_<lang>.arc `r`, entry for entry like the
-    English names.json `eng` (the piece lists keep only the real IDs, so they follow it):
+
+def text(R, r, lang, eng=None):
+    """The names of one language from its resident_<lang>.arc `r` (and the variant monster
+    names from RomFS `R`), entry for entry like the English names.json `eng` (the piece
+    lists keep only the real IDs, so they follow it):
       items, skills, support_moves, monsters   lists by ID (monsters: save index - 1)
       weapons     class -> [[base, final, ultimate] per English piece]
       armor, palico_armor   part -> [name per English piece]
@@ -300,6 +313,12 @@ def text(r, lang, eng=None):
     out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
            'support_moves': g('otomo\\support\\spt_act_base')[0::2],
            'monsters': g('GUI\\06_msg\\monsterName')[:137]}
+    m = out['monsters']
+    hub = gmd(R.read('/nativeNX/%s/GUI/06_msg/NetworkVillage_%s.gmd' % (lang, lang)))
+    for i, (e, b) in HUB_VARIANTS.items():
+        assert hub[e - 1] == m[b - 1], (lang, i, hub[e - 1], m[b - 1])
+        m[i - 1] = hub[e]
+    m[118], m[119] = FATALIS_VARIANTS[lang]
     if eng is None:
         return out
     out['items'] = [out['items'][i] if i < len(out['items']) else '' for i in range(len(eng['items']))]
