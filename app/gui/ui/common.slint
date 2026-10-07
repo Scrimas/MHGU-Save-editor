@@ -177,13 +177,16 @@ export struct CharacterInfo {
     was-name: string, was-hr: string, was-hr-points: string, was-funds: string, was-wycademy: string,
     was-playtime: string, was-village-star: string, was-hub-star: string, was-lr: [string], was-g: [string],
     weapon-use: [WeaponUseRow],
+    // Guild Card quests completed per category (QUEST_KINDS) and their total; quests per
+    // hunting style (Guild … Valor)
+    quest-counts: [int], was-quests: [string], quests-total: int, style-use: [int], was-style: [string],
 }
 
 // The own Guild Card's title (word, linking word, word), scene and pose: IDs, the title
 // as shown, the file's value when staged and why the game cannot produce a value.
 export struct CardInfo {
-    word1: int, link: int, word2: int, scene: int, pose: int, title: string,
-    was-title: string, was-scene: string, was-pose: string,
+    word1: int, link: int, word2: int, scene: int, pose: int, title: string, greeting: string,
+    was-title: string, was-scene: string, was-pose: string, was-greeting: string,
     warn-title: string, warn-scene: string, warn-pose: string,
 }
 
@@ -299,6 +302,7 @@ export global Api {
     in property <[string]> gc-scenes;
     in property <[string]> gc-poses;
     callback set-card(string /* word1 link word2 scene pose */, int);
+    callback set-greeting(string);
     in property <AppearanceInfo> appearance;
     in property <[string]> look-faces;
     in property <[string]> look-hairstyles;

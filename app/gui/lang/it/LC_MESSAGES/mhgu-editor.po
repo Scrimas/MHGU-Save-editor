@@ -839,6 +839,16 @@ msgstr "Come li imposta l'editor della tessera nel gioco. Si possono scegliere a
 msgid "Title"
 msgstr "Titolo"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "Messaggio"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/pages/character.slint
+msgid "Guild Card greeting"
+msgstr "Messaggio della Gilda-carta"
+
 #: app/gui/ui/pages/character.slint
 msgid "Scene"
 msgstr "Sfondo"
@@ -872,6 +882,71 @@ msgstr "Arena"
 #: app/gui/ui/pages/character.slint
 msgid "{} quests, {}"
 msgstr "{}: missioni, {}"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed"
+msgstr "Missioni completate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "As the Guild Card counts them; the game adds them up to {}."
+msgstr "Come le conta la Gilda-carta; il gioco le somma in {}."
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Village · Low rank"
+msgstr "Villaggio · basso grado"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Village · High rank"
+msgstr "Villaggio · alto grado"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · Low rank"
+msgstr "Base di caccia · basso grado"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · High rank"
+msgstr "Base di caccia · alto grado"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · G rank"
+msgstr "Base di caccia · grado G"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Special Permit"
+msgstr "Licenza"
+
+#: app/gui/ui/pages/character.slint
+msgid "Hunting styles"
+msgstr "Stili di caccia"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests done with each style. Your Palico's lines name the most and least used."
+msgstr "Missioni fatte con ogni stile. Le battute del tuo Palico citano il più e il meno usato."
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Guild Style"
+msgstr "Stile Gilda"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Striker Style"
+msgstr "Stile offensivo"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Aerial Style"
+msgstr "Stile aereo"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Adept Style"
+msgstr "Stile ombra"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Alchemy Style"
+msgstr "Stile alchemico"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Valor Style"
+msgstr "Stile valoroso"
 
 #: app/gui/ui/pages/character.slint
 msgid "Arena records"
@@ -1526,10 +1601,6 @@ msgstr "Obiettivo"
 #: app/gui/ui/pages/palicoes.slint
 msgid "Large First is checked in game; the others follow the game's menu order."
 msgstr "Prima grandi è verificato nel gioco; gli altri seguono l'ordine del menu del gioco."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr "Messaggio"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Original owner"
@@ -2518,6 +2589,11 @@ msgstr "Pose della tessera Gilda sbloccate"
 #: app/gui/src/targets.rs
 msgid "{} · Arena record"
 msgstr "{} · record dell'arena"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} quests"
+msgstr "{} · missioni"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs

@@ -87,6 +87,12 @@ pub enum Target {
     Appearance,
     /// The hunter's body type (gender).
     Gender,
+    /// Guild Card quests completed of one category (`character::QUEST_KINDS`).
+    CardQuests(usize),
+    /// The Guild Card greeting.
+    Greeting,
+    /// Quests done with one hunting style.
+    StyleUse(usize),
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -271,7 +277,7 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Arena(_) | Appearance | Gender => "character",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Arena(_) | Appearance | Gender | CardQuests(_) | Greeting | StyleUse(_) => "character",
             Item(..) | Loadout(_) | Obtained => "items",
             Equip(..) | Smithy(_) => "equipment",
             Palico(..) => "palicoes",
@@ -318,6 +324,9 @@ impl Target {
             Arena(q) => format!("arena:{q}"),
             Appearance => "appearance".into(),
             Gender => "gender".into(),
+            CardQuests(k) => format!("quests:{k}"),
+            Greeting => "card-greeting".into(),
+            StyleUse(k) => format!("style:{k}"),
         }
     }
 
@@ -401,6 +410,9 @@ impl Target {
             Arena(q) => trf("{} · Arena record", &[&arena_quest(q)]),
             Appearance => tr("Appearance").into(),
             Gender => tr("Body").into(),
+            CardQuests(k) => trf("{} quests", &[&tr(ch::QUEST_KINDS[k])]),
+            Greeting => tr("Guild Card greeting").into(),
+            StyleUse(k) => trf("{} quests", &[&tr(ch::STYLES[k])]),
         }
     }
 
@@ -513,6 +525,9 @@ impl Target {
                 trf("Face {} · Hairstyle {} · Voice {}", &[&(l(ch::LOOK_FACE) + 1), &(l(ch::LOOK_HAIR) + 1), &l(ch::LOOK_VOICE)])
             }
             Gender => body_type(ch::look(s, base, ch::LOOK_GENDER)),
+            CardQuests(k) => num(ch::card_quests(s, base, k)),
+            Greeting => ch::greeting(s, base),
+            StyleUse(k) => num(ch::style_use(s, base, k)),
         }
     }
 
@@ -624,6 +639,9 @@ impl Target {
                 })
                 .collect(),
             Gender => ch::LOOKS.iter().map(|&a| (base + a + ch::LOOK_GENDER, 0xFF)).collect(),
+            CardQuests(k) => range(base + ch::CARD_QUESTS + 2 * k, 2),
+            Greeting => range(base + ch::CARD_GREETING, 2 * ch::GREETING_UNITS),
+            StyleUse(k) => range(base + ch::STYLE_USE + 2 * k, 2),
         }
     }
 

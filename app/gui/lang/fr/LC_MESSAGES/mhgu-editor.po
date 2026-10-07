@@ -839,6 +839,16 @@ msgstr "Comme les règle l'éditeur de carte du jeu. Les entrées verrouillées 
 msgid "Title"
 msgstr "Titre"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "Message"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/pages/character.slint
+msgid "Guild Card greeting"
+msgstr "Message de la carte de guilde"
+
 #: app/gui/ui/pages/character.slint
 msgid "Scene"
 msgstr "Décor"
@@ -872,6 +882,71 @@ msgstr "Arène"
 #: app/gui/ui/pages/character.slint
 msgid "{} quests, {}"
 msgstr "Quêtes {}, {}"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed"
+msgstr "Quêtes terminées"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "As the Guild Card counts them; the game adds them up to {}."
+msgstr "Comme la carte de guilde les compte ; le jeu en fait un total de {}."
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Village · Low rank"
+msgstr "Village · rang inférieur"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Village · High rank"
+msgstr "Village · rang supérieur"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · Low rank"
+msgstr "Grand-Camp · rang inférieur"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · High rank"
+msgstr "Grand-Camp · rang supérieur"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · G rank"
+msgstr "Grand-Camp · rang G"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Special Permit"
+msgstr "Licence spéciale"
+
+#: app/gui/ui/pages/character.slint
+msgid "Hunting styles"
+msgstr "Styles de chasse"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests done with each style. Your Palico's lines name the most and least used."
+msgstr "Quêtes faites avec chaque style. Les répliques de votre Palico citent le plus et le moins utilisé."
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Guild Style"
+msgstr "Style Guilde"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Striker Style"
+msgstr "Style Guerrier"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Aerial Style"
+msgstr "Style Voltigeur"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Adept Style"
+msgstr "Style Bushido"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Alchemy Style"
+msgstr "Style Alchimiste"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Valor Style"
+msgstr "Style Vaillant"
 
 #: app/gui/ui/pages/character.slint
 msgid "Arena records"
@@ -1526,10 +1601,6 @@ msgstr "Cible"
 #: app/gui/ui/pages/palicoes.slint
 msgid "Large First is checked in game; the others follow the game's menu order."
 msgstr "Gros d'abord est vérifié en jeu ; les autres suivent l'ordre du menu du jeu."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr "Message"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Original owner"
@@ -2518,6 +2589,11 @@ msgstr "Poses de la Carte Guilde débloquées"
 #: app/gui/src/targets.rs
 msgid "{} · Arena record"
 msgstr "{} · record d'arène"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} quests"
+msgstr "{} · quêtes"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs

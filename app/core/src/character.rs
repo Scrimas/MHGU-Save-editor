@@ -61,6 +61,56 @@ pub const FACES: u8 = 18;
 pub const HAIRSTYLES: u8 = 30;
 pub const VOICES: u8 = 20;
 
+/// Quests completed per category, 7 × u16 on the own Guild Card (the card screen's
+/// Village, Hub (Low), Hub (High), Special Permit and Arena counts). `0x1662a0` sums them,
+/// capped at 99,999, for the quest total. DERIVED: the order follows the analysed card,
+/// whose two Village counts add up to its Village weapon usage (133) and whose Arena count
+/// is its Arena weapon usage (1).
+pub const CARD_QUESTS: usize = CARD + 0x85E;
+// i18n: shown through tr() in the GUI
+pub const QUEST_KINDS: [&str; 7] = ["Village · Low rank", "Village · High rank", "Hub · Low rank", "Hub · High rank", "Hub · G rank", "Special Permit", "Arena"];
+/// The card greeting (card editor), UTF-16, up to the owner ID at `+0x8B0`.
+pub const CARD_GREETING: usize = CARD + 0x878;
+pub const GREETING_UNITS: usize = 28;
+/// Hunting style use counts, 6 × u16 (S+0x11a): a quest raises the loaded My Set's style.
+pub const STYLE_USE: usize = 0x2905;
+// i18n: shown through tr() in the GUI
+pub const STYLES: [&str; 6] = ["Guild Style", "Striker Style", "Aerial Style", "Adept Style", "Alchemy Style", "Valor Style"];
+
+pub fn card_quests(s: &Save, base: usize, k: usize) -> u16 {
+    assert!(k < 7, "quest kind {k}");
+    s.u16(base + CARD_QUESTS + 2 * k)
+}
+
+pub fn set_card_quests(s: &mut Save, base: usize, k: usize, v: u16) {
+    assert!(k < 7, "quest kind {k}");
+    s.set_u16(base + CARD_QUESTS + 2 * k, v.min(MAX_USE));
+}
+
+pub fn greeting(s: &Save, base: usize) -> String {
+    let u: Vec<u16> = (0..GREETING_UNITS).map(|k| s.u16(base + CARD_GREETING + 2 * k)).take_while(|&u| u != 0).collect();
+    String::from_utf16_lossy(&u)
+}
+
+/// Write the greeting, cut to fit with its terminator.
+pub fn set_greeting(s: &mut Save, base: usize, text: &str) {
+    let mut w = vec![0u8; 2 * GREETING_UNITS];
+    for (k, u) in text.encode_utf16().take(GREETING_UNITS - 1).enumerate() {
+        w[2 * k..2 * k + 2].copy_from_slice(&u.to_le_bytes());
+    }
+    s.put(base + CARD_GREETING, &w);
+}
+
+pub fn style_use(s: &Save, base: usize, k: usize) -> u16 {
+    assert!(k < 6, "style {k}");
+    s.u16(base + STYLE_USE + 2 * k)
+}
+
+pub fn set_style_use(s: &mut Save, base: usize, k: usize, v: u16) {
+    assert!(k < 6, "style {k}");
+    s.set_u16(base + STYLE_USE + 2 * k, v.min(MAX_USE));
+}
+
 /// Byte `k` of the creation block.
 pub fn look(s: &Save, base: usize, k: usize) -> u8 {
     s.u8(base + BODY + k)
@@ -265,6 +315,20 @@ pub fn set_playtime(s: &mut Save, base: usize, secs: u32) {
 mod tests {
     use super::*;
     use crate::save::{blank, SLOT1_BASE};
+
+    #[test]
+    fn card_stats_round_trip() {
+        let mut s = blank();
+        set_greeting(&mut s, SLOT1_BASE, "Let's do this!");
+        assert_eq!(greeting(&s, SLOT1_BASE), "Let's do this!");
+        set_greeting(&mut s, SLOT1_BASE, &"x".repeat(40));
+        assert_eq!(greeting(&s, SLOT1_BASE).len(), GREETING_UNITS - 1);
+        assert_eq!(s.u16(SLOT1_BASE + CARD_GREETING + 2 * (GREETING_UNITS - 1)), 0, "terminator kept");
+        set_card_quests(&mut s, SLOT1_BASE, 6, 60000);
+        assert_eq!(card_quests(&s, SLOT1_BASE, 6), MAX_USE);
+        set_style_use(&mut s, SLOT1_BASE, 5, 375);
+        assert_eq!(style_use(&s, SLOT1_BASE, 5), 375);
+    }
 
     #[test]
     fn looks_reach_every_copy() {

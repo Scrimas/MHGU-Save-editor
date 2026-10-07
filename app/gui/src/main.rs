@@ -197,7 +197,8 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                 }
             }
             (_, &["goal", ..]) => api.invoke_apply_preview(parts[1..].join(":").into()),
-            (_, &["char", field, v]) => api.invoke_set_character(field.into(), num(v)),
+            // the field may hold colons ("char:use:0:3:12", "char:quests:6:12")
+            (_, &["char", ref field @ .., v]) if !field.is_empty() => api.invoke_set_character(field.join(":").into(), num(v)),
             (_, &["monster", i, field, v]) => api.invoke_set_monster(num(i), field.into(), num(v)),
             (_, &["arena", q, set, t]) => api.invoke_set_arena(num(q), num(set), num(t)),
             ("palicoes", &["entry", kind, slot, id, on]) => api.invoke_set_palico_entry(kind.into(), num(slot), num(id), on == "1"),

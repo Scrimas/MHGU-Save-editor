@@ -839,6 +839,16 @@ msgstr "Como los pone el editor de tarjeta del juego. También se pueden elegir 
 msgid "Title"
 msgstr "Título"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "Mensaje"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/pages/character.slint
+msgid "Guild Card greeting"
+msgstr "Mensaje de la tarjeta del gremio"
+
 #: app/gui/ui/pages/character.slint
 msgid "Scene"
 msgstr "Fondo"
@@ -872,6 +882,71 @@ msgstr "Arena"
 #: app/gui/ui/pages/character.slint
 msgid "{} quests, {}"
 msgstr "Misiones de {}, {}"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed"
+msgstr "Misiones completadas"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "As the Guild Card counts them; the game adds them up to {}."
+msgstr "Como las cuenta la tarjeta del gremio; el juego las suma en {}."
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Village · Low rank"
+msgstr "Aldea · rango bajo"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Village · High rank"
+msgstr "Aldea · rango alto"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · Low rank"
+msgstr "Campamento · rango bajo"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · High rank"
+msgstr "Campamento · rango alto"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Hub · G rank"
+msgstr "Campamento · rango G"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Special Permit"
+msgstr "Licencia"
+
+#: app/gui/ui/pages/character.slint
+msgid "Hunting styles"
+msgstr "Estilos de caza"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests done with each style. Your Palico's lines name the most and least used."
+msgstr "Misiones hechas con cada estilo. Las frases de tu Palico nombran el más y el menos usado."
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Guild Style"
+msgstr "Estilo del gremio"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Striker Style"
+msgstr "Estilo ariete"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Aerial Style"
+msgstr "Estilo aéreo"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Adept Style"
+msgstr "Estilo sombra"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Alchemy Style"
+msgstr "Estilo alquimista"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Valor Style"
+msgstr "Estilo valeroso"
 
 #: app/gui/ui/pages/character.slint
 msgid "Arena records"
@@ -1526,10 +1601,6 @@ msgstr "Objetivo"
 #: app/gui/ui/pages/palicoes.slint
 msgid "Large First is checked in game; the others follow the game's menu order."
 msgstr "Pref. grandes está comprobado en el juego; los demás siguen el orden del menú del juego."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr "Mensaje"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Original owner"
@@ -2518,6 +2589,11 @@ msgstr "Poses de la tarjeta del gremio desbloqueadas"
 #: app/gui/src/targets.rs
 msgid "{} · Arena record"
 msgstr "{} · récord de la arena"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} quests"
+msgstr "{} · misiones"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs

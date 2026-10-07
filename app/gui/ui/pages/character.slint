@@ -62,9 +62,30 @@ component PointsCell inherits Rectangle {
     if root.was != "": StagedBar { x: -10px; y: 6px; height: 32px; }
 }
 
+// A count with its label and "was … Undo" beside it (quests completed, style use).
+component CountCell inherits Rectangle {
+    in property <string> label;
+    in property <int> value;
+    in property <string> was;
+    in property <string> key;
+    width: 300px;
+    height: 44px;
+    HorizontalLayout {
+        spacing: 10px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        Text { text: root.label; width: 150px; vertical-alignment: center; }
+        NumberBox { width: 110px; value: root.value; maximum: 9999; label: root.label; edited(v) => { Api.set-character(root.key, v); } }
+        Rectangle { horizontal-stretch: 1; }
+    }
+    if root.was != "": StagedBar { x: -10px; y: 6px; height: 32px; }
+}
+
 export component CharacterPage inherits Rectangle {
     property <string> cur-name: Api.character.name;
     changed cur-name => { name-edit.text = self.cur-name; }
+    property <string> cur-greeting: Api.card.greeting;
+    changed cur-greeting => { greeting-edit.text = self.cur-greeting; }
     ScrollView {
         VerticalLayout {
             padding: Tok.margin;
@@ -300,6 +321,24 @@ export component CharacterPage inherits Rectangle {
                         ComboBox { width: 160px; model: Api.gc-links; current-index: Api.card.link; selected => { Api.set-card("link", self.current-index); } }
                         ComboBox { width: 220px; model: Api.gc-words; current-index: Api.card.word2; selected => { Api.set-card("word2", self.current-index); } }
                     }
+                    Field {
+                        width: 420px;
+                        label: @tr("Greeting");
+                        level: Confidence.derived;
+                        was: Api.card.was-greeting;
+                        key: "card-greeting";
+                        // staged when the field loses focus or on Enter, like the name
+                        greeting-edit := LineEdit {
+                            text: Api.card.greeting;
+                            accessible-label: @tr("Guild Card greeting");
+                            accepted(t) => { Api.set-greeting(t); }
+                            changed has-focus => {
+                                if !self.has-focus && self.text != Api.card.greeting {
+                                    Api.set-greeting(self.text);
+                                }
+                            }
+                        }
+                    }
                     HorizontalLayout {
                         spacing: 24px;
                         alignment: start;
@@ -367,6 +406,51 @@ export component CharacterPage inherits Rectangle {
                                 }
                             }
                             Text { text: w.total; width: 80px; vertical-alignment: center; color: Tok.muted; }
+                        }
+                    }
+                }
+            }
+            Card {
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 8px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: @tr("Quests completed"); vertical-alignment: center; }
+                        ConfidenceTag { level: Confidence.derived; }
+                        Text { text: @tr("As the Guild Card counts them; the game adds them up to {}.", Api.character.quests-total);color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                    }
+                    for name[k] in [@tr("Village · Low rank"), @tr("Village · High rank"), @tr("Hub · Low rank"), @tr("Hub · High rank"), @tr("Hub · G rank"), @tr("Special Permit"), @tr("Arena")]: VerticalLayout {
+                        Hairline { }
+                        HorizontalLayout {
+                            alignment: start;
+                            spacing: 14px;
+                            CountCell { label: name; value: Api.character.quest-counts[k]; was: Api.character.was-quests[k]; key: "quests:" + k; }
+                            if Api.character.was-quests[k] != "": VerticalLayout {
+                                alignment: center;
+                                WasLine { was: Api.character.was-quests[k]; key: "quests:" + k; }
+                            }
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        padding-top: 14px;
+                        SectionTitle { text: @tr("Hunting styles"); vertical-alignment: center; }
+                        Text { text: @tr("Quests done with each style. Your Palico's lines name the most and least used.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                    }
+                    for name[k] in [@tr("Guild Style"), @tr("Striker Style"), @tr("Aerial Style"), @tr("Adept Style"), @tr("Alchemy Style"), @tr("Valor Style")]: VerticalLayout {
+                        Hairline { }
+                        HorizontalLayout {
+                            alignment: start;
+                            spacing: 14px;
+                            CountCell { label: name; value: Api.character.style-use[k]; was: Api.character.was-style[k]; key: "style:" + k; }
+                            if Api.character.was-style[k] != "": VerticalLayout {
+                                alignment: center;
+                                WasLine { was: Api.character.was-style[k]; key: "style:" + k; }
+                            }
                         }
                     }
                 }

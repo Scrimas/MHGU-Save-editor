@@ -32,6 +32,12 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
         was_lr: model((0..4).map(|v| was(Target::Points(v, false))).collect()),
         was_g: model((0..4).map(|v| was(Target::Points(v, true))).collect()),
         weapon_use: model(weapon_use_rows(st)),
+        quest_counts: model((0..character::QUEST_KINDS.len()).map(|k| character::card_quests(s, st.base(), k) as i32).collect()),
+        was_quests: model((0..character::QUEST_KINDS.len()).map(|k| was(Target::CardQuests(k))).collect()),
+        // the game's total (0x1662a0): capped at 99,999
+        quests_total: (0..character::QUEST_KINDS.len()).map(|k| character::card_quests(s, st.base(), k) as i32).sum::<i32>().min(99_999),
+        style_use: model((0..character::STYLES.len()).map(|k| character::style_use(s, st.base(), k) as i32).collect()),
+        was_style: model((0..character::STYLES.len()).map(|k| was(Target::StyleUse(k))).collect()),
     });
     guild_card(ui, st);
     ui.global::<Api>().set_arena(model(arena_rows(st)));
@@ -150,6 +156,8 @@ fn guild_card(ui: &AppWindow, st: &State) {
         scene: gc::scene(s, base) as i32,
         pose: gc::pose(s, base) as i32,
         title: Target::Title.read(s, st.slot).into(),
+        greeting: character::greeting(s, base).into(),
+        was_greeting: st.was(Target::Greeting).into(),
         was_title: st.was(Target::Title).into(),
         was_scene: st.was(Target::Scene).into(),
         was_pose: st.was(Target::Pose).into(),
@@ -193,6 +201,14 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             "hub-star" => Target::HubStar,
             "play-h" | "play-m" => Target::Playtime,
             // "use:<venue>:<weapon>"
+            _ if k.starts_with("quests:") => match k[7..].parse::<usize>() {
+                Ok(i) if i < character::QUEST_KINDS.len() => Target::CardQuests(i),
+                _ => return,
+            },
+            _ if k.starts_with("style:") => match k[6..].parse::<usize>() {
+                Ok(i) if i < character::STYLES.len() => Target::StyleUse(i),
+                _ => return,
+            },
             _ if k.starts_with("use:") => {
                 let mut p = k[4..].split(':').map(|x| x.parse::<usize>().ok());
                 match (p.next().flatten(), p.next().flatten()) {
@@ -207,7 +223,8 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         };
         let mut msg = None;
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+        let conf = if matches!(t, Target::CardQuests(_) | Target::StyleUse(_)) { Conf::Derived } else { Conf::Confirmed };
+        s.edit(Edit::one(t, title, conf), |sv, base| {
             match k {
                 "hr" => {
                     if !character::set_hr(sv, base, v as u16) {
@@ -228,6 +245,8 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
                 _ => match t {
                     Target::Points(i, g) => character::set_village_points(sv, base, i, g, v),
                     Target::WeaponUse(venue, w) => character::set_weapon_use(sv, base, venue, w, v.min(u16::MAX as u32) as u16),
+                    Target::CardQuests(i) => character::set_card_quests(sv, base, i, v.min(u16::MAX as u32) as u16),
+                    Target::StyleUse(i) => character::set_style_use(sv, base, i, v.min(u16::MAX as u32) as u16),
                     _ => {}
                 },
             }
@@ -309,6 +328,13 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         let title = t.label(s.save(), s.slot);
         s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
             arena::clear(sv, base, q);
+            vec![]
+        });
+        let _ = &ui;
+    });
+    on!(ui, st, on_set_greeting, |ui, s, text: SharedString| {
+        s.edit(Edit::one(Target::Greeting, tr("Guild Card greeting").into(), Conf::Derived), |sv, base| {
+            character::set_greeting(sv, base, &text);
             vec![]
         });
         let _ = &ui;
