@@ -165,7 +165,13 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
             for i in 1..=monsters::N {
                 let Some((lo, hi)) = monsters::crown_sizes(i) else { continue };
                 let mut r = monsters::get(s, base, i);
-                let (nlo, nhi) = (if r.min == 0 { lo } else { r.min.min(lo) }, r.max.max(hi));
+                // only sizes its quests give: the crown sizes, or the nearest a quest gives when
+                // none reaches them; a record already past them stays, one outside the
+                // quests' range comes back into it
+                let (a, b) = if monsters::meta(i).fixed_size { (100, 100) } else { monsters::quest_range(i).unwrap_or((1, u16::MAX)) };
+                let ok = |v: u16| v != 0 && (a..=b).contains(&v);
+                let (lo, hi) = (lo.clamp(a, b), hi.clamp(a, b));
+                let (nlo, nhi) = (if ok(r.min) { r.min.min(lo) } else { lo }, if ok(r.max) { r.max.max(hi) } else { hi });
                 if nlo != r.min {
                     out.push(Target::Monster(i, Mon::Min));
                 }
