@@ -189,6 +189,10 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                 api.set_quest_search(q.into());
                 api.invoke_filter_quests();
             }
+            ("database", &["search", q]) => {
+                api.set_db_search(q.into());
+                api.invoke_filter_db();
+            }
             ("equipment", &["search", q]) => {
                 api.set_equip_search(q.into());
                 api.invoke_search_equip_list(q.into());

@@ -181,15 +181,21 @@ fn recipe_items(r: &mhgu_save::data::Recipe, have: &HashMap<u16, u32>) -> (Vec<D
         let members = provision_groups().get(&r.group).map_or(&[][..], Vec::as_slice);
         let worth: u32 = members.iter().map(|&(item, value)| have.get(&item).copied().unwrap_or(0) * value as u32).sum();
         ok &= worth >= r.value as u32;
-        // named by its first material in item order: an ore or a part rather than a scrap
-        let first = members.iter().map(|m| m.0).min().unwrap_or(0);
-        let (img, has) = icon(assets::item_icon(first));
+        // the game names no group: shown by its first materials in item order (ores and
+        // parts before scraps)
+        let mut ids: Vec<u16> = members.iter().map(|m| m.0).collect();
+        ids.sort_unstable();
+        let mut shown: Vec<String> = ids.iter().take(3).map(|&i| assets::item_name(i)).collect();
+        if ids.len() > 3 {
+            shown.push("…".into());
+        }
+        let (img, has) = icon(assets::item_icon(ids.first().copied().unwrap_or(0)));
         v.push(DropItem {
-            name: trf("{} or the like", &[&assets::item_name(first)]).into(),
+            name: tr("Provisions").into(),
             icon: img,
             has_icon: has,
-            chance: format!("≥{}", r.value).into(),
-            have: trf("worth {} in the box", &[&worth]).into(),
+            chance: trf("value {}", &[&r.value]).into(),
+            have: format!("{} · {}", trf("worth {} in the box", &[&worth]), shown.join(", ").replace(", …", "…")).into(),
         });
     }
     (v, ok)
@@ -318,7 +324,8 @@ fn equip(kind: usize, id: u16, have: &HashMap<u16, u32>, eq: &HashMap<(u8, u16),
     }
     let tables: Vec<DropTable> = steps.iter().map(|r| recipe_table(trf("Level {}", &[&r.level]), r, have).0).collect();
     let levels = tables.chunks(4).map(|c| DbTables { tables: model(c.to_vec()) }).collect();
-    let provisions = make.iter().chain(&tables).any(|m| m.items.iter().any(|i| i.chance.starts_with('≥')));
+    // a provision's line gives a value, a material's a count
+    let provisions = make.iter().chain(&tables).any(|m| m.items.iter().any(|i| !i.chance.starts_with('×')));
     DbEquip {
         index: id as i32,
         name: name.into(),
@@ -329,7 +336,7 @@ fn equip(kind: usize, id: u16, have: &HashMap<u16, u32>, eq: &HashMap<(u8, u16),
         tree: model(tree),
         levels: model(levels),
         note: if provisions {
-            tr("“Or the like”: any materials of that kind whose values add up to the number shown, as the Smithy's provisions take them. Zenny costs are not in these tables.")
+            tr("Provisions: any materials of the kind listed, as long as their values add up to the value asked (a material of value 2 counts twice). Zenny costs are not in these tables.")
         } else {
             tr("Zenny costs are not in these tables.")
         }
@@ -379,7 +386,14 @@ fn skills_tab(ui: &AppWindow, st: &State) {
         .filter_map(|k| {
             let name = skill_name(k as u8);
             let sub = tiers(k).iter().filter(|x| x.0 > 0).map(|x| activated(x.1)).collect::<Vec<_>>().join(" · ");
-            if !f.is_empty() && !name.to_lowercase().contains(&f) && !sub.to_lowercase().contains(&f) {
+            // found by its name, any skill it activates (down ones too) or a decoration raising it
+            let found = || {
+                let mut words = vec![name.clone()];
+                words.extend(tiers(k).iter().map(|x| activated(x.1)));
+                words.extend(t.decorations.iter().filter(|d| d.2 as usize == k && d.3 > 0).map(|d| assets::item_name(d.0)));
+                words.iter().any(|w| w.to_lowercase().contains(&f))
+            };
+            if !f.is_empty() && !found() {
                 return None;
             }
             Some(DbRow { index: k as i32, name: name.into(), sub: sub.into(), ..Default::default() })
