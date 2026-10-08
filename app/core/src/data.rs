@@ -126,6 +126,22 @@ pub struct PalicoAction {
     pub cost: u8,
 }
 
+/// data/recipes.csv: what the Smithy asks to forge a piece or bring it to a level.
+#[derive(Debug, Clone)]
+pub struct Recipe {
+    /// "weapon:<class>", "armor:<part>" (forge), "armor" (levels, every part), "deco"
+    pub kind: String,
+    /// weapon ID, armor ID (the series), decoration item
+    pub id: u16,
+    /// 0 forge, then the level reached (weapons: 1 is the upgrade from the parent)
+    pub level: u8,
+    /// (item, count)
+    pub items: Vec<(u16, u8)>,
+    /// provision: materials of this group (data/provisions.csv) worth `value`; 0 none
+    pub group: u16,
+    pub value: u8,
+}
+
 /// data/monster-carves.csv: one item of a monster's carve table (set 1 of `sets`).
 #[derive(Debug, Clone)]
 pub struct Carve {
@@ -230,6 +246,11 @@ pub struct Tables {
     pub armor_skills: Vec<(u16, u8, u8, i8)>,
     /// data/decorations.csv: (item, slots, tree, points).
     pub decorations: Vec<(u16, u8, u8, i8)>,
+    pub recipes: Vec<Recipe>,
+    /// data/weapon-tree.csv: (class, weapon, parent, level the parent must reach).
+    pub weapon_tree: Vec<(u8, u16, u16, u8)>,
+    /// data/provisions.csv: item -> (value, groups, 0 none).
+    pub provisions: HashMap<u16, (u8, [u16; 3])>,
     /// data/quest-rewards.csv: quest ID -> (slot, reward table).
     pub quest_rewards: HashMap<u32, Vec<(u8, u32)>>,
     /// data/rewards.csv: reward table -> (item, count, chance %).
@@ -392,6 +413,28 @@ pub fn tables() -> &'static Tables {
                 .iter()
                 .map(|r| (num(&r["item"]) as u16, num(&r["slots"]) as u8, num(&r["tree"]) as u8, num(&r["points"]) as i8))
                 .collect(),
+            recipes: rows(include_str!("../../../data/recipes.csv"))
+                .iter()
+                .map(|r| Recipe {
+                    kind: r["kind"].clone(),
+                    id: num(&r["id"]) as u16,
+                    level: num(&r["level"]) as u8,
+                    items: (1..=4)
+                        .map(|j| (num(&r[&format!("item{j}")]) as u16, num(&r[&format!("count{j}")]) as u8))
+                        .filter(|m| m.0 != 0)
+                        .collect(),
+                    group: num(&r["group"]) as u16,
+                    value: num(&r["value"]) as u8,
+                })
+                .collect(),
+            weapon_tree: rows(include_str!("../../../data/weapon-tree.csv"))
+                .iter()
+                .map(|r| (num(&r["class"]) as u8, num(&r["weapon"]) as u16, num(&r["parent"]) as u16, num(&r["level"]) as u8))
+                .collect(),
+            provisions: rows(include_str!("../../../data/provisions.csv"))
+                .iter()
+                .map(|r| (num(&r["item"]) as u16, (num(&r["value"]) as u8, ["group1", "group2", "group3"].map(|c| num(&r[c]) as u16))))
+                .collect(),
             carves: rows(include_str!("../../../data/monster-carves.csv"))
                 .iter()
                 .map(|r| Carve {
@@ -474,6 +517,10 @@ mod tests {
         assert!(sums.iter().all(|(k, &v)| v == 100 || k.2 == "other"), "carve tables");
         assert_eq!(t.skill_trees.len(), 206);
         assert!(t.armor_skills.iter().chain(&t.decorations).all(|r| (r.2 as usize) < 206));
+        // every upgraded weapon has its upgrade, every provision group has materials
+        assert!(t.weapon_tree.iter().all(|w| t.recipes.iter().any(|r| r.kind == format!("weapon:{}", w.0) && r.id == w.1 && r.level == 1 && !r.items.is_empty())));
+        assert!(t.recipes.iter().filter(|r| r.group != 0).all(|r| t.provisions.values().any(|p| p.1.contains(&r.group))));
+        assert!(t.recipes.iter().all(|r| r.items.iter().all(|m| m.1 > 0)));
         assert!(t.quest_rewards.values().flatten().all(|(slot, rem)| *slot < 5 && t.rewards.contains_key(rem)));
         assert_eq!(t.rewards.values().filter(|r| r.iter().map(|x| x.2 as u32).sum::<u32>() != 100).count(), 1);
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));

@@ -2,7 +2,7 @@
 //! to the pages that edit them, and those pages link back.
 
 use super::*;
-use crate::{CrownOdds, DbItem, DbLine, DbMonster, DbQuest, DbQuestMonster, DbRow, DbSkill, DbSource, DropItem, DropTable};
+use crate::{CrownOdds, DbEquip, DbItem, DbLine, DbMonster, DbQuest, DbQuestMonster, DbRow, DbSkill, DbSource, DbTables, DropItem, DropTable};
 use std::collections::HashMap;
 
 /// Quests a crown list shows before "and N more".
@@ -86,7 +86,254 @@ pub(super) fn database_page(ui: &AppWindow, st: &State) {
         1 => quests_tab(ui, st),
         2 => items_tab(ui, st),
         3 => skills_tab(ui, st),
+        4 => equip_tab(ui, st),
         _ => monsters_tab(ui, st),
+    }
+}
+
+/// The Equipment tab's kinds: the weapon classes in the Smithy's order (the game's
+/// weaponNN numbers), the armor parts, decorations.
+const SMITHY_CLASSES: [u8; 14] = [0, 7, 1, 11, 2, 12, 3, 9, 8, 14, 13, 6, 4, 10];
+
+#[derive(Clone, Copy)]
+enum EquipKind {
+    Weapon(u8),
+    /// part 1-5
+    Armor(u8),
+    Deco,
+}
+
+fn equip_kind(k: usize) -> EquipKind {
+    match k {
+        k if k < 14 => EquipKind::Weapon(SMITHY_CLASSES[k]),
+        k if k < 19 => EquipKind::Armor((k - 13) as u8),
+        _ => EquipKind::Deco,
+    }
+}
+
+/// open-db's index for piece `id` of kind `k`.
+const EQUIP_LINK: usize = 10000;
+
+/// The pieces of kind `k`: (ID, name, rarity), decorations by item.
+fn equip_pieces(k: EquipKind) -> Vec<(u16, String, u32)> {
+    let n = assets::names();
+    let real = |v: Option<&'static Vec<assets::Piece>>| v.map_or(&[][..], Vec::as_slice).iter().filter(|p| p.is_real()).map(|p| (p.id as u16, p.name.clone(), p.rarity)).collect();
+    match k {
+        EquipKind::Weapon(c) => real(n.weapons.get(&c.to_string())),
+        EquipKind::Armor(p) => real(n.armor.get(&p.to_string())),
+        EquipKind::Deco => n.decos.iter().map(|d| (d[0], assets::item_name(d[0]), 0)).collect(),
+    }
+}
+
+fn equip_icon(k: EquipKind, id: u16, rarity: u32) -> Option<Image> {
+    match k {
+        EquipKind::Weapon(c) => assets::equip_icon(Kind::Weapon(c).code(), rarity),
+        EquipKind::Armor(p) => assets::equip_icon(p, rarity),
+        EquipKind::Deco => assets::item_icon(id),
+    }
+}
+
+/// Recipes by (kind, ID), in file order.
+fn recipes() -> &'static HashMap<(&'static str, u16), Vec<&'static mhgu_save::data::Recipe>> {
+    static R: std::sync::OnceLock<HashMap<(&str, u16), Vec<&mhgu_save::data::Recipe>>> = std::sync::OnceLock::new();
+    R.get_or_init(|| {
+        let mut m: HashMap<(&str, u16), Vec<_>> = HashMap::new();
+        for r in &tables().recipes {
+            m.entry((r.kind.as_str(), r.id)).or_default().push(r);
+        }
+        m
+    })
+}
+
+/// Provision groups: (item, value), cheapest first.
+fn provision_groups() -> &'static HashMap<u16, Vec<(u16, u8)>> {
+    static G: std::sync::OnceLock<HashMap<u16, Vec<(u16, u8)>>> = std::sync::OnceLock::new();
+    G.get_or_init(|| {
+        let mut m: HashMap<u16, Vec<(u16, u8)>> = HashMap::new();
+        for (&item, &(value, groups)) in &tables().provisions {
+            for g in groups.into_iter().filter(|&g| g != 0) {
+                m.entry(g).or_default().push((item, value));
+            }
+        }
+        for v in m.values_mut() {
+            v.sort_by_key(|&(item, value)| (value, item));
+        }
+        m
+    })
+}
+
+/// A recipe's materials against the item box, and whether the box holds them all (the
+/// provision counted apart from the materials).
+fn recipe_items(r: &mhgu_save::data::Recipe, have: &HashMap<u16, u32>) -> (Vec<DropItem>, bool) {
+    let mut ok = true;
+    let mut v: Vec<DropItem> = r
+        .items
+        .iter()
+        .map(|&(item, count)| {
+            let n = have.get(&item).copied().unwrap_or(0);
+            ok &= n >= count as u32;
+            let (img, has) = icon(assets::item_icon(item));
+            let have = if n >= count as u32 { in_the_box(have, item) } else { trf("{} in the box, {} short", &[&n, &(count as u32 - n)]) };
+            DropItem { name: assets::item_name(item).into(), icon: img, has_icon: has, chance: format!("×{count}").into(), have: have.into() }
+        })
+        .collect();
+    if r.group != 0 {
+        let members = provision_groups().get(&r.group).map_or(&[][..], Vec::as_slice);
+        let worth: u32 = members.iter().map(|&(item, value)| have.get(&item).copied().unwrap_or(0) * value as u32).sum();
+        ok &= worth >= r.value as u32;
+        // named by its first material in item order: an ore or a part rather than a scrap
+        let first = members.iter().map(|m| m.0).min().unwrap_or(0);
+        let (img, has) = icon(assets::item_icon(first));
+        v.push(DropItem {
+            name: trf("{} or the like", &[&assets::item_name(first)]).into(),
+            icon: img,
+            has_icon: has,
+            chance: format!("≥{}", r.value).into(),
+            have: trf("worth {} in the box", &[&worth]).into(),
+        });
+    }
+    (v, ok)
+}
+
+/// "Forge · ready": a table title and whether the box holds what it takes.
+fn recipe_table(title: String, r: &mhgu_save::data::Recipe, have: &HashMap<u16, u32>) -> (DropTable, bool) {
+    let (items, ok) = recipe_items(r, have);
+    let state = if ok { tr("ready") } else { tr("missing materials") };
+    (DropTable { title: format!("{title} · {state}").into(), items: model(items) }, ok)
+}
+
+/// What piece `id` of kind `k` takes to make (forge, or upgrade from its parent), as
+/// tables, and whether the box holds all of one of them.
+fn equip_make(k: EquipKind, id: u16, have: &HashMap<u16, u32>) -> (Vec<DropTable>, bool) {
+    let t = tables();
+    let r = recipes();
+    let mut v = vec![];
+    let forge_kind = match k {
+        EquipKind::Weapon(c) => format!("weapon:{c}"),
+        EquipKind::Armor(p) => format!("armor:{p}"),
+        EquipKind::Deco => "deco".into(),
+    };
+    let rows = r.get(&(forge_kind.as_str(), id)).map_or(&[][..], Vec::as_slice);
+    for (j, f) in rows.iter().filter(|f| f.level == 0).enumerate() {
+        v.push(recipe_table(if j == 0 { tr("Forge").to_string() } else { tr("Forge (other recipe)").to_string() }, f, have));
+    }
+    if let EquipKind::Weapon(c) = k
+        && let Some(&(_, _, parent, lv)) = t.weapon_tree.iter().find(|w| w.0 == c && w.1 == id)
+        && let Some(u) = rows.iter().find(|f| f.level == 1)
+    {
+        let name = piece(Owner::Hunter, Kind::Weapon(c), parent).map_or_else(|| format!("#{parent}"), |p| p.name.clone());
+        v.push(recipe_table(trf("Upgrade from {} Lv {}", &[&name, &lv]), u, have));
+    }
+    let ok = v.iter().any(|x| x.1);
+    (v.into_iter().map(|x| x.0).collect(), ok)
+}
+
+/// Pieces of equipment in the box, by (box type, ID).
+fn equip_counts(st: &State) -> HashMap<(u8, u16), u32> {
+    let mut m: HashMap<(u8, u16), u32> = HashMap::new();
+    for i in 0..Owner::Hunter.len() {
+        let e = equipment::get(st.save(), st.base(), Owner::Hunter, i);
+        if !e.is_empty() {
+            *m.entry((e.kind().code(), e.id())).or_default() += 1;
+        }
+    }
+    m
+}
+
+/// "2 in your box", "none in your box".
+fn owned(k: EquipKind, id: u16, eq: &HashMap<(u8, u16), u32>, have: &HashMap<u16, u32>) -> String {
+    let n = match k {
+        EquipKind::Weapon(c) => eq.get(&(Kind::Weapon(c).code(), id)).copied().unwrap_or(0),
+        EquipKind::Armor(p) => eq.get(&(p, id)).copied().unwrap_or(0),
+        EquipKind::Deco => return in_the_box(have, id),
+    };
+    match n {
+        0 => tr("none in your box").to_string(),
+        n => trf("{} in your box", &[&n]),
+    }
+}
+
+fn equip_tab(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let (f, can, kind, mut sel) = view(|v| (v.db_search.to_lowercase(), v.db_missing, v.db_equip_kind, v.db_equip));
+    let k = equip_kind(kind);
+    let have = box_counts(st);
+    let eq = equip_counts(st);
+    let rows: Vec<DbRow> = equip_pieces(k)
+        .into_iter()
+        .filter(|(_, name, _)| f.is_empty() || name.to_lowercase().contains(&f))
+        .filter(|(id, _, _)| !can || equip_make(k, *id, &have).1)
+        .map(|(id, name, rarity)| {
+            let (img, has) = icon(equip_icon(k, id, rarity));
+            DbRow { index: id as i32, name: name.into(), sub: owned(k, id, &eq, &have).into(), icon: img, has_icon: has }
+        })
+        .collect();
+    if sel == 0 || !rows.iter().any(|r| r.index as usize == sel) {
+        sel = rows.first().map_or(0, |r| r.index as usize);
+        view(|v| v.db_equip = sel);
+    }
+    let mut kinds: Vec<String> = SMITHY_CLASSES.iter().map(|&c| weapon_classes()[c as usize].to_string()).collect();
+    kinds.extend(armor_parts().iter().map(|p| p.to_string()));
+    kinds.push(tr("Decorations").into());
+    api.set_db_equip_kinds(strings(kinds));
+    api.set_db_equip_kind(kind as i32);
+    api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
+    api.set_db_equips(model(rows));
+    api.set_db_equip(if sel == 0 { DbEquip { index: -1, ..Default::default() } } else { equip(kind, sel as u16, &have, &eq) });
+}
+
+fn equip(kind: usize, id: u16, have: &HashMap<u16, u32>, eq: &HashMap<(u8, u16), u32>) -> DbEquip {
+    let t = tables();
+    let k = equip_kind(kind);
+    let (name, rarity) = equip_pieces(k).into_iter().find(|p| p.0 == id).map_or((format!("#{id}"), 0), |p| (p.1, p.2));
+    let (img, has) = icon(equip_icon(k, id, rarity));
+    let (make, _) = equip_make(k, id, have);
+    let mut sub = vec![];
+    if rarity > 0 {
+        sub.push(trf("Rarity {}", &[&rarity]));
+    }
+    sub.push(owned(k, id, eq, have));
+    // the pieces before and after it, and its levels past the forge
+    let mut tree = vec![];
+    let mut steps: Vec<&mhgu_save::data::Recipe> = vec![];
+    let line = |c: u8, w: u16, sub: String| {
+        let p = piece(Owner::Hunter, Kind::Weapon(c), w);
+        let (img, has) = icon(assets::equip_icon(Kind::Weapon(c).code(), p.map_or(1, |p| p.rarity)));
+        DbLine { name: p.map_or_else(|| format!("#{w}"), |p| p.name.clone()).into(), sub: sub.into(), icon: img, has_icon: has, link: (kind * EQUIP_LINK + w as usize) as i32, ..Default::default() }
+    };
+    match k {
+        EquipKind::Weapon(c) => {
+            if let Some(&(_, _, parent, lv)) = t.weapon_tree.iter().find(|w| w.0 == c && w.1 == id) {
+                tree.push(line(c, parent, trf("Upgrades into this one from Lv {}", &[&lv])));
+            }
+            let mut kids: Vec<_> = t.weapon_tree.iter().filter(|w| w.0 == c && w.2 == id).collect();
+            kids.sort_by_key(|w| (w.3, w.1));
+            for &&(_, child, _, lv) in &kids {
+                tree.push(line(c, child, trf("This one upgrades into it from Lv {}", &[&lv])));
+            }
+            steps.extend(recipes().get(&(format!("weapon:{c}").as_str(), id)).map_or(&[][..], Vec::as_slice).iter().filter(|r| r.level >= 2));
+        }
+        EquipKind::Armor(_) => steps.extend(recipes().get(&("armor", id)).map_or(&[][..], Vec::as_slice).iter().filter(|r| r.level >= 2)),
+        EquipKind::Deco => {}
+    }
+    let tables: Vec<DropTable> = steps.iter().map(|r| recipe_table(trf("Level {}", &[&r.level]), r, have).0).collect();
+    let levels = tables.chunks(4).map(|c| DbTables { tables: model(c.to_vec()) }).collect();
+    let provisions = make.iter().chain(&tables).any(|m| m.items.iter().any(|i| i.chance.starts_with('≥')));
+    DbEquip {
+        index: id as i32,
+        name: name.into(),
+        sub: sub.join(" · ").into(),
+        icon: img,
+        has_icon: has,
+        make: model(make),
+        tree: model(tree),
+        levels: model(levels),
+        note: if provisions {
+            tr("“Or the like”: any materials of that kind whose values add up to the number shown, as the Smithy's provisions take them. Zenny costs are not in these tables.")
+        } else {
+            tr("Zenny costs are not in these tables.")
+        }
+        .into(),
     }
 }
 
@@ -153,7 +400,7 @@ fn skill(st: &State, k: usize) -> DbSkill {
     let have = box_counts(st);
     let line = |name: String, sub: String, value: String, i: Option<Image>| {
         let (img, has) = icon(i);
-        DbLine { name: name.into(), sub: sub.into(), value: value.into(), icon: img, has_icon: has }
+        DbLine { name: name.into(), sub: sub.into(), value: value.into(), icon: img, has_icon: has, link: 0 }
     };
     let tiers: Vec<DbLine> = tiers(k).into_iter().map(|(at, id)| line(activated(id), String::new(), trf("{} points", &[&points(at)]), None)).collect();
     // the other skill of a decoration or piece: "Expert +2"
@@ -574,6 +821,7 @@ fn shown(v: &mut View, tab: i32) -> &mut usize {
         1 => &mut v.db_quest,
         2 => &mut v.db_item,
         3 => &mut v.db_skill,
+        4 => &mut v.db_equip,
         _ => &mut v.db_monster,
     }
 }
@@ -581,6 +829,13 @@ fn shown(v: &mut View, tab: i32) -> &mut usize {
 pub(super) fn wire_database(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_select_db_rank, |ui, s, r: SharedString| {
         view(|v| v.db_rank = r.to_string());
+        let _ = (&ui, &s);
+    });
+    on!(ui, st, on_select_db_kind, |ui, s, k: i32| {
+        view(|v| {
+            v.db_equip_kind = k.max(0) as usize;
+            v.db_equip = 0;
+        });
         let _ = (&ui, &s);
     });
     on!(ui, st, on_filter_db, |ui, s| {
@@ -607,10 +862,15 @@ pub(super) fn wire_database(ui: &AppWindow, st: &Shared) {
                 "quest" => 1,
                 "item" => 2,
                 "skill" => 3,
+                "equip" => 4,
                 _ => 0,
             };
             view(|v| {
                 *shown(v, tab) = i.max(0) as usize;
+                if tab == 4 {
+                    v.db_equip_kind = i.max(0) as usize / EQUIP_LINK;
+                    v.db_equip = i.max(0) as usize % EQUIP_LINK;
+                }
                 v.db_search.clear();
                 v.db_missing = false;
             });

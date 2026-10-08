@@ -142,6 +142,9 @@ struct View {
     db_item: usize,
     /// skill tree shown in the Database (0 none: the first listed)
     db_skill: usize,
+    /// Equipment tab kind (equip_kind) and the piece shown (0 none: the first listed)
+    db_equip_kind: usize,
+    db_equip: usize,
     /// carve rank shown (low, high, g; the monster's highest when it has not this one)
     db_rank: String,
     field_filter: String,

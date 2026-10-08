@@ -1,7 +1,7 @@
-import { ListView, ScrollView } from "std-widgets.slint";
+import { ListView, ScrollView, ComboBox } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
-    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip,
 } from "../common.slint";
 
 // Crown tints as on the Monsters page.
@@ -350,12 +350,14 @@ component ItemDetail inherits VerticalLayout {
     }
 }
 
-// A titled list of lines: icon, name and second line, value at the right.
+// A titled list of lines: icon, name and second line, value at the right. A line with a
+// link opens that `link-kind` entry.
 component LineList inherits VerticalLayout {
     in property <string> title;
     in property <string> empty;
     in property <[DbLine]> lines;
     in property <string> more;
+    in property <string> link-kind;
     spacing: 2px;
     SectionTitle { text: root.title; height: 30px; }
     if root.lines.length == 0: Muted { text: root.empty; }
@@ -368,12 +370,50 @@ component LineList inherits VerticalLayout {
         VerticalLayout {
             horizontal-stretch: 1;
             alignment: center;
-            Text { text: l.name; overflow: elide; }
+            if l.link <= 0: Text { text: l.name; overflow: elide; }
+            // in a layout of its own, so its fixed width does not narrow the column
+            if l.link > 0: HorizontalLayout {
+                alignment: start;
+                TextLink { text: l.name; font-size: Tok.body; clicked => { Api.open-db(root.link-kind, l.link); } }
+            }
             if l.sub != "": Text { text: l.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
         }
         Text { text: l.value; vertical-alignment: center; horizontal-alignment: right; width: 90px; }
     }
     if root.more != "": Muted { text: root.more; }
+}
+
+component EquipDetail inherits VerticalLayout {
+    property <DbEquip> e: Api.db-equip;
+    padding: Tok.pad;
+    padding-left: 22px;
+    spacing: 14px;
+    alignment: start;
+    HorizontalLayout {
+        spacing: 12px;
+        if Api.assets-ok: Asset { width: 48px; height: 48px; source: e.icon; available: e.has-icon; }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: e.name; font-size: 18px; font-weight: 600; overflow: elide; }
+            Text { text: e.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+        }
+    }
+    Hairline { }
+    SectionTitle { text: @tr("Making it"); }
+    if e.make.length == 0: Muted { text: @tr("The Smithy neither forges it nor upgrades anything into it."); }
+    DropGrid { tables: e.make; }
+    if e.note != "": Muted { text: e.note; }
+    if e.tree.length > 0: Hairline { }
+    if e.tree.length > 0: LineList {
+        width: min(root.width - 44px, 520px);
+        title: @tr("Upgrade tree");
+        lines: e.tree;
+        link-kind: "equip";
+    }
+    if e.levels.length > 0: Hairline { }
+    if e.levels.length > 0: SectionTitle { text: @tr("Levels"); }
+    for row in e.levels: DropGrid { tables: row.tables; }
 }
 
 component SkillDetail inherits VerticalLayout {
@@ -432,7 +472,14 @@ component EntryColumn inherits VerticalLayout {
     in property <string> filter;
     in property <string> empty;
     in property <bool> icons;
+    // a list of kinds to pick from first (Equipment tab)
+    in property <[string]> kinds;
     spacing: Tok.tight;
+    if root.kinds.length > 0: ComboBox {
+        model: root.kinds;
+        current-index: Api.db-equip-kind;
+        selected => { Api.select-db-kind(self.current-index); }
+    }
     SearchField {
         placeholder-text: root.search;
         text <=> Api.db-search;
@@ -562,6 +609,27 @@ component SkillTab inherits HorizontalLayout {
     }
 }
 
+component EquipTab inherits HorizontalLayout {
+    spacing: Tok.pad;
+    EntryColumn {
+        width: min(320px, root.width * 0.36);
+        kinds: Api.db-equip-kinds;
+        rows: Api.db-equips;
+        selected: Api.db-equip.index;
+        icons: true;
+        search: @tr("Search equipment");
+        filter: @tr("Can make now");
+        empty: @tr("No equipment matches.");
+    }
+    Card {
+        horizontal-stretch: 1;
+        if Api.db-equip.index <= 0: EmptyState { text: @tr("Pick a piece of equipment."); }
+        if Api.db-equip.index > 0: ScrollView {
+            EquipDetail { }
+        }
+    }
+}
+
 export component DatabasePage inherits Rectangle {
     VerticalLayout {
         padding: Tok.margin;
@@ -572,7 +640,7 @@ export component DatabasePage inherits Rectangle {
             subtitle: @tr("The game's own data, next to this save. Nothing on this page is edited.");
         }
         TabBar {
-            tabs: [@tr("Monsters"), @tr("Quests"), @tr("Items"), @tr("Skills")];
+            tabs: [@tr("Monsters"), @tr("Quests"), @tr("Items"), @tr("Skills"), @tr("Equipment")];
             current: Api.db-tab;
             // each tab starts unfiltered
             select(i) => {
@@ -586,5 +654,6 @@ export component DatabasePage inherits Rectangle {
         if Api.db-tab == 1: QuestTab { vertical-stretch: 1; }
         if Api.db-tab == 2: ItemTab { vertical-stretch: 1; }
         if Api.db-tab == 3: SkillTab { vertical-stretch: 1; }
+        if Api.db-tab == 4: EquipTab { vertical-stretch: 1; }
     }
 }

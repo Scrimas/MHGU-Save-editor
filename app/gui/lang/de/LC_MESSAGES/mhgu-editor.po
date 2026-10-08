@@ -397,7 +397,8 @@ msgstr "Charakter"
 msgid "Items"
 msgstr "Objekte"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Equipment"
 msgstr "Ausrüstung"
 
@@ -1199,6 +1200,22 @@ msgstr "Wie"
 msgid "Chance"
 msgstr "Chance"
 
+#: app/gui/ui/pages/database.slint
+msgid "Making it"
+msgstr "Herstellung"
+
+#: app/gui/ui/pages/database.slint
+msgid "The Smithy neither forges it nor upgrades anything into it."
+msgstr "Die Schmiede stellt es weder her noch wird etwas zu ihm verbessert."
+
+#: app/gui/ui/pages/database.slint
+msgid "Upgrade tree"
+msgstr "Verbesserungsbaum"
+
+#: app/gui/ui/pages/database.slint
+msgid "Levels"
+msgstr "Stufen"
+
 #: app/gui/src/targets.rs app/gui/ui/pages/database.slint
 #: app/gui/ui/pages/palicoes.slint
 msgid "Skills"
@@ -1216,7 +1233,8 @@ msgstr "Talismane"
 msgid "No talisman rolls it."
 msgstr "Kein Talisman gibt sie."
 
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Decorations"
 msgstr "Dekorationen"
 
@@ -1295,6 +1313,22 @@ msgstr "Keine Fertigkeit passt."
 #: app/gui/ui/pages/database.slint
 msgid "Pick a skill."
 msgstr "Eine Fertigkeit wählen."
+
+#: app/gui/ui/pages/database.slint
+msgid "Search equipment"
+msgstr "Ausrüstung suchen"
+
+#: app/gui/ui/pages/database.slint
+msgid "Can make now"
+msgstr "Jetzt herstellbar"
+
+#: app/gui/ui/pages/database.slint
+msgid "No equipment matches."
+msgstr "Keine Ausrüstung passt."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a piece of equipment."
+msgstr "Ein Ausrüstungsteil wählen."
 
 #: app/gui/ui/pages/database.slint
 msgid "The game's own data, next to this save. Nothing on this page is edited."
@@ -3219,6 +3253,79 @@ msgstr "Mini fehlt"
 #: app/gui/src/views/database.rs
 msgid "mini and gold missing"
 msgstr "Mini und Gold fehlen"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in the box, {} short"
+msgstr "{} in der Box, {} fehlen"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} or the like"
+msgstr "{} oder Ähnliches"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "worth {} in the box"
+msgstr "Wert {} in der Box"
+
+#: app/gui/src/views/database.rs
+msgid "ready"
+msgstr "bereit"
+
+#: app/gui/src/views/database.rs
+msgid "missing materials"
+msgstr "Materialien fehlen"
+
+#: app/gui/src/views/database.rs
+msgid "Forge"
+msgstr "Schmieden"
+
+#: app/gui/src/views/database.rs
+msgid "Forge (other recipe)"
+msgstr "Schmieden (anderes Rezept)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Upgrade from {} Lv {}"
+msgstr "Verbesserung von {} Stufe {}"
+
+#: app/gui/src/views/database.rs
+msgid "none in your box"
+msgstr "keins in deiner Box"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in your box"
+msgstr "{} in deiner Box"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Rarity {}"
+msgstr "Seltenheit {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Upgrades into this one from Lv {}"
+msgstr "Wird ab Stufe {} zu diesem verbessert"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "This one upgrades into it from Lv {}"
+msgstr "Dieses wird ab Stufe {} dazu verbessert"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Level {}"
+msgstr "Stufe {}"
+
+#: app/gui/src/views/database.rs
+msgid "“Or the like”: any materials of that kind whose values add up to the number shown, as the Smithy's provisions take them. Zenny costs are not in these tables."
+msgstr "„Oder Ähnliches“: beliebige Materialien dieser Art, deren Werte zusammen die angegebene Zahl erreichen, wie die Schmiede sie als Proviant annimmt. Zenny-Kosten stehen nicht in diesen Tabellen."
+
+#: app/gui/src/views/database.rs
+msgid "Zenny costs are not in these tables."
+msgstr "Zenny-Kosten stehen nicht in diesen Tabellen."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/database.rs

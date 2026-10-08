@@ -99,8 +99,17 @@ export struct DbSource { kind: string, index: int, where: string, how: string, c
 // An item in the Database (index = item ID, -1: none).
 export struct DbItem { index: int, name: string, sub: string, icon: image, has-icon: bool, sources: [DbSource], more: string }
 
-// A line of a Database list: name, a second line, a value at the right.
-export struct DbLine { name: string, sub: string, value: string, icon: image, has-icon: bool }
+// A line of a Database list: name, a second line, a value at the right; `link` > 0: the
+// entry open-db opens on a click (kind given by the list).
+export struct DbLine { name: string, sub: string, value: string, icon: image, has-icon: bool, link: int }
+
+// A row of tables side by side (the levels of a piece of equipment).
+export struct DbTables { tables: [DropTable] }
+
+// A piece of equipment in the Database (index = equipment ID or decoration item, -1:
+// none): what forging it and upgrading into it take, the pieces before and after it, and
+// each level's materials.
+export struct DbEquip { index: int, name: string, sub: string, icon: image, has-icon: bool, make: [DropTable], tree: [DbLine], levels: [DbTables], note: string }
 
 // A skill tree in the Database (index = tree, -1: none): the skills it activates, the
 // decorations, talismans and armor pieces that give its points (the `-more` lines: those
@@ -511,6 +520,11 @@ export global Api {
     in property <DbItem> db-item;
     in property <[DbRow]> db-skills;
     in property <DbSkill> db-skill;
+    in property <[string]> db-equip-kinds;  // weapon classes, armor parts, decorations
+    in property <int> db-equip-kind;
+    in property <[DbRow]> db-equips;
+    in property <DbEquip> db-equip;
+    callback select-db-kind(int);
     in-out property <string> db-search;
     in-out property <bool> db-missing;
     callback filter-db();

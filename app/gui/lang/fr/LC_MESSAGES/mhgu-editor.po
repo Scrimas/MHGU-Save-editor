@@ -397,7 +397,8 @@ msgstr "Personnage"
 msgid "Items"
 msgstr "Objets"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Equipment"
 msgstr "Équipement"
 
@@ -1199,6 +1200,22 @@ msgstr "Comment"
 msgid "Chance"
 msgstr "Chance"
 
+#: app/gui/ui/pages/database.slint
+msgid "Making it"
+msgstr "Fabrication"
+
+#: app/gui/ui/pages/database.slint
+msgid "The Smithy neither forges it nor upgrades anything into it."
+msgstr "La forge ne le fabrique pas et rien ne s'améliore en lui."
+
+#: app/gui/ui/pages/database.slint
+msgid "Upgrade tree"
+msgstr "Arbre d'amélioration"
+
+#: app/gui/ui/pages/database.slint
+msgid "Levels"
+msgstr "Niveaux"
+
 #: app/gui/src/targets.rs app/gui/ui/pages/database.slint
 #: app/gui/ui/pages/palicoes.slint
 msgid "Skills"
@@ -1216,7 +1233,8 @@ msgstr "Talismans"
 msgid "No talisman rolls it."
 msgstr "Aucun talisman ne le donne."
 
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Decorations"
 msgstr "Décorations"
 
@@ -1295,6 +1313,22 @@ msgstr "Aucun talent ne correspond."
 #: app/gui/ui/pages/database.slint
 msgid "Pick a skill."
 msgstr "Choisissez un talent."
+
+#: app/gui/ui/pages/database.slint
+msgid "Search equipment"
+msgstr "Rechercher un équipement"
+
+#: app/gui/ui/pages/database.slint
+msgid "Can make now"
+msgstr "Fabricable maintenant"
+
+#: app/gui/ui/pages/database.slint
+msgid "No equipment matches."
+msgstr "Aucun équipement ne correspond."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a piece of equipment."
+msgstr "Choisissez un équipement."
 
 #: app/gui/ui/pages/database.slint
 msgid "The game's own data, next to this save. Nothing on this page is edited."
@@ -3219,6 +3253,79 @@ msgstr "mini manquante"
 #: app/gui/src/views/database.rs
 msgid "mini and gold missing"
 msgstr "mini et or manquants"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in the box, {} short"
+msgstr "{} dans le coffre, il en manque {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} or the like"
+msgstr "{} ou équivalent"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "worth {} in the box"
+msgstr "valeur {} dans le coffre"
+
+#: app/gui/src/views/database.rs
+msgid "ready"
+msgstr "prêt"
+
+#: app/gui/src/views/database.rs
+msgid "missing materials"
+msgstr "matériaux manquants"
+
+#: app/gui/src/views/database.rs
+msgid "Forge"
+msgstr "Forger"
+
+#: app/gui/src/views/database.rs
+msgid "Forge (other recipe)"
+msgstr "Forger (autre recette)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Upgrade from {} Lv {}"
+msgstr "Amélioration de {} niv. {}"
+
+#: app/gui/src/views/database.rs
+msgid "none in your box"
+msgstr "aucun dans votre coffre"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in your box"
+msgstr "{} dans votre coffre"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Rarity {}"
+msgstr "Rareté {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Upgrades into this one from Lv {}"
+msgstr "S'améliore en celui-ci dès le niv. {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "This one upgrades into it from Lv {}"
+msgstr "Celui-ci s'améliore en lui dès le niv. {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Level {}"
+msgstr "Niveau {}"
+
+#: app/gui/src/views/database.rs
+msgid "“Or the like”: any materials of that kind whose values add up to the number shown, as the Smithy's provisions take them. Zenny costs are not in these tables."
+msgstr "« Ou équivalent » : tout matériau de ce type dont les valeurs atteignent le nombre indiqué, comme la forge les accepte en provisions. Le coût en zenny n'est pas dans ces tables."
+
+#: app/gui/src/views/database.rs
+msgid "Zenny costs are not in these tables."
+msgstr "Le coût en zenny n'est pas dans ces tables."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/database.rs

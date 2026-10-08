@@ -389,7 +389,7 @@ msgstr ""
 msgid "Items"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
 msgid "Equipment"
 msgstr ""
 
@@ -1174,6 +1174,22 @@ msgstr ""
 msgid "Chance"
 msgstr ""
 
+#: app/gui/ui/pages/database.slint
+msgid "Making it"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "The Smithy neither forges it nor upgrades anything into it."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Upgrade tree"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Levels"
+msgstr ""
+
 #: app/gui/src/targets.rs app/gui/ui/pages/database.slint app/gui/ui/pages/palicoes.slint
 msgid "Skills"
 msgstr ""
@@ -1190,7 +1206,7 @@ msgstr ""
 msgid "No talisman rolls it."
 msgstr ""
 
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
 msgid "Decorations"
 msgstr ""
 
@@ -1268,6 +1284,22 @@ msgstr ""
 
 #: app/gui/ui/pages/database.slint
 msgid "Pick a skill."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Search equipment"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Can make now"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "No equipment matches."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a piece of equipment."
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
@@ -3186,6 +3218,79 @@ msgstr ""
 
 #: app/gui/src/views/database.rs
 msgid "mini and gold missing"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} in the box, {} short"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} or the like"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "worth {} in the box"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "ready"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "missing materials"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Forge"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Forge (other recipe)"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Upgrade from {} Lv {}"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "none in your box"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} in your box"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Rarity {}"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Upgrades into this one from Lv {}"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "This one upgrades into it from Lv {}"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Level {}"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "“Or the like”: any materials of that kind whose values add up to the number shown, as the Smithy's provisions take them. Zenny costs are not in these tables."
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Zenny costs are not in these tables."
 msgstr ""
 
 #: app/gui/src/views/database.rs

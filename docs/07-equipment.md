@@ -249,6 +249,31 @@ and `data/decorations.csv`; the Database page's Skills tab shows them.
   hold as points).
 - **Decoration points:** the two `[skill, points]` pairs of `decoData` above.
 
+## Smithy recipes (game tables)
+
+Read by `tools/equip_recipes.py` into `data/recipes.csv`, `data/weapon-tree.csv` and
+`data/provisions.csv`; the Database page's Equipment tab shows them against the item
+box. All in `arc/facility/blacksmith.arc` but the tree and the provision values.
+
+- **Forge:** `weaponCreateWNN` (38-byte records, `+2` weapon ID), `armorCreateANN`
+  (42 bytes, `+0` four armor IDs) and `decoCreate` (16 bytes, `+0` decoration item; a
+  few decorations have two records, two recipes). Up to four `[u16 item, u8 count]`
+  materials (4 bytes apart in the weapon and armor tables, 3 in `decoCreate`), then a
+  provision `[u16 group, u8 value]` and the scraps the Smithy gives back.
+- **Levels:** `weaponProcessWNN` (32 bytes: weapon ID, level, four 3-byte materials,
+  provision, scraps) and `armorProcessA00` (38 bytes: four armor IDs, level, the same).
+  An armor ID is the series, the same in every part, so one record levels the whole set.
+  Level 1 of a weapon is the upgrade from its parent; every upgraded weapon has one.
+- **Upgrade tree:** the last 10 bytes of each `weaponNNBaseData` record (32-34 bytes by
+  class) are five `[u8 level, u8 weapon ID]`: the weapons it upgrades into and the level
+  it must reach first. **DERIVED:** Iron Sword → Santoku Reaver at 2, Buster Sword at 3,
+  Ravager Blade at 4, Lagiacrus Blade and Clero Blade at 5.
+- **Provisions:** "Selected materials must add up to the required value or higher" (the
+  Smithy's text). `itemData` (44 bytes per item) holds an item's value at `+27` and up to
+  three groups at `+28`; the game names no group, so the editor names one by its first
+  item (group 4: Iron Ore 1, Earth Crystal 2, Disc Stone 3, …).
+- Zenny costs are not in these records.
+
 ## Editing checklist
 
 1. Resolve the character base through the pointer at `0x34`. Don't hard-code it.
