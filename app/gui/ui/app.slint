@@ -13,6 +13,7 @@ import { QuestsPage } from "pages/quests.slint";
 import { RequestsPage } from "pages/requests.slint";
 import { CollectionsPage } from "pages/collections.slint";
 import { MonstersPage } from "pages/monsters.slint";
+import { DatabasePage } from "pages/database.slint";
 import { AdvancedPage } from "pages/advanced.slint";
 
 export { Api, Fmt }
@@ -662,8 +663,8 @@ export component AppWindow inherits Window {
         }
     }
     property <length> review-w: Api.review-open && dock ? 380px : 0px;
-    property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "monsters", "advanced"];
-    property <[string]> nav-titles: [@tr("Overview"), @tr("Character"), @tr("Items"), @tr("Equipment"), @tr("Palicoes"), @tr("Quests"), @tr("Requests"), @tr("Collections"), @tr("Monsters"), @tr("Save map")];
+    property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "monsters", "database", "advanced"];
+    property <[string]> nav-titles: [@tr("Overview"), @tr("Character"), @tr("Items"), @tr("Equipment"), @tr("Palicoes"), @tr("Quests"), @tr("Requests"), @tr("Collections"), @tr("Monsters"), @tr("Database"), @tr("Save map")];
     // Shortcuts: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page,
     // Ctrl+O open a save, Escape closes Review. Dialogs take the keyboard while open
     // (Modal); when the last one closes the window takes it back.
@@ -872,6 +873,7 @@ export component AppWindow inherits Window {
                     if char-ok && Api.page == "requests": RequestsPage { }
                     if char-ok && Api.page == "collections": CollectionsPage { }
                     if char-ok && Api.page == "monsters": MonstersPage { }
+                    if char-ok && Api.page == "database": DatabasePage { }
                     if char-ok && Api.page == "advanced": AdvancedPage { }
                 }
             }

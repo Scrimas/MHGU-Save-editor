@@ -1,12 +1,13 @@
 import { LineEdit, CheckBox, ListView, Button, Palette } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, MonsterRow, PageHeader, Chip, ColHead, InfoTip, NumberBox, WasLine,
-    Hairline, EmptyState, PreviewPopup, Pill, ListRow, SearchField,
+    Hairline, EmptyState, PreviewPopup, Pill, ListRow, SearchField, TextLink,
 } from "../common.slint";
 
 global Cols {
     out property <length> hunted: 130px;
     out property <length> size: 170px;
+    out property <length> db: 64px;
 }
 
 // A count or size cell: a plain number until clicked (H4.4), "was … Undo" when staged.
@@ -123,6 +124,15 @@ component MonsterLine inherits ListRow {
                 toggled => { Api.set-monster(m.index, "notes", self.checked ? 1 : 0); }
             }
         }
+        Rectangle {
+            width: Cols.db;
+            if m.large: TextLink {
+                x: 0;
+                y: (parent.height - self.height) / 2;
+                text: @tr("Database");
+                clicked => { Api.open-db("monster", m.index); }
+            }
+        }
     }
 }
 
@@ -214,6 +224,7 @@ export component MonstersPage inherits Rectangle {
                                 }
                             }
                             ColHead { text: @tr("Notes"); width: 52px; }
+                            Rectangle { width: Cols.db; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }

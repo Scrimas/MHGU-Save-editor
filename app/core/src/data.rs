@@ -204,6 +204,10 @@ pub struct Tables {
     pub talisman: Vec<TalismanRow>,
     /// data/quest-sizes.csv: monster index -> (smallest, largest) size % its quests give.
     pub quest_sizes: HashMap<usize, (u16, u16)>,
+    /// data/quest-monsters.csv: (quest ID, monster index, size %, variation table).
+    pub quest_monsters: Vec<(u32, usize, u16, usize)>,
+    /// data/size-variation.csv by table: (scale rate in hundredths, chance %).
+    pub size_variation: Vec<Vec<(u16, u8)>>,
     pub arena: Vec<ArenaQuest>,
     /// data/palico-levels.csv, by level - 1: (free support move slots, skill slots).
     pub palico_levels: Vec<(u8, u8)>,
@@ -332,6 +336,16 @@ pub fn tables() -> &'static Tables {
                     max: num(&r["max"]) as i8,
                 })
                 .collect(),
+            quest_monsters: rows(include_str!("../../../data/quest-monsters.csv"))
+                .iter()
+                .map(|r| (num(&r["quest_id"]) as u32, num(&r["monster"]) as usize, num(&r["size"]) as u16, num(&r["table"]) as usize))
+                .collect(),
+            size_variation: rows(include_str!("../../../data/size-variation.csv")).iter().fold(Vec::new(), |mut t, r| {
+                let k = num(&r["table"]) as usize;
+                t.resize_with(t.len().max(k + 1), Vec::new);
+                t[k].push((num(&r["rate"]) as u16, num(&r["chance"]) as u8));
+                t
+            }),
             quest_sizes: rows(include_str!("../../../data/quest-sizes.csv"))
                 .iter()
                 .map(|r| (num(&r["index"]) as usize, (num(&r["min"]) as u16, num(&r["max"]) as u16)))
@@ -391,6 +405,9 @@ mod tests {
         assert_eq!(t.smithy.len(), 23);
         assert_eq!(t.talisman.iter().filter(|r| r.kind == "slots").count(), 4);
         assert_eq!(t.quest_sizes.get(&1), Some(&(88, 125)));
+        assert_eq!(t.size_variation.len(), 52);
+        assert!(t.size_variation.iter().all(|v| v.iter().map(|&(_, p)| p as u32).sum::<u32>() == 100));
+        assert!(t.quest_monsters.iter().all(|&(_, _, _, k)| k < 52));
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));
     }
 }

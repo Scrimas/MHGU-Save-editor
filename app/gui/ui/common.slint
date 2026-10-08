@@ -79,6 +79,21 @@ export struct MonsterRow {
     warning: string,  // why the game cannot produce its counts or sizes ("" when it can)
 }
 
+// The Database (read-only): an entry of a tab's list.
+export struct DbRow { index: int, name: string, sub: string, icon: image, has-icon: bool }
+
+// A quest's chance (0-1) to give a crown size.
+export struct CrownOdds { quest: string, sub: string, chance: float, label: string }
+
+// A monster in the Database. The size scale runs from `lo` to `hi` (%); min/max are the
+// save's record (0 = none). crown: 0 none, 1 silver, 2 gold.
+export struct DbMonster {
+    index: int, name: string, sub: string, icon: image, has-icon: bool,
+    has-size: bool, fixed: bool, size-note: string,
+    lo: int, hi: int, min: int, max: int, mini-le: int, silver-ge: int, gold-ge: int, mini: bool, crown: int,
+    gold-odds: [CrownOdds], gold-more: string, mini-odds: [CrownOdds], mini-more: string,
+}
+
 // max: most of the item one slot holds (pouch: the item's carry limit)
 // max: the game's limit for the item there (pouch: its carry limit); counts above it can
 // still be written, with `warning`
@@ -457,6 +472,17 @@ export global Api {
     in property <string> monster-summary;
     callback filter-monsters();
     callback set-monster(int /* index */, string /* field */, int);
+
+    // database (read-only)
+    in-out property <int> db-tab;
+    in property <[DbRow]> db-monsters;
+    in property <DbMonster> db-monster;
+    in-out property <string> db-search;
+    in-out property <bool> db-missing;
+    callback filter-db();
+    callback select-db(int);
+    callback open-db(string /* kind */, int);         // another page's entry in the Database
+    callback show-in-editor(string /* kind */, int);  // a Database entry on its own page
 
     // advanced
     in property <[FieldRow]> fields;

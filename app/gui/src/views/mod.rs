@@ -132,6 +132,10 @@ struct View {
     monster_filter: String,
     monster_large: bool,
     monster_missing: bool,
+    db_search: String,
+    db_missing: bool,
+    /// monster shown in the Database (0 none: the first listed)
+    db_monster: usize,
     field_filter: String,
     field_sel: i32,
     toast_act: ToastAct,
@@ -259,6 +263,7 @@ pub fn refresh(ui: &AppWindow, st: &State) {
         "requests" => requests_page(ui, st),
         "collections" => collections_page(ui, st),
         "monsters" => monsters_page(ui, st),
+        "database" => database_page(ui, st),
         "advanced" => fields_page(ui, st),
         _ => {}
     }
@@ -406,7 +411,13 @@ fn find_target(st: &State, key: &str) -> Option<Target> {
 
 /// Show the field of a Review entry: its page, a view that lists it (01.6).
 fn goto(ui: &AppWindow, st: &State, key: &str) {
-    let Some(t) = find_target(st, key) else { return };
+    if let Some(t) = find_target(st, key) {
+        goto_target(ui, st, t, key);
+    }
+}
+
+/// Show field `t` on its page, flashing `key`'s row.
+fn goto_target(ui: &AppWindow, st: &State, t: Target, key: &str) {
     let api = ui.global::<Api>();
     view(|v| match t {
         Target::Item(s, _) => {
@@ -561,6 +572,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_requests(ui, st);
     wire_collections(ui, st);
     wire_monsters(ui, st);
+    wire_database(ui, st);
     wire_advanced(ui, st);
 
     // page switches refresh their model (the window calls this when Api.page changes)
@@ -688,6 +700,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
 mod advanced;
 mod character_page;
 mod collections;
+mod database;
 mod equipment_page;
 mod file;
 mod items_page;
@@ -701,7 +714,7 @@ mod settings_ui;
 mod update_ui;
 
 use self::{
-    advanced::*, character_page::*, collections::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
+    advanced::*, character_page::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
     palicoes::*, quests::*, requests::*, settings_ui::*,
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};

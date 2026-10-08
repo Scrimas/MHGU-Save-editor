@@ -128,6 +128,54 @@ pub fn quest_range(i: usize) -> Option<(u16, u16)> {
         .reduce(|(a, b), (c, d)| (a.min(c), b.max(d)))
 }
 
+/// One quest's chances (0-1) to give monster `i` a crown size.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct CrownOdds {
+    pub quest_id: u32,
+    /// The quest's size % (the largest if `i` comes more than once).
+    pub size: u16,
+    pub mini: f32,
+    /// Silver or gold.
+    pub silver: f32,
+    pub gold: f32,
+}
+
+/// Crown chances per quest for monster `i` and its folded variants, from each boss entry's
+/// size % and variation table (data/quest-monsters.csv, data/size-variation.csv). The size
+/// rolled is taken as size % x a rate of the table, rounded down: the game's rounding is
+/// not checked. Entries of one quest count as separate chances. Quests in quest ID order;
+/// empty for a monster without a size record or with a fixed size.
+pub fn crown_odds(i: usize) -> Vec<CrownOdds> {
+    let m = meta(i);
+    if !m.size_record || m.fixed_size {
+        return Vec::new();
+    }
+    let t = tables();
+    let fam = |j: usize| j == i || meta(j).family_of == Some(i);
+    let mut out: Vec<CrownOdds> = Vec::new();
+    for &(quest_id, j, size, table) in &t.quest_monsters {
+        if !fam(j) {
+            continue;
+        }
+        let p = |hit: &dyn Fn(u32) -> bool| {
+            t.size_variation[table].iter().filter(|&&(r, _)| hit(size as u32 * r as u32 / 100)).map(|&(_, c)| c as f32).sum::<f32>() / 100.0
+        };
+        let (mini, silver, gold) = (
+            p(&|v| v <= m.mini_le as u32),
+            p(&|v| v >= m.silver_ge as u32),
+            p(&|v| v >= m.gold_ge as u32),
+        );
+        let any = |a: f32, b: f32| 1.0 - (1.0 - a) * (1.0 - b);
+        match out.last_mut() {
+            Some(o) if o.quest_id == quest_id => {
+                *o = CrownOdds { quest_id, size: o.size.max(size), mini: any(o.mini, mini), silver: any(o.silver, silver), gold: any(o.gold, gold) }
+            }
+            _ => out.push(CrownOdds { quest_id, size, mini, silver, gold }),
+        }
+    }
+    out
+}
+
 pub fn notes(s: &Save, base: usize, i: usize) -> Option<bool> {
     meta(i).notes_bit.map(|b| s.bit(base + NOTES, b))
 }
@@ -209,6 +257,22 @@ mod tests {
         // Raging Brachydios (126, always 100) folds into Brachydios (53)
         assert_eq!(quest_range(126), Some((100, 100)));
         assert_eq!(quest_range(53), Some((88, 125)));
+    }
+
+    #[test]
+    fn crown_odds_cover_every_crown() {
+        // Rathalos: gold in 45 quests, at best 23 % (Paint It Gold)
+        let o = crown_odds(4);
+        assert_eq!(o.iter().filter(|q| q.gold > 0.0).count(), 45);
+        assert!((o.iter().map(|q| q.gold).fold(0.0, f32::max) - 0.23).abs() < 1e-4);
+        assert!(o.iter().all(|q| q.gold <= q.silver));
+        // each crown that a quest can give shows up with a chance
+        for i in (1..=N).filter(|&i| meta(i).size_record && !meta(i).fixed_size) {
+            let (Some((lo, hi)), Some((a, b))) = (crown_sizes(i), quest_range(i)) else { continue };
+            let o = crown_odds(i);
+            assert_eq!(o.iter().any(|q| q.mini > 0.0), a <= lo, "monster {i} mini");
+            assert_eq!(o.iter().any(|q| q.gold > 0.0), hi <= b, "monster {i} gold");
+        }
     }
 
     #[test]

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Write data/quest-sizes.csv: the smallest and largest size each monster can have in the
-game's quests, from the quest files and the size variation tables. Pure stdlib; reads a
-RomFS dump like build_assets.py.
+game's quests, from the quest files and the size variation tables; with them
+data/quest-monsters.csv (each quest's boss entries) and data/size-variation.csv (the
+tables), which the Database's crown odds read. Pure stdlib; reads a RomFS dump like
+build_assets.py.
 
     quest_sizes.py [ROMFS]     default scratch/base_romfs.bin
 
@@ -29,6 +31,10 @@ game's placeholders (009xxxx, never offered) and are left out.
 Columns: index, min, max (whole percent; min rounded down, max up), entries (boss
 entries seen). Monsters absent from every quest (small monsters, unused slots) have no
 row. Folded variants keep their own rows (data/monster-sizes.csv family_of).
+
+quest-monsters.csv: quest_id, monster (index), size (%), table, one row per boss entry
+with a size, in quest then entry order. size-variation.csv: table, rate (hundredths;
+every rate is a whole hundredth), chance (%), the rates of chance 0 left out.
 """
 import csv, math, os, re, struct, sys
 
@@ -50,8 +56,8 @@ PLACEHOLDERS = {'@', 'DUMMY', 'dummy', 'dummy data'}
 
 
 def yure(d):
-    """Scale rates with a chance, per table. XFS objects in file order: a table header
-    (class 5) with its array (class 3) and element count, then the elements (class 7)."""
+    """(scale rate, chance %) of chance > 0, per table. XFS objects in file order: a table
+    header (class 5) with its array (class 3) and element count, then the elements (class 7)."""
     tab = re.compile(rb'\x05\x00..(....)\x01\x00\x00\x00\x03\x00..(....)\x01\x00\x00\x00\x01(....)', re.S)
     el = re.compile(rb'\x07\x00..\x14\x00\x00\x00\x01\x00\x00\x00(....)\x01\x00\x00\x00(....)', re.S)
     heads = [(m.start(), struct.unpack('<I', m.group(3))[0]) for m in tab.finditer(d)]
@@ -61,16 +67,28 @@ def yure(d):
         end = heads[k + 1][0] if k + 1 < len(heads) else len(d)
         e = [(s, p) for a, s, p in els if o < a < end]
         assert len(e) == n and sum(p for _, p in e) == 100, (k, n, len(e))
-        out.append([s for s, p in e if p])
+        out.append([(s, p) for s, p in e if p])
     assert len(out) == 52, len(out)
     return out
 
 
+def write(name, head, rows):
+    out = os.path.join(here, '..', 'data', name)
+    with open(out, 'w', newline='') as f:
+        w = csv.writer(f, lineterminator='\n')
+        w.writerow(head)
+        w.writerows(rows)
+    print('->', out, len(rows), 'rows')
+
+
 def main(romfs):
     R = RomFS(romfs)
-    tables = yure(arc(R.read('/nativeNX/loc/arc/resident.arc'))['enemy\\resident\\em_size_yure_data'])
+    chances = yure(arc(R.read('/nativeNX/loc/arc/resident.arc'))['enemy\\resident\\em_size_yure_data'])
+    tables = [[s for s, _ in t] for t in chances]
+    assert all(abs(s * 100 - round(s * 100)) < 1e-4 for t in tables for s in t)
     index = {c: i + 1 for i, c in enumerate(CODES)}
     rng = {}
+    entries = []
     for p in sorted(R.files):
         m = re.match(r'/nativeNX/loc/quest/questData/questData_(\d{7})\.ext$', p)
         if not m:
@@ -89,12 +107,11 @@ def main(romfs):
             hi = math.ceil(size * max(tables[table]) - 1e-3)
             a, b, n = rng.get(i, (lo, hi, 0))
             rng[i] = (min(a, lo), max(b, hi), n + 1)
-    out = os.path.join(here, '..', 'data', 'quest-sizes.csv')
-    with open(out, 'w', newline='') as f:
-        w = csv.writer(f, lineterminator='\n')
-        w.writerow(['index', 'min', 'max', 'entries'])
-        w.writerows((i,) + rng[i] for i in sorted(rng))
-    print('->', out, len(rng), 'monsters')
+            entries.append((int(m.group(1)), i, size, table))
+    write('quest-sizes.csv', ['index', 'min', 'max', 'entries'], [(i,) + rng[i] for i in sorted(rng)])
+    write('quest-monsters.csv', ['quest_id', 'monster', 'size', 'table'], entries)
+    write('size-variation.csv', ['table', 'rate', 'chance'],
+          [(k, round(s * 100), p) for k, t in enumerate(chances) for s, p in t])
 
 
 if __name__ == '__main__':

@@ -418,9 +418,15 @@ msgstr "Requêtes"
 msgid "Collections"
 msgstr "Collections"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/monsters.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
 msgid "Monsters"
 msgstr "Monstres"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Database"
+msgstr "Base de données"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/advanced.slint
 msgid "Save map"
@@ -635,7 +641,7 @@ msgstr "Filtrer par nom, gestionnaire ou décalage"
 msgid "Offset"
 msgstr "Décalage"
 
-#: app/gui/ui/pages/advanced.slint
+#: app/gui/ui/pages/advanced.slint app/gui/ui/pages/database.slint
 msgid "Size"
 msgstr "Taille"
 
@@ -1062,6 +1068,104 @@ msgid "Levels cleared of {}"
 msgstr "Niveaux terminés de {}"
 
 #. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
+msgid "Your record: {}–{} %"
+msgstr "Votre record : {}–{} %"
+
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
+msgid "No record yet"
+msgstr "Pas encore de record"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/database.slint
+msgid "mini ≤ {} %"
+msgstr "mini ≤ {} %"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/database.slint
+msgid "silver ≥ {} %"
+msgstr "argent ≥ {} %"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/database.slint
+msgid "gold ≥ {} %"
+msgstr "or ≥ {} %"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/database.slint
+msgid "Earned"
+msgstr "Obtenue"
+
+#: app/gui/ui/pages/database.slint
+msgid "Missing"
+msgstr "Manquante"
+
+#: app/gui/ui/pages/database.slint
+msgid "Edit on the Monsters page"
+msgstr "Modifier sur la page Monstres"
+
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Mini"
+msgstr "Mini"
+
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Silver"
+msgstr "Argent"
+
+#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Gold"
+msgstr "Or"
+
+#: app/gui/ui/pages/database.slint
+msgid "Crown chances"
+msgstr "Chances de couronne"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/database.slint
+msgid "Chance that a quest's {} is crown size, from the size the quest gives it and the game's size variation tables. The size rolled is assumed to be rounded down."
+msgstr "Chance que le {} d'une quête ait une taille de couronne, d'après la taille que la quête lui donne et les tables de variation de taille du jeu. La taille tirée est supposée arrondie à l'inférieur."
+
+#: app/gui/ui/pages/database.slint
+msgid "Gold crown"
+msgstr "Couronne d'or"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/database.slint
+msgid "Size {} % or larger, best quests first."
+msgstr "Taille de {} % ou plus, meilleures quêtes d'abord."
+
+#: app/gui/ui/pages/database.slint
+msgid "Mini crown"
+msgstr "Mini couronne"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/database.slint
+msgid "Size {} % or smaller, best quests first."
+msgstr "Taille de {} % ou moins, meilleures quêtes d'abord."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Search monsters"
+msgstr "Rechercher des monstres"
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Missing a crown"
+msgstr "Couronne manquante"
+
+#: app/gui/ui/pages/database.slint
+msgid "No monster matches."
+msgstr "Aucun monstre ne correspond."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a monster."
+msgstr "Choisissez un monstre."
+
+#: app/gui/ui/pages/database.slint
+msgid "The game's own data, next to this save. Nothing on this page is edited."
+msgstr "Les données du jeu, à côté de cette sauvegarde. Rien n'est modifié sur cette page."
+
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/equipment.slint
 msgid "Box slot {}: {}"
 msgstr "Emplacement {} du coffre : {}"
@@ -1409,22 +1513,10 @@ msgstr "{} capturés"
 msgid "Smallest size of {}"
 msgstr "Plus petite taille de {}"
 
-#: app/gui/ui/pages/monsters.slint
-msgid "Mini"
-msgstr "Mini"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/monsters.slint
 msgid "Largest size of {}"
 msgstr "Plus grande taille de {}"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Gold"
-msgstr "Or"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Silver"
-msgstr "Argent"
 
 #: app/gui/ui/pages/monsters.slint
 msgid "No size record"
@@ -1444,16 +1536,8 @@ msgid "Every crown…"
 msgstr "Toutes les couronnes…"
 
 #: app/gui/ui/pages/monsters.slint
-msgid "Search monsters"
-msgstr "Rechercher des monstres"
-
-#: app/gui/ui/pages/monsters.slint
 msgid "Large only"
 msgstr "Grands seulement"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Missing a crown"
-msgstr "Couronne manquante"
 
 #: app/gui/ui/pages/monsters.slint
 msgid "Monster"
@@ -2614,10 +2698,6 @@ msgid "Locked"
 msgstr "Verrouillé"
 
 #: app/gui/src/targets.rs
-msgid "Earned"
-msgstr "Obtenue"
-
-#: app/gui/src/targets.rs
 msgid "Not earned"
 msgstr "Non obtenue"
 
@@ -2993,6 +3073,72 @@ msgstr "Les niveaux de rang G apparaissent en jeu une fois complétée une quêt
 #: app/gui/src/views/collections.rs
 msgid "Written to both of the game's award lists"
 msgstr "Écrit dans les deux listes de distinctions du jeu"
+
+#: app/gui/src/views/database.rs
+msgid "cleared"
+msgstr "terminée"
+
+#: app/gui/src/views/database.rs
+msgid "locked"
+msgstr "verrouillée"
+
+#: app/gui/src/views/database.rs
+msgid "event quest"
+msgstr "quête d'événement"
+
+#: app/gui/src/views/database.rs
+msgid "in rotation"
+msgstr "en rotation"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/database.rs
+msgid "and {n} more quest at {} or less"
+msgid_plural "and {n} more quests at {} or less"
+msgstr[0] "et {n} autre quête à {} ou moins"
+msgstr[1] "et {n} autres quêtes à {} ou moins"
+
+#: app/gui/src/views/database.rs
+msgid "gold missing"
+msgstr "or manquant"
+
+#: app/gui/src/views/database.rs
+msgid "mini missing"
+msgstr "mini manquante"
+
+#: app/gui/src/views/database.rs
+msgid "mini and gold missing"
+msgstr "mini et or manquants"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Its size record is kept by {}."
+msgstr "Son record de taille est tenu par {}."
+
+#: app/gui/src/views/database.rs
+msgid "The game keeps no size record for it."
+msgstr "Le jeu ne garde aucun record de taille pour ce monstre."
+
+#: app/gui/src/views/database.rs
+msgid "Always the same size: any record shows the gold crown."
+msgstr "Toujours la même taille : tout record affiche la couronne d'or."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "its quests give {}–{} %"
+msgstr "ses quêtes donnent {}–{} %"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "100 % is {} cm"
+msgstr "100 % = {} cm"
+
+#: app/gui/src/views/database.rs
+msgid "No quest gives it a gold size."
+msgstr "Aucune quête ne lui donne une taille d'or."
+
+#: app/gui/src/views/database.rs
+msgid "No quest gives it a mini size."
+msgstr "Aucune quête ne lui donne une mini taille."
 
 #: app/gui/src/views/equipment_page.rs
 msgid "your current gear"

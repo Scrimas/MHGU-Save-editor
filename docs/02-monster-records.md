@@ -108,6 +108,21 @@ its range, and every crown threshold too. Out of range were Bulldrome 169 % and
 Basarios 160 %, which no quest gives, and the 90 / 115 pairs written by an editor on
 monsters whose quests give 95–110 % or a fixed 100.
 
+### Crown chances
+
+The same tool writes each quest's boss entries
+([`data/quest-monsters.csv`](../data/quest-monsters.csv): quest ID, monster, size %,
+table) and the tables themselves
+([`data/size-variation.csv`](../data/size-variation.csv): rate in hundredths, chance).
+The Database page gives, per quest, the chance of a mini, silver or gold size:
+the sum of the chances of the rates whose size % × rate lands past the threshold,
+several entries of one monster in a quest counting as separate draws. Rathalos has a
+gold chance in 45 quests, 23 % at best (*Paint It Gold*), 10 % elsewhere.
+
+**DERIVED**: the size rolled is taken as rounded down to a whole percent; the game's
+rounding is not checked. Every crown that a quest range allows shows up with a
+chance (test `crown_odds_cover_every_crown`).
+
 The size table `em_size_scale_data` holds per monster `mQuestSizeMin` / `mQuestSizeMax`,
 equal to the quest bounds except for Rathalos (125 against 130), Kecha Wacha (115
 against 123) and Gravios (88 against 79 in *Gravios Backbreaker*). Whether the game clamps to it

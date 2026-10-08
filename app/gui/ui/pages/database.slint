@@ -1,0 +1,242 @@
+import { ListView, ScrollView } from "std-widgets.slint";
+import {
+    Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds,
+} from "../common.slint";
+
+// Crown tints as on the Monsters page.
+global Crown {
+    out property <color> gold: Tok.dark ? #e2b93b : #8a6100;
+    out property <color> silver: Tok.dark ? #c3ccd4 : #4f5b66;
+}
+
+// The size % line: the save's record as a band, the crown thresholds as marks.
+component SizeScale inherits VerticalLayout {
+    in property <DbMonster> m;
+    property <float> span: max(1, m.hi - m.lo);
+    pure function at(v: int, w: length) -> length {
+        return w * clamp((v - m.lo) / span, 0, 1);
+    }
+    spacing: 4px;
+    Rectangle {
+        height: 16px;
+        for t in [{ v: m.mini-le, c: Tok.accent-text }, { v: m.silver-ge, c: Crown.silver }, { v: m.gold-ge, c: Crown.gold }]: Text {
+            x: root.at(t.v, parent.width) - self.width / 2;
+            text: t.v;
+            color: t.c;
+            font-size: Tok.small;
+        }
+    }
+    Rectangle {
+        height: 24px;
+        border-radius: 4px;
+        background: Tok.track;
+        accessible-role: text;
+        accessible-label: m.max > 0 ? @tr("Your record: {}–{} %", m.min, m.max) : @tr("No record yet");
+        if m.max > 0: Rectangle {
+            x: root.at(m.min, parent.width);
+            width: max(3px, root.at(m.max, parent.width) - self.x);
+            border-radius: 4px;
+            border-width: 1px;
+            border-color: Tok.accent;
+            background: Tok.accent-soft;
+        }
+        for t in [{ v: m.mini-le, c: Tok.accent-text }, { v: m.silver-ge, c: Crown.silver }, { v: m.gold-ge, c: Crown.gold }]: Rectangle {
+            x: root.at(t.v, parent.width) - 1px;
+            y: -3px;
+            width: 2px;
+            height: parent.height + 6px;
+            background: t.c;
+        }
+    }
+    HorizontalLayout {
+        Text { text: m.lo + " %"; color: Tok.muted; font-size: Tok.small; horizontal-stretch: 1; }
+        Text { text: @tr("mini ≤ {} %", m.mini-le); color: Tok.accent-text; font-size: Tok.small; horizontal-stretch: 1; horizontal-alignment: center; }
+        Text { text: @tr("silver ≥ {} %", m.silver-ge); color: Crown.silver; font-size: Tok.small; horizontal-stretch: 1; horizontal-alignment: center; }
+        Text { text: @tr("gold ≥ {} %", m.gold-ge); color: Crown.gold; font-size: Tok.small; horizontal-stretch: 1; horizontal-alignment: center; }
+        Text { text: m.hi + " %"; color: Tok.muted; font-size: Tok.small; horizontal-stretch: 1; horizontal-alignment: right; }
+    }
+}
+
+// One crown's chance per quest, best first.
+component OddsList inherits VerticalLayout {
+    in property <string> title;
+    in property <bool> earned;
+    in property <color> tint;
+    in property <string> note;
+    in property <[CrownOdds]> rows;
+    in property <string> more;
+    spacing: 4px;
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        Text { text: root.title; font-weight: 600; vertical-alignment: center; }
+        Pill { text: root.earned ? @tr("Earned") : @tr("Missing"); tint: root.earned ? Tok.ok : Tok.bad; }
+    }
+    Muted { text: root.note; }
+    // the bar stays next to its quest on a wide page
+    for o in root.rows: HorizontalLayout {
+        height: 40px;
+        spacing: 12px;
+        alignment: start;
+        accessible-role: text;
+        accessible-label: o.quest + ", " + o.label;
+        VerticalLayout {
+            width: clamp(root.width - 236px, 160px, 420px);
+            alignment: center;
+            Text { text: o.quest; overflow: elide; }
+            Text { text: o.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+        }
+        Rectangle {
+            width: 160px;
+            Rectangle {
+                y: (parent.height - self.height) / 2;
+                height: 6px;
+                border-radius: 3px;
+                background: Tok.track;
+                Rectangle {
+                    x: 0;
+                    width: parent.width * clamp(o.chance, 0, 1);
+                    border-radius: 3px;
+                    background: root.tint;
+                }
+            }
+        }
+        Text { width: 52px; text: o.label; horizontal-alignment: right; vertical-alignment: center; }
+    }
+    if root.more != "": Muted { text: root.more; }
+}
+
+component MonsterDetail inherits VerticalLayout {
+    property <DbMonster> m: Api.db-monster;
+    padding: Tok.pad;
+    padding-left: 22px;
+    spacing: 14px;
+    alignment: start;
+    HorizontalLayout {
+        spacing: 12px;
+        if Api.assets-ok: Asset { width: 56px; height: 56px; source: m.icon; available: m.has-icon; }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: m.name; font-size: 18px; font-weight: 600; overflow: elide; }
+            Text { text: m.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+        }
+        VerticalLayout {
+            alignment: center;
+            TextLink { text: @tr("Edit on the Monsters page"); clicked => { Api.show-in-editor("monster", m.index); } }
+        }
+    }
+    Hairline { }
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        SectionTitle { text: @tr("Size"); }
+        if m.mini: Pill { text: @tr("Mini"); tint: Tok.accent-text; }
+        if m.crown == 1: Pill { text: @tr("Silver"); tint: Crown.silver; }
+        if m.crown == 2: Pill { text: @tr("Gold"); tint: Crown.gold; }
+    }
+    if m.has-size && !m.fixed: SizeScale { m: root.m; }
+    Muted { text: m.size-note; }
+    if m.has-size && !m.fixed: Hairline { }
+    if m.has-size && !m.fixed: HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        SectionTitle { text: @tr("Crown chances"); }
+        ConfidenceTag { level: Confidence.derived; }
+    }
+    if m.has-size && !m.fixed: Muted {
+        text: @tr("Chance that a quest's {} is crown size, from the size the quest gives it and the game's size variation tables. The size rolled is assumed to be rounded down.", m.name);
+    }
+    if m.has-size && !m.fixed: OddsList {
+        title: @tr("Gold crown");
+        earned: m.crown == 2;
+        tint: Crown.gold;
+        note: @tr("Size {} % or larger, best quests first.", m.gold-ge);
+        rows: m.gold-odds;
+        more: m.gold-more;
+    }
+    if m.has-size && !m.fixed: OddsList {
+        title: @tr("Mini crown");
+        earned: m.mini;
+        tint: Tok.accent-text;
+        note: @tr("Size {} % or smaller, best quests first.", m.mini-le);
+        rows: m.mini-odds;
+        more: m.mini-more;
+    }
+}
+
+component MonsterTab inherits HorizontalLayout {
+    spacing: Tok.pad;
+    VerticalLayout {
+        width: min(320px, root.width * 0.36);
+        spacing: Tok.tight;
+        SearchField {
+            placeholder-text: @tr("Search monsters");
+            text <=> Api.db-search;
+            edited => { Api.filter-db(); }
+        }
+        HorizontalLayout {
+            alignment: start;
+            Chip {
+                text: @tr("Missing a crown");
+                active: Api.db-missing;
+                clicked => {
+                    Api.db-missing = !Api.db-missing;
+                    Api.filter-db();
+                }
+            }
+        }
+        Card {
+            vertical-stretch: 1;
+            if Api.db-monsters.length == 0: EmptyState { text: @tr("No monster matches."); }
+            ListView {
+                for r in Api.db-monsters: ListRow {
+                    height: 52px;
+                    selected: r.index == Api.db-monster.index;
+                    accessible-label: r.name;
+                    clicked => { Api.select-db(r.index); }
+                    HorizontalLayout {
+                        padding-left: 12px;
+                        padding-right: 12px;
+                        spacing: 10px;
+                        if Api.assets-ok: Asset { y: 8px; width: 36px; height: 36px; source: r.icon; available: r.has-icon; }
+                        VerticalLayout {
+                            alignment: center;
+                            Text { text: r.name; overflow: elide; }
+                            Text { text: r.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Card {
+        horizontal-stretch: 1;
+        if Api.db-monster.index <= 0: EmptyState { text: @tr("Pick a monster."); }
+        if Api.db-monster.index > 0: ScrollView {
+            MonsterDetail { }
+        }
+    }
+}
+
+export component DatabasePage inherits Rectangle {
+    VerticalLayout {
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: @tr("Database");
+            subtitle: @tr("The game's own data, next to this save. Nothing on this page is edited.");
+        }
+        TabBar {
+            tabs: [@tr("Monsters")];
+            current: Api.db-tab;
+            select(i) => {
+                Api.db-tab = i;
+                Api.filter-db();
+            }
+        }
+        if Api.db-tab == 0: MonsterTab { vertical-stretch: 1; }
+    }
+}

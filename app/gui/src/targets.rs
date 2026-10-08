@@ -97,7 +97,7 @@ pub enum Target {
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
 /// the UI shows `page_title`.
-pub const PAGES: [(&str, &str); 10] = [
+pub const PAGES: [(&str, &str); 11] = [
     ("overview", "Overview"),
     ("character", "Character"),
     ("items", "Items"),
@@ -107,6 +107,7 @@ pub const PAGES: [(&str, &str); 10] = [
     ("requests", "Requests"),
     ("collections", "Collections"),
     ("monsters", "Monsters"),
+    ("database", "Database"),
     ("advanced", "Save map"),
 ];
 
@@ -126,6 +127,7 @@ pub fn page_title(i: usize) -> &'static str {
         "requests" => tr("Requests"),
         "collections" => tr("Collections"),
         "monsters" => tr("Monsters"),
+        "database" => tr("Database"),
         "advanced" => tr("Save map"),
         _ => "",
     }

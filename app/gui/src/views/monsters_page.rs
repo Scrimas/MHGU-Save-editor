@@ -9,7 +9,7 @@ pub(super) fn misses_crown(i: usize, r: monsters::Record) -> bool {
 }
 
 /// A class of data/monster-sizes.csv in the interface language.
-fn class_name(c: &str) -> &str {
+pub(super) fn class_name(c: &str) -> &str {
     match c {
         "Bird Wyvern" => tr("Bird Wyvern"),
         "Brute Wyvern" => tr("Brute Wyvern"),
