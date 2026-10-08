@@ -51,7 +51,7 @@ For a portable install or another emulator, add its folder in **Settings…** or
 | Requests | Villager requests: accepted (quest posted on the board) and reported |
 | Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt) |
 | Monsters | Hunted and captured counts, smallest and largest sizes (checked against the sizes the game's quests give), Hunter's Notes |
-| Database | The game's own data next to the save, read-only: per monster, its size record against the crown sizes, the chance of a mini or gold crown in each quest (Derived) and its carves per rank with what the item box holds; per quest, its monsters' sizes and crown chances and its reward tables (Derived); per item, every carve, quest reward and combination that gives it and every Smithy recipe and combination that takes it; per skill, what it activates and the decorations, talismans and armor pieces that give its points; per weapon, armor piece and decoration, what forging, upgrading and each level take against the item box, and the upgrade tree; linked from and to the Monsters, Quests and Items pages |
+| Database | The game's own data next to the save, read-only: monsters, quests, items, skills and equipment ([below](#database)) |
 | Save map | Every byte range of the save, named from the game's own loader (read-only) |
 
 All three character slots are supported.
@@ -68,8 +68,8 @@ value and in Review and Write. They work offline; online, other hunters can see 
       <img alt="Items: the item box with game icons" src="docs/screenshots/02-items-light.png#gh-light-mode-only">
     </td>
     <td width="50%">
-      <img alt="Equipment: the hunter box and the selected piece" src="docs/screenshots/03-equipment-dark.png#gh-dark-mode-only">
-      <img alt="Equipment: the hunter box and the selected piece" src="docs/screenshots/03-equipment-light.png#gh-light-mode-only">
+      <img alt="Equipment: the hunter box and a talisman with its skills, slots and decorations" src="docs/screenshots/03-equipment-dark.png#gh-dark-mode-only">
+      <img alt="Equipment: the hunter box and a talisman with its skills, slots and decorations" src="docs/screenshots/03-equipment-light.png#gh-light-mode-only">
     </td>
   </tr>
   <tr>
@@ -89,6 +89,45 @@ value and in Review and Write. They work offline; online, other hunters can see 
   <tr>
     <td align="center">Monsters</td>
     <td align="center">Quests</td>
+  </tr>
+</table>
+
+## Database
+
+The **Database** page puts the game's own tables next to the save, so you can see what is
+left to get and where to get it. Nothing on it is edited; its links lead to the page that
+edits the value, and the Monsters, Quests and Items pages link back to it.
+
+- **Monsters**: the size record against the mini and gold crown sizes and the sizes its
+  quests give; the chance of a crown in each quest, best first (Derived); carves per rank,
+  with what the item box holds.
+- **Quests**: the monsters, their sizes and crown chances, and the reward tables (Derived).
+- **Items**: every carve, quest reward and combination that gives the item, with its chance;
+  every Smithy recipe and combination that takes it; its value as Smithy provisions.
+- **Skills**: the skills a tree activates and at how many points, and the decorations,
+  talismans and armor pieces that give those points. Search finds a tree by its own name,
+  the skills it activates or its decorations ("Razor Sharp", "Razor Jwl 3", "Sharpness").
+- **Equipment**: for every weapon, armor piece and decoration, what forging, upgrading and
+  each level take against the item box ("ready" when the box holds enough), and the
+  weapon's upgrade tree.
+
+![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-dark.png#gh-dark-mode-only)
+![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-light.png#gh-light-mode-only)
+
+<table>
+  <tr>
+    <td width="50%">
+      <img alt="Database: where to get a Rathalos Ruby, carves and quest rewards with their chances" src="docs/screenshots/09-database-item-dark.png#gh-dark-mode-only">
+      <img alt="Database: where to get a Rathalos Ruby, carves and quest rewards with their chances" src="docs/screenshots/09-database-item-light.png#gh-light-mode-only">
+    </td>
+    <td width="50%">
+      <img alt="Database: the Sharpness skill tree, its skills and the talismans, decorations and armor that give its points" src="docs/screenshots/10-database-skill-dark.png#gh-dark-mode-only">
+      <img alt="Database: the Sharpness skill tree, its skills and the talismans, decorations and armor that give its points" src="docs/screenshots/10-database-skill-light.png#gh-light-mode-only">
+    </td>
+  </tr>
+  <tr>
+    <td align="center">Items: where to get it</td>
+    <td align="center">Skills: what gives the points</td>
   </tr>
 </table>
 
