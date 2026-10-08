@@ -110,12 +110,14 @@ component OddsList inherits VerticalLayout {
     if root.more != "": Muted { text: root.more; }
 }
 
-// Carve or reward tables side by side (at most 5); each item with its chance and what
-// the item box holds.
-component DropGrid inherits HorizontalLayout {
+// Up to three carve or reward tables of a DropGrid, from `first`; each item with its
+// chance and what the item box holds.
+component DropRow inherits HorizontalLayout {
     in property <[DropTable]> tables;
+    in property <int> first;
     spacing: 24px;
-    for t in root.tables: VerticalLayout {
+    for i in min(3, root.tables.length - root.first): VerticalLayout {
+        property <DropTable> t: root.tables[root.first + i];
         horizontal-stretch: 1;
         min-width: 160px;
         preferred-width: 300px;
@@ -140,6 +142,14 @@ component DropGrid inherits HorizontalLayout {
     }
     // keeps the tables at the left of a wide page
     Rectangle { horizontal-stretch: 1; }
+}
+
+// Carve or reward tables side by side (up to 5), three a row: four (a quest's rewards, a
+// monster's carves) need a wider pane than the default window gives.
+component DropGrid inherits VerticalLayout {
+    in property <[DropTable]> tables;
+    spacing: 14px;
+    for r in ceil(root.tables.length / 3): DropRow { tables: root.tables; first: r * 3; }
 }
 
 // A monster's carve tables of one rank, side by side.
@@ -578,9 +588,11 @@ component MonsterTab inherits HorizontalLayout {
     Card {
         horizontal-stretch: 1;
         if Api.db-monster.index <= 0: EmptyState { text: @tr("Pick a monster."); }
-        // a layout of its own inside: the scroll area sizes to it (not to a component)
+        // a layout of its own inside: the scroll area sizes to it (not to a component);
+        // as wide as the pane, not as a wrapped note's single line
         if Api.db-monster.index > 0: ScrollView {
-            VerticalLayout { MonsterDetail { } }
+            content-width: max(self.visible-width, d.min-width);
+            d := VerticalLayout { MonsterDetail { } }
         }
     }
 }
@@ -599,7 +611,8 @@ component QuestTab inherits HorizontalLayout {
         horizontal-stretch: 1;
         if Api.db-quest.index <= 0: EmptyState { text: @tr("Pick a quest."); }
         if Api.db-quest.index > 0: ScrollView {
-            VerticalLayout { QuestDetail { } }
+            content-width: max(self.visible-width, d.min-width);
+            d := VerticalLayout { QuestDetail { } }
         }
     }
 }
@@ -619,7 +632,8 @@ component ItemTab inherits HorizontalLayout {
         horizontal-stretch: 1;
         if Api.db-item.index <= 0: EmptyState { text: @tr("Pick an item."); }
         if Api.db-item.index > 0: ScrollView {
-            VerticalLayout { ItemDetail { } }
+            content-width: max(self.visible-width, d.min-width);
+            d := VerticalLayout { ItemDetail { } }
         }
     }
 }
@@ -638,7 +652,8 @@ component SkillTab inherits HorizontalLayout {
         horizontal-stretch: 1;
         if Api.db-skill.index <= 0: EmptyState { text: @tr("Pick a skill."); }
         if Api.db-skill.index > 0: ScrollView {
-            VerticalLayout { SkillDetail { } }
+            content-width: max(self.visible-width, d.min-width);
+            d := VerticalLayout { SkillDetail { } }
         }
     }
 }
@@ -659,7 +674,8 @@ component EquipTab inherits HorizontalLayout {
         horizontal-stretch: 1;
         if Api.db-equip.index <= 0: EmptyState { text: @tr("Pick a piece of equipment."); }
         if Api.db-equip.index > 0: ScrollView {
-            VerticalLayout { EquipDetail { } }
+            content-width: max(self.visible-width, d.min-width);
+            d := VerticalLayout { EquipDetail { } }
         }
     }
 }

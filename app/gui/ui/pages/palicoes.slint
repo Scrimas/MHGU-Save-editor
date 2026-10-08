@@ -9,6 +9,8 @@ component Row inherits Rectangle {
     in property <string> label;
     in property <string> was;
     in property <string> key;
+    // under the control line, which is one line high: a long note wraps there instead
+    in property <string> note;
     lay := HorizontalLayout {
         spacing: Tok.gap;
         Text { text: root.label; width: 130px; height: 32px; vertical-alignment: center; }
@@ -20,6 +22,7 @@ component Row inherits Rectangle {
                 spacing: Tok.gap;
                 @children
             }
+            if root.note != "": Muted { text: root.note; }
             if root.was != "": WasLine { was: root.was; key: root.key; }
         }
     }
@@ -235,9 +238,10 @@ export component PalicoesPage inherits Rectangle {
                             label: @tr("Target");
                             was: Api.palico.was-target;
                             key: root.key + "target";
+                            note: @tr("Large First is checked in game; the others follow the game's menu order.");
                             ComboBox { width: 200px; model: Api.palico-targets; current-index: Api.palico.target - 1; selected => { Api.set-palico("target", self.current-index + 1); } }
                             ConfidenceTag { level: Confidence.derived; y: 5px; }
-                            Muted { text: @tr("Large First is checked in game; the others follow the game's menu order."); vertical-alignment: center; horizontal-stretch: 1; }
+                            Rectangle { horizontal-stretch: 1; }
                         }
                         TextRow { label: @tr("Greeting"); field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }
                         TextRow { label: @tr("Original owner"); field: "owner"; value: Api.palico.owner; was: Api.palico.was-owner; key: root.key + "owner"; field-width: 260px; }

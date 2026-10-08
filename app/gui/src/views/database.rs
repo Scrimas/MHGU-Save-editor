@@ -323,7 +323,8 @@ fn equip(kind: usize, id: u16, have: &HashMap<u16, u32>, eq: &HashMap<(u8, u16),
         EquipKind::Deco => {}
     }
     let tables: Vec<DropTable> = steps.iter().map(|r| recipe_table(trf("Level {}", &[&r.level]), r, have).0).collect();
-    let levels = tables.chunks(4).map(|c| DbTables { tables: model(c.to_vec()) }).collect();
+    // three a row, as DropGrid lays them out
+    let levels = tables.chunks(3).map(|c| DbTables { tables: model(c.to_vec()) }).collect();
     // a provision's line gives a value, a material's a count
     let provisions = make.iter().chain(&tables).any(|m| m.items.iter().any(|i| !i.chance.starts_with('×')));
     DbEquip {
