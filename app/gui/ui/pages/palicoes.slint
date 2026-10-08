@@ -225,6 +225,9 @@ export component PalicoesPage inherits Rectangle {
                             row: 0;
                             col: 0;
                             max-width: 100000px;
+                            // takes the spare width; left implicit, the stretch comes from
+                            // the content and the split moved from Palico to Palico
+                            horizontal-stretch: 1;
                             spacing: 14px;
                             alignment: start;
                         TextRow { label: @tr("Name"); field: "name"; value: Api.palico.name; was: Api.palico.was-name; key: root.key + "name"; field-width: 260px; }
@@ -271,10 +274,13 @@ export component PalicoesPage inherits Rectangle {
                         // the column's width does not depend on the placement it decides
                         Hairline { visible: !detail.side; }
                           }
+                          // beside the fields, only as wide as its pickers need
                           entries := VerticalLayout {
                             row: detail.side ? 0 : 1;
                             col: detail.side ? 1 : 0;
                             max-width: 100000px;
+                            preferred-width: 0px;
+                            horizontal-stretch: 0;
                             spacing: 14px;
                             alignment: start;
                         EntryList {
