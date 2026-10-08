@@ -78,6 +78,9 @@ pub struct Names {
     /// Talisman skill tree ID -> name.
     #[serde(default)]
     pub skills: Vec<String>,
+    /// Skill (skillData record) -> name (packs built before 2026-10-08 lack it: shown as IDs).
+    #[serde(default)]
+    pub skill_names: Vec<String>,
     /// Palico support move ID -> name (packs built before 2026-10-05 lack it: shown as IDs).
     #[serde(default)]
     pub support_moves: Vec<String>,
@@ -141,6 +144,7 @@ pub fn deco_size(id: u16) -> Option<u8> {
 struct Text {
     items: Vec<String>,
     skills: Vec<String>,
+    skill_names: Vec<String>,
     support_moves: Vec<String>,
     palico_skills: Vec<String>,
     palico_coats: Vec<String>,
@@ -176,6 +180,7 @@ impl Names {
         }
         list(&mut self.items, t.items);
         list(&mut self.skills, t.skills);
+        list(&mut self.skill_names, t.skill_names);
         list(&mut self.support_moves, t.support_moves);
         list(&mut self.palico_skills, t.palico_skills);
         list(&mut self.palico_coats, t.palico_coats);

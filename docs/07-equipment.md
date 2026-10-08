@@ -231,6 +231,24 @@ game's next save kept all three.
   `otArmorData_eng` entries 4*k* (head) and 4*k* + 1 (body). A new save's box reads
   Bone Wedge, Acorn Helm and Mail, Bherna Staff, Hood and Mail.
 
+## Skill points (game tables)
+
+Read by `tools/skill_tables.py` into `data/skill-trees.csv`, `data/armor-skills.csv`
+and `data/decorations.csv`; the Database page's Skills tab shows them.
+
+- **Skill trees:** `table\skillTypeData`, 19-byte records `[u32 tree, u8 kind, u16 × 7]`.
+  The seven u16 are the skill (a `skillData` record, named by `skillData_eng` entry 2*k*)
+  active at −20, −15, −10, +10, +15, +20 and +25 points; each tier repeats the skill of
+  the one before until a stronger one starts (Stun: Halve Stun at +10, Negate Stun from
+  +15), and the +25 tier always repeats +20. **DERIVED:** the thresholds are the ones the
+  game shows for Attack (Down L/M/S, Up S/M/L) and Health (−30 … +50).
+- **Armor points:** `armorSeriesData` from byte 28, 15 bytes per part (head first), each
+  five `[u16 tree, i8 points]`. The series record number is the piece's armor ID in
+  every part. **DERIVED:** Nargacuga Helm gives Evade Distance +3, Expert +2, Dragon
+  Res −2; the low-rank Nargacuga Faulds give none (Torso Up, which the tables do not
+  hold as points).
+- **Decoration points:** the two `[skill, points]` pairs of `decoData` above.
+
 ## Editing checklist
 
 1. Resolve the character base through the pointer at `0x34`. Don't hard-code it.

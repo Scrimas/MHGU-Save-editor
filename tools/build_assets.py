@@ -269,6 +269,8 @@ def main(romfs, out):
     names['talismans'] = [{'id': k, 'name': amn[k], 'rarity': am[8 + k * 9 + 8] + 1}
                           for k in range(struct.unpack_from('<I', am, 4)[0])]
     names['skills'] = gmd(reng['eng\\table\\skillTypeData_eng'])[0::2]
+    # skills a tree activates (data/skill-trees.csv): skillData record k -> entry 2k
+    names['skill_names'] = gmd(reng['eng\\table\\skillData_eng'])[0::2]
     # Palico support moves: name and description pairs, move ID k -> entry 2k
     # (0 "(No Move)"; the Palico record's learned slots use 57 for none). DERIVED
     names['support_moves'] = gmd(reng['eng\\otomo\\support\\spt_act_base_eng'])[0::2]
@@ -326,7 +328,8 @@ def text(R, r, lang, eng=None):
     """The names of one language from its resident_<lang>.arc `r` (and the variant monster
     names from RomFS `R`), entry for entry like the English names.json `eng` (the piece
     lists keep only the real IDs, so they follow it):
-      items, skills, support_moves, palico_skills, palico_coats, monsters   lists by ID
+      items, skills, skill_names, support_moves, palico_skills, palico_coats, monsters
+                  lists by ID
                   (monsters: save index - 1)
       weapons     class -> [[base, final, ultimate] per English piece]
       armor, palico_armor   part -> [name per English piece]
@@ -334,6 +337,7 @@ def text(R, r, lang, eng=None):
       gc_words, gc_links, gc_scenes, gc_poses   lists by ID (guild_card)"""
     g = lambda n: gmd(r['%s\\%s_%s' % (lang, n, lang)])
     out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
+           'skill_names': g('table\\skillData')[0::2],
            'support_moves': g('otomo\\support\\spt_act_base')[0::2], 'palico_skills': g('table\\ot_skl')[0::2],
            'palico_coats': g('table\\OtMenuMsg')[17:24],
            'monsters': g('GUI\\06_msg\\monsterName')[:137]}

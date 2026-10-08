@@ -140,6 +140,8 @@ struct View {
     db_quest: usize,
     /// item shown in the Database (0 none: the first listed)
     db_item: usize,
+    /// skill tree shown in the Database (0 none: the first listed)
+    db_skill: usize,
     /// carve rank shown (low, high, g; the monster's highest when it has not this one)
     db_rank: String,
     field_filter: String,

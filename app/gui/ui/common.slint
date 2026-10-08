@@ -99,6 +99,14 @@ export struct DbSource { kind: string, index: int, where: string, how: string, c
 // An item in the Database (index = item ID, -1: none).
 export struct DbItem { index: int, name: string, sub: string, icon: image, has-icon: bool, sources: [DbSource], more: string }
 
+// A line of a Database list: name, a second line, a value at the right.
+export struct DbLine { name: string, sub: string, value: string, icon: image, has-icon: bool }
+
+// A skill tree in the Database (index = tree, -1: none): the skills it activates, the
+// decorations, talismans and armor pieces that give its points (the `-more` lines: those
+// left out, and the decorations that lower it).
+export struct DbSkill { index: int, name: string, sub: string, tiers: [DbLine], decos: [DbLine], decos-more: string, charms: [DbLine], armor: [DbLine], armor-more: string }
+
 // A quest in the Database (index -1: none). `note` says why rewards are missing.
 export struct DbQuest { index: int, name: string, sub: string, monsters: [DbQuestMonster], rewards: [DropTable], note: string }
 
@@ -501,6 +509,8 @@ export global Api {
     in property <DbQuest> db-quest;
     in property <[DbRow]> db-items;
     in property <DbItem> db-item;
+    in property <[DbRow]> db-skills;
+    in property <DbSkill> db-skill;
     in-out property <string> db-search;
     in-out property <bool> db-missing;
     callback filter-db();

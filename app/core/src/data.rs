@@ -223,6 +223,13 @@ pub struct Tables {
     /// data/size-variation.csv by table: (scale rate in hundredths, chance %).
     pub size_variation: Vec<Vec<(u16, u8)>>,
     pub carves: Vec<Carve>,
+    /// data/skill-trees.csv by tree: (kind: 1 Soul, 2 Soul X; skill at -20, -15, -10, +10,
+    /// +15, +20 points, 0 none).
+    pub skill_trees: Vec<(u8, [u16; 6])>,
+    /// data/armor-skills.csv: (series, part 1-5, tree, points).
+    pub armor_skills: Vec<(u16, u8, u8, i8)>,
+    /// data/decorations.csv: (item, slots, tree, points).
+    pub decorations: Vec<(u16, u8, u8, i8)>,
     /// data/quest-rewards.csv: quest ID -> (slot, reward table).
     pub quest_rewards: HashMap<u32, Vec<(u8, u32)>>,
     /// data/rewards.csv: reward table -> (item, count, chance %).
@@ -373,6 +380,18 @@ pub fn tables() -> &'static Tables {
                 m.entry(num(&r["rem"]) as u32).or_insert_with(Vec::new).push((num(&r["item"]) as u16, num(&r["count"]) as u8, num(&r["chance"]) as u8));
                 m
             }),
+            skill_trees: rows(include_str!("../../../data/skill-trees.csv"))
+                .iter()
+                .map(|r| (num(&r["kind"]) as u8, ["m20", "m15", "m10", "p10", "p15", "p20"].map(|c| num(&r[c]) as u16)))
+                .collect(),
+            armor_skills: rows(include_str!("../../../data/armor-skills.csv"))
+                .iter()
+                .map(|r| (num(&r["series"]) as u16, num(&r["part"]) as u8, num(&r["tree"]) as u8, num(&r["points"]) as i8))
+                .collect(),
+            decorations: rows(include_str!("../../../data/decorations.csv"))
+                .iter()
+                .map(|r| (num(&r["item"]) as u16, num(&r["slots"]) as u8, num(&r["tree"]) as u8, num(&r["points"]) as i8))
+                .collect(),
             carves: rows(include_str!("../../../data/monster-carves.csv"))
                 .iter()
                 .map(|r| Carve {
@@ -453,6 +472,8 @@ mod tests {
             *sums.entry((c.monster, &c.rank, &c.kind)).or_default() += c.chance as u32;
         }
         assert!(sums.iter().all(|(k, &v)| v == 100 || k.2 == "other"), "carve tables");
+        assert_eq!(t.skill_trees.len(), 206);
+        assert!(t.armor_skills.iter().chain(&t.decorations).all(|r| (r.2 as usize) < 206));
         assert!(t.quest_rewards.values().flatten().all(|(slot, rem)| *slot < 5 && t.rewards.contains_key(rem)));
         assert_eq!(t.rewards.values().filter(|r| r.iter().map(|x| x.2 as u32).sum::<u32>() != 100).count(), 1);
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));

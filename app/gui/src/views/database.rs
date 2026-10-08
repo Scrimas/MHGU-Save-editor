@@ -2,7 +2,7 @@
 //! to the pages that edit them, and those pages link back.
 
 use super::*;
-use crate::{CrownOdds, DbItem, DbMonster, DbQuest, DbQuestMonster, DbRow, DbSource, DropItem, DropTable};
+use crate::{CrownOdds, DbItem, DbLine, DbMonster, DbQuest, DbQuestMonster, DbRow, DbSkill, DbSource, DropItem, DropTable};
 use std::collections::HashMap;
 
 /// Quests a crown list shows before "and N more".
@@ -85,7 +85,125 @@ pub(super) fn database_page(ui: &AppWindow, st: &State) {
     match ui.global::<Api>().get_db_tab() {
         1 => quests_tab(ui, st),
         2 => items_tab(ui, st),
+        3 => skills_tab(ui, st),
         _ => monsters_tab(ui, st),
+    }
+}
+
+/// Armor pieces a skill lists before "and N more".
+const PIECES: usize = 40;
+
+/// Points as the game shows them: "+3", "-2".
+fn points(p: i8) -> String {
+    format!("{p:+}")
+}
+
+/// A skill a tree activates (skillData record).
+fn activated(id: u16) -> String {
+    assets::names().skill_names.get(id as usize).filter(|n| !n.is_empty()).cloned().unwrap_or_else(|| trf("Skill #{}", &[&id]))
+}
+
+/// The skills tree `k` activates: (points needed, skill), positive tiers then negative ones.
+fn tiers(k: usize) -> Vec<(i8, u16)> {
+    const AT: [i8; 6] = [-20, -15, -10, 10, 15, 20];
+    let ids = tables().skill_trees[k].1;
+    let mut v = vec![];
+    // each tier holds the skill active from its points on: a new skill starts where it changes
+    for side in [[3, 4, 5], [2, 1, 0]] {
+        let mut last = 0;
+        for j in side {
+            if ids[j] != 0 && ids[j] != last {
+                v.push((AT[j], ids[j]));
+            }
+            last = ids[j];
+        }
+    }
+    v
+}
+
+/// Skill trees in ID order, as the talisman editor lists them; the search also finds the
+/// skills they activate.
+fn skills_tab(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let t = tables();
+    let (f, decos, mut sel) = view(|v| (v.db_search.to_lowercase(), v.db_missing, v.db_skill));
+    let rows: Vec<DbRow> = (1..t.skill_trees.len())
+        .filter(|&k| !decos || t.decorations.iter().any(|d| d.2 as usize == k))
+        .filter_map(|k| {
+            let name = skill_name(k as u8);
+            let sub = tiers(k).iter().filter(|x| x.0 > 0).map(|x| activated(x.1)).collect::<Vec<_>>().join(" · ");
+            if !f.is_empty() && !name.to_lowercase().contains(&f) && !sub.to_lowercase().contains(&f) {
+                return None;
+            }
+            Some(DbRow { index: k as i32, name: name.into(), sub: sub.into(), ..Default::default() })
+        })
+        .collect();
+    if sel == 0 || !rows.iter().any(|r| r.index as usize == sel) {
+        sel = rows.first().map_or(0, |r| r.index as usize);
+        view(|v| v.db_skill = sel);
+    }
+    api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
+    api.set_db_skills(model(rows));
+    api.set_db_skill(if sel == 0 { DbSkill { index: -1, ..Default::default() } } else { skill(st, sel) });
+}
+
+fn skill(st: &State, k: usize) -> DbSkill {
+    let t = tables();
+    let n = assets::names();
+    let have = box_counts(st);
+    let line = |name: String, sub: String, value: String, i: Option<Image>| {
+        let (img, has) = icon(i);
+        DbLine { name: name.into(), sub: sub.into(), value: value.into(), icon: img, has_icon: has }
+    };
+    let tiers: Vec<DbLine> = tiers(k).into_iter().map(|(at, id)| line(activated(id), String::new(), trf("{} points", &[&points(at)]), None)).collect();
+    // the other skill of a decoration or piece: "Expert +2"
+    let others = |rows: &mut dyn Iterator<Item = (u8, i8)>| rows.filter(|r| r.0 as usize != k).map(|(s, p)| format!("{} {}", skill_name(s), points(p))).collect::<Vec<_>>();
+    // only what raises it: the decorations that lower it are counted, armor that does is left out
+    let lower = t.decorations.iter().filter(|d| d.2 as usize == k && d.3 < 0).count();
+    let mut decos: Vec<_> = t.decorations.iter().filter(|d| d.2 as usize == k && d.3 > 0).collect();
+    decos.sort_by_key(|d| (-d.3, d.1, d.0));
+    let decos: Vec<DbLine> = decos
+        .into_iter()
+        .map(|&(item, slots_, _, p)| {
+            let mut sub = vec![slots(slots_ as usize)];
+            sub.extend(others(&mut t.decorations.iter().filter(|d| d.0 == item).map(|d| (d.2, d.3))));
+            sub.push(in_the_box(&have, item));
+            line(assets::item_name(item), sub.join(" · "), points(p), assets::item_icon(item))
+        })
+        .collect();
+    let charms: Vec<DbLine> = t
+        .talisman
+        .iter()
+        .filter(|r| r.skill as usize == k && r.kind != "slots")
+        .map(|r| {
+            let item = 353 + (r.tier - 97) as u16;
+            let which = if r.kind == "skill1" { tr("first skill") } else { tr("second skill") };
+            line(assets::item_name(item), which.into(), format!("{} … {}", points(r.min), points(r.max)), assets::item_icon(item))
+        })
+        .collect();
+    let mut armor: Vec<_> = t.armor_skills.iter().filter(|a| a.2 as usize == k && a.3 > 0).collect();
+    armor.sort_by_key(|a| (-a.3, std::cmp::Reverse(a.0), a.1));
+    let more = armor.len().saturating_sub(PIECES);
+    let armor: Vec<DbLine> = armor
+        .into_iter()
+        .take(PIECES)
+        .map(|&(series, part, _, p)| {
+            let piece = n.armor.get(&part.to_string()).and_then(|v| v.iter().find(|x| x.id == series as u32));
+            let sub = others(&mut t.armor_skills.iter().filter(|a| a.0 == series && a.1 == part).map(|a| (a.2, a.3))).join(" · ");
+            let name = piece.map_or_else(|| trf("Armor #{}", &[&series]), |x| x.name.clone());
+            line(name, sub, points(p), assets::equip_icon(part, piece.map_or(1, |x| x.rarity)))
+        })
+        .collect();
+    DbSkill {
+        index: k as i32,
+        name: skill_name(k as u8).into(),
+        sub: format!("#{k}").into(),
+        tiers: model(tiers),
+        decos: model(decos),
+        decos_more: if lower > 0 { trn("{n} other decoration lowers it", "{n} other decorations lower it", lower as i64, &[]) } else { String::new() }.into(),
+        charms: model(charms),
+        armor: model(armor),
+        armor_more: if more > 0 { trn("and {n} more piece", "and {n} more pieces", more as i64, &[]) } else { String::new() }.into(),
     }
 }
 
@@ -455,6 +573,7 @@ fn shown(v: &mut View, tab: i32) -> &mut usize {
     match tab {
         1 => &mut v.db_quest,
         2 => &mut v.db_item,
+        3 => &mut v.db_skill,
         _ => &mut v.db_monster,
     }
 }
@@ -487,6 +606,7 @@ pub(super) fn wire_database(ui: &AppWindow, st: &Shared) {
             let tab = match kind.as_str() {
                 "quest" => 1,
                 "item" => 2,
+                "skill" => 3,
                 _ => 0,
             };
             view(|v| {

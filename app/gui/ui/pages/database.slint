@@ -1,7 +1,7 @@
 import { ListView, ScrollView } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
-    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine,
 } from "../common.slint";
 
 // Crown tints as on the Monsters page.
@@ -350,6 +350,80 @@ component ItemDetail inherits VerticalLayout {
     }
 }
 
+// A titled list of lines: icon, name and second line, value at the right.
+component LineList inherits VerticalLayout {
+    in property <string> title;
+    in property <string> empty;
+    in property <[DbLine]> lines;
+    in property <string> more;
+    spacing: 2px;
+    SectionTitle { text: root.title; height: 30px; }
+    if root.lines.length == 0: Muted { text: root.empty; }
+    for l in root.lines: HorizontalLayout {
+        height: l.sub == "" ? 32px : 40px;
+        spacing: 10px;
+        accessible-role: text;
+        accessible-label: l.name + ", " + l.value;
+        if Api.assets-ok && l.has-icon: Asset { y: (parent.height - 28px) / 2; width: 28px; height: 28px; source: l.icon; available: true; }
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: center;
+            Text { text: l.name; overflow: elide; }
+            if l.sub != "": Text { text: l.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+        }
+        Text { text: l.value; vertical-alignment: center; horizontal-alignment: right; width: 90px; }
+    }
+    if root.more != "": Muted { text: root.more; }
+}
+
+component SkillDetail inherits VerticalLayout {
+    property <DbSkill> k: Api.db-skill;
+    padding: Tok.pad;
+    padding-left: 22px;
+    spacing: 14px;
+    alignment: start;
+    VerticalLayout {
+        Text { text: k.name; font-size: 18px; font-weight: 600; overflow: elide; }
+        Text { text: k.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+    }
+    Hairline { }
+    HorizontalLayout {
+        spacing: 32px;
+        alignment: start;
+        LineList {
+            width: clamp((root.width - 76px) / 2, 260px, 460px);
+            title: @tr("Skills");
+            empty: @tr("No skill.");
+            lines: k.tiers;
+        }
+        LineList {
+            width: clamp((root.width - 76px) / 2, 260px, 460px);
+            title: @tr("Talismans");
+            empty: @tr("No talisman rolls it.");
+            lines: k.charms;
+        }
+    }
+    Hairline { }
+    HorizontalLayout {
+        spacing: 32px;
+        alignment: start;
+        LineList {
+            width: clamp((root.width - 76px) / 2, 260px, 460px);
+            title: @tr("Decorations");
+            empty: @tr("No decoration gives it.");
+            lines: k.decos;
+            more: k.decos-more;
+        }
+        LineList {
+            width: clamp((root.width - 76px) / 2, 260px, 460px);
+            title: @tr("Armor");
+            empty: @tr("No armor piece gives it.");
+            lines: k.armor;
+            more: k.armor-more;
+        }
+    }
+}
+
 // A tab's list: search, one filter chip, the entries (index = what select-db takes).
 component EntryColumn inherits VerticalLayout {
     in property <[DbRow]> rows;
@@ -469,6 +543,25 @@ component ItemTab inherits HorizontalLayout {
     }
 }
 
+component SkillTab inherits HorizontalLayout {
+    spacing: Tok.pad;
+    EntryColumn {
+        width: min(320px, root.width * 0.36);
+        rows: Api.db-skills;
+        selected: Api.db-skill.index;
+        search: @tr("Search skills");
+        filter: @tr("With decorations");
+        empty: @tr("No skill matches.");
+    }
+    Card {
+        horizontal-stretch: 1;
+        if Api.db-skill.index <= 0: EmptyState { text: @tr("Pick a skill."); }
+        if Api.db-skill.index > 0: ScrollView {
+            SkillDetail { }
+        }
+    }
+}
+
 export component DatabasePage inherits Rectangle {
     VerticalLayout {
         padding: Tok.margin;
@@ -479,7 +572,7 @@ export component DatabasePage inherits Rectangle {
             subtitle: @tr("The game's own data, next to this save. Nothing on this page is edited.");
         }
         TabBar {
-            tabs: [@tr("Monsters"), @tr("Quests"), @tr("Items")];
+            tabs: [@tr("Monsters"), @tr("Quests"), @tr("Items"), @tr("Skills")];
             current: Api.db-tab;
             // each tab starts unfiltered
             select(i) => {
@@ -492,5 +585,6 @@ export component DatabasePage inherits Rectangle {
         if Api.db-tab == 0: MonsterTab { vertical-stretch: 1; }
         if Api.db-tab == 1: QuestTab { vertical-stretch: 1; }
         if Api.db-tab == 2: ItemTab { vertical-stretch: 1; }
+        if Api.db-tab == 3: SkillTab { vertical-stretch: 1; }
     }
 }

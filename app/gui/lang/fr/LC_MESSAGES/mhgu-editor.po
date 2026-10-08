@@ -1199,6 +1199,39 @@ msgstr "Comment"
 msgid "Chance"
 msgstr "Chance"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Skills"
+msgstr "Talents"
+
+#: app/gui/ui/pages/database.slint
+msgid "No skill."
+msgstr "Aucun talent."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+msgid "Talismans"
+msgstr "Talismans"
+
+#: app/gui/ui/pages/database.slint
+msgid "No talisman rolls it."
+msgstr "Aucun talisman ne le donne."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+msgid "Decorations"
+msgstr "Décorations"
+
+#: app/gui/ui/pages/database.slint
+msgid "No decoration gives it."
+msgstr "Aucune décoration ne le donne."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+msgid "Armor"
+msgstr "Armure"
+
+#: app/gui/ui/pages/database.slint
+msgid "No armor piece gives it."
+msgstr "Aucune pièce d'armure ne le donne."
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
 msgstr "Rechercher des monstres"
@@ -1248,6 +1281,22 @@ msgid "Pick an item."
 msgstr "Choisissez un objet."
 
 #: app/gui/ui/pages/database.slint
+msgid "Search skills"
+msgstr "Rechercher des talents"
+
+#: app/gui/ui/pages/database.slint
+msgid "With decorations"
+msgstr "Avec décorations"
+
+#: app/gui/ui/pages/database.slint
+msgid "No skill matches."
+msgstr "Aucun talent ne correspond."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a skill."
+msgstr "Choisissez un talent."
+
+#: app/gui/ui/pages/database.slint
 msgid "The game's own data, next to this save. Nothing on this page is edited."
 msgstr "Les données du jeu, à côté de cette sauvegarde. Rien n'est modifié sur cette page."
 
@@ -1275,14 +1324,6 @@ msgstr "Rechercher nom ou type"
 #: app/gui/ui/pages/equipment.slint
 msgid "Weapons"
 msgstr "Armes"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Armor"
-msgstr "Armure"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Talismans"
-msgstr "Talismans"
 
 #: app/gui/src/targets.rs app/gui/src/views/equipment_page.rs
 #: app/gui/src/views/items_page.rs app/gui/src/views/names.rs
@@ -1329,10 +1370,6 @@ msgstr "Utilisée par {}. Changez cela en jeu avant de remplacer ou de retirer c
 #: app/gui/ui/pages/palicoes.slint
 msgid "Level"
 msgstr "Niveau"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Decorations"
-msgstr "Décorations"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/ui/pages/equipment.slint
@@ -1771,10 +1808,6 @@ msgstr "Premier maître"
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Support moves"
 msgstr "Habiletés"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Skills"
-msgstr "Talents"
 
 #: app/gui/ui/pages/palicoes.slint
 msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
@@ -2892,8 +2925,8 @@ msgid "not a talisman type of the game"
 msgstr "pas un type de talisman du jeu"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/equipment_page.rs app/gui/src/views/names.rs
-#: app/gui/src/warnings.rs
+#: app/gui/src/views/database.rs app/gui/src/views/equipment_page.rs
+#: app/gui/src/views/names.rs app/gui/src/warnings.rs
 msgid "Skill #{}"
 msgstr "Talent #{}"
 
@@ -3186,6 +3219,38 @@ msgstr "mini manquante"
 #: app/gui/src/views/database.rs
 msgid "mini and gold missing"
 msgstr "mini et or manquants"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} points"
+msgstr "{} points"
+
+#: app/gui/src/views/database.rs
+msgid "first skill"
+msgstr "premier talent"
+
+#: app/gui/src/views/database.rs
+msgid "second skill"
+msgstr "second talent"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Armor #{}"
+msgstr "Armure #{}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/database.rs
+msgid "{n} other decoration lowers it"
+msgid_plural "{n} other decorations lower it"
+msgstr[0] "{n} autre décoration le baisse"
+msgstr[1] "{n} autres décorations le baissent"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/database.rs
+msgid "and {n} more piece"
+msgid_plural "and {n} more pieces"
+msgstr[0] "et {n} autre pièce"
+msgstr[1] "et {n} autres pièces"
 
 #: app/gui/src/views/database.rs
 msgid "none in the box"
