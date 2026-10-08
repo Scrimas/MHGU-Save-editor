@@ -418,26 +418,6 @@ export component CharacterPage inherits Rectangle {
                     HorizontalLayout {
                         spacing: Tok.gap;
                         alignment: start;
-                        SectionTitle { text: @tr("Quests completed"); vertical-alignment: center; }
-                        ConfidenceTag { level: Confidence.derived; }
-                        Text { text: @tr("As the Guild Card counts them; the game adds them up to {}.", Api.character.quests-total);color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
-                    }
-                    for name[k] in [@tr("Village · Low rank"), @tr("Village · High rank"), @tr("Hub · Low rank"), @tr("Hub · High rank"), @tr("Hub · G rank"), @tr("Special Permit"), @tr("Arena")]: VerticalLayout {
-                        Hairline { }
-                        HorizontalLayout {
-                            alignment: start;
-                            spacing: 14px;
-                            CountCell { label: name; value: Api.character.quest-counts[k]; was: Api.character.was-quests[k]; key: "quests:" + k; }
-                            if Api.character.was-quests[k] != "": VerticalLayout {
-                                alignment: center;
-                                WasLine { was: Api.character.was-quests[k]; key: "quests:" + k; }
-                            }
-                        }
-                    }
-                    HorizontalLayout {
-                        spacing: Tok.gap;
-                        alignment: start;
-                        padding-top: 14px;
                         SectionTitle { text: @tr("Hunting styles"); vertical-alignment: center; }
                         Text { text: @tr("Quests done with each style. Your Palico's lines name the most and least used.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
                     }
@@ -450,70 +430,6 @@ export component CharacterPage inherits Rectangle {
                             if Api.character.was-style[k] != "": VerticalLayout {
                                 alignment: center;
                                 WasLine { was: Api.character.was-style[k]; key: "style:" + k; }
-                            }
-                        }
-                    }
-                }
-            }
-            Card {
-                VerticalLayout {
-                    padding: Tok.pad;
-                    padding-left: 22px;
-                    spacing: 8px;
-                    HorizontalLayout {
-                        spacing: Tok.gap;
-                        alignment: start;
-                        SectionTitle { text: @tr("Arena records"); vertical-alignment: center; }
-                        ConfidenceTag { level: Confidence.derived; }
-                        Text { text: @tr("Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
-                    }
-                    HorizontalLayout {
-                        height: 28px;
-                        alignment: start;
-                        ColHead { text: @tr("Quest"); width: 280px; }
-                        ColHead { text: @tr("Best time"); width: 320px; }
-                        ColHead { text: @tr("Set"); width: 220px; }
-                        ColHead { text: @tr("Rank"); width: 70px; }
-                    }
-                    for r in Api.arena: VerticalLayout {
-                        Hairline { }
-                        Rectangle {
-                            if r.was != "": StagedBar { x: -10px; y: 6px; height: 32px; }
-                            VerticalLayout {
-                                padding-top: 6px;
-                                padding-bottom: 6px;
-                                spacing: 4px;
-                                HorizontalLayout {
-                                    alignment: start;
-                                    height: 32px;
-                                    VerticalLayout {
-                                        width: 280px;
-                                        alignment: center;
-                                        Text { text: r.quest; overflow: elide; }
-                                        Muted { text: r.grades; font-size: Tok.small; }
-                                    }
-                                    HorizontalLayout {
-                                        width: 320px;
-                                        spacing: 4px;
-                                        NumberBox { width: 80px; value: r.minutes; maximum: 30; label: @tr("{}, minutes", r.quest); edited(v) => { Api.set-arena(r.index, r.set, v * 6000 + r.seconds * 100 + r.hundredths); } }
-                                        Text { text: ":"; vertical-alignment: center; }
-                                        NumberBox { width: 80px; value: r.seconds; maximum: 59; label: @tr("{}, seconds", r.quest); edited(v) => { Api.set-arena(r.index, r.set, r.minutes * 6000 + v * 100 + r.hundredths); } }
-                                        Text { text: "."; vertical-alignment: center; }
-                                        NumberBox { width: 80px; value: r.hundredths; maximum: 99; label: @tr("{}, hundredths", r.quest); edited(v) => { Api.set-arena(r.index, r.set, r.minutes * 6000 + r.seconds * 100 + v); } }
-                                        Rectangle { }
-                                    }
-                                    ComboBox {
-                                        width: 200px;
-                                        model: r.sets;
-                                        current-index: r.set;
-                                        selected => { Api.set-arena(r.index, self.current-index, max(1, r.minutes * 6000 + r.seconds * 100 + r.hundredths)); }
-                                    }
-                                    Rectangle { width: 20px; }
-                                    Text { text: r.has ? r.grade : "—"; width: 70px; vertical-alignment: center; font-weight: 600; color: r.has ? Palette.foreground : Tok.faint; }
-                                    if r.has: TextLink { y: (parent.height - self.height) / 2; text: @tr("Clear"); clicked => { Api.clear-arena(r.index); } }
-                                }
-                                if r.was != "": WasLine { was: r.was; key: "arena:" + r.index; }
-                                if r.warning != "": Text { text: @tr("The game cannot make this: {}.", r.warning); color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
                             }
                         }
                     }

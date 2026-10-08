@@ -77,6 +77,21 @@ pub const STYLE_USE: usize = 0x2905;
 // i18n: shown through tr() in the GUI
 pub const STYLES: [&str; 6] = ["Guild Style", "Striker Style", "Aerial Style", "Adept Style", "Alchemy Style", "Valor Style"];
 
+/// The QUEST_KINDS count a clear of quest `q` adds to: Village ★1-6 low rank and ★7-10
+/// high rank, Hub ★1-3, ★4-7 and G, Special Permit, Arena (event ones with their kind).
+/// Training quests count in none of them. DERIVED from the card screen's headings.
+pub fn card_kind(q: &crate::data::Quest) -> Option<usize> {
+    let star = q.rank.parse::<u32>().ok();
+    match q.category.trim_start_matches("Event ") {
+        "Village" => Some(if star? <= 6 { 0 } else { 1 }),
+        "Hub" if q.rank.starts_with('G') => Some(4),
+        "Hub" => Some(if star? <= 3 { 2 } else { 3 }),
+        "Special Permit" => Some(5),
+        "Arena" => Some(6),
+        _ => None,
+    }
+}
+
 pub fn card_quests(s: &Save, base: usize, k: usize) -> u16 {
     assert!(k < 7, "quest kind {k}");
     s.u16(base + CARD_QUESTS + 2 * k)
@@ -315,6 +330,37 @@ pub fn set_playtime(s: &mut Save, base: usize, secs: u32) {
 mod tests {
     use super::*;
     use crate::save::{blank, SLOT1_BASE};
+
+    #[test]
+    fn card_counts_follow_cleared_quests() {
+        use crate::progress::{Char, QuestBit};
+        let t = crate::data::tables();
+        let kind = |cat: &str, rank: &str| t.quests.iter().find(|q| q.category == cat && q.rank == rank).unwrap();
+        assert_eq!(card_kind(kind("Village", "6")), Some(0));
+        assert_eq!(card_kind(kind("Village", "7")), Some(1));
+        assert_eq!(card_kind(kind("Hub", "3")), Some(2));
+        assert_eq!(card_kind(kind("Event Hub", "4")), Some(3));
+        assert_eq!(card_kind(kind("Hub", "G1")), Some(4));
+        assert_eq!(card_kind(kind("Training", "")), None);
+        let (a, b) = (kind("Village", "1").index, kind("Village", "2").index);
+        let mut s = blank();
+        let mut c = Char { s: &mut s, base: SLOT1_BASE };
+        c.set_quest(QuestBit::Cleared, a, true);
+        c.set_quest(QuestBit::Cleared, a, true);
+        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 1, "one clear, not two");
+        set_card_quests(c.s, SLOT1_BASE, 0, 40);
+        c.set_quest(QuestBit::Cleared, b, true);
+        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 41);
+        c.set_quest(QuestBit::Cleared, b, false);
+        c.set_quest(QuestBit::Cleared, a, false);
+        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 39);
+        set_card_quests(c.s, SLOT1_BASE, 0, 0);
+        c.set_quest(QuestBit::Cleared, a, true);
+        c.set_quest(QuestBit::Cleared, b, true);
+        set_card_quests(c.s, SLOT1_BASE, 0, 0);
+        c.set_quest(QuestBit::Cleared, b, false);
+        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 1, "never below the cleared quests");
+    }
 
     #[test]
     fn card_stats_round_trip() {

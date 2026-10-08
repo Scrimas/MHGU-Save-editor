@@ -295,7 +295,7 @@ msgid_plural "{n} saves listed on the Open page"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/app.slint app/gui/ui/pages/quests.slint
 msgid "Clear"
 msgstr ""
 
@@ -649,7 +649,7 @@ msgstr ""
 msgid "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."
 msgstr ""
 
-#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint app/gui/ui/pages/quests.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "The game cannot make this: {}."
 msgstr ""
@@ -870,39 +870,6 @@ msgid "{} quests, {}"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
-msgid "Quests completed"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-#. placeholders: {} in order, {0} {1} by position
-msgid "As the Guild Card counts them; the game adds them up to {}."
-msgstr ""
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Village · Low rank"
-msgstr ""
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Village · High rank"
-msgstr ""
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Hub · Low rank"
-msgstr ""
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Hub · High rank"
-msgstr ""
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Hub · G rank"
-msgstr ""
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Special Permit"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
 msgid "Hunting styles"
 msgstr ""
 
@@ -932,45 +899,6 @@ msgstr ""
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
 msgid "Valor Style"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Arena records"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
-msgstr ""
-
-#: app/gui/ui/pages/character.slint app/gui/ui/pages/quests.slint
-msgid "Quest"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Best time"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Set"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Rank"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-#. placeholders: {} in order, {0} {1} by position
-msgid "{}, minutes"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-#. placeholders: {} in order, {0} {1} by position
-msgid "{}, seconds"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-#. placeholders: {} in order, {0} {1} by position
-msgid "{}, hundredths"
 msgstr ""
 
 #: app/gui/ui/pages/collections.slint
@@ -1849,6 +1777,41 @@ msgstr ""
 #: app/gui/ui/pages/quests.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Failed: {}"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Quest"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Best time"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Set"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Rank"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}, minutes"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}, seconds"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{}, hundredths"
 msgstr ""
 
 #: app/gui/ui/pages/quests.slint
@@ -3242,8 +3205,12 @@ msgid "{} in the box, {} short"
 msgstr ""
 
 #: app/gui/src/views/database.rs
+msgid "Provisions"
+msgstr ""
+
+#: app/gui/src/views/database.rs
 #. placeholders: {} in order, {0} {1} by position
-msgid "{} or the like"
+msgid "value {}"
 msgstr ""
 
 #: app/gui/src/views/database.rs
@@ -3302,7 +3269,7 @@ msgid "Level {}"
 msgstr ""
 
 #: app/gui/src/views/database.rs
-msgid "“Or the like”: any materials of that kind whose values add up to the number shown, as the Smithy's provisions take them. Zenny costs are not in these tables."
+msgid "Provisions: any materials of the kind listed, as long as their values add up to the value asked (a material of value 2 counts twice). Zenny costs are not in these tables."
 msgstr ""
 
 #: app/gui/src/views/database.rs
@@ -4143,6 +4110,14 @@ msgid ", or "
 msgstr ""
 
 #: app/gui/src/views/quests.rs
+msgid "Arena records"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Best times and sets of the Arena quests"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
 msgid "Mark all cleared"
 msgstr ""
 
@@ -4154,6 +4129,11 @@ msgstr ""
 #: app/gui/src/views/quests.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{}: {} / {} cleared · confirmed in game except where marked"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Guild Card completions: {}"
 msgstr ""
 
 #: app/gui/src/views/quests.rs
@@ -4325,6 +4305,30 @@ msgstr ""
 #: app/gui/src/views/update_ui.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Could not start {}: {}"
+msgstr ""
+
+#: app/core/src/character.rs
+msgid "Village · Low rank"
+msgstr ""
+
+#: app/core/src/character.rs
+msgid "Village · High rank"
+msgstr ""
+
+#: app/core/src/character.rs
+msgid "Hub · Low rank"
+msgstr ""
+
+#: app/core/src/character.rs
+msgid "Hub · High rank"
+msgstr ""
+
+#: app/core/src/character.rs
+msgid "Hub · G rank"
+msgstr ""
+
+#: app/core/src/character.rs
+msgid "Special Permit"
 msgstr ""
 
 #: app/core/src/character.rs

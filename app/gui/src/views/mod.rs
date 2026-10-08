@@ -454,6 +454,8 @@ fn goto_target(ui: &AppWindow, st: &State, t: Target, key: &str) {
             api.set_quest_search("".into());
             api.set_quest_missing(false);
         }
+        // the Arena records tab, after the quest categories
+        Target::Arena(_) => v.quest_tab = quest_tabs().len(),
         Target::Request(_) => {
             v.request_filter = "all".into();
             v.request_search.clear();

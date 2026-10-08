@@ -32,15 +32,10 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
         was_lr: model((0..4).map(|v| was(Target::Points(v, false))).collect()),
         was_g: model((0..4).map(|v| was(Target::Points(v, true))).collect()),
         weapon_use: model(weapon_use_rows(st)),
-        quest_counts: model((0..character::QUEST_KINDS.len()).map(|k| character::card_quests(s, st.base(), k) as i32).collect()),
-        was_quests: model((0..character::QUEST_KINDS.len()).map(|k| was(Target::CardQuests(k))).collect()),
-        // the game's total (0x1662a0): capped at 99,999
-        quests_total: (0..character::QUEST_KINDS.len()).map(|k| character::card_quests(s, st.base(), k) as i32).sum::<i32>().min(99_999),
         style_use: model((0..character::STYLES.len()).map(|k| character::style_use(s, st.base(), k) as i32).collect()),
         was_style: model((0..character::STYLES.len()).map(|k| was(Target::StyleUse(k))).collect()),
     });
     guild_card(ui, st);
-    ui.global::<Api>().set_arena(model(arena_rows(st)));
     appearance(ui, st);
 }
 
@@ -97,8 +92,9 @@ fn parse_rgb(t: &str) -> Option<[u8; 3]> {
     Some([(v >> 16) as u8, (v >> 8) as u8, v as u8])
 }
 
-/// The card's best time per Arena quest, with the sets to pick from and the grade times.
-fn arena_rows(st: &State) -> Vec<ArenaRow> {
+/// The card's best time per Arena quest, with the sets to pick from and the grade times
+/// (the Quests page's Arena records tab).
+pub(super) fn arena_rows(st: &State) -> Vec<ArenaRow> {
     let (s, base) = (st.save(), st.base());
     arena::quests()
         .iter()
@@ -201,10 +197,6 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             "hub-star" => Target::HubStar,
             "play-h" | "play-m" => Target::Playtime,
             // "use:<venue>:<weapon>"
-            _ if k.starts_with("quests:") => match k[7..].parse::<usize>() {
-                Ok(i) if i < character::QUEST_KINDS.len() => Target::CardQuests(i),
-                _ => return,
-            },
             _ if k.starts_with("style:") => match k[6..].parse::<usize>() {
                 Ok(i) if i < character::STYLES.len() => Target::StyleUse(i),
                 _ => return,

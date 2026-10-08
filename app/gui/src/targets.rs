@@ -279,11 +279,12 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Arena(_) | Appearance | Gender | CardQuests(_) | Greeting | StyleUse(_) => "character",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Appearance | Gender | Greeting | StyleUse(_) => "character",
             Item(..) | Loadout(_) | Obtained => "items",
             Equip(..) | Smithy(_) => "equipment",
             Palico(..) => "palicoes",
-            Quest(_) => "quests",
+            // the card's quest counts follow the cleared quests
+            Quest(_) | Arena(_) | CardQuests(_) => "quests",
             Request(_) => "requests",
             Art(_) | Dish(_) | Ingredient(_) | Award(_) | Permits(_) | Levels(_) => "collections",
             Monster(..) => "monsters",

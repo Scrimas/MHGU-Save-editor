@@ -34,7 +34,19 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let c = Char::new(st.save(), st.slot);
     let tabs = quest_tabs();
-    let tab = view(|v| v.quest_tab).min(tabs.len().saturating_sub(1));
+    // the categories, then the Arena records
+    let tab = view(|v| v.quest_tab).min(tabs.len());
+    let mut labels = tabs.clone();
+    labels.push(tr("Arena records").into());
+    api.set_quest_tabs(strings(labels));
+    api.set_quest_tab(tab as i32);
+    api.set_quest_arena(tab == tabs.len());
+    if tab == tabs.len() {
+        api.set_arena(model(arena_rows(st)));
+        api.set_quest_summary(tr("Best times and sets of the Arena quests").into());
+        api.set_quests(model(vec![]));
+        return;
+    }
     let (search, missing) = view(|v| (v.quest_search.to_lowercase(), v.quest_missing));
     let cat = tabs.get(tab).cloned().unwrap_or_default();
     let mut qs: Vec<_> = Char::real_quests(true).into_iter().filter(|q| q.category == cat).collect();
@@ -88,9 +100,17 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
             action: SharedString::default(),
         });
     }
-    api.set_quest_summary(trf("{}: {} / {} cleared · confirmed in game except where marked", &[&cat, &num(done as i64), &num(total as i64)]).into());
-    api.set_quest_tabs(strings(tabs));
-    api.set_quest_tab(tab as i32);
+    // the Guild Card's counts for this category, kept in step with the cleared quests
+    let mut kinds: Vec<usize> = qs.iter().filter_map(|q| character::card_kind(q)).collect();
+    kinds.sort_unstable();
+    kinds.dedup();
+    let mut summary = trf("{}: {} / {} cleared · confirmed in game except where marked", &[&cat, &num(done as i64), &num(total as i64)]);
+    if !kinds.is_empty() {
+        let counts: Vec<String> = kinds.iter().map(|&k| format!("{} {}", tr(character::QUEST_KINDS[k]), num(character::card_quests(st.save(), base, k)))).collect();
+        summary.push_str(" · ");
+        summary.push_str(&trf("Guild Card completions: {}", &[&counts.join(", ")]));
+    }
+    api.set_quest_summary(summary.into());
     api.set_quests(model(rows));
 }
 

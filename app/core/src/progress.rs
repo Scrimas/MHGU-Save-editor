@@ -127,7 +127,27 @@ impl<S: Deref<Target = Save>> Char<S> {
     where
         S: DerefMut,
     {
-        self.set_bit(which.off(), index, v)
+        let was = self.quest(which, index);
+        self.set_bit(which.off(), index, v);
+        if which == QuestBit::Cleared && was != v {
+            self.count_clear(index, v);
+        }
+    }
+    /// The Guild Card's quests-completed count of the quest's kind follows its cleared bit:
+    /// one clear more when it becomes cleared, one fewer when it no longer is, never fewer
+    /// than the quests of that kind cleared. The counts include repeats (a played card has
+    /// more Village low rank clears than there are such quests), so they are kept, not
+    /// recomputed. DERIVED
+    fn count_clear(&mut self, index: usize, on: bool)
+    where
+        S: DerefMut,
+    {
+        let t = tables();
+        let Some(k) = t.quests.iter().find(|q| q.index == index).and_then(crate::character::card_kind) else { return };
+        let cleared = t.quests.iter().filter(|q| crate::character::card_kind(q) == Some(k) && self.quest(QuestBit::Cleared, q.index)).count() as u16;
+        let n = crate::character::card_quests(&self.s, self.base, k);
+        let n = if on { n.saturating_add(1) } else { n.saturating_sub(1) };
+        crate::character::set_card_quests(&mut self.s, self.base, k, n.max(cleared));
     }
     fn cleared_id(&self, id: u32) -> bool {
         tables().quest_index(id).is_some_and(|i| self.quest(QuestBit::Cleared, i))

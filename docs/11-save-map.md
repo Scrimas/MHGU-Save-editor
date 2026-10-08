@@ -505,7 +505,7 @@ not identified.
 | `+0x85A` | u8 | scene (editor field 4): 35 on the own card, of 136 (`GC_background`, *Gammoth*) | cUIOGuildCardEdit |
 | `+0x85B` | u8 | pose (editor field 3; a change calls `0x1605b8`): 3, of 22 (`GuildCardMsg` 235–256, *Stand* … *Beam Fire*) | cUIOGuildCardEdit |
 | `+0x85C` | u16 | HR of a transferred save, 0xFFFF = none; copied from `S+0x41a` | `0x161ac8` |
-| `+0x85E` | 7 × u16 | quests completed: Village low / high rank, Hub low / high / G rank, Special Permit, Arena (the card screen's counts, `GuildCardMsg` 8–12). `0x1662a0` sums them, capped at 99,999. DERIVED: the own card's Village pair adds up to its Village weapon usage (83 + 50 = 133) and its Arena count equals its Arena weapon usage (1) | |
+| `+0x85E` | 7 × u16 | quests completed: Village low / high rank, Hub low / high / G rank, Special Permit, Arena (the card screen's counts, `GuildCardMsg` 8–12). `0x1662a0` sums them, capped at 99,999. DERIVED: the own card's Village pair adds up to its Village weapon usage (83 + 50 = 133) and its Arena count equals its Arena weapon usage (1). They count repeats (83 Village low-rank clears), so the editor does not recompute them: clearing a quest adds one to its kind (Village ★1–6 / ★7–10, Hub ★1–3 / ★4–7 / G, Special Permit, Arena; Training none), un-clearing takes one off, never below the quests of that kind cleared | |
 | `+0x86C` | u32 | copied from `sGameControl +0x3c` | `0x161ac8` |
 | `+0x870` | u32 | the own card's Unity total (11,324 in the analysed save) | |
 | `+0x878` | 28 × u16 | greeting, UTF-16, zero-terminated (card editor *Greeting*, `GuildCardMsg` 188) | |

@@ -228,9 +228,8 @@ export struct CharacterInfo {
     was-name: string, was-hr: string, was-hr-points: string, was-funds: string, was-wycademy: string,
     was-playtime: string, was-village-star: string, was-hub-star: string, was-lr: [string], was-g: [string],
     weapon-use: [WeaponUseRow],
-    // Guild Card quests completed per category (QUEST_KINDS) and their total; quests per
-    // hunting style (Guild … Valor)
-    quest-counts: [int], was-quests: [string], quests-total: int, style-use: [int], was-style: [string],
+    // quests per hunting style (Guild … Valor)
+    style-use: [int], was-style: [string],
 }
 
 // The own Guild Card's title (word, linking word, word), scene and pose: IDs, the title
@@ -469,6 +468,7 @@ export global Api {
     // quests
     in property <[string]> quest-tabs;
     in-out property <int> quest-tab;
+    in property <bool> quest-arena;  // the Arena records tab (after the categories) is shown
     in property <[QuestRow]> quests;
     in property <string> quest-summary;
     in-out property <string> quest-search;
