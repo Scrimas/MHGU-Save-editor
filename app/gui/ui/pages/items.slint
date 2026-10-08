@@ -291,9 +291,10 @@ export component ItemsPage inherits Rectangle {
                     alignment: end;
                     TextLink {
                         text: @tr("Where to get it");
+                        // the item first: closing the popup ends what it holds
                         clicked => {
-                            picker.close();
                             Api.open-db("item", root.held-id);
+                            picker.close();
                         }
                     }
                 }
