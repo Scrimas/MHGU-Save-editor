@@ -154,6 +154,8 @@ component EntryList inherits VerticalLayout {
 
 export component PalicoesPage inherits Rectangle {
     property <string> key: "palico:" + Api.palico.index + ":";
+    // the detail card's inside: page margins, list, gap, card padding and scroll bar off
+    property <length> detail-w: root.width - 2 * Tok.margin - min(320px, root.width * 0.38) - Tok.pad - 38px - 12px;
     VerticalLayout {
         padding: Tok.margin;
         padding-top: 16px;
@@ -199,7 +201,8 @@ export component PalicoesPage inherits Rectangle {
             Card {
                 horizontal-stretch: 1;
                 if Api.palico.index < 0: EmptyState { text: @tr("Pick a Palico to edit it."); }
-                if Api.palico.index >= 0: ScrollView {
+                if Api.palico.index >= 0: detail := ScrollView {
+                    property <bool> side: root.detail-w >= fields.min-width + entries.min-width + 32px;
                     VerticalLayout {
                         padding: Tok.pad;
                         padding-left: 22px;
@@ -212,6 +215,18 @@ export component PalicoesPage inherits Rectangle {
                             font-size: Tok.small;
                             wrap: word-wrap;
                         }
+                        // looks beside moves and skills when both fit at their minimum width
+                        GridLayout {
+                          spacing-horizontal: 32px;
+                          spacing-vertical: 14px;
+                          // both as wide as their cell: their fixed-width controls would
+                          // cap them short of the edge
+                          fields := VerticalLayout {
+                            row: 0;
+                            col: 0;
+                            max-width: 100000px;
+                            spacing: 14px;
+                            alignment: start;
                         TextRow { label: @tr("Name"); field: "name"; value: Api.palico.name; was: Api.palico.was-name; key: root.key + "name"; field-width: 260px; }
                         Row {
                             label: @tr("Level");
@@ -252,7 +267,16 @@ export component PalicoesPage inherits Rectangle {
                             key: root.key + "looks";
                             warning: Api.palico.warn-looks;
                         }
-                        Hairline { }
+                        // above the moves when they come below; hidden, not removed, so
+                        // the column's width does not depend on the placement it decides
+                        Hairline { visible: !detail.side; }
+                          }
+                          entries := VerticalLayout {
+                            row: detail.side ? 0 : 1;
+                            col: detail.side ? 1 : 0;
+                            max-width: 100000px;
+                            spacing: 14px;
+                            alignment: start;
                         EntryList {
                             title: @tr("Support moves");
                             kind: "moves";
@@ -273,6 +297,8 @@ export component PalicoesPage inherits Rectangle {
                             was: Api.palico.was-skills;
                             key: root.key + "skills";
                             warning: Api.palico.warn-skills;
+                        }
+                          }
                         }
                         Muted { text: @tr("Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."); wrap: word-wrap; }
                     }

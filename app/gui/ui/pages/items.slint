@@ -42,7 +42,8 @@ component SlotCell inherits Rectangle {
 }
 
 export component ItemsPage inherits Rectangle {
-    property <int> cols: root.width >= 1150px ? 3 : 2;
+    // as many columns as the width gives, so counts stay near names (09.2)
+    property <int> cols: max(2, floor((root.width - 2 * Tok.margin - 6px) / 336px));
     // slot editor: slot, the item picked, its count, what the slot holds now
     property <int> edit-slot: -1;
     property <int> edit-id;
@@ -142,12 +143,12 @@ export component ItemsPage inherits Rectangle {
             text <=> Api.item-filter;
             edited(t) => { Api.filter-items(t); }
         }
-        // the box as a grid, like the in-game box (09.2), capped so counts stay near names
+        // the box as a grid, like the in-game box (09.2)
         if Api.item-store < 2: HorizontalLayout {
           vertical-stretch: 1;
           alignment: start;
           Card {
-            width: min(root.width - 2 * Tok.margin, 1180px);
+            width: root.width - 2 * Tok.margin;
             if Api.item-slots.length == 0: EmptyState { text: @tr("No slot matches the search."); }
             list := ListView {
                 property <int> seq: Api.jump-seq;
@@ -240,16 +241,17 @@ export component ItemsPage inherits Rectangle {
                 }
                 if Api.loadout-was != "": WasLine { was: Api.loadout-was; key: "loadout:" + Api.loadout-sel; }
                 Muted { text: @tr("The 32 pouch positions the loadout fills, with the counts it takes from the box."); }
-                // two columns like the box grid
+                // two columns like the box grid, four when they fit (32 divides evenly)
                 lv := ListView {
+                    property <int> cols: self.visible-width >= 4 * 330px ? 4 : 2;
                     vertical-stretch: 1;
-                    for r in 16: HorizontalLayout {
+                    for r in 32 / lv.cols: HorizontalLayout {
                         spacing: 6px;
                         height: 44px;
-                        for c in 2: Rectangle {
-                            width: (lv.visible-width - 6px) / 2;
+                        for c in lv.cols: Rectangle {
+                            width: (lv.visible-width - (lv.cols - 1) * 6px) / lv.cols;
                             SlotCell {
-                                it: Api.loadout-slots[r * 2 + c];
+                                it: Api.loadout-slots[r * lv.cols + c];
                                 edit => { root.open-editor(self.it, self.absolute-position.x - root.absolute-position.x, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
                             }
                         }

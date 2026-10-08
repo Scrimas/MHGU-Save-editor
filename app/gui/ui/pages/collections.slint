@@ -27,9 +27,11 @@ component CheckCell inherits Rectangle {
 }
 
 export component CollectionsPage inherits Rectangle {
-    property <length> cw: min(root.width - 2 * Tok.margin, 1400px);
+    property <length> cw: root.width - 2 * Tok.margin;
+    // grid columns as the width gives (cells of at least 270 px); Hunter Arts in side by
+    // side groups of at least 400 px, so the checks stay near the art's name
     property <int> cols: max(1, floor((cw - 12px) / 270px));
-    property <length> cell-w: (cw - 12px - (cols - 1) * 6px) / cols;
+    property <int> art-cols: max(1, floor(cw / 400px));
     property <bool> checks: Api.collection-tab < 4;
     VerticalLayout {
         padding: Tok.margin;
@@ -75,16 +77,18 @@ export component CollectionsPage inherits Rectangle {
                 }
             }
         }
-        // Hunter Arts by art, levels I / II / III on one row (H5.3)
-        if Api.collection-tab == 0: HorizontalLayout {
+        // Hunter Arts by art, levels I / II / III on one row (H5.3), in side by side groups
+        // on a wide window, read across like the grids
+        if Api.collection-tab == 0: Card {
             vertical-stretch: 1;
-            alignment: start;
-            Card {
-                width: min(root.width - 2 * Tok.margin, 760px);
-                VerticalLayout {
-                    Rectangle {
-                        height: 34px;
-                        HorizontalLayout {
+            VerticalLayout {
+                Rectangle {
+                    height: 34px;
+                    HorizontalLayout {
+                        spacing: 16px;
+                        alignment: start;
+                        for g in root.art-cols: HorizontalLayout {
+                            width: (arts.visible-width - (root.art-cols - 1) * 16px) / root.art-cols;
                             padding-left: 14px;
                             padding-right: 12px;
                             spacing: 10px;
@@ -93,30 +97,37 @@ export component CollectionsPage inherits Rectangle {
                             ColHead { text: "II"; width: 56px; }
                             ColHead { text: "III"; width: 56px; }
                         }
-                        Hairline { y: parent.height - 1px; width: parent.width; }
                     }
-                    if Api.arts.length == 0: EmptyState { text: Api.check-missing ? @tr("Every Hunter Art is unlocked.") : @tr("No art matches the search."); }
-                    ListView {
-                        for a in Api.arts: Rectangle {
-                            height: 44px;
-                            if a.changed: StagedBar { x: 2px; y: 7px; height: parent.height - 14px; }
-                            HorizontalLayout {
-                                padding-left: 14px;
-                                padding-right: 12px;
-                                spacing: 10px;
-                                Text { text: a.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
-                                for k in 3: Rectangle {
-                                    width: 56px;
-                                    if k < a.ids.length: CheckBox {
-                                        x: 0;
-                                        checked: a.on[k];
-                                        accessible-label: a.name + (a.ids.length == 1 ? "" : k == 0 ? " I" : k == 1 ? " II" : " III");
-                                        toggled => { Api.set-check(a.ids[k], self.checked); }
+                    Hairline { y: parent.height - 1px; width: parent.width; }
+                }
+                if Api.arts.length == 0: EmptyState { text: Api.check-missing ? @tr("Every Hunter Art is unlocked.") : @tr("No art matches the search."); }
+                arts := ListView {
+                    for r in (Api.arts.length + root.art-cols - 1) / root.art-cols: Rectangle {
+                        height: 44px;
+                        HorizontalLayout {
+                            spacing: 16px;
+                            for c in root.art-cols: Rectangle {
+                                property <int> i: r * root.art-cols + c;
+                                width: (arts.visible-width - (root.art-cols - 1) * 16px) / root.art-cols;
+                                if i < Api.arts.length && Api.arts[i].changed: StagedBar { x: 2px; y: 7px; height: parent.height - 14px; }
+                                if i < Api.arts.length: HorizontalLayout {
+                                    padding-left: 14px;
+                                    padding-right: 12px;
+                                    spacing: 10px;
+                                    Text { text: Api.arts[i].name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                                    for k in 3: Rectangle {
+                                        width: 56px;
+                                        if k < Api.arts[i].ids.length: CheckBox {
+                                            x: 0;
+                                            checked: Api.arts[i].on[k];
+                                            accessible-label: Api.arts[i].name + (Api.arts[i].ids.length == 1 ? "" : k == 0 ? " I" : k == 1 ? " II" : " III");
+                                            toggled => { Api.set-check(Api.arts[i].ids[k], self.checked); }
+                                        }
                                     }
                                 }
                             }
-                            Hairline { y: parent.height - 1px; width: parent.width; }
                         }
+                        Hairline { y: parent.height - 1px; width: parent.width; }
                     }
                 }
             }
@@ -124,7 +135,7 @@ export component CollectionsPage inherits Rectangle {
         if Api.collection-tab >= 1 && Api.collection-tab <= 3: Card {
             vertical-stretch: 1;
             if Api.checks.length == 0: EmptyState { text: Api.check-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); }
-            ListView {
+            grid := ListView {
                 property <int> seq: Api.jump-seq;
                 function go() {
                     if Api.page == "collections" && Api.jump-row >= 0 {
@@ -139,7 +150,7 @@ export component CollectionsPage inherits Rectangle {
                     spacing: 6px;
                     height: 40px;
                     for c in root.cols: Rectangle {
-                        width: root.cell-w;
+                        width: (grid.visible-width - 12px - (root.cols - 1) * 6px) / root.cols;
                         if r * root.cols + c < Api.checks.length: CheckCell {
                             r: Api.checks[r * root.cols + c];
                             flash: Api.highlight != "" && Api.highlight == "check:" + Api.collection-tab + ":" + self.r.key;

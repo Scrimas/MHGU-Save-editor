@@ -34,6 +34,17 @@ component Field inherits Rectangle {
     if root.was != "": StagedBar { x: -10px; y: 26px; height: 32px; }
 }
 
+// A card of a pair that sits side by side on a wide window: as wide as its grid cell
+// (its fixed-width controls would cap it short of the edge), its content at the top when
+// the other card of the row is taller.
+component PairCard inherits Card {
+    max-width: 100000px;
+    VerticalLayout {
+        alignment: start;
+        @children
+    }
+}
+
 // A table cell of Village points: field, then "was … Undo" beside it.
 component PointsCell inherits Rectangle {
     in property <int> value;
@@ -86,6 +97,11 @@ export component CharacterPage inherits Rectangle {
     changed cur-name => { name-edit.text = self.cur-name; }
     property <string> cur-greeting: Api.card.greeting;
     changed cur-greeting => { greeting-edit.text = self.cur-greeting; }
+    // the width inside the page margins, less the scroll bar
+    property <length> cw: root.width - 2 * Tok.margin - 12px;
+    property <bool> pair1: cw >= hunter.min-width + progress.min-width + Tok.gap;
+    property <bool> pair2: cw >= appearance.min-width + guild-card.min-width + Tok.gap;
+    property <bool> pair3: cw >= village-points.min-width + styles.min-width + Tok.gap;
     ScrollView {
         VerticalLayout {
             padding: Tok.margin;
@@ -97,7 +113,12 @@ export component CharacterPage inherits Rectangle {
                 subtitle: @tr("Confirmed in game except where marked");
                 staged: Api.page-counts[1];
             }
-            Card {
+            // cards in pairs, side by side when both fit at their minimum width
+            GridLayout {
+              spacing: Tok.gap;
+              hunter := PairCard {
+                row: 0;
+                col: 0;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -170,8 +191,12 @@ export component CharacterPage inherits Rectangle {
                         }
                     }
                 }
-            }
-            Card {
+              }
+              progress := PairCard {
+                row: root.pair1 ? 0 : 1;
+                col: root.pair1 ? 1 : 0;
+                // beside the Hunter card, only as wide as its own content
+                horizontal-stretch: root.pair1 ? 0 : 1;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -197,8 +222,13 @@ export component CharacterPage inherits Rectangle {
                     }
                     Muted { text: @tr("The game raises star levels when every urgent quest of a level is cleared."); }
                 }
+              }
             }
-            Card {
+            GridLayout {
+              spacing: Tok.gap;
+              appearance := PairCard {
+                row: 0;
+                col: 0;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -268,38 +298,10 @@ export component CharacterPage inherits Rectangle {
                         }
                     }
                 }
-            }
-            Card {
-                VerticalLayout {
-                    padding: Tok.pad;
-                    padding-left: 22px;
-                    spacing: 8px;
-                    HorizontalLayout {
-                        spacing: Tok.gap;
-                        alignment: start;
-                        SectionTitle { text: @tr("Village points"); vertical-alignment: center; }
-                        Text { text: @tr("The game adds Low rank and G rank and caps the sum at 20,000.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
-                    }
-                    // the eight values as a 4 × 2 table (H2.2, B5)
-                    HorizontalLayout {
-                        height: 28px;
-                        alignment: start;
-                        ColHead { text: @tr("Village"); width: 160px; }
-                        ColHead { text: @tr("Low rank"); width: 380px; }
-                        ColHead { text: @tr("G rank"); width: 380px; }
-                    }
-                    for v[i] in [@tr("Bherna"), @tr("Kokoto"), @tr("Pokke"), @tr("Yukumo")]: VerticalLayout {
-                        Hairline { }
-                        HorizontalLayout {
-                            alignment: start;
-                            Text { text: v; width: 160px; vertical-alignment: center; }
-                            PointsCell { value: Api.character.points-lr[i]; was: Api.character.was-lr[i]; key: "lr" + i; label: @tr("{} low rank points", v); }
-                            PointsCell { value: Api.character.points-g[i]; was: Api.character.was-g[i]; key: "g" + i; label: @tr("{} G rank points", v); }
-                        }
-                    }
-                }
-            }
-            Card {
+              }
+              guild-card := PairCard {
+                row: root.pair2 ? 0 : 1;
+                col: root.pair2 ? 1 : 0;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -360,6 +362,69 @@ export component CharacterPage inherits Rectangle {
                         }
                     }
                 }
+              }
+            }
+            GridLayout {
+              spacing: Tok.gap;
+              village-points := PairCard {
+                row: 0;
+                col: 0;
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 8px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: @tr("Village points"); vertical-alignment: center; }
+                        Text { text: @tr("The game adds Low rank and G rank and caps the sum at 20,000.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                    }
+                    // the eight values as a 4 × 2 table (H2.2, B5)
+                    HorizontalLayout {
+                        height: 28px;
+                        alignment: start;
+                        ColHead { text: @tr("Village"); width: 160px; }
+                        ColHead { text: @tr("Low rank"); width: 380px; }
+                        ColHead { text: @tr("G rank"); width: 380px; }
+                    }
+                    for v[i] in [@tr("Bherna"), @tr("Kokoto"), @tr("Pokke"), @tr("Yukumo")]: VerticalLayout {
+                        Hairline { }
+                        HorizontalLayout {
+                            alignment: start;
+                            Text { text: v; width: 160px; vertical-alignment: center; }
+                            PointsCell { value: Api.character.points-lr[i]; was: Api.character.was-lr[i]; key: "lr" + i; label: @tr("{} low rank points", v); }
+                            PointsCell { value: Api.character.points-g[i]; was: Api.character.was-g[i]; key: "g" + i; label: @tr("{} G rank points", v); }
+                        }
+                    }
+                }
+              }
+              styles := PairCard {
+                row: root.pair3 ? 0 : 1;
+                col: root.pair3 ? 1 : 0;
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 8px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: @tr("Hunting styles"); vertical-alignment: center; }
+                        Text { text: @tr("Quests done with each style. Your Palico's lines name the most and least used.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                    }
+                    for name[k] in [@tr("Guild Style"), @tr("Striker Style"), @tr("Aerial Style"), @tr("Adept Style"), @tr("Alchemy Style"), @tr("Valor Style")]: VerticalLayout {
+                        Hairline { }
+                        HorizontalLayout {
+                            alignment: start;
+                            spacing: 14px;
+                            CountCell { label: name; value: Api.character.style-use[k]; was: Api.character.was-style[k]; key: "style:" + k; }
+                            if Api.character.was-style[k] != "": VerticalLayout {
+                                alignment: center;
+                                WasLine { was: Api.character.was-style[k]; key: "style:" + k; }
+                            }
+                        }
+                    }
+                }
+              }
             }
             Card {
                 VerticalLayout {
@@ -406,31 +471,6 @@ export component CharacterPage inherits Rectangle {
                                 }
                             }
                             Text { text: w.total; width: 80px; vertical-alignment: center; color: Tok.muted; }
-                        }
-                    }
-                }
-            }
-            Card {
-                VerticalLayout {
-                    padding: Tok.pad;
-                    padding-left: 22px;
-                    spacing: 8px;
-                    HorizontalLayout {
-                        spacing: Tok.gap;
-                        alignment: start;
-                        SectionTitle { text: @tr("Hunting styles"); vertical-alignment: center; }
-                        Text { text: @tr("Quests done with each style. Your Palico's lines name the most and least used.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
-                    }
-                    for name[k] in [@tr("Guild Style"), @tr("Striker Style"), @tr("Aerial Style"), @tr("Adept Style"), @tr("Alchemy Style"), @tr("Valor Style")]: VerticalLayout {
-                        Hairline { }
-                        HorizontalLayout {
-                            alignment: start;
-                            spacing: 14px;
-                            CountCell { label: name; value: Api.character.style-use[k]; was: Api.character.was-style[k]; key: "style:" + k; }
-                            if Api.character.was-style[k] != "": VerticalLayout {
-                                alignment: center;
-                                WasLine { was: Api.character.was-style[k]; key: "style:" + k; }
-                            }
                         }
                     }
                 }
