@@ -97,7 +97,7 @@ export struct DbQuestMonster { index: int, name: string, icon: image, has-icon: 
 export struct DbSource { kind: string, index: int, where: string, how: string, chance: string, icon: image, has-icon: bool }
 
 // An item in the Database (index = item ID, -1: none).
-export struct DbItem { index: int, name: string, sub: string, icon: image, has-icon: bool, sources: [DbSource], more: string }
+export struct DbItem { index: int, name: string, sub: string, icon: image, has-icon: bool, sources: [DbSource], more: string, uses: [DbSource], uses-more: string }
 
 // A line of a Database list: name, a second line, a value at the right; `link` > 0: the
 // entry open-db opens on a click (kind given by the list).

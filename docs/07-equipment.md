@@ -274,6 +274,15 @@ box. All in `arc/facility/blacksmith.arc` but the tree and the provision values.
   item (group 4: Iron Ore 1, Earth Crystal 2, Disc Stone 3, …).
 - Zenny costs are not in these records.
 
+## Item combinations (game table)
+
+`table\itemPreData` in `loc/arc/resident.arc`, read by `tools/item_combos.py` into
+`data/combinations.csv`: 183 records of 24 bytes, `+2` and `+6` the two items (u32),
+`+10` the result, `+14` the success chance in % (Herb + Blue Mushroom = Potion, 95 %).
+Not read: `+15` (set on ammo and Slickaxe combinations, maybe how many it makes), `+19`
+(1 traps and meats, 2 dung, 3 bombs, 5 bait) and `+23`. The Database page's Items tab
+lists them with the Smithy recipes ("Used by").
+
 ## Editing checklist
 
 1. Resolve the character base through the pointer at `0x34`. Don't hard-code it.

@@ -1180,25 +1180,41 @@ msgstr "Detalles"
 msgid "Rewards"
 msgstr "Recompensas"
 
+#: app/gui/ui/pages/database.slint
+msgid "How"
+msgstr "Cómo"
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
 msgid "Where to get it"
 msgstr "Dónde conseguirlo"
 
 #: app/gui/ui/pages/database.slint
-msgid "No carve or quest reward gives it. It may come from gathering, the shops or crafting, which are not in the Database yet."
-msgstr "Ninguna talla ni recompensa de misión lo da. Puede venir de la recolección, las tiendas o la fabricación, que aún no están en la base de datos."
+msgid "No carve, quest reward or combination gives it. It may come from gathering or the shops, which are not in the Database yet."
+msgstr "Ningún despiece, recompensa de misión ni combinación lo da. Puede venir de la recolección o de las tiendas, que aún no están en la base de datos."
 
 #: app/gui/ui/pages/database.slint
 msgid "From"
 msgstr "Origen"
 
 #: app/gui/ui/pages/database.slint
-msgid "How"
-msgstr "Cómo"
-
-#: app/gui/ui/pages/database.slint
 msgid "Chance"
 msgstr "Probabilidad"
+
+#: app/gui/ui/pages/database.slint
+msgid "Used by"
+msgstr "Se usa en"
+
+#: app/gui/ui/pages/database.slint
+msgid "No Smithy recipe or combination takes it."
+msgstr "Ninguna receta de la herrería ni combinación lo usa."
+
+#: app/gui/ui/pages/database.slint
+msgid "For"
+msgstr "Para"
+
+#: app/gui/ui/pages/database.slint
+msgid "Takes"
+msgstr "Cantidad"
 
 #: app/gui/ui/pages/database.slint
 msgid "Making it"
@@ -3359,6 +3375,27 @@ msgid_plural "and {n} more pieces"
 msgstr[0] "y {n} pieza más"
 msgstr[1] "y {n} piezas más"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} and the rest of its set"
+msgstr "{} y el resto de su conjunto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "Combined with {}"
+msgstr "Combinado con {}"
+
+#: app/gui/src/views/database.rs
+msgid "Upgrade"
+msgstr "Mejora"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/database.rs
+msgid "and {n} more use"
+msgid_plural "and {n} more uses"
+msgstr[0] "y {n} uso más"
+msgstr[1] "y {n} usos más"
+
 #: app/gui/src/views/database.rs
 msgid "none in the box"
 msgstr "ninguno en la caja"
@@ -3403,6 +3440,15 @@ msgstr "Recompensas de submisión"
 #: app/gui/src/views/database.rs
 msgid "Extra rewards"
 msgstr "Recompensas extra"
+
+#: app/gui/src/views/database.rs
+msgid "Combination"
+msgstr "Combinación"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "value {} as Smithy provisions"
+msgstr "valor {} como provisiones de la herrería"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/database.rs

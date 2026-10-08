@@ -1,7 +1,7 @@
 import { ListView, ScrollView, ComboBox } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
-    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip, DbSource,
 } from "../common.slint";
 
 // Crown tints as on the Monsters page.
@@ -291,6 +291,46 @@ component QuestDetail inherits VerticalLayout {
     DropGrid { tables: q.rewards; }
 }
 
+// Rows of an item's sources or uses; a row with a kind links to its Database entry.
+component SourceTable inherits VerticalLayout {
+    in property <[DbSource]> rows;
+    in property <string> from;
+    in property <string> value;
+    in property <string> more;
+    HorizontalLayout {
+        height: 24px;
+        spacing: 12px;
+        Rectangle { width: Api.assets-ok ? 32px : 0px; }
+        Text { text: root.from; color: Tok.muted; font-size: Tok.small; horizontal-stretch: 1; }
+        Text { text: @tr("How"); color: Tok.muted; font-size: Tok.small; width: 260px; }
+        Text { text: root.value; color: Tok.muted; font-size: Tok.small; width: 70px; horizontal-alignment: right; }
+        Rectangle { width: 70px; }
+    }
+    for s in root.rows: HorizontalLayout {
+        height: 40px;
+        spacing: 12px;
+        accessible-role: text;
+        accessible-label: s.where + ", " + s.how + ", " + s.chance;
+        Rectangle {
+            width: Api.assets-ok ? 32px : 0px;
+            if Api.assets-ok: Asset { y: 4px; width: 32px; height: 32px; source: s.icon; available: s.has-icon; }
+        }
+        Text { text: s.where; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+        Text { text: s.how; vertical-alignment: center; width: 260px; color: Tok.muted; overflow: elide; }
+        Text { text: s.chance; vertical-alignment: center; width: 70px; horizontal-alignment: right; }
+        Rectangle {
+            width: 70px;
+            if s.kind != "": TextLink {
+                x: parent.width - self.width;
+                y: (parent.height - self.height) / 2;
+                text: @tr("Details");
+                clicked => { Api.open-db(s.kind, s.index); }
+            }
+        }
+    }
+    if root.more != "": Muted { text: root.more; }
+}
+
 component ItemDetail inherits VerticalLayout {
     property <DbItem> it: Api.db-item;
     padding: Tok.pad;
@@ -308,45 +348,22 @@ component ItemDetail inherits VerticalLayout {
         }
     }
     Hairline { }
-    HorizontalLayout {
-        spacing: 8px;
-        alignment: start;
-        SectionTitle { text: @tr("Where to get it"); }
+    SectionTitle { text: @tr("Where to get it"); }
+    if it.sources.length == 0: Muted { text: @tr("No carve, quest reward or combination gives it. It may come from gathering or the shops, which are not in the Database yet."); }
+    if it.sources.length > 0: SourceTable {
+        rows: it.sources;
+        from: @tr("From");
+        value: @tr("Chance");
+        more: it.more;
     }
-    if it.sources.length == 0: Muted { text: @tr("No carve or quest reward gives it. It may come from gathering, the shops or crafting, which are not in the Database yet."); }
-    if it.sources.length > 0: VerticalLayout {
-        HorizontalLayout {
-            height: 24px;
-            spacing: 12px;
-            Rectangle { width: Api.assets-ok ? 32px : 0px; }
-            Text { text: @tr("From"); color: Tok.muted; font-size: Tok.small; horizontal-stretch: 1; }
-            Text { text: @tr("How"); color: Tok.muted; font-size: Tok.small; width: 260px; }
-            Text { text: @tr("Chance"); color: Tok.muted; font-size: Tok.small; width: 70px; horizontal-alignment: right; }
-            Rectangle { width: 70px; }
-        }
-        for s in it.sources: HorizontalLayout {
-            height: 40px;
-            spacing: 12px;
-            accessible-role: text;
-            accessible-label: s.where + ", " + s.how + ", " + s.chance;
-            Rectangle {
-                width: Api.assets-ok ? 32px : 0px;
-                if Api.assets-ok: Asset { y: 4px; width: 32px; height: 32px; source: s.icon; available: s.has-icon; }
-            }
-            Text { text: s.where; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
-            Text { text: s.how; vertical-alignment: center; width: 260px; color: Tok.muted; overflow: elide; }
-            Text { text: s.chance; vertical-alignment: center; width: 70px; horizontal-alignment: right; }
-            Rectangle {
-                width: 70px;
-                TextLink {
-                    x: parent.width - self.width;
-                    y: (parent.height - self.height) / 2;
-                    text: @tr("Details");
-                    clicked => { Api.open-db(s.kind, s.index); }
-                }
-            }
-        }
-        if it.more != "": Muted { text: it.more; }
+    Hairline { }
+    SectionTitle { text: @tr("Used by"); }
+    if it.uses.length == 0: Muted { text: @tr("No Smithy recipe or combination takes it."); }
+    if it.uses.length > 0: SourceTable {
+        rows: it.uses;
+        from: @tr("For");
+        value: @tr("Takes");
+        more: it.uses-more;
     }
 }
 

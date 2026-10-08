@@ -251,6 +251,8 @@ pub struct Tables {
     pub weapon_tree: Vec<(u8, u16, u16, u8)>,
     /// data/provisions.csv: item -> (value, groups, 0 none).
     pub provisions: HashMap<u16, (u8, [u16; 3])>,
+    /// data/combinations.csv: (item, item, result, chance %).
+    pub combinations: Vec<(u16, u16, u16, u8)>,
     /// data/quest-rewards.csv: quest ID -> (slot, reward table).
     pub quest_rewards: HashMap<u32, Vec<(u8, u32)>>,
     /// data/rewards.csv: reward table -> (item, count, chance %).
@@ -435,6 +437,10 @@ pub fn tables() -> &'static Tables {
                 .iter()
                 .map(|r| (num(&r["item"]) as u16, (num(&r["value"]) as u8, ["group1", "group2", "group3"].map(|c| num(&r[c]) as u16))))
                 .collect(),
+            combinations: rows(include_str!("../../../data/combinations.csv"))
+                .iter()
+                .map(|r| (num(&r["item1"]) as u16, num(&r["item2"]) as u16, num(&r["result"]) as u16, num(&r["chance"]) as u8))
+                .collect(),
             carves: rows(include_str!("../../../data/monster-carves.csv"))
                 .iter()
                 .map(|r| Carve {
@@ -521,6 +527,8 @@ mod tests {
         assert!(t.weapon_tree.iter().all(|w| t.recipes.iter().any(|r| r.kind == format!("weapon:{}", w.0) && r.id == w.1 && r.level == 1 && !r.items.is_empty())));
         assert!(t.recipes.iter().filter(|r| r.group != 0).all(|r| t.provisions.values().any(|p| p.1.contains(&r.group))));
         assert!(t.recipes.iter().all(|r| r.items.iter().all(|m| m.1 > 0)));
+        assert_eq!(t.combinations.len(), 183);
+        assert!(t.combinations.iter().all(|c| c.0 != 0 && c.1 != 0 && c.2 != 0 && (1..=100).contains(&c.3)));
         assert!(t.quest_rewards.values().flatten().all(|(slot, rem)| *slot < 5 && t.rewards.contains_key(rem)));
         assert_eq!(t.rewards.values().filter(|r| r.iter().map(|x| x.2 as u32).sum::<u32>() != 100).count(), 1);
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));

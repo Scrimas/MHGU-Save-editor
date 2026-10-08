@@ -463,6 +463,8 @@ enum Source {
     Carve(usize, &'static str, &'static str, u8, u8),
     /// quest, reward slot, count, chance
     Reward(&'static mhgu_save::data::Quest, u8, u8, u8),
+    /// the two items combined, chance
+    Combo(u16, u16, u8),
 }
 
 /// Every carve and quest reward, by item.
@@ -481,8 +483,106 @@ fn sources() -> &'static HashMap<u16, Vec<Source>> {
                 }
             }
         }
+        for &(a, b, result, chance) in &t.combinations {
+            m.entry(result).or_default().push(Source::Combo(a, b, chance));
+        }
         m
     })
+}
+
+/// What takes an item: a Smithy recipe (with how many) or a combination.
+enum Use {
+    Recipe(&'static mhgu_save::data::Recipe, u8),
+    /// the other item, the result, chance
+    Combo(u16, u16, u8),
+}
+
+/// Every Smithy recipe and combination, by item taken.
+fn uses() -> &'static HashMap<u16, Vec<Use>> {
+    static U: std::sync::OnceLock<HashMap<u16, Vec<Use>>> = std::sync::OnceLock::new();
+    U.get_or_init(|| {
+        let t = tables();
+        let mut m: HashMap<u16, Vec<Use>> = HashMap::new();
+        for r in &t.recipes {
+            for &(item, count) in &r.items {
+                m.entry(item).or_default().push(Use::Recipe(r, count));
+            }
+        }
+        for &(a, b, result, chance) in &t.combinations {
+            m.entry(a).or_default().push(Use::Combo(b, result, chance));
+            if b != a {
+                m.entry(b).or_default().push(Use::Combo(a, result, chance));
+            }
+        }
+        m
+    })
+}
+
+/// A recipe's piece: its name, icon, and the Equipment tab entry (open-db index).
+fn recipe_piece(r: &mhgu_save::data::Recipe) -> (String, Option<Image>, i32) {
+    let link = |k: usize| (k * EQUIP_LINK + r.id as usize) as i32;
+    let n = assets::names();
+    if let Some(c) = r.kind.strip_prefix("weapon:").and_then(|c| c.parse::<u8>().ok()) {
+        let p = piece(Owner::Hunter, Kind::Weapon(c), r.id);
+        let k = SMITHY_CLASSES.iter().position(|&x| x == c).unwrap_or(0);
+        return (p.map_or_else(|| format!("#{}", r.id), |p| p.name.clone()), assets::equip_icon(Kind::Weapon(c).code(), p.map_or(1, |p| p.rarity)), link(k));
+    }
+    if r.kind == "deco" {
+        return (assets::item_name(r.id), assets::item_icon(r.id), link(19));
+    }
+    // armor: the part forged, or for levels the first part of the series
+    let parts: Vec<u8> = match r.kind.strip_prefix("armor:").and_then(|p| p.parse().ok()) {
+        Some(p) => vec![p],
+        None => (1..=5).collect(),
+    };
+    for p in parts {
+        if let Some(x) = n.armor.get(&p.to_string()).and_then(|v| v.iter().find(|x| x.id == r.id as u32)) {
+            let name = if r.kind == "armor" { trf("{} and the rest of its set", &[&x.name]) } else { x.name.clone() };
+            return (name, assets::equip_icon(p, x.rarity), link(13 + p as usize));
+        }
+    }
+    (trf("Armor #{}", &[&r.id]), None, 0)
+}
+
+/// Uses of an item listed before "and N more".
+const USES: usize = 40;
+
+/// What takes item `id`: combinations first, then the Smithy's recipes, forges first.
+fn item_uses(id: u16) -> (Vec<DbSource>, String) {
+    let all = uses().get(&id).map_or(&[][..], Vec::as_slice);
+    let mut v: Vec<(u8, DbSource)> = all
+        .iter()
+        .map(|u| match *u {
+            Use::Combo(other, result, chance) => {
+                let (img, has) = icon(assets::item_icon(result));
+                let src = DbSource {
+                    kind: "item".into(),
+                    index: result as i32,
+                    r#where: assets::item_name(result).into(),
+                    how: trf("Combined with {}", &[&assets::item_name(other)]).into(),
+                    chance: format!("{chance} %").into(),
+                    icon: img,
+                    has_icon: has,
+                };
+                (0, src)
+            }
+            Use::Recipe(r, count) => {
+                let (name, i, link) = recipe_piece(r);
+                let (img, has) = icon(i);
+                let how = match r.level {
+                    0 => tr("Forge").to_string(),
+                    1 if r.kind.starts_with("weapon") => tr("Upgrade").to_string(),
+                    l => trf("Level {}", &[&l]),
+                };
+                let src = DbSource { kind: if link > 0 { "equip" } else { "" }.into(), index: link, r#where: name.into(), how: how.into(), chance: format!("×{count}").into(), icon: img, has_icon: has };
+                (1 + r.level.min(1), src)
+            }
+        })
+        .collect();
+    v.sort_by_key(|x| x.0);
+    let more = v.len().saturating_sub(USES);
+    let more = if more > 0 { trn("and {n} more use", "and {n} more uses", more as i64, &[]) } else { String::new() };
+    (v.into_iter().take(USES).map(|x| x.1).collect(), more)
 }
 
 /// Items in ID order, as the item picker lists them.
@@ -563,6 +663,17 @@ fn item(id: u16, have: &HashMap<u16, u32>) -> DbItem {
                     let src = DbSource { kind: "quest".into(), index: q.index as i32, r#where: q.name.clone().into(), how: how.into(), ..Default::default() };
                     (count, chance, src)
                 }
+                Source::Combo(a, b, chance) => {
+                    let (img, has) = icon(assets::item_icon(a));
+                    let src = DbSource {
+                        r#where: format!("{} + {}", assets::item_name(a), assets::item_name(b)).into(),
+                        how: tr("Combination").into(),
+                        icon: img,
+                        has_icon: has,
+                        ..Default::default()
+                    };
+                    (1, chance, src)
+                }
             };
             let how = if count > 1 { format!("{} · ×{count}", src.how) } else { src.how.to_string() };
             (chance, DbSource { how: how.into(), chance: format!("{chance} %").into(), ..src })
@@ -570,10 +681,17 @@ fn item(id: u16, have: &HashMap<u16, u32>) -> DbItem {
         .collect();
     all.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.r#where.cmp(&b.1.r#where)));
     let more = all.len().saturating_sub(SOURCES);
+    let (used, uses_more) = item_uses(id);
+    let mut sub = vec![format!("#{id}"), in_the_box(have, id)];
+    if let Some(&(value, _)) = t.provisions.get(&id) {
+        sub.push(trf("value {} as Smithy provisions", &[&value]));
+    }
     DbItem {
         index: id as i32,
         name: assets::item_name(id).into(),
-        sub: format!("#{id} · {}", in_the_box(have, id)).into(),
+        sub: sub.join(" · ").into(),
+        uses: model(used),
+        uses_more: uses_more.into(),
         icon: img,
         has_icon: has,
         more: if more > 0 { trn("and {n} more source", "and {n} more sources", more as i64, &[]) } else { String::new() }.into(),

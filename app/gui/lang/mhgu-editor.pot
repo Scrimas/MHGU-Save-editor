@@ -1154,12 +1154,16 @@ msgstr ""
 msgid "Rewards"
 msgstr ""
 
+#: app/gui/ui/pages/database.slint
+msgid "How"
+msgstr ""
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
 msgid "Where to get it"
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
-msgid "No carve or quest reward gives it. It may come from gathering, the shops or crafting, which are not in the Database yet."
+msgid "No carve, quest reward or combination gives it. It may come from gathering or the shops, which are not in the Database yet."
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
@@ -1167,11 +1171,23 @@ msgid "From"
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
-msgid "How"
+msgid "Chance"
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
-msgid "Chance"
+msgid "Used by"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "No Smithy recipe or combination takes it."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "For"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Takes"
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
@@ -3326,6 +3342,27 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} and the rest of its set"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Combined with {}"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Upgrade"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "and {n} more use"
+msgid_plural "and {n} more uses"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/database.rs
 msgid "none in the box"
 msgstr ""
 
@@ -3368,6 +3405,15 @@ msgstr ""
 
 #: app/gui/src/views/database.rs
 msgid "Extra rewards"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Combination"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "value {} as Smithy provisions"
 msgstr ""
 
 #: app/gui/src/views/database.rs
