@@ -136,6 +136,8 @@ struct View {
     db_missing: bool,
     /// monster shown in the Database (0 none: the first listed)
     db_monster: usize,
+    /// carve rank shown (low, high, g; the monster's highest when it has not this one)
+    db_rank: String,
     field_filter: String,
     field_sel: i32,
     toast_act: ToastAct,

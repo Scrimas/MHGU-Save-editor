@@ -747,7 +747,8 @@ msgstr "Das Spiel erhöht die Sternstufe, sobald alle Dringenden Quests einer St
 msgid "As character creation sets it. Features and clothing are numbered as the game stores them."
 msgstr "Wie die Charaktererstellung es festlegt. Merkmale und Kleidung sind nummeriert, wie das Spiel sie speichert."
 
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/src/views/database.rs
+#: app/gui/ui/pages/character.slint
 msgid "Body"
 msgstr "Körper"
 
@@ -799,11 +800,11 @@ msgstr "Das Spiel addiert Niedrigrang und G-Rang und begrenzt die Summe auf 20.0
 msgid "Village"
 msgstr "Dorf"
 
-#: app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
 msgid "Low rank"
 msgstr "Niedrigrang"
 
-#: app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
 msgid "G rank"
 msgstr "G-Rang"
 
@@ -1100,6 +1101,10 @@ msgid "Missing"
 msgstr "Fehlt"
 
 #: app/gui/ui/pages/database.slint
+msgid "Carves"
+msgstr "Schnitzen"
+
+#: app/gui/ui/pages/database.slint
 msgid "Edit on the Monsters page"
 msgstr "Auf der Seite Monster bearbeiten"
 
@@ -1144,6 +1149,10 @@ msgstr "Minikrone"
 #: app/gui/ui/pages/database.slint
 msgid "Size {} % or smaller, best quests first."
 msgstr "Größe {} % oder weniger, beste Quests zuerst."
+
+#: app/gui/ui/pages/database.slint
+msgid "The game has no carve table for it."
+msgstr "Das Spiel hat keine Schnitztabelle für dieses Monster."
 
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
@@ -3140,6 +3149,36 @@ msgstr "Keine Quest gibt ihm Goldgröße."
 msgid "No quest gives it a mini size."
 msgstr "Keine Quest gibt ihm Minigröße."
 
+#: app/gui/src/views/database.rs
+msgid "High rank"
+msgstr "Hochrang"
+
+#: app/gui/src/views/database.rs app/gui/src/views/palicoes.rs
+msgid "Tail"
+msgstr "Schwanz"
+
+#: app/gui/src/views/database.rs
+msgid "Shiny drop"
+msgstr "Glänzender Gegenstand"
+
+#: app/gui/src/views/database.rs
+msgid "Other"
+msgstr "Sonstige"
+
+#: app/gui/src/views/database.rs
+msgid "none in the box"
+msgstr "keins in der Box"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in the box"
+msgstr "{} in der Box"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} sets of tables in this rank: the quest picks one (the stronger quests the later ones). The first is shown."
+msgstr "{} Tabellensätze in diesem Rang: Die Quest wählt einen (stärkere Quests die späteren). Der erste wird gezeigt."
+
 #: app/gui/src/views/equipment_page.rs
 msgid "your current gear"
 msgstr "der aktuellen Ausrüstung"
@@ -3759,10 +3798,6 @@ msgstr "Farbe des rechten Auges"
 #: app/gui/src/views/palicoes.rs
 msgid "Ears"
 msgstr "Ohren"
-
-#: app/gui/src/views/palicoes.rs
-msgid "Tail"
-msgstr "Schwanz"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs

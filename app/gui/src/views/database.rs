@@ -2,7 +2,7 @@
 //! to the pages that edit them, and those pages link back.
 
 use super::*;
-use crate::{CrownOdds, DbMonster, DbRow};
+use crate::{CarveItem, CarveTable, CrownOdds, DbMonster, DbRow};
 
 /// Quests a crown list shows before "and N more".
 const SHOWN: usize = 8;
@@ -139,6 +139,7 @@ fn monster(st: &State, i: usize) -> DbMonster {
         crown: crown.large as i32,
         ..Default::default()
     };
+    carves(st, i, &mut d);
     if let Some(h) = meta.family_of {
         d.size_note = trf("Its size record is kept by {}.", &[&name(h)]).into();
         return d;
@@ -175,7 +176,62 @@ fn monster(st: &State, i: usize) -> DbMonster {
     d
 }
 
+/// The carve tables of monster `i` in the rank picked (the highest it has by default),
+/// each item with what the item box holds of it.
+fn carves(st: &State, i: usize, d: &mut DbMonster) {
+    let t = tables();
+    let ranks: Vec<(&str, &str)> = [("low", tr("Low rank")), ("high", tr("High rank")), ("g", tr("G rank"))]
+        .into_iter()
+        .filter(|(r, _)| t.carves.iter().any(|c| c.monster == i && c.rank == *r))
+        .collect();
+    let Some(last) = ranks.len().checked_sub(1) else { return };
+    let want = view(|v| v.db_rank.clone());
+    let k = ranks.iter().position(|(r, _)| *r == want).unwrap_or(last);
+    let rank = ranks[k].0;
+    let mut have: std::collections::HashMap<u16, u32> = Default::default();
+    for st in items::all(st.save(), st.base(), Store::Box) {
+        *have.entry(st.id).or_default() += st.count as u32;
+    }
+    let rows: Vec<_> = t.carves.iter().filter(|c| c.monster == i && c.rank == rank).collect();
+    let tables = [("body", tr("Body")), ("tail", tr("Tail")), ("shiny", tr("Shiny drop")), ("other", tr("Other"))]
+        .into_iter()
+        .filter_map(|(kind, title)| {
+            let items: Vec<CarveItem> = rows
+                .iter()
+                .filter(|c| c.kind == kind)
+                .map(|c| {
+                    let (img, has) = icon(assets::item_icon(c.item));
+                    let n = have.get(&c.item).copied().unwrap_or(0);
+                    let name = assets::item_name(c.item);
+                    CarveItem {
+                        name: if c.count > 1 { format!("{name} ×{}", c.count) } else { name }.into(),
+                        icon: img,
+                        has_icon: has,
+                        chance: format!("{} %", c.chance).into(),
+                        have: if n == 0 { tr("none in the box").to_string() } else { trf("{} in the box", &[&num(n)]) }.into(),
+                    }
+                })
+                .collect();
+            (!items.is_empty()).then(|| CarveTable { title: title.into(), items: model(items) })
+        })
+        .collect();
+    let sets = rows.first().map_or(1, |c| c.sets);
+    d.carve_ranks = strings(ranks.iter().map(|r| r.1.to_string()));
+    d.carve_ids = strings(ranks.iter().map(|r| r.0.to_string()));
+    d.carve_rank = k as i32;
+    d.carves = model(tables);
+    d.carve_note = if sets > 1 {
+        trf("{} sets of tables in this rank: the quest picks one (the stronger quests the later ones). The first is shown.", &[&sets]).into()
+    } else {
+        SharedString::default()
+    };
+}
+
 pub(super) fn wire_database(ui: &AppWindow, st: &Shared) {
+    on!(ui, st, on_select_db_rank, |ui, s, r: SharedString| {
+        view(|v| v.db_rank = r.to_string());
+        let _ = (&ui, &s);
+    });
     on!(ui, st, on_filter_db, |ui, s| {
         let api = ui.global::<Api>();
         view(|v| {

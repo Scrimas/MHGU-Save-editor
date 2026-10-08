@@ -747,7 +747,8 @@ msgstr "El juego sube el nivel de estrellas al completar todas las misiones urge
 msgid "As character creation sets it. Features and clothing are numbered as the game stores them."
 msgstr "Como lo fija la creación del personaje. Rasgos y ropa van numerados como los guarda el juego."
 
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/src/views/database.rs
+#: app/gui/ui/pages/character.slint
 msgid "Body"
 msgstr "Cuerpo"
 
@@ -799,11 +800,11 @@ msgstr "El juego suma rango bajo y rango G y limita el total a 20.000."
 msgid "Village"
 msgstr "Aldea"
 
-#: app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
 msgid "Low rank"
 msgstr "Rango bajo"
 
-#: app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
 msgid "G rank"
 msgstr "Rango G"
 
@@ -1100,6 +1101,10 @@ msgid "Missing"
 msgstr "Falta"
 
 #: app/gui/ui/pages/database.slint
+msgid "Carves"
+msgstr "Tallas"
+
+#: app/gui/ui/pages/database.slint
 msgid "Edit on the Monsters page"
 msgstr "Editar en la página Monstruos"
 
@@ -1144,6 +1149,10 @@ msgstr "Corona mini"
 #: app/gui/ui/pages/database.slint
 msgid "Size {} % or smaller, best quests first."
 msgstr "Tamaño {} % o menos, mejores misiones primero."
+
+#: app/gui/ui/pages/database.slint
+msgid "The game has no carve table for it."
+msgstr "El juego no tiene tabla de talla para este monstruo."
 
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
@@ -3140,6 +3149,36 @@ msgstr "Ninguna misión le da tamaño de oro."
 msgid "No quest gives it a mini size."
 msgstr "Ninguna misión le da tamaño mini."
 
+#: app/gui/src/views/database.rs
+msgid "High rank"
+msgstr "Rango alto"
+
+#: app/gui/src/views/database.rs app/gui/src/views/palicoes.rs
+msgid "Tail"
+msgstr "Cola"
+
+#: app/gui/src/views/database.rs
+msgid "Shiny drop"
+msgstr "Objeto brillante"
+
+#: app/gui/src/views/database.rs
+msgid "Other"
+msgstr "Otros"
+
+#: app/gui/src/views/database.rs
+msgid "none in the box"
+msgstr "ninguno en la caja"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in the box"
+msgstr "{} en la caja"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} sets of tables in this rank: the quest picks one (the stronger quests the later ones). The first is shown."
+msgstr "{} juegos de tablas en este rango: la misión elige uno (las misiones más fuertes, los siguientes). Se muestra el primero."
+
 #: app/gui/src/views/equipment_page.rs
 msgid "your current gear"
 msgstr "tu equipo actual"
@@ -3759,10 +3798,6 @@ msgstr "Color del ojo derecho"
 #: app/gui/src/views/palicoes.rs
 msgid "Ears"
 msgstr "Orejas"
-
-#: app/gui/src/views/palicoes.rs
-msgid "Tail"
-msgstr "Cola"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs

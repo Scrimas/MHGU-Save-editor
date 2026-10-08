@@ -123,6 +123,16 @@ gold chance in 45 quests, 23 % at best (*Paint It Gold*), 10 % elsewhere.
 rounding is not checked. Every crown that a quest range allows shows up with a
 chance (test `crown_odds_cover_every_crown`).
 
+### Carves
+
+[`data/monster-carves.csv`](../data/monster-carves.csv), written by
+[`tools/monster_carves.py`](../tools/monster_carves.py) from the carve tables in each
+monster's arc (`enemy/hagi/hagi_sN_emXXX_YY`; layout in the tool's header): body, tail
+and shiny-drop tables per rank, plus the rarer kinds (broken parts, items dropped or
+mined) as "other". Each table's chances sum to 100. A quest can pick one of up to 3 sets
+(deviants and a few others); the Database shows set 1 and says when there are more.
+Hitzones are in the files too (`dt_tune`) but without part names, so they are left out.
+
 The size table `em_size_scale_data` holds per monster `mQuestSizeMin` / `mQuestSizeMax`,
 equal to the quest bounds except for Rathalos (125 against 130), Kecha Wacha (115
 against 123) and Gravios (88 against 79 in *Gravios Backbreaker*). Whether the game clamps to it

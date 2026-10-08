@@ -126,6 +126,20 @@ pub struct PalicoAction {
     pub cost: u8,
 }
 
+/// data/monster-carves.csv: one item of a monster's carve table (set 1 of `sets`).
+#[derive(Debug, Clone)]
+pub struct Carve {
+    pub monster: usize,
+    /// low, high, g
+    pub rank: String,
+    pub sets: u8,
+    /// body, tail, shiny, other
+    pub kind: String,
+    pub item: u16,
+    pub count: u8,
+    pub chance: u8,
+}
+
 /// data/palico-looks.csv: one look of a Palico and the choices new Palicoes get.
 #[derive(Debug, Clone)]
 pub struct PalicoLook {
@@ -208,6 +222,7 @@ pub struct Tables {
     pub quest_monsters: Vec<(u32, usize, u16, usize)>,
     /// data/size-variation.csv by table: (scale rate in hundredths, chance %).
     pub size_variation: Vec<Vec<(u16, u8)>>,
+    pub carves: Vec<Carve>,
     pub arena: Vec<ArenaQuest>,
     /// data/palico-levels.csv, by level - 1: (free support move slots, skill slots).
     pub palico_levels: Vec<(u8, u8)>,
@@ -346,6 +361,18 @@ pub fn tables() -> &'static Tables {
                 t[k].push((num(&r["rate"]) as u16, num(&r["chance"]) as u8));
                 t
             }),
+            carves: rows(include_str!("../../../data/monster-carves.csv"))
+                .iter()
+                .map(|r| Carve {
+                    monster: num(&r["monster"]) as usize,
+                    rank: r["rank"].clone(),
+                    sets: num(&r["sets"]) as u8,
+                    kind: r["kind"].clone(),
+                    item: num(&r["item"]) as u16,
+                    count: num(&r["count"]) as u8,
+                    chance: num(&r["chance"]) as u8,
+                })
+                .collect(),
             quest_sizes: rows(include_str!("../../../data/quest-sizes.csv"))
                 .iter()
                 .map(|r| (num(&r["index"]) as usize, (num(&r["min"]) as u16, num(&r["max"]) as u16)))
@@ -408,6 +435,12 @@ mod tests {
         assert_eq!(t.size_variation.len(), 52);
         assert!(t.size_variation.iter().all(|v| v.iter().map(|&(_, p)| p as u32).sum::<u32>() == 100));
         assert!(t.quest_monsters.iter().all(|&(_, _, _, k)| k < 52));
+        // every carve table sums to 100 %
+        let mut sums: std::collections::HashMap<(usize, &str, &str), u32> = Default::default();
+        for c in &t.carves {
+            *sums.entry((c.monster, &c.rank, &c.kind)).or_default() += c.chance as u32;
+        }
+        assert!(sums.iter().all(|(k, &v)| v == 100 || k.2 == "other"), "carve tables");
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));
     }
 }

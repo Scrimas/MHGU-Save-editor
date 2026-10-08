@@ -730,7 +730,7 @@ msgstr ""
 msgid "As character creation sets it. Features and clothing are numbered as the game stores them."
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/src/views/database.rs app/gui/ui/pages/character.slint
 msgid "Body"
 msgstr ""
 
@@ -782,11 +782,11 @@ msgstr ""
 msgid "Village"
 msgstr ""
 
-#: app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
 msgid "Low rank"
 msgstr ""
 
-#: app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
 msgid "G rank"
 msgstr ""
 
@@ -1080,6 +1080,10 @@ msgid "Missing"
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
+msgid "Carves"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
 msgid "Edit on the Monsters page"
 msgstr ""
 
@@ -1120,6 +1124,10 @@ msgstr ""
 #: app/gui/ui/pages/database.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Size {} % or smaller, best quests first."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "The game has no carve table for it."
 msgstr ""
 
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
@@ -3111,6 +3119,36 @@ msgstr ""
 msgid "No quest gives it a mini size."
 msgstr ""
 
+#: app/gui/src/views/database.rs
+msgid "High rank"
+msgstr ""
+
+#: app/gui/src/views/database.rs app/gui/src/views/palicoes.rs
+msgid "Tail"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Shiny drop"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Other"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "none in the box"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} in the box"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} sets of tables in this rank: the quest picks one (the stronger quests the later ones). The first is shown."
+msgstr ""
+
 #: app/gui/src/views/equipment_page.rs
 msgid "your current gear"
 msgstr ""
@@ -3729,10 +3767,6 @@ msgstr ""
 
 #: app/gui/src/views/palicoes.rs
 msgid "Ears"
-msgstr ""
-
-#: app/gui/src/views/palicoes.rs
-msgid "Tail"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs

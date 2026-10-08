@@ -107,6 +107,47 @@ component OddsList inherits VerticalLayout {
     if root.more != "": Muted { text: root.more; }
 }
 
+// A monster's carve tables of one rank, side by side.
+component Carves inherits VerticalLayout {
+    in property <DbMonster> m;
+    spacing: 8px;
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        SectionTitle { text: @tr("Carves"); }
+        for r[i] in m.carve-ranks: Chip {
+            text: r;
+            active: i == m.carve-rank;
+            clicked => { Api.select-db-rank(m.carve-ids[i]); }
+        }
+    }
+    if m.carve-note != "": Muted { text: m.carve-note; }
+    HorizontalLayout {
+        spacing: 24px;
+        alignment: start;
+        for t in m.carves: VerticalLayout {
+            width: clamp((root.width - 72px) / 4, 200px, 300px);
+            spacing: 2px;
+            alignment: start;
+            Text { text: t.title; color: Tok.muted; font-size: Tok.small; height: 22px; }
+            for c in t.items: HorizontalLayout {
+                height: 36px;
+                spacing: 8px;
+                accessible-role: text;
+                accessible-label: c.name + ", " + c.chance + ", " + c.have;
+                if Api.assets-ok: Asset { y: 6px; width: 24px; height: 24px; source: c.icon; available: c.has-icon; }
+                VerticalLayout {
+                    horizontal-stretch: 1;
+                    alignment: center;
+                    Text { text: c.name; overflow: elide; }
+                    Text { text: c.have; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+                }
+                Text { text: c.chance; horizontal-alignment: right; vertical-alignment: center; width: 44px; }
+            }
+        }
+    }
+}
+
 component MonsterDetail inherits VerticalLayout {
     property <DbMonster> m: Api.db-monster;
     padding: Tok.pad;
@@ -164,6 +205,13 @@ component MonsterDetail inherits VerticalLayout {
         rows: m.mini-odds;
         more: m.mini-more;
     }
+    Hairline { }
+    if m.carve-ranks.length == 0: VerticalLayout {
+        spacing: 8px;
+        SectionTitle { text: @tr("Carves"); }
+        Muted { text: @tr("The game has no carve table for it."); }
+    }
+    if m.carve-ranks.length > 0: Carves { m: root.m; }
 }
 
 component MonsterTab inherits HorizontalLayout {

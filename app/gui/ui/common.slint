@@ -85,13 +85,19 @@ export struct DbRow { index: int, name: string, sub: string, icon: image, has-ic
 // A quest's chance (0-1) to give a crown size.
 export struct CrownOdds { quest: string, sub: string, chance: float, label: string }
 
+// One item of a carve table; `have` is what the item box holds.
+export struct CarveItem { name: string, icon: image, has-icon: bool, chance: string, have: string }
+export struct CarveTable { title: string, items: [CarveItem] }
+
 // A monster in the Database. The size scale runs from `lo` to `hi` (%); min/max are the
-// save's record (0 = none). crown: 0 none, 1 silver, 2 gold.
+// save's record (0 = none). crown: 0 none, 1 silver, 2 gold. Carves of the rank
+// `carve-rank` of `carve-ranks` (their ids in `carve-ids`).
 export struct DbMonster {
     index: int, name: string, sub: string, icon: image, has-icon: bool,
     has-size: bool, fixed: bool, size-note: string,
     lo: int, hi: int, min: int, max: int, mini-le: int, silver-ge: int, gold-ge: int, mini: bool, crown: int,
     gold-odds: [CrownOdds], gold-more: string, mini-odds: [CrownOdds], mini-more: string,
+    carve-ranks: [string], carve-ids: [string], carve-rank: int, carves: [CarveTable], carve-note: string,
 }
 
 // max: most of the item one slot holds (pouch: the item's carry limit)
@@ -481,6 +487,7 @@ export global Api {
     in-out property <bool> db-missing;
     callback filter-db();
     callback select-db(int);
+    callback select-db-rank(string);
     callback open-db(string /* kind */, int);         // another page's entry in the Database
     callback show-in-editor(string /* kind */, int);  // a Database entry on its own page
 
