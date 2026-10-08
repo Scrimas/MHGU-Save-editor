@@ -405,7 +405,7 @@ msgid "Palicoes"
 msgstr "Kameraden"
 
 #: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/quests.slint
 msgid "Quests"
 msgstr "Quests"
 
@@ -424,7 +424,7 @@ msgid "Monsters"
 msgstr "Monster"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
+#: app/gui/ui/pages/monsters.slint app/gui/ui/pages/quests.slint
 msgid "Database"
 msgstr "Datenbank"
 
@@ -1154,6 +1154,30 @@ msgstr "Größe {} % oder weniger, beste Quests zuerst."
 msgid "The game has no carve table for it."
 msgstr "Das Spiel hat keine Schnitztabelle für dieses Monster."
 
+#: app/gui/ui/pages/database.slint
+msgid "Edit on the Quests page"
+msgstr "Auf der Seite Quests bearbeiten"
+
+#: app/gui/ui/pages/database.slint
+msgid "No large monster with a size in this quest."
+msgstr "Kein großes Monster mit Größe in dieser Quest."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Monster"
+msgstr "Monster"
+
+#: app/gui/ui/pages/database.slint
+msgid "Can be"
+msgstr "Spanne"
+
+#: app/gui/ui/pages/database.slint
+msgid "Details"
+msgstr "Details"
+
+#: app/gui/ui/pages/database.slint
+msgid "Rewards"
+msgstr "Belohnungen"
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
 msgstr "Monster suchen"
@@ -1169,6 +1193,22 @@ msgstr "Kein Monster passt."
 #: app/gui/ui/pages/database.slint
 msgid "Pick a monster."
 msgstr "Ein Monster wählen."
+
+#: app/gui/ui/pages/database.slint
+msgid "Search quests"
+msgstr "Quests suchen"
+
+#: app/gui/ui/pages/database.slint
+msgid "Not cleared"
+msgstr "Nicht abgeschlossen"
+
+#: app/gui/ui/pages/database.slint
+msgid "No quest matches."
+msgstr "Keine Quest passt."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a quest."
+msgstr "Eine Quest wählen."
 
 #: app/gui/ui/pages/database.slint
 msgid "The game's own data, next to this save. Nothing on this page is edited."
@@ -1547,10 +1587,6 @@ msgstr "Alle Kronen…"
 #: app/gui/ui/pages/monsters.slint
 msgid "Large only"
 msgstr "Nur große"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Monster"
-msgstr "Monster"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
 msgid "Hunted"
@@ -3118,6 +3154,39 @@ msgstr "Mini fehlt"
 msgid "mini and gold missing"
 msgstr "Mini und Gold fehlen"
 
+#: app/gui/src/views/database.rs
+msgid "none in the box"
+msgstr "keins in der Box"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in the box"
+msgstr "{} in der Box"
+
+#: app/gui/src/views/database.rs
+msgid "Main rewards"
+msgstr "Hauptbelohnungen"
+
+#: app/gui/src/views/database.rs
+msgid "More main rewards"
+msgstr "Weitere Hauptbelohnungen"
+
+#: app/gui/src/views/database.rs
+msgid "Subquest rewards"
+msgstr "Nebenquest-Belohnungen"
+
+#: app/gui/src/views/database.rs
+msgid "Extra rewards"
+msgstr "Zusatzbelohnungen"
+
+#: app/gui/src/views/database.rs
+msgid "This quest is not in the game's files: it comes as a download."
+msgstr "Diese Quest ist nicht in den Spieldateien: Sie wird heruntergeladen."
+
+#: app/gui/src/views/database.rs
+msgid "The chance of each item per reward drawn; how many are drawn is not in these files."
+msgstr "Die Chance jedes Gegenstands pro gezogener Belohnung; wie viele gezogen werden, steht nicht in diesen Dateien."
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/database.rs
 msgid "Its size record is kept by {}."
@@ -3164,15 +3233,6 @@ msgstr "Glänzender Gegenstand"
 #: app/gui/src/views/database.rs
 msgid "Other"
 msgstr "Sonstige"
-
-#: app/gui/src/views/database.rs
-msgid "none in the box"
-msgstr "keins in der Box"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/database.rs
-msgid "{} in the box"
-msgstr "{} in der Box"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/database.rs

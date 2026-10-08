@@ -85,9 +85,15 @@ export struct DbRow { index: int, name: string, sub: string, icon: image, has-ic
 // A quest's chance (0-1) to give a crown size.
 export struct CrownOdds { quest: string, sub: string, chance: float, label: string }
 
-// One item of a carve table; `have` is what the item box holds.
-export struct CarveItem { name: string, icon: image, has-icon: bool, chance: string, have: string }
-export struct CarveTable { title: string, items: [CarveItem] }
+// One item of a carve or reward table; `have` is what the item box holds.
+export struct DropItem { name: string, icon: image, has-icon: bool, chance: string, have: string }
+export struct DropTable { title: string, items: [DropItem] }
+
+// A quest's monster in the Database: size %, the sizes it can roll, crown chances.
+export struct DbQuestMonster { index: int, name: string, icon: image, has-icon: bool, size: string, range: string, gold: string, mini: string }
+
+// A quest in the Database (index -1: none). `note` says why rewards are missing.
+export struct DbQuest { index: int, name: string, sub: string, monsters: [DbQuestMonster], rewards: [DropTable], note: string }
 
 // A monster in the Database. The size scale runs from `lo` to `hi` (%); min/max are the
 // save's record (0 = none). crown: 0 none, 1 silver, 2 gold. Carves of the rank
@@ -97,7 +103,7 @@ export struct DbMonster {
     has-size: bool, fixed: bool, size-note: string,
     lo: int, hi: int, min: int, max: int, mini-le: int, silver-ge: int, gold-ge: int, mini: bool, crown: int,
     gold-odds: [CrownOdds], gold-more: string, mini-odds: [CrownOdds], mini-more: string,
-    carve-ranks: [string], carve-ids: [string], carve-rank: int, carves: [CarveTable], carve-note: string,
+    carve-ranks: [string], carve-ids: [string], carve-rank: int, carves: [DropTable], carve-note: string,
 }
 
 // max: most of the item one slot holds (pouch: the item's carry limit)
@@ -483,10 +489,13 @@ export global Api {
     in-out property <int> db-tab;
     in property <[DbRow]> db-monsters;
     in property <DbMonster> db-monster;
+    in property <[DbRow]> db-quests;
+    in property <int> db-row;  // row of the entry shown in its tab's list
+    in property <DbQuest> db-quest;
     in-out property <string> db-search;
     in-out property <bool> db-missing;
     callback filter-db();
-    callback select-db(int);
+    callback select-db(int);  // an entry of the tab shown
     callback select-db-rank(string);
     callback open-db(string /* kind */, int);         // another page's entry in the Database
     callback show-in-editor(string /* kind */, int);  // a Database entry on its own page

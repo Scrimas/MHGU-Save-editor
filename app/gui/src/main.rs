@@ -144,8 +144,8 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             ("palicoes", &["sel", n]) => api.invoke_select_palico(num(n)),
             ("advanced", &["sel", n]) => api.invoke_select_field(num(n)),
             ("database", &["sel", n]) => api.invoke_select_db(num(n)),
-            ("monsters", &["db", n]) => api.invoke_open_db("monster".into(), num(n)),
-            ("database", &["edit", n]) => api.invoke_show_in_editor("monster".into(), num(n)),
+            (_, &["db", kind, n]) => api.invoke_open_db(kind.into(), num(n)),
+            ("database", &["edit", kind, n]) => api.invoke_show_in_editor(kind.into(), num(n)),
             (_, &["sel", n]) => api.invoke_select_equip(num(n)),
             (_, &["store", n]) => {
                 api.set_item_store(num(n));

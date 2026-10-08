@@ -852,3 +852,17 @@ deserializer `0x37539c` stores the last u16 of each `questData_*.ext` file there
 Hub) and the 113 Training quests. So tours and Training never re-roll the rotation and
 never advance the quest counter. The other bits of that u16 are UNRESOLVED.
 
+## Reward tables — `quest/rem/rem_XXXXXX`
+
+Each quest's `questLink` names 5 reward tables; their items and chances are in
+[`data/rewards.csv`](../data/rewards.csv), which quest uses which in
+[`data/quest-rewards.csv`](../data/quest-rewards.csv), written by
+[`tools/quest_rewards.py`](../tools/quest_rewards.py) (layout in its header). The
+Database's Quests tab shows them with each item's chance and what the item box holds.
+
+**DERIVED**: the slots are named by what they hold: 0 main rewards (the target's parts,
+e.g. Rajang pelts in *Paint It Gold*), 1 more main rewards (bones, spheres, charms),
+2 and 3 extra rewards (Distinction, Horns Coins), 4 the subquest's. How many items each
+slot draws is not in these files. One table sums to 104 %; the rest to 100. The 37
+event quests downloaded separately have no files in the game.
+

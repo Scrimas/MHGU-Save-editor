@@ -51,7 +51,7 @@ For a portable install or another emulator, add its folder in **Settings…** or
 | Requests | Villager requests: accepted (quest posted on the board) and reported |
 | Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt) |
 | Monsters | Hunted and captured counts, smallest and largest sizes (checked against the sizes the game's quests give), Hunter's Notes |
-| Database | The game's own data next to the save, read-only: per monster, its size record against the crown sizes, the chance of a mini or gold crown in each quest (Derived) and its carves per rank with what the item box holds; linked from and to the Monsters page |
+| Database | The game's own data next to the save, read-only: per monster, its size record against the crown sizes, the chance of a mini or gold crown in each quest (Derived) and its carves per rank with what the item box holds; per quest, its monsters' sizes and crown chances and its reward tables (Derived); linked from and to the Monsters and Quests pages |
 | Save map | Every byte range of the save, named from the game's own loader (read-only) |
 
 All three character slots are supported.

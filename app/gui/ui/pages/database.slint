@@ -1,7 +1,7 @@
 import { ListView, ScrollView } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
-    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest,
 } from "../common.slint";
 
 // Crown tints as on the Monsters page.
@@ -107,6 +107,34 @@ component OddsList inherits VerticalLayout {
     if root.more != "": Muted { text: root.more; }
 }
 
+// Carve or reward tables side by side (at most 5); each item with its chance and what
+// the item box holds.
+component DropGrid inherits HorizontalLayout {
+    in property <[DropTable]> tables;
+    spacing: 24px;
+    alignment: start;
+    for t in root.tables: VerticalLayout {
+        width: clamp((root.width - 24px * max(3, tables.length - 1)) / max(4, tables.length), 160px, 300px);
+        spacing: 2px;
+        alignment: start;
+        Text { text: t.title; color: Tok.muted; font-size: Tok.small; height: 22px; overflow: elide; }
+        for c in t.items: HorizontalLayout {
+            height: 36px;
+            spacing: 8px;
+            accessible-role: text;
+            accessible-label: c.name + ", " + c.chance + ", " + c.have;
+            if Api.assets-ok: Asset { y: 6px; width: 24px; height: 24px; source: c.icon; available: c.has-icon; }
+            VerticalLayout {
+                horizontal-stretch: 1;
+                alignment: center;
+                Text { text: c.name; overflow: elide; }
+                Text { text: c.have; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+            }
+            Text { text: c.chance; horizontal-alignment: right; vertical-alignment: center; width: 44px; }
+        }
+    }
+}
+
 // A monster's carve tables of one rank, side by side.
 component Carves inherits VerticalLayout {
     in property <DbMonster> m;
@@ -122,30 +150,7 @@ component Carves inherits VerticalLayout {
         }
     }
     if m.carve-note != "": Muted { text: m.carve-note; }
-    HorizontalLayout {
-        spacing: 24px;
-        alignment: start;
-        for t in m.carves: VerticalLayout {
-            width: clamp((root.width - 72px) / 4, 200px, 300px);
-            spacing: 2px;
-            alignment: start;
-            Text { text: t.title; color: Tok.muted; font-size: Tok.small; height: 22px; }
-            for c in t.items: HorizontalLayout {
-                height: 36px;
-                spacing: 8px;
-                accessible-role: text;
-                accessible-label: c.name + ", " + c.chance + ", " + c.have;
-                if Api.assets-ok: Asset { y: 6px; width: 24px; height: 24px; source: c.icon; available: c.has-icon; }
-                VerticalLayout {
-                    horizontal-stretch: 1;
-                    alignment: center;
-                    Text { text: c.name; overflow: elide; }
-                    Text { text: c.have; color: Tok.muted; font-size: Tok.small; overflow: elide; }
-                }
-                Text { text: c.chance; horizontal-alignment: right; vertical-alignment: center; width: 44px; }
-            }
-        }
-    }
+    DropGrid { tables: m.carves; }
 }
 
 component MonsterDetail inherits VerticalLayout {
@@ -214,56 +219,173 @@ component MonsterDetail inherits VerticalLayout {
     if m.carve-ranks.length > 0: Carves { m: root.m; }
 }
 
-component MonsterTab inherits HorizontalLayout {
-    spacing: Tok.pad;
-    VerticalLayout {
-        width: min(320px, root.width * 0.36);
-        spacing: Tok.tight;
-        SearchField {
-            placeholder-text: @tr("Search monsters");
-            text <=> Api.db-search;
-            edited => { Api.filter-db(); }
+component QuestDetail inherits VerticalLayout {
+    property <DbQuest> q: Api.db-quest;
+    padding: Tok.pad;
+    padding-left: 22px;
+    spacing: 14px;
+    alignment: start;
+    HorizontalLayout {
+        spacing: 12px;
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: q.name; font-size: 18px; font-weight: 600; overflow: elide; }
+            Text { text: q.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
         }
+        VerticalLayout {
+            alignment: center;
+            TextLink { text: @tr("Edit on the Quests page"); clicked => { Api.show-in-editor("quest", q.index); } }
+        }
+    }
+    Hairline { }
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        SectionTitle { text: @tr("Monsters"); }
+        if q.monsters.length > 0: ConfidenceTag { level: Confidence.derived; }
+    }
+    if q.monsters.length == 0: Muted { text: @tr("No large monster with a size in this quest."); }
+    if q.monsters.length > 0: VerticalLayout {
         HorizontalLayout {
-            alignment: start;
-            Chip {
-                text: @tr("Missing a crown");
-                active: Api.db-missing;
-                clicked => {
-                    Api.db-missing = !Api.db-missing;
-                    Api.filter-db();
+            height: 24px;
+            spacing: 12px;
+            Rectangle { width: Api.assets-ok ? 32px : 0px; }
+            Text { text: @tr("Monster"); color: Tok.muted; font-size: Tok.small; horizontal-stretch: 1; }
+            Text { text: @tr("Size"); color: Tok.muted; font-size: Tok.small; width: 70px; horizontal-alignment: right; }
+            Text { text: @tr("Can be"); color: Tok.muted; font-size: Tok.small; width: 110px; horizontal-alignment: right; }
+            Text { text: @tr("Gold crown"); color: Tok.muted; font-size: Tok.small; width: 100px; horizontal-alignment: right; }
+            Text { text: @tr("Mini crown"); color: Tok.muted; font-size: Tok.small; width: 100px; horizontal-alignment: right; }
+            Rectangle { width: 70px; }
+        }
+        for e in q.monsters: HorizontalLayout {
+            height: 40px;
+            spacing: 12px;
+            accessible-role: text;
+            accessible-label: e.name + ", " + e.size + ", " + e.range;
+            if Api.assets-ok: Asset { y: 4px; width: 32px; height: 32px; source: e.icon; available: e.has-icon; }
+            Text { text: e.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+            Text { text: e.size; vertical-alignment: center; width: 70px; horizontal-alignment: right; }
+            Text { text: e.range; vertical-alignment: center; width: 110px; horizontal-alignment: right; color: Tok.muted; }
+            Text { text: e.gold; vertical-alignment: center; width: 100px; horizontal-alignment: right; color: Crown.gold; }
+            Text { text: e.mini; vertical-alignment: center; width: 100px; horizontal-alignment: right; color: Tok.accent-text; }
+            Rectangle {
+                width: 70px;
+                TextLink {
+                    x: parent.width - self.width;
+                    y: (parent.height - self.height) / 2;
+                    text: @tr("Details");
+                    clicked => { Api.open-db("monster", e.index); }
                 }
             }
         }
-        Card {
-            vertical-stretch: 1;
-            if Api.db-monsters.length == 0: EmptyState { text: @tr("No monster matches."); }
-            ListView {
-                for r in Api.db-monsters: ListRow {
-                    height: 52px;
-                    selected: r.index == Api.db-monster.index;
-                    accessible-label: r.name;
-                    clicked => { Api.select-db(r.index); }
-                    HorizontalLayout {
-                        padding-left: 12px;
-                        padding-right: 12px;
-                        spacing: 10px;
-                        if Api.assets-ok: Asset { y: 8px; width: 36px; height: 36px; source: r.icon; available: r.has-icon; }
-                        VerticalLayout {
-                            alignment: center;
-                            Text { text: r.name; overflow: elide; }
-                            Text { text: r.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
-                        }
+    }
+    Hairline { }
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        SectionTitle { text: @tr("Rewards"); }
+        if q.rewards.length > 0: ConfidenceTag { level: Confidence.derived; }
+    }
+    Muted { text: q.note; }
+    DropGrid { tables: q.rewards; }
+}
+
+// A tab's list: search, one filter chip, the entries (index = what select-db takes).
+component EntryColumn inherits VerticalLayout {
+    in property <[DbRow]> rows;
+    in property <int> selected;
+    in property <string> search;
+    in property <string> filter;
+    in property <string> empty;
+    in property <bool> icons;
+    spacing: Tok.tight;
+    SearchField {
+        placeholder-text: root.search;
+        text <=> Api.db-search;
+        edited => { Api.filter-db(); }
+    }
+    HorizontalLayout {
+        alignment: start;
+        Chip {
+            text: root.filter;
+            active: Api.db-missing;
+            clicked => {
+                Api.db-missing = !Api.db-missing;
+                Api.filter-db();
+            }
+        }
+    }
+    Card {
+        vertical-stretch: 1;
+        if root.rows.length == 0: EmptyState { text: root.empty; }
+        ListView {
+            // an entry opened from another page is scrolled into view; the row can arrive
+            // after the list is made
+            property <int> shown: Api.db-row;
+            function go() {
+                if self.content-y > -(shown * 52px) || self.content-y < -(shown * 52px) + 52px - self.visible-height {
+                    self.content-y = -max(0px, shown * 52px - self.visible-height / 3);
+                }
+            }
+            init => { self.go(); }
+            changed shown => { self.go(); }
+            for r in root.rows: ListRow {
+                height: 52px;
+                selected: r.index == root.selected;
+                accessible-label: r.name;
+                clicked => { Api.select-db(r.index); }
+                HorizontalLayout {
+                    padding-left: 12px;
+                    padding-right: 12px;
+                    spacing: 10px;
+                    if root.icons && Api.assets-ok: Asset { y: 8px; width: 36px; height: 36px; source: r.icon; available: r.has-icon; }
+                    VerticalLayout {
+                        alignment: center;
+                        Text { text: r.name; overflow: elide; }
+                        Text { text: r.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
                     }
                 }
             }
         }
+    }
+}
+
+component MonsterTab inherits HorizontalLayout {
+    spacing: Tok.pad;
+    EntryColumn {
+        width: min(320px, root.width * 0.36);
+        rows: Api.db-monsters;
+        selected: Api.db-monster.index;
+        search: @tr("Search monsters");
+        filter: @tr("Missing a crown");
+        empty: @tr("No monster matches.");
+        icons: true;
     }
     Card {
         horizontal-stretch: 1;
         if Api.db-monster.index <= 0: EmptyState { text: @tr("Pick a monster."); }
         if Api.db-monster.index > 0: ScrollView {
             MonsterDetail { }
+        }
+    }
+}
+
+component QuestTab inherits HorizontalLayout {
+    spacing: Tok.pad;
+    EntryColumn {
+        width: min(320px, root.width * 0.36);
+        rows: Api.db-quests;
+        selected: Api.db-quest.index;
+        search: @tr("Search quests");
+        filter: @tr("Not cleared");
+        empty: @tr("No quest matches.");
+    }
+    Card {
+        horizontal-stretch: 1;
+        if Api.db-quest.index <= 0: EmptyState { text: @tr("Pick a quest."); }
+        if Api.db-quest.index > 0: ScrollView {
+            QuestDetail { }
         }
     }
 }
@@ -278,13 +400,17 @@ export component DatabasePage inherits Rectangle {
             subtitle: @tr("The game's own data, next to this save. Nothing on this page is edited.");
         }
         TabBar {
-            tabs: [@tr("Monsters")];
+            tabs: [@tr("Monsters"), @tr("Quests")];
             current: Api.db-tab;
+            // each tab starts unfiltered
             select(i) => {
                 Api.db-tab = i;
+                Api.db-search = "";
+                Api.db-missing = false;
                 Api.filter-db();
             }
         }
         if Api.db-tab == 0: MonsterTab { vertical-stretch: 1; }
+        if Api.db-tab == 1: QuestTab { vertical-stretch: 1; }
     }
 }

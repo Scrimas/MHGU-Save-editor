@@ -223,6 +223,10 @@ pub struct Tables {
     /// data/size-variation.csv by table: (scale rate in hundredths, chance %).
     pub size_variation: Vec<Vec<(u16, u8)>>,
     pub carves: Vec<Carve>,
+    /// data/quest-rewards.csv: quest ID -> (slot, reward table).
+    pub quest_rewards: HashMap<u32, Vec<(u8, u32)>>,
+    /// data/rewards.csv: reward table -> (item, count, chance %).
+    pub rewards: HashMap<u32, Vec<(u16, u8, u8)>>,
     pub arena: Vec<ArenaQuest>,
     /// data/palico-levels.csv, by level - 1: (free support move slots, skill slots).
     pub palico_levels: Vec<(u8, u8)>,
@@ -361,6 +365,14 @@ pub fn tables() -> &'static Tables {
                 t[k].push((num(&r["rate"]) as u16, num(&r["chance"]) as u8));
                 t
             }),
+            quest_rewards: rows(include_str!("../../../data/quest-rewards.csv")).iter().fold(HashMap::new(), |mut m, r| {
+                m.entry(num(&r["quest_id"]) as u32).or_insert_with(Vec::new).push((num(&r["slot"]) as u8, num(&r["rem"]) as u32));
+                m
+            }),
+            rewards: rows(include_str!("../../../data/rewards.csv")).iter().fold(HashMap::new(), |mut m, r| {
+                m.entry(num(&r["rem"]) as u32).or_insert_with(Vec::new).push((num(&r["item"]) as u16, num(&r["count"]) as u8, num(&r["chance"]) as u8));
+                m
+            }),
             carves: rows(include_str!("../../../data/monster-carves.csv"))
                 .iter()
                 .map(|r| Carve {
@@ -441,6 +453,8 @@ mod tests {
             *sums.entry((c.monster, &c.rank, &c.kind)).or_default() += c.chance as u32;
         }
         assert!(sums.iter().all(|(k, &v)| v == 100 || k.2 == "other"), "carve tables");
+        assert!(t.quest_rewards.values().flatten().all(|(slot, rem)| *slot < 5 && t.rewards.contains_key(rem)));
+        assert_eq!(t.rewards.values().filter(|r| r.iter().map(|x| x.2 as u32).sum::<u32>() != 100).count(), 1);
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));
     }
 }

@@ -405,7 +405,7 @@ msgid "Palicoes"
 msgstr "Palicos"
 
 #: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/quests.slint
 msgid "Quests"
 msgstr "Quêtes"
 
@@ -424,7 +424,7 @@ msgid "Monsters"
 msgstr "Monstres"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
+#: app/gui/ui/pages/monsters.slint app/gui/ui/pages/quests.slint
 msgid "Database"
 msgstr "Base de données"
 
@@ -1154,6 +1154,30 @@ msgstr "Taille de {} % ou moins, meilleures quêtes d'abord."
 msgid "The game has no carve table for it."
 msgstr "Le jeu n'a pas de table de découpe pour ce monstre."
 
+#: app/gui/ui/pages/database.slint
+msgid "Edit on the Quests page"
+msgstr "Modifier sur la page Quêtes"
+
+#: app/gui/ui/pages/database.slint
+msgid "No large monster with a size in this quest."
+msgstr "Aucun grand monstre avec une taille dans cette quête."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Monster"
+msgstr "Monstre"
+
+#: app/gui/ui/pages/database.slint
+msgid "Can be"
+msgstr "Plage"
+
+#: app/gui/ui/pages/database.slint
+msgid "Details"
+msgstr "Détails"
+
+#: app/gui/ui/pages/database.slint
+msgid "Rewards"
+msgstr "Récompenses"
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
 msgstr "Rechercher des monstres"
@@ -1169,6 +1193,22 @@ msgstr "Aucun monstre ne correspond."
 #: app/gui/ui/pages/database.slint
 msgid "Pick a monster."
 msgstr "Choisissez un monstre."
+
+#: app/gui/ui/pages/database.slint
+msgid "Search quests"
+msgstr "Rechercher des quêtes"
+
+#: app/gui/ui/pages/database.slint
+msgid "Not cleared"
+msgstr "Non terminées"
+
+#: app/gui/ui/pages/database.slint
+msgid "No quest matches."
+msgstr "Aucune quête ne correspond."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a quest."
+msgstr "Choisissez une quête."
 
 #: app/gui/ui/pages/database.slint
 msgid "The game's own data, next to this save. Nothing on this page is edited."
@@ -1547,10 +1587,6 @@ msgstr "Toutes les couronnes…"
 #: app/gui/ui/pages/monsters.slint
 msgid "Large only"
 msgstr "Grands seulement"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Monster"
-msgstr "Monstre"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
 msgid "Hunted"
@@ -3118,6 +3154,39 @@ msgstr "mini manquante"
 msgid "mini and gold missing"
 msgstr "mini et or manquants"
 
+#: app/gui/src/views/database.rs
+msgid "none in the box"
+msgstr "aucun dans le coffre"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} in the box"
+msgstr "{} dans le coffre"
+
+#: app/gui/src/views/database.rs
+msgid "Main rewards"
+msgstr "Récompenses principales"
+
+#: app/gui/src/views/database.rs
+msgid "More main rewards"
+msgstr "Autres récompenses principales"
+
+#: app/gui/src/views/database.rs
+msgid "Subquest rewards"
+msgstr "Récompenses de sous-quête"
+
+#: app/gui/src/views/database.rs
+msgid "Extra rewards"
+msgstr "Récompenses en plus"
+
+#: app/gui/src/views/database.rs
+msgid "This quest is not in the game's files: it comes as a download."
+msgstr "Cette quête n'est pas dans les fichiers du jeu : elle se télécharge."
+
+#: app/gui/src/views/database.rs
+msgid "The chance of each item per reward drawn; how many are drawn is not in these files."
+msgstr "La chance de chaque objet par récompense tirée ; le nombre de tirages n'est pas dans ces fichiers."
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/database.rs
 msgid "Its size record is kept by {}."
@@ -3164,15 +3233,6 @@ msgstr "Objet brillant"
 #: app/gui/src/views/database.rs
 msgid "Other"
 msgstr "Autre"
-
-#: app/gui/src/views/database.rs
-msgid "none in the box"
-msgstr "aucun dans le coffre"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/database.rs
-msgid "{} in the box"
-msgstr "{} dans le coffre"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/database.rs

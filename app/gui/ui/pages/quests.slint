@@ -1,6 +1,6 @@
 import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
 import {
-    Api, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField,
+    Api, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField, TextLink,
 } from "../common.slint";
 
 component QuestLine inherits ListRow {
@@ -48,6 +48,15 @@ component QuestLine inherits ListRow {
             // as wide as the header's longest translation ("Fehlgeschlagen")
             width: 110px;
             CheckBox { x: 0; checked: q.failed; accessible-label: @tr("Failed: {}", q.name); toggled => { Api.set-quest(q.index, "failed", self.checked); } }
+        }
+        Rectangle {
+            width: 64px;
+            TextLink {
+                x: 0;
+                y: (parent.height - self.height) / 2;
+                text: @tr("Database");
+                clicked => { Api.open-db("quest", q.index); }
+            }
         }
     }
 }
@@ -106,6 +115,7 @@ export component QuestsPage inherits Rectangle {
                             }
                             ColHead { text: @tr("Seen"); width: 80px; }
                             ColHead { text: @tr("Failed"); width: 110px; }
+                            Rectangle { width: 64px; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
                     }

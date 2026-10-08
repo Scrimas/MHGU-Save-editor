@@ -397,7 +397,7 @@ msgstr ""
 msgid "Palicoes"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/app.slint app/gui/ui/pages/quests.slint
+#: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint app/gui/ui/pages/quests.slint
 msgid "Quests"
 msgstr ""
 
@@ -413,7 +413,7 @@ msgstr ""
 msgid "Monsters"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint app/gui/ui/pages/quests.slint
 msgid "Database"
 msgstr ""
 
@@ -1130,6 +1130,30 @@ msgstr ""
 msgid "The game has no carve table for it."
 msgstr ""
 
+#: app/gui/ui/pages/database.slint
+msgid "Edit on the Quests page"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "No large monster with a size in this quest."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Monster"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Can be"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Details"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Rewards"
+msgstr ""
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
 msgstr ""
@@ -1144,6 +1168,22 @@ msgstr ""
 
 #: app/gui/ui/pages/database.slint
 msgid "Pick a monster."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Search quests"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Not cleared"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "No quest matches."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick a quest."
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
@@ -1518,10 +1558,6 @@ msgstr ""
 
 #: app/gui/ui/pages/monsters.slint
 msgid "Large only"
-msgstr ""
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Monster"
 msgstr ""
 
 #: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
@@ -3089,6 +3125,39 @@ msgid "mini and gold missing"
 msgstr ""
 
 #: app/gui/src/views/database.rs
+msgid "none in the box"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} in the box"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Main rewards"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "More main rewards"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Subquest rewards"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Extra rewards"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "This quest is not in the game's files: it comes as a download."
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "The chance of each item per reward drawn; how many are drawn is not in these files."
+msgstr ""
+
+#: app/gui/src/views/database.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Its size record is kept by {}."
 msgstr ""
@@ -3133,15 +3202,6 @@ msgstr ""
 
 #: app/gui/src/views/database.rs
 msgid "Other"
-msgstr ""
-
-#: app/gui/src/views/database.rs
-msgid "none in the box"
-msgstr ""
-
-#: app/gui/src/views/database.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "{} in the box"
 msgstr ""
 
 #: app/gui/src/views/database.rs

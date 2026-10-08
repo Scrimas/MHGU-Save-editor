@@ -157,14 +157,7 @@ pub fn crown_odds(i: usize) -> Vec<CrownOdds> {
         if !fam(j) {
             continue;
         }
-        let p = |hit: &dyn Fn(u32) -> bool| {
-            t.size_variation[table].iter().filter(|&&(r, _)| hit(size as u32 * r as u32 / 100)).map(|&(_, c)| c as f32).sum::<f32>() / 100.0
-        };
-        let (mini, silver, gold) = (
-            p(&|v| v <= m.mini_le as u32),
-            p(&|v| v >= m.silver_ge as u32),
-            p(&|v| v >= m.gold_ge as u32),
-        );
+        let Some((mini, silver, gold)) = entry_odds(j, size, table) else { continue };
         let any = |a: f32, b: f32| 1.0 - (1.0 - a) * (1.0 - b);
         match out.last_mut() {
             Some(o) if o.quest_id == quest_id => {
@@ -174,6 +167,51 @@ pub fn crown_odds(i: usize) -> Vec<CrownOdds> {
         }
     }
     out
+}
+
+/// Chances (mini, silver or gold, gold) that a boss entry of monster `j` with size %
+/// `size` and variation table `table` is crown size, by the thresholds of the monster
+/// keeping its record (`j` or its family head; see `crown_odds`). None when that monster
+/// has no size record or a fixed size.
+pub fn entry_odds(j: usize, size: u16, table: usize) -> Option<(f32, f32, f32)> {
+    let m = meta(meta(j).family_of.unwrap_or(j));
+    if !m.size_record || m.fixed_size {
+        return None;
+    }
+    let p = |hit: &dyn Fn(u32) -> bool| {
+        tables().size_variation[table].iter().filter(|&&(r, _)| hit(size as u32 * r as u32 / 100)).map(|&(_, c)| c as f32).sum::<f32>() / 100.0
+    };
+    Some((p(&|v| v <= m.mini_le as u32), p(&|v| v >= m.silver_ge as u32), p(&|v| v >= m.gold_ge as u32)))
+}
+
+/// A boss entry of a quest: its monster and size %, the sizes its variation table can
+/// roll, and the crown chances (`entry_odds`).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct QuestMonster {
+    pub monster: usize,
+    pub size: u16,
+    pub min: u16,
+    pub max: u16,
+    pub odds: Option<(f32, f32, f32)>,
+}
+
+/// The boss entries with a size of quest `quest_id`, in the quest's order.
+pub fn quest_monsters(quest_id: u32) -> Vec<QuestMonster> {
+    let t = tables();
+    t.quest_monsters
+        .iter()
+        .filter(|e| e.0 == quest_id)
+        .map(|&(_, j, size, table)| {
+            let rates = t.size_variation[table].iter().map(|&(r, _)| size as u32 * r as u32 / 100);
+            QuestMonster {
+                monster: j,
+                size,
+                min: rates.clone().min().unwrap_or(0) as u16,
+                max: rates.max().unwrap_or(0) as u16,
+                odds: entry_odds(j, size, table),
+            }
+        })
+        .collect()
 }
 
 pub fn notes(s: &Save, base: usize, i: usize) -> Option<bool> {
