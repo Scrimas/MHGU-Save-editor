@@ -791,6 +791,36 @@ msgid "Clothing"
 msgstr "Ropa"
 
 #: app/gui/ui/pages/character.slint
+msgid "Guild Card"
+msgstr "Tarjeta del gremio"
+
+#: app/gui/ui/pages/character.slint
+msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
+msgstr "Como los pone el editor de tarjeta del juego. También se pueden elegir entradas bloqueadas: la tarjeta lo indica entonces."
+
+#: app/gui/ui/pages/character.slint
+msgid "Title"
+msgstr "Título"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "Mensaje"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/pages/character.slint
+msgid "Guild Card greeting"
+msgstr "Mensaje de la tarjeta del gremio"
+
+#: app/gui/ui/pages/character.slint
+msgid "Scene"
+msgstr "Fondo"
+
+#: app/gui/ui/pages/character.slint
+msgid "Pose"
+msgstr "Pose"
+
+#: app/gui/ui/pages/character.slint
 msgid "Village points"
 msgstr "Puntos de contribución"
 
@@ -837,62 +867,6 @@ msgid "{} G rank points"
 msgstr "Puntos de rango G de {}"
 
 #: app/gui/ui/pages/character.slint
-msgid "Guild Card"
-msgstr "Tarjeta del gremio"
-
-#: app/gui/ui/pages/character.slint
-msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
-msgstr "Como los pone el editor de tarjeta del juego. También se pueden elegir entradas bloqueadas: la tarjeta lo indica entonces."
-
-#: app/gui/ui/pages/character.slint
-msgid "Title"
-msgstr "Título"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr "Mensaje"
-
-#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
-#: app/gui/ui/pages/character.slint
-msgid "Guild Card greeting"
-msgstr "Mensaje de la tarjeta del gremio"
-
-#: app/gui/ui/pages/character.slint
-msgid "Scene"
-msgstr "Fondo"
-
-#: app/gui/ui/pages/character.slint
-msgid "Pose"
-msgstr "Pose"
-
-#: app/gui/ui/pages/character.slint
-msgid "Weapon usage"
-msgstr "Uso de armas"
-
-#: app/gui/ui/pages/character.slint
-msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
-msgstr "Misiones completadas con cada arma, según las cuenta la tarjeta del gremio. El total más alto es el arma principal."
-
-#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
-msgid "Weapon"
-msgstr "Arma"
-
-#: app/core/src/character.rs app/gui/src/views/requests.rs
-#: app/gui/ui/pages/character.slint
-msgid "Hub"
-msgstr "Campamento"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Arena"
-msgstr "Arena"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/character.slint
-msgid "{} quests, {}"
-msgstr "Misiones de {}, {}"
-
-#: app/gui/ui/pages/character.slint
 msgid "Hunting styles"
 msgstr "Estilos de caza"
 
@@ -923,6 +897,32 @@ msgstr "Estilo alquimista"
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
 msgid "Valor Style"
 msgstr "Estilo valeroso"
+
+#: app/gui/ui/pages/character.slint
+msgid "Weapon usage"
+msgstr "Uso de armas"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
+msgstr "Misiones completadas con cada arma, según las cuenta la tarjeta del gremio. El total más alto es el arma principal."
+
+#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
+msgid "Weapon"
+msgstr "Arma"
+
+#: app/core/src/character.rs app/gui/src/views/requests.rs
+#: app/gui/ui/pages/character.slint
+msgid "Hub"
+msgstr "Campamento"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Arena"
+msgstr "Arena"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{} quests, {}"
+msgstr "Misiones de {}, {}"
 
 #: app/gui/ui/pages/collections.slint
 msgid "Check all…"

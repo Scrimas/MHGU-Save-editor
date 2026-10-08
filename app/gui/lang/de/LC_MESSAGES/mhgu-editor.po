@@ -791,6 +791,36 @@ msgid "Clothing"
 msgstr "Kleidung"
 
 #: app/gui/ui/pages/character.slint
+msgid "Guild Card"
+msgstr "Gildenkarte"
+
+#: app/gui/ui/pages/character.slint
+msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
+msgstr "Wie sie der Karteneditor im Spiel setzt. Gesperrte Einträge lassen sich auch wählen: Die Karte sagt es dann."
+
+#: app/gui/ui/pages/character.slint
+msgid "Title"
+msgstr "Titel"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "Kommentar"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/pages/character.slint
+msgid "Guild Card greeting"
+msgstr "Gildenkarten-Kommentar"
+
+#: app/gui/ui/pages/character.slint
+msgid "Scene"
+msgstr "Hintergrund"
+
+#: app/gui/ui/pages/character.slint
+msgid "Pose"
+msgstr "Pose"
+
+#: app/gui/ui/pages/character.slint
 msgid "Village points"
 msgstr "Beitragspunkte"
 
@@ -837,62 +867,6 @@ msgid "{} G rank points"
 msgstr "{} G-Rang-Punkte"
 
 #: app/gui/ui/pages/character.slint
-msgid "Guild Card"
-msgstr "Gildenkarte"
-
-#: app/gui/ui/pages/character.slint
-msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
-msgstr "Wie sie der Karteneditor im Spiel setzt. Gesperrte Einträge lassen sich auch wählen: Die Karte sagt es dann."
-
-#: app/gui/ui/pages/character.slint
-msgid "Title"
-msgstr "Titel"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr "Kommentar"
-
-#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
-#: app/gui/ui/pages/character.slint
-msgid "Guild Card greeting"
-msgstr "Gildenkarten-Kommentar"
-
-#: app/gui/ui/pages/character.slint
-msgid "Scene"
-msgstr "Hintergrund"
-
-#: app/gui/ui/pages/character.slint
-msgid "Pose"
-msgstr "Pose"
-
-#: app/gui/ui/pages/character.slint
-msgid "Weapon usage"
-msgstr "Waffennutzung"
-
-#: app/gui/ui/pages/character.slint
-msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
-msgstr "Mit jeder Waffe abgeschlossene Quests, wie die Gildenkarte sie zählt. Die höchste Summe ist die Hauptwaffe."
-
-#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
-msgid "Weapon"
-msgstr "Waffe"
-
-#: app/core/src/character.rs app/gui/src/views/requests.rs
-#: app/gui/ui/pages/character.slint
-msgid "Hub"
-msgstr "Lager"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Arena"
-msgstr "Arena"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/character.slint
-msgid "{} quests, {}"
-msgstr "{} Quests, {}"
-
-#: app/gui/ui/pages/character.slint
 msgid "Hunting styles"
 msgstr "Jagdstile"
 
@@ -923,6 +897,32 @@ msgstr "Alchemiestil"
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
 msgid "Valor Style"
 msgstr "Wagemutstil"
+
+#: app/gui/ui/pages/character.slint
+msgid "Weapon usage"
+msgstr "Waffennutzung"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
+msgstr "Mit jeder Waffe abgeschlossene Quests, wie die Gildenkarte sie zählt. Die höchste Summe ist die Hauptwaffe."
+
+#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
+msgid "Weapon"
+msgstr "Waffe"
+
+#: app/core/src/character.rs app/gui/src/views/requests.rs
+#: app/gui/ui/pages/character.slint
+msgid "Hub"
+msgstr "Lager"
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Arena"
+msgstr "Arena"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/character.slint
+msgid "{} quests, {}"
+msgstr "{} Quests, {}"
 
 #: app/gui/ui/pages/collections.slint
 msgid "Check all…"

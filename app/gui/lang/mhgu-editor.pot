@@ -771,6 +771,34 @@ msgid "Clothing"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
+msgid "Guild Card"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Title"
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/ui/pages/character.slint
+msgid "Guild Card greeting"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Scene"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Pose"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
 msgid "Village points"
 msgstr ""
 
@@ -817,59 +845,6 @@ msgid "{} G rank points"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
-msgid "Guild Card"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Title"
-msgstr ""
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr ""
-
-#: app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/ui/pages/character.slint
-msgid "Guild Card greeting"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Scene"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Pose"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Weapon usage"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
-msgstr ""
-
-#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
-msgid "Weapon"
-msgstr ""
-
-#: app/core/src/character.rs app/gui/src/views/requests.rs app/gui/ui/pages/character.slint
-msgid "Hub"
-msgstr ""
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Arena"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
-#. placeholders: {} in order, {0} {1} by position
-msgid "{} quests, {}"
-msgstr ""
-
-#: app/gui/ui/pages/character.slint
 msgid "Hunting styles"
 msgstr ""
 
@@ -899,6 +874,31 @@ msgstr ""
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
 msgid "Valor Style"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Weapon usage"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
+msgstr ""
+
+#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
+msgid "Weapon"
+msgstr ""
+
+#: app/core/src/character.rs app/gui/src/views/requests.rs app/gui/ui/pages/character.slint
+msgid "Hub"
+msgstr ""
+
+#: app/core/src/character.rs app/gui/ui/pages/character.slint
+msgid "Arena"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} quests, {}"
 msgstr ""
 
 #: app/gui/ui/pages/collections.slint
