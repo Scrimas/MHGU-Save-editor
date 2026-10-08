@@ -2,7 +2,7 @@
 //! to the pages that edit them, and those pages link back.
 
 use super::*;
-use crate::{CrownOdds, DbMonster, DbQuest, DbQuestMonster, DbRow, DropItem, DropTable};
+use crate::{CrownOdds, DbItem, DbMonster, DbQuest, DbQuestMonster, DbRow, DbSource, DropItem, DropTable};
 use std::collections::HashMap;
 
 /// Quests a crown list shows before "and N more".
@@ -84,7 +84,135 @@ fn crown_line(i: usize, r: monsters::Record) -> String {
 pub(super) fn database_page(ui: &AppWindow, st: &State) {
     match ui.global::<Api>().get_db_tab() {
         1 => quests_tab(ui, st),
+        2 => items_tab(ui, st),
         _ => monsters_tab(ui, st),
+    }
+}
+
+/// Sources of an item listed before "and N more".
+const SOURCES: usize = 40;
+
+/// Where an item comes from.
+enum Source {
+    /// monster, rank, kind, count, chance
+    Carve(usize, &'static str, &'static str, u8, u8),
+    /// quest, reward slot, count, chance
+    Reward(&'static mhgu_save::data::Quest, u8, u8, u8),
+}
+
+/// Every carve and quest reward, by item.
+fn sources() -> &'static HashMap<u16, Vec<Source>> {
+    static S: std::sync::OnceLock<HashMap<u16, Vec<Source>>> = std::sync::OnceLock::new();
+    S.get_or_init(|| {
+        let t = tables();
+        let mut m: HashMap<u16, Vec<Source>> = HashMap::new();
+        for c in &t.carves {
+            m.entry(c.item).or_default().push(Source::Carve(c.monster, &c.rank, &c.kind, c.count, c.chance));
+        }
+        for q in Char::real_quests(true) {
+            for &(slot, rem) in t.quest_rewards.get(&q.id).map_or(&[][..], Vec::as_slice) {
+                for &(item, count, chance) in &t.rewards[&rem] {
+                    m.entry(item).or_default().push(Source::Reward(q, slot, count, chance));
+                }
+            }
+        }
+        m
+    })
+}
+
+/// Items in ID order, as the item picker lists them.
+fn items_tab(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let (f, in_box, mut sel) = view(|v| (v.db_search.to_lowercase(), v.db_missing, v.db_item));
+    let n = assets::names();
+    let have = box_counts(st);
+    let rows: Vec<DbRow> = (1..n.items.len().min(items::MAX_ID as usize + 1))
+        .filter(|&id| !n.items[id].is_empty() && n.items[id] != "(None)" && n.items[id] != "DUMMY" && !n.items[id].starts_with('-'))
+        .filter(|id| !in_box || have.contains_key(&(*id as u16)))
+        .filter_map(|id| {
+            let name = assets::item_name(id as u16);
+            if !f.is_empty() && !name.to_lowercase().contains(&f) && id.to_string() != f {
+                return None;
+            }
+            let (img, has) = icon(assets::item_icon(id as u16));
+            Some(DbRow { index: id as i32, name: name.into(), sub: in_the_box(&have, id as u16).into(), icon: img, has_icon: has })
+        })
+        .collect();
+    if sel == 0 || !rows.iter().any(|r| r.index as usize == sel) {
+        sel = rows.first().map_or(0, |r| r.index as usize);
+        view(|v| v.db_item = sel);
+    }
+    api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
+    api.set_db_items(model(rows));
+    api.set_db_item(if sel == 0 { DbItem { index: -1, ..Default::default() } } else { item(sel as u16, &have) });
+}
+
+/// "3 in the box", "none in the box".
+fn in_the_box(have: &HashMap<u16, u32>, id: u16) -> String {
+    match have.get(&id).copied().unwrap_or(0) {
+        0 => tr("none in the box").to_string(),
+        n => trf("{} in the box", &[&num(n)]),
+    }
+}
+
+fn item(id: u16, have: &HashMap<u16, u32>) -> DbItem {
+    let t = tables();
+    let (img, has) = icon(assets::item_icon(id));
+    let rank = |r: &str| match r {
+        "low" => tr("Low rank"),
+        "high" => tr("High rank"),
+        _ => tr("G rank"),
+    };
+    let mut all: Vec<(u8, DbSource)> = sources()
+        .get(&id)
+        .map_or(&[][..], Vec::as_slice)
+        .iter()
+        .map(|s| {
+            let (count, chance, src) = match *s {
+                Source::Carve(m, r, kind, count, chance) => {
+                    let (img, has) = icon(assets::monster_icon(m));
+                    let how = match kind {
+                        "body" => tr("Body carve"),
+                        "tail" => tr("Tail carve"),
+                        "shiny" => tr("Shiny drop"),
+                        _ => tr("Other carve or drop"),
+                    };
+                    let src = DbSource {
+                        kind: "monster".into(),
+                        index: m as i32,
+                        r#where: assets::monster_name(m).unwrap_or(&t.monsters[m - 1].name).into(),
+                        how: format!("{} · {how}", rank(r)).into(),
+                        icon: img,
+                        has_icon: has,
+                        ..Default::default()
+                    };
+                    (count, chance, src)
+                }
+                Source::Reward(q, slot, count, chance) => {
+                    let how = match slot {
+                        0 => tr("Main rewards"),
+                        1 => tr("More main rewards"),
+                        4 => tr("Subquest rewards"),
+                        _ => tr("Extra rewards"),
+                    };
+                    let src = DbSource { kind: "quest".into(), index: q.index as i32, r#where: q.name.clone().into(), how: how.into(), ..Default::default() };
+                    (count, chance, src)
+                }
+            };
+            let how = if count > 1 { format!("{} · ×{count}", src.how) } else { src.how.to_string() };
+            (chance, DbSource { how: how.into(), chance: format!("{chance} %").into(), ..src })
+        })
+        .collect();
+    all.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.r#where.cmp(&b.1.r#where)));
+    let more = all.len().saturating_sub(SOURCES);
+    DbItem {
+        index: id as i32,
+        name: assets::item_name(id).into(),
+        sub: format!("#{id} · {}", in_the_box(have, id)).into(),
+        icon: img,
+        has_icon: has,
+        more: if more > 0 { trn("and {n} more source", "and {n} more sources", more as i64, &[]) } else { String::new() }.into(),
+        sources: model(all.into_iter().take(SOURCES).map(|s| s.1).collect()),
     }
 }
 
@@ -100,14 +228,13 @@ fn box_counts(st: &State) -> HashMap<u16, u32> {
 /// An item of a carve or reward table.
 fn drop_item(item: u16, count: u8, chance: u8, have: &HashMap<u16, u32>) -> DropItem {
     let (img, has) = icon(assets::item_icon(item));
-    let n = have.get(&item).copied().unwrap_or(0);
     let name = assets::item_name(item);
     DropItem {
         name: if count > 1 { format!("{name} ×{count}") } else { name }.into(),
         icon: img,
         has_icon: has,
         chance: format!("{chance} %").into(),
-        have: if n == 0 { tr("none in the box").to_string() } else { trf("{} in the box", &[&num(n)]) }.into(),
+        have: in_the_box(have, item).into(),
     }
 }
 
@@ -323,6 +450,15 @@ fn carves(st: &State, i: usize, d: &mut DbMonster) {
     };
 }
 
+/// The entry shown in Database tab `tab`.
+fn shown(v: &mut View, tab: i32) -> &mut usize {
+    match tab {
+        1 => &mut v.db_quest,
+        2 => &mut v.db_item,
+        _ => &mut v.db_monster,
+    }
+}
+
 pub(super) fn wire_database(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_select_db_rank, |ui, s, r: SharedString| {
         view(|v| v.db_rank = r.to_string());
@@ -337,8 +473,8 @@ pub(super) fn wire_database(ui: &AppWindow, st: &Shared) {
         let _ = &s;
     });
     on!(ui, st, on_select_db, |ui, s, i: i32| {
-        let quest = ui.global::<Api>().get_db_tab() == 1;
-        view(|v| *if quest { &mut v.db_quest } else { &mut v.db_monster } = i.max(0) as usize);
+        let tab = ui.global::<Api>().get_db_tab();
+        view(|v| *shown(v, tab) = i.max(0) as usize);
         let _ = &s;
     });
     // an entry of another page or tab: the Database opens on it, with no filter hiding it
@@ -348,15 +484,19 @@ pub(super) fn wire_database(ui: &AppWindow, st: &Shared) {
         ui.global::<Api>().on_open_db(move |kind, i| {
             let Some(ui) = w.upgrade() else { return };
             let api = ui.global::<Api>();
-            let quest = kind == "quest";
+            let tab = match kind.as_str() {
+                "quest" => 1,
+                "item" => 2,
+                _ => 0,
+            };
             view(|v| {
-                *if quest { &mut v.db_quest } else { &mut v.db_monster } = i.max(0) as usize;
+                *shown(v, tab) = i.max(0) as usize;
                 v.db_search.clear();
                 v.db_missing = false;
             });
             api.set_db_search("".into());
             api.set_db_missing(false);
-            api.set_db_tab(if quest { 1 } else { 0 });
+            api.set_db_tab(tab);
             if api.get_page() == "database" {
                 refresh(&ui, &st.borrow());
             } else {

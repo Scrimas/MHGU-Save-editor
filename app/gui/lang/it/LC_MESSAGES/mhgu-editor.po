@@ -392,7 +392,8 @@ msgstr "Panoramica"
 msgid "Character"
 msgstr "Personaggio"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/items.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/items.slint
 msgid "Items"
 msgstr "Oggetti"
 
@@ -1178,6 +1179,26 @@ msgstr "Dettagli"
 msgid "Rewards"
 msgstr "Ricompense"
 
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
+msgid "Where to get it"
+msgstr "Dove ottenerlo"
+
+#: app/gui/ui/pages/database.slint
+msgid "No carve or quest reward gives it. It may come from gathering, the shops or crafting, which are not in the Database yet."
+msgstr "Nessun intaglio né ricompensa di missione lo dà. Può venire dalla raccolta, dai negozi o dalla creazione, non ancora nel database."
+
+#: app/gui/ui/pages/database.slint
+msgid "From"
+msgstr "Da"
+
+#: app/gui/ui/pages/database.slint
+msgid "How"
+msgstr "Come"
+
+#: app/gui/ui/pages/database.slint
+msgid "Chance"
+msgstr "Probabilità"
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
 msgstr "Cerca mostri"
@@ -1209,6 +1230,22 @@ msgstr "Nessuna missione corrisponde."
 #: app/gui/ui/pages/database.slint
 msgid "Pick a quest."
 msgstr "Scegli una missione."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
+msgid "Search items"
+msgstr "Cerca oggetti"
+
+#: app/gui/ui/pages/database.slint
+msgid "In the box"
+msgstr "Nella cassa"
+
+#: app/gui/ui/pages/database.slint
+msgid "No item matches."
+msgstr "Nessun oggetto corrisponde."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick an item."
+msgstr "Scegli un oggetto."
 
 #: app/gui/ui/pages/database.slint
 msgid "The game's own data, next to this save. Nothing on this page is edited."
@@ -1511,10 +1548,6 @@ msgstr "Casella {} della cassa oggetti"
 #: app/gui/src/targets.rs app/gui/ui/pages/items.slint
 msgid "Pouch slot {}"
 msgstr "Casella {} della borsa"
-
-#: app/gui/ui/pages/items.slint
-msgid "Search items"
-msgstr "Cerca oggetti"
 
 #: app/gui/ui/pages/items.slint
 msgid "Count"
@@ -3164,6 +3197,26 @@ msgid "{} in the box"
 msgstr "{} nella cassa"
 
 #: app/gui/src/views/database.rs
+msgid "High rank"
+msgstr "Alto grado"
+
+#: app/gui/src/views/database.rs
+msgid "Body carve"
+msgstr "Intaglio del corpo"
+
+#: app/gui/src/views/database.rs
+msgid "Tail carve"
+msgstr "Intaglio della coda"
+
+#: app/gui/src/views/database.rs
+msgid "Shiny drop"
+msgstr "Oggetto luccicante"
+
+#: app/gui/src/views/database.rs
+msgid "Other carve or drop"
+msgstr "Altro intaglio o caduta"
+
+#: app/gui/src/views/database.rs
 msgid "Main rewards"
 msgstr "Ricompense principali"
 
@@ -3178,6 +3231,13 @@ msgstr "Ricompense della sottomissione"
 #: app/gui/src/views/database.rs
 msgid "Extra rewards"
 msgstr "Ricompense extra"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/database.rs
+msgid "and {n} more source"
+msgid_plural "and {n} more sources"
+msgstr[0] "e {n} altra fonte"
+msgstr[1] "e altre {n} fonti"
 
 #: app/gui/src/views/database.rs
 msgid "This quest is not in the game's files: it comes as a download."
@@ -3218,17 +3278,9 @@ msgstr "Nessuna missione gli dà una taglia d'oro."
 msgid "No quest gives it a mini size."
 msgstr "Nessuna missione gli dà una taglia mini."
 
-#: app/gui/src/views/database.rs
-msgid "High rank"
-msgstr "Alto grado"
-
 #: app/gui/src/views/database.rs app/gui/src/views/palicoes.rs
 msgid "Tail"
 msgstr "Coda"
-
-#: app/gui/src/views/database.rs
-msgid "Shiny drop"
-msgstr "Oggetto luccicante"
 
 #: app/gui/src/views/database.rs
 msgid "Other"

@@ -92,6 +92,13 @@ export struct DropTable { title: string, items: [DropItem] }
 // A quest's monster in the Database: size %, the sizes it can roll, crown chances.
 export struct DbQuestMonster { index: int, name: string, icon: image, has-icon: bool, size: string, range: string, gold: string, mini: string }
 
+// Where an item comes from: a monster's carve or a quest's reward (kind "monster" or
+// "quest", index what open-db takes).
+export struct DbSource { kind: string, index: int, where: string, how: string, chance: string, icon: image, has-icon: bool }
+
+// An item in the Database (index = item ID, -1: none).
+export struct DbItem { index: int, name: string, sub: string, icon: image, has-icon: bool, sources: [DbSource], more: string }
+
 // A quest in the Database (index -1: none). `note` says why rewards are missing.
 export struct DbQuest { index: int, name: string, sub: string, monsters: [DbQuestMonster], rewards: [DropTable], note: string }
 
@@ -492,6 +499,8 @@ export global Api {
     in property <[DbRow]> db-quests;
     in property <int> db-row;  // row of the entry shown in its tab's list
     in property <DbQuest> db-quest;
+    in property <[DbRow]> db-items;
+    in property <DbItem> db-item;
     in-out property <string> db-search;
     in-out property <bool> db-missing;
     callback filter-db();

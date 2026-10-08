@@ -1,7 +1,7 @@
 import { ListView, ScrollView } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
-    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem,
 } from "../common.slint";
 
 // Crown tints as on the Monsters page.
@@ -291,6 +291,65 @@ component QuestDetail inherits VerticalLayout {
     DropGrid { tables: q.rewards; }
 }
 
+component ItemDetail inherits VerticalLayout {
+    property <DbItem> it: Api.db-item;
+    padding: Tok.pad;
+    padding-left: 22px;
+    spacing: 14px;
+    alignment: start;
+    HorizontalLayout {
+        spacing: 12px;
+        if Api.assets-ok: Asset { width: 48px; height: 48px; source: it.icon; available: it.has-icon; }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: it.name; font-size: 18px; font-weight: 600; overflow: elide; }
+            Text { text: it.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+        }
+    }
+    Hairline { }
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        SectionTitle { text: @tr("Where to get it"); }
+    }
+    if it.sources.length == 0: Muted { text: @tr("No carve or quest reward gives it. It may come from gathering, the shops or crafting, which are not in the Database yet."); }
+    if it.sources.length > 0: VerticalLayout {
+        HorizontalLayout {
+            height: 24px;
+            spacing: 12px;
+            Rectangle { width: Api.assets-ok ? 32px : 0px; }
+            Text { text: @tr("From"); color: Tok.muted; font-size: Tok.small; horizontal-stretch: 1; }
+            Text { text: @tr("How"); color: Tok.muted; font-size: Tok.small; width: 260px; }
+            Text { text: @tr("Chance"); color: Tok.muted; font-size: Tok.small; width: 70px; horizontal-alignment: right; }
+            Rectangle { width: 70px; }
+        }
+        for s in it.sources: HorizontalLayout {
+            height: 40px;
+            spacing: 12px;
+            accessible-role: text;
+            accessible-label: s.where + ", " + s.how + ", " + s.chance;
+            Rectangle {
+                width: Api.assets-ok ? 32px : 0px;
+                if Api.assets-ok: Asset { y: 4px; width: 32px; height: 32px; source: s.icon; available: s.has-icon; }
+            }
+            Text { text: s.where; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+            Text { text: s.how; vertical-alignment: center; width: 260px; color: Tok.muted; overflow: elide; }
+            Text { text: s.chance; vertical-alignment: center; width: 70px; horizontal-alignment: right; }
+            Rectangle {
+                width: 70px;
+                TextLink {
+                    x: parent.width - self.width;
+                    y: (parent.height - self.height) / 2;
+                    text: @tr("Details");
+                    clicked => { Api.open-db(s.kind, s.index); }
+                }
+            }
+        }
+        if it.more != "": Muted { text: it.more; }
+    }
+}
+
 // A tab's list: search, one filter chip, the entries (index = what select-db takes).
 component EntryColumn inherits VerticalLayout {
     in property <[DbRow]> rows;
@@ -390,6 +449,26 @@ component QuestTab inherits HorizontalLayout {
     }
 }
 
+component ItemTab inherits HorizontalLayout {
+    spacing: Tok.pad;
+    EntryColumn {
+        width: min(320px, root.width * 0.36);
+        rows: Api.db-items;
+        selected: Api.db-item.index;
+        search: @tr("Search items");
+        filter: @tr("In the box");
+        empty: @tr("No item matches.");
+        icons: true;
+    }
+    Card {
+        horizontal-stretch: 1;
+        if Api.db-item.index <= 0: EmptyState { text: @tr("Pick an item."); }
+        if Api.db-item.index > 0: ScrollView {
+            ItemDetail { }
+        }
+    }
+}
+
 export component DatabasePage inherits Rectangle {
     VerticalLayout {
         padding: Tok.margin;
@@ -400,7 +479,7 @@ export component DatabasePage inherits Rectangle {
             subtitle: @tr("The game's own data, next to this save. Nothing on this page is edited.");
         }
         TabBar {
-            tabs: [@tr("Monsters"), @tr("Quests")];
+            tabs: [@tr("Monsters"), @tr("Quests"), @tr("Items")];
             current: Api.db-tab;
             // each tab starts unfiltered
             select(i) => {
@@ -412,5 +491,6 @@ export component DatabasePage inherits Rectangle {
         }
         if Api.db-tab == 0: MonsterTab { vertical-stretch: 1; }
         if Api.db-tab == 1: QuestTab { vertical-stretch: 1; }
+        if Api.db-tab == 2: ItemTab { vertical-stretch: 1; }
     }
 }

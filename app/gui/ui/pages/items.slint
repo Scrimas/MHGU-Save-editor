@@ -1,7 +1,7 @@
 import { LineEdit, ListView, Button, Palette } from "std-widgets.slint";
 import {
     Api, Tok, Fmt, Card, Asset, Muted, ItemSlot, PageHeader, TabBar, NumberBox, StagedBar, WasLine, PreviewPopup,
-    MoreButton, ListRow, EmptyState, SearchField, KeyActivate, FocusRing,
+    MoreButton, ListRow, EmptyState, SearchField, KeyActivate, FocusRing, TextLink,
 } from "../common.slint";
 
 // One slot of the box grid: number, icon, name, count; staged slots show what they held.
@@ -286,6 +286,16 @@ export component ItemsPage inherits Rectangle {
                         horizontal-stretch: 1;
                     }
                     Text { text: root.held; color: Tok.muted; vertical-alignment: center; overflow: elide; }
+                }
+                if root.held-id != 0: HorizontalLayout {
+                    alignment: end;
+                    TextLink {
+                        text: @tr("Where to get it");
+                        clicked => {
+                            picker.close();
+                            Api.open-db("item", root.held-id);
+                        }
+                    }
                 }
                 if root.edit-was != "" && !root.loadout-mode: WasLine { was: root.edit-was; key: (Api.item-store == 0 ? "item:box:" : "item:pouch:") + root.edit-slot; }
                 LineEdit {

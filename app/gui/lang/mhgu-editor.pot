@@ -385,7 +385,7 @@ msgstr ""
 msgid "Character"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/items.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
 msgid "Items"
 msgstr ""
 
@@ -1154,6 +1154,26 @@ msgstr ""
 msgid "Rewards"
 msgstr ""
 
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
+msgid "Where to get it"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "No carve or quest reward gives it. It may come from gathering, the shops or crafting, which are not in the Database yet."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "From"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "How"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Chance"
+msgstr ""
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
 msgstr ""
@@ -1184,6 +1204,22 @@ msgstr ""
 
 #: app/gui/ui/pages/database.slint
 msgid "Pick a quest."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
+msgid "Search items"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "In the box"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "No item matches."
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick an item."
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
@@ -1482,10 +1518,6 @@ msgstr ""
 #: app/gui/src/targets.rs app/gui/ui/pages/items.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Pouch slot {}"
-msgstr ""
-
-#: app/gui/ui/pages/items.slint
-msgid "Search items"
 msgstr ""
 
 #: app/gui/ui/pages/items.slint
@@ -3134,6 +3166,26 @@ msgid "{} in the box"
 msgstr ""
 
 #: app/gui/src/views/database.rs
+msgid "High rank"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Body carve"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Tail carve"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Shiny drop"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Other carve or drop"
+msgstr ""
+
+#: app/gui/src/views/database.rs
 msgid "Main rewards"
 msgstr ""
 
@@ -3148,6 +3200,13 @@ msgstr ""
 #: app/gui/src/views/database.rs
 msgid "Extra rewards"
 msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "and {n} more source"
+msgid_plural "and {n} more sources"
+msgstr[0] ""
+msgstr[1] ""
 
 #: app/gui/src/views/database.rs
 msgid "This quest is not in the game's files: it comes as a download."
@@ -3188,16 +3247,8 @@ msgstr ""
 msgid "No quest gives it a mini size."
 msgstr ""
 
-#: app/gui/src/views/database.rs
-msgid "High rank"
-msgstr ""
-
 #: app/gui/src/views/database.rs app/gui/src/views/palicoes.rs
 msgid "Tail"
-msgstr ""
-
-#: app/gui/src/views/database.rs
-msgid "Shiny drop"
 msgstr ""
 
 #: app/gui/src/views/database.rs

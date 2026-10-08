@@ -392,7 +392,8 @@ msgstr "Aperçu"
 msgid "Character"
 msgstr "Personnage"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/items.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/items.slint
 msgid "Items"
 msgstr "Objets"
 
@@ -1178,6 +1179,26 @@ msgstr "Détails"
 msgid "Rewards"
 msgstr "Récompenses"
 
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
+msgid "Where to get it"
+msgstr "Où l'obtenir"
+
+#: app/gui/ui/pages/database.slint
+msgid "No carve or quest reward gives it. It may come from gathering, the shops or crafting, which are not in the Database yet."
+msgstr "Aucune découpe ni récompense de quête ne le donne. Il peut venir de la récolte, des boutiques ou de l'artisanat, pas encore dans la base de données."
+
+#: app/gui/ui/pages/database.slint
+msgid "From"
+msgstr "Source"
+
+#: app/gui/ui/pages/database.slint
+msgid "How"
+msgstr "Comment"
+
+#: app/gui/ui/pages/database.slint
+msgid "Chance"
+msgstr "Chance"
+
 #: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Search monsters"
 msgstr "Rechercher des monstres"
@@ -1209,6 +1230,22 @@ msgstr "Aucune quête ne correspond."
 #: app/gui/ui/pages/database.slint
 msgid "Pick a quest."
 msgstr "Choisissez une quête."
+
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
+msgid "Search items"
+msgstr "Rechercher des objets"
+
+#: app/gui/ui/pages/database.slint
+msgid "In the box"
+msgstr "Dans le coffre"
+
+#: app/gui/ui/pages/database.slint
+msgid "No item matches."
+msgstr "Aucun objet ne correspond."
+
+#: app/gui/ui/pages/database.slint
+msgid "Pick an item."
+msgstr "Choisissez un objet."
 
 #: app/gui/ui/pages/database.slint
 msgid "The game's own data, next to this save. Nothing on this page is edited."
@@ -1511,10 +1548,6 @@ msgstr "Emplacement {} du coffre"
 #: app/gui/src/targets.rs app/gui/ui/pages/items.slint
 msgid "Pouch slot {}"
 msgstr "Emplacement {} de l'inventaire"
-
-#: app/gui/ui/pages/items.slint
-msgid "Search items"
-msgstr "Rechercher des objets"
 
 #: app/gui/ui/pages/items.slint
 msgid "Count"
@@ -3164,6 +3197,26 @@ msgid "{} in the box"
 msgstr "{} dans le coffre"
 
 #: app/gui/src/views/database.rs
+msgid "High rank"
+msgstr "Rang supérieur"
+
+#: app/gui/src/views/database.rs
+msgid "Body carve"
+msgstr "Découpe du corps"
+
+#: app/gui/src/views/database.rs
+msgid "Tail carve"
+msgstr "Découpe de la queue"
+
+#: app/gui/src/views/database.rs
+msgid "Shiny drop"
+msgstr "Objet brillant"
+
+#: app/gui/src/views/database.rs
+msgid "Other carve or drop"
+msgstr "Autre découpe ou objet lâché"
+
+#: app/gui/src/views/database.rs
 msgid "Main rewards"
 msgstr "Récompenses principales"
 
@@ -3178,6 +3231,13 @@ msgstr "Récompenses de sous-quête"
 #: app/gui/src/views/database.rs
 msgid "Extra rewards"
 msgstr "Récompenses en plus"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/database.rs
+msgid "and {n} more source"
+msgid_plural "and {n} more sources"
+msgstr[0] "et {n} autre source"
+msgstr[1] "et {n} autres sources"
 
 #: app/gui/src/views/database.rs
 msgid "This quest is not in the game's files: it comes as a download."
@@ -3218,17 +3278,9 @@ msgstr "Aucune quête ne lui donne une taille d'or."
 msgid "No quest gives it a mini size."
 msgstr "Aucune quête ne lui donne une mini taille."
 
-#: app/gui/src/views/database.rs
-msgid "High rank"
-msgstr "Rang supérieur"
-
 #: app/gui/src/views/database.rs app/gui/src/views/palicoes.rs
 msgid "Tail"
 msgstr "Queue"
-
-#: app/gui/src/views/database.rs
-msgid "Shiny drop"
-msgstr "Objet brillant"
 
 #: app/gui/src/views/database.rs
 msgid "Other"
