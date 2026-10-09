@@ -1,4 +1,4 @@
-import { ListView, LineEdit, ScrollView, Palette, CheckBox } from "std-widgets.slint";
+import { ListView, LineEdit, ScrollView, Palette, CheckBox, Button } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
     Confidence, SearchField, PalicoEntry, LookRow, Pair, Picker,
@@ -195,6 +195,7 @@ export component PalicoesPage inherits Rectangle {
                     }
                 }
             }
+                Button { text: @tr("Import Palico…"); clicked => { Api.palico-import(); } }
             }
             Card {
                 horizontal-stretch: 1;
@@ -206,6 +207,14 @@ export component PalicoesPage inherits Rectangle {
                         spacing: 14px;
                         alignment: start;
                         Text { text: Api.palico.name; font-size: 18px; font-weight: 600; }
+                        // the Palico with its equipment into another character, or a file
+                        HorizontalLayout {
+                            spacing: Tok.tight;
+                            alignment: start;
+                            for s in Api.other-characters: Button { text: @tr("Copy to {}", s.name); clicked => { Api.palico-copy(s.slot); } }
+                            Button { text: @tr("Export…"); clicked => { Api.palico-export(); } }
+                            ConfidenceTag { level: Confidence.derived; y: 5px; }
+                        }
                         if Api.palico.warning != "": Text {
                             text: @tr("The game cannot make this: {}.", Api.palico.warning);
                             color: Tok.bad;

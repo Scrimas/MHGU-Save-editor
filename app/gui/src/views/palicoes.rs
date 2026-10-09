@@ -132,6 +132,7 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
 }
 
 pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
+    let api = ui.global::<Api>();
     // palicoes
     on!(ui, st, on_filter_palicoes, |ui, s, q: SharedString| {
         view(|v| v.palico_search = q.to_string());
@@ -229,4 +230,77 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         });
         let _ = &ui;
     });
+    // the selected Palico and the equipment it wears, into another character's Palicoes
+    on!(ui, st, on_palico_copy, |ui, s, k: i32| {
+        let (Ok(i), Ok(k)) = (usize::try_from(view(|v| v.palico_sel)), usize::try_from(k)) else { return };
+        let from = s.slot;
+        if k > 2 || k == from || !s.save().slot_used(k) || palico::is_empty(s.save(), s.base(), i) {
+            return;
+        }
+        let name = palico::get(s.save(), s.base(), i).name;
+        let to = character::get(s.save(), s.save().base(k)).name;
+        let file = palico::export(s.save(), s.base(), i);
+        add_palico(&ui, &mut s, k, &file, trf("Copy {} to {}", &[&name, &to]));
+    });
+    {
+        let w = ui.as_weak();
+        let st = st.clone();
+        api.on_palico_export(move || {
+            let Some(ui) = w.upgrade() else { return };
+            let (name, bytes) = {
+                let s = st.borrow();
+                let Ok(i) = usize::try_from(view(|v| v.palico_sel)) else { return };
+                if s.doc.is_none() || palico::is_empty(s.save(), s.base(), i) {
+                    return;
+                }
+                (palico::get(s.save(), s.base(), i).name, palico::export(s.save(), s.base(), i))
+            };
+            save_file(&ui, tr("Export Palico"), (tr("MHGU Palico"), PALICO_EXT), &name, &bytes, (trf("Exported {}", &[&name]), tr("With the equipment it wears")));
+        });
+    }
+    {
+        let w = ui.as_weak();
+        let st = st.clone();
+        api.on_palico_import(move || {
+            let Some(ui) = w.upgrade() else { return };
+            if st.borrow().doc.is_none() {
+                return;
+            }
+            let Some(f) = open_file(&ui, tr("Import Palico"), tr("MHGU Palico"), PALICO_EXT) else { return };
+            let Ok(name) = palico::name_of(&f) else {
+                return toast(&ui, tr("Not imported: the file is not a Palico exported by this editor"), true);
+            };
+            {
+                let mut s = st.borrow_mut();
+                let k = s.slot;
+                add_palico(&ui, &mut s, k, &f, trf("Import {}", &[&name]));
+            }
+            refresh(&ui, &st.borrow());
+        });
+    }
+}
+
+/// Stage a Palico file's Palico into character `k`'s Palicoes; says why when it does not
+/// fit, and selects it when `k` is the character shown.
+fn add_palico(ui: &AppWindow, s: &mut State, k: usize, file: &[u8], title: String) {
+    let e = Edit { key: String::new(), title: title.clone(), detail: tr("Palicoes").into(), note: String::new(), conf: Conf::Derived, targets: vec![] };
+    if refused(ui, e.conf) {
+        return;
+    }
+    let mut r = Err(palico::ImportError::NotAPalico);
+    s.edit_at(k, true, e, |sv, base| {
+        r = palico::import(sv, base, file);
+        r.iter().map(|&i| Target::Palico(i, targets::Pal::All)).collect()
+    });
+    match r {
+        Ok(i) => {
+            if k == s.slot {
+                view(|v| v.palico_sel = i as i32);
+            }
+            toast_full(ui, tr("Added to Review"), &title, "", ToastAct::None, false);
+        }
+        Err(palico::ImportError::ListFull) => toast(ui, tr("Not added: every Palico place of that character is taken"), true),
+        Err(palico::ImportError::BoxFull) => toast(ui, tr("Not added: the Palico equipment box has no room for its equipment"), true),
+        Err(palico::ImportError::NotAPalico) => toast(ui, tr("Not imported: the file is not a Palico exported by this editor"), true),
+    }
 }

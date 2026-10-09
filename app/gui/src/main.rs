@@ -139,6 +139,8 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
         let parts: Vec<&str> = step.split(':').collect();
         match (page, &parts[..]) {
             (_, &["slot", n]) => api.invoke_select_slot(num(n)),
+            (_, &["characters"]) => api.set_characters_open(true),
+            (_, &["copy", a, b]) => api.invoke_slot_copy(num(a), num(b)),
             ("quests", &["tab", n]) => api.invoke_select_quest_tab(num(n)),
             (_, &["tab", n]) => api.invoke_select_collection(num(n)),
             ("palicoes", &["sel", n]) => api.invoke_select_palico(num(n)),
@@ -259,13 +261,13 @@ mod tests {
     use super::*;
     use slint::Model;
 
-    #[test]
-    #[ignore = "needs MHGU_TEST_SAVE"]
-    fn edit_review_undo_write() {
+    /// The test save's folder copied to a temporary one (`tag` names it) and opened in a
+    /// headless window.
+    fn opened(tag: &str) -> (AppWindow, Shared, std::path::PathBuf) {
         let p = std::env::var_os("MHGU_TEST_SAVE").expect("set MHGU_TEST_SAVE to a copy of 0/system");
         i_slint_backend_testing::init_no_event_loop();
         let src = std::path::Path::new(&p).parent().unwrap().parent().unwrap();
-        let dir = std::env::temp_dir().join(format!("mhgu-ui-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("mhgu-ui-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         for c in ["0", "1"] {
             std::fs::create_dir_all(dir.join(c)).unwrap();
@@ -277,6 +279,55 @@ mod tests {
         let st: Shared = Rc::new(RefCell::new(State::default()));
         views::wire(&ui, &st);
         views::open(&ui, &st, &dir.join("0/system"));
+        (ui, st, dir)
+    }
+
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn characters_and_palicoes_move() {
+        let (ui, st, dir) = opened("chars");
+        let api = ui.global::<Api>();
+        let used = |k: usize| st.borrow().save().slot_used(k);
+        let pals = |k: usize| {
+            let s = st.borrow();
+            (0..mhgu_save::palico::LIST_N).filter(|&i| !mhgu_save::palico::is_empty(s.save(), s.save().base(k), i)).count()
+        };
+        let name = api.get_slots().row_data(0).unwrap().name;
+        // slot 1 copied over slot 3: one edit, listed as the slot, old → new
+        api.invoke_slot_copy(0, 2);
+        assert_eq!(api.get_change_count(), 1);
+        assert!(used(2));
+        assert_eq!(api.get_slots().row_data(2).unwrap().name, name);
+        let c = api.get_changes().row_data(0).unwrap();
+        assert!(c.single && c.title == "Character slot 3" && c.new.starts_with(name.as_str()), "{c:?}");
+        // a Palico of slot 1 into the copy, its equipment with it
+        api.set_page("palicoes".into());
+        views::refresh(&ui, &st.borrow());
+        let n = pals(2);
+        api.invoke_palico_copy(2);
+        assert_eq!(api.get_change_count(), 2);
+        assert_eq!(pals(2), n + 1);
+        // Undo all: the file as read
+        api.invoke_undo_all();
+        assert!(!st.borrow().save().is_dirty());
+        // a swap keeps the character shown: it moves to the other slot
+        api.invoke_slot_swap(0, 2);
+        assert_eq!(st.borrow().slot, 2);
+        assert_eq!(api.get_slots().row_data(2).unwrap().name, name);
+        api.invoke_undo_all();
+        // delete: the slot is empty; Undo on the field puts it back
+        api.invoke_select_slot(0);
+        api.invoke_slot_delete(0);
+        assert!(!used(0));
+        api.invoke_undo_value("slot:0".into());
+        assert!(used(0) && !st.borrow().save().is_dirty());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn edit_review_undo_write() {
+        let (ui, st, dir) = opened("edit");
         let api = ui.global::<Api>();
         assert!(api.get_loaded());
         assert_eq!(api.get_write_targets().row_count(), 4);
@@ -413,8 +464,8 @@ mod tests {
             assert_eq!(api.get_value_count(), 0);
         }
 
-        // Confirmed only refuses a Derived edit (no edit is Derived since 2.0), not a
-        // Confirmed one; off again, a Derived one goes through
+        // Confirmed only refuses a Derived edit, not a Confirmed one; off again, a Derived
+        // one goes through
         settings::update(|s| s.confirmed_only = true);
         assert!(views::refused(&ui, state::Conf::Derived));
         assert!(!views::refused(&ui, state::Conf::Confirmed));

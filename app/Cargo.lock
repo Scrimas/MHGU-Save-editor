@@ -2757,6 +2757,7 @@ name = "mhgu-save"
 version = "2.0.0"
 dependencies = [
  "csv",
+ "miniz_oxide 0.8.9",
 ]
 
 [[package]]

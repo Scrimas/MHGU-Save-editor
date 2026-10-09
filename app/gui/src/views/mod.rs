@@ -242,14 +242,14 @@ pub fn refresh(ui: &AppWindow, st: &State) {
         api.set_emulator_name(emu.into());
     }
     api.set_slot(st.slot as i32);
-    api.set_slots(model(
-        (0..3)
-            .map(|k| {
-                let c = character::get(s, s.base(k));
-                SlotInfo { slot: k as i32, used: s.slot_used(k), name: c.name.into(), hr: c.hr as i32, playtime: fmt::playtime(c.playtime).into() }
-            })
-            .collect(),
-    ));
+    let slots: Vec<SlotInfo> = (0..3)
+        .map(|k| {
+            let c = character::get(s, s.base(k));
+            SlotInfo { slot: k as i32, used: s.slot_used(k), name: c.name.into(), hr: c.hr as i32, playtime: fmt::playtime(c.playtime).into() }
+        })
+        .collect();
+    api.set_other_characters(model(slots.iter().filter(|x| x.used && x.slot as usize != st.slot).cloned().collect()));
+    api.set_slots(model(slots));
     review(ui, st);
     // paths elided in the middle, so the part that differs stays visible (02.4)
     api.set_write_targets(strings(doc.loc.copies.iter().map(|p| fmt::elide_path(&p.display().to_string(), 64))));
@@ -400,9 +400,7 @@ fn review(ui: &AppWindow, st: &State) {
     api.set_warn_why(crate::warnings::why().into());
 }
 
-/// Confirmed only (Settings) refuses edits not checked in game, and says so. Every edit
-/// was checked in game by 1.0; kept for the next one that is not.
-#[allow(dead_code)]
+/// Confirmed only (Settings) refuses edits not checked in game, and says so.
 pub(crate) fn refused(ui: &AppWindow, c: Conf) -> bool {
     let r = c != Conf::Confirmed && settings::get().confirmed_only;
     if r {
@@ -576,6 +574,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_settings(ui, st);
     wire_update(ui, st);
     wire_file(ui, st);
+    wire_characters(ui, st);
     wire_overview(ui, st);
     wire_character(ui, st);
     wire_items(ui, st);
@@ -712,6 +711,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
 // (`*_page` where the name is taken by the save library's module)
 mod advanced;
 mod character_page;
+mod characters;
 mod collections;
 mod database;
 mod equipment_page;
@@ -727,7 +727,7 @@ mod settings_ui;
 mod update_ui;
 
 use self::{
-    advanced::*, character_page::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
+    advanced::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
     palicoes::*, quests::*, requests::*, settings_ui::*,
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};

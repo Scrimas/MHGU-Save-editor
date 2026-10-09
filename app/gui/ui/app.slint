@@ -400,6 +400,76 @@ component SnapshotsDialog inherits Modal {
     }
 }
 
+// Characters: each slot exported, imported or deleted, one copied or swapped onto
+// another. Every change is staged like any other edit (Review, Write, Undo).
+component CharactersDialog inherits Modal {
+    card-width: 640px;
+    dismiss => { Api.characters-open = false; }
+    property <int> from: Api.slot;
+    property <int> to: Api.slot == 0 ? 1 : 0;
+    property <[string]> labels: [
+        Api.slots[0].used ? "1 · " + Api.slots[0].name : @tr("{} · empty", 1),
+        Api.slots[1].used ? "2 · " + Api.slots[1].name : @tr("{} · empty", 2),
+        Api.slots[2].used ? "3 · " + Api.slots[2].name : @tr("{} · empty", 3),
+    ];
+    Text { text: @tr("Characters"); font-size: 20px; font-weight: 600; }
+    Muted { text: @tr("Copy, swap, delete, export or import whole characters. Each change is staged: it shows in Review and goes into the save with Write."); }
+    Rectangle {
+        border-radius: Tok.radius;
+        border-width: 1px;
+        border-color: Tok.line;
+        VerticalLayout {
+            for s[i] in Api.slots: Rectangle {
+                height: 58px;
+                if i > 0: Hairline { y: 0; width: parent.width; }
+                HorizontalLayout {
+                    padding-left: 14px;
+                    padding-right: 10px;
+                    spacing: Tok.tight;
+                    VerticalLayout {
+                        alignment: center;
+                        horizontal-stretch: 1;
+                        Text { text: root.labels[i]; overflow: elide; }
+                        Muted { text: s.used ? @tr("HR {} · {}", s.hr, s.playtime) : @tr("No character in this slot"); wrap: no-wrap; overflow: elide; }
+                    }
+                    Button { y: (parent.height - 32px) / 2; height: 32px; text: @tr("Import…"); clicked => { Api.slot-import(i); } }
+                    if s.used: Button { y: (parent.height - 32px) / 2; height: 32px; text: @tr("Export…"); clicked => { Api.slot-export(i); } }
+                    if s.used: Button { y: (parent.height - 32px) / 2; height: 32px; text: @tr("Delete"); clicked => { Api.slot-delete(i); } }
+                }
+            }
+        }
+    }
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Text { text: @tr("Copy"); vertical-alignment: center; }
+        Picker { width: 160px; model: root.labels; value: root.from; picked(i) => { root.from = i; } }
+        Text { text: @tr("to"); vertical-alignment: center; }
+        Picker { width: 160px; model: root.labels; value: root.to; picked(i) => { root.to = i; } }
+        Rectangle { horizontal-stretch: 1; }
+        Button {
+            text: @tr("Copy");
+            enabled: root.from != root.to && Api.slots[root.from].used;
+            clicked => { Api.slot-copy(root.from, root.to); }
+        }
+        Button {
+            text: @tr("Swap");
+            enabled: root.from != root.to && (Api.slots[root.from].used || Api.slots[root.to].used);
+            clicked => { Api.slot-swap(root.from, root.to); }
+        }
+    }
+    VerticalLayout {
+        Reveal {
+            shown: root.from != root.to && Api.slots[root.from].used && Api.slots[root.to].used;
+            Text { text: @tr("Copy replaces {} in slot {}.", Api.slots[root.to].name, root.to + 1); color: Tok.warn; font-size: Tok.small; wrap: word-wrap; }
+        }
+    }
+    Muted { text: @tr("Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."); }
+    HorizontalLayout {
+        alignment: end;
+        Button { text: @tr("Close"); clicked => { Api.characters-open = false; } }
+    }
+}
+
 // One setting: what it is on the left, its controls on the right.
 component SettingRow inherits HorizontalLayout {
     in property <string> title;
@@ -677,7 +747,7 @@ export component AppWindow inherits Window {
     forward-focus: keys;
     property <string> page-now: Api.page;
     changed page-now => { Api.page-shown(); }
-    property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
+    property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
     changed any-modal => {
         if !any-modal {
             keys.focus();
@@ -744,6 +814,11 @@ export component AppWindow inherits Window {
                     clicked => { Api.page = id; }
                 }
                 Rectangle { vertical-stretch: 1; }
+                NavButton {
+                    text: @tr("Characters…");
+                    enabled: Api.loaded;
+                    clicked => { Api.characters-open = true; }
+                }
                 NavButton {
                     text: @tr("Snapshots…");
                     enabled: Api.loaded;
@@ -868,7 +943,9 @@ export component AppWindow inherits Window {
                 Rectangle {
                     if Api.page == "open": OpenPage { }
                     if !char-ok && Api.page != "open": EmptyState {
-                        text: @tr("Character slot {} is empty. Pick a character in the sidebar; a new one is made in game.", Api.slot + 1);
+                        text: @tr("Character slot {} is empty. Pick a character in the sidebar, copy or import one into it, or make a new one in game.", Api.slot + 1);
+                        action: @tr("Characters…");
+                        act => { Api.characters-open = true; }
                     }
                     if char-ok && Api.page == "overview": OverviewPage { }
                     if char-ok && Api.page == "character": CharacterPage { }
@@ -894,6 +971,7 @@ export component AppWindow inherits Window {
     }
     if Api.write-open: WriteDialog { }
     if Api.snapshots-open: SnapshotsDialog { }
+    if Api.characters-open: CharactersDialog { }
     if Api.settings-open: SettingsDialog { }
     if Api.update-open: Modal {
         property <string> state: Api.update.state;

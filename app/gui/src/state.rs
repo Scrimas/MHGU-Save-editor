@@ -137,13 +137,18 @@ impl State {
     /// it changed beyond `e.targets`. Returns whether an edit holds it afterwards. With
     /// Confirmed only on (Settings), edits not confirmed in game are refused.
     pub fn edit(&mut self, e: Edit, f: impl FnOnce(&mut Save, usize) -> Vec<Target>) -> bool {
+        self.edit_at(self.slot, true, e, f)
+    }
+
+    /// `edit` on character `slot`, which the edit is listed under; `need_char` false lets
+    /// it run on an empty slot (a character copied or imported into it).
+    pub fn edit_at(&mut self, slot: usize, need_char: bool, e: Edit, f: impl FnOnce(&mut Save, usize) -> Vec<Target>) -> bool {
         if e.conf != Conf::Confirmed && crate::settings::get().confirmed_only {
             return false;
         }
-        let slot = self.slot;
         let Some(doc) = self.doc.as_mut() else { return false };
         // an empty slot has no character: its bytes are not a character's yet
-        if slot > 2 || !doc.save.slot_used(slot) {
+        if slot > 2 || (need_char && !doc.save.slot_used(slot)) {
             return false;
         }
         self.version += 1;

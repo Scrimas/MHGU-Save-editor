@@ -191,6 +191,61 @@ msgstr ""
 msgid "Restore"
 msgstr ""
 
+#: app/gui/ui/app.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · empty"
+msgstr ""
+
+#: app/gui/src/views/characters.rs app/gui/ui/app.slint
+msgid "Characters"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Copy, swap, delete, export or import whole characters. Each change is staged: it shows in Review and goes into the save with Write."
+msgstr ""
+
+#: app/gui/src/views/file.rs app/gui/ui/app.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "HR {} · {}"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "No character in this slot"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Import…"
+msgstr ""
+
+#: app/gui/ui/app.slint app/gui/ui/pages/palicoes.slint
+msgid "Export…"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Delete"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Copy"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "to"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Swap"
+msgstr ""
+
+#: app/gui/ui/app.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "Copy replaces {} in slot {}."
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
+msgstr ""
+
 #: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
 msgid "Remove"
 msgstr ""
@@ -393,7 +448,7 @@ msgstr ""
 msgid "Equipment"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs app/gui/ui/app.slint app/gui/ui/pages/palicoes.slint
 msgid "Palicoes"
 msgstr ""
 
@@ -422,17 +477,7 @@ msgid "Save map"
 msgstr ""
 
 #: app/gui/ui/app.slint
-#. placeholders: {} in order, {0} {1} by position
-msgid "{} · empty"
-msgstr ""
-
-#: app/gui/src/views/file.rs app/gui/ui/app.slint
-#. placeholders: {} in order, {0} {1} by position
-msgid "HR {} · {}"
-msgstr ""
-
-#: app/gui/ui/app.slint
-msgid "No character in this slot"
+msgid "Characters…"
 msgstr ""
 
 #: app/gui/ui/app.slint
@@ -456,10 +501,6 @@ msgid "Save file"
 msgstr ""
 
 #: app/gui/ui/app.slint
-msgid "Copy"
-msgstr ""
-
-#: app/gui/ui/app.slint
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 msgid "{} value not written yet"
 msgid_plural "{} values not written yet"
@@ -473,7 +514,7 @@ msgstr ""
 
 #: app/gui/ui/app.slint
 #. placeholders: {} in order, {0} {1} by position
-msgid "Character slot {} is empty. Pick a character in the sidebar; a new one is made in game."
+msgid "Character slot {} is empty. Pick a character in the sidebar, copy or import one into it, or make a new one in game."
 msgstr ""
 
 #: app/gui/ui/app.slint
@@ -1732,7 +1773,16 @@ msgid "No Palico matches the search."
 msgstr ""
 
 #: app/gui/ui/pages/palicoes.slint
+msgid "Import Palico…"
+msgstr ""
+
+#: app/gui/ui/pages/palicoes.slint
 msgid "Pick a Palico to edit it."
+msgstr ""
+
+#: app/gui/ui/pages/palicoes.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "Copy to {}"
 msgstr ""
 
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
@@ -2718,6 +2768,15 @@ msgid "Box slot {}"
 msgstr ""
 
 #: app/gui/src/targets.rs
+msgid "Whole Palico"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Palico place {} · {}"
+msgstr ""
+
+#: app/gui/src/targets.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Delivery request {}"
 msgstr ""
@@ -2779,9 +2838,23 @@ msgstr ""
 msgid "{} quests"
 msgstr ""
 
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Character slot {}"
+msgstr ""
+
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/src/views/names.rs app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Type {}"
+msgstr ""
+
+#: app/gui/src/targets.rs
+msgid "No Palico"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · Lv {} · {}"
 msgstr ""
 
 #: app/gui/src/targets.rs
@@ -2817,6 +2890,11 @@ msgstr ""
 #: app/gui/src/targets.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Face {} · Hairstyle {} · Voice {}"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · HR {} · {}"
 msgstr ""
 
 #: app/gui/src/update.rs
@@ -3098,6 +3176,75 @@ msgstr ""
 
 #: app/gui/src/views/character_page.rs
 msgid "Written to the save, the player record and the Guild Card"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Could not write {}: {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Could not read {}: {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} (slot {})"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "slot {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs app/gui/src/views/palicoes.rs
+msgid "Added to Review"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Copy {} to slot {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Swap {} and {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Delete {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "With its changes not written yet"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Export character"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "MHGU character"
+msgstr ""
+
+#: app/gui/src/views/characters.rs app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Exported {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Import character"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Not imported: the file is not a character exported by this editor"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Import {} into slot {}"
 msgstr ""
 
 #: app/gui/src/views/collections.rs
@@ -3777,10 +3924,6 @@ msgid "Confirmed changes only is on in Settings"
 msgstr ""
 
 #: app/gui/src/views/mod.rs
-msgid "Added to Review"
-msgstr ""
-
-#: app/gui/src/views/mod.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Undid {}"
 msgstr ""
@@ -4119,6 +4262,44 @@ msgstr ""
 
 #: app/gui/src/views/palicoes.rs
 msgid "A Palico needs a name"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Copy {} to {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Export Palico"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "MHGU Palico"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "With the equipment it wears"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Import Palico"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not imported: the file is not a Palico exported by this editor"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Import {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not added: every Palico place of that character is taken"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not added: the Palico equipment box has no room for its equipment"
 msgstr ""
 
 #: app/gui/src/views/quests.rs

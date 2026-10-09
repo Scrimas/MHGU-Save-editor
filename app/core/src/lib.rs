@@ -14,6 +14,7 @@ pub mod monsters;
 pub mod palico;
 pub mod progress;
 pub mod save;
+pub mod slots;
 pub mod smithy;
 pub mod store;
 

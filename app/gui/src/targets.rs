@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, monsters, palico, smithy, Save};
+use mhgu_save::{arena, monsters, palico, save, slots, smithy, Save};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -37,6 +37,8 @@ pub enum Pal {
     Skills,
     /// Coat, eyes, ears, tail, voice, clothing and their colours.
     Looks,
+    /// The whole record and the Palico equipment box entries it wears (a Palico copied in).
+    All,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -93,6 +95,9 @@ pub enum Target {
     Greeting,
     /// Quests done with one hunting style.
     StyleUse(usize),
+    /// A whole character slot (0-2, whatever the edit's character): copied, swapped,
+    /// deleted or imported.
+    Slot(usize),
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -155,6 +160,7 @@ fn pal_field(f: Pal) -> &'static str {
         Pal::Moves => "moves",
         Pal::Skills => "skills",
         Pal::Looks => "looks",
+        Pal::All => "all",
     }
 }
 
@@ -169,6 +175,7 @@ pub fn pal_of(field: &str) -> Pal {
         "moves" => Pal::Moves,
         "skills" => Pal::Skills,
         "looks" => Pal::Looks,
+        "all" => Pal::All,
         _ => Pal::Owner,
     }
 }
@@ -288,6 +295,7 @@ impl Target {
             Request(_) => "requests",
             Art(_) | Dish(_) | Ingredient(_) | Award(_) | Permits(_) | Levels(_) => "collections",
             Monster(..) => "monsters",
+            Slot(_) => "overview",
         }
     }
 
@@ -330,6 +338,7 @@ impl Target {
             CardQuests(k) => format!("quests:{k}"),
             Greeting => "card-greeting".into(),
             StyleUse(k) => format!("style:{k}"),
+            Slot(k) => format!("slot:{k}"),
         }
     }
 
@@ -373,8 +382,9 @@ impl Target {
                     Pal::Moves => tr("Support moves"),
                     Pal::Skills => tr("Skills"),
                     Pal::Looks => tr("Looks"),
+                    Pal::All => tr("Whole Palico"),
                 };
-                format!("{n} · {what}")
+                if n.is_empty() { trf("Palico place {} · {}", &[&(i + 1), &what]) } else { format!("{n} · {what}") }
             }
             Quest(i) => t.quests.iter().find(|q| q.index == i).map(|q| q.name.clone()).unwrap_or_else(|| trf("Quest {}", &[&i])),
             Request(i) => t
@@ -416,6 +426,7 @@ impl Target {
             CardQuests(k) => trf("{} quests", &[&tr(ch::QUEST_KINDS[k])]),
             Greeting => tr("Guild Card greeting").into(),
             StyleUse(k) => trf("{} quests", &[&tr(ch::STYLES[k])]),
+            Slot(k) => trf("Character slot {}", &[&(k + 1)]),
         }
     }
 
@@ -463,6 +474,8 @@ impl Target {
                         let [r, g, b, _] = p.colours[0];
                         format!("{coat} · #{r:02x}{g:02x}{b:02x}")
                     }
+                    Pal::All if palico::is_empty(s, base, i) => tr("No Palico").into(),
+                    Pal::All => trf("{} · Lv {} · {}", &[&p.name, &p.level, &tr(palico::BIASES.get(p.bias as usize).copied().unwrap_or("?"))]),
                 }
             }
             Quest(i) => {
@@ -531,6 +544,11 @@ impl Target {
             CardQuests(k) => num(ch::card_quests(s, base, k)),
             Greeting => ch::greeting(s, base),
             StyleUse(k) => num(ch::style_use(s, base, k)),
+            Slot(k) if !s.slot_used(k) => tr("Empty").into(),
+            Slot(k) => {
+                let c = ch::get(s, s.base(k));
+                trf("{} · HR {} · {}", &[&c.name, &num(c.hr), &playtime(c.playtime)])
+            }
         }
     }
 
@@ -571,6 +589,11 @@ impl Target {
                     Pal::Moves => [range(o + palico::MOVES, 8), range(o + palico::LEARNED, 16)].concat(),
                     Pal::Skills => [range(o + palico::SKILLS_ON, 8), range(o + palico::SKILLS, 12)].concat(),
                     Pal::Looks => [range(o + palico::LOOKS, 12), range(o + palico::COLOURS, 36)].concat(),
+                    // the entries it wears now: put back, they are free again
+                    Pal::All => {
+                        let worn = palico::gear(s, base, i).into_iter().map(|j| range(base + equipment::PALICO_BOX + equipment::ENTRY * j, equipment::ENTRY));
+                        std::iter::once(range(o, palico::RECORD)).chain(worn).flatten().collect()
+                    }
                 }
             }
             Quest(i) => {
@@ -645,6 +668,7 @@ impl Target {
             CardQuests(k) => range(base + ch::CARD_QUESTS + 2 * k, 2),
             Greeting => range(base + ch::CARD_GREETING, 2 * ch::GREETING_UNITS),
             StyleUse(k) => range(base + ch::STYLE_USE + 2 * k, 2),
+            Slot(k) => [range(s.base(k), slots::LEN), range(save::SLOT_USED + k, 1), range(save::LAST_PLAYED, 1)].concat(),
         }
     }
 

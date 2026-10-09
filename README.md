@@ -46,7 +46,7 @@ For a portable install or another emulator, add its folder in **Settings…** or
 | Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, appearance: body type, face, hairstyle, voice, features, clothing, skin and clothing colours; Guild Card title, scene, pose and greeting, Guild Card weapon usage, quests completed per hunting style |
 | Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts. A pouch stack above the item's carry limit is written with a warning |
 | Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables) |
-| Palicoes | Name, level and experience, forte, target, greeting, original owner; support moves and skills: the list and what is equipped, checked against the forte's innate entries and the level's slots; looks: coat, eyes, ears, tail, voice, clothing and their colours from the game's palettes |
+| Palicoes | Name, level and experience, forte, target, greeting, original owner; support moves and skills: the list and what is equipped, checked against the forte's innate entries and the level's slots; looks: coat, eyes, ears, tail, voice, clothing and their colours from the game's palettes; and, Derived: a Palico copied with the equipment it wears to another character, or exported to a file and imported into any save |
 | Quests | Every quest cleared or not (seen and quest sets follow, as in game, and so do the Guild Card's quests-completed counts); says what unlocks a quest that is not on the board yet. Arena records: best time and equipment set per Arena quest, ranked by the quest's times |
 | Requests | Villager requests: accepted (quest posted on the board) and reported |
 | Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt) |
@@ -54,7 +54,8 @@ For a portable install or another emulator, add its folder in **Settings…** or
 | Database | The game's own data next to the save, read-only: monsters, quests, items, skills and equipment ([below](#database)) |
 | Save map | Every byte range of the save, named from the game's own loader (read-only) |
 
-All three character slots are supported.
+All three character slots are supported. **Characters…** (Derived) copies, swaps and
+deletes whole characters, and exports one to a file to import it into a slot of any save.
 
 **Values the game cannot produce** (a stack above its limit, a decoration that does not
 fit, a talisman outside the charm tables, a weapon above its top level, a locked Guild

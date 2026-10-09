@@ -7,3 +7,4 @@ license.workspace = true
 
 [dependencies]
 csv = "1"
+miniz_oxide = "0.8"

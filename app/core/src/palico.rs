@@ -1,5 +1,6 @@
 //! Palico records, 324 B (docs/11-save-map.md "Palico records", from the loader; every
-//! field the editor writes CONFIRMED in game, the lists and looks on 2026-10-09).
+//! field the editor writes CONFIRMED in game, the lists and looks on 2026-10-09). A
+//! Palico copied or imported into another character (`export`, `import`) is DERIVED.
 //!
 //!   +0x00 char[32] name
 //!   +0x20 224 B parameter block: exp u32 +0, level - 1 u8 +4, support bias +5, +6 UNRESOLVED,
@@ -19,6 +20,7 @@
 //! skill slots.
 
 use crate::data::tables;
+use crate::equipment::{self, Owner, PALICO_BOX_N};
 use crate::save::Save;
 
 pub const LIST: usize = 0x23BB6;
@@ -27,6 +29,13 @@ pub const HIRE_LIST: usize = 0x2A606;
 pub const HIRE_N: usize = 24;
 pub const RECORD: usize = 324;
 pub const NAME: usize = 32;
+/// 7 x u16 equipment references: Palico equipment box indices, 0xFFFF = none.
+pub const GEAR: usize = 0x100;
+pub const GEAR_N: usize = 7;
+pub const NO_GEAR: u16 = 0xFFFF;
+/// Start of an exported Palico file, then the record and, per equipment reference, its
+/// box entry (zeros for none).
+pub const MAGIC: &[u8; 8] = b"MHGUCAT1";
 pub const GREETING: (usize, usize) = (0x60, 60);
 pub const OWNER: (usize, usize) = (0x9C, 32);
 pub const EXP: usize = 0x20;
@@ -268,6 +277,82 @@ pub fn get(s: &Save, base: usize, i: usize) -> Palico {
     }
 }
 
+/// Palico equipment box indices of Palico `i`'s equipment references (none skipped).
+pub fn gear(s: &Save, base: usize, i: usize) -> Vec<usize> {
+    let o = at(base, LIST, i);
+    (0..GEAR_N).map(|k| s.u16(o + GEAR + 2 * k)).filter(|&r| r != NO_GEAR && (r as usize) < PALICO_BOX_N).map(usize::from).collect()
+}
+
+/// Why a Palico file did not go in.
+#[derive(Debug, PartialEq, Eq)]
+pub enum ImportError {
+    NotAPalico,
+    /// All 84 Palico places hold one.
+    ListFull,
+    /// Fewer free Palico equipment box entries than the Palico's equipment.
+    BoxFull,
+}
+
+impl std::fmt::Display for ImportError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.write_str(match self {
+            ImportError::NotAPalico => "not a Palico exported by this editor",
+            ImportError::ListFull => "every Palico place is taken",
+            ImportError::BoxFull => "the Palico equipment box has no room for its equipment",
+        })
+    }
+}
+
+impl std::error::Error for ImportError {}
+
+/// Palico `i` and the equipment it wears, as a file.
+pub fn export(s: &Save, base: usize, i: usize) -> Vec<u8> {
+    let o = at(base, LIST, i);
+    let mut v = [MAGIC.as_slice(), s.get(o, RECORD)].concat();
+    for k in 0..GEAR_N {
+        let r = s.u16(o + GEAR + 2 * k);
+        let e = if r != NO_GEAR && (r as usize) < PALICO_BOX_N { equipment::get(s, base, Owner::Palico, r as usize).raw } else { [0; equipment::ENTRY] };
+        v.extend_from_slice(&e);
+    }
+    v
+}
+
+/// The record and the equipment entries of a file made by `export`.
+fn parts(file: &[u8]) -> Result<(&[u8], &[u8]), ImportError> {
+    let b = file.strip_prefix(MAGIC.as_slice()).filter(|b| b.len() == RECORD + GEAR_N * equipment::ENTRY).ok_or(ImportError::NotAPalico)?;
+    let (rec, entries) = b.split_at(RECORD);
+    // a record without a name is an empty place
+    if rec[0] == 0 { Err(ImportError::NotAPalico) } else { Ok((rec, entries)) }
+}
+
+/// The name of the Palico in a file made by `export`.
+pub fn name_of(file: &[u8]) -> Result<String, ImportError> {
+    let n = &parts(file)?.0[..NAME];
+    let end = n.iter().position(|&c| c == 0).unwrap_or(NAME);
+    Ok(String::from_utf8_lossy(&n[..end]).into_owned())
+}
+
+/// A file made by `export` becomes a Palico of this character, in the first free place;
+/// its equipment goes into free Palico equipment box entries. Returns its index.
+pub fn import(s: &mut Save, base: usize, file: &[u8]) -> Result<usize, ImportError> {
+    let (rec, entries) = parts(file)?;
+    let i = (0..LIST_N).find(|&i| is_empty(s, base, i)).ok_or(ImportError::ListFull)?;
+    let worn: Vec<(usize, &[u8])> = entries.chunks(equipment::ENTRY).enumerate().filter(|(k, e)| u16::from_le_bytes([rec[GEAR + 2 * k], rec[GEAR + 2 * k + 1]]) != NO_GEAR && e.iter().any(|&x| x != 0)).collect();
+    let free = (0..PALICO_BOX_N).filter(|&j| equipment::get(s, base, Owner::Palico, j).is_empty()).count();
+    if free < worn.len() {
+        return Err(ImportError::BoxFull);
+    }
+    let mut rec = rec.to_vec();
+    rec[GEAR..GEAR + 2 * GEAR_N].fill(0xFF);
+    for (k, e) in worn {
+        let j = equipment::free_slot(s, base, Owner::Palico).expect("counted free above");
+        equipment::set(s, base, Owner::Palico, j, &equipment::Entry { raw: e.try_into().unwrap() });
+        rec[GEAR + 2 * k..GEAR + 2 * k + 2].copy_from_slice(&(j as u16).to_le_bytes());
+    }
+    s.put(at(base, LIST, i), &rec);
+    Ok(i)
+}
+
 /// Writes the edited fields only; appearance, equipment, the unresolved bytes and fields
 /// left as read stay byte for byte. An empty name is refused: a record without a name
 /// is an empty slot.
@@ -351,6 +436,33 @@ mod tests {
         assert!(!is_empty(&s, SLOT1_BASE, 1));
         assert_eq!(get(&s, SLOT1_BASE, 1).name, "Tama");
         assert_eq!(get(&s, SLOT1_BASE, 1).greeting, "Meow");
+    }
+
+    #[test]
+    fn import_brings_the_equipment_into_free_box_entries() {
+        use crate::equipment::{Entry, Kind};
+        let mut s = blank();
+        let (a, b) = (SLOT1_BASE, s.base(1));
+        let o = a + LIST + RECORD * 3;
+        s.set_str(o, NAME, "Suds");
+        s.put(o + GEAR, &[0xFF; 2 * GEAR_N]);
+        // weapon in entry 13, mail in entry 15
+        s.set_u16(o + GEAR, 13);
+        s.set_u16(o + GEAR + 4, 15);
+        equipment::set(&mut s, a, Owner::Palico, 13, &Entry::new(Kind::from_code(22), 7));
+        equipment::set(&mut s, a, Owner::Palico, 15, &Entry::new(Kind::from_code(24), 9));
+        // the other character: Palico 0 and box entry 0 taken
+        s.set_str(b + LIST, NAME, "Tama");
+        equipment::set(&mut s, b, Owner::Palico, 0, &Entry::new(Kind::from_code(22), 1));
+        let f = export(&s, a, 3);
+        assert_eq!(import(&mut s, b, &f), Ok(1));
+        let r = b + LIST + RECORD;
+        assert_eq!((s.u16(r + GEAR), s.u16(r + GEAR + 2), s.u16(r + GEAR + 4)), (1, NO_GEAR, 2));
+        assert_eq!(equipment::get(&s, b, Owner::Palico, 1).id(), 7);
+        assert_eq!(equipment::get(&s, b, Owner::Palico, 2).id(), 9);
+        assert_eq!(get(&s, b, 1).name, "Suds");
+        assert_eq!(gear(&s, b, 1), vec![1, 2]);
+        assert_eq!(import(&mut s, b, &f[..50]), Err(ImportError::NotAPalico));
     }
 
     /// Musashi of the analysed save: Gathering, Lv 7, 12 moves (2 taught slots), 12 skills.

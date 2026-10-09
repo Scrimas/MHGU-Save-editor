@@ -327,6 +327,13 @@ export global Api {
     in-out property <string> restore-when;
     callback list-snapshots();
     callback restore(string /* dir */);
+    // characters: whole slots copied, swapped, deleted, exported, imported
+    in-out property <bool> characters-open;
+    callback slot-copy(int /* from */, int /* to */);
+    callback slot-swap(int, int);
+    callback slot-delete(int);
+    callback slot-export(int);
+    callback slot-import(int);
     // quitting with staged changes
     in-out property <bool> quit-open;
     callback quit();
@@ -468,6 +475,12 @@ export global Api {
     callback set-palico-entry(string, int, int, bool);
     // look key, choice or palette index
     callback set-palico-look(string, int);
+    // the selected Palico, with the equipment it wears: into another character's
+    // Palicoes, or a file; a file's Palico into this character's
+    in property <[SlotInfo]> other-characters;  // the other slots in use
+    callback palico-copy(int /* slot */);
+    callback palico-export();
+    callback palico-import();
 
     // quests
     in property <[string]> quest-tabs;

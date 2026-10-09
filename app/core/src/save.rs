@@ -10,7 +10,10 @@ pub const FILE_SIZE: usize = 5_159_100;
 /// u32 changed on every in-game save; not a checksum. Never written by the editor.
 pub const HEADER_NONCE: usize = 0x14;
 /// 3 x u8: character slot in use.
-const SLOT_USED: usize = 0x28;
+pub const SLOT_USED: usize = 0x28;
+/// u8: the slot played last, 0-2 (it followed each new character and went back to 0
+/// when slot 1 was played again; save timeline).
+pub const LAST_PLAYED: usize = 0x2B;
 /// 3 x u32 slot pointers, relative to 0x24.
 const SLOT_PTR: usize = 0x34;
 const SLOT_PTR_BASE: usize = 0x24;
@@ -88,6 +91,10 @@ impl Save {
 
     pub fn slot_used(&self, slot: usize) -> bool {
         self.buf[SLOT_USED + slot] != 0
+    }
+
+    pub fn set_slot_used(&mut self, slot: usize, used: bool) {
+        self.set_u8(SLOT_USED + slot, used as u8);
     }
 
     pub fn base(&self, slot: usize) -> usize {
