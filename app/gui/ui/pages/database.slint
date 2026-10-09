@@ -1,7 +1,7 @@
-import { ListView, ScrollView, ComboBox } from "std-widgets.slint";
+import { ListView, ScrollView } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
-    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip, DbSource, Settle,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip, DbSource, Settle, Picker,
 } from "../common.slint";
 
 // Crown tints as on the Monsters page.
@@ -524,10 +524,10 @@ component EntryColumn inherits VerticalLayout {
     // a list of kinds to pick from first (Equipment tab)
     in property <[string]> kinds;
     spacing: Tok.tight;
-    if root.kinds.length > 0: ComboBox {
+    if root.kinds.length > 0: Picker {
         model: root.kinds;
-        current-index: Api.db-equip-kind;
-        selected => { Api.select-db-kind(self.current-index); }
+        value: Api.db-equip-kind;
+        picked(i) => { Api.select-db-kind(i); }
     }
     SearchField {
         placeholder-text: root.search;

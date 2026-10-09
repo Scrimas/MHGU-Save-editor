@@ -1,5 +1,5 @@
-import { LineEdit, ScrollView, Palette, ComboBox } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, ColHead, Hairline, TextLink, Pair } from "../common.slint";
+import { LineEdit, ScrollView, Palette } from "std-widgets.slint";
+import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, ColHead, Hairline, TextLink, Pair, Picker } from "../common.slint";
 
 // Label, control, then "was … Undo" when staged (or the hint). Only the exceptions carry
 // a confidence tag (06); the page header states the rule.
@@ -266,7 +266,7 @@ export component CharacterPage inherits Rectangle {
                         warning: Api.appearance.warn-gender;
                         was: Api.appearance.was-gender;
                         key: "gender";
-                        ComboBox { width: 200px; model: [@tr("Type 1 (male)"), @tr("Type 2 (female)")]; current-index: Api.appearance.gender; selected => { Api.set-look("gender", self.current-index); } }
+                        Picker { width: 200px; model: [@tr("Type 1 (male)"), @tr("Type 2 (female)")]; value: Api.appearance.gender; picked(i) => { Api.set-look("gender", i); } }
                     }
                     Field {
                         label: @tr("Face, hairstyle, voice");
@@ -278,13 +278,13 @@ export component CharacterPage inherits Rectangle {
                             spacing: 10px;
                             alignment: start;
                             Text { text: @tr("Face"); vertical-alignment: center; color: Tok.muted; }
-                            ComboBox { width: 120px; model: Api.look-faces; current-index: Api.appearance.face; selected => { Api.set-look("face", self.current-index); } }
+                            Picker { width: 120px; model: Api.look-faces; value: Api.appearance.face; picked(i) => { Api.set-look("face", i); } }
                             Rectangle { width: 14px; }
                             Text { text: @tr("Hairstyle"); vertical-alignment: center; color: Tok.muted; }
-                            ComboBox { width: 120px; model: Api.look-hairstyles; current-index: Api.appearance.hair; selected => { Api.set-look("hair", self.current-index); } }
+                            Picker { width: 120px; model: Api.look-hairstyles; value: Api.appearance.hair; picked(i) => { Api.set-look("hair", i); } }
                             Rectangle { width: 14px; }
                             Text { text: @tr("Voice"); vertical-alignment: center; color: Tok.muted; }
-                            ComboBox { width: 120px; model: Api.look-voices; current-index: Api.appearance.voice - 1; selected => { Api.set-look("voice", self.current-index + 1); } }
+                            Picker { width: 120px; model: Api.look-voices; value: Api.appearance.voice - 1; picked(i) => { Api.set-look("voice", i + 1); } }
                         }
                     }
                     HorizontalLayout {
@@ -340,9 +340,9 @@ export component CharacterPage inherits Rectangle {
                         warning: Api.card.warn-title;
                         was: Api.card.was-title;
                         key: "card-title";
-                        ComboBox { width: 220px; model: Api.gc-words; current-index: Api.card.word1; selected => { Api.set-card("word1", self.current-index); } }
-                        ComboBox { width: 160px; model: Api.gc-links; current-index: Api.card.link; selected => { Api.set-card("link", self.current-index); } }
-                        ComboBox { width: 220px; model: Api.gc-words; current-index: Api.card.word2; selected => { Api.set-card("word2", self.current-index); } }
+                        Picker { width: 220px; model: Api.gc-words; value: Api.card.word1; picked(i) => { Api.set-card("word1", i); } }
+                        Picker { width: 160px; model: Api.gc-links; value: Api.card.link; picked(i) => { Api.set-card("link", i); } }
+                        Picker { width: 220px; model: Api.gc-words; value: Api.card.word2; picked(i) => { Api.set-card("word2", i); } }
                     }
                     Field {
                         width: 420px;
@@ -371,7 +371,7 @@ export component CharacterPage inherits Rectangle {
                             warning: Api.card.warn-scene;
                             was: Api.card.was-scene;
                             key: "card-scene";
-                            ComboBox { width: 260px; model: Api.gc-scenes; current-index: Api.card.scene; selected => { Api.set-card("scene", self.current-index); } }
+                            Picker { width: 260px; model: Api.gc-scenes; value: Api.card.scene; picked(i) => { Api.set-card("scene", i); } }
                         }
                         Field {
                             label: @tr("Pose");
@@ -379,7 +379,7 @@ export component CharacterPage inherits Rectangle {
                             warning: Api.card.warn-pose;
                             was: Api.card.was-pose;
                             key: "card-pose";
-                            ComboBox { width: 220px; model: Api.gc-poses; current-index: Api.card.pose; selected => { Api.set-card("pose", self.current-index); } }
+                            Picker { width: 220px; model: Api.gc-poses; value: Api.card.pose; picked(i) => { Api.set-card("pose", i); } }
                         }
                     }
                 }

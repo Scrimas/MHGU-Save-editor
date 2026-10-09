@@ -1,5 +1,5 @@
 // Shared structs, the Rust bridge, design tokens and small widgets.
-import { Palette, Button, LineEdit } from "std-widgets.slint";
+import { Palette, Button, LineEdit, ComboBox } from "std-widgets.slint";
 
 export enum Confidence { confirmed, derived, unresolved }
 
@@ -682,6 +682,23 @@ export component Settle {
 }
 
 // --- small widgets -------------------------------------------------------------------
+
+// A ComboBox that always shows `value`. The std ComboBox sets its own current-index when
+// a choice is picked and when its model is set again, which cuts a `current-index: <data>`
+// binding: it then kept showing an old choice (a Palico's forte after picking another
+// Palico). A pick goes to `picked`; what the data says afterwards is shown.
+export component Picker inherits ComboBox {
+    in property <int> value;
+    callback picked(int);
+    current-index: root.value;
+    // a new model of another length can clamp the index too
+    property <string> sync: root.value + ":" + root.model.length;
+    changed sync => { self.current-index = root.value; }
+    selected => {
+        root.picked(self.current-index);
+        self.current-index = root.value;
+    }
+}
 
 export component Hairline inherits Rectangle {
     height: 1px;

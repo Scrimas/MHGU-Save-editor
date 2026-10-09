@@ -1,7 +1,7 @@
-import { ListView, ComboBox, LineEdit, ScrollView, Palette, CheckBox } from "std-widgets.slint";
+import { ListView, LineEdit, ScrollView, Palette, CheckBox } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
-    Confidence, SearchField, PalicoEntry, LookRow, Pair,
+    Confidence, SearchField, PalicoEntry, LookRow, Pair, Picker,
 } from "../common.slint";
 
 // Label, control, "was … Undo" under it when staged.
@@ -69,11 +69,11 @@ component LookList inherits VerticalLayout {
         spacing: Tok.gap;
         height: 34px;
         Text { text: r.label; width: 130px; vertical-alignment: center; color: Tok.muted; }
-        if !r.is-colour: ComboBox {
+        if !r.is-colour: Picker {
             width: 200px;
             model: r.choices;
-            current-index: r.index;
-            selected => { Api.set-palico-look(r.key, self.current-index); }
+            value: r.index;
+            picked(i) => { Api.set-palico-look(r.key, i); }
         }
         if r.is-colour: HorizontalLayout {
             spacing: 4px;
@@ -136,11 +136,11 @@ component EntryList inherits VerticalLayout {
             toggled => { Api.set-palico-entry(root.kind, r.slot, r.id, self.checked); }
         }
         if r.innate: Text { text: r.name; width: 260px; vertical-alignment: center; }
-        if !r.innate: ComboBox {
+        if !r.innate: Picker {
             width: 260px;
             model: root.names;
-            current-index: r.id;
-            selected => { Api.set-palico-entry(root.kind, r.slot, self.current-index, r.on); }
+            value: r.id;
+            picked(i) => { Api.set-palico-entry(root.kind, r.slot, i, r.on); }
         }
         Text {
             text: r.innate ? @tr("Innate") : r.taught ? @tr("Taught slot") : "";
@@ -255,7 +255,7 @@ export component PalicoesPage inherits Rectangle {
                             label: @tr("Forte");
                             was: Api.palico.was-bias;
                             key: root.key + "bias";
-                            ComboBox { width: 200px; model: Api.biases; current-index: Api.palico.bias; selected => { Api.set-palico("bias", self.current-index); } }
+                            Picker { width: 200px; model: Api.biases; value: Api.palico.bias; picked(i) => { Api.set-palico("bias", i); } }
                             Rectangle { horizontal-stretch: 1; }
                         }
                         Row {
@@ -263,7 +263,7 @@ export component PalicoesPage inherits Rectangle {
                             was: Api.palico.was-target;
                             key: root.key + "target";
                             note: @tr("Large First is checked in game; the others follow the game's menu order.");
-                            ComboBox { width: 200px; model: Api.palico-targets; current-index: Api.palico.target - 1; selected => { Api.set-palico("target", self.current-index + 1); } }
+                            Picker { width: 200px; model: Api.palico-targets; value: Api.palico.target - 1; picked(i) => { Api.set-palico("target", i + 1); } }
                             ConfidenceTag { level: Confidence.derived; y: 5px; }
                             Rectangle { horizontal-stretch: 1; }
                         }

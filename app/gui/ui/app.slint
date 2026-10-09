@@ -1,7 +1,7 @@
-import { Button, ComboBox, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator } from "std-widgets.slint";
+import { Button, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator } from "std-widgets.slint";
 import {
     Api, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
-    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing,
+    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing, Picker,
 } from "common.slint";
 import { OpenPage } from "pages/open.slint";
 import { OverviewPage } from "pages/overview.slint";
@@ -449,20 +449,20 @@ component SettingsDialog inherits Modal {
             SectionTitle { text: @tr("Appearance"); }
             SettingRow {
                 title: @tr("Language");
-                ComboBox {
+                Picker {
                     width: 210px;
                     model: s.languages;
-                    current-index: s.language;
-                    selected => { Api.set-setting("language", self.current-index); }
+                    value: s.language;
+                    picked(i) => { Api.set-setting("language", i); }
                 }
             }
             SettingRow {
                 title: @tr("Theme");
-                ComboBox {
+                Picker {
                     width: 170px;
                     model: [@tr("System"), @tr("Light"), @tr("Dark")];
-                    current-index: s.theme;
-                    selected => { Api.set-setting("theme", self.current-index); }
+                    value: s.theme;
+                    picked(i) => { Api.set-setting("theme", i); }
                 }
             }
             if s.matugen-offered: VerticalLayout {
@@ -506,11 +506,11 @@ component SettingsDialog inherits Modal {
             SettingRow {
                 title: @tr("Interface size");
                 hint: s.scale-now;
-                ComboBox {
+                Picker {
                     width: 170px;
                     model: [@tr("System"), "100 %", "125 %", "150 %", "175 %", "200 %"];
-                    current-index: s.scale;
-                    selected => { Api.set-setting("scale", self.current-index); }
+                    value: s.scale;
+                    picked(i) => { Api.set-setting("scale", i); }
                 }
             }
             Hairline { }
@@ -524,11 +524,11 @@ component SettingsDialog inherits Modal {
             SettingRow {
                 title: @tr("Keep per save");
                 hint: @tr("After each new snapshot, the oldest beyond this number are deleted.");
-                ComboBox {
+                Picker {
                     width: 170px;
                     model: [@tr("All"), @tr("Last {}", 5), @tr("Last {}", 10), @tr("Last {}", 20), @tr("Last {}", 50)];
-                    current-index: s.keep;
-                    selected => { Api.set-setting("keep", self.current-index); }
+                    value: s.keep;
+                    picked(i) => { Api.set-setting("keep", i); }
                 }
             }
             CheckBox {
@@ -729,10 +729,10 @@ export component AppWindow inherits Window {
                 if Api.loaded: VerticalLayout {
                     spacing: 6px;
                     padding-bottom: 8px;
-                    ComboBox {
+                    Picker {
                         model: [Api.slots[0].used ? "1 · " + Api.slots[0].name : @tr("{} · empty", 1), Api.slots[1].used ? "2 · " + Api.slots[1].name : @tr("{} · empty", 2), Api.slots[2].used ? "3 · " + Api.slots[2].name : @tr("{} · empty", 3)];
-                        current-index: Api.slot;
-                        selected => { Api.select-slot(self.current-index); }
+                        value: Api.slot;
+                        picked(i) => { Api.select-slot(i); }
                     }
                     Muted { text: Api.slots[Api.slot].used ? @tr("HR {} · {}", Api.slots[Api.slot].hr, Api.slots[Api.slot].playtime) : @tr("No character in this slot"); x: 6px; }
                 }

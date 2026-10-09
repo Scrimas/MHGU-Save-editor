@@ -1,8 +1,8 @@
-import { ListView, ComboBox, Button, ScrollView, Palette, LineEdit } from "std-widgets.slint";
+import { ListView, Button, ScrollView, Palette, LineEdit } from "std-widgets.slint";
 import {
     Api, Tok, Fmt, Card, Asset, Muted, Chip, EquipRow, ConfidenceTag, Confidence, SectionTitle, PageHeader, TabBar,
     NumberBox, StagedBar, WasLine, EmptyState, Pill, Hairline, TextLink, Chevron, ListRow, SearchField, KeyActivate,
-    FocusRing,
+    FocusRing, Picker,
 } from "../common.slint";
 
 component EquipLine inherits ListRow {
@@ -303,11 +303,11 @@ export component EquipmentPage inherits Rectangle {
                             for k in 2: HorizontalLayout {
                                 spacing: Tok.tight;
                                 Text { text: @tr("Skill {}", k + 1); width: 60px; vertical-alignment: center; }
-                                ComboBox {
+                                Picker {
                                     horizontal-stretch: 1;
                                     model: Api.skill-names;
-                                    current-index: k == 0 ? Api.equip-detail.skill1 : Api.equip-detail.skill2;
-                                    selected => { Api.set-equip("skill" + k, self.current-index); }
+                                    value: k == 0 ? Api.equip-detail.skill1 : Api.equip-detail.skill2;
+                                    picked(i) => { Api.set-equip("skill" + k, i); }
                                 }
                                 NumberBox {
                                     width: 100px;
@@ -384,12 +384,12 @@ export component EquipmentPage inherits Rectangle {
                 Muted { text: Api.pick-mode == "transmog" ? @tr("The piece keeps its skills, slots and defense; only its look changes.") : @tr("New pieces start at level 1 with no decorations; edit them afterwards."); }
                 HorizontalLayout {
                     spacing: Tok.tight;
-                    if Api.pick-mode != "transmog": ComboBox {
+                    if Api.pick-mode != "transmog": Picker {
                         width: 190px;
                         model: Api.equip-categories;
-                        current-index: Api.equip-category;
-                        selected => {
-                            Api.equip-category = self.current-index;
+                        value: Api.equip-category;
+                        picked(i) => {
+                            Api.equip-category = i;
                             Api.search-equip(root.pick-search);
                         }
                     }

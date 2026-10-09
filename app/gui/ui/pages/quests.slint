@@ -1,7 +1,7 @@
-import { ListView, CheckBox, Button, Palette, LineEdit, ScrollView, ComboBox } from "std-widgets.slint";
+import { ListView, CheckBox, Button, Palette, LineEdit, ScrollView } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField, TextLink,
-    ConfidenceTag, Confidence, NumberBox, StagedBar, WasLine,
+    ConfidenceTag, Confidence, NumberBox, StagedBar, WasLine, Picker,
 } from "../common.slint";
 
 component QuestLine inherits ListRow {
@@ -109,11 +109,11 @@ component ArenaRecords inherits Card {
                             NumberBox { width: 80px; value: r.hundredths; maximum: 99; label: @tr("{}, hundredths", r.quest); edited(v) => { Api.set-arena(r.index, r.set, r.minutes * 6000 + r.seconds * 100 + v); } }
                             Rectangle { }
                         }
-                        ComboBox {
+                        Picker {
                             width: 200px;
                             model: r.sets;
-                            current-index: r.set;
-                            selected => { Api.set-arena(r.index, self.current-index, max(1, r.minutes * 6000 + r.seconds * 100 + r.hundredths)); }
+                            value: r.set;
+                            picked(i) => { Api.set-arena(r.index, i, max(1, r.minutes * 6000 + r.seconds * 100 + r.hundredths)); }
                         }
                         Rectangle { width: 20px; }
                         Text { text: r.has ? r.grade : "—"; width: 70px; vertical-alignment: center; font-weight: 600; color: r.has ? Palette.foreground : Tok.faint; }
