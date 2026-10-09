@@ -135,6 +135,21 @@ pub struct Names {
     pub quest_text: HashMap<String, [String; 2]>,
     #[serde(default)]
     pub stages: HashMap<String, String>,
+    /// Unlock map entries by bit: Lab upgrades, Jukebox songs, supply drop sets, Poogie /
+    /// Moofy costumes, Gallery movies, Hunter's Notes tips (packs built before 2026-10-10
+    /// lack them: shown as numbers).
+    #[serde(default)]
+    pub lab: Vec<String>,
+    #[serde(default)]
+    pub songs: Vec<String>,
+    #[serde(default)]
+    pub supply: Vec<String>,
+    #[serde(default)]
+    pub pet_costumes: Vec<String>,
+    #[serde(default)]
+    pub gallery: Vec<String>,
+    #[serde(default)]
+    pub tips: Vec<String>,
 }
 
 /// Slots decoration item `id` takes; None when it is not a decoration (or the pack is
@@ -167,6 +182,12 @@ struct Text {
     gc_poses: Vec<String>,
     quest_text: HashMap<String, [String; 2]>,
     stages: HashMap<String, String>,
+    lab: Vec<String>,
+    songs: Vec<String>,
+    supply: Vec<String>,
+    pet_costumes: Vec<String>,
+    gallery: Vec<String>,
+    tips: Vec<String>,
 }
 
 impl Names {
@@ -197,6 +218,12 @@ impl Names {
         list(&mut self.gc_links, t.gc_links);
         list(&mut self.gc_scenes, t.gc_scenes);
         list(&mut self.gc_poses, t.gc_poses);
+        list(&mut self.lab, t.lab);
+        list(&mut self.songs, t.songs);
+        list(&mut self.supply, t.supply);
+        list(&mut self.pet_costumes, t.pet_costumes);
+        list(&mut self.gallery, t.gallery);
+        list(&mut self.tips, t.tips);
         for (id, [obj, sub]) in t.quest_text {
             if let Some(e) = self.quest_text.get_mut(&id).filter(|_| !obj.is_empty()) {
                 *e = [obj, sub];

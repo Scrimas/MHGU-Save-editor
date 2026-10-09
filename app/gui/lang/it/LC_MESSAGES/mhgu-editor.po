@@ -476,6 +476,11 @@ msgstr "Richieste"
 msgid "Collections"
 msgstr "Collezioni"
 
+#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/app.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Unlocks"
+msgstr "Sblocchi"
+
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
 #: app/gui/ui/pages/monsters.slint
 msgid "Monsters"
@@ -901,19 +906,23 @@ msgstr "Basso grado"
 msgid "G rank"
 msgstr "Grado G"
 
-#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "Bherna"
 msgstr "Bherna"
 
-#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "Kokoto"
 msgstr "Kokoto"
 
-#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "Pokke"
 msgstr "Pokke"
 
-#: app/core/src/progress.rs app/gui/ui/pages/character.slint
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "Yukumo"
 msgstr "Yukumo"
 
@@ -1009,10 +1018,12 @@ msgid "Max permits…"
 msgstr "Licenze max…"
 
 #: app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/unlocks.slint
 msgid "Search"
 msgstr "Cerca"
 
 #: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/unlocks.slint
 msgid "Missing only"
 msgstr "Solo mancanti"
 
@@ -1028,11 +1039,11 @@ msgstr "Ogni arte di caccia è sbloccata."
 msgid "No art matches the search."
 msgstr "Nessuna arte corrisponde alla ricerca."
 
-#: app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/unlocks.slint
 msgid "Nothing is missing here."
 msgstr "Qui non manca nulla."
 
-#: app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/unlocks.slint
 msgid "Nothing matches the search."
 msgstr "Nessun risultato per la ricerca."
 
@@ -2103,6 +2114,55 @@ msgstr "I colori indossati con questo set, applicati quando viene caricato."
 msgid "Replace with what you have on"
 msgstr "Sostituisci con ciò che indossi"
 
+#: app/gui/ui/pages/unlocks.slint
+msgid "NEW"
+msgstr "NEW"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "A pet is adopted from its village's pet menu the first time it is used; that gives its first costume. A pet wears costumes of its own kind: Moofy's or the Poogies'."
+msgstr "Un animale viene adottato al primo uso del menu animali del suo villaggio, che gli dà il primo costume. Un animale indossa costumi della sua specie: quelli di Moofy o quelli dei Poogie."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/unlocks.slint
+msgid "Name of the pet of {}"
+msgstr "Nome dell'animale di {}"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Adopted"
+msgstr "Adottato"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/unlocks.slint
+msgid "Moofah affection"
+msgstr "Affetto dei Moofah"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Petting a Moofah raises it by one, up to 10, and each quest lowers it by 2. At 6 the game unlocks the title word Moofah, which an edit to 6 or more also does."
+msgstr "Coccolare un Moofah lo aumenta di 1, fino a 10, e ogni missione lo riduce di 2. A 6 il gioco sblocca la parola del titolo Moofah; una modifica a 6 o più fa lo stesso."
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Bherna Moofah 1"
+msgstr "Moofah di Bherna 1"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Bherna Moofah 2"
+msgstr "Moofah di Bherna 2"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Palico Ranch Moofah 1"
+msgstr "Moofah del Ranch compagni 1"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Palico Ranch Moofah 2"
+msgstr "Moofah del Ranch compagni 2"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Unlock all…"
+msgstr "Sblocca tutto…"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Lock all…"
+msgstr "Blocca tutto…"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/assets.rs
 msgid "Item #{}"
@@ -2710,6 +2770,191 @@ msgstr "Svuota borsa"
 msgid "Empty box"
 msgstr "Svuota cassa"
 
+#: app/gui/src/goals.rs
+msgid "Every Soaratorium Lab upgrade"
+msgstr "Tutti i potenziamenti del solcacieli"
+
+#: app/gui/src/goals.rs
+msgid "Every Lab upgrade is installed."
+msgstr "Tutti i potenziamenti del laboratorio sono installati."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Installs the {} not installed yet, without spending Wycademy points or materials: the Item Box grows to its largest size and the Provision Division gets every supply drop set."
+msgstr "Installa i {} non ancora installati, senza spendere punti Wyccademia né materiali: la cassa oggetti raggiunge la dimensione massima e il Centro scorte ottiene tutti i kit di scorte."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} Lab upgrade"
+msgid_plural "{} Lab upgrades"
+msgstr[0] "{} potenziamento del laboratorio"
+msgstr[1] "{} potenziamenti del laboratorio"
+
+#: app/gui/src/goals.rs
+msgid "Each upgrade is offered too, as the game installs only offered ones. Box expansions can't be removed again here."
+msgstr "Ogni potenziamento viene anche offerto, perché il gioco installa solo quelli offerti. Le espansioni della cassa qui non si possono più rimuovere."
+
+#: app/gui/src/goals.rs
+msgid "Every Poogie and Moofy costume"
+msgstr "Tutti i costumi di Poogie e Moofy"
+
+#: app/gui/src/goals.rs
+msgid "Your pets have every costume."
+msgstr "I tuoi animali hanno tutti i costumi."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} your pets don't have yet, each with its NEW mark."
+msgstr "Sblocca i {} che i tuoi animali non hanno ancora, ognuno con il segno NEW."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} costume"
+msgid_plural "{} costumes"
+msgstr[0] "{} costume"
+msgstr[1] "{} costumi"
+
+#: app/gui/src/goals.rs
+msgid "The Poogie Ball and Moofy Ball awards follow after your next quest. Some costumes come from downloads in game."
+msgstr "I premi Poogie alla moda e Palla Moofy arrivano dopo la tua prossima missione. Nel gioco alcuni costumi arrivano da download."
+
+#: app/gui/src/goals.rs
+msgid "Every Jukebox song"
+msgstr "Tutti i brani del jukebox"
+
+#: app/gui/src/goals.rs
+msgid "The Jukebox has every song."
+msgstr "Il jukebox ha tutti i brani."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} the Hunters' Pub Jukebox can't play yet."
+msgstr "Sblocca i {} che il jukebox della Taverna dei cacciatori non può ancora suonare."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} song"
+msgid_plural "{} songs"
+msgstr[0] "{} brano"
+msgstr[1] "{} brani"
+
+#: app/gui/src/goals.rs
+msgid "Everything the Trader sells"
+msgstr "Tutto ciò che vende il mercante"
+
+#: app/gui/src/goals.rs
+msgid "The Trader offers everything it can sell."
+msgstr "Il mercante offre tutto ciò che può vendere."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Puts up for sale the {} the Trader does not offer yet: items, title words, Guild Card scenes and pet costumes, the downloads' ones included."
+msgstr "Mette in vendita le {} che il mercante non offre ancora: oggetti, parole del titolo, sfondi della tessera Gilda e costumi degli animali, compresi quelli dei download."
+
+#: app/gui/src/goals.rs
+msgid "Buying still takes Trader points; what you already have is not shown."
+msgstr "Comprare costa sempre punti del mercante; ciò che hai già non viene mostrato."
+
+#: app/gui/src/goals.rs
+msgid "Every Horns Coin trade"
+msgstr "Tutti gli scambi di monete corno"
+
+#: app/gui/src/goals.rs
+msgid "The Mewstress offers every Horns Coin trade."
+msgstr "Mialady offre tutti gli scambi di monete corno."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} the Mewstress does not offer yet."
+msgstr "Sblocca gli {} che Mialady non offre ancora."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} Horns Coin trade"
+msgid_plural "{} Horns Coin trades"
+msgstr[0] "{} scambio di monete corno"
+msgstr[1] "{} scambi di monete corno"
+
+#: app/gui/src/goals.rs
+msgid "Trading still takes Horns Coins."
+msgstr "Scambiare costa sempre monete corno."
+
+#: app/gui/src/goals.rs
+msgid "Every combination recipe combined"
+msgstr "Tutte le ricette di combinazione combinate"
+
+#: app/gui/src/goals.rs
+msgid "Every combination recipe has been combined."
+msgstr "Tutte le ricette di combinazione sono state combinate."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Marks the {} never combined as combined. The award for 130 recipes follows after your next quest."
+msgstr "Segna come combinate le {} mai combinate. Il premio per 130 ricette arriva dopo la tua prossima missione."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} recipe"
+msgid_plural "{} recipes"
+msgstr[0] "{} ricetta"
+msgstr[1] "{} ricette"
+
+#: app/gui/src/goals.rs
+msgid "A recipe never combined always succeeds the first time; these lose that bonus."
+msgstr "Una ricetta mai combinata riesce sempre la prima volta; queste perdono quel bonus."
+
+#: app/gui/src/goals.rs
+msgid "Every Gallery movie"
+msgstr "Tutti i filmati della Galleria"
+
+#: app/gui/src/goals.rs
+msgid "The Housekeeper's Gallery has every movie."
+msgstr "La Galleria dell'attendente ha tutti i filmati."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Adds the {} missing to the Housekeeper's Gallery, each with its NEW mark."
+msgstr "Aggiunge i {} mancanti alla Galleria dell'attendente, ognuno con il segno NEW."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/goals.rs
+msgid "{} movie"
+msgid_plural "{} movies"
+msgstr[0] "{} filmato"
+msgstr[1] "{} filmati"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlock all · {}"
+msgstr "Sblocca tutto · {}"
+
+#: app/gui/src/goals.rs
+msgid "Every entry is unlocked."
+msgstr "Tutte le voci sono sbloccate."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Unlocks the {} not unlocked yet, each with its NEW mark where the game keeps one."
+msgstr "Sblocca le {} non ancora sbloccate, ognuna con il segno NEW dove il gioco ne tiene uno."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Lock all · {}"
+msgstr "Blocca tutto · {}"
+
+#: app/gui/src/goals.rs
+msgid "No entry is unlocked."
+msgstr "Nessuna voce è sbloccata."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/goals.rs
+msgid "Locks the {} unlocked now."
+msgstr "Blocca le {} sbloccate ora."
+
+#: app/gui/src/goals.rs
+msgid "Item Box expansions and the supply drop sets of installed Lab upgrades stay."
+msgstr "Le espansioni della cassa oggetti e i kit di scorte dei potenziamenti installati restano."
+
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/goals.rs
 msgid "{} deviant"
@@ -2922,7 +3167,7 @@ msgid "Palico place {} · {}"
 msgstr "Posto compagno {} · {}"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs
+#: app/gui/src/targets.rs app/gui/src/views/unlocks_ui.rs
 msgid "Delivery request {}"
 msgstr "Richiesta di consegna {}"
 
@@ -2998,6 +3243,11 @@ msgid "Hunting style and Hunter Arts"
 msgstr "Stile di caccia e Arti di caccia"
 
 #. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} pet"
+msgstr "Animale di {}"
+
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
 #: app/gui/src/views/names.rs app/gui/src/views/palicoes.rs
 msgid "Type {}"
@@ -3051,6 +3301,16 @@ msgstr "Viso {} · Capelli {} · Voce {}"
 #: app/gui/src/targets.rs
 msgid "{} · HR {} · {}"
 msgstr "{} · GC {} · {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} of {}"
+msgstr "{} su {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · {} · adopted"
+msgstr "{} · {} · adottato"
 
 #: app/gui/src/update.rs
 msgid "GitHub refused the request (too many in the last hour), try later"
@@ -4515,7 +4775,7 @@ msgstr "elencata solo nella sua rotazione"
 msgid "event quest: listed once downloaded"
 msgstr "missione evento: elencata una volta scaricata"
 
-#: app/gui/src/views/quests.rs
+#: app/gui/src/views/quests.rs app/gui/src/views/unlocks_ui.rs
 msgid " and "
 msgstr " e "
 
@@ -4711,6 +4971,382 @@ msgid "Found {n} new save"
 msgid_plural "Found {n} new saves"
 msgstr[0] "Trovato {n} nuovo salvataggio"
 msgstr[1] "Trovati {n} nuovi salvataggi"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Soaratorium Lab upgrades"
+msgstr "Potenziamenti del solcacieli"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Jukebox songs"
+msgstr "Brani del jukebox"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Supply drop sets"
+msgstr "Kit di scorte"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Horns Coin trades"
+msgstr "Scambi di monete corno"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Poogie and Moofy costumes"
+msgstr "Costumi di Poogie e Moofy"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Housekeeper's Gallery"
+msgstr "Galleria dell'attendente"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Trader · items"
+msgstr "Mercante · oggetti"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Trader · special items"
+msgstr "Mercante · oggetti speciali"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Trader · title words"
+msgstr "Mercante · parole del titolo"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Trader · Guild Card scenes"
+msgstr "Mercante · sfondi della tessera Gilda"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Trader · pet costumes"
+msgstr "Mercante · costumi degli animali"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Trader · delivery requests"
+msgstr "Mercante · richieste di consegna"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Hunter's Notes · second list"
+msgstr "Note di caccia · seconda lista"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Hunter's Notes · tips read"
+msgstr "Note di caccia · consigli letti"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Combination List · recipes combined"
+msgstr "Lista combinazioni · ricette combinate"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "One-time event scenes"
+msgstr "Scene uniche"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Award milestones"
+msgstr "Traguardi dei premi"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Market"
+msgstr "Mercato"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Guild Store"
+msgstr "Negozio Gilda"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Armory · {}"
+msgstr "Armeria · {}"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Village pets"
+msgstr "Animali dei villaggi"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Armory"
+msgstr "Armeria"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Names, costumes worn and adoption of Moofy and the three Poogies."
+msgstr "Nomi, costumi indossati e adozione di Moofy e dei tre Poogie."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Upgrades installed at the Soaratorium Lab. Installing one here also offers it, as the game installs only offered ones, and unlocks the supply drop set it gives. The three Item Box expansions stay once installed: a smaller box could lose what is stored past it."
+msgstr "Potenziamenti installati al Laboratorio del solcacieli. Installarne uno qui lo offre anche, perché il gioco installa solo quelli offerti, e sblocca il kit di scorte che dà. Le tre espansioni della cassa oggetti restano una volta installate: una cassa più piccola potrebbe perdere ciò che è conservato oltre."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Songs the Hunters' Pub Jukebox plays. The Mewstress unlocks the others when you talk to her."
+msgstr "Brani che suona il jukebox della Taverna dei cacciatori. Mialady sblocca gli altri quando le parli."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Sets the Provision Division can send. Most follow a Lab upgrade: the game gives them back each time the Division opens while the upgrade is installed."
+msgstr "Kit che il Centro scorte può inviare. La maggior parte segue un potenziamento del laboratorio: il gioco li restituisce a ogni apertura del Centro finché il potenziamento è installato."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Items the Mewstress trades for Horns Coins."
+msgstr "Oggetti che Mialady scambia con monete corno."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Costumes for the village pets: Moofy's (the first six) and the Poogies'. Ten, twenty, twenty-eight and every Poogie costume earn the Poogie Ball awards after your next quest."
+msgstr "Costumi degli animali dei villaggi: quelli di Moofy (i primi sei) e quelli dei Poogie. Dieci, venti, ventotto e tutti i costumi Poogie valgono i premi Poogie alla moda dopo la tua prossima missione."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Movies the Housekeeper's Gallery plays. Credits 2 and 3 come back at the next load once the ending is in the Gallery."
+msgstr "Filmati che riproduce la Galleria dell'attendente. Riconoscimenti 2 e 3 tornano al caricamento successivo una volta che il finale è nella Galleria."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "What the Trader puts up for sale. An entry for sale can be bought even without the download that sells it; what you already have is not shown."
+msgstr "Ciò che il mercante mette in vendita. Una voce in vendita si può comprare anche senza il download che la vende; ciò che hai già non viene mostrato."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Items the Trader sells for Trader points."
+msgstr "Oggetti che il mercante vende per punti del mercante."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Delivery requests the Trader offers. The game offers one once its villager's request is raised."
+msgstr "Richieste di consegna offerte dal mercante. Il gioco ne offre una quando la richiesta del suo abitante è aperta."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Extra Hunter's Notes entries of the Elder Dragons and deviants. Unlocking one gives the monster's Notes page its NEW mark, as the game does."
+msgstr "Voci aggiuntive delle Note di caccia per i draghi anziani e i mostri devianti. Sbloccarne una dà il segno NEW alla pagina del mostro, come fa il gioco."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Hunter's Notes tips read. A tip not read shows NEW once the game offers it."
+msgstr "Consigli delle Note di caccia letti. Un consiglio non letto mostra NEW quando il gioco lo offre."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Recipes combined at least once. A recipe never combined always succeeds the first time; 130 earn an award after your next quest."
+msgstr "Ricette combinate almeno una volta. Una ricetta mai combinata riesce sempre la prima volta; 130 valgono un premio dopo la tua prossima missione."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Scenes that play once. Clearing one plays it again the next time its place loads."
+msgstr "Scene che si vedono una volta. Cancellarne una la rivede al prossimo caricamento del suo luogo."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "What the award checks read. Each award follows after your next quest once all its milestones are set."
+msgstr "Ciò che leggono i controlli dei premi. Ogni premio arriva dopo la tua prossima missione quando tutti i suoi traguardi sono segnati."
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Read only: the shop sells an entry once its star level allows, whatever the save holds; the save only keeps which entries got their NEW mark."
+msgstr "Sola lettura: il negozio vende una voce quando il suo livello di stelle lo permette, qualunque cosa contenga il salvataggio; questo tiene solo quali voci hanno avuto il segno NEW."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{} ({} + {})"
+msgstr "{} ({} + {})"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Recipe {}"
+msgstr "Ricetta {}"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Hunters Hub"
+msgstr "Base di caccia"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Palico Ranch"
+msgstr "Ranch compagni"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Wycademy"
+msgstr "Wyccademia"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Hunters' Pub"
+msgstr "Taverna dei cacciatori"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Facilities"
+msgstr "Strutture"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Pets"
+msgstr "Animali"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Trader"
+msgstr "Mercante"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Records"
+msgstr "Registri"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Shops"
+msgstr "Negozi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{}: first visit"
+msgstr "{}: prima visita"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Palico Ranch: event {}"
+msgstr "Ranch compagni: evento {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{}: Village ★4"
+msgstr "{}: Villaggio ★4"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{}: first urgent quests"
+msgstr "{}: prime missioni urgenti"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Wycademy: event {}"
+msgstr "Wyccademia: evento {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Event {}"
+msgstr "Evento {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{} armor at its max level"
+msgstr "Armatura ({}) al livello massimo"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{} at its max level"
+msgstr "{} al livello massimo"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "A Moofy or Poogie moment in {}"
+msgstr "Un momento Moofy o Poogie a {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Footbath guest: {}"
+msgstr "Ospite del pediluvio: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "A Palico of the {} forte hired"
+msgstr "Un Palico di tendenza {} ingaggiato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{} past its second level threshold (read by nothing)"
+msgstr "{} oltre la sua seconda soglia di livello (letto da nulla)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "A Palico of the {} forte at level 99"
+msgstr "Un Palico di tendenza {} al livello 99"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Delivery request {} · {}"
+msgstr "Richiesta di consegna {} · {}"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "from the start"
+msgstr "dall'inizio"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "the HR limit released"
+msgstr "il limite di GC rimosso"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "a download"
+msgstr "un download"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "a deviant's EX level cleared"
+msgstr "il livello EX di un mostro deviante completato"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "opening the Provision Division"
+msgstr "l'apertura del Centro scorte"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "adopting the pet"
+msgstr "l'adozione dell'animale"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "a villager's gift"
+msgstr "il regalo di un abitante"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "buying it at the Trader"
+msgstr "l'acquisto dal mercante"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "the first visit"
+msgstr "la prima visita"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "reading it"
+msgstr "la lettura"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "combining it"
+msgstr "la combinazione"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "story progress"
+msgstr "il progresso della storia"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "the Lab upgrade {}"
+msgstr "il potenziamento del laboratorio {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{} obtained"
+msgstr "{} ottenuto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Village ★{}"
+msgstr "Villaggio ★{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Hub ★{}"
+msgstr "Base di caccia ★{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "“{}” cleared"
+msgstr "«{}» completata"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "quest {} cleared"
+msgstr "missione {} completata"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "event flag {}"
+msgstr "flag evento {}"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid " or "
+msgstr " o "
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "On sale · {}"
+msgstr "In vendita · {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Not yet · {}"
+msgstr "Non ancora · {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{} · stays installed"
+msgstr "{} · resta installato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "{} of {} entries unlocked"
+msgstr "{} voci sbloccate su {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs

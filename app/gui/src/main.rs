@@ -131,6 +131,7 @@ fn main() -> Result<(), slint::PlatformError> {
 ///   slot:N  tab:N  sel:N  store:N  loadout:N  owner:N  filter:F  large  missing  search:S  add:<category>:<id>
 ///   goal:<id>  char:<field>:<value>  monster:<index>:<field>:<value>  item:<slot>:<id>:<count>
 ///   set:N  arts:<where>:<field>:<slot>:<value>  pigment:<where>:<part>:<hex>
+///   unlock:<map * 1024 + bit>:<0|1>  pet:<k>:<name|costume|adopted>:<value>  moofah:<k>:<v>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
 ///   theme:light|dark  update (asks GitHub, as Settings' Check now)
 fn steps(ui: &AppWindow, page: &str, list: &str) {
@@ -147,6 +148,14 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             ("palicoes", &["sel", n]) => api.invoke_select_palico(num(n)),
             ("advanced", &["sel", n]) => api.invoke_select_field(num(n)),
             ("database", &["sel", n]) => api.invoke_select_db(num(n)),
+            ("unlocks", &["sel", n]) => api.invoke_select_unlock(num(n)),
+            (_, &["unlock", key, on]) => api.invoke_set_unlock(num(key), on == "1"),
+            (_, &["pet", k, field, v]) => api.invoke_set_pet(num(k), field.into(), v.into()),
+            (_, &["moofah", k, v]) => api.invoke_set_moofah(num(k), num(v)),
+            ("unlocks", &["missing"]) => {
+                api.set_unlock_missing(true);
+                api.invoke_filter_unlocks();
+            }
             (_, &["db", kind, n]) => api.invoke_open_db(kind.into(), num(n)),
             ("database", &["edit", kind, n]) => api.invoke_show_in_editor(kind.into(), num(n)),
             (_, &["sel", n]) => api.invoke_select_equip(num(n)),
@@ -378,6 +387,49 @@ mod tests {
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
+    /// The Unlocks page: an entry stages its map, a Lab upgrade takes its supply set
+    /// along, the pets and Moofahs; each Undo puts the file's bytes back, and every
+    /// unlock goal runs to nothing left.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn unlocks_page() {
+        use mhgu_save::unlocks;
+        let (ui, st, dir) = opened("unlocks");
+        let api = ui.global::<Api>();
+        let base = st.borrow().base();
+        api.set_page("unlocks".into());
+        views::refresh(&ui, &st.borrow());
+        assert!(api.get_unlock_rows().row_count() > 15);
+        // Lab upgrade 10 (Heal Supplies: Pro Kit) off: its supply set 9 follows
+        let lab = unlocks::find("lab").unwrap();
+        let installed = unlocks::on(st.borrow().save(), base, lab, 10);
+        api.invoke_set_unlock((lab * 1024 + 10) as i32, !installed);
+        assert_eq!(unlocks::on(st.borrow().save(), base, lab, 10), !installed);
+        if installed {
+            assert!(!st.borrow().save().bit(base + unlocks::SUPPLY, 9));
+        }
+        // a pet adopted, a Moofah petted to 6
+        api.invoke_select_unlock(4);
+        assert!(api.get_unlock_pets() && api.get_pets().row_count() == 4);
+        let adopted = unlocks::adopted(st.borrow().save(), base, 1);
+        api.invoke_set_pet(1, "adopted".into(), if adopted { "0" } else { "1" }.into());
+        api.invoke_set_pet(2, "name".into(), "Bacon".into());
+        assert_eq!(api.get_pets().row_data(2).unwrap().name, "Bacon");
+        api.invoke_set_moofah(0, 6);
+        assert_eq!(api.get_moofahs().row_data(0), Some(6));
+        for key in ["unlock:lab", "pet:1", "pet:2", "moofahs"] {
+            api.invoke_undo_value(key.into());
+        }
+        assert!(!st.borrow().save().is_dirty(), "{:?}", &st.borrow().save().diff()[..st.borrow().save().diff().len().min(6)]);
+        // the unlock goals and a page-wide Unlock all
+        let (mut s, slot) = (st.borrow().save().clone(), st.borrow().slot);
+        for g in ["lab", "costumes", "songs", "trader", "coins", "combos", "gallery", "unlocks:all:14"] {
+            goals::apply(g, &mut s, slot);
+            assert!(goals::plan(g, &s, slot).targets.is_empty(), "{g} twice");
+        }
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
     #[test]
     #[ignore = "needs MHGU_TEST_SAVE"]
     fn edit_review_undo_write() {
@@ -410,7 +462,7 @@ mod tests {
         assert_eq!(row(48).was_hunts.as_str(), fmt::num(old));
         let c = api.get_changes().row_data(0).unwrap();
         assert!(c.single && c.old.as_str() == fmt::num(old) && c.new == "777" && c.title.ends_with("· Hunted"));
-        assert_eq!(api.get_page_counts().row_data(8), Some(1));
+        assert_eq!(api.get_page_counts().row_data(targets::page_index("monsters")), Some(1));
         assert_eq!(api.get_value_count(), 1);
         api.invoke_set_monster(4, "captures".into(), 5);
         assert_eq!(api.get_change_count(), 2);

@@ -8,7 +8,9 @@
 
 Writes:
   names.json       item, equipment, skill, monster, Palico support move and skill names; Guild
-                   Card title words, scenes and poses; quest objectives, subquests and
+                   Card title words, scenes and poses; Lab upgrades, Jukebox songs, supply
+                   drop sets, pet costumes, Gallery movies and Hunter's Notes tips; quest
+                   objectives, subquests and
                    stage names (data/quest-info.csv); item icon / colour / rarity and
                    pouch carry limit; palettes; equipment type icons; icon cell positions
                    on items.png
@@ -283,6 +285,7 @@ def main(romfs, out):
     # Two-tone, Calico, Tabby: the 7 models of otomo/mod/skin): OtMenuMsg 17-23. DERIVED
     names['palico_coats'] = gmd(reng['eng\\table\\OtMenuMsg_eng'])[17:24]
     names.update(guild_card(R, 'eng'))
+    names.update(unlock_names(R, 'eng'))
 
     # Guild Card awards: bit i -> cell i, 10 x 48 px; 0-99 lby_deco, 100+ lby_deco2
     aw = [tex('HD_lby_deco_BM_MQ_NOMIP'), tex('HD_lby_deco2_BM_MQ_NOMIP')]
@@ -327,6 +330,24 @@ def guild_card(R, lang):
             'gc_scenes': g('GC_background')[:136], 'gc_poses': g('GuildCardMsg')[235:257]}
 
 
+# Gallery movie (S +0x970 bit) -> Lb_GalleryMsg entry (Room Service table 0x1650b50), and
+# Hunter's Notes tip (S +0x35ac bit) -> HN_HunterTipsMsg title (tip IDs at 0x1631e74)
+GALLERY = [0, 5, 6, 4, 2, 1, 3, 14, 15, 16, 17, 22, 24, 26]
+TIPS = [64, 70, 71, 72, 85, 99, 108, 160, 139, 140, 154, 102, 143, 152, 86, 87]
+
+
+def unlock_names(R, lang):
+    """Names of the unlock maps of data/unlock-lists.csv, by bit (tools/unlock_lists.py):
+    lab (researchReinforce, name 2k), songs (ResultMsg 143-156, the Jukebox's message
+    table 0x1650394), supply (otodokeSetList), pet_costumes (Lb_PetMsg 20 + costume),
+    gallery and tips (tables above). DERIVED"""
+    g = lambda n: gmd(R.read('/nativeNX/%s/table/%s_%s.gmd' % (lang, n, lang)))
+    gal, tips = g('Lb_GalleryMsg'), g('HN_HunterTipsMsg')
+    return {'lab': g('researchReinforce')[0::2][:69], 'songs': g('ResultMsg')[143:157],
+            'supply': g('otodokeSetList')[:25], 'pet_costumes': g('Lb_PetMsg')[20:60],
+            'gallery': [gal[i] for i in GALLERY], 'tips': [tips[i] for i in TIPS]}
+
+
 def quest_text(R, lang):
     """Quest board texts of one language (tools/quest_info.py): quest_text, quest ID ->
     [main objective, subquest] (questData entries 4 and 6; "" without a subquest, which is
@@ -354,6 +375,7 @@ def text(R, r, lang, eng=None):
       armor, palico_armor   part -> [name per English piece]
       palico_weapons, talismans   [name per English piece]
       gc_words, gc_links, gc_scenes, gc_poses   lists by ID (guild_card)
+      lab, songs, supply, pet_costumes, gallery, tips   lists by bit (unlock_names)
       quest_text, stages   by quest / stage ID (quest_text)"""
     g = lambda n: gmd(r['%s\\%s_%s' % (lang, n, lang)])
     out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
@@ -362,6 +384,7 @@ def text(R, r, lang, eng=None):
            'palico_coats': g('table\\OtMenuMsg')[17:24],
            'monsters': g('GUI\\06_msg\\monsterName')[:137]}
     out.update(guild_card(R, lang))
+    out.update(unlock_names(R, lang))
     out.update(quest_text(R, lang))
     m = out['monsters']
     hub = gmd(R.read('/nativeNX/%s/GUI/06_msg/NetworkVillage_%s.gmd' % (lang, lang)))

@@ -132,6 +132,10 @@ struct View {
     collection: usize,
     check_search: String,
     check_missing: bool,
+    /// Unlocks page: the list's row picked, the entries' search
+    unlock_sel: usize,
+    unlock_search: String,
+    unlock_missing: bool,
     monster_filter: String,
     monster_large: bool,
     monster_missing: bool,
@@ -276,6 +280,7 @@ pub fn refresh(ui: &AppWindow, st: &State) {
         "quests" => quests_page(ui, st),
         "requests" => requests_page(ui, st),
         "collections" => collections_page(ui, st),
+        "unlocks" => unlocks_page(ui, st),
         "monsters" => monsters_page(ui, st),
         "database" => database_page(ui, st),
         "advanced" => fields_page(ui, st),
@@ -485,6 +490,17 @@ fn goto_target(ui: &AppWindow, st: &State, t: Target, key: &str) {
             api.set_check_search("".into());
             api.set_check_missing(false);
         }
+        Target::Unlock(_) | Target::Pet(_) | Target::Moofahs => {
+            let rows = unlock_rows();
+            v.unlock_sel = match t {
+                Target::Unlock(m) => rows.iter().position(|r| r.maps.contains(&m)).unwrap_or(0),
+                _ => rows.iter().position(|r| r.maps.is_empty()).unwrap_or(0),
+            };
+            v.unlock_search.clear();
+            v.unlock_missing = false;
+            api.set_unlock_search("".into());
+            api.set_unlock_missing(false);
+        }
         Target::Monster(..) => {
             v.monster_filter.clear();
             v.monster_large = false;
@@ -548,6 +564,7 @@ fn bulk_id(ui: &AppWindow, id: &str) -> String {
     match id {
         "items:sort" | "items:max" | "items:empty" => format!("{id}:{}", if store_of(ui) == Store::Pouch { "pouch" } else { "box" }),
         "checks:all" | "checks:none" => format!("{id}:{}", api.get_collection_tab()),
+        "unlocks:all" | "unlocks:none" => format!("{id}:{}", api.get_unlock_sel()),
         _ => id.to_string(),
     }
 }
@@ -595,6 +612,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_quests(ui, st);
     wire_requests(ui, st);
     wire_collections(ui, st);
+    wire_unlocks(ui, st);
     wire_monsters(ui, st);
     wire_database(ui, st);
     wire_advanced(ui, st);
@@ -737,13 +755,15 @@ mod quests;
 mod requests;
 mod sets_ui;
 mod settings_ui;
+mod unlocks_ui;
 mod update_ui;
 
 use self::{
     advanced::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
-    palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*,
+    palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, unlocks_ui::*,
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
 pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};
+pub use self::unlocks_ui::{pet_costume_name, unlock_map_name, unlock_rows};
 pub use self::palicoes::look_label;
 pub use self::{file::*, update_ui::*};

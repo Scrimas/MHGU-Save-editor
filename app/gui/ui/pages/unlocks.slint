@@ -1,0 +1,208 @@
+import { ListView, CheckBox, Button, Palette, LineEdit, ScrollView } from "std-widgets.slint";
+import {
+    Api, Tok, Card, Muted, Chip, PageHeader, StagedBar, WasLine, Hairline, EmptyState, PreviewPopup, MoreButton,
+    UnlockCell, ListRow, SearchField, Settle, SectionTitle, Picker, NumberBox,
+} from "../common.slint";
+
+// One entry: checkbox, name, then what unlocks it in game; the game's NEW mark.
+component Cell inherits Rectangle {
+    in property <UnlockCell> c;
+    in property <bool> flash;
+    height: 52px;
+    border-radius: 4px;
+    background: root.flash ? Tok.accent-soft : ta.has-hover && c.enabled ? Tok.hover : transparent;
+    ta := TouchArea { enabled: c.enabled; clicked => { Api.set-unlock(c.key, !c.on); } }
+    if c.changed: StagedBar { x: 0; y: 8px; height: parent.height - 16px; }
+    HorizontalLayout {
+        padding-left: 8px;
+        padding-right: 6px;
+        spacing: 8px;
+        if c.check: Rectangle {
+            width: 28px;
+            CheckBox { x: 0; checked: c.on; enabled: c.enabled; accessible-label: c.name; toggled => { Api.set-unlock(c.key, self.checked); } }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            HorizontalLayout {
+                spacing: 6px;
+                Text { text: c.name; overflow: elide; horizontal-stretch: 1; color: c.on ? Palette.foreground : Tok.muted; }
+                if c.new: Text { text: @tr("NEW"); color: Tok.accent-text; font-size: Tok.small; font-weight: 600; vertical-alignment: center; }
+            }
+            if c.sub != "": Text { text: c.sub; color: Tok.muted; font-size: Tok.small; overflow: elide; }
+        }
+    }
+}
+
+// The village pets and the Moofahs.
+component Pets inherits VerticalLayout {
+    spacing: 14px;
+    padding: Tok.pad;
+    alignment: start;
+    Muted { text: @tr("A pet is adopted from its village's pet menu the first time it is used; that gives its first costume. A pet wears costumes of its own kind: Moofy's or the Poogies'."); wrap: word-wrap; }
+    for p in Api.pets: VerticalLayout {
+        spacing: 2px;
+        HorizontalLayout {
+            spacing: 10px;
+            alignment: start;
+            height: 32px;
+            Text { text: p.place; width: 90px; vertical-alignment: center; overflow: elide; }
+            LineEdit {
+                width: 180px;
+                property <string> cur: p.name;
+                changed cur => { self.text = self.cur; }
+                text: p.name;
+                accessible-label: @tr("Name of the pet of {}", p.place);
+                accepted(t) => { Api.set-pet(p.index, "name", t); }
+                changed has-focus => {
+                    if !self.has-focus && self.text != p.name {
+                        Api.set-pet(p.index, "name", self.text);
+                    }
+                }
+            }
+            Picker { width: 240px; model: p.costumes; value: p.costume; picked(i) => { Api.set-pet(p.index, "costume", i); } }
+            CheckBox { text: @tr("Adopted"); checked: p.adopted; toggled => { Api.set-pet(p.index, "adopted", self.checked ? "1" : "0"); } }
+        }
+        if p.was != "": HorizontalLayout {
+            padding-left: 100px;
+            WasLine { was: p.was; key: "pet:" + p.index; }
+        }
+    }
+    SectionTitle { text: @tr("Moofah affection"); }
+    Muted { text: @tr("Petting a Moofah raises it by one, up to 10, and each quest lowers it by 2. At 6 the game unlocks the title word Moofah, which an edit to 6 or more also does."); wrap: word-wrap; }
+    for v[k] in Api.moofahs: HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 32px;
+        Text {
+            text: k == 0 ? @tr("Bherna Moofah 1") : k == 1 ? @tr("Bherna Moofah 2") : k == 2 ? @tr("Palico Ranch Moofah 1") : @tr("Palico Ranch Moofah 2");
+            width: 180px;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+        NumberBox { width: 100px; minimum: 0; maximum: 10; value: v; label: @tr("Moofah affection"); edited(x) => { Api.set-moofah(k, x); } }
+        Text { text: "/ 10"; color: Tok.muted; vertical-alignment: center; }
+    }
+    if Api.was-moofahs != "": WasLine { was: Api.was-moofahs; key: "moofahs"; }
+}
+
+export component UnlocksPage inherits Rectangle {
+    property <length> list-w: min(300px, root.width * 0.32);
+    property <length> grid-w: root.width - 2 * Tok.margin - root.list-w - Tok.pad;
+    // cells of at least 300 px
+    property <int> cols: max(1, floor((grid-w - 12px) / 300px));
+    settle := Settle { key: root.cols; }
+    VerticalLayout {
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: @tr("Unlocks");
+            subtitle: Api.unlock-summary;
+            staged: Api.page-counts[8];
+            derived: true;
+            if Api.unlock-editable && !Api.unlock-pets: Button {
+                text: @tr("Unlock all…");
+                clicked => { pv.open("unlocks:all", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
+            }
+            if Api.unlock-editable && !Api.unlock-pets: MoreButton {
+                items: [@tr("Lock all…")];
+                activated => { pv.open("unlocks:none", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }
+            }
+        }
+        HorizontalLayout {
+            vertical-stretch: 1;
+            spacing: Tok.pad;
+            VerticalLayout {
+                width: root.list-w;
+                alignment: start;
+                Card {
+                    max-height: list.preferred-height + 2px;
+                    Flickable {
+                        content-width: self.width;
+                        content-height: list.preferred-height;
+                        list := VerticalLayout {
+                            for r in Api.unlock-rows: VerticalLayout {
+                                if r.group != "": Rectangle {
+                                    height: 30px;
+                                    Text { x: 14px; y: 10px; text: r.group; color: Tok.muted; font-size: Tok.small; font-weight: 600; }
+                                }
+                                ListRow {
+                                    two-line: false;
+                                    staged: r.changed;
+                                    selected: r.index == Api.unlock-sel;
+                                    accessible-label: r.name;
+                                    clicked => { Api.select-unlock(r.index); }
+                                    HorizontalLayout {
+                                        padding-left: 14px;
+                                        padding-right: 14px;
+                                        spacing: 10px;
+                                        Text { text: r.name; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
+                                        Text { text: r.count; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            VerticalLayout {
+                horizontal-stretch: 1;
+                spacing: Tok.gap;
+                VerticalLayout {
+                    spacing: 4px;
+                    Text { text: Api.unlock-title; font-size: 18px; font-weight: 600; overflow: elide; }
+                    if Api.unlock-note != "": Muted { text: Api.unlock-note; wrap: word-wrap; }
+                }
+                if !Api.unlock-pets: HorizontalLayout {
+                    spacing: Tok.tight;
+                    SearchField {
+                        placeholder-text: @tr("Search");
+                        text <=> Api.unlock-search;
+                        edited => { Api.filter-unlocks(); }
+                    }
+                    Chip {
+                        y: 2px;
+                        text: @tr("Missing only");
+                        active: Api.unlock-missing;
+                        clicked => {
+                            Api.unlock-missing = !Api.unlock-missing;
+                            Api.filter-unlocks();
+                        }
+                    }
+                }
+                if !Api.unlock-pets: Card {
+                    vertical-stretch: 1;
+                    if Api.unlock-cells.length == 0: EmptyState { text: Api.unlock-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); }
+                    grid := ListView {
+                        opacity: settle.o;
+                        for r in (Api.unlock-cells.length + root.cols - 1) / root.cols: HorizontalLayout {
+                            padding-left: 6px;
+                            padding-right: 6px;
+                            spacing: 6px;
+                            height: 52px;
+                            for c in root.cols: Rectangle {
+                                width: (grid.visible-width - 12px - (root.cols - 1) * 6px) / root.cols;
+                                if r * root.cols + c < Api.unlock-cells.length: Cell {
+                                    c: Api.unlock-cells[r * root.cols + c];
+                                    flash: Api.highlight != "" && Api.highlight == "unlock-cell:" + self.c.key;
+                                }
+                            }
+                        }
+                    }
+                }
+                if Api.unlock-pets: Card {
+                    vertical-stretch: 1;
+                    // an inline layout sizes the scroll area (a component child alone does not)
+                    ScrollView {
+                        VerticalLayout {
+                            alignment: start;
+                            Pets { }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    pv := PreviewPopup { x: 0; y: 0; page-width: root.width; }
+}

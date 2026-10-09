@@ -206,6 +206,14 @@ export struct DeviantRow {
     gate: string,
 }
 
+// Unlocks page: a list (with a group heading on the first row of each group), then the
+// entries of the list picked. Cell key = map * 1024 + bit; sub = what unlocks it in game.
+export struct UnlockRow { index: int, group: string, name: string, count: string, changed: bool }
+// check: false for the shops' read-only lists (on = on sale now)
+export struct UnlockCell { key: int, name: string, sub: string, on: bool, new: bool, changed: bool, enabled: bool, check: bool }
+// A village pet: name, costume worn (index in costumes), adopted
+export struct PetRow { index: int, place: string, name: string, costume: int, costumes: [string], adopted: bool, was: string }
+
 export struct FieldRow { index: int, offset: string, size: string, owner: string, label: string, confidence: Confidence, changed: bool }
 
 export struct StatCard { title: string, value: string, sub: string, progress: float, done: bool, bar: bool, page: string, tab: int }
@@ -554,6 +562,27 @@ export global Api {
     callback set-check(int, bool);
     in property <[DeviantRow]> deviants;
     callback set-deviant(int, string, int);
+
+    // unlocks
+    in property <[UnlockRow]> unlock-rows;
+    in-out property <int> unlock-sel;
+    in property <[UnlockCell]> unlock-cells;
+    in property <string> unlock-title;
+    in property <string> unlock-note;
+    in property <string> unlock-summary;
+    // entries can be edited (not the shops' lists); the pets' form instead of entries
+    in property <bool> unlock-editable;
+    in property <bool> unlock-pets;
+    in property <[PetRow]> pets;
+    in property <[int]> moofahs;
+    in property <string> was-moofahs;
+    in-out property <string> unlock-search;
+    in-out property <bool> unlock-missing;
+    callback select-unlock(int);
+    callback filter-unlocks();
+    callback set-unlock(int, bool);
+    callback set-pet(int, string /* name, costume, adopted */, string);
+    callback set-moofah(int, int);
 
     // monsters
     in property <[MonsterRow]> monsters;

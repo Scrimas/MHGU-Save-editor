@@ -12,7 +12,7 @@ use mhgu_save::items::{self, Stack, Store};
 use mhgu_save::progress::{Char, QuestBit, DEVIANTS, VILLAGES};
 use mhgu_save::save::Save;
 use mhgu_save::guildcard as gc;
-use mhgu_save::{monsters, smithy};
+use mhgu_save::{monsters, smithy, unlocks};
 
 pub struct Def {
     pub id: &'static str,
@@ -25,7 +25,10 @@ pub struct Def {
 /// write of 2026-10-05; items obtained, the Smithy lists and the card's titles, scenes and
 /// poses in game on 2026-10-09) or every field written is CONFIRMED by the save timeline
 /// (awards, money; tools/evidence).
-pub const GOALS: [Def; 11] = [
+///
+/// The unlock goals after them are Derived: from code, checked against the save
+/// timeline, not tried in game yet (`mhgu_save::unlocks`).
+pub const GOALS: [Def; 18] = [
     Def { id: "quests", conf: Conf::Confirmed },
     Def { id: "arts", conf: Conf::Confirmed },
     Def { id: "canteen", conf: Conf::Confirmed },
@@ -37,7 +40,42 @@ pub const GOALS: [Def; 11] = [
     Def { id: "obtained", conf: Conf::Confirmed },
     Def { id: "smithy", conf: Conf::Confirmed },
     Def { id: "card", conf: Conf::Confirmed },
+    Def { id: "lab", conf: Conf::Derived },
+    Def { id: "costumes", conf: Conf::Derived },
+    Def { id: "songs", conf: Conf::Derived },
+    Def { id: "trader", conf: Conf::Derived },
+    Def { id: "coins", conf: Conf::Derived },
+    Def { id: "combos", conf: Conf::Derived },
+    Def { id: "gallery", conf: Conf::Derived },
 ];
+
+/// The unlock maps (`unlocks::maps()` ids) a goal unlocks every entry of.
+fn goal_maps(id: &str) -> &'static [&'static str] {
+    match id {
+        "lab" => &["lab"],
+        "costumes" => &["costume"],
+        "songs" => &["song"],
+        "trader" => &["trader:items0", "trader:items1", "trader:words", "trader:scenes", "trader:costumes"],
+        "coins" => &["coin"],
+        "combos" => &["combos"],
+        "gallery" => &["gallery"],
+        _ => &[],
+    }
+}
+
+/// The maps of a goal or of the Unlocks page's row `row` ("unlocks:all:<row>").
+fn unlock_maps(parts: &[&str]) -> Vec<usize> {
+    match parts {
+        ["unlocks", _, row] => row.parse::<usize>().ok().and_then(|r| crate::views::unlock_rows().into_iter().nth(r)).map(|r| r.maps).unwrap_or_default(),
+        [g] => goal_maps(g).iter().filter_map(|id| unlocks::find(id)).collect(),
+        _ => vec![],
+    }
+}
+
+/// Entries of `maps` that differ between two saves.
+fn unlock_changes(a: &Save, b: &Save, base: usize, maps: &[usize]) -> usize {
+    maps.iter().map(|&m| unlocks::entries(m).iter().filter(|e| unlocks::on(a, base, m, e.bit) != unlocks::on(b, base, m, e.bit)).count()).sum()
+}
 
 /// The names of a Guild Card unlock map, from the asset pack.
 fn card_names(m: gc::Map) -> &'static [String] {
@@ -243,6 +281,14 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
                 }
                 if !todo.is_empty() {
                     out.push(Target::CardMap(k));
+                }
+            }
+        }
+        ["lab"] | ["costumes"] | ["songs"] | ["trader"] | ["coins"] | ["combos"] | ["gallery"] | ["unlocks", _, _] => {
+            let on = parts.get(1) != Some(&"none");
+            for m in unlock_maps(&parts) {
+                if unlocks::set_all(s, base, m, on) > 0 {
+                    out.push(Target::Unlock(m));
                 }
             }
         }
@@ -552,6 +598,81 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             }
             p.count = slots;
             p.detail = if pouch { tr("Pouch") } else { tr("Item box") }.into();
+        }
+        [g @ ("lab" | "costumes" | "songs" | "trader" | "coins" | "combos" | "gallery")] => {
+            let k = unlock_changes(s, &c, base, &unlock_maps(&[g]));
+            let ki = k as i64;
+            let entries = trn("{} entry", "{} entries", ki, &[&num(ki)]);
+            let (title, done, todo, note) = match g {
+                "lab" => (
+                    tr("Every Soaratorium Lab upgrade"),
+                    tr("Every Lab upgrade is installed."),
+                    trf("Installs the {} not installed yet, without spending Wycademy points or materials: the Item Box grows to its largest size and the Provision Division gets every supply drop set.", &[&trn("{} Lab upgrade", "{} Lab upgrades", ki, &[&num(ki)])]),
+                    tr("Each upgrade is offered too, as the game installs only offered ones. Box expansions can't be removed again here."),
+                ),
+                "costumes" => (
+                    tr("Every Poogie and Moofy costume"),
+                    tr("Your pets have every costume."),
+                    trf("Unlocks the {} your pets don't have yet, each with its NEW mark.", &[&trn("{} costume", "{} costumes", ki, &[&num(ki)])]),
+                    tr("The Poogie Ball and Moofy Ball awards follow after your next quest. Some costumes come from downloads in game."),
+                ),
+                "songs" => (
+                    tr("Every Jukebox song"),
+                    tr("The Jukebox has every song."),
+                    trf("Unlocks the {} the Hunters' Pub Jukebox can't play yet.", &[&trn("{} song", "{} songs", ki, &[&num(ki)])]),
+                    "",
+                ),
+                "trader" => (
+                    tr("Everything the Trader sells"),
+                    tr("The Trader offers everything it can sell."),
+                    trf("Puts up for sale the {} the Trader does not offer yet: items, title words, Guild Card scenes and pet costumes, the downloads' ones included.", &[&entries]),
+                    tr("Buying still takes Trader points; what you already have is not shown."),
+                ),
+                "coins" => (
+                    tr("Every Horns Coin trade"),
+                    tr("The Mewstress offers every Horns Coin trade."),
+                    trf("Unlocks the {} the Mewstress does not offer yet.", &[&trn("{} Horns Coin trade", "{} Horns Coin trades", ki, &[&num(ki)])]),
+                    tr("Trading still takes Horns Coins."),
+                ),
+                "combos" => (
+                    tr("Every combination recipe combined"),
+                    tr("Every combination recipe has been combined."),
+                    trf("Marks the {} never combined as combined. The award for 130 recipes follows after your next quest.", &[&trn("{} recipe", "{} recipes", ki, &[&num(ki)])]),
+                    tr("A recipe never combined always succeeds the first time; these lose that bonus."),
+                ),
+                _ => (
+                    tr("Every Gallery movie"),
+                    tr("The Housekeeper's Gallery has every movie."),
+                    trf("Adds the {} missing to the Housekeeper's Gallery, each with its NEW mark.", &[&trn("{} movie", "{} movies", ki, &[&num(ki)])]),
+                    "",
+                ),
+            };
+            p.title = title.into();
+            p.summary = if k == 0 { done.into() } else { todo };
+            p.count = entries;
+            p.note = note.into();
+        }
+        ["unlocks", on, row] => {
+            let maps = unlock_maps(&["unlocks", on, row]);
+            let k = unlock_changes(s, &c, base, &maps) as i64;
+            let entries = trn("{} entry", "{} entries", k, &[&num(k)]);
+            let what = crate::views::unlock_rows().into_iter().nth(row.parse().unwrap_or(usize::MAX)).map_or(String::new(), |r| match r.maps[..] {
+                [m] => crate::views::unlock_map_name(m),
+                _ => String::new(),
+            });
+            if on == "all" {
+                p.title = trf("Unlock all · {}", &[&what]);
+                p.summary = if k == 0 { tr("Every entry is unlocked.").into() } else { trf("Unlocks the {} not unlocked yet, each with its NEW mark where the game keeps one.", &[&entries]) };
+            } else {
+                p.title = trf("Lock all · {}", &[&what]);
+                p.summary = if k == 0 { tr("No entry is unlocked.").into() } else { trf("Locks the {} unlocked now.", &[&entries]) };
+                if maps.iter().any(|&m| matches!(unlocks::maps()[m].id.as_str(), "lab" | "supply")) {
+                    p.note = tr("Item Box expansions and the supply drop sets of installed Lab upgrades stay.").into();
+                }
+            }
+            p.count = entries;
+            p.conf = Some(Conf::Derived);
+            p.detail = tr("Unlocks").into();
         }
         ["deviants", "permits"] => {
             let devs = trn("{} deviant", "{} deviants", n as i64, &[&num(n as i64)]);

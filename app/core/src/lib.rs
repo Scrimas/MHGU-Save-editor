@@ -18,6 +18,7 @@ pub mod sets;
 pub mod slots;
 pub mod smithy;
 pub mod store;
+pub mod unlocks;
 
 pub use save::{Error, Save};
 
@@ -148,6 +149,32 @@ mod real_save {
         }
         let a = sets::arts(&s, base);
         sets::set_arts(&mut s, base, a);
+        assert!(s.diff().is_empty(), "changed {:?}", &s.diff()[..s.diff().len().min(8)]);
+    }
+
+    /// Every bit of every unlock map of a played character is one of the map's entries,
+    /// and writing each entry back as read changes nothing.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn unlock_maps_match_the_game() {
+        let mut s = load();
+        let base = s.base(0);
+        for (m, mp) in unlocks::maps().iter().enumerate() {
+            let known: Vec<usize> = unlocks::entries(m).iter().map(|e| e.bit).collect();
+            let set: Vec<usize> = (0..8 * mp.bytes).filter(|&b| unlocks::on(&s, base, m, b)).collect();
+            assert!(set.iter().all(|b| known.contains(b)), "{}: {set:?}", mp.id);
+            for b in known {
+                let v = unlocks::on(&s, base, m, b);
+                if unlocks::refusal(&s, base, m, b, v).is_none() {
+                    assert!(unlocks::set(&mut s, base, m, b, v), "{} {b}", mp.id);
+                }
+            }
+        }
+        for k in 0..unlocks::PETS {
+            let (n, c) = (unlocks::pet_name(&s, base, k), unlocks::pet_costume(&s, base, k));
+            unlocks::set_pet_name(&mut s, base, k, &n);
+            assert!(unlocks::set_pet_costume(&mut s, base, k, c), "pet {k} wears {c}");
+        }
         assert!(s.diff().is_empty(), "changed {:?}", &s.diff()[..s.diff().len().min(8)]);
     }
 

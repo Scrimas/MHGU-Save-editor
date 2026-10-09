@@ -156,6 +156,18 @@ pub struct Carve {
     pub chance: u8,
 }
 
+/// data/unlock-lists.csv: one entry of an unlock map (`unlocks`) and what unlocks it in
+/// game (tokens documented in tools/unlock_lists.py).
+#[derive(Debug, Clone)]
+pub struct UnlockEntry {
+    pub map: String,
+    pub bit: usize,
+    /// The item, word, scene, costume, equipment or request it stands for; 0 when the bit
+    /// is the ID.
+    pub id: u32,
+    pub need: String,
+}
+
 /// data/palico-looks.csv: one look of a Palico and the choices new Palicoes get.
 #[derive(Debug, Clone)]
 pub struct PalicoLook {
@@ -234,6 +246,8 @@ pub struct Tables {
     pub requests: Vec<Request>,
     pub offers: Vec<Offer>,
     pub npc_bit: HashMap<String, usize>,
+    /// data/npc-index.csv: NPC ID -> name.
+    pub npc_name: HashMap<u32, String>,
     pub monsters: Vec<Monster>,
     /// Indexed by monster index - 1.
     pub monster_meta: Vec<MonsterMeta>,
@@ -281,6 +295,7 @@ pub struct Tables {
     /// By forte.
     pub palico_fortes: Vec<PalicoForte>,
     pub palico_looks: Vec<PalicoLook>,
+    pub unlock_lists: Vec<UnlockEntry>,
 }
 
 impl Tables {
@@ -337,6 +352,7 @@ pub fn tables() -> &'static Tables {
                 })
                 .collect(),
             npc_bit: rows(include_str!("../../../data/npc-index.csv")).iter().map(|r| (r["npc_id"].clone(), num(&r["bit"]) as usize)).collect(),
+            npc_name: rows(include_str!("../../../data/npc-index.csv")).iter().map(|r| (num(&r["npc_id"]) as u32, r["name"].clone())).collect(),
             monsters: rows(include_str!("../../../data/monster-index.csv"))
                 .iter()
                 .map(|r| Monster {
@@ -517,6 +533,10 @@ pub fn tables() -> &'static Tables {
                         palette: r["palette"].split_whitespace().map(rgb).collect(),
                     }
                 })
+                .collect(),
+            unlock_lists: rows(include_str!("../../../data/unlock-lists.csv"))
+                .iter()
+                .map(|r| UnlockEntry { map: r["map"].clone(), bit: num(&r["bit"]) as usize, id: opt(&r["id"]).unwrap_or(0) as u32, need: r["need"].clone() })
                 .collect(),
         }
     })

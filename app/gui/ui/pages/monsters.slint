@@ -147,7 +147,7 @@ export component MonstersPage inherits Rectangle {
         PageHeader {
             title: @tr("Monsters");
             subtitle: Api.monster-summary;
-            staged: Api.page-counts[8];
+            staged: Api.page-counts[9];
             Button {
                 text: @tr("Max hunts…");
                 clicked => { root.bulk("monsters:hunts", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }

@@ -52,8 +52,8 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FB13,0,256,char1,0x2E77,sUserInfo,1,,256B,0x51dd3c,obj17+0x62c,quests failed bitmap,DERIVED
 0x18FC13,0,8,char1,0x2F77,sUserInfo,1,,8B,0x51dd50,obj17+0x958,contains: progress word,DERIVED
 0x18FC1B,0,8,char1,0x2F7F,sUserInfo,1,,8B,0x51dd64,obj17+0x968,progress map NEW (S+0x968),DERIVED
-0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"flagship monster story events, bits 2-8 set by the quest flow (S+0x970; runtime NEW copy S+0x974 not saved)",DERIVED
-0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,flagship monster story events NEW (S+0x978),DERIVED
+0x18FC23,0,4,char1,0x2F87,sUserInfo,1,,4B,0x51dd74,obj17+0x970,"Housekeeper's Gallery movies, 14 bits (Room Service table 0x1650ae8); the quest flow 0x14d53c sets the monster movies, the ending 0x12074 bits 9-13 (S+0x970; runtime NEW copy S+0x974 not saved)",DERIVED
+0x18FC27,0,4,char1,0x2F8B,sUserInfo,1,,4B,0x51dd88,obj17+0x978,"Gallery movies NEW, cleared once viewed (S+0x978)",DERIVED
 0x18FC2B,0,8,char1,0x2F8F,sUserInfo,1,,8B,0x51dd9c,obj17+0x97c,"contains: Canteen ingredients (bit = kitchenListMenu ingredient, data/canteen.csv)",CONFIRMED
 0x18FC33,0,8,char1,0x2F97,sUserInfo,1,,8B,0x51ddb0,obj17+0x98c,Canteen ingredients NEW (S+0x98c),DERIVED
 0x18FC3B,0,8,char1,0x2F9F,sUserInfo,1,,8B,0x51ddc4,obj17+0x994,"Poogie costumes owned, 64 bits (S+0x994)",CONFIRMED
@@ -99,11 +99,11 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x18FF73,0,4,char1,0x32D7,sUserInfo,1,,4B,0x51e0cc,obj17+0x35d0,"Hunter's Notes, second list: 30 bits (S+0x35d0)",DERIVED
 0x18FF77,0,8,char1,0x32DB,sUserInfo,1,,8B,0x51e0e0,obj17+0x35dc,"DLC item packs taken from the Room Service, bit b = bit b of sPrivilege +0xf3c (S+0x35dc)",CONFIRMED
 0x18FF7F,0,4,char1,0x32E3,sUserInfo,1,,4B,0x51e0f4,obj17+0x3668,"flags: bit 0 network-mode switch (mirrored to sFestaNetwork), bit 1 daily quest bonus received (S+0x3668)",DERIVED
-0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,"shop list 1 listed: 256 bits (uUIGuildShop, S+0xd98)",DERIVED
-0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,shop list 1 NEW (S+0xdd8),DERIVED
-0x18FFC3,0,32,char1,0x3327,sUserInfo,1,,32B,0x51e130,obj17+0xdf8,shop list 2 listed: 256 bits (S+0xdf8),DERIVED
-0x18FFE3,0,32,char1,0x3347,sUserInfo,1,,32B,0x51e144,obj17+0xe38,shop list 2 NEW (S+0xe38),DERIVED
-0x190003,0,840,char1,0x3367,sUserInfo,21,320,20B 20B,0x51e160,obj17+0xe58,"Armory (equipment shop): 21 types x (20 B listed, 20 B NEW), bit = shop entry",DERIVED
+0x18FF83,0,32,char1,0x32E7,sUserInfo,1,,32B,0x51e108,obj17+0xd98,"Market listed: 256 bits, bit = shopList00 record (73); the shop lists an entry by its star condition, the bit only decides NEW (uUIItemShop 0x72ef60, S+0xd98)",DERIVED
+0x18FFA3,0,32,char1,0x3307,sUserInfo,1,,32B,0x51e11c,obj17+0xdd8,Market NEW (S+0xdd8),DERIVED
+0x18FFC3,0,32,char1,0x3327,sUserInfo,1,,32B,0x51e130,obj17+0xdf8,"Guild Store listed: 256 bits, bit = shopList01 record (73), as the Market (uUIGuildShop, S+0xdf8)",DERIVED
+0x18FFE3,0,32,char1,0x3347,sUserInfo,1,,32B,0x51e144,obj17+0xe38,Guild Store NEW (S+0xe38),DERIVED
+0x190003,0,840,char1,0x3367,sUserInfo,21,320,20B 20B,0x51e160,obj17+0xe58,"Armory (uUIArmsShop): 21 equipment types (type - 1) x (20 B listed, 20 B NEW), bit = equipShopList record; listed only decides NEW (0x6eb9fc)",DERIVED
 0x19034B,0,600,char1,0x36AF,sUserInfo,15,320,20B 20B,0x51e198,obj17+0x1344,"Smithy weapon lists, types 7-21: 15 x (20 B listed, 20 B NEW)",DERIVED
 0x1905A3,0,288,char1,0x3907,sUserInfo,1,,288B,0x51e1c8,obj17+0x16c8,"Smithy armor list, head: listed",DERIVED
 0x1906C3,0,288,char1,0x3A27,sUserInfo,1,,288B,0x51e1dc,obj17+0x1908,"Smithy armor list, head: NEW",DERIVED
@@ -137,21 +137,21 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1918FB,0,128,char1,0x4C5F,sUserInfo,1,,128B,0x51e408,obj17+0x30f8,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
 0x19197B,0,128,char1,0x4CDF,sUserInfo,1,,128B,0x51e41c,obj17+0x3178,Smithy weapon maps by weapon ID: 15 types x 1024 bits (set by the list builder 0x6ffd40),DERIVED
 0x1919FB,0,656,char1,0x4D5F,sUserInfo,1,,656B,0x51e430,obj17+0x31f8,Smithy armor map by armor ID: 5248 bits (set by the list builder 0x6ffd40),DERIVED
-0x191C8B,0,12,char1,0x4FEF,sUserInfo,1,,12B,0x51e444,obj17+0xd8c,"S+0xd8c: 96-bit milestone map read by award checks (Moofy/Poogie moments, Footbath, Palico biases)",DERIVED
+0x191C8B,0,12,char1,0x4FEF,sUserInfo,1,,12B,0x51e444,obj17+0xd8c,"S+0xd8c: 96-bit milestone map read by award checks: 0-4 armor parts and 5-19 weapon classes at max level (awards 29, 28), 20-23 Moofy/Poogie moments (48, 69, 84, 99), 24-34 Footbath guests (88), 35-41 forte hired (51), 42-56 a second level threshold (no reader), 57-64 forte at level 99 (128)",DERIVED
 0x191C97,0,40,char1,0x4FFB,sUserInfo,1,,40B,0x51e454,obj17+0xca0,Arena: bit 5 x quest + set = cleared with that equipment set (S+0xca0),DERIVED
 0x191CBF,0,40,char1,0x5023,sUserInfo,1,,40B,0x51e464,obj17+0xcf0,Arena equipment sets NEW (S+0xcf0),DERIVED
 0x191CE7,0,8,char1,0x504B,sUserInfo,1,,8B,0x51e478,obj17+0x35d4,rotating quests bitmap,CONFIRMED
 0x191CEF,0,4,char1,0x5053,sUserInfo,1,,4B,0x51e48c,obj17+0x3670,"bit 0: Moofah Fleeceball given since the last quest (0x6be478; cleared by the quest result 0x38b948, S+0x3670)",DERIVED
 0x191CF3,0,4,char1,0x5057,sUserInfo,1,,4B,0x1cab78,obj100+0x641c8,u32 of the chat-phrase object (+0x2838) loaded inside the S stream; a value >= 0 is replaced by 0xF8FC7E3F at load,DERIVED
-0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,Jukebox songs unlocked (S+0x35e4; runtime NEW copy not saved),DERIVED
+0x191CF7,0,4,char1,0x505B,sUserInfo,1,,4B,0x51e4b4,obj17+0x35e4,"Jukebox songs unlocked, 14 (0x7304d8; 0-4 and 9 from the start; S+0x35e4; runtime NEW copy not saved)",DERIVED
 0x191CFB,0,4,char1,0x505F,sUserInfo,1,,4B,0x51e4c8,obj17+0x35ec,Jukebox songs NEW (S+0x35ec),DERIVED
 0x191CFF,0,12,char1,0x5063,sUserInfo,1,,12B,0x51e4dc,obj17+0x35f0,"Lab upgrades offered, 96 bits (S+0x35f0; runtime NEW copy not saved)",DERIVED
 0x191D0B,0,12,char1,0x506F,sUserInfo,1,,12B,0x51e4f0,obj17+0x3608,Lab upgrades offered NEW (S+0x3608),DERIVED
 0x191D17,0,12,char1,0x507B,sUserInfo,1,,12B,0x51e504,obj17+0x3614,"Lab upgrades installed, bit = researchReinforce ID - 1; bits 0-2 = Item Box expansions (S+0x3614; runtime NEW copy not saved)",DERIVED
 0x191D23,0,12,char1,0x5087,sUserInfo,1,,12B,0x51e518,obj17+0x362c,Lab upgrades installed NEW (S+0x362c),DERIVED
-0x191D2F,0,8,char1,0x5093,sUserInfo,1,,8B,0x51e52c,obj17+0x3638,"supply drop sets unlocked (Provision Division, S+0x3638; runtime NEW copy not saved)",DERIVED
+0x191D2F,0,8,char1,0x5093,sUserInfo,1,,8B,0x51e52c,obj17+0x3638,"supply drop sets unlocked, bit = otodokeSetList entry (1-24): set 2 when the Provision Division opens, the rest copied from installed Lab upgrades 3-25 (0x1914a0; S+0x3638; runtime NEW copy not saved)",DERIVED
 0x191D37,0,8,char1,0x509B,sUserInfo,1,,8B,0x51e540,obj17+0x3648,supply drop sets NEW (S+0x3648),DERIVED
-0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,Cross coin trades unlocked (S+0x3650; runtime NEW copy not saved),DERIVED
+0x191D3F,0,8,char1,0x50A3,sUserInfo,1,,8B,0x51e554,obj17+0x3650,"Cross coin trades unlocked (the Mewstress: items for Horns Coins), bit = coinTradeList entry (29; S+0x3650; runtime NEW copy not saved)",DERIVED
 0x191D47,0,8,char1,0x50AB,sUserInfo,1,,8B,0x51e568,obj17+0x3660,Cross coin trades NEW (S+0x3660),DERIVED
 0x191D4F,0,4,char1,0x50B3,sUserInfo,1,,4B,0x51e57c,obj17+0xd18,deviants: bit i = deviant i's EX Special Permit quest (level 16) cleared (S+0xd18),DERIVED
 0x191D53,0,4,char1,0x50B7,sUserInfo,1,,4B,0x51e58c,obj17+0xd20,"deviant last level cleared, NEW (S+0xd20)",DERIVED
@@ -431,13 +431,13 @@ offset,bit,size,block,rel,manager,count,stride_bits,element,loader_pc,object_fie
 0x1B9175,0,1,char1,0x2C4D9,sVillage,1,,1B,0x507d78,obj100+0x64e73,"Dark Piece / Dark Stone counts of the cut Cave feature (sVillage +0x472, +0x473)",DERIVED
 0x1B9176,0,2,char1,0x2C4DA,sVillage,1,,2B,0x507d88,obj100+0x64de0,Village star level,CONFIRMED
 0x1B9178,0,2,char1,0x2C4DC,sVillage,1,,2B,0x507d9c,obj100+0x64de2,Hub star level,CONFIRMED
-0x1B917A,0,4,char1,0x2C4DE,sVillage,1,,4B,0x507dac,obj100+0x64de4,"village pet affection, u8 per village, at most 10; 6 unlocks a title word (sVillage +0x3e4)",DERIVED
+0x1B917A,0,4,char1,0x2C4DE,sVillage,1,,4B,0x507dac,obj100+0x64de4,"Moofah affection, u8 per Moofah (Bherna NPCs 24, 25, Palico Ranch 626, 627), at most 10, -2 per quest; reaching 6 unlocks title word 114 (0x50d728, sVillage +0x3e4)",DERIVED
 0x1B917E,0,1,char1,0x2C4E2,sVillage,1,,1B,0x507dc0,obj100+0x64e71,"Moofah gifts received, at most 10; award 49 (sVillage +0x471)",DERIVED
 0x1B917F,0,128,char1,0x2C4E3,sVillage,1,,128B,0x507dd0,obj100+0x64de8,"village pet names, 4 x char[32] (Moofy, Poogie x 3; sVillage +0x3e8)",CONFIRMED
 0x1B91FF,0,4,char1,0x2C563,sVillage,1,,4B,0x507de4,obj100+0x64e68,"village pet costumes, u8 per pet, below 40 (sVillage +0x468, pet menu)",DERIVED
-0x1B9203,0,4,char1,0x2C567,sVillage,1,,4B,0x507df8,obj100+0x64e6c,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
-0x1B9207,0,1,char1,0x2C56B,sVillage,1,,1B,0x507e08,obj100+0x64e70,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
-0x1B9208,0,1,char1,0x2C56C,sVillage,1,,1B,0x3e7868,obj100+0x64e74,"village pet events seen (u32, bit per village), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
+0x1B9203,0,4,char1,0x2C567,sVillage,1,,4B,0x507df8,obj100+0x64e6c,"village pets adopted (u32, bit per pet: Moofy, the Kokoto, Pokke, Yukumo Poogies; 0x50d890), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
+0x1B9207,0,1,char1,0x2C56B,sVillage,1,,1B,0x507e08,obj100+0x64e70,"village pets adopted (u32, bit per pet: Moofy, the Kokoto, Pokke, Yukumo Poogies; 0x50d890), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
+0x1B9208,0,1,char1,0x2C56C,sVillage,1,,1B,0x3e7868,obj100+0x64e74,"village pets adopted (u32, bit per pet: Moofy, the Kokoto, Pokke, Yukumo Poogies; 0x50d890), Housekeeper (u8), start village (u8) (sVillage +0x46c, +0x470, +0x474)",DERIVED
 0x1B9209,0,192,char1,0x2C56D,sNpcTalk,1,,192B,0x240d7c,obj100+0x64700,event flags (villager requests),CONFIRMED
 0x1B92C9,0,24,char1,0x2C62D,sNpcTalk,1,,24B,0x240d8c,obj100+0x647c0,per-NPC talk hold bits,CONFIRMED
 0x1B92E1,0,24,char1,0x2C645,sNpcTalk,1,,24B,0x240da0,obj100+0x647d8,per-NPC talk hold bits,CONFIRMED

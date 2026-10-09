@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, monsters, palico, save, sets, slots, smithy, Save};
+use mhgu_save::{arena, monsters, palico, save, sets, slots, smithy, unlocks, Save};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -118,11 +118,18 @@ pub enum Target {
     Pigment,
     /// The hunting style and Hunter Arts the hunter has on.
     Arts,
+    /// An unlock map (index in `unlocks::maps()`) with its NEW copy and the fields that
+    /// follow it (Lab: offered and supply sets; Notes second list: the Notes NEW marks).
+    Unlock(usize),
+    /// A village pet (`unlocks::PETS`): name, costume worn, adoption.
+    Pet(usize),
+    /// The four Moofahs' affection.
+    Moofahs,
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
 /// the UI shows `page_title`.
-pub const PAGES: [(&str, &str); 11] = [
+pub const PAGES: [(&str, &str); 12] = [
     ("overview", "Overview"),
     ("character", "Character"),
     ("items", "Items"),
@@ -131,6 +138,7 @@ pub const PAGES: [(&str, &str); 11] = [
     ("quests", "Quests"),
     ("requests", "Requests"),
     ("collections", "Collections"),
+    ("unlocks", "Unlocks"),
     ("monsters", "Monsters"),
     ("database", "Database"),
     ("advanced", "Save map"),
@@ -151,6 +159,7 @@ pub fn page_title(i: usize) -> &'static str {
         "quests" => tr("Quests"),
         "requests" => tr("Requests"),
         "collections" => tr("Collections"),
+        "unlocks" => tr("Unlocks"),
         "monsters" => tr("Monsters"),
         "database" => tr("Database"),
         "advanced" => tr("Save map"),
@@ -324,6 +333,7 @@ impl Target {
             Quest(_) | Arena(_) | CardQuests(_) => "quests",
             Request(_) => "requests",
             Art(_) | Dish(_) | Ingredient(_) | Award(_) | Permits(_) | Levels(_) => "collections",
+            Unlock(_) | Pet(_) | Moofahs => "unlocks",
             Monster(..) => "monsters",
             Slot(_) => "overview",
         }
@@ -373,6 +383,9 @@ impl Target {
             PalicoSet(k) => format!("palset:{k}"),
             Pigment => "pigment".into(),
             Arts => "arts".into(),
+            Unlock(m) => format!("unlock:{}", unlocks::maps()[m].id),
+            Pet(k) => format!("pet:{k}"),
+            Moofahs => "moofahs".into(),
         }
     }
 
@@ -474,6 +487,9 @@ impl Target {
             PalicoSet(k) => trf("Palico set {}", &[&(k + 1)]),
             Pigment => tr("Armor pigment").into(),
             Arts => tr("Hunting style and Hunter Arts").into(),
+            Unlock(m) => crate::views::unlock_map_name(m),
+            Pet(k) => trf("{} pet", &[&tr(["Bherna", "Kokoto", "Pokke", "Yukumo"][k])]),
+            Moofahs => tr("Moofah affection").into(),
         }
     }
 
@@ -618,6 +634,16 @@ impl Target {
             }
             Pigment => crate::views::pigment_value(&sets::pigment(s, base)),
             Arts => crate::views::arts_value(&sets::arts(s, base)),
+            Unlock(m) => {
+                let (k, n) = unlocks::count(s, base, m);
+                trf("{} of {}", &[&num(k as i64), &num(n as i64)])
+            }
+            Pet(k) => {
+                let c = crate::views::pet_costume_name(unlocks::pet_costume(s, base, k));
+                let n = unlocks::pet_name(s, base, k);
+                if unlocks::adopted(s, base, k) { trf("{} · {} · adopted", &[&n, &c]) } else { format!("{n} · {c}") }
+            }
+            Moofahs => (0..unlocks::PETS).map(|k| unlocks::moofah(s, base, k).to_string()).collect::<Vec<_>>().join(" · "),
         }
     }
 
@@ -761,6 +787,41 @@ impl Target {
                 ch::LOOKS[..2].iter().map(|&l| (base + l + sets::LOOK_STYLE, 0xFF)).collect(),
             ]
             .concat(),
+            Unlock(m) => {
+                let mp = &unlocks::maps()[m];
+                let mut f = range(base + mp.on, mp.bytes);
+                if let Some(n) = mp.new {
+                    f.extend(range(base + n, mp.bytes));
+                }
+                match mp.id.as_str() {
+                    "lab" => {
+                        for a in [unlocks::LAB_OFFERED, unlocks::LAB_OFFERED_NEW] {
+                            f.extend(range(base + a, mp.bytes));
+                        }
+                        // the supply sets that follow the Lab, never set 2 (the Division's)
+                        for k in (1..=24).filter(|&k| unlocks::supply_lab(k).is_some()) {
+                            f.extend([bit(base, unlocks::SUPPLY, k), bit(base, unlocks::SUPPLY_NEW, k)]);
+                        }
+                    }
+                    "notes2" => f.extend(unlocks::entries(m).iter().map(|e| bit(base, monsters::NOTES_NEW, e.id as usize))),
+                    _ => {}
+                }
+                f
+            }
+            // the adoption's default costume and event flags; 769 is every pet's (restore)
+            Pet(k) => {
+                let c = unlocks::PET_DEFAULT[k] as usize;
+                let mut f = [range(base + unlocks::PET_NAMES + unlocks::PET_NAME_LEN * k, unlocks::PET_NAME_LEN), range(base + unlocks::PET_COSTUMES + k, 1)].concat();
+                f.extend([bit(base, unlocks::PETS_ADOPTED, k), bit(base, unlocks::COSTUMES, c), bit(base, unlocks::COSTUMES_NEW, c), bit(base, pg::FLAGS, unlocks::ADOPT_FLAG)]);
+                if k > 0 {
+                    f.push(bit(base, pg::FLAGS, unlocks::POOGIE_FLAGS + k));
+                }
+                f
+            }
+            Moofahs => {
+                let (on, new, _) = gc::Map::Words.at();
+                [range(base + unlocks::MOOFAHS, unlocks::PETS), vec![bit(base, on, unlocks::MOOFAH_WORD), bit(base, new, unlocks::MOOFAH_WORD)]].concat()
+            }
         }
     }
 
@@ -780,6 +841,10 @@ impl Target {
                 ch::set_hr_points(live, base, p);
             }
             Target::Monster(i, _) => monsters::sync_card(live, base, i),
+            // another pet still adopted keeps the flag every adoption raises
+            Target::Pet(_) if (0..unlocks::PETS).any(|k| unlocks::adopted(live, base, k)) => {
+                Char::new(&mut *live, slot).set_flag(unlocks::ADOPT_FLAG, true);
+            }
             _ => {}
         }
     }
