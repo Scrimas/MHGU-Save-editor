@@ -1,5 +1,5 @@
 import { Button, ScrollView, Palette } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, StatTile, SectionTitle, Goal, PageHeader, ConfidenceTag, Confidence, PreviewPopup, EmptyState } from "../common.slint";
+import { Api, Tok, Card, Muted, StatTile, SectionTitle, Goal, PageHeader, ConfidenceTag, Confidence, PreviewPopup, EmptyState, Settle } from "../common.slint";
 
 component GoalCard inherits Card {
     in property <Goal> goal;
@@ -32,6 +32,7 @@ export component OverviewPage inherits Rectangle {
     // from 1100 px, one more column each time a card of 355 px fits, never more than goals
     property <int> cols: cw >= 1100px ? max(3, min(Api.goals.length, floor((cw + Tok.gap) / (355px + Tok.gap)))) : cw >= 560px ? 2 : 1;
     property <length> goal-w: (cw - (cols - 1) * Tok.gap) / cols;
+    settle := Settle { key: root.cols; }
     property <string> popup-request: Api.snapshot-popup;
     changed popup-request => {
         if popup-request == "goal" && Api.goals.length > 0 {
@@ -90,6 +91,7 @@ export component OverviewPage inherits Rectangle {
                 for c in root.cols: Rectangle {
                     width: root.goal-w;
                     min-height: 168px;
+                    opacity: settle.o;
                     if r * root.cols + c < Api.goals.length: GoalCard {
                         goal: Api.goals[r * root.cols + c];
                         preview => {

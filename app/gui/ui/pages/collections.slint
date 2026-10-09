@@ -1,7 +1,7 @@
 import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, Chip, Asset, PageHeader, TabBar, ColHead, NumberBox, StagedBar, WasLine, Hairline,
-    EmptyState, PreviewPopup, MoreButton, CheckRow, SearchField,
+    EmptyState, PreviewPopup, MoreButton, CheckRow, SearchField, Settle,
 } from "../common.slint";
 
 // Checkbox, icon, name: the order of the in-game lists (H5.4); long names elide (H5.2).
@@ -32,6 +32,8 @@ export component CollectionsPage inherits Rectangle {
     // side groups of at least 400 px, so the checks stay near the art's name
     property <int> cols: max(1, floor((cw - 12px) / 270px));
     property <int> art-cols: max(1, floor(cw / 400px));
+    settle := Settle { key: root.cols; }
+    art-settle := Settle { key: root.art-cols; }
     property <bool> checks: Api.collection-tab < 4;
     VerticalLayout {
         padding: Tok.margin;
@@ -81,6 +83,7 @@ export component CollectionsPage inherits Rectangle {
         // on a wide window, read across like the grids
         if Api.collection-tab == 0: Card {
             vertical-stretch: 1;
+            opacity: art-settle.o;
             VerticalLayout {
                 Rectangle {
                     height: 34px;
@@ -136,6 +139,7 @@ export component CollectionsPage inherits Rectangle {
             vertical-stretch: 1;
             if Api.checks.length == 0: EmptyState { text: Api.check-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); }
             grid := ListView {
+                opacity: settle.o;
                 property <int> seq: Api.jump-seq;
                 function go() {
                     if Api.page == "collections" && Api.jump-row >= 0 {
@@ -164,7 +168,7 @@ export component CollectionsPage inherits Rectangle {
             vertical-stretch: 1;
             alignment: start;
             Card {
-                width: min(root.width - 2 * Tok.margin, 900px);
+                width: min(root.width - 2 * Tok.margin, Tok.row-max);
                 VerticalLayout {
                     Rectangle {
                         height: 34px;

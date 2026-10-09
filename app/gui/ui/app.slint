@@ -632,6 +632,7 @@ export component AppWindow inherits Window {
     // would feed back into the window's own size constraints.
     property <bool> dock: root.width >= 1440px;
     property <length> side: root.width >= 1000px ? 220px : 188px;
+    animate side { duration: 180ms; easing: ease-in-out; }
     property <bool> about-open;
     init => {
         Win.width = self.width;
@@ -662,7 +663,12 @@ export component AppWindow inherits Window {
             Palette.color-scheme = ColorScheme.unknown;
         }
     }
-    property <length> review-w: Api.review-open && dock ? 380px : 0px;
+    // Review slides in and out (open), and the pages make room for it while docked (dk)
+    property <float> open: Api.review-open ? 1 : 0;
+    animate open { duration: 180ms; easing: ease-in-out; }
+    property <float> dk: dock ? 1 : 0;
+    animate dk { duration: 180ms; easing: ease-in-out; }
+    property <length> review-w: 380px * open * dk;
     property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "monsters", "database", "advanced"];
     property <[string]> nav-titles: [@tr("Overview"), @tr("Character"), @tr("Items"), @tr("Equipment"), @tr("Palicoes"), @tr("Quests"), @tr("Requests"), @tr("Collections"), @tr("Monsters"), @tr("Database"), @tr("Save map")];
     // Shortcuts: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page,
@@ -878,12 +884,13 @@ export component AppWindow inherits Window {
                 }
             }
         }
-        if Api.review-open && dock: ReviewPanel { x: root.width - 380px; width: 380px; height: root.height; }
+        if root.open > 0 && dock: ReviewPanel { x: root.width - 380px * root.open; width: 380px; height: root.height; }
     }
-    if Api.review-open && !dock: Rectangle {
+    if root.open > 0 && !dock: Rectangle {
         background: #0005;
+        opacity: root.open;
         TouchArea { clicked => { Api.review-open = false; } }
-        ReviewPanel { x: parent.width - self.width; width: min(400px, parent.width - 40px); height: parent.height; }
+        ReviewPanel { x: parent.width - self.width * root.open; width: min(400px, parent.width - 40px); height: parent.height; }
     }
     if Api.write-open: WriteDialog { }
     if Api.snapshots-open: SnapshotsDialog { }

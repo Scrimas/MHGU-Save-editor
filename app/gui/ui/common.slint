@@ -621,7 +621,64 @@ export global Tok {
     out property <length> tight: 8px;
     out property <length> radius: 6px;
     // rows are capped so labels stay near their values (09)
-    out property <length> row-max: 1100px;
+    out property <length> row-max: 1600px;
+    // a list beside a detail pane: 320 px, a little more on a wide page, never past 38 %
+    public pure function list-w(w: length) -> length {
+        return min(w * 0.38, clamp(w * 0.22, 320px, 400px));
+    }
+}
+
+// Where two cards go: side by side when both fit at their minimum width, else one under
+// the other. `p` eases from one placement to the other, so a switch slides instead of
+// jumping; the width itself is never animated, so a resize follows the window's edge.
+export component Pair {
+    in property <length> w;
+    in property <length> gap: Tok.gap;
+    // between them when one is under the other
+    in property <length> v-gap: gap;
+    in property <length> a-min;
+    in property <length> b-min;
+    // the part of the spare width the second card takes beside the first
+    in property <float> b-share;
+    // each card's height at the width it is given
+    in property <length> a-h;
+    in property <length> b-h;
+    out property <bool> side: w >= a-min + b-min + gap;
+    out property <float> p: side ? 1 : 0;
+    animate p { duration: 180ms; easing: ease-in-out; }
+    property <length> b-beside: b-min + max(0px, w - a-min - b-min - gap) * b-share;
+    property <length> row-h: max(a-h, b-h);
+    out property <length> a-w: w - p * (b-beside + gap);
+    out property <length> b-x: p * (w - b-beside);
+    out property <length> b-y: (1 - p) * (a-h + v-gap);
+    out property <length> b-w: w - p * (w - b-beside);
+    // beside each other both are as tall as the taller one
+    out property <length> a-height: a-h + p * (row-h - a-h);
+    out property <length> b-height: b-h + p * (row-h - b-h);
+    out property <length> h: (1 - p) * (a-h + v-gap + b-h) + p * row-h;
+    out property <length> min-w: max(a-min, b-min);
+}
+
+// Opacity for a grid whose column count is `key`: when it changes, the grid's cells are
+// rebuilt in their new places (too many to slide), so the grid fades back in instead.
+export component Settle {
+    in property <int> key;
+    out property <float> o: 1;
+    property <bool> low;
+    changed key => { root.low = true; }
+    Timer {
+        interval: 30ms;
+        running: root.low;
+        triggered => { root.low = false; }
+    }
+    states [
+        low when root.low: {
+            o: 0.3;
+            out {
+                animate o { duration: 180ms; easing: ease-out; }
+            }
+        }
+    ]
 }
 
 // --- small widgets -------------------------------------------------------------------

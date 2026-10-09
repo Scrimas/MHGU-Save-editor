@@ -1,7 +1,7 @@
 import { ListView, ScrollView, ComboBox } from "std-widgets.slint";
 import {
     Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
-    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip, DbSource,
+    Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip, DbSource, Settle,
 } from "../common.slint";
 
 // Crown tints as on the Monsters page.
@@ -110,13 +110,14 @@ component OddsList inherits VerticalLayout {
     if root.more != "": Muted { text: root.more; }
 }
 
-// Up to three carve or reward tables of a DropGrid, from `first`; each item with its
+// Up to `count` carve or reward tables of a DropGrid, from `first`; each item with its
 // chance and what the item box holds.
 component DropRow inherits HorizontalLayout {
     in property <[DropTable]> tables;
     in property <int> first;
+    in property <int> count;
     spacing: 24px;
-    for i in min(3, root.tables.length - root.first): VerticalLayout {
+    for i in min(root.count, root.tables.length - root.first): VerticalLayout {
         property <DropTable> t: root.tables[root.first + i];
         horizontal-stretch: 1;
         min-width: 160px;
@@ -144,12 +145,24 @@ component DropRow inherits HorizontalLayout {
     Rectangle { horizontal-stretch: 1; }
 }
 
-// Carve or reward tables side by side (up to 5), three a row: four (a quest's rewards, a
-// monster's carves) need a wider pane than the default window gives.
-component DropGrid inherits VerticalLayout {
+// The width inside a detail pane, set by the page: what the drop tables are laid out in
+// (their own width would depend on how many share a row).
+global DbPane {
+    in-out property <length> w: 600px;
+}
+
+// Carve or reward tables side by side (up to 5), as many a row as the pane gives (from
+// 260 px each), the rows balanced: five on a pane for four go 3 + 2, not 4 + 1.
+component DropGrid inherits Rectangle {
     in property <[DropTable]> tables;
-    spacing: 14px;
-    for r in ceil(root.tables.length / 3): DropRow { tables: root.tables; first: r * 3; }
+    property <int> fit: max(1, min(5, floor((DbPane.w + 24px) / 284px)));
+    property <int> per-row: root.tables.length == 0 ? 1 : ceil(root.tables.length / ceil(root.tables.length / root.fit));
+    settle := Settle { key: root.per-row; }
+    opacity: settle.o;
+    VerticalLayout {
+        spacing: 14px;
+        for r in ceil(root.tables.length / root.per-row): DropRow { tables: root.tables; first: r * root.per-row; count: root.per-row; }
+    }
 }
 
 // A monster's carve tables of one rank, side by side.
@@ -577,7 +590,7 @@ component EntryColumn inherits VerticalLayout {
 component MonsterTab inherits HorizontalLayout {
     spacing: Tok.pad;
     EntryColumn {
-        width: min(320px, root.width * 0.36);
+        width: Tok.list-w(root.width);
         rows: Api.db-monsters;
         selected: Api.db-monster.index;
         search: @tr("Search monsters");
@@ -600,7 +613,7 @@ component MonsterTab inherits HorizontalLayout {
 component QuestTab inherits HorizontalLayout {
     spacing: Tok.pad;
     EntryColumn {
-        width: min(320px, root.width * 0.36);
+        width: Tok.list-w(root.width);
         rows: Api.db-quests;
         selected: Api.db-quest.index;
         search: @tr("Search quests");
@@ -620,7 +633,7 @@ component QuestTab inherits HorizontalLayout {
 component ItemTab inherits HorizontalLayout {
     spacing: Tok.pad;
     EntryColumn {
-        width: min(320px, root.width * 0.36);
+        width: Tok.list-w(root.width);
         rows: Api.db-items;
         selected: Api.db-item.index;
         search: @tr("Search items");
@@ -641,7 +654,7 @@ component ItemTab inherits HorizontalLayout {
 component SkillTab inherits HorizontalLayout {
     spacing: Tok.pad;
     EntryColumn {
-        width: min(320px, root.width * 0.36);
+        width: Tok.list-w(root.width);
         rows: Api.db-skills;
         selected: Api.db-skill.index;
         search: @tr("Search skills");
@@ -661,7 +674,7 @@ component SkillTab inherits HorizontalLayout {
 component EquipTab inherits HorizontalLayout {
     spacing: Tok.pad;
     EntryColumn {
-        width: min(320px, root.width * 0.36);
+        width: Tok.list-w(root.width);
         kinds: Api.db-equip-kinds;
         rows: Api.db-equips;
         selected: Api.db-equip.index;
@@ -681,6 +694,11 @@ component EquipTab inherits HorizontalLayout {
 }
 
 export component DatabasePage inherits Rectangle {
+    // inside the detail card: the tab less the list, the gap, the card's padding and its
+    // scroll bar
+    property <length> pane-w: root.width - 2 * Tok.margin - Tok.list-w(root.width - 2 * Tok.margin) - Tok.pad - 2 * Tok.pad - 12px;
+    init => { DbPane.w = root.pane-w; }
+    changed pane-w => { DbPane.w = root.pane-w; }
     VerticalLayout {
         padding: Tok.margin;
         padding-top: 16px;

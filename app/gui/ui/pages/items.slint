@@ -1,7 +1,7 @@
 import { LineEdit, ListView, Button, Palette } from "std-widgets.slint";
 import {
     Api, Tok, Fmt, Card, Asset, Muted, ItemSlot, PageHeader, TabBar, NumberBox, StagedBar, WasLine, PreviewPopup,
-    MoreButton, ListRow, EmptyState, SearchField, KeyActivate, FocusRing, TextLink,
+    MoreButton, ListRow, EmptyState, SearchField, KeyActivate, FocusRing, TextLink, Settle,
 } from "../common.slint";
 
 // One slot of the box grid: number, icon, name, count; staged slots show what they held.
@@ -44,6 +44,7 @@ component SlotCell inherits Rectangle {
 export component ItemsPage inherits Rectangle {
     // as many columns as the width gives, so counts stay near names (09.2)
     property <int> cols: max(2, floor((root.width - 2 * Tok.margin - 6px) / 336px));
+    settle := Settle { key: root.cols; }
     // slot editor: slot, the item picked, its count, what the slot holds now
     property <int> edit-slot: -1;
     property <int> edit-id;
@@ -151,6 +152,7 @@ export component ItemsPage inherits Rectangle {
             width: root.width - 2 * Tok.margin;
             if Api.item-slots.length == 0: EmptyState { text: @tr("No slot matches the search."); }
             list := ListView {
+                opacity: settle.o;
                 property <int> seq: Api.jump-seq;
                 function go() {
                     if Api.page == "items" && Api.jump-row >= 0 {

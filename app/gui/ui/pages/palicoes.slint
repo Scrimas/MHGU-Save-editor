@@ -1,7 +1,7 @@
 import { ListView, ComboBox, LineEdit, ScrollView, Palette, CheckBox } from "std-widgets.slint";
 import {
     Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
-    Confidence, SearchField, PalicoEntry, LookRow,
+    Confidence, SearchField, PalicoEntry, LookRow, Pair,
 } from "../common.slint";
 
 // Label, control, "was … Undo" under it when staged.
@@ -155,7 +155,7 @@ component EntryList inherits VerticalLayout {
 export component PalicoesPage inherits Rectangle {
     property <string> key: "palico:" + Api.palico.index + ":";
     // the detail card's inside: page margins, list, gap, card padding and scroll bar off
-    property <length> detail-w: root.width - 2 * Tok.margin - min(320px, root.width * 0.38) - Tok.pad - 38px - 12px;
+    property <length> detail-w: root.width - 2 * Tok.margin - Tok.list-w(root.width) - Tok.pad - 38px - 12px;
     VerticalLayout {
         padding: Tok.margin;
         padding-top: 16px;
@@ -169,7 +169,7 @@ export component PalicoesPage inherits Rectangle {
             spacing: Tok.pad;
             vertical-stretch: 1;
             VerticalLayout {
-                width: min(320px, root.width * 0.38);
+                width: Tok.list-w(root.width);
                 spacing: Tok.tight;
                 SearchField {
                     placeholder-text: @tr("Search Palicoes");
@@ -201,8 +201,7 @@ export component PalicoesPage inherits Rectangle {
             Card {
                 horizontal-stretch: 1;
                 if Api.palico.index < 0: EmptyState { text: @tr("Pick a Palico to edit it."); }
-                if Api.palico.index >= 0: detail := ScrollView {
-                    property <bool> side: root.detail-w >= fields.min-width + entries.min-width + 32px;
+                if Api.palico.index >= 0: ScrollView {
                     VerticalLayout {
                         padding: Tok.pad;
                         padding-left: 22px;
@@ -216,18 +215,25 @@ export component PalicoesPage inherits Rectangle {
                             wrap: word-wrap;
                         }
                         // looks beside moves and skills when both fit at their minimum width
-                        GridLayout {
-                          spacing-horizontal: 32px;
-                          spacing-vertical: 14px;
-                          // both as wide as their cell: their fixed-width controls would
-                          // cap them short of the edge
+                        Rectangle {
+                          min-width: pair.min-w;
+                          height: pair.h;
+                          // the moves beside the fields only as wide as their pickers need
+                          pair := Pair {
+                            w: root.detail-w;
+                            gap: 32px;
+                            v-gap: 14px;
+                            a-min: fields.min-width;
+                            b-min: entries.min-width;
+                            b-share: 0;
+                            a-h: fields.preferred-height;
+                            b-h: entries.preferred-height;
+                          }
                           fields := VerticalLayout {
-                            row: 0;
-                            col: 0;
-                            max-width: 100000px;
-                            // takes the spare width; left implicit, the stretch comes from
-                            // the content and the split moved from Palico to Palico
-                            horizontal-stretch: 1;
+                            x: 0;
+                            y: 0;
+                            width: pair.a-w;
+                            height: pair.a-height;
                             spacing: 14px;
                             alignment: start;
                         TextRow { label: @tr("Name"); field: "name"; value: Api.palico.name; was: Api.palico.was-name; key: root.key + "name"; field-width: 260px; }
@@ -272,15 +278,13 @@ export component PalicoesPage inherits Rectangle {
                         }
                         // above the moves when they come below; hidden, not removed, so
                         // the column's width does not depend on the placement it decides
-                        Hairline { visible: !detail.side; }
+                        Hairline { visible: !pair.side; }
                           }
-                          // beside the fields, only as wide as its pickers need
                           entries := VerticalLayout {
-                            row: detail.side ? 0 : 1;
-                            col: detail.side ? 1 : 0;
-                            max-width: 100000px;
-                            preferred-width: 0px;
-                            horizontal-stretch: 0;
+                            x: pair.b-x;
+                            y: pair.b-y;
+                            width: pair.b-w;
+                            height: pair.b-height;
                             spacing: 14px;
                             alignment: start;
                         EntryList {

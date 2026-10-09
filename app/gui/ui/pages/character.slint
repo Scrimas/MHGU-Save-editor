@@ -1,5 +1,5 @@
 import { LineEdit, ScrollView, Palette, ComboBox } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, ColHead, Hairline, TextLink } from "../common.slint";
+import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, ColHead, Hairline, TextLink, Pair } from "../common.slint";
 
 // Label, control, then "was … Undo" when staged (or the hint). Only the exceptions carry
 // a confidence tag (06); the page header states the rule.
@@ -34,11 +34,9 @@ component Field inherits Rectangle {
     if root.was != "": StagedBar { x: -10px; y: 26px; height: 32px; }
 }
 
-// A card of a pair that sits side by side on a wide window: as wide as its grid cell
-// (its fixed-width controls would cap it short of the edge), its content at the top when
-// the other card of the row is taller.
+// A card of a pair that sits side by side on a wide window (placed by a Pair), its content
+// at the top when the other card of the row is taller.
 component PairCard inherits Card {
-    max-width: 100000px;
     VerticalLayout {
         alignment: start;
         @children
@@ -99,9 +97,6 @@ export component CharacterPage inherits Rectangle {
     changed cur-greeting => { greeting-edit.text = self.cur-greeting; }
     // the width inside the page margins, less the scroll bar
     property <length> cw: root.width - 2 * Tok.margin - 12px;
-    property <bool> pair1: cw >= hunter.min-width + progress.min-width + Tok.gap;
-    property <bool> pair2: cw >= appearance.min-width + guild-card.min-width + Tok.gap;
-    property <bool> pair3: cw >= village-points.min-width + styles.min-width + Tok.gap;
     ScrollView {
         VerticalLayout {
             padding: Tok.margin;
@@ -114,11 +109,23 @@ export component CharacterPage inherits Rectangle {
                 staged: Api.page-counts[1];
             }
             // cards in pairs, side by side when both fit at their minimum width
-            GridLayout {
-              spacing: Tok.gap;
+            Rectangle {
+              min-width: pair1.min-w;
+              height: pair1.h;
+              // Progress beside the Hunter card only as wide as its own content
+              pair1 := Pair {
+                w: root.cw;
+                a-min: hunter.min-width;
+                b-min: progress.min-width;
+                b-share: 0;
+                a-h: hunter.preferred-height;
+                b-h: progress.preferred-height;
+              }
               hunter := PairCard {
-                row: 0;
-                col: 0;
+                x: 0;
+                y: 0;
+                width: pair1.a-w;
+                height: pair1.a-height;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -193,10 +200,10 @@ export component CharacterPage inherits Rectangle {
                 }
               }
               progress := PairCard {
-                row: root.pair1 ? 0 : 1;
-                col: root.pair1 ? 1 : 0;
-                // beside the Hunter card, only as wide as its own content
-                horizontal-stretch: root.pair1 ? 0 : 1;
+                x: pair1.b-x;
+                y: pair1.b-y;
+                width: pair1.b-w;
+                height: pair1.b-height;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -224,11 +231,23 @@ export component CharacterPage inherits Rectangle {
                 }
               }
             }
-            GridLayout {
-              spacing: Tok.gap;
+            Rectangle {
+              min-width: pair2.min-w;
+              height: pair2.h;
+              // beside each other they share the spare width
+              pair2 := Pair {
+                w: root.cw;
+                a-min: appearance.min-width;
+                b-min: guild-card.min-width;
+                b-share: 0.5;
+                a-h: appearance.preferred-height;
+                b-h: guild-card.preferred-height;
+              }
               appearance := PairCard {
-                row: 0;
-                col: 0;
+                x: 0;
+                y: 0;
+                width: pair2.a-w;
+                height: pair2.a-height;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -300,8 +319,10 @@ export component CharacterPage inherits Rectangle {
                 }
               }
               guild-card := PairCard {
-                row: root.pair2 ? 0 : 1;
-                col: root.pair2 ? 1 : 0;
+                x: pair2.b-x;
+                y: pair2.b-y;
+                width: pair2.b-w;
+                height: pair2.b-height;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -364,11 +385,22 @@ export component CharacterPage inherits Rectangle {
                 }
               }
             }
-            GridLayout {
-              spacing: Tok.gap;
+            Rectangle {
+              min-width: pair3.min-w;
+              height: pair3.h;
+              pair3 := Pair {
+                w: root.cw;
+                a-min: village-points.min-width;
+                b-min: styles.min-width;
+                b-share: 0.5;
+                a-h: village-points.preferred-height;
+                b-h: styles.preferred-height;
+              }
               village-points := PairCard {
-                row: 0;
-                col: 0;
+                x: 0;
+                y: 0;
+                width: pair3.a-w;
+                height: pair3.a-height;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;
@@ -399,8 +431,10 @@ export component CharacterPage inherits Rectangle {
                 }
               }
               styles := PairCard {
-                row: root.pair3 ? 0 : 1;
-                col: root.pair3 ? 1 : 0;
+                x: pair3.b-x;
+                y: pair3.b-y;
+                width: pair3.b-w;
+                height: pair3.b-height;
                 VerticalLayout {
                     padding: Tok.pad;
                     padding-left: 22px;

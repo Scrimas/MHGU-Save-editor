@@ -37,7 +37,11 @@ component EquipLine inherits ListRow {
 
 export component EquipmentPage inherits Rectangle {
     property <bool> wide: root.width > 900px;
-    property <length> detail-w: root.width > 1100px ? 480px : root.width * 0.44;
+    // the detail beside the list grows with the window: 44 % up to 480 px, then 36 %
+    property <length> detail-w: min(root.width * 0.44, max(480px, root.width * 0.36));
+    // the detail slides in beside the list (1) or out of it (0)
+    property <float> beside: wide ? 1 : 0;
+    animate beside { duration: 180ms; easing: ease-in-out; }
     property <bool> hunter: Api.equip-owner == 0;
     // narrow window: the selected piece's detail is shown instead of the list
     property <bool> show-detail;
@@ -180,8 +184,10 @@ export component EquipmentPage inherits Rectangle {
                     }
                 }
             }
-            if root.wide || root.show-detail: Card {
-                width: root.wide ? root.detail-w : root.width - 2 * Tok.margin;
+            if root.wide || root.show-detail || root.beside > 0: Card {
+                width: root.show-detail && !root.wide ? root.width - 2 * Tok.margin : root.detail-w * root.beside;
+                // narrower than its content while it slides
+                clip: root.beside > 0 && root.beside < 1;
                 if Api.equip-detail.slot < 0: EmptyState {
                     text: @tr("Pick a piece, or add one to the first free slot.");
                     action: Api.equip-free >= 0 ? @tr("Add equipment") : "";
