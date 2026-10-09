@@ -1,5 +1,5 @@
 import { Button, ScrollView, Palette } from "std-widgets.slint";
-import { Api, Tok, Card, Muted, StatTile, SectionTitle, Goal, PageHeader, ConfidenceTag, Confidence, PreviewPopup, EmptyState, Settle } from "../common.slint";
+import { Api, Tok, Card, Muted, StatTile, SectionTitle, Goal, PageHeader, ConfidenceTag, Confidence, PreviewPopup, EmptyState } from "../common.slint";
 
 component GoalCard inherits Card {
     in property <Goal> goal;
@@ -28,11 +28,26 @@ component GoalCard inherits Card {
 export component OverviewPage inherits Rectangle {
     // content width inside the page margins
     property <length> cw: root.width - 2 * Tok.margin;
-    property <length> tile-w: (cw - 3 * Tok.gap) / 4;
+    // stat tiles as many a row as fit at 200 px, the rows balanced (8 go 4 + 4, not 7 + 1)
+    property <int> tile-fit: max(1, floor((cw + Tok.gap) / (200px + Tok.gap)));
+    property <int> tile-cols: Api.stats.length == 0 ? 1 : ceil(Api.stats.length / ceil(Api.stats.length / tile-fit));
     // from 1100 px, one more column each time a card of 355 px fits, never more than goals
     property <int> cols: cw >= 1100px ? max(3, min(Api.goals.length, floor((cw + Tok.gap) / (355px + Tok.gap)))) : cw >= 560px ? 2 : 1;
     property <length> goal-w: (cw - (cols - 1) * Tok.gap) / cols;
-    settle := Settle { key: root.cols; }
+    // The column and row counts ease, so on a switch each card slides to its new place and
+    // width; the width itself follows the window at once.
+    property <float> tile-cols-f: tile-cols;
+    animate tile-cols-f { duration: 180ms; easing: ease-in-out; }
+    property <float> tile-rows-f: ceil(Api.stats.length / tile-cols);
+    animate tile-rows-f { duration: 180ms; easing: ease-in-out; }
+    property <float> cols-f: cols;
+    animate cols-f { duration: 180ms; easing: ease-in-out; }
+    property <float> rows-f: ceil(Api.goals.length / cols);
+    animate rows-f { duration: 180ms; easing: ease-in-out; }
+    property <length> tile-w-now: (cw - (tile-cols-f - 1) * Tok.gap) / tile-cols-f;
+    property <length> goal-w-now: (cw - (cols-f - 1) * Tok.gap) / cols-f;
+    // every goal card as tall as the tallest at the width it is going to
+    property <length> goal-h: max(168px, measure.preferred-height);
     property <string> popup-request: Api.snapshot-popup;
     changed popup-request => {
         if popup-request == "goal" && Api.goals.length > 0 {
@@ -50,22 +65,25 @@ export component OverviewPage inherits Rectangle {
                 title: @tr("Overview");
                 subtitle: Api.slots[Api.slot].used ? @tr("Character {}, {} · confirmed in game except where marked", Api.slot + 1, Api.slots[Api.slot].name) : "";
             }
-            // stat tiles on a fixed 4-column grid, so the gutters line up (C1m); each
-            // opens its page (H1.4)
-            for r in (Api.stats.length + 3) / 4: HorizontalLayout {
-                spacing: Tok.gap;
-                alignment: start;
-                for c in 4: Rectangle {
-                    width: root.tile-w;
+            // stat tiles in equal columns, so the gutters line up (C1m); each opens its page
+            // (H1.4)
+            Rectangle {
+                height: max(0px, root.tile-rows-f * (108px + Tok.gap) - Tok.gap);
+                for s[i] in Api.stats: StatTile {
+                    property <float> at-col: Math.mod(i, root.tile-cols);
+                    animate at-col { duration: 180ms; easing: ease-in-out; }
+                    property <float> at-row: floor(i / root.tile-cols);
+                    animate at-row { duration: 180ms; easing: ease-in-out; }
+                    x: self.at-col * (root.tile-w-now + Tok.gap);
+                    y: self.at-row * (108px + Tok.gap);
+                    width: root.tile-w-now;
                     height: 108px;
-                    if r * 4 + c < Api.stats.length: StatTile {
-                        card: Api.stats[r * 4 + c];
-                        open => {
-                            if self.card.page == "collections" {
-                                Api.select-collection(self.card.tab);
-                            }
-                            Api.page = self.card.page;
+                    card: s;
+                    open => {
+                        if self.card.page == "collections" {
+                            Api.select-collection(self.card.tab);
                         }
+                        Api.page = self.card.page;
                     }
                 }
             }
@@ -85,21 +103,23 @@ export component OverviewPage inherits Rectangle {
             // only goals that can still change something get a card, in equal columns
             // (C3m, K1)
             if Api.goals.length == 0: Card { EmptyState { text: @tr("Every goal is already in this save."); } }
-            for r in (Api.goals.length + root.cols - 1) / root.cols: HorizontalLayout {
-                spacing: Tok.gap;
-                alignment: start;
-                for c in root.cols: Rectangle {
-                    width: root.goal-w;
-                    min-height: 168px;
-                    opacity: settle.o;
-                    if r * root.cols + c < Api.goals.length: GoalCard {
-                        goal: Api.goals[r * root.cols + c];
-                        preview => {
-                            pv.open(
-                                self.goal.id,
-                                self.absolute-position.x - root.absolute-position.x + self.width,
-                                self.absolute-position.y - root.absolute-position.y + self.height);
-                        }
+            if Api.goals.length > 0: Rectangle {
+                height: max(0px, root.rows-f * (root.goal-h + Tok.gap) - Tok.gap);
+                for g[i] in Api.goals: GoalCard {
+                    property <float> at-col: Math.mod(i, root.cols);
+                    animate at-col { duration: 180ms; easing: ease-in-out; }
+                    property <float> at-row: floor(i / root.cols);
+                    animate at-row { duration: 180ms; easing: ease-in-out; }
+                    x: self.at-col * (root.goal-w-now + Tok.gap);
+                    y: self.at-row * (root.goal-h + Tok.gap);
+                    width: root.goal-w-now;
+                    height: root.goal-h;
+                    goal: g;
+                    preview => {
+                        pv.open(
+                            self.goal.id,
+                            self.absolute-position.x - root.absolute-position.x + self.width,
+                            self.absolute-position.y - root.absolute-position.y + self.height);
                     }
                 }
             }
@@ -126,6 +146,14 @@ export component OverviewPage inherits Rectangle {
                     }
                 }
             }
+        }
+    }
+    // hidden copies of the goal cards at the width they are going to: the tallest sets
+    // the height of all
+    Rectangle {
+        visible: false;
+        measure := HorizontalLayout {
+            for g in Api.goals: GoalCard { width: root.goal-w; goal: g; }
         }
     }
     pv := PreviewPopup { x: 0; y: 0; page-width: root.width; }
