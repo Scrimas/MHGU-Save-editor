@@ -280,7 +280,7 @@ mod tests {
         let api = ui.global::<Api>();
         assert!(api.get_loaded());
         assert_eq!(api.get_write_targets().row_count(), 4);
-        // the Derived goals find work on a played save, and after them nothing is left
+        // the unlock goals find work on a played save, and after them nothing is left
         if assets::available() {
             let (mut s, slot) = (st.borrow().save().clone(), st.borrow().slot);
             for g in ["obtained", "smithy", "card"] {
@@ -413,7 +413,7 @@ mod tests {
             assert_eq!(api.get_value_count(), 0);
         }
 
-        // Confirmed only refuses a Derived edit (no edit is Derived since 1.0), not a
+        // Confirmed only refuses a Derived edit (no edit is Derived since 2.0), not a
         // Confirmed one; off again, a Derived one goes through
         settings::update(|s| s.confirmed_only = true);
         assert!(views::refused(&ui, state::Conf::Derived));

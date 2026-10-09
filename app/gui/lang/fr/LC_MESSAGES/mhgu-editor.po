@@ -746,8 +746,8 @@ msgid "The game raises star levels when every urgent quest of a level is cleared
 msgstr "Le jeu augmente le niveau d'étoiles quand toutes les quêtes urgentes d'un niveau sont complétées."
 
 #: app/gui/ui/pages/character.slint
-msgid "As character creation sets it. Features and clothing are numbered as the game stores them."
-msgstr "Comme la création de personnage le règle. Cosmétique et vêtements sont numérotés comme le jeu les enregistre."
+msgid "As character creation sets it, numbered as the game shows it."
+msgstr "Comme à la création du personnage, numéroté comme dans le jeu."
 
 #: app/gui/src/targets.rs app/gui/src/views/database.rs
 #: app/gui/ui/pages/character.slint
@@ -1089,6 +1089,10 @@ msgid "Edit on the Quests page"
 msgstr "Modifier sur la page Quêtes"
 
 #: app/gui/ui/pages/database.slint
+msgid "Subquest"
+msgstr "Secondaire"
+
+#: app/gui/ui/pages/database.slint
 msgid "No large monster with a size in this quest."
 msgstr "Aucun grand monstre avec une taille dans cette quête."
 
@@ -1107,6 +1111,10 @@ msgstr "Détails"
 #: app/gui/ui/pages/database.slint
 msgid "Rewards"
 msgstr "Récompenses"
+
+#: app/gui/ui/pages/database.slint
+msgid "Base: the red rows"
+msgstr "Base : les lignes rouges"
 
 #: app/gui/ui/pages/database.slint
 msgid "How"
@@ -1357,7 +1365,7 @@ msgstr[0] "{} emplacement utilisé sur {n}"
 msgstr[1] "{} emplacements utilisés sur {n}"
 
 #: app/core/src/palico.rs app/gui/src/targets.rs
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/character_page.rs app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr "Aucun"
 
@@ -3055,8 +3063,8 @@ msgid "not unlocked in this save"
 msgstr "pas débloqué dans cette sauvegarde"
 
 #: app/gui/src/warnings.rs
-msgid "over 30 minutes"
-msgstr "plus de 30 minutes"
+msgid "over 50 minutes"
+msgstr "plus de 50 minutes"
 
 #: app/gui/src/warnings.rs
 msgid "a grade its time does not earn"
@@ -3082,6 +3090,10 @@ msgid "a voice outside the game's 1–{}"
 msgstr "une voix hors des 1–{} du jeu"
 
 #: app/gui/src/warnings.rs
+msgid "features or clothing past the game's list"
+msgstr "cosmétique ou vêtements hors de la liste du jeu"
+
+#: app/gui/src/warnings.rs
 msgid "not a body type of the game"
 msgstr "pas un type de corps du jeu"
 
@@ -3102,16 +3114,8 @@ msgid "Skin Tone"
 msgstr "Peau"
 
 #: app/gui/src/views/character_page.rs
-msgid "Hair Color"
-msgstr "Couleur des cheveux"
-
-#: app/gui/src/views/character_page.rs
-msgid "Feature Color"
-msgstr "Couleur cosmétique"
-
-#: app/gui/src/views/character_page.rs
-msgid "Eye Color"
-msgstr "Couleur des yeux"
+msgid "Clothing Color"
+msgstr "Couleur des vêtements"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/character_page.rs
@@ -3393,22 +3397,6 @@ msgid "Other carve or drop"
 msgstr "Autre découpe ou objet lâché"
 
 #: app/gui/src/views/database.rs
-msgid "Main rewards"
-msgstr "Récompenses principales"
-
-#: app/gui/src/views/database.rs
-msgid "More main rewards"
-msgstr "Autres récompenses principales"
-
-#: app/gui/src/views/database.rs
-msgid "Subquest rewards"
-msgstr "Récompenses de sous-quête"
-
-#: app/gui/src/views/database.rs
-msgid "Extra rewards"
-msgstr "Récompenses en plus"
-
-#: app/gui/src/views/database.rs
 msgid "Combination"
 msgstr "Combinaison"
 
@@ -3425,12 +3413,57 @@ msgstr[0] "et {n} autre source"
 msgstr[1] "et {n} autres sources"
 
 #: app/gui/src/views/database.rs
+msgid "Always"
+msgstr "Toujours"
+
+#: app/gui/src/views/database.rs
+msgid "Locale"
+msgstr "Carte"
+
+#: app/gui/src/views/database.rs
+msgid "Reward"
+msgstr "Prime"
+
+#: app/gui/src/views/database.rs
+msgid "HRP"
+msgstr "Points RC"
+
+#: app/gui/src/views/database.rs
+msgid "Fee"
+msgstr "Prix"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/database.rs
+msgid "{} · {} HRP"
+msgstr "{} · {} points RC"
+
+#: app/gui/src/views/database.rs
 msgid "This quest is not in the game's files: it comes as a download."
 msgstr "Cette quête n'est pas dans les fichiers du jeu : elle se télécharge."
 
 #: app/gui/src/views/database.rs
 msgid "The chance of each item per reward drawn; how many are drawn is not in these files."
 msgstr "La chance de chaque objet par récompense tirée ; le nombre de tirages n'est pas dans ces fichiers."
+
+#: app/gui/src/views/database.rs
+msgid "Rewards A"
+msgstr "Récompenses A"
+
+#: app/gui/src/views/database.rs
+msgid "Rewards B"
+msgstr "Récompenses B"
+
+#: app/gui/src/views/database.rs
+msgid "Rewards C"
+msgstr "Récompenses C"
+
+#: app/gui/src/views/database.rs
+msgid "Rewards D"
+msgstr "Récompenses D"
+
+#: app/gui/src/views/database.rs
+msgid "Subquest rewards"
+msgstr "Récompenses de sous-quête"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/database.rs

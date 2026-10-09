@@ -183,9 +183,9 @@ routine `0x14709c` moves the same bytes. In the analysed save set 1 has style 5 
 151 (*Wolf's Maw III*). The style numbering is **DERIVED** from these values and the
 counters (Valor used 375 times).
 
-The five RGBA values are probably ordered chest, arms, waist, legs, head, as in the
-MHXX Guild Card. That order is **DERIVED** only: every test used the same colour on
-all five parts.
+The five RGBA values are ordered chest, arms, waist, legs, head, as in the MHXX Guild
+Card: **CONFIRMED** in game on 2026-10-09 with five different colours in the hunter's
+pigment slots (the game's pigment screen showed each on its part).
 
 To dye a set, write the RGBA five times at `+0x6A` and clear the five flags at `+0x83`.
 Confirmed in-game: a colour written this way appears on the hunter when the set is

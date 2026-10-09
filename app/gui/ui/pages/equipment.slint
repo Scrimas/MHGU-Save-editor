@@ -278,7 +278,6 @@ export component EquipmentPage inherits Rectangle {
                                     text: @tr("Add decoration…");
                                     clicked => { root.open-decos(self.absolute-position.x - root.absolute-position.x + root.pick-w, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
                                 }
-                                ConfidenceTag { level: Confidence.derived; y: 5px; }
                             }
                             if Api.equip-detail.deco-slots < 0: Muted { text: @tr("This build's game data has no slot counts: decorations can only be removed."); }
                         }

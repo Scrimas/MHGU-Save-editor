@@ -229,12 +229,12 @@ pub fn card(t: Target, s: &Save, base: usize) -> Option<String> {
 }
 
 /// The warning of a value of the editor, if the game cannot produce it.
-/// The card's best time on Arena quest `q`: the clear caps it at 30 minutes, grades it
+/// The card's best time on Arena quest `q`: the clear caps it at 50 minutes, grades it
 /// by the quest's times and writes the weapon of the set used.
 pub fn arena_best(q: usize, e: &arena::Entry) -> Option<String> {
     let set_weapon = arena::quests()[q].sets.get(e.set as usize).copied();
     if e.time > arena::MAX_TIME {
-        Some(tr("over 30 minutes").into())
+        Some(tr("over 50 minutes").into())
     } else if e.grade != arena::grade(q, e.time) {
         Some(tr("a grade its time does not earn").into())
     } else if set_weapon != Some(e.weapon) {
@@ -254,6 +254,8 @@ fn appearance(s: &Save, base: usize) -> Option<String> {
         Some(trf("a hairstyle past the game's {}", &[&ch::HAIRSTYLES]))
     } else if !(1..=ch::VOICES).contains(&l(ch::LOOK_VOICE)) {
         Some(trf("a voice outside the game's 1–{}", &[&ch::VOICES]))
+    } else if l(ch::LOOK_FEATURES) >= ch::FEATURES || l(ch::LOOK_CLOTHING) >= ch::CLOTHING {
+        Some(tr("features or clothing past the game's list").into())
     } else {
         None
     }

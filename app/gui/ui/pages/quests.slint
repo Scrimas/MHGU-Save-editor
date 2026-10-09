@@ -71,7 +71,6 @@ component ArenaRecords inherits Card {
         HorizontalLayout {
             spacing: Tok.gap;
             alignment: start;
-            ConfidenceTag { level: Confidence.derived; }
             Text { text: @tr("Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
         }
         HorizontalLayout {
@@ -102,7 +101,7 @@ component ArenaRecords inherits Card {
                         HorizontalLayout {
                             width: 320px;
                             spacing: 4px;
-                            NumberBox { width: 80px; value: r.minutes; maximum: 30; label: @tr("{}, minutes", r.quest); edited(v) => { Api.set-arena(r.index, r.set, v * 6000 + r.seconds * 100 + r.hundredths); } }
+                            NumberBox { width: 80px; value: r.minutes; maximum: 49; label: @tr("{}, minutes", r.quest); edited(v) => { Api.set-arena(r.index, r.set, v * 6000 + r.seconds * 100 + r.hundredths); } }
                             Text { text: ":"; vertical-alignment: center; }
                             NumberBox { width: 80px; value: r.seconds; maximum: 59; label: @tr("{}, seconds", r.quest); edited(v) => { Api.set-arena(r.index, r.set, r.minutes * 6000 + v * 100 + r.hundredths); } }
                             Text { text: "."; vertical-alignment: center; }

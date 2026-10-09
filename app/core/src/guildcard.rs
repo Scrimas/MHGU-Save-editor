@@ -4,7 +4,8 @@
 //! Only the card holds the choice: the card editor (`cUIOGuildCardEdit`) writes it there.
 //! The title is three IDs: a word of `GC_Title_1`, a linking word of `GC_Title_2` (0 =
 //! none) and a word of `GC_Title_1`. Each unlock map has a NEW copy; the game sets both
-//! when it unlocks an entry. DERIVED.
+//! when it unlocks an entry. CONFIRMED in game 2026-10-09 (a written title, scene and
+//! pose showed on the card; every unlocked entry was offered).
 
 use crate::character::CARD;
 use crate::save::Save;

@@ -256,12 +256,10 @@ export component CharacterPage inherits Rectangle {
                         spacing: Tok.gap;
                         alignment: start;
                         SectionTitle { text: @tr("Appearance"); vertical-alignment: center; }
-                        ConfidenceTag { level: Confidence.derived; }
-                        Text { text: @tr("As character creation sets it. Features and clothing are numbered as the game stores them.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
+                        Text { text: @tr("As character creation sets it, numbered as the game shows it.");color: Tok.muted; font-size: Tok.small; vertical-alignment: center; wrap: word-wrap; }
                     }
                     Field {
                         label: @tr("Body");
-                        level: Confidence.derived;
                         hint: @tr("Some armour is made for one body type only: check what you wear after changing it.");
                         warning: Api.appearance.warn-gender;
                         was: Api.appearance.was-gender;
@@ -270,7 +268,6 @@ export component CharacterPage inherits Rectangle {
                     }
                     Field {
                         label: @tr("Face, hairstyle, voice");
-                        level: Confidence.derived;
                         warning: Api.appearance.warn-appearance;
                         was: Api.appearance.was-appearance;
                         key: "appearance";
@@ -293,12 +290,12 @@ export component CharacterPage inherits Rectangle {
                         Field {
                             width: 170px;
                             label: @tr("Features");
-                            NumberBox { width: 110px; value: Api.appearance.features; maximum: 255; label: @tr("Features"); edited(v) => { Api.set-look("features", v); } }
+                            Picker { width: 120px; model: Api.look-features; value: Api.appearance.features; picked(i) => { Api.set-look("features", i); } }
                         }
                         Field {
                             width: 170px;
                             label: @tr("Clothing");
-                            NumberBox { width: 110px; value: Api.appearance.clothing; maximum: 255; label: @tr("Clothing"); edited(v) => { Api.set-look("clothing", v); } }
+                            Picker { width: 120px; model: Api.look-clothing; value: Api.appearance.clothing; picked(i) => { Api.set-look("clothing", i); } }
                         }
                     }
                     HorizontalLayout {
@@ -335,7 +332,6 @@ export component CharacterPage inherits Rectangle {
                     }
                     Field {
                         label: @tr("Title");
-                        level: Confidence.derived;
                         hint: Api.card.title;
                         warning: Api.card.warn-title;
                         was: Api.card.was-title;
@@ -347,7 +343,6 @@ export component CharacterPage inherits Rectangle {
                     Field {
                         width: 420px;
                         label: @tr("Greeting");
-                        level: Confidence.derived;
                         was: Api.card.was-greeting;
                         key: "card-greeting";
                         // staged when the field loses focus or on Enter, like the name
@@ -367,7 +362,6 @@ export component CharacterPage inherits Rectangle {
                         alignment: start;
                         Field {
                             label: @tr("Scene");
-                            level: Confidence.derived;
                             warning: Api.card.warn-scene;
                             was: Api.card.was-scene;
                             key: "card-scene";
@@ -375,7 +369,6 @@ export component CharacterPage inherits Rectangle {
                         }
                         Field {
                             label: @tr("Pose");
-                            level: Confidence.derived;
                             warning: Api.card.warn-pose;
                             was: Api.card.was-pose;
                             key: "card-pose";

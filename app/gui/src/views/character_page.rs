@@ -40,7 +40,8 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
 }
 
 /// The hunter's creation choices and colours, in the game's terms.
-const LOOK_COLOURS: [(&str, usize); 4] = [("skin", character::COLOUR_SKIN), ("hair", character::COLOUR_HAIR), ("features", character::COLOUR_FEATURES), ("eyes", character::COLOUR_EYES)];
+// the colours the game keeps (hair, features and eyes come from elsewhere)
+const LOOK_COLOURS: [(&str, usize); 2] = [("skin", character::COLOUR_SKIN), ("clothing", character::COLOUR_CLOTHING)];
 
 fn appearance(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
@@ -49,6 +50,9 @@ fn appearance(ui: &AppWindow, st: &State) {
     api.set_look_faces(types(character::FACES, 1));
     api.set_look_hairstyles(types(character::HAIRSTYLES, 1));
     api.set_look_voices(types(character::VOICES, 1));
+    api.set_look_clothing(types(character::CLOTHING, 1));
+    // the game's list ends with None
+    api.set_look_features(strings((1..character::FEATURES).map(|k| trf("Type {}", &[&k])).chain([tr("None").to_string()])));
     let l = |k| character::look(s, base, k) as i32;
     let warn = |t: Target| -> SharedString { crate::warnings::of(t, s, st.slot).unwrap_or_default().into() };
     api.set_appearance(AppearanceInfo {
@@ -67,9 +71,7 @@ fn appearance(ui: &AppWindow, st: &State) {
                         key: key.into(),
                         label: match key {
                             "skin" => tr("Skin Tone"),
-                            "hair" => tr("Hair Color"),
-                            "features" => tr("Feature Color"),
-                            _ => tr("Eye Color"),
+                            _ => tr("Clothing Color"),
                         }
                         .into(),
                         colour: slint::Color::from_rgb_u8(r, g, b),
@@ -101,7 +103,7 @@ pub(super) fn arena_rows(st: &State) -> Vec<ArenaRow> {
         .enumerate()
         .map(|(q, a)| {
             let e = arena::best(s, base, q);
-            let t = e.map_or(0, |e| e.time);
+            let t = e.map_or(0, |e| arena::hundredths(e.time));
             let set_name = |&w: &u8| -> SharedString {
                 let name = if a.prowler { palico::BIASES.get(w as usize) } else { character::USE_WEAPONS.get(w as usize) };
                 tr(name.copied().unwrap_or("?")).into()
@@ -215,8 +217,7 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         };
         let mut msg = None;
         let title = t.label(s.save(), s.slot);
-        let conf = if matches!(t, Target::CardQuests(_) | Target::StyleUse(_)) { Conf::Derived } else { Conf::Confirmed };
-        s.edit(Edit::one(t, title, conf), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             match k {
                 "hr" => {
                     if !character::set_hr(sv, base, v as u16) {
@@ -258,7 +259,7 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             _ => Target::Title,
         };
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut tl = gc::title(sv, base);
             match f {
                 "word1" => tl[0] = v,
@@ -286,7 +287,7 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             _ => return,
         };
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             character::set_look(sv, base, k, v);
             vec![]
         });
@@ -298,18 +299,19 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             return toast(&ui, tr("A colour is six hex digits, like #E9D6CC"), true);
         };
         let title = Target::Appearance.label(s.save(), s.slot);
-        s.edit(Edit::one(Target::Appearance, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(Target::Appearance, title, Conf::Confirmed), |sv, base| {
             character::set_look_colour(sv, base, c, rgb);
             vec![]
         });
     });
-    // an Arena best time as a solo clear with the set picked; the grade follows the time
+    // an Arena best time (in 1/100 s, as shown) as a solo clear with the set picked; the
+    // grade follows the time
     on!(ui, st, on_set_arena, |ui, s, q: i32, set: i32, time: i32| {
         let Some(q) = usize::try_from(q).ok().filter(|&q| q < arena::quests().len()) else { return };
         let t = Target::Arena(q);
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
-            arena::set_best(sv, base, q, time.max(1) as u32, set.clamp(0, 4) as u8);
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+            arena::set_best(sv, base, q, arena::frames(time.max(1) as u32), set.clamp(0, 4) as u8);
             vec![]
         });
         let _ = &ui;
@@ -318,14 +320,14 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         let Some(q) = usize::try_from(q).ok().filter(|&q| q < arena::quests().len()) else { return };
         let t = Target::Arena(q);
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             arena::clear(sv, base, q);
             vec![]
         });
         let _ = &ui;
     });
     on!(ui, st, on_set_greeting, |ui, s, text: SharedString| {
-        s.edit(Edit::one(Target::Greeting, tr("Guild Card greeting").into(), Conf::Derived), |sv, base| {
+        s.edit(Edit::one(Target::Greeting, tr("Guild Card greeting").into(), Conf::Confirmed), |sv, base| {
             character::set_greeting(sv, base, &text);
             vec![]
         });

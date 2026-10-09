@@ -15,6 +15,8 @@ pub const HDR_NAME: usize = 0x0;
 pub const HDR_PLAYTIME: usize = 0x20;
 pub const HDR_FUNDS: usize = 0x24;
 pub const HDR_HR: usize = 0x28;
+/// The slot screen's body type symbol; the game writes it from the loaded one on save.
+pub const HDR_GENDER: usize = 0x2A;
 pub const PLAYER_NAME: usize = 0x23B7D;
 pub const NAME_LEN: usize = 32;
 /// "Names must be 10 characters or less."
@@ -41,10 +43,13 @@ pub const MAX_PLAYTIME: u32 = 35_999_999;
 
 /// The character-creation block (12 B, `BODY` in the player record, the copy the game
 /// loads; summaries in the slot header and the own Guild Card) and its 9 RGBA colours
-/// right after it. DERIVED (docs/11-save-map.md, "Hunter appearance"): +0 weapon class,
-/// +1 voice (1-20, player/com/<m|f>/vo/01-20), +2 face (18 models), +3 clothing, +4 gender,
-/// +5 hunting style, +6 hairstyle (30 models), +8 features; colours 0-4 the armour
-/// pigment, 5 skin, 6 hair, 7 features, 8 eyes.
+/// right after it (docs/11-save-map.md, "Hunter appearance"): +0 weapon class, +1 voice
+/// (1-20, player/com/<m|f>/vo/01-20), +2 face (18 models), +3 clothing, +4 body type,
+/// +5 hunting style, +6 hairstyle (30 models), +8 features; the game shows a byte as
+/// "Type byte + 1". Colours: 0-4 the equipped pieces' pigment (chest, arms, waist, legs,
+/// head), 5 skin, 6 and 7 rebuilt by the game on save (the hair and features colours
+/// are kept elsewhere, not found), 8 clothing. CONFIRMED in game 2026-10-09: every byte
+/// edit shows and is kept, skin and clothing too; eye colour is not in this block.
 pub const LOOKS: [usize; 3] = [BODY, 0x240, CARD + 0x18];
 pub const LOOK_COLOURS: [usize; 3] = [BODY + 12, 0x24C, CARD + 0x24];
 pub const LOOK_VOICE: usize = 1;
@@ -54,32 +59,34 @@ pub const LOOK_GENDER: usize = 4;
 pub const LOOK_HAIR: usize = 6;
 pub const LOOK_FEATURES: usize = 8;
 pub const COLOUR_SKIN: usize = 5;
-pub const COLOUR_HAIR: usize = 6;
-pub const COLOUR_FEATURES: usize = 7;
-pub const COLOUR_EYES: usize = 8;
+pub const COLOUR_CLOTHING: usize = 8;
 pub const FACES: u8 = 18;
 pub const HAIRSTYLES: u8 = 30;
 pub const VOICES: u8 = 20;
+pub const CLOTHING: u8 = 7;
+/// 14 types, then 14 = None (the game's list order).
+pub const FEATURES: u8 = 15;
 
 /// Quests completed per category, 7 × u16 on the own Guild Card (the card screen's
 /// Village, Hub (Low), Hub (High), Special Permit and Arena counts). `0x1662a0` sums them,
-/// capped at 99,999, for the quest total. DERIVED: the order follows the analysed card,
-/// whose two Village counts add up to its Village weapon usage (133) and whose Arena count
-/// is its Arena weapon usage (1).
+/// capped at 99,999, for the quest total. CONFIRMED in game 2026-10-09: 111 … 777 showed
+/// in this order, and a Village ★5 and a G★4 clear each added one to their kind.
 pub const CARD_QUESTS: usize = CARD + 0x85E;
 // i18n: shown through tr() in the GUI
 pub const QUEST_KINDS: [&str; 7] = ["Village · Low rank", "Village · High rank", "Hub · Low rank", "Hub · High rank", "Hub · G rank", "Special Permit", "Arena"];
 /// The card greeting (card editor), UTF-16, up to the owner ID at `+0x8B0`.
 pub const CARD_GREETING: usize = CARD + 0x878;
 pub const GREETING_UNITS: usize = 28;
-/// Hunting style use counts, 6 × u16 (S+0x11a): a quest raises the loaded My Set's style.
+/// Hunting style use counts, 6 × u16 (S+0x11a): a quest raises the loaded My Set's style
+/// (CONFIRMED in game 2026-10-09: two Valor clears, +2 to the sixth).
 pub const STYLE_USE: usize = 0x2905;
 // i18n: shown through tr() in the GUI
 pub const STYLES: [&str; 6] = ["Guild Style", "Striker Style", "Aerial Style", "Adept Style", "Alchemy Style", "Valor Style"];
 
 /// The QUEST_KINDS count a clear of quest `q` adds to: Village ★1-6 low rank and ★7-10
 /// high rank, Hub ★1-3, ★4-7 and G, Special Permit, Arena (event ones with their kind).
-/// Training quests count in none of them. DERIVED from the card screen's headings.
+/// Training quests count in none of them. From the card screen's headings; kinds 0 and 4
+/// checked by a clear in game.
 pub fn card_kind(q: &crate::data::Quest) -> Option<usize> {
     let star = q.rank.parse::<u32>().ok();
     match q.category.trim_start_matches("Event ") {
@@ -131,10 +138,14 @@ pub fn look(s: &Save, base: usize, k: usize) -> u8 {
     s.u8(base + BODY + k)
 }
 
-/// Write byte `k` of the creation block to all three copies.
+/// Write byte `k` of the creation block to all three copies (the body type also to the
+/// slot screen's symbol).
 pub fn set_look(s: &mut Save, base: usize, k: usize, v: u8) {
     for a in LOOKS {
         s.set_u8(base + a + k, v);
+    }
+    if k == LOOK_GENDER {
+        s.set_u8(base + HDR_GENDER, v);
     }
 }
 

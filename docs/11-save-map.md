@@ -196,12 +196,22 @@ character, and the next save overwrites it (not tested in game).
 
 ### Hunter appearance
 
-DERIVED. The 12-byte block and the 9 colours after it are kept three times: the player
-record (`base + 0x23B47`, the copy the game loads), the slot header (`+0x240`, `+0x24C`)
-and the own Guild Card (`+0x18`, `+0x24`); all three agree in the analysed save. The title
-menu (`0x68894c`) copies bytes 1–8 to the model and colours 5–8 with their colour modes;
-colours 0–4 are the armour pigment. The character-creation handler (`0x685a54` …) edits
-one byte per step and pairs three of them with a colour:
+CONFIRMED in game (2026-10-09, two controlled writes; the game's next save kept every
+byte below). The 12-byte block and the 9 colours after it are kept three times: the
+player record (`base + 0x23B47`, the copy the game loads), the slot header (`+0x240`,
+`+0x24C`) and the own Guild Card (`+0x18`, `+0x24`); all three agree in the analysed save.
+The game shows a byte as "Type *byte* + 1" (hairstyle 27 = Type 28, features 12 = Type 13
+of 14 then None, clothing 0 = Type 1 of 7). A body type change also needs the slot
+screen's symbol, header `+0x2A` (the game wrote it on its next save). The title menu
+(`0x68894c`) copies bytes 1–8 to the model and colours 5–8 with their colour modes.
+Colours, checked with a probe (each slot its own colour): 0–4 the equipped pieces'
+pigment (chest, arms, waist, legs, head), 5 skin, 8 clothing; the game rebuilt 6 and 7 on
+save (hair brown `391E0E`, features white `FAF5E6`) while showing hair and features in
+other colours, and the eye colour is not in this block. Likely why (UNRESOLVED): the
+default-colour flags (`+0x270`, `0xFEE0` in the analysed save) have bits 6 and 7 set, so
+those slots take the hairstyle's and features' default colour. The editor edits skin and
+clothing only. The character-creation handler (`0x685a54` …) edits one byte per step and
+pairs three of them with a colour:
 
 | Byte | Content | Evidence |
 |---|---|---|
@@ -214,8 +224,9 @@ one byte per step and pairs three of them with a colour:
 | `+7` | edited with colour 5 (skin) | |
 | `+8` | features | edited with colour 7 (feature colour) |
 
-Colour 8 stands alone: the eye colour. The menu's own words are `CharMakeMsg` (Gender,
-Face, Skin Tone, Eye Color, Features, Voice, Hairstyle, Clothing).
+Colour 8 stands alone: in game it colours the clothing (the analysis above had it as the
+eye colour). The menu's own words are `CharMakeMsg` (Gender, Face, Skin Tone, Eye Color,
+Features, Voice, Hairstyle, Clothing).
 
 "sPlayer" here is the player data the getter `0x277454` returns: the loaded object
 `+0x7C`. The loader's offsets below are therefore `0x7C` higher than the header
@@ -365,7 +376,8 @@ bias 6, the greeting and buddy 1 = its index.
 | `+0x10E` | 12 | look block, the hunter's character-creation layout (slot header `+0x240`): `+0` = 15 (Prowler), `+1` voice (1–3), `+2` eyes, `+3` clothing, `+6` coat, `+7` ears, `+8` tail |
 | `+0x11A` | 9 × RGBA | colours: 0 coat, 1 left eye, 2 right eye, 3 clothing; 4–8 not drawn for new Palicoes |
 
-**Support moves and skills**, DERIVED from the parameter class (`0xe8000`–`0xea000`,
+**Support moves and skills**, CONFIRMED in game on 2026-10-09 (a random move and skill
+replaced, each equipped: shown and kept), worked out from the parameter class (`0xe8000`–`0xea000`,
 object `+0x23C` = record `+0x20`) and the save. A move list is the forte's innate moves
 (`otLotOwnSupport`: one for Charisma, else the first and one of the other two), Mini
 Barrel Bombay, Herb Horn, the random moves, then the slots taught moves fill (3 for
@@ -381,7 +393,9 @@ slot), and equipped skills whose `mSlotCost` (`ot_skl`) add up to at most
 writes these tables to `data/palico-*.csv`. The 57-bit map at `base + 0x2C6F`
 (`S+0xd84`) holds the moves seen on any Palico, every forte's innate moves among them.
 
-**Looks**, DERIVED. The record is loaded into the same player-data class as the hunter's
+**Looks**, CONFIRMED in game on 2026-10-09 (coat, coat colour, clothing and its colour,
+eyes and both eye colours, ears, tail and voice changed at once: all shown as written).
+The record is loaded into the same player-data class as the hunter's
 (name `+0x514`, parameter block `+0x240`, look block `+0x4D4`, colours `+0x4E0`). A new
 Palico's looks (`0x25aee0`) are drawn from the 9 rows of `otParamLot`: coat (7), coat
 colour (13), clothing (2), clothing colour (14), eyes (6), eye colour (9; the right eye
@@ -483,7 +497,8 @@ with the same layout as the own card (history log at `+0x918` in both).
 award test `0x162720` and the history insert (`0x1628a0`). Checked on the own card and
 a received card: HR 999 / 148, sensible equipment types, transmog IDs. CONFIRMED by the
 [save timeline](#confirmed-by-the-save-timeline): name, equipment, weapon usage, play
-time, quest history, awards and monster log.
+time, quest history, awards and monster log. CONFIRMED in game on 2026-10-09 by written
+values: title, scene, pose, greeting, quests completed and the Arena log.
 
 The equipment and Palico blocks are a snapshot, not a mirror: over 36 saves the
 equipped gear changed three times with quests in between and card `+0x54` never moved;
@@ -505,7 +520,7 @@ not identified.
 | `+0x85A` | u8 | scene (editor field 4): 35 on the own card, of 136 (`GC_background`, *Gammoth*) | cUIOGuildCardEdit |
 | `+0x85B` | u8 | pose (editor field 3; a change calls `0x1605b8`): 3, of 22 (`GuildCardMsg` 235–256, *Stand* … *Beam Fire*) | cUIOGuildCardEdit |
 | `+0x85C` | u16 | HR of a transferred save, 0xFFFF = none; copied from `S+0x41a` | `0x161ac8` |
-| `+0x85E` | 7 × u16 | quests completed: Village low / high rank, Hub low / high / G rank, Special Permit, Arena (the card screen's counts, `GuildCardMsg` 8–12). `0x1662a0` sums them, capped at 99,999. DERIVED: the own card's Village pair adds up to its Village weapon usage (83 + 50 = 133) and its Arena count equals its Arena weapon usage (1). They count repeats (83 Village low-rank clears), so the editor does not recompute them: clearing a quest adds one to its kind (Village ★1–6 / ★7–10, Hub ★1–3 / ★4–7 / G, Special Permit, Arena; Training none), un-clearing takes one off, never below the quests of that kind cleared | |
+| `+0x85E` | 7 × u16 | quests completed: Village low / high rank, Hub low / high / G rank, Special Permit, Arena (the card screen's counts, `GuildCardMsg` 8–12). `0x1662a0` sums them, capped at 99,999. CONFIRMED in game on 2026-10-09: 111, 222 … 777 written showed in this order on the card, and a Village ★5 and a G★4 clear added one to the first and the fifth. They count repeats (83 Village low-rank clears), so the editor does not recompute them: clearing a quest adds one to its kind (Village ★1–6 / ★7–10, Hub ★1–3 / ★4–7 / G, Special Permit, Arena; Training none), un-clearing takes one off, never below the quests of that kind cleared | |
 | `+0x86C` | u32 | copied from `sGameControl +0x3c` | `0x161ac8` |
 | `+0x870` | u32 | the own card's Unity total (11,324 in the analysed save) | |
 | `+0x878` | 28 × u16 | greeting, UTF-16, zero-terminated (card editor *Greeting*, `GuildCardMsg` 188) | |
@@ -563,8 +578,10 @@ at exactly the quests:
 `+0x1224 … +0x1378` is the Arena log: 17 entries of 20 bytes (5 × u32), one per Arena
 quest of the Arena Counter's table (`0x164fdb4`, [above](#the-block-s0x20--0x41f--base--0x280b)).
 The initialiser `0x161184` sets each u32 to `0x63800000` (Arena) or `0x61400000`
-(Prowler Arena, test `0x3b5ac0`). **DERIVED** from the writer `0x3b123c` (caller
-`0x6a1320`) and the leaderboard code (`0x6e47a4`, `0x6e7488`).
+(Prowler Arena, test `0x3b5ac0`). From the writer `0x3b123c` (caller `0x6a1320`) and
+the leaderboard code (`0x6e47a4`, `0x6e7488`); **CONFIRMED** in game on 2026-10-09: three
+written times on Grudge Match: Malfestio (entry 0) showed with their sets and weapons,
+grade S, and the Arena Counter's best followed; the game's next save kept them.
 
 **The five u32 of a quest are its five best times, best first.** A new time goes in at
 its rank and the lower entries move down (`0x3b1400` … `0x3b1528`); a time no better
@@ -572,16 +589,17 @@ than all five is dropped. Each u32:
 
 | Bits | Content |
 |---|---|
-| 0–17 | time in 1/100 s, at most 180,000 (`0x3b1530`) |
+| 0–17 | time in 1/60 s (frames; the game shows 8485 as 2'21"41, hundredths cut), at most 180,000 = 50 minutes (`0x3b1530`) |
 | 18–25 | weapons, *w*: the hunter's is *w* mod 15 and the partner's (*w* / 15) mod 15, 14 = none. Prowler quests use 9 instead of 15 (support bias, 8 shown as 14). Written last (`0x3b181c`) |
 | 26–28 | the quest's equipment set used, 0–4 (`0x3b1564`); the same index sets bit 5 × quest + set of `S+0xca0` |
-| 29–30 | grade 0, 1, 2 when the time is within the quest's three thresholds, 3 = none. Readers (`0x3b8db4`, `0x3f1a64`) test ≤ 2 |
+| 29–30 | grade 0, 1, 2 (shown S, A, B) when the time is within the quest's three thresholds, 3 = none. Readers (`0x3b8db4`, `0x3f1a64`) test ≤ 2 |
 | 31 | always 0 |
 
 The initial values decode as grade 3, set 0, no weapons. The partner's 8-byte ID is
 at `+0x16D4` + 8 × quest and is copied only when the new time takes rank 1
 (`0x3b166c`); the card owner's own ID is at `+0x8B0`. The own card has one entry:
-quest 0, `0x0F682125` = 84.85 s, weapon 218 mod 15 = 8, set 3, grade 0, no partner.
+quest 0, `0x0F682125` = 8485 frames (2'21"41 in game), weapon 218 mod 15 = 8 (Gunlance),
+set 3 (the fourth), grade 0 (S), no partner.
 It agrees with the save object's best time for that quest (`S+0x134`) and with bit 3
 of `S+0xca0`. The rest of the card, `+0x1378 … +0x18B8` (partner IDs included), is zero
 on the own card.
@@ -635,9 +653,9 @@ transfer).
 | `0x28AC` | `+0xc1` … `+0x10f` | u8, then u16 fields (8 at `+0xc2`, a u32 at `+0xd4`, 28 at `+0xd8`). UNRESOLVED |
 | `0x28FB` | `+0x110` … `+0x117` | u8 and two u16 of talk condition 54 ([10](10-npc-talk.md)) |
 | `0x2903` | `+0x118` | u8; the Start Menu raises a notice bit once it reaches 50 (`0x3f5200`). UNRESOLVED |
-| `0x2905` | `+0x11a` | **hunting style use counts**, 6 × u16: Guild, Striker, Aerial, Adept, Alchemy, Valor. Talk condition 29 (sub-tests 56–67, `0x2493c8`) picks the most and least used; the Palico's lines name the style. The transfer fills only the first four. 0, 0, 1, 26, 0, 375 in the analysed save |
+| `0x2905` | `+0x11a` | **hunting style use counts**, 6 × u16: Guild, Striker, Aerial, Adept, Alchemy, Valor. Talk condition 29 (sub-tests 56–67, `0x2493c8`) picks the most and least used; the Palico's lines name the style. The transfer fills only the first four. 0, 0, 1, 26, 0, 375 in the analysed save. CONFIRMED in game on 2026-10-09: two Valor clears added 2 to the sixth |
 | `0x2913` | `+0x128` | 3 × (u8 day, u8 month, u16 year): the dates of the Arena Counter's *Latest Updates* (`Lb_ArenaCounterMsg` 13, 14) |
-| `0x291F` | `+0x134` | **Arena best times**, 57 × 12 B: u32 time in 1/100 s, then the 8-byte Guild Card ID of the hunter who set it. Index = the Arena Counter's quest table `0x164fdb4`: 0–10 Arena quests 20001–20011, 11–16 Prowler Arena 120001–120006, 17 onwards the challenge quests 1020001 …. The leaderboard (`0x6e47a4`) compares it with the cards' Arena logs. The analysed save has entries 0 (84.85 s, own ID), 6, 8 and 16 (the ID of a card in list 1) |
+| `0x291F` | `+0x134` | **Arena best times**, 57 × 12 B: u32 time in 1/60 s, then the 8-byte Guild Card ID of the hunter who set it. Index = the Arena Counter's quest table `0x164fdb4`: 0–10 Arena quests 20001–20011, 11–16 Prowler Arena 120001–120006, 17 onwards the challenge quests 1020001 …. The leaderboard (`0x6e47a4`) compares it with the cards' Arena logs. The analysed save has entries 0 (2'21"41, own ID), 6, 8 and 16 (the ID of a card in list 1) |
 | `0x2BCF` | `+0x3e4` … `+0x403` | fields set only by the initialisers `0x51cbe4` / `0x51ce44`. UNRESOLVED |
 | `0x2BEF` | `+0x404` | u8 × 3, the quests of the three *Latest Updates*, index into the same table (17 = none) |
 | `0x2BF3` | `+0x408` | u32 taken over by the transfer (old `+0x264`). UNRESOLVED |

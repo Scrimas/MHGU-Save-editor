@@ -22,9 +22,9 @@ pub struct Def {
 /// The Overview's goals (titles and copy come from `plan`). All confirmed: tested in game
 /// (arts and canteen as written, quests by the bulk completion of 2026-09-19, crowns by
 /// the game's award check after the 2026-10-04 write, notes and HR by the controlled
-/// write of 2026-10-05) or every field written is CONFIRMED by the save timeline
-/// (awards, money; tools/evidence). Items obtained and the Smithy lists are Derived from
-/// the game's code until checked in game.
+/// write of 2026-10-05; items obtained, the Smithy lists and the card's titles, scenes and
+/// poses in game on 2026-10-09) or every field written is CONFIRMED by the save timeline
+/// (awards, money; tools/evidence).
 pub const GOALS: [Def; 11] = [
     Def { id: "quests", conf: Conf::Confirmed },
     Def { id: "arts", conf: Conf::Confirmed },
@@ -34,9 +34,9 @@ pub const GOALS: [Def; 11] = [
     Def { id: "crowns", conf: Conf::Confirmed },
     Def { id: "hr999", conf: Conf::Confirmed },
     Def { id: "money", conf: Conf::Confirmed },
-    Def { id: "obtained", conf: Conf::Derived },
-    Def { id: "smithy", conf: Conf::Derived },
-    Def { id: "card", conf: Conf::Derived },
+    Def { id: "obtained", conf: Conf::Confirmed },
+    Def { id: "smithy", conf: Conf::Confirmed },
+    Def { id: "card", conf: Conf::Confirmed },
 ];
 
 /// The names of a Guild Card unlock map, from the asset pack.

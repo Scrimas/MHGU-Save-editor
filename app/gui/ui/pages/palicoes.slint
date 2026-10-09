@@ -60,7 +60,6 @@ component LookList inherits VerticalLayout {
     HorizontalLayout {
         spacing: Tok.gap;
         SectionTitle { text: @tr("Looks"); vertical-alignment: center; }
-        ConfidenceTag { level: Confidence.derived; }
         Rectangle { horizontal-stretch: 1; }
     }
     if root.was != "": WasLine { was: root.was; key: root.key; }
@@ -119,7 +118,6 @@ component EntryList inherits VerticalLayout {
     HorizontalLayout {
         spacing: Tok.gap;
         SectionTitle { text: root.title; vertical-alignment: center; }
-        ConfidenceTag { level: Confidence.derived; }
         Text { text: root.used; color: Tok.muted; vertical-alignment: center; }
         Rectangle { horizontal-stretch: 1; }
     }

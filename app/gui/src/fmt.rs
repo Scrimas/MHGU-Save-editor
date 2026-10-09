@@ -27,8 +27,9 @@ pub fn playtime(secs: u32) -> String {
     trf("{}h {}m", &[&(secs / 3600), &format!("{:02}", secs / 60 % 60)])
 }
 
-/// An Arena time in 1/100 s as "4:05.30".
-pub fn arena_time(t: u32) -> String {
+/// An Arena time in frames as the game shows it, "4:05.30".
+pub fn arena_time(frames: u32) -> String {
+    let t = mhgu_save::arena::hundredths(frames);
     format!("{}:{:02}.{:02}", t / 6000, t / 100 % 60, t % 100)
 }
 

@@ -170,7 +170,7 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         let moves = kind == "moves";
         let t = Target::Palico(i, if moves { targets::Pal::Moves } else { targets::Pal::Skills });
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             let id = id.clamp(0, if moves { palico::NO_MOVE } else { palico::NO_SKILL } as i32 - 1) as u8;
             if moves {
@@ -196,7 +196,7 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         let Some(f) = palico::look_fields().into_iter().find(|f| f.key == key.as_str()) else { return };
         let t = Target::Palico(i, targets::Pal::Looks);
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             f.set(&mut p, if f.colour.is_some() { v } else { v.saturating_add(f.first) });
             palico::set(sv, base, i, &p);

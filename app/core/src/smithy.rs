@@ -5,7 +5,8 @@
 //! The Smithy shows an entry whose listed bit is set, whatever its other conditions
 //! (`0x5248c0` weapons, `0x5249f4` armor, read by `0x6fa928`); when it first lists one it
 //! sets listed and NEW (`0x524980`). Bit = record index of the list's create table; armor
-//! bit = 4 x record + armor ID slot. DERIVED.
+//! bit = 4 x record + armor ID slot. CONFIRMED in game 2026-10-09 (every list written
+//! showed with its NEW marks).
 
 use crate::data::{tables, SmithyList};
 use crate::save::Save;

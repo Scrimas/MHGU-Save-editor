@@ -227,9 +227,9 @@ pub fn arena_quest(q: usize) -> String {
 /// A grade as the Arena Counter ranks it: A, B, C, or a dash past the slowest time.
 pub fn arena_grade(g: u8) -> &'static str {
     match g {
-        0 => "A",
-        1 => "B",
-        2 => "C",
+        0 => "S",
+        1 => "A",
+        2 => "B",
         _ => "—",
     }
 }
@@ -638,10 +638,10 @@ impl Target {
                 .zip(ch::LOOK_COLOURS)
                 .flat_map(|(a, c)| {
                     let bytes = [ch::LOOK_VOICE, ch::LOOK_FACE, ch::LOOK_CLOTHING, ch::LOOK_HAIR, ch::LOOK_FEATURES].map(|k| (base + a + k, 0xFF));
-                    [bytes.to_vec(), range(base + c + 4 * ch::COLOUR_SKIN, 16)].concat()
+                    [bytes.to_vec(), range(base + c + 4 * ch::COLOUR_SKIN, 4), range(base + c + 4 * ch::COLOUR_CLOTHING, 4)].concat()
                 })
                 .collect(),
-            Gender => ch::LOOKS.iter().map(|&a| (base + a + ch::LOOK_GENDER, 0xFF)).collect(),
+            Gender => ch::LOOKS.iter().map(|&a| (base + a + ch::LOOK_GENDER, 0xFF)).chain([(base + ch::HDR_GENDER, 0xFF)]).collect(),
             CardQuests(k) => range(base + ch::CARD_QUESTS + 2 * k, 2),
             Greeting => range(base + ch::CARD_GREETING, 2 * ch::GREETING_UNITS),
             StyleUse(k) => range(base + ch::STYLE_USE + 2 * k, 2),

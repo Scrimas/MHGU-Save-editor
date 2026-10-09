@@ -727,7 +727,7 @@ msgid "The game raises star levels when every urgent quest of a level is cleared
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
-msgid "As character creation sets it. Features and clothing are numbered as the game stores them."
+msgid "As character creation sets it, numbered as the game shows it."
 msgstr ""
 
 #: app/gui/src/targets.rs app/gui/src/views/database.rs app/gui/ui/pages/character.slint
@@ -1063,6 +1063,10 @@ msgid "Edit on the Quests page"
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
+msgid "Subquest"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
 msgid "No large monster with a size in this quest."
 msgstr ""
 
@@ -1080,6 +1084,10 @@ msgstr ""
 
 #: app/gui/ui/pages/database.slint
 msgid "Rewards"
+msgstr ""
+
+#: app/gui/ui/pages/database.slint
+msgid "Base: the red rows"
 msgstr ""
 
 #: app/gui/ui/pages/database.slint
@@ -1325,7 +1333,7 @@ msgid_plural "{} of {n} slots used"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/core/src/palico.rs app/gui/src/targets.rs app/gui/ui/pages/equipment.slint
+#: app/core/src/palico.rs app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr ""
 
@@ -3021,7 +3029,7 @@ msgid "not unlocked in this save"
 msgstr ""
 
 #: app/gui/src/warnings.rs
-msgid "over 30 minutes"
+msgid "over 50 minutes"
 msgstr ""
 
 #: app/gui/src/warnings.rs
@@ -3048,6 +3056,10 @@ msgid "a voice outside the game's 1–{}"
 msgstr ""
 
 #: app/gui/src/warnings.rs
+msgid "features or clothing past the game's list"
+msgstr ""
+
+#: app/gui/src/warnings.rs
 msgid "not a body type of the game"
 msgstr ""
 
@@ -3068,15 +3080,7 @@ msgid "Skin Tone"
 msgstr ""
 
 #: app/gui/src/views/character_page.rs
-msgid "Hair Color"
-msgstr ""
-
-#: app/gui/src/views/character_page.rs
-msgid "Feature Color"
-msgstr ""
-
-#: app/gui/src/views/character_page.rs
-msgid "Eye Color"
+msgid "Clothing Color"
 msgstr ""
 
 #: app/gui/src/views/character_page.rs
@@ -3359,22 +3363,6 @@ msgid "Other carve or drop"
 msgstr ""
 
 #: app/gui/src/views/database.rs
-msgid "Main rewards"
-msgstr ""
-
-#: app/gui/src/views/database.rs
-msgid "More main rewards"
-msgstr ""
-
-#: app/gui/src/views/database.rs
-msgid "Subquest rewards"
-msgstr ""
-
-#: app/gui/src/views/database.rs
-msgid "Extra rewards"
-msgstr ""
-
-#: app/gui/src/views/database.rs
 msgid "Combination"
 msgstr ""
 
@@ -3391,11 +3379,56 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: app/gui/src/views/database.rs
+msgid "Always"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Locale"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Reward"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "HRP"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Fee"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · {} HRP"
+msgstr ""
+
+#: app/gui/src/views/database.rs
 msgid "This quest is not in the game's files: it comes as a download."
 msgstr ""
 
 #: app/gui/src/views/database.rs
 msgid "The chance of each item per reward drawn; how many are drawn is not in these files."
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Rewards A"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Rewards B"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Rewards C"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Rewards D"
+msgstr ""
+
+#: app/gui/src/views/database.rs
+msgid "Subquest rewards"
 msgstr ""
 
 #: app/gui/src/views/database.rs
