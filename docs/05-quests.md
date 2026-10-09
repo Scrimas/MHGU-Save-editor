@@ -860,9 +860,13 @@ Each quest's `questLink` names 5 reward tables; their items and chances are in
 [`tools/quest_rewards.py`](../tools/quest_rewards.py) (layout in its header). The
 Database's Quests tab shows them with each item's chance and what the item box holds.
 
-**DERIVED**: the slots are named by what they hold: 0 main rewards (the target's parts,
-e.g. Rajang pelts in *Paint It Gold*), 1 more main rewards (bones, spheres, charms),
-2 and 3 extra rewards (Distinction, Horns Coins), 4 the subquest's. How many items each
-slot draws is not in these files. One table sums to 104 %; the rest to 100. The 37
-event quests downloaded separately have no files in the game.
+**CONFIRMED** in game on 2026-10-09 (*The Dark Age*, *Lavaclad Beast*; the items and
+chances also match a reference database for those and *Tongue-Tied*): slots 0–3 are
+rows A–D of the reward screen's red **Base** rows (0 the target's parts, 1 bones,
+spheres, charms, 2 and 3 Distinction, Horns Coins), 4 the subquest's. Rows A and B
+also give their table's first item once for sure (Garuga Scale and Monster Bone+
+opened the two rows). How many more items each slot draws is not in these files. One
+table sums to 104 %; the rest to 100. The 37 event quests downloaded separately have
+no files in the game. The quest board's money, points and locale are in
+[`data/quest-info.csv`](../data/quest-info.csv) ([`tools/quest_info.py`](../tools/quest_info.py)).
 

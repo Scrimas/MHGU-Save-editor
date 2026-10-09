@@ -169,6 +169,19 @@ pub struct PalicoLook {
     pub palette: Vec<[u8; 3]>,
 }
 
+/// data/quest-info.csv (tools/quest_info.py): the quest board's money, points and locale.
+#[derive(Debug, Clone, Copy)]
+pub struct QuestInfo {
+    /// Stage ID (the asset pack names it; 101-104 are night versions).
+    pub stage: u16,
+    pub reward: u32,
+    pub hrp: u32,
+    pub fee: u32,
+    /// 0 = no subquest.
+    pub sub_reward: u32,
+    pub sub_hrp: u32,
+}
+
 /// data/arena.csv: an Arena quest of the Arena Counter's table, in its order.
 #[derive(Debug, Clone)]
 pub struct ArenaQuest {
@@ -257,6 +270,8 @@ pub struct Tables {
     pub quest_rewards: HashMap<u32, Vec<(u8, u32)>>,
     /// data/rewards.csv: reward table -> (item, count, chance %).
     pub rewards: HashMap<u32, Vec<(u16, u8, u8)>>,
+    /// data/quest-info.csv: quest ID -> what the quest board shows.
+    pub quest_info: HashMap<u32, QuestInfo>,
     pub arena: Vec<ArenaQuest>,
     /// data/palico-levels.csv, by level - 1: (free support move slots, skill slots).
     pub palico_levels: Vec<(u8, u8)>,
@@ -403,6 +418,13 @@ pub fn tables() -> &'static Tables {
                 m.entry(num(&r["rem"]) as u32).or_insert_with(Vec::new).push((num(&r["item"]) as u16, num(&r["count"]) as u8, num(&r["chance"]) as u8));
                 m
             }),
+            quest_info: rows(include_str!("../../../data/quest-info.csv"))
+                .iter()
+                .map(|r| {
+                    let n = |c: &str| num(&r[c]) as u32;
+                    (n("quest_id"), QuestInfo { stage: n("stage") as u16, reward: n("reward"), hrp: n("hrp"), fee: n("fee"), sub_reward: n("sub_reward"), sub_hrp: n("sub_hrp") })
+                })
+                .collect(),
             skill_trees: rows(include_str!("../../../data/skill-trees.csv"))
                 .iter()
                 .map(|r| (num(&r["kind"]) as u8, ["m20", "m15", "m10", "p10", "p15", "p20"].map(|c| num(&r[c]) as u16)))
@@ -531,6 +553,10 @@ mod tests {
         assert!(t.combinations.iter().all(|c| c.0 != 0 && c.1 != 0 && c.2 != 0 && (1..=100).contains(&c.3)));
         assert!(t.quest_rewards.values().flatten().all(|(slot, rem)| *slot < 5 && t.rewards.contains_key(rem)));
         assert_eq!(t.rewards.values().filter(|r| r.iter().map(|x| x.2 as u32).sum::<u32>() != 100).count(), 1);
+        // The Dark Age, as the quest board shows it
+        let q = t.quest_info[&501];
+        assert_eq!((q.stage, q.reward, q.hrp, q.fee, q.sub_reward, q.sub_hrp), (1, 3900, 250, 400, 600, 30));
+        assert!(t.quest_rewards.keys().all(|id| t.quest_info.contains_key(id)));
         assert!(t.smithy.iter().filter(|l| l.list.starts_with("armor:")).all(|l| l.ids.len() == l.records));
     }
 }

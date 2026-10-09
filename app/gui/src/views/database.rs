@@ -2,7 +2,7 @@
 //! to the pages that edit them, and those pages link back.
 
 use super::*;
-use crate::{CrownOdds, DbEquip, DbItem, DbLine, DbMonster, DbQuest, DbQuestMonster, DbRow, DbSkill, DbSource, DbTables, DropItem, DropTable};
+use crate::{CrownOdds, DbEquip, DbFact, DbItem, DbLine, DbMonster, DbQuest, DbQuestMonster, DbRow, DbSkill, DbSource, DbTables, DropItem, DropTable};
 use std::collections::HashMap;
 
 /// Quests a crown list shows before "and N more".
@@ -669,13 +669,7 @@ fn item(id: u16, have: &HashMap<u16, u32>) -> DbItem {
                     (count, chance, src)
                 }
                 Source::Reward(q, slot, count, chance) => {
-                    let how = match slot {
-                        0 => tr("Main rewards"),
-                        1 => tr("More main rewards"),
-                        4 => tr("Subquest rewards"),
-                        _ => tr("Extra rewards"),
-                    };
-                    let src = DbSource { kind: "quest".into(), index: q.index as i32, r#where: q.name.clone().into(), how: how.into(), ..Default::default() };
+                    let src = DbSource { kind: "quest".into(), index: q.index as i32, r#where: q.name.clone().into(), how: reward_row(slot).into(), ..Default::default() };
                     (count, chance, src)
                 }
                 Source::Combo(a, b, chance) => {
@@ -790,31 +784,65 @@ fn quest(st: &State, c: &Char<&mhgu_save::save::Save>, q: &mhgu_save::data::Ques
         .collect();
     let have = box_counts(st);
     let slots = t.quest_rewards.get(&q.id).map_or(&[][..], Vec::as_slice);
-    let rewards: Vec<DropTable> = slots
-        .iter()
-        .map(|&(slot, rem)| DropTable {
-            title: match slot {
-                0 => tr("Main rewards"),
-                1 => tr("More main rewards"),
-                4 => tr("Subquest rewards"),
-                _ => tr("Extra rewards"),
-            }
-            .into(),
-            items: model(t.rewards[&rem].iter().map(|&(item, count, chance)| drop_item(item, count, chance, &have)).collect()),
-        })
-        .collect();
+    // A to D are the reward screen's red "Base" rows; A and B give their table's first item
+    // once for sure before the draws (checked in game 2026-10-09)
+    let table = |&(slot, rem): &(u8, u32)| {
+        let rows = &t.rewards[&rem];
+        let mut items: Vec<DropItem> = rows.iter().map(|&(item, count, chance)| drop_item(item, count, chance, &have)).collect();
+        if let (true, Some(&(item, count, _))) = (slot < 2, rows.first()) {
+            items.insert(0, DropItem { chance: tr("Always").into(), ..drop_item(item, count, 0, &have) });
+        }
+        DropTable { title: reward_row(slot).into(), items: model(items) }
+    };
+    let main: Vec<DropTable> = slots.iter().filter(|s| s.0 < 4).map(table).collect();
+    let extra: Vec<DropTable> = slots.iter().filter(|s| s.0 >= 4).map(table).collect();
+    let n = assets::names();
+    let text = n.quest_text.get(&q.id.to_string());
+    let info = t.quest_info.get(&q.id);
+    let z = |v: u32| format!("{}z", num(v as i64));
+    // Village quests carry HRP in their file, but the game neither shows nor gives it
+    let hrp = q.category != "Village";
+    let facts = info.map_or(vec![], |i| {
+        let mut v = vec![];
+        if let Some(s) = n.stages.get(&i.stage.to_string()) {
+            v.push(DbFact { label: tr("Locale").into(), value: s.into() });
+        }
+        v.push(DbFact { label: tr("Reward").into(), value: z(i.reward).into() });
+        if hrp {
+            v.push(DbFact { label: tr("HRP").into(), value: num(i.hrp as i64).into() });
+        }
+        v.push(DbFact { label: tr("Fee").into(), value: z(i.fee).into() });
+        v
+    });
     DbQuest {
         index: q.index as i32,
         name: q.name.clone().into(),
         sub: format!("#{} · {}", q.id, quest_sub(c, q)).into(),
+        objective: text.map_or("", |x| x[0].as_str()).into(),
+        subquest: text.map_or("", |x| x[1].as_str()).into(),
+        sub_reward: info.filter(|i| i.sub_reward > 0).map_or(String::new(), |i| if hrp { trf("{} · {} HRP", &[&z(i.sub_reward), &num(i.sub_hrp as i64)]) } else { z(i.sub_reward) }).into(),
+        facts: model(facts),
         monsters: model(monsters),
-        note: if rewards.is_empty() {
+        note: if slots.is_empty() {
             tr("This quest is not in the game's files: it comes as a download.")
         } else {
             tr("The chance of each item per reward drawn; how many are drawn is not in these files.")
         }
         .into(),
-        rewards: model(rewards),
+        main: model(main),
+        extra: model(extra),
+    }
+}
+
+/// A reward table's name, by its slot in the quest: rows A and B, then C, D and the
+/// subquest's.
+fn reward_row(slot: u8) -> &'static str {
+    match slot {
+        0 => tr("Rewards A"),
+        1 => tr("Rewards B"),
+        2 => tr("Rewards C"),
+        3 => tr("Rewards D"),
+        _ => tr("Subquest rewards"),
     }
 }
 

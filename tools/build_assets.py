@@ -8,7 +8,8 @@
 
 Writes:
   names.json       item, equipment, skill, monster, Palico support move and skill names; Guild
-                   Card title words, scenes and poses; item icon / colour / rarity and
+                   Card title words, scenes and poses; quest objectives, subquests and
+                   stage names (data/quest-info.csv); item icon / colour / rarity and
                    pouch carry limit; palettes; equipment type icons; icon cell positions
                    on items.png
   names.<code>.json  the same names in French, German, Italian and Spanish (fr de it es),
@@ -26,7 +27,7 @@ Where things are (all CONFIRMED visually or against a real save unless noted):
              Guild Card texts loose in <lang>/table/ (guild_card)
 Tables the game builds in code (EXE, v1.4 main) are copied below with their addresses.
 """
-import json, os, struct, sys, zlib
+import csv, json, os, struct, sys, zlib
 
 # ---------------------------------------------------------------- containers
 class RomFS:
@@ -289,7 +290,9 @@ def main(romfs, out):
         s, c = divmod(i, 100)
         aw[s].crop((c % 10) * 48, (c // 10) * 48, 48, 48).save(P('awards', '%d.png' % i))
 
-    names['monsters'] = text(R, reng, 'eng')['monsters']
+    eng = text(R, reng, 'eng')
+    for k in ('monsters', 'quest_text', 'stages'):
+        names[k] = eng[k]
     json.dump(names, open(P('names.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
     # the same names in the game's other languages, in the same order
     for code, lang in LANGS.items():
@@ -324,6 +327,22 @@ def guild_card(R, lang):
             'gc_scenes': g('GC_background')[:136], 'gc_poses': g('GuildCardMsg')[235:257]}
 
 
+def quest_text(R, lang):
+    """Quest board texts of one language (tools/quest_info.py): quest_text, quest ID ->
+    [main objective, subquest] (questData entries 4 and 6; "" without a subquest, which is
+    a subquest reward of 0), and stages, stage ID -> the board's Locale name (questMessage
+    entry per quest_info.STAGE_TEXT)."""
+    from quest_info import STAGE_TEXT
+    nl = lambda s: s.replace('\r\n', '\n')
+    loc = gmd(R.read('/nativeNX/%s/GUI/06_msg/questMessage_%s.gmd' % (lang, lang)))
+    quests = {}
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'quest-info.csv')) as f:
+        for r in csv.DictReader(f):
+            t = gmd(R.read('/nativeNX/%s/quest/questData/questData_%07d_%s.gmd' % (lang, int(r['quest_id']), lang)))
+            quests[r['quest_id']] = [nl(t[4]), nl(t[6]) if int(r['sub_reward']) else '']
+    return {'quest_text': quests, 'stages': {str(k): loc[e] for k, e in STAGE_TEXT.items()}}
+
+
 def text(R, r, lang, eng=None):
     """The names of one language from its resident_<lang>.arc `r` (and the variant monster
     names from RomFS `R`), entry for entry like the English names.json `eng` (the piece
@@ -334,7 +353,8 @@ def text(R, r, lang, eng=None):
       weapons     class -> [[base, final, ultimate] per English piece]
       armor, palico_armor   part -> [name per English piece]
       palico_weapons, talismans   [name per English piece]
-      gc_words, gc_links, gc_scenes, gc_poses   lists by ID (guild_card)"""
+      gc_words, gc_links, gc_scenes, gc_poses   lists by ID (guild_card)
+      quest_text, stages   by quest / stage ID (quest_text)"""
     g = lambda n: gmd(r['%s\\%s_%s' % (lang, n, lang)])
     out = {'items': g('table\\itemData')[0::2], 'skills': g('table\\skillTypeData')[0::2],
            'skill_names': g('table\\skillData')[0::2],
@@ -342,6 +362,7 @@ def text(R, r, lang, eng=None):
            'palico_coats': g('table\\OtMenuMsg')[17:24],
            'monsters': g('GUI\\06_msg\\monsterName')[:137]}
     out.update(guild_card(R, lang))
+    out.update(quest_text(R, lang))
     m = out['monsters']
     hub = gmd(R.read('/nativeNX/%s/GUI/06_msg/NetworkVillage_%s.gmd' % (lang, lang)))
     for i, (e, b) in HUB_VARIANTS.items():

@@ -249,6 +249,21 @@ component MonsterDetail inherits VerticalLayout {
     if m.carve-ranks.length > 0: Carves { m: root.m; }
 }
 
+// One colour of the reward screen's rows: a heading with its colour, then the tables.
+component RewardRows inherits VerticalLayout {
+    in property <string> title;
+    in property <color> tint;
+    in property <[DropTable]> tables;
+    spacing: 6px;
+    HorizontalLayout {
+        spacing: 8px;
+        alignment: start;
+        Rectangle { width: 10px; height: 10px; y: 5px; border-radius: 5px; background: root.tint; }
+        Text { text: root.title; font-weight: 600; }
+    }
+    DropGrid { tables: root.tables; }
+}
+
 component QuestDetail inherits VerticalLayout {
     property <DbQuest> q: Api.db-quest;
     padding: Tok.pad;
@@ -269,6 +284,30 @@ component QuestDetail inherits VerticalLayout {
         }
     }
     Hairline { }
+    // what the quest board shows: objective, locale, money, points, subquest
+    if q.objective != "" || q.facts.length > 0: VerticalLayout {
+        spacing: 10px;
+        if q.objective != "": Text { text: q.objective; font-size: 15px; font-weight: 600; wrap: word-wrap; }
+        HorizontalLayout {
+            spacing: 32px;
+            alignment: start;
+            for f in q.facts: VerticalLayout {
+                spacing: 2px;
+                accessible-role: text;
+                accessible-label: f.label + ": " + f.value;
+                Text { text: f.label; color: Tok.muted; font-size: Tok.small; }
+                Text { text: f.value; font-weight: 600; }
+            }
+        }
+        if q.subquest != "": HorizontalLayout {
+            spacing: 8px;
+            alignment: start;
+            Text { text: @tr("Subquest"); color: Tok.muted; vertical-alignment: center; }
+            Text { text: q.subquest; vertical-alignment: center; wrap: word-wrap; }
+            Text { text: q.sub-reward; color: Tok.muted; vertical-alignment: center; }
+        }
+    }
+    if q.objective != "" || q.facts.length > 0: Hairline { }
     HorizontalLayout {
         spacing: 8px;
         alignment: start;
@@ -315,10 +354,10 @@ component QuestDetail inherits VerticalLayout {
         spacing: 8px;
         alignment: start;
         SectionTitle { text: @tr("Rewards"); }
-        if q.rewards.length > 0: ConfidenceTag { level: Confidence.derived; }
     }
     Muted { text: q.note; }
-    DropGrid { tables: q.rewards; }
+    if q.main.length > 0: RewardRows { title: @tr("Base: the red rows"); tint: Tok.bad; tables: q.main; }
+    if q.extra.length > 0: RewardRows { title: @tr("Subquest"); tint: Tok.muted; tables: q.extra; }
 }
 
 // Rows of an item's sources or uses; a row with a kind links to its Database entry.

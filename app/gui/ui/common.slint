@@ -117,7 +117,9 @@ export struct DbEquip { index: int, name: string, sub: string, icon: image, has-
 export struct DbSkill { index: int, name: string, sub: string, tiers: [DbLine], decos: [DbLine], decos-more: string, charms: [DbLine], armor: [DbLine], armor-more: string }
 
 // A quest in the Database (index -1: none). `note` says why rewards are missing.
-export struct DbQuest { index: int, name: string, sub: string, monsters: [DbQuestMonster], rewards: [DropTable], note: string }
+export struct DbFact { label: string, value: string }
+// main: reward rows A to D (the reward screen's red Base rows); extra: the subquest's
+export struct DbQuest { index: int, name: string, sub: string, objective: string, subquest: string, sub-reward: string, facts: [DbFact], monsters: [DbQuestMonster], main: [DropTable], extra: [DropTable], note: string }
 
 // A monster in the Database. The size scale runs from `lo` to `hi` (%); min/max are the
 // save's record (0 = none). crown: 0 none, 1 silver, 2 gold. Carves of the rank
@@ -357,8 +359,10 @@ export global Api {
     in property <[string]> look-faces;
     in property <[string]> look-hairstyles;
     in property <[string]> look-voices;
+    in property <[string]> look-features;
+    in property <[string]> look-clothing;
     callback set-look(string /* gender face hair features voice clothing */, int);
-    callback set-look-colour(string /* skin hair features eyes */, string /* #RRGGBB */);
+    callback set-look-colour(string /* skin clothing */, string /* #RRGGBB */);
     in property <[ArenaRow]> arena;
     callback set-arena(int /* quest */, int /* set */, int /* time, 1/100 s */);
     callback clear-arena(int);

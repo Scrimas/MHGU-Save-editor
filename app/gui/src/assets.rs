@@ -129,6 +129,12 @@ pub struct Names {
     pub gc_scenes: Vec<String>,
     #[serde(default)]
     pub gc_poses: Vec<String>,
+    /// Quest ID -> [main objective, subquest ("" for none)]; stage ID -> the quest board's
+    /// locale (packs built before 2026-10-09 lack them: not shown).
+    #[serde(default)]
+    pub quest_text: HashMap<String, [String; 2]>,
+    #[serde(default)]
+    pub stages: HashMap<String, String>,
 }
 
 /// Slots decoration item `id` takes; None when it is not a decoration (or the pack is
@@ -159,6 +165,8 @@ struct Text {
     gc_links: Vec<String>,
     gc_scenes: Vec<String>,
     gc_poses: Vec<String>,
+    quest_text: HashMap<String, [String; 2]>,
+    stages: HashMap<String, String>,
 }
 
 impl Names {
@@ -189,6 +197,16 @@ impl Names {
         list(&mut self.gc_links, t.gc_links);
         list(&mut self.gc_scenes, t.gc_scenes);
         list(&mut self.gc_poses, t.gc_poses);
+        for (id, [obj, sub]) in t.quest_text {
+            if let Some(e) = self.quest_text.get_mut(&id).filter(|_| !obj.is_empty()) {
+                *e = [obj, sub];
+            }
+        }
+        for (id, n) in t.stages {
+            if let Some(e) = self.stages.get_mut(&id).filter(|_| !n.is_empty()) {
+                *e = n;
+            }
+        }
         for (cls, v) in t.weapons {
             for (p, n) in self.weapons.get_mut(&cls).into_iter().flatten().zip(v) {
                 if p.is_real() && n.first().is_some_and(|s| !s.is_empty()) {
