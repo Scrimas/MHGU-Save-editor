@@ -130,6 +130,7 @@ fn main() -> Result<(), slint::PlatformError> {
 /// Put the UI in a given state for a screenshot: comma-separated steps run in order.
 ///   slot:N  tab:N  sel:N  store:N  loadout:N  owner:N  filter:F  large  missing  search:S  add:<category>:<id>
 ///   goal:<id>  char:<field>:<value>  monster:<index>:<field>:<value>  item:<slot>:<id>:<count>
+///   set:N  arts:<where>:<field>:<slot>:<value>  pigment:<where>:<part>:<hex>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
 ///   theme:light|dark  update (asks GitHub, as Settings' Check now)
 fn steps(ui: &AppWindow, page: &str, list: &str) {
@@ -213,6 +214,9 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             ("palicoes", &["entry", kind, slot, id, on]) => api.invoke_set_palico_entry(kind.into(), num(slot), num(id), on == "1"),
             ("palicoes", &["look", key, v]) => api.invoke_set_palico_look(key.into(), num(v)),
             ("character", &["look", key, v]) => api.invoke_set_look(key.into(), num(v)),
+            ("equipment", &["set", n]) => api.invoke_select_set(num(n)),
+            (_, &["arts", at, field, slot, v]) => api.invoke_set_arts(num(at), field.into(), num(slot), num(v)),
+            (_, &["pigment", at, part, hex]) => api.invoke_set_pigment(num(at), num(part), hex.into()),
             ("character", &["colour", key, hex]) => api.invoke_set_look_colour(key.into(), hex.into()),
             (_, &["item", slot, id, n]) => api.invoke_set_item(num(slot), num(id), num(n)),
             (_, &["goto", ..]) => api.invoke_goto(parts[1..].join(":").into()),
@@ -321,6 +325,56 @@ mod tests {
         assert!(!used(0));
         api.invoke_undo_value("slot:0".into());
         assert!(used(0) && !st.borrow().save().is_dirty());
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// My Sets, Palico sets and what the hunter has on: each edit stages one value, the
+    /// models follow, and Undo on the field puts the file's bytes back.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn sets_and_arts() {
+        use mhgu_save::sets;
+        let (ui, st, dir) = opened("sets");
+        let api = ui.global::<Api>();
+        let base = st.borrow().base();
+        // an unused My Set takes what the hunter has on
+        api.set_page("equipment".into());
+        api.set_equip_owner(2);
+        let free = (0..sets::MY_SETS_N).find(|&k| !sets::my_set(st.borrow().save(), base, k).used()).unwrap();
+        api.invoke_select_set(free as i32);
+        assert!(!api.get_set_detail().used);
+        api.invoke_set_from_current();
+        assert!(api.get_set_detail().used);
+        assert_eq!(sets::my_set(st.borrow().save(), base, free).arts, sets::arts(st.borrow().save(), base));
+        // its style, then its name; then no weapon: no class to check the arts against
+        api.invoke_set_arts(0, "style".into(), 0, 1);
+        assert_eq!(api.get_set_detail().arts.slots, 3);
+        api.invoke_set_set_name("Test".into());
+        assert_eq!(api.get_set_detail().name, "Test");
+        api.invoke_set_set_piece(0, 0);
+        assert_eq!(sets::my_set(st.borrow().save(), base, free).gear[0], sets::NO_BOX);
+        api.invoke_undo_all();
+        assert!(!st.borrow().save().is_dirty());
+        // a Palico set's piece names it; Undo on the field
+        api.set_equip_owner(3);
+        api.invoke_select_set(0);
+        if api.get_set_detail().pieces.row_data(0).unwrap().choices.row_count() > 1 {
+            api.invoke_set_set_piece(0, 1);
+            assert_eq!(api.get_set_detail().name, "Set 01");
+            api.invoke_undo_value("palset:0".into());
+            assert!(!st.borrow().save().is_dirty());
+        }
+        // what the hunter has on: a custom colour, a style with fewer slots
+        api.set_page("character".into());
+        views::refresh(&ui, &st.borrow());
+        api.invoke_set_pigment(-1, 0, "#2060C0".into());
+        assert_eq!(api.get_char_pigment().row_data(0).unwrap().hex, "#2060C0");
+        assert!(!api.get_was_pigment().is_empty());
+        api.invoke_set_arts(-1, "style".into(), 0, 3);
+        assert_eq!(api.get_char_arts().slots, 1);
+        api.invoke_undo_value("pigment".into());
+        api.invoke_undo_value("arts".into());
+        assert!(!st.borrow().save().is_dirty());
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

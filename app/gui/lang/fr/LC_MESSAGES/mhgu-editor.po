@@ -452,8 +452,8 @@ msgstr "Personnage"
 msgid "Items"
 msgstr "Objets"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/src/targets.rs app/gui/src/views/sets_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
 msgid "Equipment"
 msgstr "Équipement"
 
@@ -696,6 +696,7 @@ msgstr "Gestionnaire"
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
 #: app/gui/ui/pages/advanced.slint app/gui/ui/pages/character.slint
 #: app/gui/ui/pages/items.slint app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/pages/sets.slint
 msgid "Name"
 msgstr "Nom"
 
@@ -710,6 +711,7 @@ msgstr "Choisissez une ligne pour voir ses octets. Un * marque les octets modifi
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
 #: app/gui/ui/pages/palicoes.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/sets.slint
 msgid "The game cannot make this: {}."
 msgstr "Le jeu ne peut pas produire ceci : {}."
 
@@ -862,6 +864,23 @@ msgstr "Décor"
 msgid "Pose"
 msgstr "Pose"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Style and Hunter Arts"
+msgstr "Style et Arts de chasse"
+
+#: app/gui/ui/pages/character.slint
+msgid "What you have on now. Loading a My Set in game replaces them with the set's."
+msgstr "Ce que vous portez maintenant. Charger un set perso en jeu les remplace par ceux du set."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Armor pigment"
+msgstr "Teinture de l'armure"
+
+#: app/gui/ui/pages/character.slint
+msgid "The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets)."
+msgstr "Les couleurs de l'armure que vous portez maintenant. Chaque set perso garde les siennes (Équipement, Sets perso)."
+
 #: app/gui/ui/pages/character.slint
 msgid "Village points"
 msgstr "Points de village"
@@ -917,26 +936,32 @@ msgid "Quests done with each style. Your Palico's lines name the most and least 
 msgstr "Quêtes faites avec chaque style. Les répliques de votre Palico citent le plus et le moins utilisé."
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
 msgid "Guild Style"
 msgstr "Style Guilde"
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
 msgid "Striker Style"
 msgstr "Style Guerrier"
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
 msgid "Aerial Style"
 msgstr "Style Voltigeur"
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
 msgid "Adept Style"
 msgstr "Style Bushido"
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
 msgid "Alchemy Style"
 msgstr "Style Alchimiste"
 
 #: app/core/src/character.rs app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
 msgid "Valor Style"
 msgstr "Style Vaillant"
 
@@ -948,7 +973,8 @@ msgstr "Utilisation des armes"
 msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
 msgstr "Quêtes complétées avec chaque arme, comptées comme sur la Carte Guilde. Le plus grand total désigne l'arme principale."
 
-#: app/gui/src/views/names.rs app/gui/ui/pages/character.slint
+#: app/gui/src/views/names.rs app/gui/src/views/sets_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "Weapon"
 msgstr "Arme"
 
@@ -1342,6 +1368,14 @@ msgid "Palico"
 msgstr "Palico"
 
 #: app/gui/ui/pages/equipment.slint
+msgid "My Sets"
+msgstr "Sets perso"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Palico sets"
+msgstr "Sets de Palico"
+
+#: app/gui/ui/pages/equipment.slint
 msgid "Search name, weapon type or skill"
 msgstr "Rechercher nom, type d'arme ou talent"
 
@@ -1377,7 +1411,7 @@ msgid "{} · box slot {} · ID {}"
 msgstr "{} · emplacement {} du coffre · ID {}"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
 msgid "{} · box slot {}"
 msgstr "{} · emplacement {} du coffre"
 
@@ -1407,7 +1441,8 @@ msgstr[0] "{} emplacement utilisé sur {n}"
 msgstr[1] "{} emplacements utilisés sur {n}"
 
 #: app/core/src/palico.rs app/gui/src/targets.rs
-#: app/gui/src/views/character_page.rs app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
+#: app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr "Aucun"
 
@@ -1446,7 +1481,8 @@ msgstr "Rétablir l'apparence d'origine"
 msgid "Looks of the same part that this piece's class and your body type can wear. Skills, slots and defense stay."
 msgstr "Apparences de la même partie que la classe de cette pièce et votre type de corps peuvent porter. Talents, emplacements et défense restent."
 
-#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/names.rs app/gui/src/views/sets_ui.rs
+#: app/gui/ui/pages/equipment.slint
 msgid "Talisman"
 msgstr "Talisman"
 
@@ -1990,6 +2026,82 @@ msgstr "Acceptée : {}"
 #: app/gui/ui/pages/requests.slint
 msgid "Reported: {}"
 msgstr "Rapportée : {}"
+
+#: app/gui/ui/pages/sets.slint
+msgid "Style"
+msgstr "Style"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/sets.slint
+msgid "Arts for the {}"
+msgstr "Arts de l'arme : {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/sets.slint
+msgid "Art {}"
+msgstr "Art {}"
+
+#: app/gui/ui/pages/sets.slint
+msgid "SP Art"
+msgstr "Art SP"
+
+#: app/gui/ui/pages/sets.slint
+msgid "the armor's own colour"
+msgstr "la couleur d'origine de l'armure"
+
+#: app/gui/ui/pages/sets.slint
+msgid "Armor's own colour"
+msgstr "Couleur d'origine"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
+msgid "Palico set {}"
+msgstr "Set de Palico {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
+msgid "My Set {}"
+msgstr "Set perso {}"
+
+#: app/gui/ui/pages/sets.slint
+msgid "Set name"
+msgstr "Nom du set"
+
+#: app/gui/ui/pages/sets.slint
+msgid "Clear set"
+msgstr "Vider le set"
+
+#: app/gui/ui/pages/sets.slint
+msgid "An unused set. Save what you have on into it, as the game's Register does, then change it here."
+msgstr "Set inutilisé. Enregistrez-y ce que vous portez, comme le fait l'enregistrement en jeu, puis modifiez-le ici."
+
+#: app/gui/ui/pages/sets.slint
+msgid "Save what you have on"
+msgstr "Enregistrer ce que vous portez"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
+msgid "Gear"
+msgstr "Équipement"
+
+#: app/gui/ui/pages/sets.slint
+msgid "Pieces of the Palico box."
+msgstr "Pièces du coffre Palico."
+
+#: app/gui/ui/pages/sets.slint
+msgid "Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box."
+msgstr "Pièces du coffre du chasseur, avec leurs décorations. Une pièce utilisée par un set ne peut être ni remplacée ni retirée du coffre."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
+msgid "Pigment"
+msgstr "Teinture"
+
+#: app/gui/ui/pages/sets.slint
+msgid "The colours the hunter wears with this set, applied when it is loaded."
+msgstr "Les couleurs portées avec ce set, appliquées quand il est chargé."
+
+#: app/gui/ui/pages/sets.slint
+msgid "Replace with what you have on"
+msgstr "Remplacer par ce que vous portez"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/assets.rs
@@ -2877,6 +2989,15 @@ msgid "Character slot {}"
 msgstr "Emplacement de personnage {}"
 
 #. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/src/views/equipment_page.rs
+msgid "My Set {} “{}”"
+msgstr "Set perso {} “{}”"
+
+#: app/gui/src/targets.rs
+msgid "Hunting style and Hunter Arts"
+msgstr "Style de chasse et Arts de chasse"
+
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
 #: app/gui/src/views/names.rs app/gui/src/views/palicoes.rs
 msgid "Type {}"
@@ -3172,6 +3293,59 @@ msgstr "une voix hors des 1–{} du jeu"
 msgid "features or clothing past the game's list"
 msgstr "cosmétique ou vêtements hors de la liste du jeu"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "Art #{}"
+msgstr "Art n° {}"
+
+#: app/gui/src/warnings.rs
+msgid "not a hunting style of the game"
+msgstr "pas un style de chasse du jeu"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} has {} art slots"
+msgstr "{} a {} emplacements d'art"
+
+#: app/gui/src/warnings.rs
+msgid "an SP Art slot without an art"
+msgstr "un emplacement d'Art SP sans art"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "art #{} is not a Hunter Art of the game"
+msgstr "l'art n° {} n'est pas un Art de chasse du jeu"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} is not an art of the {}"
+msgstr "{} n'est pas un art de l'arme : {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} is not unlocked"
+msgstr "{} n'est pas débloqué"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "box slot {} does not exist"
+msgstr "l'emplacement {} du coffre n'existe pas"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "box slot {} holds no {}"
+msgstr "l'emplacement {} du coffre ne contient pas : {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "Palico box slot {} does not exist"
+msgstr "l'emplacement {} du coffre Palico n'existe pas"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "Palico box slot {} holds no {}"
+msgstr "l'emplacement {} du coffre Palico ne contient pas : {}"
+
 #: app/gui/src/warnings.rs
 msgid "not a body type of the game"
 msgstr "pas un type de corps du jeu"
@@ -3197,7 +3371,7 @@ msgid "Clothing Color"
 msgstr "Couleur des vêtements"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/character_page.rs
+#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
 msgid "{} · locked"
 msgstr "{} · verrouillé"
 
@@ -3205,7 +3379,7 @@ msgstr "{} · verrouillé"
 msgid "HR below 13 follows the Hub star level: edit Hub ★ instead"
 msgstr "Sous RC 13, le RC suit le niveau d'étoiles du Grand-Camp : modifiez plutôt Grand-Camp ★"
 
-#: app/gui/src/views/character_page.rs
+#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
 msgid "A colour is six hex digits, like #E9D6CC"
 msgstr "Une couleur s'écrit avec six chiffres hexadécimaux, comme #E9D6CC"
 
@@ -3664,11 +3838,6 @@ msgstr "votre équipement actuel"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/equipment_page.rs
-msgid "My Set {} “{}”"
-msgstr "Set perso {} “{}”"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/equipment_page.rs
 msgid "Rare {}"
 msgstr "Rareté {}"
 
@@ -4105,35 +4274,35 @@ msgstr "Insectoglaive"
 msgid "Charge Blade"
 msgstr "Volto-hache"
 
-#: app/gui/src/views/names.rs
+#: app/core/src/sets.rs app/gui/src/views/names.rs
 msgid "Head"
 msgstr "Tête"
 
-#: app/gui/src/views/names.rs
+#: app/core/src/sets.rs app/gui/src/views/names.rs
 msgid "Chest"
 msgstr "Torse"
 
-#: app/gui/src/views/names.rs
+#: app/core/src/sets.rs app/gui/src/views/names.rs
 msgid "Arms"
 msgstr "Bras"
 
-#: app/gui/src/views/names.rs
+#: app/core/src/sets.rs app/gui/src/views/names.rs
 msgid "Waist"
 msgstr "Taille"
 
-#: app/gui/src/views/names.rs
+#: app/core/src/sets.rs app/gui/src/views/names.rs
 msgid "Legs"
 msgstr "Jambes"
 
-#: app/gui/src/views/names.rs
+#: app/gui/src/views/names.rs app/gui/src/views/sets_ui.rs
 msgid "Palico weapon"
 msgstr "Arme de Palico"
 
-#: app/gui/src/views/names.rs
+#: app/gui/src/views/names.rs app/gui/src/views/sets_ui.rs
 msgid "Palico head"
 msgstr "Tête de Palico"
 
-#: app/gui/src/views/names.rs
+#: app/gui/src/views/names.rs app/gui/src/views/sets_ui.rs
 msgid "Palico body"
 msgstr "Corps de Palico"
 
@@ -4421,6 +4590,58 @@ msgstr "{} ouvertes · {} rapportées"
 #: app/gui/src/views/requests.rs
 msgid "The villager's reward is not handed over in game"
 msgstr "La récompense du villageois n'est pas remise en jeu"
+
+#: app/gui/src/views/sets_ui.rs
+msgid "own colour"
+msgstr "couleur d'origine"
+
+#: app/gui/src/views/sets_ui.rs
+msgid "Unused"
+msgstr "Inutilisé"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "{} (SP)"
+msgstr "{} (SP)"
+
+#: app/gui/src/views/sets_ui.rs
+msgid "no arts"
+msgstr "aucun art"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "Set {} · unused"
+msgstr "Set {} · inutilisé"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "Sets {}–{} · unused"
+msgstr "Sets {}–{} · inutilisés"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "{} of {} Palico sets used · Derived: not checked in game yet"
+msgstr "{} sets de Palico utilisés sur {} · Déduit : pas encore vérifié en jeu"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "{} of {} My Sets used · Derived except the pigment"
+msgstr "{} sets perso utilisés sur {} · Déduit sauf la teinture"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "My Set {}: what you have on"
+msgstr "Set perso {} : ce que vous portez"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "Palico set {} cleared"
+msgstr "Set de Palico {} vidé"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs
+msgid "My Set {} cleared"
+msgstr "Set perso {} vidé"
 
 #: app/gui/src/views/settings_ui.rs
 msgid "Set by SLINT_SCALE_FACTOR in the environment"

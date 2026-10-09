@@ -252,6 +252,28 @@ export struct AppearanceInfo {
     was-appearance: string, was-gender: string, warn-appearance: string, warn-gender: string,
 }
 
+// Hunting style and Hunter Arts, as a My Set keeps them or as the hunter has them on:
+// per art slot the pick (index into `choices`, 0 = none) and SP; `choices` are the arts
+// the weapon takes, locked ones marked. Style 6 = an unused set.
+export struct ArtsInfo {
+    style: int, slots: int, picks: [int], sp: [bool], choices: [string], weapon: string, was: string, warning: string,
+}
+
+// One armor part's pigment: its colour, or the armor's own one.
+export struct PigmentRow { part: string, colour: color, hex: string, own: bool }
+
+// A row of the set list; runs of unused sets collapse into one (index -1).
+export struct SetRow { index: int, first: int, last: int, name: string, sub: string, used: bool, changed: bool }
+
+// A piece of a set: the box entry picked (index into `choices`, 0 = none).
+export struct SetPiece { part: string, pick: int, choices: [string] }
+
+// The set being edited (My Set, or Palico set with `palico`).
+export struct SetDetail {
+    index: int, used: bool, palico: bool, name: string, pieces: [SetPiece], pigment: [PigmentRow], arts: ArtsInfo,
+    was-name: string, was-gear: string, was-pigment: string, warn-gear: string,
+}
+
 // The card's best time on one Arena quest of the counter's table: the time split for its
 // fields, the equipment set (the choices name their weapon or Prowler support), the
 // grade it earns and the quest's grade times.
@@ -399,7 +421,23 @@ export global Api {
 
     // equipment
     in property <[EquipRow]> equip-rows;
-    in-out property <int> equip-owner: 0;  // 0 hunter, 1 Palico
+    in-out property <int> equip-owner: 0;  // 0 hunter box, 1 Palico box, 2 My Sets, 3 Palico sets
+    // My Sets and Palico sets (equip-owner 2, 3)
+    in property <[SetRow]> set-rows;
+    in property <SetDetail> set-detail;
+    callback select-set(int);
+    callback set-set-name(string);
+    callback set-set-piece(int /* part */, int /* pick */);
+    callback set-from-current();
+    callback clear-set();
+    // style, arts and pigment of what the hunter has on (where -1) or of the selected My
+    // Set (where 0): field "style" (value), "art" (slot, pick) or "sp" (slot, 0/1)
+    in property <ArtsInfo> char-arts;
+    in property <[PigmentRow]> char-pigment;
+    in property <string> was-pigment;
+    callback set-arts(int /* where */, string /* field */, int /* slot */, int /* value */);
+    callback set-pigment(int /* where */, int /* part */, string /* hex */);
+    callback own-pigment(int /* where */, int /* part */);
     in-out property <string> equip-filter: "all";
     in-out property <string> equip-search;
     in property <string> equip-summary;

@@ -4,6 +4,7 @@ import {
     NumberBox, StagedBar, WasLine, EmptyState, Pill, Hairline, TextLink, Chevron, ListRow, SearchField, KeyActivate,
     FocusRing, Picker,
 } from "../common.slint";
+import { SetsView } from "sets.slint";
 
 component EquipLine inherits ListRow {
     in property <EquipRow> e;
@@ -114,15 +115,15 @@ export component EquipmentPage inherits Rectangle {
             title: @tr("Equipment");
             subtitle: Api.equip-summary;
             staged: Api.page-counts[3];
-            Button {
+            if Api.equip-owner < 2: Button {
                 text: @tr("Add equipment");
                 enabled: Api.equip-free >= 0;
                 clicked => { root.open-picker(-1, 0, -1, self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
             }
         }
-        // Hunter / Palico as two tabs (C3)
+        // Hunter / Palico box as two tabs (C3), then their sets
         TabBar {
-            tabs: [@tr("Hunter"), @tr("Palico")];
+            tabs: [@tr("Hunter"), @tr("Palico"), @tr("My Sets"), @tr("Palico sets")];
             current: Api.equip-owner;
             select(i) => {
                 Api.equip-owner = i;
@@ -132,7 +133,8 @@ export component EquipmentPage inherits Rectangle {
                 Api.filter-equip(Api.equip-filter);
             }
         }
-        HorizontalLayout {
+        if Api.equip-owner >= 2: SetsView { vertical-stretch: 1; }
+        if Api.equip-owner < 2: HorizontalLayout {
             spacing: Tok.tight;
             SearchField {
                 placeholder-text: root.hunter ? @tr("Search name, weapon type or skill") : @tr("Search name or type");
@@ -149,7 +151,7 @@ export component EquipmentPage inherits Rectangle {
                 clicked => { Api.equip-filter = f.k; Api.filter-equip(f.k); }
             }
         }
-        HorizontalLayout {
+        if Api.equip-owner < 2: HorizontalLayout {
             spacing: Tok.pad;
             vertical-stretch: 1;
             // narrow: the detail of a picked piece takes the list's place, with Back

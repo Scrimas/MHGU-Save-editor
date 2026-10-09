@@ -1,0 +1,190 @@
+import { Button, ScrollView, LineEdit, CheckBox, Palette } from "std-widgets.slint";
+import {
+    Api, Tok, Card, Muted, SectionTitle, WasLine, ListRow, Picker, ArtsInfo, PigmentRow, ConfidenceTag, Confidence,
+} from "../common.slint";
+
+// Hunting style and Hunter Arts: the style, then per art slot of it the art and SP.
+export component ArtsEditor inherits VerticalLayout {
+    in property <ArtsInfo> info;
+    // -1 what the hunter has on, 0 the selected My Set
+    in property <int> where;
+    in property <string> key;
+    spacing: 8px;
+    HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 32px;
+        Text { text: @tr("Style"); width: 80px; vertical-alignment: center; }
+        Picker {
+            width: 200px;
+            model: [@tr("Guild Style"), @tr("Striker Style"), @tr("Aerial Style"), @tr("Adept Style"), @tr("Alchemy Style"), @tr("Valor Style")];
+            value: root.info.style;
+            picked(i) => { Api.set-arts(root.where, "style", 0, i); }
+        }
+        if root.info.weapon != "": Muted { text: @tr("Arts for the {}", root.info.weapon); vertical-alignment: center; }
+    }
+    for k in root.info.slots: HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 32px;
+        Text { text: @tr("Art {}", k + 1); width: 80px; vertical-alignment: center; }
+        Picker { width: 280px; model: root.info.choices; value: root.info.picks[k]; picked(i) => { Api.set-arts(root.where, "art", k, i); } }
+        CheckBox {
+            text: @tr("SP Art");
+            checked: root.info.sp[k];
+            enabled: root.info.picks[k] != 0;
+            toggled => { Api.set-arts(root.where, "sp", k, self.checked ? 1 : 0); }
+        }
+    }
+    if root.info.was != "": WasLine { was: root.info.was; key: root.key; }
+    if root.info.warning != "": Text { text: @tr("The game cannot make this: {}.", root.info.warning); color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+}
+
+// The five armor parts' pigment: a swatch and #RRGGBB each, or the armor's own colour.
+export component PigmentEditor inherits VerticalLayout {
+    in property <[PigmentRow]> rows;
+    in property <int> where;
+    in property <string> was;
+    in property <string> key;
+    spacing: 6px;
+    for r[k] in root.rows: HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 32px;
+        Text { text: r.part; width: 80px; vertical-alignment: center; }
+        Rectangle { width: 32px; height: 32px; border-radius: 4px; background: r.colour; border-width: 1px; border-color: Tok.input-border; opacity: r.own ? 0.4 : 1; }
+        LineEdit { width: 110px; text: r.hex; accessible-label: r.part; accepted(t) => { Api.set-pigment(root.where, k, t); } }
+        if r.own: Muted { text: @tr("the armor's own colour"); vertical-alignment: center; }
+        if !r.own: Button { text: @tr("Armor's own colour"); clicked => { Api.own-pigment(root.where, k); } }
+    }
+    if root.was != "": WasLine { was: root.was; key: root.key; }
+}
+
+// The Equipment page's My Sets and Palico sets: the list (unused runs collapsed), then
+// the set picked.
+export component SetsView inherits HorizontalLayout {
+    property <bool> palico: Api.set-detail.palico;
+    property <int> k: Api.set-detail.index;
+    property <string> set-key: palico ? "palset:" + k : "myset:" + k;
+    spacing: Tok.pad;
+    VerticalLayout {
+        width: min(380px, root.width * 0.4);
+        alignment: start;
+        Card {
+            max-height: list.preferred-height + 2px;
+            Flickable {
+                // the card's width, so long names elide instead of scrolling sideways
+                content-width: self.width;
+                content-height: list.preferred-height;
+                list := VerticalLayout {
+                    for r in Api.set-rows: ListRow {
+                        two-line: r.used && r.sub != "";
+                        staged: r.changed;
+                        selected: r.first == root.k || (r.index < 0 && root.k >= r.first && root.k <= r.last);
+                        accessible-label: r.name;
+                        clicked => { Api.select-set(r.first); }
+                        HorizontalLayout {
+                            padding-left: 14px;
+                            padding-right: 14px;
+                            spacing: 10px;
+                            Text { text: r.index >= 0 ? r.index + 1 : ""; width: 28px; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
+                            VerticalLayout {
+                                alignment: center;
+                                Text { text: r.name; color: r.used ? Palette.foreground : Tok.faint; overflow: elide; }
+                                if r.used && r.sub != "": Muted { text: r.sub; wrap: no-wrap; overflow: elide; }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Card {
+        horizontal-stretch: 1;
+        ScrollView {
+            VerticalLayout {
+                padding: Tok.pad;
+                spacing: 14px;
+                alignment: start;
+                HorizontalLayout {
+                    spacing: Tok.gap;
+                    Text {
+                        text: root.palico ? @tr("Palico set {}", root.k + 1) : @tr("My Set {}", root.k + 1);
+                        font-size: 18px;
+                        font-weight: 600;
+                        vertical-alignment: center;
+                    }
+                    if root.palico || Api.set-detail.used: LineEdit {
+                        // follows the set picked, once typed into too
+                        property <string> cur: Api.set-detail.name;
+                        changed cur => { self.text = self.cur; }
+                        width: 220px;
+                        text: Api.set-detail.name;
+                        placeholder-text: @tr("Name");
+                        accessible-label: @tr("Set name");
+                        accepted(t) => { Api.set-set-name(t); }
+                        changed has-focus => {
+                            if !self.has-focus && self.text != Api.set-detail.name {
+                                Api.set-set-name(self.text);
+                            }
+                        }
+                    }
+                    Rectangle { horizontal-stretch: 1; }
+                    if root.palico || Api.set-detail.used: Button { text: @tr("Clear set"); clicked => { Api.clear-set(); } }
+                }
+                if Api.set-detail.was-name != "": WasLine { was: Api.set-detail.was-name; key: root.palico ? root.set-key : root.set-key + ":name"; }
+                if !root.palico && !Api.set-detail.used: VerticalLayout {
+                    spacing: 10px;
+                    alignment: start;
+                    Muted { text: @tr("An unused set. Save what you have on into it, as the game's Register does, then change it here."); wrap: word-wrap; }
+                    HorizontalLayout {
+                        alignment: start;
+                        Button { text: @tr("Save what you have on"); clicked => { Api.set-from-current(); } }
+                    }
+                }
+                if root.palico || Api.set-detail.used: VerticalLayout {
+                    spacing: 8px;
+                    HorizontalLayout {
+                        spacing: Tok.tight;
+                        alignment: start;
+                        SectionTitle { text: @tr("Gear"); }
+                        ConfidenceTag { level: Confidence.derived; }
+                    }
+                    Muted {
+                        text: root.palico ? @tr("Pieces of the Palico box.") : @tr("Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box.");
+                        wrap: word-wrap;
+                    }
+                    for p[j] in Api.set-detail.pieces: HorizontalLayout {
+                        spacing: 10px;
+                        alignment: start;
+                        height: 32px;
+                        Text { text: p.part; width: 110px; vertical-alignment: center; overflow: elide; }
+                        Picker { width: 480px; model: p.choices; value: p.pick; picked(i) => { Api.set-set-piece(j, i); } }
+                    }
+                    if Api.set-detail.was-gear != "": WasLine { was: Api.set-detail.was-gear; key: root.set-key + ":gear"; }
+                    if Api.set-detail.warn-gear != "": Text { text: @tr("The game cannot make this: {}.", Api.set-detail.warn-gear); color: Tok.bad; font-size: Tok.small; wrap: word-wrap; }
+                }
+                if !root.palico && Api.set-detail.used: VerticalLayout {
+                    spacing: 8px;
+                    HorizontalLayout {
+                        spacing: Tok.tight;
+                        alignment: start;
+                        SectionTitle { text: @tr("Style and Hunter Arts"); }
+                        ConfidenceTag { level: Confidence.derived; }
+                    }
+                    ArtsEditor { info: Api.set-detail.arts; where: 0; key: root.set-key + ":arts"; }
+                }
+                if !root.palico && Api.set-detail.used: VerticalLayout {
+                    spacing: 8px;
+                    SectionTitle { text: @tr("Pigment"); }
+                    Muted { text: @tr("The colours the hunter wears with this set, applied when it is loaded."); wrap: word-wrap; }
+                    PigmentEditor { rows: Api.set-detail.pigment; where: 0; was: Api.set-detail.was-pigment; key: root.set-key + ":pigment"; }
+                }
+                if !root.palico && Api.set-detail.used: HorizontalLayout {
+                    alignment: start;
+                    Button { text: @tr("Replace with what you have on"); clicked => { Api.set-from-current(); } }
+                }
+            }
+        }
+    }
+}

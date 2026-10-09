@@ -5,13 +5,13 @@
 use crate::assets;
 use crate::fmt::num;
 use crate::i18n::{tr, trf};
-use crate::targets::{Mon, Pal, Target};
+use crate::targets::{Mon, Pal, SetPart, Target};
 use crate::views::{deco_slots, deco_used, piece};
 use mhgu_save::equipment::{self, Entry, Kind, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::data::{tables, TalismanRow};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, character, monsters, palico, Save};
+use mhgu_save::{arena, character, monsters, palico, progress, sets, Save};
 
 /// Why a warning matters, shown once next to the list of warnings.
 pub fn why() -> &'static str {
@@ -261,9 +261,107 @@ fn appearance(s: &Save, base: usize) -> Option<String> {
     }
 }
 
+/// Name of Hunter Art `id`.
+pub fn art_name(id: u8) -> String {
+    tables().arts.iter().find(|a| a.0 == id as u32).map(|a| a.1.clone()).unwrap_or_else(|| trf("Art #{}", &[&id]))
+}
+
+/// Style, arts and SP bits with weapon class `weapon` (none: no weapon to check against):
+/// a style of the game, no more arts than its slots, each a real art of that weapon or of
+/// any weapon, unlocked, one tier of each, SP only on a slot with an art.
+pub fn arts(s: &Save, base: usize, a: &sets::Arts, weapon: Option<u8>) -> Option<String> {
+    if a.style > 5 {
+        return Some(tr("not a hunting style of the game").into());
+    }
+    let on: Vec<(usize, u8)> = a.ids.iter().copied().enumerate().filter(|&(_, id)| id != 0).collect();
+    if on.iter().any(|&(k, _)| k >= a.slots()) {
+        return Some(trf("{} has {} art slots", &[&tr(character::STYLES[a.style as usize]), &a.slots()]));
+    }
+    if (0..3).any(|k| a.sp >> k & 1 != 0 && a.ids[k] == 0) {
+        return Some(tr("an SP Art slot without an art").into());
+    }
+    for (j, &(_, id)) in on.iter().enumerate() {
+        let Some(class) = sets::art_class(id) else {
+            return Some(trf("art #{} is not a Hunter Art of the game", &[&id]));
+        };
+        if let (sets::ArtFor::Weapon(c), Some(w)) = (class, weapon)
+            && c != w
+        {
+            let weapon = crate::views::weapon_classes().get(w as usize).copied().unwrap_or("?");
+            return Some(trf("{} is not an art of the {}", &[&art_name(id), &weapon]));
+        }
+        if !s.bit(base + progress::ARTS, id as usize) {
+            return Some(trf("{} is not unlocked", &[&art_name(id)]));
+        }
+        if on[..j].iter().any(|&(_, x)| sets::art_family(x) == sets::art_family(id)) {
+            return Some(trf("{} twice", &[&art_name(id)]));
+        }
+    }
+    None
+}
+
+/// The class of the weapon in hunter box entry `i` (none: no weapon there).
+fn box_weapon(s: &Save, base: usize, i: u16) -> Option<u8> {
+    match (i as usize) < equipment::BOX_N {
+        true => match equipment::get(s, base, Owner::Hunter, i as usize).kind() {
+            Kind::Weapon(c) => Some(c),
+            _ => None,
+        },
+        false => None,
+    }
+}
+
+/// A My Set part: each piece in its place, and the arts as `arts` checks them against the
+/// set's weapon.
+fn my_set(s: &Save, base: usize, k: usize, p: SetPart) -> Option<String> {
+    let m = sets::my_set(s, base, k);
+    if !m.used() {
+        return None;
+    }
+    match p {
+        SetPart::Gear => m.gear.iter().enumerate().find_map(|(j, &g)| {
+            if g == sets::NO_BOX {
+                return None;
+            }
+            let fits = |k: Kind| match j {
+                0 => matches!(k, Kind::Weapon(_)),
+                6 => k == Kind::Talisman,
+                _ => k.code() as usize == j,
+            };
+            match (g as usize) < equipment::BOX_N {
+                false => Some(trf("box slot {} does not exist", &[&(g as usize + 1)])),
+                true => {
+                    let e = equipment::get(s, base, Owner::Hunter, g as usize);
+                    (!fits(e.kind())).then(|| trf("box slot {} holds no {}", &[&(g as usize + 1), &crate::views::set_piece_label(j)]))
+                }
+            }
+        }),
+        SetPart::Arts => arts(s, base, &m.arts, box_weapon(s, base, m.gear[0])),
+        _ => None,
+    }
+}
+
+/// A Palico set: each piece of the Palico box type of its place (22 weapon, 23 head,
+/// 24 body).
+fn palico_set(s: &Save, base: usize, k: usize) -> Option<String> {
+    sets::palico_set(s, base, k).gear.iter().enumerate().find_map(|(j, &g)| {
+        if g == sets::NO_BOX {
+            return None;
+        }
+        if g as usize >= equipment::PALICO_BOX_N {
+            return Some(trf("Palico box slot {} does not exist", &[&(g as usize + 1)]));
+        }
+        let e = equipment::get(s, base, Owner::Palico, g as usize);
+        (e.kind() != Kind::Other(22 + j as u8)).then(|| trf("Palico box slot {} holds no {}", &[&(g as usize + 1), &crate::views::palico_piece_label(j)]))
+    })
+}
+
 pub fn of(t: Target, s: &Save, slot: usize) -> Option<String> {
     let base = s.base(slot);
     match t {
+        Target::Arts => arts(s, base, &sets::arts(s, base), Some(sets::weapon_class(s, base))),
+        Target::MySet(k, p) => my_set(s, base, k, p),
+        Target::PalicoSet(k) => palico_set(s, base, k),
         Target::Item(st, i) => {
             let x = items::get(s, base, st, i);
             item(x.id, x.count as u16, st)

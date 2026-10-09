@@ -37,6 +37,7 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
     });
     guild_card(ui, st);
     appearance(ui, st);
+    char_loadout(ui, st);
 }
 
 /// The hunter's creation choices and colours, in the game's terms.
@@ -88,7 +89,7 @@ fn appearance(ui: &AppWindow, st: &State) {
 }
 
 /// "#e9d6cc", "e9d6cc" -> RGB.
-fn parse_rgb(t: &str) -> Option<[u8; 3]> {
+pub(super) fn parse_rgb(t: &str) -> Option<[u8; 3]> {
     let h = t.trim().trim_start_matches('#');
     let v = (h.len() == 6).then(|| u32::from_str_radix(h, 16).ok()).flatten()?;
     Some([(v >> 16) as u8, (v >> 8) as u8, v as u8])

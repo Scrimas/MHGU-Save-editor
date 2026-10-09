@@ -1,5 +1,6 @@
 import { LineEdit, ScrollView, Palette } from "std-widgets.slint";
 import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, ColHead, Hairline, TextLink, Pair, Picker } from "../common.slint";
+import { ArtsEditor, PigmentEditor } from "sets.slint";
 
 // Label, control, then "was … Undo" when staged (or the hint). Only the exceptions carry
 // a confidence tag (06); the page header states the rule.
@@ -375,6 +376,56 @@ export component CharacterPage inherits Rectangle {
                             Picker { width: 220px; model: Api.gc-poses; value: Api.card.pose; picked(i) => { Api.set-card("pose", i); } }
                         }
                     }
+                }
+              }
+            }
+            Rectangle {
+              min-width: pair4.min-w;
+              height: pair4.h;
+              pair4 := Pair {
+                w: root.cw;
+                a-min: arts.min-width;
+                b-min: pigment.min-width;
+                b-share: 0.5;
+                a-h: arts.preferred-height;
+                b-h: pigment.preferred-height;
+              }
+              arts := PairCard {
+                x: 0;
+                y: 0;
+                width: pair4.a-w;
+                height: pair4.a-height;
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 10px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: @tr("Style and Hunter Arts"); vertical-alignment: center; }
+                        ConfidenceTag { level: Confidence.derived; }
+                    }
+                    Muted { text: @tr("What you have on now. Loading a My Set in game replaces them with the set's."); wrap: word-wrap; }
+                    ArtsEditor { info: Api.char-arts; where: -1; key: "arts"; }
+                }
+              }
+              pigment := PairCard {
+                x: pair4.b-x;
+                y: pair4.b-y;
+                width: pair4.b-w;
+                height: pair4.b-height;
+                VerticalLayout {
+                    padding: Tok.pad;
+                    padding-left: 22px;
+                    spacing: 10px;
+                    HorizontalLayout {
+                        spacing: Tok.gap;
+                        alignment: start;
+                        SectionTitle { text: @tr("Armor pigment"); vertical-alignment: center; }
+                        ConfidenceTag { level: Confidence.derived; }
+                    }
+                    Muted { text: @tr("The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets)."); wrap: word-wrap; }
+                    PigmentEditor { rows: Api.char-pigment; where: -1; was: Api.was-pigment; key: "pigment"; }
                 }
               }
             }

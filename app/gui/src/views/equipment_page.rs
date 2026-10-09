@@ -3,7 +3,8 @@
 use super::*;
 
 pub(super) fn owner_of(ui: &AppWindow) -> Owner {
-    if ui.global::<Api>().get_equip_owner() == 1 { Owner::Palico } else { Owner::Hunter }
+    // the Palico box and the Palico sets
+    if ui.global::<Api>().get_equip_owner() % 2 == 1 { Owner::Palico } else { Owner::Hunter }
 }
 
 /// "your current gear, My Set 2 “Fire DB”" for the references to hunter box entry `i`.
@@ -97,6 +98,9 @@ pub(super) fn deco_picker(ui: &AppWindow, st: &State, search: &str) {
 }
 
 pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
+    if let Some(palico) = sets_tab(ui) {
+        return sets_page(ui, st, palico);
+    }
     let api = ui.global::<Api>();
     let s = st.save();
     let orig = st.orig();

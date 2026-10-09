@@ -14,6 +14,7 @@ pub mod monsters;
 pub mod palico;
 pub mod progress;
 pub mod save;
+pub mod sets;
 pub mod slots;
 pub mod smithy;
 pub mod store;
@@ -114,6 +115,40 @@ mod real_save {
         }
         let f = equipment::free_slot(&s, base, Owner::Hunter).unwrap();
         assert!(equipment::get(&s, base, Owner::Hunter, f).is_empty() && equipment::uses(&s, base, f).is_empty());
+    }
+
+    /// The loaded set registered again is the set the game wrote; rewriting every set's
+    /// pieces and arts as read changes nothing (the decorations are the box entries').
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn sets_match_the_game() {
+        let mut s = load();
+        let base = s.base(0);
+        let worn: Vec<u16> = (0..sets::PIECES).map(|p| s.u16(base + equipment::WORN + 2 * p)).collect();
+        // (none after the editor changed the worn gear)
+        if let Some(k) = (0..sets::MY_SETS_N).find(|&k| sets::my_set(&s, base, k).gear[..] == worn[..]) {
+            let m = sets::my_set(&s, base, k);
+            assert!(m.arts == sets::arts(&s, base) && m.pigment == sets::pigment(&s, base), "set {} is the one worn", k + 1);
+            sets::save_current(&mut s, base, k);
+        }
+        for k in 0..sets::MY_SETS_N {
+            let m = sets::my_set(&s, base, k);
+            for (p, &g) in m.gear.iter().enumerate() {
+                sets::set_my_set_piece(&mut s, base, k, p, (g != sets::NO_BOX).then_some(g as usize));
+            }
+            sets::set_my_set_arts(&mut s, base, k, m.arts);
+            if !m.used() {
+                sets::clear_my_set(&mut s, base, k);
+            }
+        }
+        for k in 0..sets::PALICO_SETS_N {
+            if !sets::palico_set(&s, base, k).used() {
+                sets::clear_palico_set(&mut s, base, k);
+            }
+        }
+        let a = sets::arts(&s, base);
+        sets::set_arts(&mut s, base, a);
+        assert!(s.diff().is_empty(), "changed {:?}", &s.diff()[..s.diff().len().min(8)]);
     }
 
     /// Edit a copy of the whole save folder and write it: all four files get the body,

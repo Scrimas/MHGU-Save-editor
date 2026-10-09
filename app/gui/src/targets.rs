@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, monsters, palico, save, slots, smithy, Save};
+use mhgu_save::{arena, monsters, palico, save, sets, slots, smithy, Save};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -40,6 +40,18 @@ pub enum Pal {
     /// The whole record and the Palico equipment box entries it wears (a Palico copied in).
     All,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SetPart {
+    Name,
+    /// The seven pieces with their decorations.
+    Gear,
+    Pigment,
+    /// Hunting style, Hunter Arts and SP Arts.
+    Arts,
+}
+
+pub const SET_PARTS: [SetPart; 4] = [SetPart::Name, SetPart::Gear, SetPart::Pigment, SetPart::Arts];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Target {
@@ -98,6 +110,14 @@ pub enum Target {
     /// A whole character slot (0-2, whatever the edit's character): copied, swapped,
     /// deleted or imported.
     Slot(usize),
+    /// A part of a My Set.
+    MySet(usize, SetPart),
+    /// A Palico equipment set: name and gear.
+    PalicoSet(usize),
+    /// The armor pigment the hunter has on.
+    Pigment,
+    /// The hunting style and Hunter Arts the hunter has on.
+    Arts,
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -177,6 +197,15 @@ pub fn pal_of(field: &str) -> Pal {
         "looks" => Pal::Looks,
         "all" => Pal::All,
         _ => Pal::Owner,
+    }
+}
+
+fn set_part(p: SetPart) -> &'static str {
+    match p {
+        SetPart::Name => "name",
+        SetPart::Gear => "gear",
+        SetPart::Pigment => "pigment",
+        SetPart::Arts => "arts",
     }
 }
 
@@ -286,9 +315,10 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Appearance | Gender | Greeting | StyleUse(_) => "character",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Appearance | Gender | Greeting | StyleUse(_)
+            | Pigment | Arts => "character",
             Item(..) | Loadout(_) | Obtained => "items",
-            Equip(..) | Smithy(_) => "equipment",
+            Equip(..) | Smithy(_) | MySet(..) | PalicoSet(_) => "equipment",
             Palico(..) => "palicoes",
             // the card's quest counts follow the cleared quests
             Quest(_) | Arena(_) | CardQuests(_) => "quests",
@@ -339,6 +369,10 @@ impl Target {
             Greeting => "card-greeting".into(),
             StyleUse(k) => format!("style:{k}"),
             Slot(k) => format!("slot:{k}"),
+            MySet(k, p) => format!("myset:{k}:{}", set_part(p)),
+            PalicoSet(k) => format!("palset:{k}"),
+            Pigment => "pigment".into(),
+            Arts => "arts".into(),
         }
     }
 
@@ -427,6 +461,19 @@ impl Target {
             Greeting => tr("Guild Card greeting").into(),
             StyleUse(k) => trf("{} quests", &[&tr(ch::STYLES[k])]),
             Slot(k) => trf("Character slot {}", &[&(k + 1)]),
+            MySet(k, p) => {
+                let what = match p {
+                    SetPart::Name => tr("Name"),
+                    SetPart::Gear => tr("Gear"),
+                    SetPart::Pigment => tr("Pigment"),
+                    SetPart::Arts => tr("Style and Hunter Arts"),
+                };
+                let m = sets::my_set(s, s.base(slot), k);
+                if m.used() { format!("{} · {what}", trf("My Set {} “{}”", &[&(k + 1), &m.name])) } else { format!("{} · {what}", trf("My Set {}", &[&(k + 1)])) }
+            }
+            PalicoSet(k) => trf("Palico set {}", &[&(k + 1)]),
+            Pigment => tr("Armor pigment").into(),
+            Arts => tr("Hunting style and Hunter Arts").into(),
         }
     }
 
@@ -549,6 +596,28 @@ impl Target {
                 let c = ch::get(s, s.base(k));
                 trf("{} · HR {} · {}", &[&c.name, &num(c.hr), &playtime(c.playtime)])
             }
+            MySet(k, p) => {
+                let m = sets::my_set(s, base, k);
+                match p {
+                    SetPart::Name => m.name,
+                    SetPart::Gear => {
+                        let v: Vec<String> = m.gear.iter().filter(|&&g| g != sets::NO_BOX).map(|&g| crate::views::box_piece_value(s, base, Owner::Hunter, g)).collect();
+                        if v.is_empty() { tr("None").into() } else { v.join(", ") }
+                    }
+                    SetPart::Pigment => crate::views::pigment_value(&m.pigment),
+                    SetPart::Arts => crate::views::arts_value(&m.arts),
+                }
+            }
+            PalicoSet(k) => {
+                let p = sets::palico_set(s, base, k);
+                if !p.used() {
+                    return tr("Empty").into();
+                }
+                let v: Vec<String> = p.gear.iter().filter(|&&g| g != sets::NO_BOX).map(|&g| crate::views::box_piece_value(s, base, Owner::Palico, g)).collect();
+                format!("{} · {}", p.name, if v.is_empty() { tr("None").to_string() } else { v.join(", ") })
+            }
+            Pigment => crate::views::pigment_value(&sets::pigment(s, base)),
+            Arts => crate::views::arts_value(&sets::arts(s, base)),
         }
     }
 
@@ -669,6 +738,29 @@ impl Target {
             Greeting => range(base + ch::CARD_GREETING, 2 * ch::GREETING_UNITS),
             StyleUse(k) => range(base + ch::STYLE_USE + 2 * k, 2),
             Slot(k) => [range(s.base(k), slots::LEN), range(save::SLOT_USED + k, 1), range(save::LAST_PLAYED, 1)].concat(),
+            MySet(k, p) => {
+                let o = base + sets::MY_SETS + sets::MY_SET * k;
+                match p {
+                    SetPart::Name => range(o, sets::NAME_LEN),
+                    // the seven box indices and the decorations copied with them
+                    SetPart::Gear => range(o + sets::GEAR, sets::PIGMENT - sets::GEAR),
+                    // colours, colour modes and own-colour flags
+                    SetPart::Pigment => range(o + sets::PIGMENT, sets::STYLE - sets::PIGMENT),
+                    // style, arts, SP bits
+                    SetPart::Arts => range(o + sets::STYLE, sets::SP + 1 - sets::STYLE),
+                }
+            }
+            PalicoSet(k) => range(base + sets::PALICO_SETS + sets::PALICO_SET * k, sets::PALICO_SET),
+            Pigment => {
+                let colours = ch::LOOK_COLOURS.iter().flat_map(|&c| range(base + c, 20));
+                [sets::PLAYER_OWN, sets::HDR_OWN].iter().flat_map(|&a| range(base + a, 2)).chain([sets::PLAYER_MODES, sets::HDR_MODES].iter().flat_map(|&a| range(base + a, 4))).chain(colours).collect()
+            }
+            Arts => [
+                range(base + sets::PLAYER_ARTS, 8),
+                range(base + sets::HDR_ARTS, 8),
+                ch::LOOKS[..2].iter().map(|&l| (base + l + sets::LOOK_STYLE, 0xFF)).collect(),
+            ]
+            .concat(),
         }
     }
 

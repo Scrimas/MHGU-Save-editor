@@ -11,9 +11,9 @@ use crate::targets::{self, Mon, Target, PAGES};
 use crate::update::{self, VERSION};
 use crate::{model, strings, Shared};
 use crate::{
-    Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, CardInfo, ColourRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow, EquipDetail,
-    EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, LookRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, Preview, PreviewLine,
-    QuestRow, RequestRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
+    Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ColourRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow,
+    EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, LookRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow, Preview,
+    PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SetRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
 };
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Kind, Owner};
@@ -120,6 +120,9 @@ struct View {
     /// box slot to scroll to on the next refresh
     equip_jump: Option<i32>,
     palico_sel: i32,
+    /// My Set and Palico set being edited
+    set_sel: i32,
+    palset_sel: i32,
     palico_search: String,
     quest_tab: usize,
     quest_search: String,
@@ -443,6 +446,14 @@ fn goto_target(ui: &AppWindow, st: &State, t: Target, key: &str) {
             v.equip_sel = i as i32;
         }
         Target::Palico(i, _) => v.palico_sel = i as i32,
+        Target::MySet(k, _) => {
+            api.set_equip_owner(2);
+            v.set_sel = k as i32;
+        }
+        Target::PalicoSet(k) => {
+            api.set_equip_owner(3);
+            v.palset_sel = k as i32;
+        }
         Target::Quest(i) => {
             if let Some(q) = tables().quests.iter().find(|q| q.index == i) {
                 v.quest_tab = quest_tabs().iter().position(|c| *c == q.category).unwrap_or(0);
@@ -579,6 +590,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_character(ui, st);
     wire_items(ui, st);
     wire_equipment(ui, st);
+    wire_sets(ui, st);
     wire_palicoes(ui, st);
     wire_quests(ui, st);
     wire_requests(ui, st);
@@ -723,13 +735,15 @@ mod overview;
 mod palicoes;
 mod quests;
 mod requests;
+mod sets_ui;
 mod settings_ui;
 mod update_ui;
 
 use self::{
     advanced::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
-    palicoes::*, quests::*, requests::*, settings_ui::*,
+    palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*,
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
+pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};
 pub use self::palicoes::look_label;
 pub use self::{file::*, update_ui::*};
