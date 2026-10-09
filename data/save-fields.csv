@@ -1,0 +1,546 @@
+scope,offset,size,count,stride,conf,field
+# Byte-level field map of the MHGU save (5,159,100 B). tools/bytemap.py expands it and writes data/save-unmapped.md.
+# scope: file (absolute offset), slot (base + offset; the three slots share one layout, CONFIRMED), or a struct name.
+# size: bytes of one element; count/stride: repeats (stride defaults to size). A field starting with @name embeds that struct.
+# conf: C = CONFIRMED, D = DERIVED, U = located but meaning UNRESOLVED (counts as unmapped). Bytes with no row are unmapped too.
+# Lines starting with # are comments.
+#
+# ---- Switch header and body header (docs/01, docs/07) ----
+file,0x00,8,,,U,Switch header bytes 0-7 (zero)
+file,0x08,4,,,U,Switch header u32 (4)
+file,0x0C,4,,,U,Switch header bytes 0xC-0xF (zero)
+file,0x10,4,,,U,Switch header u32 (0x14)
+file,0x14,4,,,D,header nonce: changes on every save; not a checksum (docs/01)
+file,0x18,4,,,U,Switch header u32 (0xC)
+file,0x1C,4,,,U,Switch header u32 = body length (0x4EB898 = file size - 0x24)
+file,0x20,4,,,U,Switch header bytes 0x20-0x23 (zero)
+file,0x24,4,,,U,body header u32 0xC6
+file,0x28,3,,,C,slot in use (1/0) for characters 1-3
+file,0x2B,1,,,C,last loaded slot (0-based)
+file,0x2C,4,,,C,block A offset relative to 0x24
+file,0x30,4,,,C,block B offset relative to 0x24
+file,0x34,12,,,C,"3 x u32 offset of character slots 1-3, relative to 0x24"
+#
+# ---- Block A (shared) ----
+file,0x40,4,,,D,bonus packs loaded: bit N = privilege pack N (S+0x420)
+file,0x44,6,,,D,"3 x u16 vestigial: written only by the transfer 0x52171c, no reader (S+0x3676)"
+file,0x4A,1,,,D,title-menu one-time notice shown (S+0x367c)
+file,0x4B,1,,,D,transfer-server link made (S+0x367d)
+file,0x4C,1,,,D,TV brightness: scale 0.4 + 0.025 x value (S+0x367e)
+file,0x4D,1,,,D,rumble on/off (S+0x367f)
+file,0x4E,324,50,,C,"@pal324 Palicoes, common pool (DLC Palicoes, owner Capcom)"
+file,0x3F96,64,100,96,U,blacklist entry: first 64 B
+file,0x3FD6,32,100,96,U,blacklist entry: last 32 B
+file,0x6516,6616,3,,U,sGuildCard common: card copy (6616 B)
+file,0xB29E,1,,,U,sGuildCard common: byte after the three copies
+file,0xB29F,3,,,U,sGuildCard common: 3 bytes the loader reads after it
+file,0xB2A2,1,,,D,sGameControl +0x5c: written by constructor / reset / transfer only; no reader
+file,0xB2A3,1,,,D,sGameControl +0x5d: 3DS Circle Pad Pro in use
+file,0xB2A4,1,,,D,"text language, 0 = from the system language (sGameControl +0xa5)"
+#
+# ---- Block B (shared) ----
+file,0xB2A5,8,,,C,"DLC Palicoes received, 50 bits, bit = DLC Palico info entry (sPrivilege +0xf34)"
+file,0xB2AD,8,,,C,"DLC item packs received, 50 bits, catalog ID 507 + bit (sPrivilege +0xf3c)"
+file,0xB2B5,4,,,D,"DLC extras of download type 4 (9 entries); bits 0-3 = Guild Card poses 17, 20, 21, 18"
+file,0xB2B9,12,,,D,DLC extras of download type 5: 80 Guild Card scenes sold by the Trader
+file,0xB2C5,4,,,D,DLC extras of download type 6: 10 pet costumes sold by the Trader
+file,0xB2C9,40,,,D,DLC extras of download type 7: 300 title words sold by the Trader
+file,0xB2F1,8,,,C,"challenge quest records in use, 45 bits, bit = record slot at 0x176499"
+file,0xB2F9,20,,,U,"event quests stored, 160 bits: count = stored quests, index not the block B slot (UNRESOLVED)"
+file,0xB30D,4,,,D,u32 stamp compared with the download catalog +0xe5c (sPrivilege +0xf9c)
+file,0xB311,104,50,,U,DLC item pack record (pack names; layout not decoded)
+file,0xC761,252,50,,U,DLC Palico info record (names, greetings; layout not decoded)
+file,0xF899,7168,160,,C,"@qslot event quest slot"
+file,0x127899,7168,45,,C,"@qslot challenge quest slot"
+file,0x12C2D6,8,,,D,"shared copy of the linked Nintendo Account ID (S+0x4408), inside challenge slot 2's unused tail (overlay)"
+file,0x176499,2048,45,,C,"@crec challenge quest record"
+file,0x18CC99,3,,,D,alignment padding before slot 1
+#
+# ---- Character slots ----
+file,0x18CC9C,0x11F8C4,1,,C,@slot character slot 1
+file,0x2AC560,0x11F8C4,1,,C,@slot character slot 2
+file,0x3CBE24,0x11F8C3,1,,C,@slot character slot 3 (its last alignment byte is the tail below)
+file,0x4EB6E7,469,,,D,zero tail after slot 3 (never read)
+#
+# ---- slot: header (writer 0x3e0ea4) ----
+slot,0x0,32,,,C,hunter name (slot screen copy)
+slot,0x20,4,,,C,play time in seconds (copy)
+slot,0x24,4,,,C,funds (copy)
+slot,0x28,2,,,C,HR (copy)
+slot,0x2A,1,,,C,"slot screen symbol: 2 Prowler, else 1 female, 0 male"
+slot,0x2B,1,,,U,u8 from the writer's argument
+slot,0x2C,8,,,C,"equipped Hunter Arts 3 x u16, SP Art bits u16 (copy)"
+slot,0x34,216,,,D,"rest of the 224-byte parameter block: Palico fields, no reader for a hunter, zero"
+slot,0x10C,4,7,44,D,"equipped-gear cache: vtable pointer written as is (runtime address, no data)"
+slot,0x110,36,7,44,C,"@equip36 equipped-gear cache: box entry copy"
+slot,0x134,4,7,44,U,equipped-gear cache: trailing u32
+slot,0x240,1,,,C,weapon class (15 = Prowler)
+slot,0x241,1,,,C,"voice, 1-20"
+slot,0x242,1,,,C,face
+slot,0x243,1,,,C,clothing
+slot,0x244,1,,,C,gender / body type
+slot,0x245,1,,,C,hunting style
+slot,0x246,1,,,C,hairstyle
+slot,0x247,1,,,U,appearance byte 7 (edited with colour 5 = skin)
+slot,0x248,1,,,C,features
+slot,0x249,3,,,U,appearance bytes 9-11
+slot,0x24C,20,,,C,"current pigment, 5 x RGBA (chest, arms, waist, legs, head)"
+slot,0x260,4,,,C,colour 5: skin
+slot,0x264,8,,,D,"colours 6, 7: hair, features (rebuilt by the game on save)"
+slot,0x26C,4,,,C,colour 8: clothing
+slot,0x270,2,,,C,default-colour flags
+slot,0x272,2,,,D,struct padding (stale bytes)
+slot,0x274,4,,,D,"u32: five 5-bit colour modes (0 RGBA, 1 separate path, 2+ preset v-2)"
+#
+# ---- slot: item box, loadouts, pouch ----
+slot,0x278,5463,,,C,"item box: 2300 x (u12 item ID, u7 count) bit stream (last 4 bits spare)"
+slot,0x17CF,170,24,,C,"@loadout item loadout"
+slot,0x27BF,76,,,C,"item pouch: 32 x (u12 item ID, u7 count) bit stream"
+#
+# ---- slot: S block S+0x20..0x41f (object order) ----
+slot,0x280B,4,,,C,HR points
+slot,0x280F,4,,,C,funds (zenny)
+slot,0x2813,4,,,U,"S+0x28: copy of sItem +0x69, random below 1-3 at quest result"
+slot,0x2817,4,,,C,Wycademy points
+slot,0x281B,16,,,C,"Village contribution points, low rank, 4 x u32"
+slot,0x282B,16,,,C,"Village contribution points, G rank, 4 x u32"
+slot,0x283B,1,,,U,S+0x50 u8
+slot,0x283C,18,,,C,Special Permits held per deviant (u8 x 18)
+slot,0x284E,1,,,U,S+0x63
+slot,0x284F,24,,,U,"S+0x64..0x7b, 12 x u16"
+slot,0x2867,12,,,U,S+0x7c..0x87
+slot,0x2873,44,,,U,"S+0x88..0xb3, copied as one block by the transfer"
+slot,0x289F,12,,,U,S+0xb4..0xbf
+slot,0x28AB,1,,,U,"S+0xc0 u8 counter: +1 per quest result when quest-data byte +0x5b is set"
+slot,0x28AC,79,,,U,"S+0xc1..0x10f: u8, u16 fields, u32 at +0xd4"
+slot,0x28FB,8,,,U,S+0x110..0x117: u8 and two u16 of talk condition 54
+slot,0x2903,1,,,U,"S+0x118 u8, Start Menu notice at 50"
+slot,0x2904,1,,,U,S+0x119
+slot,0x2905,12,,,C,"hunting style use counts, 6 x u16"
+slot,0x2911,2,,,U,S+0x126
+slot,0x2913,12,,,D,"Arena Latest Updates dates, 3 x (u8 day, u8 month, u16 year)"
+slot,0x291F,12,57,,C,"Arena best time: u32 frames, 8-byte Guild Card ID of the hunter"
+slot,0x2BCB,4,,,U,S+0x3e0
+slot,0x2BCF,32,,,U,S+0x3e4..0x403: set only by the initialisers
+slot,0x2BEF,3,,,D,"quests of the three Latest Updates (Arena table index, 17 = none)"
+slot,0x2BF2,1,,,U,S+0x407
+slot,0x2BF3,4,,,U,S+0x408: u32 taken over by the transfer
+slot,0x2BF7,3,,,D,quest counter's last three daily picks (255 = none)
+slot,0x2BFA,1,,,U,S+0x40f
+slot,0x2BFB,8,,,D,"u64 Unix time of the last daily pick"
+slot,0x2C03,1,,,D,Jukebox song chosen (0 = none)
+slot,0x2C04,1,,,U,S+0x419
+slot,0x2C05,2,,,D,"HR of the transferred save, 0xFFFF = none"
+slot,0x2C07,4,,,D,HR points of the transferred save
+#
+# ---- slot: S unlock maps and counters ----
+slot,0x2C0B,4,,,D,bonus packs announced (S+0x424)
+slot,0x2C0F,4,,,D,bonus packs granted (S+0x428)
+slot,0x2C13,24,,,C,Hunter Arts unlocked
+slot,0x2C2B,24,,,D,Hunter Arts unlocked N1 copy (S+0xd3c)
+slot,0x2C43,24,,,D,Hunter Arts NEW (S+0xd54)
+slot,0x2C5B,4,,,U,"S+0xd6c 31-bit map: OR of S+0xd74 at quest end, set by monster code (uEm014/022/085), counted by Alchemy"
+slot,0x2C5F,4,,,U,S+0xd70 u32 map tested by 0x5245d4
+slot,0x2C63,12,,,D,"Palico skills learned, 96 bits, bit = ot_skl entry"
+slot,0x2C6F,8,,,D,"Palico support moves seen, 57 bits"
+slot,0x2C77,256,,,C,quests cleared bitmap
+slot,0x2D77,256,,,C,quests seen bitmap
+slot,0x2E77,256,,,D,quests failed bitmap
+slot,0x2F77,8,,,U,"progress map, 64 bits (bits 8-12, 20, 29, 31 named; the rest not)"
+slot,0x2F7F,8,,,D,progress map NEW
+slot,0x2F87,4,,,D,"Housekeeper's Gallery movies, 14 bits"
+slot,0x2F8B,4,,,D,Gallery movies NEW
+slot,0x2F8F,8,,,C,Canteen ingredients
+slot,0x2F97,8,,,D,Canteen ingredients NEW
+slot,0x2F9F,8,,,C,"Poogie / Moofy costumes owned, 64 bits"
+slot,0x2FA7,8,,,D,costumes NEW
+slot,0x2FAF,4,,,D,deviants: first Special Permit quest unlocked
+slot,0x2FB3,4,,,D,deviants unlocked NEW
+slot,0x2FB7,4,,,D,deviants offered by the Courier
+slot,0x2FBB,4,,,D,deviants offered NEW
+slot,0x2FBF,8,,,D,"vestigial map S+0x9c4 and NEW copy: transfer only, no reader"
+slot,0x2FC7,164,,,C,"Guild Card title words part 1 unlocked, 1312 bits"
+slot,0x306B,164,,,C,title words part 1 NEW
+slot,0x310F,16,,,D,title words part 2 unlocked
+slot,0x311F,16,,,D,title words part 2 NEW
+slot,0x312F,20,,,C,Guild Card scenes unlocked
+slot,0x3143,20,,,D,scenes NEW
+slot,0x3157,20,,,C,"awards, game-side map"
+slot,0x316B,20,,,C,award notices
+slot,0x317F,4,,,D,Guild Card poses unlocked
+slot,0x3183,4,,,D,poses NEW
+slot,0x3187,16,,,C,quest sets completed
+slot,0x3197,16,,,D,quest set notices pending
+slot,0x31A7,36,,,D,"Smithy decorations listed, bit = decoCreate record"
+slot,0x31CB,36,,,D,Smithy decorations NEW
+slot,0x31EF,4,,,D,Trader item list 0
+slot,0x31F3,4,,,D,Trader item list 0 NEW
+slot,0x31F7,4,,,D,Trader item list 1
+slot,0x31FB,4,,,D,Trader item list 1 NEW
+slot,0x31FF,56,,,D,Trader title words for sale
+slot,0x3237,56,,,D,Trader title words NEW
+slot,0x326F,20,,,D,Trader scenes for sale
+slot,0x3283,20,,,D,Trader scenes NEW
+slot,0x3297,4,,,D,Trader pet costumes for sale
+slot,0x329B,4,,,D,Trader pet costumes NEW
+slot,0x329F,4,,,D,"Trader coin-ticket trades, bit = rTradeCoinTicketList entry (transfer only)"
+slot,0x32A3,4,,,D,coin-ticket trades NEW
+slot,0x32A7,4,,,C,Trader delivery requests offered
+slot,0x32AB,4,,,D,delivery requests offered NEW
+slot,0x32AF,4,,,C,delivery requests delivered
+slot,0x32B3,4,,,D,Hunter's Notes tips read
+slot,0x32B7,16,,,C,"Hunter's Notes, large monsters"
+slot,0x32C7,16,,,D,Hunter's Notes large monsters NEW
+slot,0x32D7,4,,,D,"Hunter's Notes, second list, 30 bits"
+slot,0x32DB,8,,,C,DLC item packs taken from the Room Service
+slot,0x32E3,4,,,U,"S+0x3668 flags: bit 1 daily bonus received; bit 0 network-mode switch (meaning UNRESOLVED)"
+slot,0x32E7,32,,,D,"Market listed, bit = shopList00 record"
+slot,0x3307,32,,,D,Market NEW
+slot,0x3327,32,,,D,"Guild Store listed, bit = shopList01 record"
+slot,0x3347,32,,,D,Guild Store NEW
+slot,0x3367,20,21,40,D,"Armory listed, type - 1"
+slot,0x337B,20,21,40,D,Armory NEW
+slot,0x36AF,20,15,40,D,"Smithy weapon list listed, types 7-21"
+slot,0x36C3,20,15,40,D,Smithy weapon list NEW
+slot,0x3907,288,5,576,D,"Smithy armor list listed, head..legs"
+slot,0x3A27,288,5,576,D,Smithy armor list NEW
+slot,0x4447,68,3,136,D,"Palico smithy listed (weapons, helms, mail)"
+slot,0x448B,68,3,136,D,Palico smithy NEW
+slot,0x45DF,128,15,,D,"Smithy weapon map by weapon ID, 15 types"
+slot,0x4D5F,656,,,D,Smithy armor map by armor ID
+slot,0x4FEF,12,,,D,"S+0xd8c 96-bit milestone map (bits 65-95: no writer or reader)"
+slot,0x4FFB,40,,,D,Arena: cleared with equipment set (bit 5 x quest + set)
+slot,0x5023,40,,,D,Arena equipment sets NEW
+slot,0x504B,8,,,C,rotating quests bitmap
+slot,0x5053,4,,,D,bit 0: Moofah Fleeceball given since the last quest
+slot,0x5057,4,,,U,"u32 of the chat-phrase object (+0x2838); a value >= 0 is replaced by 0xF8FC7E3F at load"
+slot,0x505B,4,,,D,Jukebox songs unlocked
+slot,0x505F,4,,,D,Jukebox songs NEW
+slot,0x5063,12,,,D,Lab upgrades offered
+slot,0x506F,12,,,D,Lab upgrades offered NEW
+slot,0x507B,12,,,D,Lab upgrades installed
+slot,0x5087,12,,,D,Lab upgrades installed NEW
+slot,0x5093,8,,,D,supply drop sets unlocked
+slot,0x509B,8,,,D,supply drop sets NEW
+slot,0x50A3,8,,,D,Cross coin trades unlocked
+slot,0x50AB,8,,,D,Cross coin trades NEW
+slot,0x50B3,4,,,D,deviants: EX Special Permit quest cleared
+slot,0x50B7,4,,,D,deviant EX cleared NEW
+slot,0x50BB,1,,,D,S+0x3680 u8 (transferred save)
+slot,0x50BC,2,,,D,"S+0x3682 u16: large monsters hunted in the transferred save, recomputed at load"
+slot,0x50BE,3444,,,D,"S+0x3684 reserved: only init / save / load touch it, zero"
+slot,0x5E32,3,,,D,"S+0x43f8 reserved: only save / load touch it"
+slot,0x5E35,1,,,U,"S+0x43fb control option byte (Game options window; player, target camera)"
+slot,0x5E36,4,,,D,Courier: deviant bit lent for temporary mode 1
+slot,0x5E3A,4,,,D,Courier: deviant bit lent for temporary mode 2
+slot,0x5E3E,8,,,D,u64 Nintendo Account ID linked to the save-transfer server
+slot,0x5E46,4,,,D,"S+0x4410 reserved: only save / load touch it"
+slot,0x5E4A,4,,,D,"Courier flags: bits 0-5 one-time gifts at 10, 30, 50, 80, 100, 150 quests"
+slot,0x5E4E,4,,,C,quest counter
+slot,0x5E52,4,,,D,quest counter at the Courier's last talk
+slot,0x5E56,4,,,D,Courier points
+slot,0x5E5A,36,,,D,"Special Permit points per deviant, 18 x u16"
+slot,0x5E7E,36,,,D,"Special Permit points waiting at the Courier, 18 x u16"
+slot,0x5EA2,1,,,U,S+0x446c control option byte 0 (Game options; target camera)
+slot,0x5EA3,1,,,U,S+0x446d
+slot,0x5EA4,2,,,U,"S+0x446e, +0x446f control option bytes (target camera, Hunter Art gauge)"
+slot,0x5EA6,274,,,C,"monster hunt tallies, u16 index 1-137"
+slot,0x5FB8,274,,,C,"monster capture counts, u16 index 1-137"
+slot,0x60CA,548,,,C,"monster size records, (u16 min, u16 max) index 1-137"
+#
+# ---- slot: sEquipBox ----
+slot,0x62EE,36,2000,,C,@equip36 equipment box entry
+slot,0x17C2E,36,1000,,C,@equip36 Palico equipment box entry
+slot,0x208CE,136,40,,C,@myset My Set
+slot,0x21E0E,68,24,,D,@palset Palico equipment set
+#
+# ---- slot: sGameControl ----
+slot,0x2246E,29,,,U,"game options, 29 bytes (per-byte meaning not mapped)"
+slot,0x2248B,4,,,C,play time in seconds
+slot,0x2248F,4,,,C,f32 play-time remainder in frames
+slot,0x22493,4,,,U,"sGameControl +0x3c u32, copied to Guild Card +0x86C"
+#
+# ---- slot: sItem ----
+slot,0x22497,376,,,C,"items obtained, bit = item ID"
+slot,0x2260F,136,3,,U,Trader cargo order (136 B; layout not decoded)
+slot,0x227A7,420,10,,U,"Alchemy request (u8, u8, u16, 3 x equip36, 7 x (u32, u32, equip36))"
+slot,0x2380F,4,,,D,"village tier bytes, Bherna / Kokoto / Pokke / Yukumo"
+slot,0x23813,6,,,U,sItem +0x90 6 bytes after the tier bytes
+slot,0x23819,1,,,D,Trader cargo shipments counter
+slot,0x2381A,1,,,D,low-rank contribution points accumulator
+slot,0x2381B,2,,,C,G-rank contribution points accumulator
+slot,0x2381D,1,,,D,Footbath uses
+slot,0x2381E,23,,,D,"pending village rewards, one count per reward kind (at most 99)"
+slot,0x23835,5,,,D,"staged quest-clear counters 0-4"
+slot,0x2383A,1,,,U,staged quest-clear counter byte 5
+slot,0x2383B,25,,,D,"Combination List recipes combined, bit = itemPreData record"
+slot,0x23854,256,,,D,Combination List order (pouch list)
+slot,0x23954,256,,,D,Combination List order (item box list)
+slot,0x23A54,4,,,D,Horns Coins traded in total
+#
+# ---- slot: sPlayer record ----
+slot,0x23A58,1,,,U,sPlayer +0x9C5C u8 (Guild Card flags bit 1 comes from it)
+slot,0x23A59,8,,,C,"equipped Hunter Arts 3 x u16, SP Art bits u16"
+slot,0x23A61,216,,,D,"rest of the 224-byte parameter block, no reader for a hunter"
+slot,0x23B39,14,,,C,"equipped gear, 7 x u16 box index"
+slot,0x23B47,1,,,C,weapon class
+slot,0x23B48,1,,,C,voice
+slot,0x23B49,1,,,C,face
+slot,0x23B4A,1,,,C,clothing
+slot,0x23B4B,1,,,C,gender
+slot,0x23B4C,1,,,C,hunting style
+slot,0x23B4D,1,,,C,hairstyle
+slot,0x23B4E,1,,,U,appearance byte 7 (edited with the skin colour)
+slot,0x23B4F,1,,,C,features
+slot,0x23B50,3,,,U,appearance bytes 9-11
+slot,0x23B53,20,,,C,"current pigment, 5 x RGBA"
+slot,0x23B67,4,,,C,colour 5: skin
+slot,0x23B6B,8,,,D,"colours 6, 7: hair, features"
+slot,0x23B73,4,,,C,colour 8: clothing
+slot,0x23B77,4,,,D,five 5-bit colour modes
+slot,0x23B7B,2,,,C,default-colour flags
+slot,0x23B7D,32,,,C,hunter name
+#
+# ---- slot: sOtomo ----
+slot,0x23B9D,1,,,D,Palico played as Prowler (index; 0xFF = none)
+slot,0x23B9E,1,,,C,hunting buddy 1 (index; 0xFF = none)
+slot,0x23B9F,1,,,D,hunting buddy 2
+slot,0x23BA0,1,,,D,"Palico Dojo sessions completed, at most 100"
+slot,0x23BA1,1,,,D,"Palicoes hired in total, at most 200"
+slot,0x23BA2,20,,,U,"Palico service settings (u2 mode, seven small values, four u32, bit-packed; values not named)"
+slot,0x23BB6,324,84,,C,@pal324 Palico of the slot
+slot,0x2A606,324,24,,C,@pal324 Palico for hire
+slot,0x2C466,8,5,,D,ID of a Palico that reached level 50
+slot,0x2C48E,4,,,D,Palico Dojo teaching session: 4 Palico indices
+slot,0x2C492,1,,,D,"teaching session kind (1 = Palico skill, else support move)"
+slot,0x2C493,1,,,D,teaching session skill / move ID
+slot,0x2C494,2,,,D,teaching session in progress
+slot,0x2C496,8,,,U,teaching session: two u32
+slot,0x2C49E,3,3,16,D,"Palico Dojo training slot: index (0xFF = empty), type 0-3, sessions left"
+slot,0x2C4A1,13,3,16,U,Palico Dojo training slot: bytes 3-15
+slot,0x2C4CE,6,,,U,"team of up to 5 Palicoes, u8 count + 5 x u8 index (probably Meownster Hunters)"
+slot,0x2C4D4,4,,,D,"Palico level milestones: bit 0 level 20, bit 1 level 25"
+#
+# ---- slot: sVillage ----
+slot,0x2C4D8,2,,,D,Dark Piece / Dark Stone counts (cut Cave feature)
+slot,0x2C4DA,2,,,C,Village star level
+slot,0x2C4DC,2,,,C,Hub star level
+slot,0x2C4DE,4,,,D,"Moofah affection, u8 x 4"
+slot,0x2C4E2,1,,,D,Moofah gifts received
+slot,0x2C4E3,128,,,C,"village pet names, 4 x char[32]"
+slot,0x2C563,4,,,D,"village pet costumes, u8 per pet"
+slot,0x2C567,4,,,D,"village pets adopted, bit per pet"
+slot,0x2C56B,1,,,D,Housekeeper (Room Service NPC index)
+slot,0x2C56C,1,,,D,village to start in on load
+#
+# ---- slot: sNpcTalk, sKitchen, sFlagChecker, sMakeAmulet ----
+slot,0x2C56D,192,,,C,"event flags, 1536 bits"
+slot,0x2C62D,24,,,D,per-NPC hold bits A (request offers)
+slot,0x2C645,24,,,C,per-NPC hold bits B
+slot,0x2C65D,24,,,D,per-NPC hold bits C (story announcements)
+slot,0x2C675,4,,,D,random word (talk conditions 106-108)
+slot,0x2C679,4,,,D,second random word
+slot,0x2C67D,13,,,C,"Canteen dishes, 99 bits"
+slot,0x2C68A,3,,,U,sKitchen +0x115: 3 bytes after the dishes
+slot,0x2C68D,13,,,D,Canteen dishes viewed
+slot,0x2C69A,3,,,U,sKitchen +0x125: 3 bytes after the viewed map
+slot,0x2C69D,8,,,U,sKitchen +0x128: 8 bytes
+slot,0x2C6A5,4,,,U,"sFlagChecker +0x20: flags latched from another object"
+slot,0x2C6A9,16,,,D,"sMakeAmulet 128-bit map over a 107-entry table, set at quest end, read by the quest rotation"
+slot,0x2C6B9,4,,,D,"one-time event scenes played, 24 bits"
+#
+# ---- slot: sGuildCard ----
+slot,0x2C6BD,633600,,,C,"Guild Card list 1: 100 x (u32 len, zlib card, u32 state, 36 B trailer), then heap padding"
+slot,0xC71BD,6328,,,D,@card own Guild Card
+slot,0xC8A75,44,100,,D,@info44 list 1 card info
+slot,0xC9BA5,316800,,,D,"Guild Card inbox (list 2): 50 elements, then heap padding"
+slot,0x117125,4,50,36,D,"list 2 card info: date received (u8 day, u8 month, u16 year)"
+slot,0x117129,32,50,36,U,list 2 card info: bytes 4-35
+slot,0x11782D,276,,,D,@sp276 StreetPass Palico to send
+slot,0x117941,276,50,,D,@sp276 Palico inbox entry
+slot,0x11AF29,36,50,,U,Palico inbox info record
+#
+# ---- slot: guest hunters, tutorial, sMonNyan, chat ----
+slot,0x11B631,98,,,U,guest hunters header (98 B)
+slot,0x11B693,470,13,,C,@guest guest hunter record
+slot,0x11CE71,8,5,,U,guest hunters: 5 x 8-byte hunter IDs
+slot,0x11CE99,8,,,U,sTutorial first 8 bytes
+slot,0x11CEA1,152,,,U,sTutorial 152 bytes
+slot,0x11CF39,263,,,U,Meownster Hunters (sMonNyan) state
+slot,0x11D040,73,,,U,chat phrases header (0x49 B)
+slot,0x11D089,104,72,,C,"chat phrase slot: 3 copies of the 24 shortcut phrases"
+slot,0x11EDC9,104,27,,C,"chat phrase slot: 3 copies of the 9 auto-chat lines"
+slot,0x11F8C1,2,,,U,last 2 bytes of the chat block before alignment
+slot,0x11F8C3,1,,,D,alignment byte (slots 1 and 2; slot 3's is part of the zero tail)
+#
+# ==== structs ====
+# Palico record, 324 B (sOtomo loader 0x263390)
+pal324,0x00,32,,,C,name char[32]
+pal324,0x20,4,,,C,experience
+pal324,0x24,1,,,C,level - 1
+pal324,0x25,1,,,C,support bias
+pal324,0x26,1,,,U,"parameter +6: 0-99 value capped per entry (possibly Enthusiasm)"
+pal324,0x27,1,,,C,target
+pal324,0x28,8,,,C,equipped support moves
+pal324,0x30,8,,,C,equipped skills
+pal324,0x38,16,,,C,support move list
+pal324,0x48,12,,,C,skill list
+pal324,0x54,1,,,D,move point pattern
+pal324,0x55,1,,,C,move list length
+pal324,0x56,1,,,D,skill point pattern
+pal324,0x57,1,,,C,skill list length
+pal324,0x58,8,,,D,ID per Palico
+pal324,0x60,60,,,C,greeting
+pal324,0x9C,32,,,C,original owner name
+pal324,0xBC,68,,,U,parameter block +0x9C..+0xDF
+pal324,0x100,14,,,C,"equipment references, 7 x u16"
+pal324,0x10E,1,,,C,look: 15 (Prowler)
+pal324,0x10F,1,,,C,look: voice
+pal324,0x110,1,,,C,look: eyes
+pal324,0x111,1,,,C,look: clothing
+pal324,0x112,2,,,U,look bytes 4-5
+pal324,0x114,1,,,C,look: coat
+pal324,0x115,1,,,C,look: ears
+pal324,0x116,1,,,C,look: tail
+pal324,0x117,3,,,U,look bytes 9-11
+pal324,0x11A,16,,,C,"colours 0-3: coat, left eye, right eye, clothing"
+pal324,0x12A,20,,,D,colours 4-8 (not drawn for new Palicoes)
+pal324,0x13E,4,,,U,u32 +0x13E
+pal324,0x142,2,,,U,u16 +0x142
+#
+# equipment box entry, 36 B (docs/07)
+equip36,0x00,2,,,C,"type bits 0-4, level - 1 bits 5-9, transmog level bits 10-14, bit 15 UNRESOLVED"
+equip36,0x02,2,,,C,equipment ID
+equip36,0x04,2,,,C,transmog appearance ID
+equip36,0x06,6,,,C,"3 x u16 decoration item IDs"
+equip36,0x0C,2,,,C,talisman skill trees 1-2
+equip36,0x0E,2,,,C,talisman skill points 1-2
+equip36,0x10,1,,,C,talisman slot count
+equip36,0x11,1,,,U,byte +0x11
+equip36,0x12,1,,,C,talisman tier code
+equip36,0x13,1,,,U,"byte +0x13 (1 on every talisman)"
+equip36,0x14,16,,,U,bytes +0x14..+0x23 (zero in every entry observed)
+#
+# My Set, 136 B (game record; docs/07 offsets - 6)
+myset,0x00,42,,,C,set name
+myset,0x2A,14,,,C,"box index x 7, 0xFFFF = empty"
+myset,0x38,42,,,D,copy of each piece's decorations
+myset,0x62,2,,,U,bytes +0x62..+0x63
+myset,0x64,20,,,C,"pigment, 5 x RGBA"
+myset,0x78,5,,,D,colour modes
+myset,0x7D,5,,,C,default-colour flags
+myset,0x82,1,,,C,hunting style
+myset,0x83,3,,,C,Hunter Arts
+myset,0x86,1,,,C,SP Art bits
+myset,0x87,1,,,D,padding
+#
+# Palico equipment set, 68 B
+palset,0x00,42,,,D,set name
+palset,0x2A,6,,,D,"3 x u16 box index, 0xFFFF = empty"
+palset,0x30,20,,,U,bytes +0x30..+0x43 (flags; 3 bytes at +0x30 stay 1 in unused sets)
+#
+# item loadout, 170 B
+loadout,0x00,42,,,C,"name char[42] (--- = unused)"
+loadout,0x2A,128,,,C,"32 x (u16 item ID, u16 count)"
+#
+# event / challenge quest slot, 0x1C00 B
+qslot,0x00,4,,,C,quest ID (0 = empty)
+qslot,0x04,4,,,C,archive size
+qslot,0x08,7160,,,C,"MT ARC archive (size bytes), then zero padding"
+#
+# challenge quest record, 0x800 B
+crec,0x00,4,,,C,quest ID
+crec,0x04,4,,,C,data size
+crec,0x08,2040,,,U,raw challenge record data (fixed loadouts? not decoded)
+#
+# Guild Card, 6328 B
+card,0x000,22,,,C,"hunter name, UTF-16"
+card,0x016,2,,,C,HR
+card,0x018,12,,,C,appearance bytes (as slot header +0x240)
+card,0x024,36,,,C,"pigment, 9 colours"
+card,0x048,4,,,D,colour modes (as slot header +0x274)
+card,0x04C,8,,,D,first 8 bytes of the 224-byte block (arts; does not follow the player)
+card,0x054,44,7,,C,@cequip44 equipment
+card,0x188,580,3,,U,"@cpal580 Palico (main, buddy 1, buddy 2)"
+card,0x854,6,,,C,"title, 3 x u16"
+card,0x85A,1,,,C,scene
+card,0x85B,1,,,C,pose
+card,0x85C,2,,,D,"HR of a transferred save, 0xFFFF = none"
+card,0x85E,14,,,C,"quests completed, 7 x u16"
+card,0x86C,4,,,U,copied from sGameControl +0x3c
+card,0x870,4,,,D,Unity total
+card,0x874,4,,,U,card +0x874
+card,0x878,56,,,C,"greeting, UTF-16"
+card,0x8B0,8,,,D,card owner's ID
+card,0x8B8,1,,,U,"flags: bit 7 award 100/101, bit 1 from sPlayer +0x9C5C"
+card,0x8B9,1,,,U,card +0x8B9
+card,0x8BA,90,,,C,"weapon usage, 3 x 15 x u16"
+card,0x914,4,,,C,play time
+card,0x918,160,10,,C,@hist160 quest history record
+card,0xF58,20,,,C,awards
+card,0xF6C,8,87,,C,"monster log entry (u16 max, u16 min, hunts/captures/notes/crowns)"
+card,0x1224,20,17,,C,"Arena log: 5 best times (u32 bit fields)"
+card,0x1378,860,,,U,card +0x1378..+0x16D3 (zero on the own card)
+card,0x16D4,8,17,,D,partner ID of the best Arena time per quest
+card,0x175C,348,,,U,card +0x175C..+0x18B7 (zero on the own card)
+#
+# card equipment entry, 44 B
+cequip44,0x00,1,,,C,type
+cequip44,0x01,1,,,U,byte +1
+cequip44,0x02,2,,,C,equipment ID
+cequip44,0x04,1,,,C,level - 1
+cequip44,0x05,3,,,U,bytes +5..+7
+cequip44,0x08,6,,,C,3 x u16 decorations
+cequip44,0x0E,2,,,U,bytes +0xE..+0xF
+cequip44,0x10,24,,,C,talisman data (box +0x0C)
+cequip44,0x28,2,,,C,transmog ID
+cequip44,0x2A,1,,,C,transmog level (box bits 10-14)
+cequip44,0x2B,1,,,U,byte +0x2B
+#
+# card Palico section, 580 B
+cpal580,0x000,22,,,D,"Palico name, UTF-16"
+cpal580,0x016,558,,,U,rest of the card Palico section
+#
+# quest history record, 160 B
+hist160,0x00,4,,,C,"date: u8 day, u8 month, u16 year"
+hist160,0x04,2,,,C,record kind
+hist160,0x06,2,,,C,quest ID / value
+hist160,0x08,32,,,C,"quest name, UTF-16, 16 characters"
+hist160,0x28,3,,,D,highlight codes
+hist160,0x2B,1,,,U,byte +0x2B
+hist160,0x2C,12,,,D,highlight value 1 x 3
+hist160,0x38,12,,,D,highlight value 2 x 3
+hist160,0x44,88,,,D,"hunter and Palico names, UTF-16"
+hist160,0x9C,4,,,D,"weapon type per party slot (15 Palico, ff empty)"
+#
+# list 1 card info, 44 B
+info44,0x00,4,,,D,"date received: u8 day, u8 month, u16 year"
+info44,0x04,24,,,D,"comment, UTF-16"
+info44,0x1C,4,,,D,Unity with the card's owner
+info44,0x20,1,,,D,card type
+info44,0x21,8,,,D,sender ID
+info44,0x29,3,,,U,bytes +0x29..+0x2B
+#
+# StreetPass Palico record, 276 B
+sp276,0x00,8,,,D,sender's hunter ID
+sp276,0x08,22,,,D,"Palico name, UTF-16"
+sp276,0x1E,12,,,D,appearance bytes
+sp276,0x2A,2,,,D,padding (stale stack bytes)
+sp276,0x2C,36,,,D,9 colours
+sp276,0x50,6,,,D,parameter block bytes 0-5
+sp276,0x56,1,,,U,"parameter block +6 (forced to 55)"
+sp276,0x57,189,,,D,parameter block bytes 7-195
+#
+# guest hunter record, 470 B
+guest,0x00,22,,,C,"name, UTF-16"
+guest,0x16,6,,,C,title
+guest,0x1C,2,,,C,HR
+guest,0x1E,56,,,C,greeting
+guest,0x56,6,,,U,bytes +0x56..+0x5B
+guest,0x5C,4,,,C,Unity (u32)
+guest,0x60,5,,,U,bytes +0x60..+0x64
+guest,0x65,8,,,C,owner ID
+guest,0x6D,5,,,U,bytes +0x6D..+0x71
+guest,0x72,12,,,C,appearance
+guest,0x7E,36,,,C,pigment
+guest,0xA2,44,7,,C,@cequip44 equipment
