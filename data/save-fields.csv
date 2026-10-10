@@ -101,36 +101,44 @@ slot,0x27BF,76,,,C,"item pouch: 32 x (u12 item ID, u7 count) bit stream"
 # ---- slot: S block S+0x20..0x41f (object order) ----
 slot,0x280B,4,,,C,HR points
 slot,0x280F,4,,,C,funds (zenny)
-slot,0x2813,4,,,U,"S+0x28: copy of sItem +0x69, random below 1-3 at quest result"
+slot,0x2813,4,,,D,"S+0x28 Trader trade-goods tier (Exchange for Items list 0): 0/1/2 = entries with condition 0/3/7; random below 1+[cond 3]+[cond 7] at each quest result (0x195758, also sItem +0x69); read by the list builder 0x7a565c"
 slot,0x2817,4,,,C,Wycademy points
 slot,0x281B,16,,,C,"Village contribution points, low rank, 4 x u32"
 slot,0x282B,16,,,C,"Village contribution points, G rank, 4 x u32"
-slot,0x283B,1,,,U,S+0x50 u8
+slot,0x283B,1,,,D,"S+0x50 u8: only the transfer (old +0x3c, 0x51e6d8) and init write it; no reader"
 slot,0x283C,18,,,C,Special Permits held per deviant (u8 x 18)
-slot,0x284E,1,,,U,S+0x63
-slot,0x284F,24,,,U,"S+0x64..0x7b, 12 x u16"
-slot,0x2867,12,,,U,S+0x7c..0x87
-slot,0x2873,44,,,U,"S+0x88..0xb3, copied as one block by the transfer"
-slot,0x289F,12,,,U,S+0xb4..0xbf
-slot,0x28AB,1,,,U,"S+0xc0 u8 counter: +1 per quest result when quest-data byte +0x5b is set"
-slot,0x28AC,79,,,U,"S+0xc1..0x10f: u8, u16 fields, u32 at +0xd4"
-slot,0x28FB,8,,,U,S+0x110..0x117: u8 and two u16 of talk condition 54
-slot,0x2903,1,,,U,"S+0x118 u8, Start Menu notice at 50"
-slot,0x2904,1,,,U,S+0x119
+slot,0x284E,1,,,D,"S+0x63 padding before the u16 array S+0x64: no initialiser, transfer or other access"
+slot,0x284F,2,12,,D,"S+0x64 u16 x 12: vestigial, only the transfer (old +0x4a..+0x61) writes them; no reader"
+slot,0x2867,12,,,D,"S+0x7c..0x87 reserved: only init / load / save touch it"
+slot,0x2873,2,28,,C,"quests completed per stage (stage ID mod 100 mod 28): u8 base stage, u8 its 101-104 variant; +1 per cleared quest, max 255 (0x38e75c); no reader. Timeline: Harvest Tour 201 (stage 1) raised stage 1 by 1"
+slot,0x28AB,1,,,D,"S+0xc0 times begun in a Hidden Area (quest data +0x5b, 0x3ad988), +1 at quest result (0x388b28), max 255; title words 77 Secret at 5, 78 Hidden at 10 (0x3f45dc)"
+slot,0x28AC,1,,,C,"S+0xc1 100-hour play-time milestones announced: the quest result 0x38f454 raises it while play time >= (n+1) x 100 h (max 255). Timeline: play time written to 458.9 h, the next quest result set it 0 -> 4"
+slot,0x28AD,2,,,D,"S+0xc2 u16 quests abandoned (sQuest +0x50 = 6, 0x38e818), max 9999; every 10th logs a history message (0x3901e0)"
+slot,0x28AF,2,7,,D,"S+0xc4..0xd1 u16 x 7: vestigial, only the transfer (old +0x92..+0x9f) writes them; no reader"
+slot,0x28BD,2,,,D,"S+0xd2 padding before the u32 at S+0xd4: no access"
+slot,0x28BF,4,,,D,"S+0xd4 u32 times fainted in quests: the quest result 0x390330 adds the hunter's faints (sQuest +0x166b), up to 999,999,999"
+slot,0x28C3,2,14,,D,"S+0xd8 u16 x 14 weapons upgraded per weapon type (index: class 7-11 -> 0-4, 13-21 -> 5-13); Smithy upgrade 0x702e48 -> 0x162b54"
+slot,0x28DF,2,14,,D,"S+0xf4 u16 x 14 weapons forged per weapon type, same index; Smithy forge 0x6fb0dc -> 0x162e0c"
+slot,0x28FB,1,,,U,"S+0x110 u8 countdown: talk condition 54 needs 0; talk action 0x1977f8 decrements it and re-rates S+0x116; setter not found"
+slot,0x28FC,1,,,D,S+0x111 padding
+slot,0x28FD,2,,,U,"S+0x112 u16: written by the transfer (old +0xdc) only; 1324 in slot 1, no v1.4 writer or reader found"
+slot,0x28FF,2,,,D,"S+0x114 u16: 20000-HR-point steps acknowledged (talk condition 54, 0x197598: HR points - 20000 x this >= 20000); talk action 0x1977f8 adds 1"
+slot,0x2901,2,,,D,"S+0x116 u16 rating 3-6 from the cleared-quest count (0x197624: >= 90 / 180 / 540 with Hub star gates), written by 0x1977f8"
+slot,0x2903,1,,,D,"S+0x118 Hyper monsters hunted (pending S+0x44a7 added at quest end, 0x5245a8); title word 116 Hyper at 50 (0x3f5200)"
+slot,0x2904,1,,,D,S+0x119 padding
 slot,0x2905,12,,,C,"hunting style use counts, 6 x u16"
-slot,0x2911,2,,,U,S+0x126
+slot,0x2911,2,,,D,"S+0x126 padding (the initialisers write 0x11a..0x125 and from 0x128)"
 slot,0x2913,12,,,D,"Arena Latest Updates dates, 3 x (u8 day, u8 month, u16 year)"
-slot,0x291F,12,57,,C,"Arena best time: u32 frames, 8-byte Guild Card ID of the hunter"
-slot,0x2BCB,4,,,U,S+0x3e0
-slot,0x2BCF,32,,,U,S+0x3e4..0x403: set only by the initialisers
+slot,0x291F,12,57,,C,"Arena best time: u32 frames, 8-byte Guild Card ID of the hunter (entries 0-56)"
+slot,0x2BCB,12,3,,D,"Arena best time entries 57-59 (1120011, 1120012, 1120013 of the Arena Counter's 60-quest table 0x164fdb4; written at S+0x134 + 12 x index, 0x6e50f4)"
 slot,0x2BEF,3,,,D,"quests of the three Latest Updates (Arena table index, 17 = none)"
-slot,0x2BF2,1,,,U,S+0x407
-slot,0x2BF3,4,,,U,S+0x408: u32 taken over by the transfer
+slot,0x2BF2,1,,,D,S+0x407 padding
+slot,0x2BF3,4,,,D,"S+0x408 u32: only init and the transfer (old +0x264) write it; no reader"
 slot,0x2BF7,3,,,D,quest counter's last three daily picks (255 = none)
-slot,0x2BFA,1,,,U,S+0x40f
+slot,0x2BFA,1,,,D,S+0x40f padding
 slot,0x2BFB,8,,,D,"u64 Unix time of the last daily pick"
 slot,0x2C03,1,,,D,Jukebox song chosen (0 = none)
-slot,0x2C04,1,,,U,S+0x419
+slot,0x2C04,1,,,D,S+0x419 padding
 slot,0x2C05,2,,,D,"HR of the transferred save, 0xFFFF = none"
 slot,0x2C07,4,,,D,HR points of the transferred save
 #
@@ -140,14 +148,17 @@ slot,0x2C0F,4,,,D,bonus packs granted (S+0x428)
 slot,0x2C13,24,,,C,Hunter Arts unlocked
 slot,0x2C2B,24,,,D,Hunter Arts unlocked N1 copy (S+0xd3c)
 slot,0x2C43,24,,,D,Hunter Arts NEW (S+0xd54)
-slot,0x2C5B,4,,,U,"S+0xd6c 31-bit map: OR of S+0xd74 at quest end, set by monster code (uEm014/022/085), counted by Alchemy"
-slot,0x2C5F,4,,,U,S+0xd70 u32 map tested by 0x5245d4
+slot,0x2C5B,4,,,D,"S+0xd6c Hyper monster species hunted, 31 bits = table 0x162c124 (u16 monster IDs); pending S+0xd74 set by 0x524534, ORed at quest end (0x524580); award checks 36, 61, 76, 91 count ranges of it"
+slot,0x2C5F,4,,,C,"S+0xd70 progress-condition latch: bit i (2-18) set once condition i of 0x561b28 holds (0x3eb1f4), raising event flag 184; bits 0-1, 19-31 unused. Timeline: bit 10 appeared with flag 39, bits 11-13 with flags 161 / 211 / 261"
 slot,0x2C63,12,,,D,"Palico skills learned, 96 bits, bit = ot_skl entry"
 slot,0x2C6F,8,,,D,"Palico support moves seen, 57 bits"
 slot,0x2C77,256,,,C,quests cleared bitmap
 slot,0x2D77,256,,,C,quests seen bitmap
 slot,0x2E77,256,,,D,quests failed bitmap
-slot,0x2F77,8,,,U,"progress map, 64 bits (bits 8-12, 20, 29, 31 named; the rest not)"
+slot,0x2F77,3,,,D,"progress map bits 0-23 (setters run by the post-quest flow 0x3ea7c4): 0/1/2 quest 10335/601/10722 cleared; 3/4 Palico level cap 35/50 (cap table 0x1627e70); 5 Village 4 star (gates Poogie costume 24); 6/7 Melding Pot features; 8-10 Trader locations (table 0x162ae60); 11/12 Trader carts 2/3; 13 Palico roster 24 -> 36; 14-16 roster +12 each (table 0x162ae78); 17-19 Palico service tiers 2-4 (0x3eb5dc); 20 HR limit released; 21/22 Item Box expansions from the Guild Store (+200 slots each, 0x140f60); 23 unused"
+slot,0x2F7A,1,,,U,"progress map bits 24-31: 24-29 Room Service housekeepers 1-6 available (0x78b474; bit 29 = talk condition 85); 30 set by 0x297f24 (uPlayerLobbyAirou, flag 141), read by aVillage02 0x6bc0e0, meaning UNRESOLVED; 31 quest 10646 listed (condition 64)"
+slot,0x2F7B,1,,,U,"progress map bits 32-39: 32 Nakarkos in the keyboard dictionary; 33 set at quest end 0x38b904 when 0x25d484 > 0, read by Palico training / Room Service, UNRESOLVED; 34 set by the Smithy 0x6f0c84, UNRESOLVED; 35/36 Palico roster +6 each; 37 Hub 9 star or q10768; 38 Hub 13 star or q111304; 39 Palico level cap 75"
+slot,0x2F7C,3,,,D,"progress map bits 40-63: 40 Palico level cap 99; 41-43 Palico service tiers 5-6; 44-47 Melding Pot features (q11204, q10768, q11432); 48-51 Lao-Shan Lung, Ahtal-Ka, Bloodbath Diablos, Fatalis in the keyboard dictionary (0x525a9c); 52-63 never referenced"
 slot,0x2F7F,8,,,D,progress map NEW
 slot,0x2F87,4,,,D,"Housekeeper's Gallery movies, 14 bits"
 slot,0x2F8B,4,,,D,Gallery movies NEW
@@ -194,7 +205,7 @@ slot,0x32B7,16,,,C,"Hunter's Notes, large monsters"
 slot,0x32C7,16,,,D,Hunter's Notes large monsters NEW
 slot,0x32D7,4,,,D,"Hunter's Notes, second list, 30 bits"
 slot,0x32DB,8,,,C,DLC item packs taken from the Room Service
-slot,0x32E3,4,,,U,"S+0x3668 flags: bit 1 daily bonus received; bit 0 network-mode switch (meaning UNRESOLVED)"
+slot,0x32E3,4,,,D,"S+0x3668 flags: bit 0 Hunter Search on (mirrored to sFestaNetwork +0x1624e at load 0x2282a8; info panel 0x5c90fc shows CommonMsg 120 Hunter Search); bit 1 today's quest-counter daily bonus received; other bits unused"
 slot,0x32E7,32,,,D,"Market listed, bit = shopList00 record"
 slot,0x3307,32,,,D,Market NEW
 slot,0x3327,32,,,D,"Guild Store listed, bit = shopList01 record"
@@ -231,7 +242,7 @@ slot,0x50BB,1,,,D,S+0x3680 u8 (transferred save)
 slot,0x50BC,2,,,D,"S+0x3682 u16: large monsters hunted in the transferred save, recomputed at load"
 slot,0x50BE,3444,,,D,"S+0x3684 reserved: only init / save / load touch it, zero"
 slot,0x5E32,3,,,D,"S+0x43f8 reserved: only save / load touch it"
-slot,0x5E35,1,,,U,"S+0x43fb control option byte (Game options window; player, target camera)"
+slot,0x5E35,1,,,D,"S+0x43fb option L Stick press controls (Game window page 3, StartMenuMsg 556-567): 0 Type 1 (default), 1-2 press to dash (0x65f8a0; player 0x27ca28, target camera 0x657320)"
 slot,0x5E36,4,,,D,Courier: deviant bit lent for temporary mode 1
 slot,0x5E3A,4,,,D,Courier: deviant bit lent for temporary mode 2
 slot,0x5E3E,8,,,D,u64 Nintendo Account ID linked to the save-transfer server
@@ -242,9 +253,10 @@ slot,0x5E52,4,,,D,quest counter at the Courier's last talk
 slot,0x5E56,4,,,D,Courier points
 slot,0x5E5A,36,,,D,"Special Permit points per deviant, 18 x u16"
 slot,0x5E7E,36,,,D,"Special Permit points waiting at the Courier, 18 x u16"
-slot,0x5EA2,1,,,U,S+0x446c control option byte 0 (Game options; target camera)
-slot,0x5EA3,1,,,U,S+0x446d
-slot,0x5EA4,2,,,U,"S+0x446e, +0x446f control option bytes (target camera, Hunter Art gauge)"
+slot,0x5EA2,1,,,D,"S+0x446c option Control Type (StartMenuMsg 530: Types 1-4)"
+slot,0x5EA3,1,,,D,"S+0x446d option + Button Controls (535: Type 1/2 swaps + and -, 0x65f808)"
+slot,0x5EA4,1,,,D,"S+0x446e option L/R Button Controls (545: swap L/R with ZL/ZR, 0x65f8c4)"
+slot,0x5EA5,1,,,D,"S+0x446f option R Stick Controls (551: swap R Stick and directional buttons, 0x65f87c)"
 slot,0x5EA6,274,,,C,"monster hunt tallies, u16 index 1-137"
 slot,0x5FB8,274,,,C,"monster capture counts, u16 index 1-137"
 slot,0x60CA,548,,,C,"monster size records, (u16 min, u16 max) index 1-137"
@@ -256,10 +268,39 @@ slot,0x208CE,136,40,,C,@myset My Set
 slot,0x21E0E,68,24,,D,@palset Palico equipment set
 #
 # ---- slot: sGameControl ----
-slot,0x2246E,29,,,U,"game options, 29 bytes (per-byte meaning not mapped)"
+# game options (sGameControl +0x5e; Game / Chat / Network option windows; value = index of the choice; defaults table 0x162cda8 = the fresh slots)
+slot,0x2246E,1,,,D,"Music Volume (StartMenuMsg 125; 0 Off .. 7 Max), default 5"
+slot,0x2246F,1,,,D,"SFX Volume (126), default 7"
+slot,0x22470,1,,,D,"Sound Settings (135: Mono / Stereo / Surround), default 1"
+slot,0x22471,1,,,D,HUD (139)
+slot,0x22472,1,,,D,Map (142)
+slot,0x22473,1,,,D,"Camera Angle (143: Type 1-5), default 3"
+slot,0x22474,1,,,D,Camera Controls (149)
+slot,0x22475,1,,,D,Camera Speed (154)
+slot,0x22476,1,,,D,Scope Controls (158)
+slot,0x22477,1,,,D,"Bowgun Controls (159), default 1"
+slot,0x22478,1,,,D,Quick Aim Controls (160)
+slot,0x22479,1,,,D,Quick Aim Camera (161)
+slot,0x2247A,1,,,D,"Reticle Speed (162), default 1"
+slot,0x2247B,1,,,D,Orientation (163)
+slot,0x2247C,1,,,D,"Bow Controls (164), default 1"
+slot,0x2247D,1,,,D,Bow Aim Mode Cancel (165)
+slot,0x2247E,1,,,D,START: Kick (168)
+slot,0x2247F,1,,,D,Target Cam Controls (170)
+slot,0x22480,1,,,D,Target Cam Behavior (171)
+slot,0x22481,1,,,D,"Terrain-savvy Camera (172), default 1"
+slot,0x22482,1,,,D,"Circle Pad Pro working copy (sGameControl +0x72): saved but reset at load to (+0x5d == 1) (0x3f8e10)"
+slot,0x22483,1,,,D,"3DS-era option, default 4 (0x162cdbd); no label or reader in v1.4"
+slot,0x22484,1,,,D,Lens Flares (178; uLensFlareCtrl)
+slot,0x22485,1,,,D,Network: Guild Cards / Palicoes receive (479)
+slot,0x22486,1,,,D,Network: Chat (480)
+slot,0x22487,1,,,D,Network: Invites (482)
+slot,0x22488,1,,,D,Network: Palico Chat (492)
+slot,0x22489,1,,,D,Melody Effect Display (180)
+slot,0x2248A,1,,,D,"Chat window: Shoutout Reset Selection (LobbyMenuMsg 65; 0 All Groups, 1-3 Group 1-3)"
 slot,0x2248B,4,,,C,play time in seconds
 slot,0x2248F,4,,,C,f32 play-time remainder in frames
-slot,0x22493,4,,,U,"sGameControl +0x3c u32, copied to Guild Card +0x86C"
+slot,0x22493,4,,,D,"play time (s) of the transferred 3DS save (0 = none); set by the transfer 0x3f8e40 from old +0x1c; copied to the Guild Card +0x86C"
 #
 # ---- slot: sItem ----
 slot,0x22497,376,,,C,"items obtained, bit = item ID"
@@ -384,7 +425,7 @@ slot,0x2C6A1,1,,,D,"Rife Roast result count 0: Burnt Meat / Burnt Fish (+0x12c)"
 slot,0x2C6A2,1,,,D,"Rife Roast result count 1: Rare Steak / Rare Fish (+0x12d)"
 slot,0x2C6A3,1,,,D,"Rife Roast result count 2: Well-done Steak / Gourmet Fish (+0x12e)"
 slot,0x2C6A4,1,,,D,"+0x12f padding: no reader or writer besides load/save"
-slot,0x2C6A5,4,,,U,"sFlagChecker +0x20: flags latched from another object"
+slot,0x2C6A5,4,,,C,"sFlagChecker +0x20: bits 0-6 star-tier notices latched (0x3f1778; tables 0x162ae28 -> event flags 233-237, 0x162ae50 -> 238-239); the transfer ORs the old save's bits (0x3f43e8). Slot 1 0x7f with flags 237 and 239 set, 233-236 and 238 clear, as the code leaves them"
 slot,0x2C6A9,16,,,D,"sMakeAmulet 128-bit map over a 107-entry table, set at quest end, read by the quest rotation"
 slot,0x2C6B9,4,,,D,"one-time event scenes played, 24 bits"
 #
@@ -650,7 +691,7 @@ card,0x85A,1,,,C,scene
 card,0x85B,1,,,C,pose
 card,0x85C,2,,,D,"HR of a transferred save, 0xFFFF = none"
 card,0x85E,14,,,C,"quests completed, 7 x u16"
-card,0x86C,4,,,U,copied from sGameControl +0x3c
+card,0x86C,4,,,D,"play time (s) of the transferred save, copied from sGameControl +0x3c; shown with the transferred HR by cUIOGuildCardView 0x5a90b4"
 card,0x870,4,,,D,Unity total
 card,0x874,4,,,D,"reserved: no access in the card code, UIs, Arena writer or leaderboard; only zeroed (0x161184); 0"
 card,0x878,56,,,C,"greeting, UTF-16"

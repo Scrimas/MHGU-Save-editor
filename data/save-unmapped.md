@@ -16,46 +16,20 @@ non-zero instance in the live save (first 24 bytes), its absolute offset in brac
 
 | Status | Bytes | Share |
 |---|---|---|
-| C | 3691647 | 71.556% |
-| D | 1466355 | 28.423% |
-| U | 1098 | 0.021% |
+| C | 3691842 | 71.560% |
+| D | 1467042 | 28.436% |
+| U | 216 | 0.004% |
 | gap | 0 | 0.000% |
 
-Items to resolve: 42 (in 5 scopes).
+Items to resolve: 15 (in 4 scopes).
 
 ## Scope `slot` (1177796 B, 3 instances)
 
-- `+0x2813` 4 B, **U** S+0x28: copy of sItem +0x69, random below 1-3 at quest result; instances 3 (12 B), nz 0, timeline 3
-- `+0x283B` 1 B, **U** S+0x50 u8; instances 3 (3 B), nz 0, timeline 1
-- `+0x284E` 1 B, **U** S+0x63; instances 3 (3 B), nz 0, timeline 1
-- `+0x284F` 24 B, **U** S+0x64..0x7b, 12 x u16; instances 3 (72 B), nz 0, timeline 1
-- `+0x2867` 12 B, **U** S+0x7c..0x87; instances 3 (36 B), nz 0, timeline 1
-- `+0x2873` 44 B, **U** S+0x88..0xb3, copied as one block by the transfer; instances 3 (132 B), nz 1, timeline 7, sample [0x18F50F] `00 00 1b 15 12 09 0b 09 0f 12 1b 00 11 00 14 00 13 00 0b 00 00 00 11 00`
-- `+0x289F` 12 B, **U** S+0xb4..0xbf; instances 3 (36 B), nz 1, timeline 2, sample [0x18F53B] `17 00 08 00 13 00 03 00 03 00 0c 00`
-- `+0x28AB` 1 B, **U** S+0xc0 u8 counter: +1 per quest result when quest-data byte +0x5b is set; instances 3 (3 B), nz 1, timeline 2, sample [0x18F547] `12`
-- `+0x28AC` 79 B, **U** S+0xc1..0x10f: u8, u16 fields, u32 at +0xd4; instances 3 (237 B), nz 1, timeline 2, sample [0x18F548] `00 0a 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 22 00 00 00 03`
-- `+0x28FB` 8 B, **U** S+0x110..0x117: u8 and two u16 of talk condition 54; instances 3 (24 B), nz 1, timeline 2, sample [0x18F597] `00 00 2c 05 03 01 03 00`
-- `+0x2903` 1 B, **U** S+0x118 u8, Start Menu notice at 50; instances 3 (3 B), nz 1, timeline 1, sample [0x18F59F] `26`
-- `+0x2904` 1 B, **U** S+0x119; instances 3 (3 B), nz 0, timeline 1
-- `+0x2911` 2 B, **U** S+0x126; instances 3 (6 B), nz 0, timeline 1
-- `+0x2BCB` 4 B, **U** S+0x3e0; instances 3 (12 B), nz 0, timeline 1
-- `+0x2BCF` 32 B, **U** S+0x3e4..0x403: set only by the initialisers; instances 3 (96 B), nz 0, timeline 1
-- `+0x2BF2` 1 B, **U** S+0x407; instances 3 (3 B), nz 0, timeline 1
-- `+0x2BF3` 4 B, **U** S+0x408: u32 taken over by the transfer; instances 3 (12 B), nz 0, timeline 1
-- `+0x2BFA` 1 B, **U** S+0x40f; instances 3 (3 B), nz 0, timeline 1
-- `+0x2C04` 1 B, **U** S+0x419; instances 3 (3 B), nz 0, timeline 1
-- `+0x2C5B` 4 B, **U** S+0xd6c 31-bit map: OR of S+0xd74 at quest end, set by monster code (uEm014/022/085), counted by Alchemy; instances 3 (12 B), nz 1, timeline 1, sample [0x18F8F7] `fa f7 9e 00`
-- `+0x2C5F` 4 B, **U** S+0xd70 u32 map tested by 0x5245d4; instances 3 (12 B), nz 1, timeline 3, sample [0x18F8FB] `fc ff 07 00`
-- `+0x2F77` 8 B, **U** progress map, 64 bits (bits 8-12, 20, 29, 31 named; the rest not); instances 3 (24 B), nz 1, timeline 2, sample [0x18FC13] `ff ff 7f bf ff ff 0f 00`
-- `+0x32E3` 4 B, **U** S+0x3668 flags: bit 1 daily bonus received; bit 0 network-mode switch (meaning UNRESOLVED); instances 3 (12 B), nz 0, timeline 1
-- `+0x5E35` 1 B, **U** S+0x43fb control option byte (Game options window; player, target camera); instances 3 (3 B), nz 0, timeline 1
-- `+0x5EA2` 1 B, **U** S+0x446c control option byte 0 (Game options; target camera); instances 3 (3 B), nz 0, timeline 1
-- `+0x5EA3` 1 B, **U** S+0x446d; instances 3 (3 B), nz 0, timeline 1
-- `+0x5EA4` 2 B, **U** S+0x446e, +0x446f control option bytes (target camera, Hunter Art gauge); instances 3 (6 B), nz 0, timeline 1
-- `+0x2246E` 29 B, **U** game options, 29 bytes (per-byte meaning not mapped); instances 3 (87 B), nz 3, timeline 1, sample [0x1AF10A] `07 07 01 00 00 04 00 00 00 01 00 00 01 00 01 00 00 00 00 01 00 04 00 00`
-- `+0x22493` 4 B, **U** sGameControl +0x3c u32, copied to Guild Card +0x86C; instances 3 (12 B), nz 0, timeline 1
+- `+0x28FB` 1 B, **U** S+0x110 u8 countdown: talk condition 54 needs 0; talk action 0x1977f8 decrements it and re-rates S+0x116; setter not found; instances 3 (3 B), nz 0, timeline 1
+- `+0x28FD` 2 B, **U** S+0x112 u16: written by the transfer (old +0xdc) only; 1324 in slot 1, no v1.4 writer or reader found; instances 3 (6 B), nz 1, timeline 1, sample [0x18F599] `2c 05`
+- `+0x2F7A` 1 B, **U** progress map bits 24-31: 24-29 Room Service housekeepers 1-6 available (0x78b474; bit 29 = talk condition 85); 30 set by 0x297f24 (uPlayerLobbyAirou, flag 141), read by aVillage02 0x6bc0e0, meaning UNRESOLVED; 31 quest 10646 listed (condition 64); instances 3 (3 B), nz 1, timeline 2, sample [0x18FC16] `bf`
+- `+0x2F7B` 1 B, **U** progress map bits 32-39: 32 Nakarkos in the keyboard dictionary; 33 set at quest end 0x38b904 when 0x25d484 > 0, read by Palico training / Room Service, UNRESOLVED; 34 set by the Smithy 0x6f0c84, UNRESOLVED; 35/36 Palico roster +6 each; 37 Hub 9 star or q10768; 38 Hub 13 star or q111304; 39 Palico level cap 75; instances 3 (3 B), nz 1, timeline 1, sample [0x18FC17] `ff`
 - `+0x2C4A5` 3 x 1 B (stride 16), **U** a Palico level (looked up via 0x2641d0 by cUIOOtomo 0x5eb284); init 0; instances 9 (9 B), nz 0, timeline 1
-- `+0x2C6A5` 4 B, **U** sFlagChecker +0x20: flags latched from another object; instances 3 (12 B), nz 1, timeline 1, sample [0x1B9341] `7f 00 00 00`
 - `+0x11CF3E` 18 B, **U** u8[3][6] flags [k][locale j], set at dispatch (0x1ac470), read by uUIMonNyan 0x1a9510; axis k unnamed; instances 3 (54 B), nz 1, timeline 1, sample [0x2A9BDA] `00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00`
 - `+0x11CF84` 5 B, **U** cSaveDataLocation: 5 x u8 copied from game data +5..+9 at dispatch; byte 3 == 2 selects the result branch (0x1c8d30); byte 2 probably the locale; instances 3 (15 B), nz 3, timeline 1, sample [0x2A9C20] `00 00 05 01 03`
 - `+0x11CF89` 5 x 1 B (stride 15), **U** search circle 1-5: u8 +4 (unnamed); instances 15 (15 B), nz 4, timeline 1, sample [0x2A9C25] `01`
@@ -71,10 +45,6 @@ Items to resolve: 42 (in 5 scopes).
 ## Scope `arena942` (942 B, reference struct: its bytes are counted by the row that names it)
 
 - `+0x4` 1 B, **U** u8, 2 in every record (11 game-table, 29 saved); not read by 0x3c1568; instances 0 (0 B), nz 0, timeline 1
-
-## Scope `card` (6328 B, 3 instances)
-
-- `+0x86C` 4 B, **U** copied from sGameControl +0x3c; instances 3 (12 B), nz 0, timeline 1
 
 ## Scope `crec` (2048 B, 45 instances)
 
