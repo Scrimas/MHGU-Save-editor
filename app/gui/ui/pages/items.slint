@@ -130,10 +130,19 @@ export component ItemsPage inherits Rectangle {
                 text: @tr("Max counts…");
                 clicked => { root.bulk("items:max", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width); }
             }
-            // the most destructive action of the app sits behind More… (04)
+            // the most destructive action of the app sits behind More… (04), with the box's
+            // file export and import
             if Api.item-store < 2: MoreButton {
-                items: [Api.item-store == 0 ? @tr("Empty box…") : @tr("Empty pouch…")];
-                activated => { root.bulk("items:empty", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width); }
+                items: Api.item-store == 0 ? [@tr("Export box to CSV…"), @tr("Import box from CSV…"), @tr("Empty box…")] : [@tr("Empty pouch…")];
+                activated(i) => {
+                    if Api.item-store == 0 && i == 0 {
+                        Api.item-export();
+                    } else if Api.item-store == 0 && i == 1 {
+                        Api.item-import();
+                    } else {
+                        root.bulk("items:empty", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width);
+                    }
+                }
             }
         }
         TabBar {

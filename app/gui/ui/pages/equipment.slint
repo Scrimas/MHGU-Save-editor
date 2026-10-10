@@ -2,7 +2,7 @@ import { ListView, Button, ScrollView, Palette, LineEdit } from "std-widgets.sli
 import {
     Api, Tabs, Tok, Fmt, Card, Asset, Muted, Chip, EquipRow, ConfidenceTag, Confidence, SectionTitle, PageHeader, TabBar,
     NumberBox, StagedBar, WasLine, EmptyState, Pill, Hairline, TextLink, Chevron, ListRow, SearchField, KeyActivate,
-    FocusRing, Picker,
+    FocusRing, Picker, MoreButton,
 } from "../common.slint";
 import { SetsView } from "sets.slint";
 
@@ -119,6 +119,19 @@ export component EquipmentPage inherits Rectangle {
                 text: @tr("Add equipment");
                 enabled: Api.equip-free >= 0;
                 clicked => { root.open-picker(-1, 0, -1, self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height + 4px); }
+            }
+            // the box to and from a file; talismans as text (hunter box)
+            if Api.equip-owner < 2: MoreButton {
+                items: Api.equip-owner == 0 ? [@tr("Export box to CSV…"), @tr("Import box from CSV…"), @tr("Talismans as text…")] : [@tr("Export box to CSV…"), @tr("Import box from CSV…")];
+                activated(i) => {
+                    if i == 0 {
+                        Api.equip-export();
+                    } else if i == 1 {
+                        Api.equip-import();
+                    } else {
+                        Api.talisman-text-show(false);
+                    }
+                }
             }
         }
         // Hunter / Palico box as two tabs (C3), then their sets
@@ -320,6 +333,8 @@ export component EquipmentPage inherits Rectangle {
                                 alignment: start;
                                 Text { text: @tr("Slots"); width: 60px; vertical-alignment: center; }
                                 NumberBox { width: 100px; minimum: 0; maximum: 3; value: Api.equip-detail.slots; label: @tr("Decoration slots"); edited(v) => { Api.set-equip("slots", v); } }
+                                Rectangle { width: 12px; }
+                                TextLink { y: (parent.height - self.height) / 2; text: @tr("Share as text…"); clicked => { Api.talisman-text-show(true); } }
                             }
                         }
                         // raw bytes recede into a collapsed section (K4)

@@ -62,6 +62,39 @@ component QuestLine inherits ListRow {
     }
 }
 
+// The history log tab: the Guild Card's last ten records, newest first, read only.
+component HistoryLog inherits Card {
+    VerticalLayout {
+        padding: Tok.pad;
+        padding-left: 22px;
+        spacing: 8px;
+        Text { text: @tr("The last ten records of your Guild Card, newest first, as the game wrote them. Read only."); color: Tok.muted; font-size: Tok.small; wrap: word-wrap; }
+        HorizontalLayout {
+            height: 28px;
+            alignment: start;
+            spacing: 10px;
+            ColHead { text: @tr("Date"); width: 100px; }
+            ColHead { text: @tr("Result"); width: 130px; }
+            ColHead { text: @tr("Quest"); width: 260px; }
+            ColHead { text: @tr("Party"); }
+        }
+        if Api.quest-log.length == 0: EmptyState { text: @tr("No record yet."); }
+        for r in Api.quest-log: VerticalLayout {
+            Hairline { }
+            HorizontalLayout {
+                padding-top: 8px;
+                padding-bottom: 8px;
+                alignment: start;
+                spacing: 10px;
+                Text { text: r.date; width: 100px; color: Tok.muted; }
+                Text { text: r.what; width: 130px; color: r.bad ? Tok.bad : Palette.foreground; overflow: elide; }
+                Text { text: r.quest; width: 260px; overflow: elide; }
+                Text { text: r.party; color: Tok.muted; wrap: word-wrap; horizontal-stretch: 1; }
+            }
+        }
+    }
+}
+
 // The Arena records tab: the best time and set per Arena quest.
 component ArenaRecords inherits Card {
     VerticalLayout {
@@ -144,7 +177,14 @@ export component QuestsPage inherits Rectangle {
                 ArenaRecords { width: min(root.width - 2 * Tok.margin, Tok.row-max); }
             }
         }
-        if !Api.quest-arena: HorizontalLayout {
+        if Api.quest-history: ScrollView {
+            vertical-stretch: 1;
+            HorizontalLayout {
+                alignment: start;
+                HistoryLog { width: min(root.width - 2 * Tok.margin, Tok.row-max); }
+            }
+        }
+        if !Api.quest-arena && !Api.quest-history: HorizontalLayout {
             spacing: Tok.tight;
             SearchField {
                 placeholder-text: @tr("Search quests by name or number");
@@ -161,7 +201,7 @@ export component QuestsPage inherits Rectangle {
                 }
             }
         }
-        if !Api.quest-arena: HorizontalLayout {
+        if !Api.quest-arena && !Api.quest-history: HorizontalLayout {
             vertical-stretch: 1;
             alignment: start;
             Card {

@@ -11,6 +11,7 @@ pub mod data;
 pub mod equipment;
 pub mod guildcard;
 pub mod items;
+pub mod mhxx;
 pub mod monsters;
 pub mod options;
 pub mod otomo;
@@ -21,6 +22,7 @@ pub mod sets;
 pub mod slots;
 pub mod smithy;
 pub mod store;
+pub mod transfer;
 pub mod unlocks;
 
 pub use save::{Error, Save};

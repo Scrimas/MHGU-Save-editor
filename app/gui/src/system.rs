@@ -61,8 +61,54 @@ fn yuzu_saves(root: &std::path::Path) -> Vec<PathBuf> {
     users.iter().flat_map(|u| sorted_dirs(u)).map(|t| t.join("system")).filter(|p| is_save(p)).collect()
 }
 
+/// Where removable drives show up: the folders an SD card is mounted in.
+fn drive_roots() -> Vec<PathBuf> {
+    let mut v = vec![];
+    if cfg!(windows) {
+        v.extend((b'D'..=b'Z').map(|d| PathBuf::from(format!("{}:\\", d as char))).filter(|p| p.is_dir()));
+    } else {
+        let user = std::env::var("USER").unwrap_or_default();
+        for m in [format!("/run/media/{user}"), format!("/media/{user}"), "/media".into(), "/mnt".into(), "/Volumes".into()] {
+            v.extend(sorted_dirs(std::path::Path::new(&m)));
+        }
+    }
+    v
+}
+
+/// A game's folder in a backup tool's folder: named after the title or its ID.
+fn is_mhgu_folder(p: &std::path::Path) -> bool {
+    let n = p.file_name().map(|n| n.to_string_lossy().to_lowercase()).unwrap_or_default();
+    n.contains("monster hunter") || n.contains("0100770008dd8000")
+}
+
+/// Save backups a Switch homebrew tool made, on an SD card: JKSV keeps
+/// `JKSV/<game title>/<user> - <date>/system`, Checkpoint
+/// `switch/Checkpoint/saves/0x<title id> <game title>/<backup>/system` (docs/01-container.md).
+fn backup_saves(drive: &std::path::Path) -> Vec<PathBuf> {
+    let mut out = vec![];
+    for tool in [drive.join("JKSV"), drive.join("switch/Checkpoint/saves")] {
+        for game in sorted_dirs(&tool).into_iter().filter(|g| is_mhgu_folder(g)) {
+            out.extend(find_saves(&game));
+        }
+    }
+    out
+}
+
+/// The Switch backup tool whose folder holds the save, if any.
+pub fn console_backup(save: &std::path::Path) -> Option<&'static str> {
+    let parts: Vec<String> = save.components().map(|c| c.as_os_str().to_string_lossy().to_lowercase()).collect();
+    if parts.iter().any(|c| c == "jksv") {
+        Some("JKSV")
+    } else if parts.windows(2).any(|w| w[0] == "checkpoint" && w[1] == "saves") {
+        Some("Checkpoint")
+    } else {
+        None
+    }
+}
+
 /// Ryujinx's `bis/user/save/<id>/0/system` and the yuzu family's saves (files of the
-/// right size), then the `system` files found in the folders added in Settings.
+/// right size), JKSV and Checkpoint backups on a mounted SD card, then the `system`
+/// files found in the folders added in Settings.
 pub fn detect_saves() -> Vec<PathBuf> {
     let mut out = vec![];
     for r in ryujinx_roots() {
@@ -75,6 +121,13 @@ pub fn detect_saves() -> Vec<PathBuf> {
     }
     for r in yuzu_roots() {
         for p in yuzu_saves(&r) {
+            if !out.contains(&p) {
+                out.push(p);
+            }
+        }
+    }
+    for d in drive_roots() {
+        for p in backup_saves(&d) {
             if !out.contains(&p) {
                 out.push(p);
             }
@@ -363,6 +416,21 @@ mod tests {
         assert_eq!(known_emulator(&b), Some("Eden"));
         assert_eq!(known_emulator(std::path::Path::new("/home/edenfield/saves/system")), None, "whole folder names only");
         assert_eq!(known_emulator(std::path::Path::new("/home/u/.config/Ryujinx/bis/user/save/1/0/system")), Some("Ryujinx"));
+        std::fs::remove_dir_all(&d).unwrap();
+    }
+
+    #[test]
+    fn finds_switch_backups_on_an_sd_card() {
+        let d = std::env::temp_dir().join(format!("mhgu-sd-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        let jksv = d.join("JKSV/Monster Hunter Generations Ultimate/Scrimas - 2026.10.10 @ 12.00.00/system");
+        let cp = d.join("switch/Checkpoint/saves/0x0100770008DD8000 Monster Hunter Generations Ultimate/20261010-120000/system");
+        save_at(&jksv);
+        save_at(&cp);
+        save_at(&d.join("JKSV/Other Game/backup/system"));
+        assert_eq!(backup_saves(&d), vec![jksv.clone(), cp.clone()]);
+        assert_eq!((console_backup(&jksv), console_backup(&cp)), (Some("JKSV"), Some("Checkpoint")));
+        assert_eq!(console_backup(std::path::Path::new("/home/u/checkpoint/system")), None);
         std::fs::remove_dir_all(&d).unwrap();
     }
 

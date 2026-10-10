@@ -94,10 +94,21 @@ pub fn name_of(file: &[u8]) -> Result<String, NotACharacter> {
 
 /// A file made by `export` becomes the character of `slot`, over what it held.
 pub fn import(s: &mut Save, slot: usize, file: &[u8]) -> Result<(), NotACharacter> {
-    let b = body(file)?;
+    put(s, slot, body(file)?);
+    Ok(())
+}
+
+/// The slot bytes `b` (`LEN`, as `export` or `mhxx::Mhxx::character` give them) become
+/// the character of `slot`.
+pub fn put(s: &mut Save, slot: usize, b: &[u8]) {
+    assert_eq!(b.len(), LEN, "one slot");
     s.put(s.base(slot), b);
     s.set_slot_used(slot, true);
-    Ok(())
+}
+
+/// The bytes of `slot`, `LEN` of them.
+pub fn get(s: &Save, slot: usize) -> &[u8] {
+    s.get(s.base(slot), LEN)
 }
 
 #[cfg(test)]

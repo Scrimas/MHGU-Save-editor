@@ -1,6 +1,9 @@
 //! The Quests page: its models and the callbacks that edit it.
 
 use super::*;
+use crate::HistoryRow;
+use mhgu_save::character as ch;
+use mhgu_save::guildcard as gc;
 
 pub(super) fn lock_text(l: &Lock) -> (String, bool) {
     match l {
@@ -30,17 +33,65 @@ pub(super) fn quest_group(q: &mhgu_save::data::Quest) -> String {
     }
 }
 
+/// The Guild Card's history log (core `guildcard::history`), newest first.
+fn history_rows(st: &State) -> Vec<HistoryRow> {
+    gc::history(st.save(), st.base())
+        .into_iter()
+        .map(|r| {
+            let what = match r.kind {
+                0 => tr("HR up"),
+                1 => tr("Transferred from MHGen"),
+                2 => tr("Welcome"),
+                3 => tr("Forged"),
+                4 => tr("Upgrades"),
+                5 => tr("Forged count"),
+                6 => tr("Awards complete"),
+                7 => tr("Completed"),
+                8 => tr("Failed"),
+                9 => tr("Abandoned"),
+                10 => tr("Hired"),
+                _ => "—",
+            };
+            let quest = if r.kind == 0 { trf("HR {}", &[&r.value]) } else { r.name };
+            let party: Vec<String> = r
+                .party
+                .iter()
+                .map(|(n, w)| match ch::USE_WEAPONS.get(*w as usize) {
+                    _ if *w == gc::PARTY_PALICO => trf("{} (Palico)", &[n]),
+                    Some(c) => format!("{n} ({})", tr(c)),
+                    None => n.clone(),
+                })
+                .collect();
+            HistoryRow {
+                date: format!("{:04}-{:02}-{:02}", r.year, r.month, r.day).into(),
+                what: what.into(),
+                quest: quest.into(),
+                party: party.join(", ").into(),
+                bad: matches!(r.kind, 8 | 9),
+            }
+        })
+        .collect()
+}
+
 pub(super) fn quests_page(ui: &AppWindow, st: &State) {
     let api = ui.global::<Api>();
     let c = Char::new(st.save(), st.slot);
     let tabs = quest_tabs();
-    // the categories, then the Arena records
-    let tab = view(|v| v.quest_tab).min(tabs.len());
+    // the categories, then the Arena records and the history log
+    let tab = view(|v| v.quest_tab).min(tabs.len() + 1);
     let mut labels = tabs.clone();
     labels.push(tr("Arena records").into());
+    labels.push(tr("History").into());
     api.set_quest_tabs(strings(labels));
     api.set_quest_tab(tab as i32);
     api.set_quest_arena(tab == tabs.len());
+    api.set_quest_history(tab == tabs.len() + 1);
+    if tab == tabs.len() + 1 {
+        api.set_quest_log(model(history_rows(st)));
+        api.set_quest_summary(tr("Your Guild Card's last ten records").into());
+        api.set_quests(model(vec![]));
+        return;
+    }
     if tab == tabs.len() {
         api.set_arena(keep(api.get_arena(), arena_rows(st)));
         api.set_quest_summary(tr("Best times and sets of the Arena quests").into());

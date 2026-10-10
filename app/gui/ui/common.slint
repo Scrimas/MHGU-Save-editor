@@ -23,6 +23,11 @@ export struct ChangeRow {
 export struct WriteRow { title: string, right: string, confidence: Confidence, old: string, new: string, warning: string }
 
 export struct SnapRow { dir: string, when: string, before: string }
+export struct MhxxRow { name: string, sub: string, used: bool }
+// a record of the Guild Card's history log; `bad` for a failed or abandoned quest
+export struct HistoryRow { date: string, what: string, quest: string, party: string, bad: bool }
+// a value that differs between two saves; `group` names the page (heading rows: label "")
+export struct DiffRow { group: string, label: string, old: string, new: string }
 
 export struct DetectedSave { path: string, title: string, sub: string, when: string, short: string }
 
@@ -393,6 +398,34 @@ export global Api {
     callback slot-delete(int);
     callback slot-export(int);
     callback slot-import(int);
+    // an MHXX save picked to import a character from (mhxx-export false) or to export
+    // one into: the question ("" none) and its three slots
+    in-out property <string> mhxx-title;
+    in property <[MhxxRow]> mhxx-rows;
+    in property <bool> mhxx-export;
+    callback mhxx-export-start(int /* slot */);
+    callback mhxx-pick(int /* MHXX slot */);
+    // the item box and the equipment box shown, to and from CSV files
+    callback item-export();
+    callback item-import();
+    callback equip-export();
+    callback equip-import();
+    // talismans as text (Athena's charm list): every one or the one selected; text pasted
+    // in is added to the hunter box
+    in-out property <bool> talisman-text-open;
+    in-out property <string> talisman-text;
+    callback talisman-text-show(bool /* selected only */);
+    callback talisman-text-add(string);
+    // snapshot comparison: what differs, in game terms ("" title: closed)
+    in-out property <string> diff-title;
+    in property <string> diff-sub;
+    in property <[DiffRow]> diff-rows;
+    // the snapshot compared, and what with: 0 the open save, then the snapshots
+    in property <string> diff-dir;
+    in property <[string]> diff-others;
+    in property <int> diff-other;
+    // the other side: the open save (-1) or a snapshot of the list
+    callback compare(string /* snapshot dir */, int /* other: -1 open save, else snapshot index */);
     // quitting with staged changes
     in-out property <bool> quit-open;
     callback quit();
@@ -574,6 +607,8 @@ export global Api {
     in property <[string]> quest-tabs;
     in-out property <int> quest-tab;
     in property <bool> quest-arena;  // the Arena records tab (after the categories) is shown
+    in property <bool> quest-history;  // the history log tab (after the Arena records)
+    in property <[HistoryRow]> quest-log;
     in property <[QuestRow]> quests;
     in property <string> quest-summary;
     in-out property <string> quest-search;

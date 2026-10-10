@@ -171,6 +171,8 @@ struct View {
     update_cancel: Option<Arc<AtomicBool>>,
     /// the Overview's goals as planned for (save state, character)
     goal_plans: Option<((u64, usize), Vec<GoalView>)>,
+    /// the MHXX save the Characters dialog asks about
+    mhxx: Option<MhxxPick>,
 }
 
 /// What the Overview shows of a goal's plan.
@@ -242,7 +244,7 @@ pub fn refresh(ui: &AppWindow, st: &State) {
     api.set_loaded(true);
     api.set_file_path(doc.loc.opened.display().to_string().into());
     let emu = system::emulator_name(&doc.loc.opened);
-    api.set_path_label(system::known_emulator(&doc.loc.opened).unwrap_or("").into());
+    api.set_path_label(system::known_emulator(&doc.loc.opened).or_else(|| system::console_backup(&doc.loc.opened)).unwrap_or("").into());
     api.set_path_tail(fmt::path_tail(&doc.loc.opened, 4).into());
     // a running emulator names itself (check-emulator); otherwise the save's folder does
     if !api.get_emulator_running() {
@@ -622,6 +624,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_update(ui, st);
     wire_file(ui, st);
     wire_characters(ui, st);
+    wire_transfer(ui, st);
     wire_overview(ui, st);
     wire_character(ui, st);
     wire_items(ui, st);
@@ -779,12 +782,13 @@ mod quests;
 mod requests;
 mod sets_ui;
 mod settings_ui;
+mod transfer_ui;
 mod unlocks_ui;
 mod update_ui;
 
 use self::{
     advanced::*, cards_ui::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, options_ui::*, overview::*,
-    palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, unlocks_ui::*,
+    palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, transfer_ui::*, unlocks_ui::*,
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
 pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};

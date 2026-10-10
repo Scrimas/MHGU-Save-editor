@@ -165,6 +165,10 @@ msgstr "Una copia dell'intera cartella del salvataggio, creata prima di ogni scr
 msgid "No snapshots of this save yet. Write takes one first unless you untick it."
 msgstr "Ancora nessuna istantanea di questo salvataggio. Scrivi ne crea una prima, a meno che tu non tolga la spunta."
 
+#: app/gui/ui/app.slint
+msgid "Compare"
+msgstr "Confronta"
+
 #: app/gui/src/views/file.rs app/gui/ui/app.slint
 msgid "Restore…"
 msgstr "Ripristina…"
@@ -197,8 +201,52 @@ msgstr "{} è in esecuzione. Chiudilo prima: sovrascrive il salvataggio quando e
 msgid "Restore"
 msgstr "Ripristina"
 
-#. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint
+msgid "Talismans as text"
+msgstr "Talismani come testo"
+
+#: app/gui/ui/app.slint
+msgid "One talisman a line: slots, skill, points, second skill, points, with the game's English skill names. The charm list of Athena's Armor Set Search reads it as it is. Paste talismans here to add them to the box."
+msgstr "Un talismano per riga: slot, abilità, punti, seconda abilità, punti, con i nomi inglesi delle abilità del gioco. L'elenco dei talismani di Athena's Armor Set Search lo legge così com'è. Incolla qui i talismani per aggiungerli alla cassa."
+
+#: app/gui/ui/app.slint
+msgid "Copy"
+msgstr "Copia"
+
+#: app/gui/ui/app.slint
+msgid "Add to the box"
+msgstr "Aggiungi alla cassa"
+
+#: app/gui/ui/app.slint
+msgid "Compared with"
+msgstr "Confrontato con"
+
+#: app/gui/ui/app.slint
+msgid "Nothing differs."
+msgstr "Nessuna differenza."
+
+#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+msgid "Replace…"
+msgstr "Sostituisci…"
+
+#: app/gui/ui/app.slint
+msgid "Put here…"
+msgstr "Metti qui…"
+
+#: app/gui/ui/app.slint
+msgid "Import"
+msgstr "Importa"
+
+#: app/gui/ui/app.slint
+msgid "The MHXX save you picked stays as it is: the result is saved as a new file."
+msgstr "Il salvataggio MHXX scelto resta com'è: il risultato viene salvato in un nuovo file."
+
+#: app/gui/ui/app.slint
+msgid "The character is staged like any import: it shows in Review and goes into the save with Write."
+msgstr "Il personaggio resta in attesa come ogni importazione: compare in Revisione e va nel salvataggio con Scrivi."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs app/gui/ui/app.slint
 msgid "{} · empty"
 msgstr "{} · vuoto"
 
@@ -211,11 +259,12 @@ msgid "Copy, swap, delete, export or import whole characters. Each change is sta
 msgstr "Copia, scambia, elimina, esporta o importa personaggi interi. Ogni modifica resta in attesa: compare in Revisione e va nel salvataggio con Scrivi."
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/file.rs app/gui/ui/app.slint
+#: app/gui/src/views/characters.rs app/gui/src/views/file.rs
+#: app/gui/ui/app.slint
 msgid "HR {} · {}"
 msgstr "GC {} · {}"
 
-#: app/gui/ui/app.slint
+#: app/gui/src/views/characters.rs app/gui/ui/app.slint
 msgid "No character in this slot"
 msgstr "Nessun personaggio in questo slot"
 
@@ -232,10 +281,6 @@ msgid "Delete"
 msgstr "Elimina"
 
 #: app/gui/ui/app.slint
-msgid "Copy"
-msgstr "Copia"
-
-#: app/gui/ui/app.slint
 msgid "to"
 msgstr "in"
 
@@ -247,6 +292,18 @@ msgstr "Scambia"
 #: app/gui/ui/app.slint
 msgid "Copy replaces {} in slot {}."
 msgstr "La copia sostituisce {} nello slot {}."
+
+#: app/gui/ui/app.slint
+msgid "MHXX"
+msgstr "MHXX"
+
+#: app/gui/ui/app.slint
+msgid "Export to an MHXX save…"
+msgstr "Esporta in un salvataggio MHXX…"
+
+#: app/gui/ui/app.slint
+msgid "Import… also takes a character from an MHXX save: the system file of a JKSM or Checkpoint backup (3DS), or of JKSV or Checkpoint (Switch). Unequip gear the other game lacks before moving a character."
+msgstr "Importa… accetta anche un personaggio da un salvataggio MHXX: il file system di un backup JKSM o Checkpoint (3DS), o di JKSV o Checkpoint (Switch). Togli l'equipaggiamento che l'altro gioco non ha prima di spostare un personaggio."
 
 #: app/gui/ui/app.slint
 msgid "Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
@@ -1450,6 +1507,18 @@ msgstr "Casella {}: {}"
 msgid "Add equipment"
 msgstr "Aggiungi equipaggiamento"
 
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+msgid "Export box to CSV…"
+msgstr "Esporta la cassa in CSV…"
+
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+msgid "Import box from CSV…"
+msgstr "Importa la cassa da CSV…"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Talismans as text…"
+msgstr "Talismani come testo…"
+
 #: app/gui/ui/pages/equipment.slint
 msgid "Palico"
 msgstr "Compagno"
@@ -1474,9 +1543,10 @@ msgstr "Cerca nome o tipo"
 msgid "Weapons"
 msgstr "Armi"
 
-#: app/gui/src/targets.rs app/gui/src/views/equipment_page.rs
-#: app/gui/src/views/items_page.rs app/gui/src/views/names.rs
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+#: app/gui/src/diff.rs app/gui/src/targets.rs
+#: app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs
+#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
 msgid "Empty"
 msgstr "Vuoto"
 
@@ -1505,10 +1575,6 @@ msgstr "{} · casella {}"
 #: app/gui/ui/pages/equipment.slint
 msgid "Add equipment here"
 msgstr "Aggiungi equipaggiamento qui"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Replace…"
-msgstr "Sostituisci…"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/equipment.slint
@@ -1590,6 +1656,10 @@ msgstr "Spazi"
 #: app/gui/ui/pages/equipment.slint
 msgid "Decoration slots"
 msgstr "Spazi decorazione"
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Share as text…"
+msgstr "Condividi come testo…"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Advanced"
@@ -1681,7 +1751,8 @@ msgstr "Svuota cassa…"
 msgid "Empty pouch…"
 msgstr "Svuota borsa…"
 
-#: app/gui/src/goals.rs app/gui/ui/pages/items.slint
+#: app/gui/src/goals.rs app/gui/src/views/transfer_ui.rs
+#: app/gui/ui/pages/items.slint
 msgid "Item box"
 msgstr "Cassa oggetti"
 
@@ -2013,12 +2084,32 @@ msgid "Failed: {}"
 msgstr "Fallita: {}"
 
 #: app/gui/ui/pages/quests.slint
-msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
-msgstr "Il tuo miglior tempo per missione dell'arena, in solitario con l'equipaggiamento scelto. Il grado segue il tempo; il miglior tempo del banco dell'arena segue il tuo."
+msgid "The last ten records of your Guild Card, newest first, as the game wrote them. Read only."
+msgstr "Gli ultimi dieci record della tua Tessera Gilda, i più recenti per primi, come li ha scritti il gioco. Sola lettura."
+
+#: app/gui/ui/pages/quests.slint
+msgid "Date"
+msgstr "Data"
+
+#: app/gui/ui/pages/quests.slint
+msgid "Result"
+msgstr "Esito"
 
 #: app/gui/ui/pages/quests.slint
 msgid "Quest"
 msgstr "Missione"
+
+#: app/gui/ui/pages/quests.slint
+msgid "Party"
+msgstr "Squadra"
+
+#: app/gui/ui/pages/quests.slint
+msgid "No record yet."
+msgstr "Ancora nessun record."
+
+#: app/gui/ui/pages/quests.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgstr "Il tuo miglior tempo per missione dell'arena, in solitario con l'equipaggiamento scelto. Il grado segue il tempo; il miglior tempo del banco dell'arena segue il tuo."
 
 #: app/gui/ui/pages/quests.slint
 msgid "Best time"
@@ -2063,7 +2154,8 @@ msgstr "Una riga rossa indica che la missione non è ancora in bacheca e dice co
 msgid "Seen"
 msgstr "Vista"
 
-#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
+#: app/gui/src/targets.rs app/gui/src/views/quests.rs
+#: app/gui/ui/pages/quests.slint
 msgid "Failed"
 msgstr "Fallita"
 
@@ -2274,6 +2366,35 @@ msgstr "Blocca tutto…"
 #: app/gui/src/assets.rs
 msgid "Item #{}"
 msgstr "Oggetto #{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/diff.rs app/gui/src/views/characters.rs
+msgid "{} (slot {})"
+msgstr "{} (slot {})"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/diff.rs
+msgid "Slot {}"
+msgstr "Slot {}"
+
+#: app/gui/src/diff.rs
+msgid "Shared by the characters"
+msgstr "Condiviso dai personaggi"
+
+#: app/gui/src/diff.rs
+msgid "Bytes outside the save map"
+msgstr "Byte fuori dalla mappa del salvataggio"
+
+#: app/gui/src/diff.rs
+msgid "Other bytes"
+msgstr "Altri byte"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/diff.rs
+msgid "{n} byte"
+msgid_plural "{n} bytes"
+msgstr[0] "{n} byte"
+msgstr[1] "{n} byte"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/fmt.rs
@@ -3967,7 +4088,7 @@ msgid "Hired Charge Blade"
 msgstr "Spad-ascia caricata"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/cards_ui.rs
+#: app/gui/src/views/cards_ui.rs app/gui/src/views/quests.rs
 msgid "HR {}"
 msgstr "GC {}"
 
@@ -4024,7 +4145,7 @@ msgstr "Offerto"
 msgid "Next offer"
 msgstr "Prossima offerta"
 
-#: app/gui/src/views/cards_ui.rs
+#: app/gui/src/views/cards_ui.rs app/gui/src/views/quests.rs
 msgid "Hired"
 msgstr "Ingaggiato"
 
@@ -4128,14 +4249,9 @@ msgid "Could not write {}: {}"
 msgstr "Impossibile scrivere {}: {}"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
+#: app/gui/src/views/characters.rs app/gui/src/views/file.rs
 msgid "Could not read {}: {}"
 msgstr "Impossibile leggere {}: {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
-msgid "{} (slot {})"
-msgstr "{} (slot {})"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
@@ -4143,7 +4259,7 @@ msgid "slot {}"
 msgstr "slot {}"
 
 #: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
-#: app/gui/src/views/palicoes.rs
+#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
 msgid "Added to Review"
 msgstr "Aggiunto a Revisione"
 
@@ -4184,6 +4300,10 @@ msgid "Import character"
 msgstr "Importa personaggio"
 
 #: app/gui/src/views/characters.rs
+msgid "MHXX save (system)"
+msgstr "Salvataggio MHXX (system)"
+
+#: app/gui/src/views/characters.rs
 msgid "Not imported: the file is not a character exported by this editor"
 msgstr "Non importato: il file non è un personaggio esportato da questo editor"
 
@@ -4191,6 +4311,56 @@ msgstr "Non importato: il file non è un personaggio esportato da questo editor"
 #: app/gui/src/views/characters.rs
 msgid "Import {} into slot {}"
 msgstr "Importa {} nello slot {}"
+
+#: app/gui/src/views/characters.rs
+msgid "Not imported: the file is neither a character exported by this editor nor an MHXX save"
+msgstr "Non importato: il file non è né un personaggio esportato da questo editor né un salvataggio MHXX"
+
+#: app/gui/src/views/characters.rs
+msgid "Not imported: that MHXX save holds no character"
+msgstr "Non importato: quel salvataggio MHXX non contiene personaggi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "MHXX save to put {} in"
+msgstr "Salvataggio MHXX in cui mettere {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "Not an MHXX save: {}"
+msgstr "Non è un salvataggio MHXX: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "Which character of {} goes into slot {}?"
+msgstr "Quale personaggio di {} va nello slot {}?"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "Which slot of {} does the character go into?"
+msgstr "In quale slot di {} va il personaggio?"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "Import {} from MHXX into slot {}"
+msgstr "Importa {} da MHXX nello slot {}"
+
+#: app/gui/src/views/characters.rs
+msgid "Save the MHXX save"
+msgstr "Salva il salvataggio MHXX"
+
+#: app/gui/src/views/characters.rs
+msgid "Restore it on the 3DS with JKSM or Checkpoint"
+msgstr "Ripristinalo sul 3DS con JKSM o Checkpoint"
+
+#: app/gui/src/views/characters.rs
+msgid "Restore it on the Switch with JKSV or Checkpoint"
+msgstr "Ripristinalo sulla Switch con JKSV o Checkpoint"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "Exported {} to slot {} of the MHXX save"
+msgstr "{} esportato nello slot {} del salvataggio MHXX"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/collections.rs
@@ -4701,6 +4871,47 @@ msgstr "Impossibile aprire {}: {}"
 msgid "Before a write"
 msgstr "Prima di una scrittura"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "the snapshot from {}"
+msgstr "l'istantanea di {}"
+
+#: app/gui/src/views/file.rs
+msgid "the save as open"
+msgstr "il salvataggio com'è aperto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "From {} to {}"
+msgstr "Da {} a {}"
+
+#: app/gui/src/views/file.rs
+msgid "the open save includes the changes not written yet"
+msgstr "il salvataggio aperto include le modifiche non ancora scritte"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/file.rs
+msgid "{n} more line not shown"
+msgid_plural "{n} more lines not shown"
+msgstr[0] "{n} riga in più non mostrata"
+msgstr[1] "{n} righe in più non mostrate"
+
+#: app/gui/src/views/file.rs
+msgid "The save as open"
+msgstr "Il salvataggio com'è aperto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Snapshot from {}"
+msgstr "Istantanea di {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/file.rs
+msgid "{n} difference"
+msgid_plural "{n} differences"
+msgstr[0] "{n} differenza"
+msgstr[1] "{n} differenze"
+
 #: app/gui/src/views/file.rs
 msgid "Open MHGU save (system)"
 msgstr "Apri salvataggio MHGU (system)"
@@ -4713,6 +4924,11 @@ msgstr "Percorso copiato"
 #: app/gui/src/views/file.rs
 msgid "Snapshot failed, nothing written: {}"
 msgstr "Istantanea non riuscita, niente scritto: {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Snapshot from {} kept · restore the backup on the Switch with {}"
+msgstr "Istantanea di {} conservata · ripristina il backup sulla Switch con {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/file.rs
@@ -4732,6 +4948,11 @@ msgid "Wrote {n} change (no snapshot)"
 msgid_plural "Wrote {n} changes (no snapshot)"
 msgstr[0] "{n} modifica scritta (senza istantanea)"
 msgstr[1] "{n} modifiche scritte (senza istantanea)"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Restore the backup on the Switch with {}"
+msgstr "Ripristina il backup sulla Switch con {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/file.rs
@@ -5663,8 +5884,57 @@ msgid ", or "
 msgstr ", oppure "
 
 #: app/gui/src/views/quests.rs
+msgid "HR up"
+msgstr "GC aumentato"
+
+#: app/gui/src/views/quests.rs
+msgid "Transferred from MHGen"
+msgstr "Trasferito da MHGen"
+
+#: app/gui/src/views/quests.rs
+msgid "Welcome"
+msgstr "Benvenuto"
+
+#: app/gui/src/views/quests.rs
+msgid "Forged"
+msgstr "Forgiato"
+
+#: app/gui/src/views/quests.rs
+msgid "Upgrades"
+msgstr "Miglioramenti"
+
+#: app/gui/src/views/quests.rs
+msgid "Forged count"
+msgstr "Numero di forgiature"
+
+#: app/gui/src/views/quests.rs
+msgid "Awards complete"
+msgstr "Premi completati"
+
+#: app/gui/src/views/quests.rs
+msgid "Completed"
+msgstr "Completata"
+
+#: app/gui/src/views/quests.rs
+msgid "Abandoned"
+msgstr "Abbandonata"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "{} (Palico)"
+msgstr "{} (Compagno)"
+
+#: app/gui/src/views/quests.rs
 msgid "Arena records"
 msgstr "Record dell'arena"
+
+#: app/gui/src/views/quests.rs
+msgid "History"
+msgstr "Cronologia"
+
+#: app/gui/src/views/quests.rs
+msgid "Your Guild Card's last ten records"
+msgstr "Gli ultimi dieci record della tua Tessera Gilda"
 
 #: app/gui/src/views/quests.rs
 msgid "Best times and sets of the Arena quests"
@@ -5845,6 +6115,155 @@ msgid "Found {n} new save"
 msgid_plural "Found {n} new saves"
 msgstr[0] "Trovato {n} nuovo salvataggio"
 msgstr[1] "Trovati {n} nuovi salvataggi"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "not a file of this kind"
+msgstr "non è un file di questo tipo"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "no slot {}"
+msgstr "nessuno slot {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "slot {} is given twice"
+msgstr "lo slot {} è indicato due volte"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "neither an ID nor a name"
+msgstr "né un ID né un nome"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "nothing is called {}"
+msgstr "nulla si chiama {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "{} is not a count of 1 to 99"
+msgstr "{} non è una quantità da 1 a 99"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "{} is not a level of 1 to 32"
+msgstr "{} non è un livello da 1 a 32"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "the raw entry is not 72 hex digits"
+msgstr "la voce grezza non è di 72 cifre esadecimali"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "more lines than the box has slots"
+msgstr "più righe delle caselle della cassa"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "a talisman needs a first skill"
+msgstr "un talismano richiede una prima abilità"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "no skill is called {}"
+msgstr "nessuna abilità si chiama {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "{} is not a number of points"
+msgstr "{} non è un numero di punti"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/transfer_ui.rs
+msgid "Line {}: {}"
+msgstr "Riga {}: {}"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "CSV file"
+msgstr "File CSV"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Not imported: the file is not UTF-8 text"
+msgstr "Non importato: il file non è testo UTF-8"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Export the item box"
+msgstr "Esporta la cassa oggetti"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "item box"
+msgstr "cassa oggetti"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Item box exported"
+msgstr "Cassa oggetti esportata"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Import the item box"
+msgstr "Importa la cassa oggetti"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Item box not imported"
+msgstr "Cassa oggetti non importata"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "equipment box"
+msgstr "cassa equipaggiamento"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Palico equipment box"
+msgstr "Cassa equipaggiamento del compagno"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Export the equipment box"
+msgstr "Esporta la cassa equipaggiamento"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Equipment box exported"
+msgstr "Cassa equipaggiamento esportata"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Import the equipment box"
+msgstr "Importa la cassa equipaggiamento"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Equipment box not imported"
+msgstr "Cassa equipaggiamento non importata"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Import the Palico equipment box"
+msgstr "Importa la cassa equipaggiamento del compagno"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Equipment box"
+msgstr "Cassa equipaggiamento"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/transfer_ui.rs
+msgid "{n} entry kept as it was: worn or in a set"
+msgid_plural "{n} entries kept as they were: worn or in a set"
+msgstr[0] "{n} voce lasciata com'era: indossata o in un set"
+msgstr[1] "{n} voci lasciate com'erano: indossate o in un set"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "No talisman in the text"
+msgstr "Nessun talismano nel testo"
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Talismans not added"
+msgstr "Talismani non aggiunti"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/transfer_ui.rs
+msgid "Not added: the box has room for {n} talisman"
+msgid_plural "Not added: the box has room for {n} talismans"
+msgstr[0] "Non aggiunto: la cassa ha posto per {n} talismano"
+msgstr[1] "Non aggiunti: la cassa ha posto per {n} talismani"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/transfer_ui.rs
+msgid "Add {n} talisman"
+msgid_plural "Add {n} talismans"
+msgstr[0] "Aggiungi {n} talismano"
+msgstr[1] "Aggiungi {n} talismani"
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Soaratorium Lab upgrades"

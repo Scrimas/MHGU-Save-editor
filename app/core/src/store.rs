@@ -127,6 +127,11 @@ pub fn changed_on_disk(loc: &Location) -> Option<PathBuf> {
     loc.copies.iter().zip(&loc.seen).find(|(p, s)| fs::read(p).ok().as_deref().map(fingerprint) != **s).map(|(p, _)| p.clone())
 }
 
+/// The copy of the opened file in snapshot `snap`.
+pub fn snapshot_file(loc: &Location, snap: &Path) -> PathBuf {
+    snap.join(loc.rel(&loc.opened))
+}
+
 /// Copies every file of the save (both commit folders) into `dest/<timestamp>/`.
 pub fn snapshot(loc: &Location, dest_root: &Path, stamp: &str) -> std::io::Result<PathBuf> {
     let dest = dest_root.join(stamp);

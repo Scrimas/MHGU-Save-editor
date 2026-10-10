@@ -255,8 +255,17 @@ impl Names {
 
 /// The game's names in the interface language (i18n), English where the game has none.
 pub fn names() -> &'static Names {
+    names_in(crate::i18n::current())
+}
+
+/// The game's English names, whatever the interface language (files read by other tools
+/// use them).
+pub fn english() -> &'static Names {
+    names_in(0)
+}
+
+fn names_in(lang: usize) -> &'static Names {
     static N: [OnceLock<Names>; crate::i18n::LANGS.len()] = [const { OnceLock::new() }; crate::i18n::LANGS.len()];
-    let lang = crate::i18n::current();
     N[lang].get_or_init(|| {
         let mut n: Names = file("names.json").and_then(|b| serde_json::from_slice(b).ok()).unwrap_or_default();
         let code = crate::i18n::LANGS[lang].0;

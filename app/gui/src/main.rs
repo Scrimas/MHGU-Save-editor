@@ -4,6 +4,7 @@ mod arrows;
 mod assets;
 #[cfg(target_os = "linux")]
 mod desktop;
+mod diff;
 mod fmt;
 mod focus;
 mod goals;

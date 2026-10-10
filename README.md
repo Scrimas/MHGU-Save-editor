@@ -38,16 +38,21 @@ Flatpak folders) and for yuzu and its forks: suyu, Sudachi, Citron, Eden, torzu
 For a portable install or another emulator, add its folder in **Settings…** or use
 **Open save…** on its `system` file. Title ID `0100770008DD8000` (EU / western release).
 
+A save from a real Switch works too: back it up with JKSV or Checkpoint, open the
+`system` file of the backup folder on the SD card (found automatically while the card is
+mounted), write, then restore the backup on the console with the same tool. A JKSV ZIP
+backup has to be extracted first. Details in [docs/01-container.md](docs/01-container.md#saves-from-a-real-switch).
+
 ## What it edits
 
 | Page | |
 |---|---|
 | Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points, every item obtained, every Smithy entry listed, every Guild Card title word, scene and pose; and, Derived: every Soaratorium Lab upgrade, Poogie and Moofy costume, Jukebox song, Trader ware, Horns Coin trade, combination recipe and Gallery movie |
 | Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, appearance: body type, face, hairstyle, voice, features, clothing, skin and clothing colours; Guild Card title, scene, pose and greeting, Guild Card weapon usage, quests completed per hunting style; and, Derived: the hunting style, Hunter Arts (SP too) and armor pigment you have on, the Courier's quest counter and points, the village a load starts in and the Room Service's Housekeeper (only those the game offers) |
-| Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts. A pouch stack above the item's carry limit is written with a warning |
-| Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables); My Sets: pigment, and, Derived: name, gear, hunting style and Hunter Arts (checked against the weapon, the style's slots and the arts unlocked), a set made from what you have on; Palico equipment sets (Derived): name and gear |
+| Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts; the item box exported to and imported from a CSV file (slot, ID, name, count). A pouch stack above the item's carry limit is written with a warning |
+| Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables); each box exported to and imported from a CSV file (entries worn or in a set stay); talismans copied as text in the charm list format of Athena's Armor Set Search, and pasted in to add; My Sets: pigment, and, Derived: name, gear, hunting style and Hunter Arts (checked against the weapon, the style's slots and the arts unlocked), a set made from what you have on; Palico equipment sets (Derived): name and gear |
 | Palicoes | Name, level and experience, forte, target, greeting, original owner; support moves and skills: the list and what is equipped, checked against the forte's innate entries and the level's slots; looks: coat, eyes, ears, tail, voice, clothing and their colours from the game's palettes; and, Derived: a Palico copied with the equipment it wears to another character, or exported to a file and imported into any save; the Palicoes for hire (same editor); the Palico played as Prowler and the two hunting buddies, Dojo sessions completed and Palicoes hired; the Palico Scout's conditions; StreetPass Palicoes (remove from the inbox); the Dojo, Palico Board and Meownster Hunters read-only |
-| Quests | Every quest cleared or not (seen and quest sets follow, as in game, and so do the Guild Card's quests-completed counts); says what unlocks a quest that is not on the board yet. Arena records: best time and equipment set per Arena quest, ranked by the quest's times |
+| Quests | Every quest cleared or not (seen and quest sets follow, as in game, and so do the Guild Card's quests-completed counts); says what unlocks a quest that is not on the board yet. Arena records: best time and equipment set per Arena quest, ranked by the quest's times. History: the Guild Card's last ten records (date, result, quest, party), read-only |
 | Requests | Villager requests: accepted (quest posted on the board) and reported |
 | Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt; Derived: Special Permit points and those waiting at the Courier) |
 | Unlocks | Derived, entry by entry, each with what unlocks it in game: Soaratorium Lab upgrades (the supply drop sets follow), Jukebox songs, supply drop sets, Horns Coin trades, Poogie and Moofy costumes; the village pets (names, costumes worn, adoption), Moofah affection and Moofah gifts (with their award); what the Trader sells (items, title words, Guild Card scenes, pet costumes, delivery requests); the Housekeeper's Gallery, the Hunter's Notes second list and tips read, the Combination List recipes combined, one-time event scenes and the milestones the award checks read. The Market, Guild Store and Armory lists are shown read-only: the game sells by star level, whatever the save holds |
@@ -59,6 +64,10 @@ For a portable install or another emulator, add its folder in **Settings…** or
 
 All three character slots are supported. **Characters…** (Derived) copies, swaps and
 deletes whole characters, and exports one to a file to import it into a slot of any save.
+It also moves characters from and to **MHXX**: Import… takes a character from the
+`system` file of an MHXX save (3DS, from a JKSM or Checkpoint backup, or the Japanese
+Switch release), and Export to an MHXX save… puts one into a copy of such a save
+([docs/01-container.md](docs/01-container.md#mhxx-saves-3ds-and-the-japanese-switch-release)).
 
 **Values the game cannot produce** (a stack above its limit, a decoration that does not
 fit, a talisman outside the charm tables, a weapon above its top level, a locked Guild
@@ -147,7 +156,8 @@ edits the value, and the Monsters, Quests and Items pages link back to it.
   not lost; Reload reads it again and keeps the staged changes.
 - **A snapshot is taken before every write** (and before every restore). Snapshots
   restores the whole save folder from any of them, and only into the save it was
-  taken of.
+  taken of; Compare lists what differs, in game terms, between a snapshot and the open
+  save or another snapshot.
 - The emulator keeps two copies of the save, each with a backup; all four files get
   the same bytes and keep their own headers. Every copy is checked before any is
   written, and each write is checked by reading it back.

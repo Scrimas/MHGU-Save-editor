@@ -1,6 +1,8 @@
 //! Opening saves, the Open screen, Write, snapshots and Restore.
 
 use super::*;
+use crate::{diff, DiffRow};
+use mhgu_save::Save;
 
 /// A running emulator overwrites the save when it exits: Write and Restore wait for it.
 fn emulator_blocks(ui: &AppWindow) -> bool {
@@ -114,6 +116,53 @@ pub(super) fn list_snapshots(ui: &AppWindow, st: &State) {
     api.set_snapshot_dir(fmt::elide_path(&root.display().to_string(), 56).into());
 }
 
+/// Compare snapshot `dir` with the save as open (`other` < 0) or with snapshot `other` of
+/// the list; the older one is the left side.
+fn compare(ui: &AppWindow, st: &State, dir: &str, other: i32) {
+    let Some(doc) = st.doc.as_ref() else { return };
+    let api = ui.global::<Api>();
+    let snaps: Vec<SnapRow> = api.get_snapshots().iter().collect();
+    let Some(me) = snaps.iter().position(|r| r.dir == dir) else { return };
+    let read = |d: &str| -> Result<Save, String> {
+        let p = store::snapshot_file(&doc.loc, Path::new(d));
+        let b = std::fs::read(&p).map_err(|e| trf("Could not read {}: {}", &[&p.display(), &e]))?;
+        Save::from_bytes(b).map_err(|e| e.to_string())
+    };
+    let other = usize::try_from(other).ok().filter(|&o| o < snaps.len() && o != me);
+    let snap = |k: usize| trf("the snapshot from {}", &[&snaps[k].when]);
+    let sides = match other {
+        None => read(dir).map(|a| (a, doc.save.clone(), snap(me), tr("the save as open").to_string())),
+        // the list is newest first
+        Some(o) => read(dir).and_then(|a| read(&snaps[o].dir).map(|b| if o < me { (a, b, snap(me), snap(o)) } else { (b, a, snap(o), snap(me)) })),
+    };
+    let (old, new, from, to) = match sides {
+        Ok(x) => x,
+        Err(e) => return toast(ui, e, true),
+    };
+    let lines = diff::diff(&old, &new);
+    let n = lines.iter().filter(|l| !l.label.is_empty()).count();
+    let mut sub = trf("From {} to {}", &[&from, &to]);
+    if other.is_none() && st.save().is_dirty() {
+        sub.push_str(" · ");
+        sub.push_str(tr("the open save includes the changes not written yet"));
+    }
+    // a whole box changed is thousands of lines: the dialog shows the first ones
+    const SHOWN: usize = 1500;
+    let more = lines.len().saturating_sub(SHOWN);
+    let mut rows: Vec<DiffRow> = lines.into_iter().take(SHOWN).map(|l| DiffRow { group: l.group.into(), label: l.label.into(), old: l.old.into(), new: l.new.into() }).collect();
+    if more > 0 {
+        let label = trn("{n} more line not shown", "{n} more lines not shown", more as i64, &[]);
+        rows.push(DiffRow { group: "".into(), label: label.into(), old: "".into(), new: "".into() });
+    }
+    let others: Vec<String> = std::iter::once(tr("The save as open").to_string()).chain(snaps.iter().map(|r| trf("Snapshot from {}", &[&r.when]))).collect();
+    api.set_diff_rows(model(rows));
+    api.set_diff_sub(sub.into());
+    api.set_diff_dir(dir.into());
+    api.set_diff_others(strings(others));
+    api.set_diff_other(other.map_or(0, |o| o as i32 + 1));
+    api.set_diff_title(trn("{n} difference", "{n} differences", n as i64, &[]).into());
+}
+
 pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
     {
@@ -173,6 +222,8 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
         let titles: Vec<String> = s.ops.iter().map(|o| if o.values.len() == 1 { o.values[0].0.label(s.save(), o.slot) } else { o.title.clone() }).collect();
         let n = s.ops.len();
         let Some(doc) = s.doc.as_mut() else { return false };
+        // a backup made on the Switch goes back there with the tool that made it
+        let tool = system::console_backup(&doc.loc.opened);
         // the game saved since the save was read: writing would undo that play
         if let Some(p) = store::changed_on_disk(&doc.loc) {
             changed_on_disk(&ui, &p);
@@ -203,11 +254,20 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
                 match kept {
                     // taken just now: its time says enough
                     Some((p, when, time)) => {
-                        let sub = trf("Snapshot from {} kept", &[&time]);
+                        let sub = match tool {
+                            Some(t) => trf("Snapshot from {} kept · restore the backup on the Switch with {}", &[&time, &t]),
+                            None => trf("Snapshot from {} kept", &[&time]),
+                        };
                         let msg = trn("Wrote {n} change", "Wrote {n} changes", n as i64, &[]);
                         toast_full(&ui, msg, &sub, tr("Restore…"), ToastAct::Restore(p, when), false)
                     }
-                    None => toast(&ui, trn("Wrote {n} change (no snapshot)", "Wrote {n} changes (no snapshot)", n as i64, &[]), false),
+                    None => {
+                        let msg = trn("Wrote {n} change (no snapshot)", "Wrote {n} changes (no snapshot)", n as i64, &[]);
+                        match tool {
+                            Some(t) => toast_full(&ui, msg, &trf("Restore the backup on the Switch with {}", &[&t]), "", ToastAct::None, false),
+                            None => toast(&ui, msg, false),
+                        }
+                    }
                 }
                 true
             }
@@ -235,6 +295,9 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
     }
     on!(ui, st, on_list_snapshots, |ui, s| {
         list_snapshots(&ui, &s);
+    });
+    on!(ui, st, on_compare, |ui, s, dir: SharedString, other: i32| {
+        compare(&ui, &s, &dir, other);
     });
     // restoring snapshots the current save first, so a restore can be undone too (A3)
     on!(ui, st, on_restore, |ui, s, dir: SharedString| {

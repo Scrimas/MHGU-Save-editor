@@ -88,9 +88,52 @@ their entry names differ. An editor leaves the header alone.
 
 ## Regions and builds
 
-Only the EU/western build (`0100770008DD8000`) was examined. The 3DS release of
-MHGU's predecessor (MHXX) uses a different, encrypted container and none of this
-applies to it.
+Only the EU/western build (`0100770008DD8000`) was examined.
+
+## Saves from a real Switch
+
+**DERIVED** (backup tools' documented layouts; the editor reads them like any copy).
+A console's savedata is not reachable from a PC; homebrew backup tools copy the files
+out of the save volume onto the SD card, unchanged. They are the same `system` and
+`system_backup` as above, 5,159,100 bytes each, without Ryujinx's `0/` and `1/` commit
+folders (those are the emulator's view of the save volume's journal, not files of the
+game):
+
+| Tool | Where the backup lands on the SD card |
+|---|---|
+| JKSV | `JKSV/<game title>/<user> - <date>/system`, `system_backup` |
+| Checkpoint | `switch/Checkpoint/saves/0x0100770008DD8000 <game title>/<backup name>/system`, `system_backup` |
+| yuzu family (emulator) | `nand/user/save/0000000000000000/<user id>/0100770008DD8000/system` |
+
+JKSV can also write a backup as a ZIP archive; it has to be extracted first. An
+editor writes both files of the backup folder (body only, each keeps its header) and
+the tool restores the folder on the console. The editor looks for these folders on
+mounted drives (`/run/media/<user>`, `/media`, `/mnt`, `/Volumes`, drive letters D–Z)
+and names the tool next to the save's path.
+
+## MHXX saves (3DS and the Japanese Switch release)
+
+**DERIVED** from SilverJolteon's MHXX/MHGU Save Manager (v1.5.1), which converts
+characters between the three games this way; not yet checked in game with this editor.
+
+MHGU is MHXX's international release and keeps its save layout. A 3DS `system` file
+(from a JKSM or Checkpoint backup of the game's extra data, which those tools write
+decrypted) is the MHGU body without the 36-byte container header, in a smaller file:
+
+| Game | File size | Header | Slot stride |
+|---|---|---|---|
+| MHXX 3DS | 4,726,152 (`0x481D88`) | none | `0x11E7C0` |
+| MHXX Switch (JP) | 4,726,188 (`0x481DAC`) | `0x24`, as above | `0x11E7C0` |
+| MHGU Switch | 5,159,100 (`0x4EB8BC`) | `0x24` | `0x11F8C4` |
+
+Body offsets are shared: slots in use at body `+0x04` (3 × u8), slot pointers at body
+`+0x10` (3 × u32, relative to the body). The first `0x11D088` bytes of a character slot
+are laid out alike in both games. The chat phrases after them differ in size: a flag
+byte, 99 phrases (3 groups × (24 phrases + 9 auto-shoutouts)) of 60 bytes in MHXX and
+104 in MHGU (UTF-8, NUL-padded), then the u16 chat group in use
+([11](11-save-map.md)). Moving a character copies the shared bytes and rewrites the
+phrases, cutting a long one on a character boundary. Gear one game lacks should be
+unequipped first; the shared block (DLC quests, options) stays the target save's own.
 
 ## Open questions
 

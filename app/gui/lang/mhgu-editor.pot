@@ -159,6 +159,10 @@ msgstr ""
 msgid "No snapshots of this save yet. Write takes one first unless you untick it."
 msgstr ""
 
+#: app/gui/ui/app.slint
+msgid "Compare"
+msgstr ""
+
 #: app/gui/src/views/file.rs app/gui/ui/app.slint
 msgid "Restore…"
 msgstr ""
@@ -192,6 +196,50 @@ msgid "Restore"
 msgstr ""
 
 #: app/gui/ui/app.slint
+msgid "Talismans as text"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "One talisman a line: slots, skill, points, second skill, points, with the game's English skill names. The charm list of Athena's Armor Set Search reads it as it is. Paste talismans here to add them to the box."
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Copy"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Add to the box"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Compared with"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Nothing differs."
+msgstr ""
+
+#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+msgid "Replace…"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Put here…"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Import"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "The MHXX save you picked stays as it is: the result is saved as a new file."
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "The character is staged like any import: it shows in Review and goes into the save with Write."
+msgstr ""
+
+#: app/gui/src/views/characters.rs app/gui/ui/app.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} · empty"
 msgstr ""
@@ -204,12 +252,12 @@ msgstr ""
 msgid "Copy, swap, delete, export or import whole characters. Each change is staged: it shows in Review and goes into the save with Write."
 msgstr ""
 
-#: app/gui/src/views/file.rs app/gui/ui/app.slint
+#: app/gui/src/views/characters.rs app/gui/src/views/file.rs app/gui/ui/app.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "HR {} · {}"
 msgstr ""
 
-#: app/gui/ui/app.slint
+#: app/gui/src/views/characters.rs app/gui/ui/app.slint
 msgid "No character in this slot"
 msgstr ""
 
@@ -226,10 +274,6 @@ msgid "Delete"
 msgstr ""
 
 #: app/gui/ui/app.slint
-msgid "Copy"
-msgstr ""
-
-#: app/gui/ui/app.slint
 msgid "to"
 msgstr ""
 
@@ -240,6 +284,18 @@ msgstr ""
 #: app/gui/ui/app.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Copy replaces {} in slot {}."
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "MHXX"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Export to an MHXX save…"
+msgstr ""
+
+#: app/gui/ui/app.slint
+msgid "Import… also takes a character from an MHXX save: the system file of a JKSM or Checkpoint backup (3DS), or of JKSV or Checkpoint (Switch). Unequip gear the other game lacks before moving a character."
 msgstr ""
 
 #: app/gui/ui/app.slint
@@ -1402,6 +1458,18 @@ msgstr ""
 msgid "Add equipment"
 msgstr ""
 
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+msgid "Export box to CSV…"
+msgstr ""
+
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+msgid "Import box from CSV…"
+msgstr ""
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Talismans as text…"
+msgstr ""
+
 #: app/gui/ui/pages/equipment.slint
 msgid "Palico"
 msgstr ""
@@ -1426,7 +1494,7 @@ msgstr ""
 msgid "Weapons"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+#: app/gui/src/diff.rs app/gui/src/targets.rs app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Empty"
 msgstr ""
 
@@ -1454,10 +1522,6 @@ msgstr ""
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Add equipment here"
-msgstr ""
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Replace…"
 msgstr ""
 
 #: app/gui/ui/pages/equipment.slint
@@ -1535,6 +1599,10 @@ msgstr ""
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Decoration slots"
+msgstr ""
+
+#: app/gui/ui/pages/equipment.slint
+msgid "Share as text…"
 msgstr ""
 
 #: app/gui/ui/pages/equipment.slint
@@ -1627,7 +1695,7 @@ msgstr ""
 msgid "Empty pouch…"
 msgstr ""
 
-#: app/gui/src/goals.rs app/gui/ui/pages/items.slint
+#: app/gui/src/goals.rs app/gui/src/views/transfer_ui.rs app/gui/ui/pages/items.slint
 msgid "Item box"
 msgstr ""
 
@@ -1956,11 +2024,31 @@ msgid "Failed: {}"
 msgstr ""
 
 #: app/gui/ui/pages/quests.slint
-msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgid "The last ten records of your Guild Card, newest first, as the game wrote them. Read only."
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Date"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Result"
 msgstr ""
 
 #: app/gui/ui/pages/quests.slint
 msgid "Quest"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Party"
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "No record yet."
+msgstr ""
+
+#: app/gui/ui/pages/quests.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
 msgstr ""
 
 #: app/gui/ui/pages/quests.slint
@@ -2006,7 +2094,7 @@ msgstr ""
 msgid "Seen"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
+#: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/pages/quests.slint
 msgid "Failed"
 msgstr ""
 
@@ -2217,6 +2305,35 @@ msgstr ""
 #. placeholders: {} in order, {0} {1} by position
 msgid "Item #{}"
 msgstr ""
+
+#: app/gui/src/diff.rs app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} (slot {})"
+msgstr ""
+
+#: app/gui/src/diff.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Slot {}"
+msgstr ""
+
+#: app/gui/src/diff.rs
+msgid "Shared by the characters"
+msgstr ""
+
+#: app/gui/src/diff.rs
+msgid "Bytes outside the save map"
+msgstr ""
+
+#: app/gui/src/diff.rs
+msgid "Other bytes"
+msgstr ""
+
+#: app/gui/src/diff.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "{n} byte"
+msgid_plural "{n} bytes"
+msgstr[0] ""
+msgstr[1] ""
 
 #: app/gui/src/fmt.rs
 #. placeholders: {} in order, {0} {1} by position
@@ -3906,7 +4023,7 @@ msgstr ""
 msgid "Hired Charge Blade"
 msgstr ""
 
-#: app/gui/src/views/cards_ui.rs
+#: app/gui/src/views/cards_ui.rs app/gui/src/views/quests.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "HR {}"
 msgstr ""
@@ -3964,7 +4081,7 @@ msgstr ""
 msgid "Next offer"
 msgstr ""
 
-#: app/gui/src/views/cards_ui.rs
+#: app/gui/src/views/cards_ui.rs app/gui/src/views/quests.rs
 msgid "Hired"
 msgstr ""
 
@@ -4067,14 +4184,9 @@ msgstr ""
 msgid "Could not write {}: {}"
 msgstr ""
 
-#: app/gui/src/views/characters.rs
+#: app/gui/src/views/characters.rs app/gui/src/views/file.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Could not read {}: {}"
-msgstr ""
-
-#: app/gui/src/views/characters.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "{} (slot {})"
 msgstr ""
 
 #: app/gui/src/views/characters.rs
@@ -4082,7 +4194,7 @@ msgstr ""
 msgid "slot {}"
 msgstr ""
 
-#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs app/gui/src/views/palicoes.rs
+#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
 msgid "Added to Review"
 msgstr ""
 
@@ -4123,12 +4235,66 @@ msgid "Import character"
 msgstr ""
 
 #: app/gui/src/views/characters.rs
+msgid "MHXX save (system)"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
 msgid "Not imported: the file is not a character exported by this editor"
 msgstr ""
 
 #: app/gui/src/views/characters.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Import {} into slot {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Not imported: the file is neither a character exported by this editor nor an MHXX save"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Not imported: that MHXX save holds no character"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "MHXX save to put {} in"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Not an MHXX save: {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Which character of {} goes into slot {}?"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Which slot of {} does the character go into?"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Import {} from MHXX into slot {}"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Save the MHXX save"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Restore it on the 3DS with JKSM or Checkpoint"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+msgid "Restore it on the Switch with JKSV or Checkpoint"
+msgstr ""
+
+#: app/gui/src/views/characters.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Exported {} to slot {} of the MHXX save"
 msgstr ""
 
 #: app/gui/src/views/collections.rs
@@ -4641,6 +4807,47 @@ msgid "Before a write"
 msgstr ""
 
 #: app/gui/src/views/file.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "the snapshot from {}"
+msgstr ""
+
+#: app/gui/src/views/file.rs
+msgid "the save as open"
+msgstr ""
+
+#: app/gui/src/views/file.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "From {} to {}"
+msgstr ""
+
+#: app/gui/src/views/file.rs
+msgid "the open save includes the changes not written yet"
+msgstr ""
+
+#: app/gui/src/views/file.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "{n} more line not shown"
+msgid_plural "{n} more lines not shown"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/file.rs
+msgid "The save as open"
+msgstr ""
+
+#: app/gui/src/views/file.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Snapshot from {}"
+msgstr ""
+
+#: app/gui/src/views/file.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "{n} difference"
+msgid_plural "{n} differences"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/file.rs
 msgid "Open MHGU save (system)"
 msgstr ""
 
@@ -4651,6 +4858,11 @@ msgstr ""
 #: app/gui/src/views/file.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Snapshot failed, nothing written: {}"
+msgstr ""
+
+#: app/gui/src/views/file.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Snapshot from {} kept · restore the backup on the Switch with {}"
 msgstr ""
 
 #: app/gui/src/views/file.rs
@@ -4671,6 +4883,11 @@ msgid "Wrote {n} change (no snapshot)"
 msgid_plural "Wrote {n} changes (no snapshot)"
 msgstr[0] ""
 msgstr[1] ""
+
+#: app/gui/src/views/file.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Restore the backup on the Switch with {}"
+msgstr ""
 
 #: app/gui/src/views/file.rs
 #. placeholders: {} in order, {0} {1} by position
@@ -5602,7 +5819,56 @@ msgid ", or "
 msgstr ""
 
 #: app/gui/src/views/quests.rs
+msgid "HR up"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Transferred from MHGen"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Welcome"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Forged"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Upgrades"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Forged count"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Awards complete"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Completed"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Abandoned"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} (Palico)"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
 msgid "Arena records"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "History"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Your Guild Card's last ten records"
 msgstr ""
 
 #: app/gui/src/views/quests.rs
@@ -5782,6 +6048,155 @@ msgstr ""
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 msgid "Found {n} new save"
 msgid_plural "Found {n} new saves"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "not a file of this kind"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "no slot {}"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "slot {} is given twice"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "neither an ID nor a name"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "nothing is called {}"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} is not a count of 1 to 99"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} is not a level of 1 to 32"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "the raw entry is not 72 hex digits"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "more lines than the box has slots"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "a talisman needs a first skill"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "no skill is called {}"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} is not a number of points"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Line {}: {}"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "CSV file"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Not imported: the file is not UTF-8 text"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Export the item box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "item box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Item box exported"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Import the item box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Item box not imported"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "equipment box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Palico equipment box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Export the equipment box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Equipment box exported"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Import the equipment box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Equipment box not imported"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Import the Palico equipment box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Equipment box"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "{n} entry kept as it was: worn or in a set"
+msgid_plural "{n} entries kept as they were: worn or in a set"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "No talisman in the text"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+msgid "Talismans not added"
+msgstr ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "Not added: the box has room for {n} talisman"
+msgid_plural "Not added: the box has room for {n} talismans"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/transfer_ui.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "Add {n} talisman"
+msgid_plural "Add {n} talismans"
 msgstr[0] ""
 msgstr[1] ""
 

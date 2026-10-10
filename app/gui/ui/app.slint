@@ -1,4 +1,4 @@
-import { Button, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator } from "std-widgets.slint";
+import { Button, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator, TextEdit } from "std-widgets.slint";
 import {
     Api, Tabs, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
     Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing, Picker,
@@ -344,6 +344,12 @@ component SnapshotsDialog inherits Modal {
                                     Button {
                                         y: (parent.height - 32px) / 2;
                                         height: 32px;
+                                        text: @tr("Compare");
+                                        clicked => { Api.compare(s.dir, -1); }
+                                    }
+                                    Button {
+                                        y: (parent.height - 32px) / 2;
+                                        height: 32px;
                                         text: @tr("Restore…");
                                         clicked => {
                                             Api.restore-ask = s.dir;
@@ -403,6 +409,124 @@ component SnapshotsDialog inherits Modal {
     }
 }
 
+// Talismans as text: Athena's charm list, to copy and share, or pasted in to add.
+component TalismanTextDialog inherits Modal {
+    card-width: 560px;
+    dismiss => { Api.talisman-text-open = false; }
+    Text { text: @tr("Talismans as text"); font-size: 20px; font-weight: 600; }
+    Muted { text: @tr("One talisman a line: slots, skill, points, second skill, points, with the game's English skill names. The charm list of Athena's Armor Set Search reads it as it is. Paste talismans here to add them to the box."); }
+    edit := TextEdit {
+        height: 220px;
+        text: Api.talisman-text;
+        font-size: Tok.small;
+        edited(t) => { Api.talisman-text = t; }
+    }
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Button {
+            text: @tr("Copy");
+            clicked => {
+                edit.select-all();
+                edit.copy();
+            }
+        }
+        Rectangle { horizontal-stretch: 1; }
+        Button { text: @tr("Close"); clicked => { Api.talisman-text-open = false; } }
+        Button { text: @tr("Add to the box"); primary: true; clicked => { Api.talisman-text-add(Api.talisman-text); } }
+    }
+}
+
+// A snapshot compared with the open save or another snapshot, over the Snapshots
+// dialog: each value that differs, by character and page.
+component DiffDialog inherits Modal {
+    card-width: 760px;
+    dismiss => { Api.diff-title = ""; }
+    Text { text: Api.diff-title; font-size: 20px; font-weight: 600; }
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Text { text: @tr("Compared with"); vertical-alignment: center; }
+        Picker { width: 280px; model: Api.diff-others; value: Api.diff-other; picked(i) => { Api.compare(Api.diff-dir, i - 1); } }
+        Rectangle { horizontal-stretch: 1; }
+    }
+    Muted { text: Api.diff-sub; }
+    VerticalLayout {
+        Reveal {
+            shown: Api.diff-rows.length == 0;
+            EmptyState { text: @tr("Nothing differs."); }
+        }
+    }
+    if Api.diff-rows.length > 0: Rectangle {
+        border-radius: Tok.radius;
+        border-width: 1px;
+        border-color: Tok.line;
+        height: min(rows.preferred-height, 440px);
+        Flickable {
+            content-height: rows.preferred-height;
+            rows := VerticalLayout {
+                padding-top: 4px;
+                padding-bottom: 8px;
+                for r[i] in Api.diff-rows: HorizontalLayout {
+                    padding-left: 14px;
+                    padding-right: 14px;
+                    padding-top: r.label == "" ? (i == 0 ? 6px : 14px) : 3px;
+                    padding-bottom: r.label == "" ? 4px : 3px;
+                    spacing: Tok.tight;
+                    if r.label == "": Text { text: r.group; font-weight: 600; overflow: elide; }
+                    if r.label != "": Text { text: r.label; horizontal-stretch: 1; overflow: elide; }
+                    if r.label != "": Text { text: r.old; width: 200px; color: Tok.muted; horizontal-alignment: right; overflow: elide; }
+                    if r.label != "": Text { text: "→"; color: Tok.faint; }
+                    if r.label != "": Text { text: r.new; width: 200px; overflow: elide; }
+                }
+            }
+        }
+    }
+    HorizontalLayout {
+        alignment: end;
+        Button { text: @tr("Close"); clicked => { Api.diff-title = ""; } }
+    }
+}
+
+// An MHXX save's slots, over the Characters dialog: which character to import, or
+// which slot to export into.
+component MhxxDialog inherits Modal {
+    card-width: 560px;
+    dismiss => { Api.mhxx-title = ""; }
+    Text { text: Api.mhxx-title; font-size: 20px; font-weight: 600; wrap: word-wrap; }
+    Rectangle {
+        border-radius: Tok.radius;
+        border-width: 1px;
+        border-color: Tok.line;
+        VerticalLayout {
+            for r[i] in Api.mhxx-rows: Rectangle {
+                height: 58px;
+                if i > 0: Hairline { y: 0; width: parent.width; }
+                HorizontalLayout {
+                    padding-left: 14px;
+                    padding-right: 10px;
+                    spacing: Tok.tight;
+                    VerticalLayout {
+                        alignment: center;
+                        horizontal-stretch: 1;
+                        Text { text: r.name; overflow: elide; color: r.used ? Palette.foreground : Tok.faint; }
+                        Muted { text: r.sub; wrap: no-wrap; overflow: elide; }
+                    }
+                    if r.used || Api.mhxx-export: Button {
+                        y: (parent.height - 32px) / 2;
+                        height: 32px;
+                        text: Api.mhxx-export ? (r.used ? @tr("Replace…") : @tr("Put here…")) : @tr("Import");
+                        clicked => { Api.mhxx-pick(i); }
+                    }
+                }
+            }
+        }
+    }
+    Muted { text: Api.mhxx-export ? @tr("The MHXX save you picked stays as it is: the result is saved as a new file.") : @tr("The character is staged like any import: it shows in Review and goes into the save with Write."); }
+    HorizontalLayout {
+        alignment: end;
+        Button { text: @tr("Cancel"); clicked => { Api.mhxx-title = ""; } }
+    }
+}
+
 // Characters: each slot exported, imported or deleted, one copied or swapped onto
 // another. Every change is staged like any other edit (Review, Write, Undo).
 component CharactersDialog inherits Modal {
@@ -410,6 +534,7 @@ component CharactersDialog inherits Modal {
     dismiss => { Api.characters-open = false; }
     property <int> from: Api.slot;
     property <int> to: Api.slot == 0 ? 1 : 0;
+    property <int> xx: Api.slot;
     property <[string]> labels: [
         Api.slots[0].used ? "1 · " + Api.slots[0].name : @tr("{} · empty", 1),
         Api.slots[1].used ? "2 · " + Api.slots[1].name : @tr("{} · empty", 2),
@@ -466,6 +591,19 @@ component CharactersDialog inherits Modal {
             Text { text: @tr("Copy replaces {} in slot {}.", Api.slots[root.to].name, root.to + 1); color: Tok.warn; font-size: Tok.small; wrap: word-wrap; }
         }
     }
+    // MHXX (3DS, or the Japanese Switch release): Import… reads its saves too
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Text { text: @tr("MHXX"); vertical-alignment: center; }
+        Picker { width: 160px; model: root.labels; value: root.xx; picked(i) => { root.xx = i; } }
+        Rectangle { horizontal-stretch: 1; }
+        Button {
+            text: @tr("Export to an MHXX save…");
+            enabled: Api.slots[root.xx].used;
+            clicked => { Api.mhxx-export-start(root.xx); }
+        }
+    }
+    Muted { text: @tr("Import… also takes a character from an MHXX save: the system file of a JKSM or Checkpoint backup (3DS), or of JKSV or Checkpoint (Switch). Unequip gear the other game lacks before moving a character."); }
     Muted { text: @tr("Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."); }
     HorizontalLayout {
         alignment: end;
@@ -755,7 +893,7 @@ export component AppWindow inherits Window {
     forward-focus: keys;
     property <string> page-now: Api.page;
     changed page-now => { Api.page-shown(); }
-    property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
+    property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.mhxx-title != "" || Api.diff-title != "" || Api.talisman-text-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
     changed any-modal => {
         if !any-modal {
             keys.focus();
@@ -1022,6 +1160,9 @@ export component AppWindow inherits Window {
     if Api.write-open: WriteDialog { }
     if Api.snapshots-open: SnapshotsDialog { }
     if Api.characters-open: CharactersDialog { }
+    if Api.mhxx-title != "": MhxxDialog { }
+    if Api.diff-title != "": DiffDialog { }
+    if Api.talisman-text-open: TalismanTextDialog { }
     if Api.settings-open: SettingsDialog { }
     if Api.update-open: Modal {
         property <string> state: Api.update.state;

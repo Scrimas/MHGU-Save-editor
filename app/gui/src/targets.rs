@@ -783,6 +783,61 @@ impl Target {
         }
     }
 
+    /// Every value of character `slot` the editor names, then the ones the characters
+    /// share (the blocked users, the title menu's settings): what a comparison of two
+    /// saves goes through. Whole slots and Palico copies are left out: their parts are
+    /// listed one by one.
+    pub fn all() -> (Vec<Target>, Vec<Target>) {
+        use Target::*;
+        let t = tables();
+        let mut v = vec![Name, Hr, HrPoints, Funds, Wycademy, Playtime, VillageStar, HubStar, Appearance, Gender, Greeting, Title, Scene, Pose, Pigment, Arts];
+        v.extend((0..VILLAGES.len()).flat_map(|k| [Points(k, false), Points(k, true)]));
+        v.extend((0..ch::VENUES.len()).flat_map(|venue| (0..ch::USE_WEAPONS.len()).map(move |w| WeaponUse(venue, w))));
+        v.extend((0..ch::QUEST_KINDS.len()).map(CardQuests));
+        v.extend((0..ch::STYLES.len()).map(StyleUse));
+        v.extend((0..Store::Box.len()).map(|i| Item(Store::Box, i)));
+        v.extend((0..Store::Pouch.len()).map(|i| Item(Store::Pouch, i)));
+        v.extend((0..items::LOADOUT_N).map(Loadout));
+        v.extend((0..Owner::Hunter.len()).map(|i| Equip(Owner::Hunter, i)));
+        v.extend((0..Owner::Palico.len()).map(|i| Equip(Owner::Palico, i)));
+        v.extend((0..sets::MY_SETS_N).flat_map(|k| SET_PARTS.map(|p| MySet(k, p))));
+        v.extend((0..sets::PALICO_SETS_N).map(PalicoSet));
+        let pal = [Pal::Name, Pal::Level, Pal::Exp, Pal::Bias, Pal::Greeting, Pal::Owner, Pal::Target, Pal::Moves, Pal::Skills, Pal::Looks];
+        v.extend((0..palico::PLACES).flat_map(|i| pal.map(|f| Palico(i, f))));
+        v.extend((0..otomo::ROLE_N).map(PalRole));
+        v.extend([DojoDone, PalicoesHired, PalInbox]);
+        v.extend((0..otomo::REQUEST_FIELDS.len()).map(Scouting));
+        v.extend(t.quests.iter().map(|q| Quest(q.index)));
+        let mut req: Vec<usize> = t.requests.iter().map(|r| r.index).chain(t.offers.iter().map(|o| o.index)).collect();
+        req.sort_unstable();
+        req.dedup();
+        v.extend(req.into_iter().map(Request));
+        v.extend(t.arts.iter().map(|a| Art(a.0)));
+        v.extend((0..99).map(Dish));
+        v.extend((0..45).map(Ingredient));
+        v.extend((0..132).map(Award));
+        v.extend((0..DEVIANTS.len()).flat_map(|d| [Permits(d), PermitPoints(d, false), PermitPoints(d, true), Levels(d)]));
+        v.extend((1..=monsters::N).flat_map(|i| [Mon::Hunts, Mon::Captures, Mon::Min, Mon::Max, Mon::Notes].map(|f| Monster(i, f))));
+        v.push(Obtained);
+        v.extend((0..smithy::lists().len()).map(Smithy));
+        v.extend((0..gc::MAPS.len()).map(CardMap));
+        v.extend((0..arena::quests().len()).map(Arena));
+        v.extend((0..unlocks::maps().len()).map(Unlock));
+        v.extend((0..unlocks::PETS).map(Pet));
+        v.extend([Moofahs, MoofahGifts, QuestCounter, CourierPoints, Housekeeper, StartVillage, Cards(false), Cards(true), AutoOn, ChatGroup]);
+        v.extend((0..options::OPTIONS.len()).map(Opt));
+        for auto in [false, true] {
+            let n = if auto { options::AUTO_PER_GROUP } else { options::PER_GROUP };
+            v.extend((0..options::GROUPS).flat_map(|g| (0..n).map(move |i| Phrase(auto, g, i))));
+        }
+        (v, vec![Blacklist, Brightness, Rumble, Language])
+    }
+
+    /// The bytes that hold the value, its copies included.
+    pub fn bytes(&self, s: &Save, slot: usize) -> Vec<usize> {
+        self.footprint(s, slot).into_iter().map(|(a, _)| a).collect()
+    }
+
     /// The bytes (and bits) that hold the value, its copies included.
     fn footprint(&self, s: &Save, slot: usize) -> Footprint {
         use Target::*;
