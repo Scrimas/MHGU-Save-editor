@@ -5,12 +5,14 @@
 //! DERIVED.
 
 pub mod arena;
+pub mod cards;
 pub mod character;
 pub mod data;
 pub mod equipment;
 pub mod guildcard;
 pub mod items;
 pub mod monsters;
+pub mod options;
 pub mod palico;
 pub mod progress;
 pub mod save;
@@ -231,5 +233,29 @@ mod real_save {
                 assert!(!m.starts_with('?'), "offer {}: {m}", r.index);
             }
         }
+    }
+
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn stored_cards_and_guests() {
+        use cards::{List, Role};
+        let mut s = load();
+        let base = s.base(0);
+        let c = cards::cards(&s, base, List::Stored);
+        let seen = |c: &[cards::Card]| c.iter().map(|c| (c.name.clone(), c.hr, c.unity(), c.kind())).collect::<Vec<_>>();
+        // the trailer repeats the card's HR and name
+        assert!(c.iter().all(|c| c.data[0x16..0x18] == c.hr.to_le_bytes() && c.data[..2 * c.name.encode_utf16().count()] == c.name.encode_utf16().flat_map(u16::to_le_bytes).collect::<Vec<_>>()[..]));
+        eprintln!("{:?} · {:?}", seen(&c), c.iter().map(|c| (c.title(), c.weapon(), c.quests(), c.date())).collect::<Vec<_>>());
+        assert_eq!(c.len(), 2);
+        assert!(cards::cards(&s, base, List::Inbox).is_empty());
+        let g = cards::guests(&s, base);
+        eprintln!("{:?}", g.iter().map(|g| (g.role, g.name.clone(), g.hr, g.weapon, g.card)).collect::<Vec<_>>());
+        assert_eq!(g.iter().filter(|g| g.role == Role::Hired).count(), 4);
+        assert!(g.iter().filter(|g| g.card).all(|g| c.iter().any(|c| c.name == g.name)));
+        let kept = c[1].clone();
+        assert!(cards::remove(&mut s, base, List::Stored, 0));
+        let after = cards::cards(&s, base, List::Stored);
+        assert_eq!(seen(&after), seen(std::slice::from_ref(&kept)));
+        assert_eq!((after[0].slot, &after[0].data), (0, &kept.data));
     }
 }

@@ -133,7 +133,7 @@ file, so those labels now cover only the saved map.
 | `0x24` | 28 | body header | — | u32 save version 198 (`0xC6`, written by `0x3e798c`, never read), 3 × u8 slot in use, u8 last slot, block A offset, block B offset, 3 slot offsets (offsets relative to `0x24`) |
 | `0x40` | 14 | A | sUserInfo (`0x52163c`) | shared settings: bonus packs, TV brightness, rumble ([below](#block-a-header-and-shared-settings)) |
 | `0x4E` | 16200 | A | sOtomo (`0x263298`) | shared Palico pool, 50 × 324 B (DLC Palicoes, owner "Capcom") |
-| `0x3F96` | 9600 | A | sBlackList (`0x2257e4`) | 100 × 96 B: the blocked player's network ID (40 B of a 64-B buffer, big-endian `MtNetUniqueId`), then the name (UTF-8, 32 B; first byte 0 = empty); all zero here |
+| `0x3F96` | 9600 | A | sBlackList (`0x2257e4`) | 100 × 96 B: the blocked player's network ID (40 B of a 64-B buffer, big-endian `MtNetUniqueId`), then the name (UTF-8, 32 B; first byte 0 = empty, later bytes may keep an older name); all zero here. No count: `0x1e63e0` counts the named records. The lobby menu adds into the first empty record (`0x1e6414`); its delete (`0x1d1a14`) clears the record (`0x1e6248`) and moves the later ones up (`0x1e6698`). The Guild Card list's "Delete and block" passes the ID to a stub (`0x2257fc`) and blocks no one |
 | `0x6516` | 19852 | A | sGuildCard (`0x16424c`) | 3 × 6616 B with no reader on Switch (only the constructor, loader and writer touch them; probably 3DS per-character StreetPass copies), then 1 B *StreetPass Setup* On/Off, bit = character slot (`0x1668cc`, `uUIPostOffice`), then 3 uninitialised heap bytes; the records are zero here |
 | `0xB2A2` | 3 | A | sGameControl (`0x3f8ef8`) | 3 × u8, the last is the text language |
 | `0xB2A5` | 108 | B | sPrivilege (`0x36bdc`) | which downloads the save holds: 8 bitmaps and a stamp ([below](#downloads-held--block-b-header)) |
@@ -171,10 +171,10 @@ Blocks A and B are shared by all characters. Each block starts 4-aligned relativ
 | `0x2C6A5` | 4 | sFlagChecker (`0x3f43d4`) | star-tier notice latches ([below](#smaller-managers)) |
 | `0x2C6A9` | 20 | sMakeAmulet (`0x14c568`) | 128-bit quest map, event scenes played ([below](#smaller-managers)) |
 | `0x2C6BD` | 978804 | sGuildCard (`0x163e0c`) | Guild Cards ([below](#guild-card-manager)) |
-| `0x11B631` | 6248 | sGuestHunter (`0x15bd3c`) | Hunters for Hire (`GuestHunterMsg`): a 98-byte header (hire state, quests left, offer counts, preference menus and choices, the two reward lists), 13 records of 470 B (0–2 offered, 3–5 next offer, 6–9 the hired party, 10–12), then the IDs of the last five hired guests. A record is either a hunter met online, an exact copy of that hunter's stored Guild Card (name `+0`, title `+0x16`, HR `+0x1C`, greeting `+0x1E`, pose `+0x56`, colour modes `+0x58`, owner ID `+0x65`, appearance `+0x72`, pigment `+0x7E`, equipment 7 × 44 B `+0xA2`; u32 `+0x5C` = the card's Unity), or a "Hired *weapon*" hunter rerolled after every quest (CONFIRMED, [timeline](#confirmed-by-the-save-timeline)) |
+| `0x11B631` | 6248 | sGuestHunter (`0x15bd3c`) | Hunters for Hire (`GuestHunterMsg`): a 98-byte header (hire state, quests left, offer counts, preference menus and choices, the two reward lists), 13 records of 470 B (0–2 offered, 3–5 next offer, 6–9 the hired party, 10–12), then the IDs of the last five hired guests. A record is either a hunter met online, an exact copy of that hunter's stored Guild Card (name `+0`, title `+0x16`, HR `+0x1C`, greeting `+0x1E`, pose `+0x56`, colour modes `+0x58`, owner ID `+0x65`, appearance `+0x72`, pigment `+0x7E`, equipment 7 × 44 B `+0xA2`; u32 `+0x5C` = the card's Unity), or a "Hired *weapon*" hunter rerolled after every quest (CONFIRMED, [timeline](#confirmed-by-the-save-timeline)). DERIVED: header `+0` hire active, `+1` quests left, `+2` / `+3` offered and next-offer counts, `+5` hired count; records past their count are stale, actor kind `+0x70` 2 = empty. A Hired hunter (builder `0x159e50`) has owner ID 0, HR 3 and a name cut to 11 characters of `GuestHunterMsg` 29–42 by weapon type. Records 6–9 become the hired guests' player objects (`0x159b18`); the quest result rerolls the others (`0x15c6e8`, `0x15ca84`) |
 | `0x11CE99` | 160 | sTutorial (`0x539120`) | 64 Training-quest script flags, then 152 B of step-done bits for the Hunter, Prowler and Style Training quests |
 | `0x11CF39` | 263 | sMonNyan (`0x1c9388`) | Meownster Hunters expedition (`cMonNyanDataSave`): seed, state (out / results pending), RARE rotation flags per rank and locale, 4 members with positions, the dispatched location (RARE, WARNING, locale, rank, level), 5 search circles, the large monsters hunted per rank (low, high, G; bit = monster code 1–88), the advent monsters per rank and locale |
-| `0x11D040` | 10371 | `0x55d2c0` | UI manager: a 0x49-byte touch-panel block (4 panel packs, register panels' items and phrases, key panels, preset type; earlier revisions called it a chat header), then the chat phrases, 104-byte text slots: 72 = three copies of the 24 shortcut phrases ("Let's do this!" … "I'm outta here.") at `0x11D089`, 27 = three copies of the 9 auto-chat lines ("I mounted it!", "Hunter Art 1 activated!", …) at `0x11EDC9`, then the active chat set (u16) |
+| `0x11D040` | 10371 | `0x55d2c0` | UI manager: a 0x49-byte touch-panel block (4 panel packs, register panels' items and phrases, key panels, preset type; earlier revisions called it a chat header), then the chat phrases, 104-byte text slots: 72 = three copies of the 24 shortcut phrases ("Let's do this!" … "I'm outta here.") at `0x11D089`, 27 = three copies of the 9 auto-chat lines ("I mounted it!", "Hunter Art 1 activated!", …) at `0x11EDC9`, then the active chat set (u16) at `0x11F8C1`. DERIVED (loader `0x1caab8`, setters `0x1cab90`, `0x1cabac`): the copies are the three chat groups (`OnlineMsg` 30–32, *Switch Group*); group *g*'s phrase *i* is slot 24*g* + *i* (auto 9*g* + *i*), the set in use is 0–2. A slot is UTF-8, NUL-terminated, at most 103 bytes; the in-game keyboard allows 26 characters (`0x1c9dd0`). Character creation and *Reset Shoutout Groups* copy `OnlineMsg` 0–23 and 44–52 in the game's language into the slots (`0x55db48`, `0x55da44`); an empty slot is sent empty. Auto line *i* is said on `OnlineMsg` 35 + *i* (mounting, trap, bombs, mobility, pinned, health, Hunter Art 1–3) while its bit at `0x5057` is set |
 | `0x11F8C3` | 1 | — | alignment |
 
 ### Slot header — `base + 0x0`, 632 B
@@ -315,7 +315,7 @@ buddy 1 and the pet names.
 
 | `base +` | Owner | Content |
 |---|---|---|
-| `0x2246E` | sGameControl `+0x5e` | game options, 29 bytes: written by the Game, Chat and Network option windows (`cUIOOptionWindowFor…`), read by the quest camera and the players. One byte per option, the index of the choice: Music Volume, SFX Volume, Sound Settings, HUD, Map, Camera Angle, Camera Controls, Camera Speed, Scope, Bowgun, Quick Aim Controls, Quick Aim Camera, Reticle Speed, Orientation, Bow Controls, Bow Aim Mode Cancel, START: Kick, Target Cam Controls, Target Cam Behavior, Terrain-savvy Camera, the Circle Pad Pro working copy (reset at load), an unused 3DS option, Lens Flares, four Network options, Melody Effect Display, Shoutout Reset Selection. The defaults table `0x162cda8` equals the fresh slots |
+| `0x2246E` | sGameControl `+0x5e` | game options, 29 bytes: written by the Game, Chat and Network option windows (`cUIOOptionWindowFor…`), read by the quest camera and the players. One byte per option, the index of the choice: Music Volume, SFX Volume, Sound Settings, HUD, Map, Camera Angle, Camera Controls, Camera Speed, Scope, Bowgun, Quick Aim Controls, Quick Aim Camera, Reticle Speed, Orientation, Bow Controls, Bow Aim Mode Cancel, START: Kick, Target Cam Controls, Target Cam Behavior, Terrain-savvy Camera, the Circle Pad Pro working copy (reset at load), an unused 3DS option, Lens Flares, four Network options, Melody Effect Display, Shoutout Reset Selection. The defaults table `0x162cda8` equals the fresh slots. DERIVED by running the windows' item, get and set functions (`0x5e7558`, `0x5e7d34`, `0x5e8130`, network `0x5e947c`): On/Off options store 0 for On (`StartMenuMsg` 140/141); volumes 0 Off, 1–6, 7 Max; Camera Angle and Quick Aim Camera Types 1–5, Bowgun Types 1–3; the camera, scope and quick-aim controls Normal / Flip Y / Flip X / Flip X+Y; Camera and Reticle Speed Slow / Default / Fast; Bow Aim Mode Cancel Auto / Manual; Terrain-savvy Camera Manual / Semi-auto. Sound Settings and START: Kick are hidden in the Switch menu (the menu bar `0x5ce358` still reads Kick). The window's pages: Music … Scope; Bowgun … Bow Aim Mode Cancel, Melody Effect Display; Target Cam … Lens Flares and the four control bytes at `S+0x446c`; then the L Stick option (`S+0x43fb`, text in the update only) |
 | `0x2248B` | `+0x34` | play time in seconds. The slot header (`+0x20`) and the own Guild Card (`+0x914`) are copies |
 | `0x2248F` | `+0x38` | f32, the play-time remainder in frames: `0x3f83a8` (each frame, from `0x69fb24`) adds the frame delta and at 60.0 moves one second into `+0x34` (capped at 35,999,999). 28.19 in the analysed save, 0 in a fresh slot |
 | `0x22493` | `+0x3c` | u32 play time (s) of the transferred 3DS save, 0 = none (set by the transfer `0x3f8e40`); copied to the own Guild Card `+0x86C` (`0x161ac8`), shown next to the transferred HR by `cUIOGuildCardView` |
@@ -461,6 +461,21 @@ sender's hunter ID (`+4`, copied to list 1's `+0x21` when a card moves there,
 key, the sender's ID at `+4`, and 24 bytes with no reader. All three are empty in the
 analysed save.
 
+**DERIVED: the lists stay packed.** No card count is stored: `0x164414` (list 1) and
+`0x165180` (list 2) count the leading elements with state bit 1 set, the list screen shows
+only those, and a received card goes into the first empty element (`0x16449c`). The
+loader accepts holes, but a card after one is never shown and gets overwritten.
+*Delete Card* (`0x164e5c` with compact = 1) clears element *i* and its info record, moves
+the later elements and info records up one, and clears the last. The Post Office deletes
+the marked inbox cards (`0x165624`) and compacts once (`0x1656fc`). Its *Move*
+(`0x16491c`) first looks in list 1 for the same name and ID: a stored card with less
+play time is replaced (info date set to today; Unity, comment and type kept), a newer one
+is kept. Otherwise the card goes to list-1 index = count, below 100, with the inbox date,
+no comment, Unity 0, type 25 and the sender's ID. The inbox card is deleted either way.
+Nothing else in the save names a list slot: Unity at quest end matches cards by ID
+(`0x166b7c`), the Hunters for Hire keep copies, the Arena records keep IDs. The own card's
+Unity total `+0x870` is a lifetime sum that a delete leaves alone.
+
 ### StreetPass Palico record (276 B)
 
 **DERIVED** from the pack `0x526860` (called by `0x165f44`) and the unpack `0x5265b8`.
@@ -510,7 +525,9 @@ date, Unity, type and name.
 After the elements comes one padding block of Σ(`0x18B8` − length − 36) bytes. The
 list size is therefore fixed: n × (`0x18B8` + 8), which is 633,600 B for list 1 and
 316,800 B for list 2. The game fills the padding from an uninitialised heap buffer. It
-contains stale strings and must not be read as data.
+contains stale strings and must not be read as data. The loader reads it in one block and
+frees it unchecked (DERIVED), so an editor may write zeros; a compressed card must stay
+within 6292 bytes.
 
 The analysed save holds two received cards in list 1. Each decompresses to 6328 bytes
 with the same layout as the own card (history log at `+0x918` in both).
@@ -794,12 +811,15 @@ read and write them (`0x3e7f90`, `0x3e8254`).
 | `0x44` | 3 × u16 | `+0x3676` | vestigial: only the transfer `0x52171c` writes them (old `+0x28ea` … `+0x28ee`); no reader | 0 |
 | `0x4A` | u8 | `+0x367c` | one-time title-menu notice shown: `0x67b544` shows *TitleMsg* 88 while it is 0, then sets it (`0x67de64`). Entry 88 is not in the base romfs table (an update text) | 1 |
 | `0x4B` | u8 | `+0x367d` | transfer-server link made: set by `0x6917e8` when the link succeeds, cleared by the flows that rewrite the account ID at `+0x4408`; read by the title menu (`0x680714`) | 0 |
-| `0x4C` | u8 | `+0x367e` | TV brightness: the game sets a scale of 0.4 + 0.025 × value (`0x5216c8`) | 24 (scale 1.0) |
-| `0x4D` | u8 | `+0x367f` | rumble on (1) / off (0), copied to the pad object (`0x4e0ec8`) | 1 |
+| `0x4C` | u8 | `+0x367e` | TV brightness: the game sets a scale of 0.4 + 0.025 × value (`0x5216c8`, no clamp); the title menu's slider gives 0–48 (`0x6bb7ac`), 255 = not set | 24 (scale 1.0) |
+| `0x4D` | u8 | `+0x367f` | rumble on (1) / off (any other value), copied to the pad object (`0x4e0ec8`) | 1 |
 
 The three bytes at `0xB2A2` belong to `sGameControl` (`0x3f8ef8`): `+0x5c`, `+0x5d` and
 `+0xa5`. `+0xa5` is the text language. When it is 0 the loader takes it from the system
-language, and nearly every UI class reads it. `+0x5d` is the 3DS leftover "use the Circle
+language, and nearly every UI class reads it. Its value is the MT language index (suffix
+table `0x1792504`): 1 English, 2 French, 3 Spanish, 4 German, 5 Italian, the title menu's
+choices (`TitleMsg` 79–83, picker `0x6891e0` / `0x6893fc`); 0 Japanese is never stored,
+6–8 are Korean and Chinese. `+0x5d` is the 3DS leftover "use the Circle
 Pad Pro" flag (*CommonMsg* 141–146): the Game options window (`0x5e7000`) and the title
 menu store 1 when ZL/ZR are seen, 0 otherwise, and the loader copies it to the runtime
 byte `+0x72`. `+0x5c` is written only by the constructor, the reset and the transfer

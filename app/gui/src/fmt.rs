@@ -33,6 +33,15 @@ pub fn arena_time(frames: u32) -> String {
     format!("{}:{:02}.{:02}", t / 6000, t / 100 % 60, t % 100)
 }
 
+/// "30 Aug 2026"; a date the game never wrote shows as a dash.
+pub fn date(day: u8, m: u8, year: u16) -> String {
+    if day == 0 || !(1..=12).contains(&m) {
+        return "—".into();
+    }
+    // day, month, year
+    trf("{0} {1} {2}", &[&day, &month(m as u32), &year])
+}
+
 /// Short month name, 1 = January.
 fn month(m: u32) -> &'static str {
     match m {

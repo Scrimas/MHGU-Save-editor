@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, monsters, palico, save, sets, slots, smithy, unlocks, Save};
+use mhgu_save::{arena, cards, monsters, options, palico, save, sets, slots, smithy, unlocks, Save};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -136,11 +136,27 @@ pub enum Target {
     Housekeeper,
     /// The place a load starts in.
     StartVillage,
+    /// The stored Guild Cards (false) or the inbox (true), with their info records.
+    Cards(bool),
+    /// The blocked-user list (shared by the characters).
+    Blacklist,
+    /// A game option (index in `options::OPTIONS`).
+    Opt(usize),
+    /// A chat phrase: auto-shoutout or not, group, index in the group.
+    Phrase(bool, usize, usize),
+    /// Which auto-shoutouts are on, in all three groups.
+    AutoOn,
+    /// The chat group in use.
+    ChatGroup,
+    /// The title menu's settings, shared by the characters.
+    Brightness,
+    Rumble,
+    Language,
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
 /// the UI shows `page_title`.
-pub const PAGES: [(&str, &str); 12] = [
+pub const PAGES: [(&str, &str); 14] = [
     ("overview", "Overview"),
     ("character", "Character"),
     ("items", "Items"),
@@ -151,6 +167,8 @@ pub const PAGES: [(&str, &str); 12] = [
     ("collections", "Collections"),
     ("unlocks", "Unlocks"),
     ("monsters", "Monsters"),
+    ("cards", "Guild Cards"),
+    ("options", "Options"),
     ("database", "Database"),
     ("advanced", "Save map"),
 ];
@@ -172,6 +190,8 @@ pub fn page_title(i: usize) -> &'static str {
         "collections" => tr("Collections"),
         "unlocks" => tr("Unlocks"),
         "monsters" => tr("Monsters"),
+        "cards" => tr("Guild Cards"),
+        "options" => tr("Options"),
         "database" => tr("Database"),
         "advanced" => tr("Save map"),
         _ => "",
@@ -346,6 +366,8 @@ impl Target {
             Art(_) | Dish(_) | Ingredient(_) | Award(_) | Permits(_) | PermitPoints(..) | Levels(_) => "collections",
             Unlock(_) | Pet(_) | Moofahs | MoofahGifts => "unlocks",
             Monster(..) => "monsters",
+            Cards(_) | Blacklist => "cards",
+            Opt(_) | Phrase(..) | AutoOn | ChatGroup | Brightness | Rumble | Language => "options",
             Slot(_) => "overview",
         }
     }
@@ -403,6 +425,15 @@ impl Target {
             CourierPoints => "courier-points".into(),
             Housekeeper => "housekeeper".into(),
             StartVillage => "start-village".into(),
+            Cards(inbox) => if inbox { "cards:inbox" } else { "cards:stored" }.into(),
+            Blacklist => "blacklist".into(),
+            Opt(k) => format!("opt:{}", options::OPTIONS[k].id),
+            Phrase(auto, g, i) => format!("chat:{}:{g}:{i}", if auto { "auto" } else { "phrase" }),
+            AutoOn => "auto-on".into(),
+            ChatGroup => "chat-group".into(),
+            Brightness => "brightness".into(),
+            Rumble => "rumble".into(),
+            Language => "language".into(),
         }
     }
 
@@ -515,6 +546,19 @@ impl Target {
             CourierPoints => tr("Courier points").into(),
             Housekeeper => tr("Housekeeper").into(),
             StartVillage => tr("Start in").into(),
+            Cards(false) => tr("Guild Cards").into(),
+            Cards(true) => tr("Guild Card Inbox").into(),
+            Blacklist => tr("Blocked-user List").into(),
+            Opt(k) => crate::views::option_name(k),
+            Phrase(auto, g, i) => {
+                let what = if auto { crate::views::auto_trigger(i) } else { trf("Shoutout {}", &[&(i + 1)]) };
+                format!("{} · {what}", crate::views::chat_group_name(g))
+            }
+            AutoOn => tr("Auto-Shoutouts on").into(),
+            ChatGroup => tr("Chat group in use").into(),
+            Brightness => tr("TV Brightness").into(),
+            Rumble => tr("Rumble").into(),
+            Language => tr("Language").into(),
         }
     }
 
@@ -675,6 +719,32 @@ impl Target {
             CourierPoints => num(Char::new(s, slot).courier_points()),
             Housekeeper => crate::views::housekeeper_name(unlocks::housekeeper(s, base)),
             StartVillage => crate::views::start_place_name(unlocks::start_village(s, base)),
+            Cards(inbox) => {
+                let c = cards::names(s, base, if inbox { cards::List::Inbox } else { cards::List::Stored });
+                let n = trn("{n} card", "{n} cards", c.len() as i64, &[]);
+                if c.is_empty() { n } else { format!("{n}: {}", c.join(", ")) }
+            }
+            Blacklist => {
+                let b = cards::blacklist(s);
+                if b.is_empty() { tr("Empty").into() } else { b.iter().map(|b| b.name.as_str()).collect::<Vec<_>>().join(", ") }
+            }
+            Opt(k) => crate::views::choice_name(options::OPTIONS[k].choices, options::option(s, base, k)),
+            Phrase(auto, g, i) => {
+                let p = options::phrase(s, base, auto, g, i);
+                if p.is_empty() { tr("Empty").into() } else { format!("“{p}”") }
+            }
+            // "Group 1: 1–6 · Group 2: …": the lines on in each group
+            AutoOn => (0..options::GROUPS)
+                .map(|g| {
+                    let on: Vec<String> = (0..options::AUTO_PER_GROUP).filter(|&i| options::auto_on(s, base, g, i)).map(|i| (i + 1).to_string()).collect();
+                    format!("{}: {}", crate::views::chat_group_name(g), if on.is_empty() { tr("None").to_string() } else { on.join(", ") })
+                })
+                .collect::<Vec<_>>()
+                .join(" · "),
+            ChatGroup => crate::views::chat_group_name(options::chat_group(s, base) as usize),
+            Brightness => num(s.u8(options::BRIGHTNESS)),
+            Rumble => crate::views::choice_name(options::Choices::OnOff, !options::rumble(s) as u8),
+            Language => crate::views::language_name(s.u8(options::LANGUAGE)),
         }
     }
 
@@ -862,6 +932,22 @@ impl Target {
             CourierPoints => range(base + pg::COURIER_POINTS, 4),
             Housekeeper => range(base + unlocks::HOUSEKEEPER, 1),
             StartVillage => range(base + unlocks::START_VILLAGE, 1),
+            Cards(inbox) => {
+                let l = if inbox { cards::List::Inbox } else { cards::List::Stored };
+                let (at, n, info, info_len) = l.at();
+                [range(base + at, l.size()), range(base + info, n * info_len)].concat()
+            }
+            Blacklist => range(cards::BLACKLIST, cards::BLOCKED * 96),
+            Opt(k) => range(base + options::OPTIONS[k].at, 1),
+            Phrase(auto, g, i) => {
+                let (at, n) = options::phrase_slot(auto, g, i);
+                range(base + at, n)
+            }
+            AutoOn => range(base + options::AUTO_ON, 4),
+            ChatGroup => range(base + options::CHAT_GROUP, 2),
+            Brightness => range(options::BRIGHTNESS, 1),
+            Rumble => range(options::RUMBLE, 1),
+            Language => range(options::LANGUAGE, 1),
         }
     }
 

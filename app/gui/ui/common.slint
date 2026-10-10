@@ -216,6 +216,17 @@ export struct UnlockCell { key: int, name: string, sub: string, on: bool, new: b
 // A village pet: name, costume worn (index in costumes), adopted
 export struct PetRow { index: int, place: string, name: string, costume: int, costumes: [string], adopted: bool, was: string }
 
+// A Guild Card of the list or the inbox, a blocked user, or a hunter for hire: the name,
+// then one or two lines of what the game shows about it
+export struct CardRow { slot: int, name: string, tag: string, line1: string, line2: string, greeting: string }
+
+// An option: its choices in a picker, or a number up to `max`; `head` starts a section
+export struct OptionRow { id: string, head: string, name: string, choices: [string], value: int, number: bool, max: int, was: string }
+
+// A chat phrase of the group shown: a shoutout, or an auto-shoutout with its trigger and
+// whether it is on; `head` starts a section
+export struct PhraseRow { auto: bool, index: int, head: string, label: string, text: string, on: bool, was: string }
+
 export struct FieldRow { index: int, offset: string, size: string, owner: string, label: string, confidence: Confidence, changed: bool }
 
 export struct StatCard { title: string, value: string, sub: string, progress: float, done: bool, bar: bool, page: string, tab: int }
@@ -602,6 +613,38 @@ export global Api {
     callback set-pet(int, string /* name, costume, adopted */, string);
     callback set-moofah(int, int);
     callback set-moofah-gifts(int);
+
+    // Guild Cards: 0 the list, 1 the inbox, 2 Hunters for Hire, 3 the blocked-user list
+    in-out property <int> card-tab;
+    in property <[string]> card-tabs;
+    in property <[CardRow]> card-rows;
+    in property <string> cards-summary;
+    // the tab's list in the file, when an edit changed it
+    in property <string> was-cards;
+    in property <string> was-cards-key;
+    callback select-card-tab(int);
+    // the row's slot in the tab's list
+    callback remove-card(int);
+    callback move-card(int);
+
+    // Options: 0 the character's options, 1 chat, 2 the title menu's (shared)
+    in-out property <int> option-tab;
+    in property <[string]> option-tabs;
+    in property <[OptionRow]> option-rows;
+    in property <string> options-summary;
+    callback select-option-tab(int);
+    callback set-option(string, int);
+    // the chat group shown (0-2) and the one in use
+    in-out property <int> chat-shown;
+    in property <[string]> chat-groups;
+    in property <int> chat-group;
+    in property <string> was-chat-group;
+    in property <string> was-auto-on;
+    in property <[PhraseRow]> phrases;
+    callback show-chat-group(int);
+    callback set-chat-group(int);
+    callback set-phrase(bool, int, string);
+    callback set-auto-on(int, bool);
 
     // monsters
     in property <[MonsterRow]> monsters;
@@ -1090,6 +1133,8 @@ export global Tabs {
             : page == "quests" ? Api.quest-tab
             : page == "collections" ? Api.collection-tab
             : page == "database" ? Api.db-tab
+            : page == "cards" ? Api.card-tab
+            : page == "options" ? Api.option-tab
             : -1;
     }
     public function select(page: string, i: int) {
@@ -1112,6 +1157,10 @@ export global Tabs {
             Api.db-search = "";
             Api.db-missing = false;
             Api.filter-db();
+        } else if page == "cards" {
+            Api.select-card-tab(i);
+        } else if page == "options" {
+            Api.select-option-tab(i);
         }
     }
 }

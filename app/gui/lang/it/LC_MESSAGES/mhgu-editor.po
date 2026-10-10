@@ -252,7 +252,8 @@ msgstr "La copia sostituisce {} nello slot {}."
 msgid "Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
 msgstr "Copie e importazioni sono dedotte: non ancora verificate nel gioco. Elimina lascia lo slot come mai usato; un nuovo personaggio si crea lì nel gioco."
 
-#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/app.slint app/gui/ui/pages/cards.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Remove"
 msgstr "Rimuovi"
 
@@ -264,7 +265,7 @@ msgstr "Impostazioni"
 msgid "Appearance"
 msgstr "Aspetto"
 
-#: app/gui/ui/app.slint
+#: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
 msgid "Language"
 msgstr "Lingua"
 
@@ -308,7 +309,7 @@ msgstr "Cartella istantanee"
 msgid "Change…"
 msgstr "Cambia…"
 
-#: app/gui/ui/app.slint
+#: app/gui/src/views/options_ui.rs app/gui/ui/app.slint
 msgid "Default"
 msgstr "Predefinita"
 
@@ -485,6 +486,15 @@ msgstr "Sblocchi"
 #: app/gui/ui/pages/monsters.slint
 msgid "Monsters"
 msgstr "Mostri"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/cards.slint
+msgid "Guild Cards"
+msgstr "Tessere Gilda"
+
+#: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/pages/options.slint
+msgid "Options"
+msgstr "Opzioni"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
 #: app/gui/ui/pages/monsters.slint app/gui/ui/pages/quests.slint
@@ -712,6 +722,30 @@ msgstr "Affidabilità"
 #: app/gui/ui/pages/advanced.slint
 msgid "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."
 msgstr "Scegli una riga per vederne i byte. Un * indica i byte cambiati da modifiche non ancora scritte."
+
+#: app/gui/ui/pages/cards.slint
+msgid "Move to Card List"
+msgstr "Sposta nella Lista tessere"
+
+#: app/gui/ui/pages/cards.slint
+msgid "No Guild Cards stored."
+msgstr "Nessuna tessera Gilda salvata."
+
+#: app/gui/ui/pages/cards.slint
+msgid "The inbox is empty."
+msgstr "La casella è vuota."
+
+#: app/gui/ui/pages/cards.slint
+msgid "No hunters for hire."
+msgstr "Nessun cacciatore a noleggio."
+
+#: app/gui/ui/pages/cards.slint
+msgid "No one is blocked."
+msgstr "Nessuno è bloccato."
+
+#: app/gui/ui/pages/cards.slint
+msgid "Unblock"
+msgstr "Sblocca"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
@@ -1831,6 +1865,18 @@ msgstr "Anche su questo computer"
 msgid "Found on this computer"
 msgstr "Trovati su questo computer"
 
+#: app/gui/src/views/options_ui.rs app/gui/ui/pages/options.slint
+msgid "On"
+msgstr "Sì"
+
+#: app/gui/ui/pages/options.slint
+msgid "Group in use"
+msgstr "Gruppo in uso"
+
+#: app/gui/ui/pages/options.slint
+msgid "Showing"
+msgstr "Mostrato"
+
 #: app/gui/ui/pages/overview.slint
 msgid "In Review"
 msgstr "In Revisione"
@@ -2226,6 +2272,11 @@ msgstr "Oggetto #{}"
 #: app/gui/src/fmt.rs
 msgid "{}h {}m"
 msgstr "{} h {} min"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/fmt.rs
+msgid "{0} {1} {2}"
+msgstr "{0} {1} {2}"
 
 #: app/gui/src/fmt.rs
 msgid "Jan"
@@ -3311,9 +3362,39 @@ msgstr "Stile di caccia e Arti di caccia"
 msgid "{} pet"
 msgstr "Animale di {}"
 
+#: app/gui/src/targets.rs
+msgid "Guild Card Inbox"
+msgstr "Casella tessere Gilda"
+
+#: app/gui/src/targets.rs
+msgid "Blocked-user List"
+msgstr "Utenti bloccati"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Shoutout {}"
+msgstr "Frase {}"
+
+#: app/gui/src/targets.rs
+msgid "Auto-Shoutouts on"
+msgstr "Frasi automatiche attive"
+
+#: app/gui/src/targets.rs
+msgid "Chat group in use"
+msgstr "Gruppo chat in uso"
+
+#: app/gui/src/targets.rs app/gui/src/views/options_ui.rs
+msgid "TV Brightness"
+msgstr "Luminosità TV"
+
+#: app/gui/src/targets.rs app/gui/src/views/options_ui.rs
+msgid "Rumble"
+msgstr "Vibrazione"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
-#: app/gui/src/views/names.rs app/gui/src/views/palicoes.rs
+#: app/gui/src/views/names.rs app/gui/src/views/options_ui.rs
+#: app/gui/src/views/palicoes.rs
 msgid "Type {}"
 msgstr "Tipo {}"
 
@@ -3375,6 +3456,13 @@ msgstr "{} su {}"
 #: app/gui/src/targets.rs
 msgid "{} · {} · adopted"
 msgstr "{} · {} · adottato"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/targets.rs
+msgid "{n} card"
+msgid_plural "{n} cards"
+msgstr[0] "{n} tessera"
+msgstr[1] "{n} tessere"
 
 #: app/gui/src/update.rs
 msgid "GitHub refused the request (too many in the last hour), try later"
@@ -3685,6 +3773,283 @@ msgstr[1] "… altri {} byte"
 #: app/gui/src/views/advanced.rs
 msgid "block {}"
 msgstr "blocco {}"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Partner"
+msgstr "Partner"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Friend"
+msgstr "Amico"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Classmate"
+msgstr "Compagno"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Teammate"
+msgstr "Alleato"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Bandmate"
+msgstr "Musicista"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Roommate"
+msgstr "Coinquilino"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Family"
+msgstr "Famiglia"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Special"
+msgstr "Speciale"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Co-worker"
+msgstr "Socio"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Colleague"
+msgstr "Collega"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "VIP"
+msgstr "VIP"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Rival"
+msgstr "Rivale"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Elite"
+msgstr "Élite"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Best Bud"
+msgstr "Conoscente"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Sensei"
+msgstr "Sensei"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Online"
+msgstr "Online"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Guild"
+msgstr "Gilda"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Soldier"
+msgstr "Soldato"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Scrivener"
+msgstr "Scrivano"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Team 1"
+msgstr "Squadra 1"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Team 2"
+msgstr "Squadra 2"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Team 3"
+msgstr "Squadra 3"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Passerby"
+msgstr "Passante"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Sweetheart"
+msgstr "Zuccherino"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "StreetPass"
+msgstr "StreetPass"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Great Sword"
+msgstr "Spadone"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Sword & Shield"
+msgstr "Spada e scudo"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Hammer"
+msgstr "Martello"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Lance"
+msgstr "Lancia"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Heavy Bowgun"
+msgstr "Balestra pesante"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Light Bowgun"
+msgstr "Balestra leggera"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Long Sword"
+msgstr "Spada lunga"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Switch Axe"
+msgstr "Spad-ascia"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Gunlance"
+msgstr "Lancia-fucile"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Bow"
+msgstr "Arco"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Dual Blades"
+msgstr "Doppie lame"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Hunting Horn"
+msgstr "Corno da caccia"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Insect Glaive"
+msgstr "Falcione insetto"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired Charge Blade"
+msgstr "Spad-ascia caricata"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "HR {}"
+msgstr "GC {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Unity {}"
+msgstr "Legame {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Updated {}"
+msgstr "Aggiornata {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Received {}"
+msgstr "Ricevuta {}"
+
+#: app/core/src/character.rs app/gui/src/views/cards_ui.rs
+msgid "Prowler"
+msgstr "Cacciamiao"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/cards_ui.rs
+msgid "{n} quest"
+msgid_plural "{n} quests"
+msgstr[0] "{n} missione"
+msgstr[1] "{n} missioni"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Card List {} / {}"
+msgstr "Lista tessere {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Guild Card Inbox {} / {}"
+msgstr "Casella tessere Gilda {} / {}"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hunters for Hire"
+msgstr "Cacciatori a noleggio"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Blocked-user List {}"
+msgstr "Utenti bloccati {}"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Offered"
+msgstr "Offerto"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Next offer"
+msgstr "Prossima offerta"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hired"
+msgstr "Ingaggiato"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "From a Guild Card"
+msgstr "Da una tessera Gilda"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Of the Guild"
+msgstr "Della Gilda"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Network ID {}"
+msgstr "ID di rete {}"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Cards received from other hunters. The game keeps them at the front of the list: removing one moves the later ones up, as its Delete does."
+msgstr "Tessere ricevute da altri cacciatori. Il gioco le tiene in cima alla lista: rimuoverne una fa salire le successive, come il suo comando Elimina."
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Cards the Courier Service received. Move one to the Card List, as the Post Office does, or remove it."
+msgstr "Tessere ricevute dal servizio di consegna. Spostane una nella Lista tessere, come fa l'ufficio postale, oppure rimuovila."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/cards_ui.rs
+msgid "The party is hired for {n} more quest. The game picks new offers after every quest, so this list is read-only."
+msgid_plural "The party is hired for {n} more quests. The game picks new offers after every quest, so this list is read-only."
+msgstr[0] "Il gruppo è ingaggiato per ancora {n} missione. Il gioco sceglie nuove offerte dopo ogni missione, quindi questa lista è di sola lettura."
+msgstr[1] "Il gruppo è ingaggiato per ancora {n} missioni. Il gioco sceglie nuove offerte dopo ogni missione, quindi questa lista è di sola lettura."
+
+#: app/gui/src/views/cards_ui.rs
+msgid "No one is hired. The game picks new offers after every quest, so this list is read-only."
+msgstr "Nessuno è ingaggiato. Il gioco sceglie nuove offerte dopo ogni missione, quindi questa lista è di sola lettura."
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hunters you blocked online, shared by the three characters."
+msgstr "Cacciatori che hai bloccato online, condivisi dai tre personaggi."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Remove the Guild Card of {}"
+msgstr "Rimuovi la tessera Gilda di {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Unblock {}"
+msgstr "Sblocca {}"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Not changed: the Card List holds 100 cards"
+msgstr "Non modificato: la Lista tessere contiene già 100 tessere"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Move the Guild Card of {} to the Card List"
+msgstr "Sposta la tessera Gilda di {} nella Lista tessere"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "The Card List already holds as recent a card of this hunter: only the inbox card goes"
+msgstr "La Lista tessere contiene già una tessera altrettanto recente di questo cacciatore: va via solo quella della casella"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
@@ -4670,6 +5035,265 @@ msgstr "Talismano consunto"
 msgid "Enduring Talisman"
 msgstr "Talismano antico"
 
+#: app/gui/src/views/options_ui.rs
+msgid "Music Volume"
+msgstr "Volume musica"
+
+#: app/gui/src/views/options_ui.rs
+msgid "SFX Volume"
+msgstr "Volume effetti"
+
+#: app/gui/src/views/options_ui.rs
+msgid "HUD"
+msgstr "Interfaccia"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Map"
+msgstr "Mappa"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Camera Angle"
+msgstr "Angolo visuale"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Camera Controls"
+msgstr "Comandi visuale"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Camera Speed"
+msgstr "Velocità visuale"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Scope Controls"
+msgstr "Comandi mirino"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Bowgun Controls"
+msgstr "Comandi balestra"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Quick Aim Controls"
+msgstr "Comandi mira vel."
+
+#: app/gui/src/views/options_ui.rs
+msgid "Quick Aim Camera"
+msgstr "Visuale mira vel."
+
+#: app/gui/src/views/options_ui.rs
+msgid "Reticle Speed"
+msgstr "Velocità mirino"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Orientation"
+msgstr "Orientamento"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Bow Controls"
+msgstr "Comandi arco"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Bow Aim Mode Cancel"
+msgstr "Annulla mira arco"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Melody Effect Display"
+msgstr "Mostra effetti melodia"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Target Cam Controls"
+msgstr "Comandi visuale ob."
+
+#: app/gui/src/views/options_ui.rs
+msgid "Target Cam Behavior"
+msgstr "Gestione visuale ob."
+
+#: app/gui/src/views/options_ui.rs
+msgid "Terrain-savvy Camera"
+msgstr "Visuale adattabile"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Lens Flares"
+msgstr "Effetti di luce"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Control Type"
+msgstr "Tipo di comandi"
+
+#: app/gui/src/views/options_ui.rs
+msgid "+ Button Controls"
+msgstr "Funzione pulsante +"
+
+#: app/gui/src/views/options_ui.rs
+msgid "L/R Button Controls"
+msgstr "Funzione L/R e ZL/ZR"
+
+#: app/gui/src/views/options_ui.rs
+msgid "R Stick Controls"
+msgstr "Stick R e pulsanti direzionali"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Guild Cards/Palicoes"
+msgstr "Tessere Gilda/Compagni"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Chat"
+msgstr "Chat"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Invites"
+msgstr "Inviti"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Palico Chat"
+msgstr "Messaggi compagni"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Off"
+msgstr "No"
+
+#: app/gui/src/views/options_ui.rs app/gui/src/views/overview.rs
+msgid "Max"
+msgstr "Max"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Normal"
+msgstr "Normale"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Flip Y"
+msgstr "Inv. Y"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Flip X"
+msgstr "Inv. X"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Flip X+Y"
+msgstr "Inv. X + Y"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Slow"
+msgstr "Lenta"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Fast"
+msgstr "Veloce"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Auto"
+msgstr "Auto"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Manual"
+msgstr "Manuale"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Semi-auto"
+msgstr "Auto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/options_ui.rs
+msgid "Group {}"
+msgstr "Set {}"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When mounting a monster"
+msgstr "In groppa a un mostro"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When setting a trap"
+msgstr "Quando piazzi una trappola"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When setting bombs"
+msgstr "Quando piazzi una bomba"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When mobility is affected"
+msgstr "Se la mobilità è ridotta"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When pinned down"
+msgstr "Quando sei bloccato"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When health is restored"
+msgstr "Quando recuperi vita"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When using Hunter Art 1"
+msgstr "Se usi arte di caccia 1"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When using Hunter Art 2"
+msgstr "Se usi arte di caccia 2"
+
+#: app/gui/src/views/options_ui.rs
+msgid "When using Hunter Art 3"
+msgstr "Se usi arte di caccia 3"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Console language"
+msgstr "Lingua della console"
+
+#: app/gui/src/views/options_ui.rs
+msgid "English"
+msgstr "Inglese"
+
+#: app/gui/src/views/options_ui.rs
+msgid "French"
+msgstr "Francese"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Spanish"
+msgstr "Spagnolo"
+
+#: app/gui/src/views/options_ui.rs
+msgid "German"
+msgstr "Tedesco"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Italian"
+msgstr "Italiano"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/options_ui.rs
+msgid "Language {}"
+msgstr "Lingua {}"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Shoutouts"
+msgstr "Frasi"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Game Settings"
+msgstr "Impostazioni di gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/options_ui.rs
+msgid "Options · page {}"
+msgstr "Opzioni · pagina {}"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Multiplayer Settings"
+msgstr "Trasmissione dati"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Auto-Shoutouts"
+msgstr "Frasi automatiche"
+
+#: app/gui/src/views/options_ui.rs
+msgid "The Start Menu's Options and Multiplayer Settings of this character."
+msgstr "Le Opzioni e la Trasmissione dati del menu Start di questo personaggio."
+
+#: app/gui/src/views/options_ui.rs
+msgid "Each chat group holds 24 shoutouts and 9 auto-shoutouts, said when their event happens while they are on. A phrase holds up to 26 characters."
+msgstr "Ogni gruppo chat contiene 24 frasi e 9 frasi automatiche, dette quando avviene il loro evento se sono attive. Una frase contiene fino a 26 caratteri."
+
+#: app/gui/src/views/options_ui.rs
+msgid "The title screen's settings, shared by the three characters."
+msgstr "Le impostazioni della schermata del titolo, condivise dai tre personaggi."
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/overview.rs
 msgid "1 missing: {}"
@@ -4721,10 +5345,6 @@ msgstr "Max · {} punti GC"
 #: app/gui/src/views/overview.rs
 msgid "{} HR points"
 msgstr "{} punti GC"
-
-#: app/gui/src/views/overview.rs
-msgid "Max"
-msgstr "Max"
 
 #: app/gui/src/views/overview.rs
 msgid "Its changes are in Review. Nothing is written until you press Write."
@@ -5569,10 +6189,6 @@ msgstr "Base di caccia · grado G"
 #: app/core/src/character.rs
 msgid "Special Permit"
 msgstr "Licenza"
-
-#: app/core/src/character.rs
-msgid "Prowler"
-msgstr "Cacciamiao"
 
 #: app/core/src/palico.rs
 msgid "Small Only"

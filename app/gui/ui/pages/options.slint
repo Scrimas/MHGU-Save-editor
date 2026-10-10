@@ -1,0 +1,117 @@
+import { ListView, CheckBox, LineEdit } from "std-widgets.slint";
+import {
+    Api, Tabs, Tok, Card, Muted, Chip, PageHeader, TabBar, WasLine, SectionTitle, Picker, NumberBox, ConfidenceTag, Confidence,
+    OptionRow, PhraseRow,
+} from "../common.slint";
+
+// An option: name, then its choices or a number, "was … Undo" under it.
+component OptionLine inherits VerticalLayout {
+    in property <OptionRow> r;
+    padding-left: 14px;
+    padding-right: 12px;
+    spacing: 2px;
+    if r.head != "": SectionTitle { text: r.head; height: 34px; vertical-alignment: bottom; }
+    HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 38px;
+        Text { text: r.name; width: 240px; vertical-alignment: center; overflow: elide; }
+        if !r.number: Picker { y: 3px; width: 220px; height: 32px; model: r.choices; value: r.value; picked(i) => { Api.set-option(r.id, i); } }
+        if r.number: NumberBox { y: 3px; width: 120px; height: 32px; minimum: 0; maximum: r.max; value: r.value; label: r.name; edited(v) => { Api.set-option(r.id, v); } }
+    }
+    if r.was != "": HorizontalLayout {
+        padding-left: 250px;
+        WasLine { was: r.was; key: r.id; }
+    }
+}
+
+// A phrase of the group shown: its number or trigger, the text, and for an auto-shoutout
+// whether it is on.
+component PhraseLine inherits VerticalLayout {
+    in property <PhraseRow> r;
+    in property <int> group;
+    padding-left: 14px;
+    padding-right: 12px;
+    spacing: 2px;
+    if r.head != "": HorizontalLayout {
+        height: 34px;
+        spacing: 10px;
+        SectionTitle { text: r.head; vertical-alignment: bottom; }
+        if r.auto && Api.was-auto-on != "": WasLine { y: 12px; was: Api.was-auto-on; key: "auto-on"; }
+    }
+    HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 38px;
+        Text { text: r.label; width: r.auto ? 220px : 40px; vertical-alignment: center; overflow: elide; color: Tok.muted; }
+        LineEdit {
+            y: 3px;
+            width: 320px;
+            height: 32px;
+            property <string> cur: r.text;
+            changed cur => { self.text = self.cur; }
+            text: r.text;
+            accessible-label: r.label;
+            accepted(t) => { Api.set-phrase(r.auto, r.index, t); }
+            changed has-focus => {
+                if !self.has-focus && self.text != r.text {
+                    Api.set-phrase(r.auto, r.index, self.text);
+                }
+            }
+        }
+        if r.auto: CheckBox { text: @tr("On"); checked: r.on; toggled => { Api.set-auto-on(r.index, self.checked); } }
+    }
+    if r.was != "": HorizontalLayout {
+        padding-left: r.auto ? 230px : 50px;
+        WasLine { was: r.was; key: "chat:" + (r.auto ? "auto" : "phrase") + ":" + group + ":" + r.index; }
+    }
+}
+
+export component OptionsPage inherits Rectangle {
+    VerticalLayout {
+        padding: Tok.margin;
+        padding-top: 16px;
+        spacing: Tok.gap;
+        PageHeader {
+            title: @tr("Options");
+            subtitle: Api.options-summary;
+            staged: Api.page-counts[11];
+        }
+        TabBar { tabs: Api.option-tabs; current: Api.option-tab; select(i) => { Tabs.select("options", i); } }
+        HorizontalLayout {
+            spacing: 10px;
+            alignment: start;
+            height: 20px;
+            ConfidenceTag { level: Confidence.derived; }
+        }
+        if Api.option-tab == 1: HorizontalLayout {
+            spacing: Tok.tight;
+            alignment: start;
+            height: 36px;
+            Text { text: @tr("Group in use"); vertical-alignment: center; }
+            Picker { width: 160px; model: Api.chat-groups; value: Api.chat-group; picked(i) => { Api.set-chat-group(i); } }
+            if Api.was-chat-group != "": WasLine { y: 9px; was: Api.was-chat-group; key: "chat-group"; }
+            Rectangle { width: 24px; }
+            Text { text: @tr("Showing"); vertical-alignment: center; color: Tok.muted; }
+            for g[i] in Api.chat-groups: Chip {
+                y: 4px;
+                text: g;
+                active: Api.chat-shown == i;
+                clicked => { Api.show-chat-group(i); }
+            }
+        }
+        HorizontalLayout {
+            vertical-stretch: 1;
+            alignment: start;
+            Card {
+                width: min(root.width - 2 * Tok.margin, Tok.row-max);
+                if Api.option-tab != 1: ListView {
+                    for r in Api.option-rows: OptionLine { r: r; }
+                }
+                if Api.option-tab == 1: ListView {
+                    for r in Api.phrases: PhraseLine { r: r; group: Api.chat-shown; }
+                }
+            }
+        }
+    }
+}

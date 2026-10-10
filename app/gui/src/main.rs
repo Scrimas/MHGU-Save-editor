@@ -155,6 +155,7 @@ fn main() -> Result<(), slint::PlatformError> {
 ///   set:N  arts:<where>:<field>:<slot>:<value>  pigment:<where>:<part>:<hex>
 ///   unlock:<map * 1024 + bit>:<0|1>  pet:<k>:<name|costume|adopted>:<value>  moofah:<k>:<v>
 ///   moofah-gifts:<v>  deviant:<d>:<permits|points|waiting|levels>:<v>
+///   remove-card:<slot>  option:<id>:<v>  chat-show:<g>  phrase:<auto|phrase>:<i>:<text>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
 ///   theme:light|dark  update (asks GitHub, as Settings' Check now)
 fn steps(ui: &AppWindow, page: &str, list: &str) {
@@ -167,6 +168,12 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             (_, &["characters"]) => api.set_characters_open(true),
             (_, &["copy", a, b]) => api.invoke_slot_copy(num(a), num(b)),
             ("quests", &["tab", n]) => api.invoke_select_quest_tab(num(n)),
+            ("cards", &["tab", n]) => api.invoke_select_card_tab(num(n)),
+            ("options", &["tab", n]) => api.invoke_select_option_tab(num(n)),
+            (_, &["remove-card", n]) => api.invoke_remove_card(num(n)),
+            (_, &["option", id, v]) => api.invoke_set_option(id.into(), num(v)),
+            (_, &["chat-show", g]) => api.invoke_show_chat_group(num(g)),
+            (_, &["phrase", auto, i, text]) => api.invoke_set_phrase(auto == "auto", num(i), text.into()),
             (_, &["tab", n]) => api.invoke_select_collection(num(n)),
             ("palicoes", &["sel", n]) => api.invoke_select_palico(num(n)),
             ("advanced", &["sel", n]) => api.invoke_select_field(num(n)),
@@ -497,6 +504,52 @@ mod tests {
             assert!(c.award(unlocks::MOOFAH_AWARD));
         }
         for key in ["quest-counter", "courier-points", "start-village", "housekeeper", "permit-points:0", "permit-wait:0", "moofah-gifts"] {
+            api.invoke_undo_value(key.into());
+        }
+        assert!(!st.borrow().save().is_dirty(), "{:?}", &st.borrow().save().diff()[..st.borrow().save().diff().len().min(6)]);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn cards_and_options() {
+        use mhgu_save::{cards, options};
+        let (ui, st, dir) = opened("cards");
+        let api = ui.global::<Api>();
+        let base = st.borrow().base();
+        api.set_page("cards".into());
+        api.invoke_select_card_tab(0);
+        let rows = api.get_card_rows().row_count();
+        assert!(rows >= 1);
+        let second = cards::names(st.borrow().save(), base, cards::List::Stored).get(1).cloned();
+        api.invoke_remove_card(0);
+        let left = cards::names(st.borrow().save(), base, cards::List::Stored);
+        assert_eq!(left.len(), rows - 1);
+        assert_eq!(left.first(), second.as_ref());
+        assert_eq!(api.get_page_counts().row_data(targets::page_index("cards")), Some(1));
+        assert!(!api.get_was_cards().is_empty());
+
+        api.set_page("options".into());
+        api.invoke_set_option("opt:camera-angle".into(), 0);
+        api.invoke_set_option("opt:camera-angle".into(), 9);
+        api.invoke_set_option("brightness".into(), 99);
+        api.invoke_set_option("language".into(), 4);
+        api.invoke_show_chat_group(1);
+        api.invoke_set_phrase(false, 3, "Over here!".into());
+        api.invoke_set_auto_on(7, true);
+        api.invoke_set_chat_group(0);
+        {
+            let b = st.borrow();
+            let s = b.save();
+            let cam = options::OPTIONS.iter().position(|o| o.id == "camera-angle").unwrap();
+            assert_eq!(options::option(s, base, cam), 0, "a choice the option lacks is not written");
+            assert_eq!(s.u8(options::BRIGHTNESS), options::MAX_BRIGHTNESS);
+            assert_eq!(s.u8(options::LANGUAGE), 4);
+            assert_eq!(options::phrase(s, base, false, 1, 3), "Over here!");
+            assert!(options::auto_on(s, base, 1, 7));
+            assert_eq!(options::chat_group(s, base), 0);
+        }
+        for key in ["cards:stored", "opt:camera-angle", "brightness", "language", "chat:phrase:1:3", "auto-on", "chat-group"] {
             api.invoke_undo_value(key.into());
         }
         assert!(!st.borrow().save().is_dirty(), "{:?}", &st.borrow().save().diff()[..st.borrow().save().diff().len().min(6)]);

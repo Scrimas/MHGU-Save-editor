@@ -282,6 +282,8 @@ pub fn refresh(ui: &AppWindow, st: &State) {
         "collections" => collections_page(ui, st),
         "unlocks" => unlocks_page(ui, st),
         "monsters" => monsters_page(ui, st),
+        "cards" => cards_page(ui, st),
+        "options" => options_page(ui, st),
         "database" => database_page(ui, st),
         "advanced" => fields_page(ui, st),
         _ => {}
@@ -501,6 +503,15 @@ fn goto_target(ui: &AppWindow, st: &State, t: Target, key: &str) {
             api.set_unlock_search("".into());
             api.set_unlock_missing(false);
         }
+        Target::Cards(inbox) => api.set_card_tab(inbox as i32),
+        Target::Blacklist => api.set_card_tab(3),
+        Target::Opt(_) => api.set_option_tab(0),
+        Target::Phrase(_, g, _) => {
+            api.set_option_tab(1);
+            api.set_chat_shown(g as i32);
+        }
+        Target::AutoOn | Target::ChatGroup => api.set_option_tab(1),
+        Target::Brightness | Target::Rumble | Target::Language => api.set_option_tab(2),
         Target::Monster(..) => {
             v.monster_filter.clear();
             v.monster_large = false;
@@ -614,6 +625,8 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_collections(ui, st);
     wire_unlocks(ui, st);
     wire_monsters(ui, st);
+    wire_cards(ui, st);
+    wire_options(ui, st);
     wire_database(ui, st);
     wire_advanced(ui, st);
 
@@ -741,6 +754,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
 // it; what they share stays here.
 // (`*_page` where the name is taken by the save library's module)
 mod advanced;
+mod cards_ui;
 mod character_page;
 mod characters;
 mod collections;
@@ -750,6 +764,7 @@ mod file;
 mod items_page;
 mod monsters_page;
 mod names;
+mod options_ui;
 mod overview;
 mod palicoes;
 mod quests;
@@ -760,11 +775,12 @@ mod unlocks_ui;
 mod update_ui;
 
 use self::{
-    advanced::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, overview::*,
+    advanced::*, cards_ui::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, options_ui::*, overview::*,
     palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, unlocks_ui::*,
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
 pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};
 pub use self::unlocks_ui::{housekeeper_name, pet_costume_name, start_place_name, unlock_map_name, unlock_rows};
 pub use self::palicoes::look_label;
+pub use self::options_ui::{auto_trigger, chat_group_name, choice_name, language_name, option_name};
 pub use self::{file::*, update_ui::*};

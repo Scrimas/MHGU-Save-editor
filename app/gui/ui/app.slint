@@ -14,6 +14,8 @@ import { RequestsPage } from "pages/requests.slint";
 import { CollectionsPage } from "pages/collections.slint";
 import { UnlocksPage } from "pages/unlocks.slint";
 import { MonstersPage } from "pages/monsters.slint";
+import { CardsPage } from "pages/cards.slint";
+import { OptionsPage } from "pages/options.slint";
 import { DatabasePage } from "pages/database.slint";
 import { AdvancedPage } from "pages/advanced.slint";
 
@@ -740,11 +742,11 @@ export component AppWindow inherits Window {
     property <float> dk: dock ? 1 : 0;
     animate dk { duration: 180ms; easing: ease-in-out; }
     property <length> review-w: 380px * open * dk;
-    property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "unlocks", "monsters", "database", "advanced"];
+    property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "unlocks", "monsters", "cards", "options", "database", "advanced"];
     // Up/Down/Home/End on a sidebar page: the one that takes the focus
     property <int> nav-focus;
     property <int> nav-focus-seq;
-    property <[string]> nav-titles: [@tr("Overview"), @tr("Character"), @tr("Items"), @tr("Equipment"), @tr("Palicoes"), @tr("Quests"), @tr("Requests"), @tr("Collections"), @tr("Unlocks"), @tr("Monsters"), @tr("Database"), @tr("Save map")];
+    property <[string]> nav-titles: [@tr("Overview"), @tr("Character"), @tr("Items"), @tr("Equipment"), @tr("Palicoes"), @tr("Quests"), @tr("Requests"), @tr("Collections"), @tr("Unlocks"), @tr("Monsters"), @tr("Guild Cards"), @tr("Options"), @tr("Database"), @tr("Save map")];
     // Shortcuts: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page,
     // Ctrl+O open a save, Ctrl+Up/Down the previous/next page, Ctrl+Left/Right the
     // previous/next tab of the page, Escape closes Review. Dialogs take the keyboard while
@@ -1002,6 +1004,8 @@ export component AppWindow inherits Window {
                     if char-ok && Api.page == "collections": CollectionsPage { }
                     if char-ok && Api.page == "unlocks": UnlocksPage { }
                     if char-ok && Api.page == "monsters": MonstersPage { }
+                    if char-ok && Api.page == "cards": CardsPage { }
+                    if char-ok && Api.page == "options": OptionsPage { }
                     if char-ok && Api.page == "database": DatabasePage { }
                     if char-ok && Api.page == "advanced": AdvancedPage { }
                 }
