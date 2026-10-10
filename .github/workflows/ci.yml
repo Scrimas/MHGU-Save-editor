@@ -10,7 +10,10 @@ name: CI
 on:
   push:
     branches: ["**"]
+    # the maintainer's CI watcher: nothing it changes is built or tested
+    paths-ignore: ["tools/ci-watch.sh"]
   pull_request:
+    paths-ignore: ["tools/ci-watch.sh"]
 
 permissions:
   contents: read
