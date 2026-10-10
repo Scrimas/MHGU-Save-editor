@@ -16,35 +16,23 @@ non-zero instance in the live save (first 24 bytes), its absolute offset in brac
 
 | Status | Bytes | Share |
 |---|---|---|
-| C | 3716148 | 72.031% |
-| D | 1070200 | 20.744% |
-| U | 372752 | 7.225% |
+| C | 3673442 | 71.203% |
+| D | 1222520 | 23.696% |
+| U | 263138 | 5.100% |
 | gap | 0 | 0.000% |
 
-Items to resolve: 104 (in 14 scopes).
+Items to resolve: 94 (in 16 scopes).
 
 ## Scope `file` (5159100 B, 1 instance)
 
-- `0x0` 8 B, **U** Switch header bytes 0-7 (zero); instances 1 (8 B), nz 0, timeline 1
-- `0x8` 4 B, **U** Switch header u32 (4); instances 1 (4 B), nz 1, timeline 1, sample [0x8] `04 00 00 00`
-- `0xC` 4 B, **U** Switch header bytes 0xC-0xF (zero); instances 1 (4 B), nz 0, timeline 1
-- `0x10` 4 B, **U** Switch header u32 (0x14); instances 1 (4 B), nz 1, timeline 1, sample [0x10] `14 00 00 00`
-- `0x18` 4 B, **U** Switch header u32 (0xC); instances 1 (4 B), nz 1, timeline 1, sample [0x18] `0c 00 00 00`
-- `0x1C` 4 B, **U** Switch header u32 = body length (0x4EB898 = file size - 0x24); instances 1 (4 B), nz 1, timeline 1, sample [0x1C] `98 b8 4e 00`
-- `0x20` 4 B, **U** Switch header bytes 0x20-0x23 (zero); instances 1 (4 B), nz 0, timeline 1
-- `0x24` 4 B, **U** body header u32 0xC6; instances 1 (4 B), nz 1, timeline 1, sample [0x24] `c6 00 00 00`
 - `0x3F96` 100 x 64 B (stride 96), **U** blacklist entry: first 64 B; instances 100 (6400 B), nz 0, timeline 1
 - `0x3FD6` 100 x 32 B (stride 96), **U** blacklist entry: last 32 B; instances 100 (3200 B), nz 0, timeline 1
 - `0x6516` 3 x 6616 B (stride 6616), **U** sGuildCard common: card copy (6616 B); instances 3 (19848 B), nz 0, timeline 1
 - `0xB29E` 1 B, **U** sGuildCard common: byte after the three copies; instances 1 (1 B), nz 0, timeline 1
 - `0xB29F` 3 B, **U** sGuildCard common: 3 bytes the loader reads after it; instances 1 (3 B), nz 1, timeline 15, sample [0xB29F] `85 ac e9`
-- `0xB2F9` 20 B, **U** event quests stored, 160 bits: count = stored quests, index not the block B slot (UNRESOLVED); instances 1 (20 B), nz 1, timeline 1, sample [0xB2F9] `f8 ff e0 df 77 fb ff 7f fd ef b7 f2 ef bd ff ff bf 7f 77 00`
-- `0xB311` 50 x 104 B (stride 104), **U** DLC item pack record (pack names; layout not decoded); instances 50 (5200 B), nz 17, timeline 1, sample [0xC011] `53 74 61 72 74 65 72 20 50 61 63 6b 00 47 75 69 6c 64 20 50 72 6f 76 69`
-- `0xC761` 50 x 252 B (stride 252), **U** DLC Palico info record (names; instances 50 (12600 B), nz 3, timeline 1, sample [0xD625] `52 61 6e 67 65 72 20 32 00 43 61 70 63 6f 6d 00 48 61 70 70 79 20 48 75`
 
 ## Scope `slot` (1177796 B, 3 instances)
 
-- `+0x2B` 1 B, **U** u8 from the writer's argument; instances 3 (3 B), nz 0, timeline 1
 - `+0x134` 7 x 4 B (stride 44), **U** equipped-gear cache: trailing u32; instances 21 (84 B), nz 0, timeline 1
 - `+0x247` 1 B, **U** appearance byte 7 (edited with colour 5 = skin); instances 3 (3 B), nz 0, timeline 1
 - `+0x249` 3 B, **U** appearance bytes 9-11; instances 3 (9 B), nz 0, timeline 1
@@ -103,6 +91,14 @@ Items to resolve: 104 (in 14 scopes).
 - `+0x11D040` 73 B, **U** chat phrases header (0x49 B); instances 3 (219 B), nz 3, timeline 3, sample [0x2A9CDC] `06 13 06 13 02 13 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c 1c`
 - `+0x11F8C1` 2 B, **U** last 2 bytes of the chat block before alignment; instances 3 (6 B), nz 1, timeline 1, sample [0x2AC55D] `02 00`
 
+## Scope `arena169` (169 B, reference struct: its bytes are counted by the row that names it)
+
+- `+0x4` 1 B, **U** u8, 2 in every record; not read by 0x3c2038; instances 0 (0 B), nz 0, timeline 1
+
+## Scope `arena942` (942 B, reference struct: its bytes are counted by the row that names it)
+
+- `+0x4` 1 B, **U** u8, 2 in every record (11 game-table, 29 saved); not read by 0x3c1568; instances 0 (0 B), nz 0, timeline 1
+
 ## Scope `card` (6328 B, 3 instances)
 
 - `+0x188` 3 x 580 B (stride 580), **U** @cpal580 Palico (main, buddy 1, buddy 2); instances 9 (5220 B), nz 2, timeline 1, sample [0x254225] `53 00 75 00 64 00 73 00 00 00 00 00 00 00 00 00 53 00 63 00 72 00 0f 01`
@@ -126,7 +122,7 @@ Items to resolve: 104 (in 14 scopes).
 
 ## Scope `crec` (2048 B, 45 instances)
 
-- `+0x8` 2040 B, **U** raw challenge record data (fixed loadouts? not decoded); instances 45 (91800 B), nz 40, timeline 1, sample [0x1764A1] `61 90 0f 00 02 a4 01 00 00 48 03 00 00 08 07 00 00 96 00 00 00 64 00 00`
+- `+0xC` 1 B, **U** record data +4: u8, 2 in every record; not read by the quest setup 0x3c1568 / 0x3c2038; instances 45 (45 B), nz 40, timeline 1, sample [0x1764A5] `02`
 
 ## Scope `equip36` (36 B, 9021 instances)
 

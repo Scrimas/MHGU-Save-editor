@@ -5,16 +5,16 @@ scope,offset,size,count,stride,conf,field
 # conf: C = CONFIRMED, D = DERIVED, U = located but meaning UNRESOLVED (counts as unmapped). Bytes with no row are unmapped too.
 # Lines starting with # are comments.
 #
-# ---- Switch header and body header (docs/01, docs/07) ----
-file,0x00,8,,,U,Switch header bytes 0-7 (zero)
-file,0x08,4,,,U,Switch header u32 (4)
-file,0x0C,4,,,U,Switch header bytes 0xC-0xF (zero)
-file,0x10,4,,,U,Switch header u32 (0x14)
-file,0x14,4,,,D,header nonce: changes on every save; not a checksum (docs/01)
-file,0x18,4,,,U,Switch header u32 (0xC)
-file,0x1C,4,,,U,Switch header u32 = body length (0x4EB898 = file size - 0x24)
-file,0x20,4,,,U,Switch header bytes 0x20-0x23 (zero)
-file,0x24,4,,,U,body header u32 0xC6
+# ---- sSavedata container header (writer 0x877c20, loader 0x8778cc) and body header (docs/01, docs/07) ----
+file,0x00,4,,,D,"sSavedata container header +0 (sSavedata +0x30, zeroed by the constructor 0x8771f0): always 0; the loader 0x8778cc rejects the file otherwise (error 6)"
+file,0x04,4,,,D,"container format version (sSavedata +0x34) = 0; the loader 0x8778cc rejects a different version (error 7)"
+file,0x08,4,,,C,"size of the entry offset table = 4 x entry count (sSavedata +0x38, set by 0x877658); 4 = one entry"
+file,0x0C,4,,,D,"container header +0xC (sSavedata +0x3c), always 0, not checked by the loader"
+file,0x10,4,,,C,"offset table: file offset of entry 0's record (0x14), written by the serializer pointer fix-up 0x8282cc / 0x82806c; skipped by the loader"
+file,0x14,4,,,C,"entry 0 key: JAMCRC (0x7cbdb4) of the entry name, 0x36B2EE74 = ""system"" (0xD0819B92 = ""system_backup"" in system_backup); constant, not a nonce"
+file,0x18,4,,,C,"entry 0 type: 12 = raw blob; a type mismatch makes the loader skip the blob"
+file,0x1C,8,,,C,"entry 0 value, u64: blob size 0x4EB898 (= file size - 0x24); loaded only when it equals the registered size"
+file,0x24,4,,,D,"save data version 198 (0xC6): constant written by the full writer 0x3e798c; never read"
 file,0x28,3,,,C,slot in use (1/0) for characters 1-3
 file,0x2B,1,,,C,last loaded slot (0-based)
 file,0x2C,4,,,C,block A offset relative to 0x24
@@ -45,11 +45,11 @@ file,0xB2B5,4,,,D,"DLC extras of download type 4 (9 entries); bits 0-3 = Guild C
 file,0xB2B9,12,,,D,DLC extras of download type 5: 80 Guild Card scenes sold by the Trader
 file,0xB2C5,4,,,D,DLC extras of download type 6: 10 pet costumes sold by the Trader
 file,0xB2C9,40,,,D,DLC extras of download type 7: 300 title words sold by the Trader
-file,0xB2F1,8,,,C,"challenge quest records in use, 45 bits, bit = record slot at 0x176499"
-file,0xB2F9,20,,,U,"event quests stored, 160 bits: count = stored quests, index not the block B slot (UNRESOLVED)"
+file,0xB2F1,8,,,C,"challenge quest records in use, 45 bits (sPrivilege +0xf80): bit i = record slot i at 0x176499 = catalog 577 + i = entry i of the table 0x1595e98 (set 0x399bc)"
+file,0xB2F9,20,,,C,"event quests stored, 160 bits (sPrivilege +0xf88): bit i = download catalog entry 637 + i (set 0x39744, test 0x3b788); quest ID = entry 45 + i of the table 0x1595e98 (205 x {u32 quest ID, u16 catalog, u16 0}); not the store slot (the store is packed). The 125 set bits name exactly the 125 stored quests"
 file,0xB30D,4,,,D,u32 stamp compared with the download catalog +0xe5c (sPrivilege +0xf9c)
-file,0xB311,104,50,,U,DLC item pack record (pack names; layout not decoded)
-file,0xC761,252,50,,U,DLC Palico info record (names, greetings; layout not decoded)
+file,0xB311,104,50,,C,"@dlcpack DLC item pack record, index = bit of 0xB2AD (catalog 507 + index)"
+file,0xC761,252,50,,C,"@dlcpal DLC Palico info record, index = bit of 0xB2A5 (catalog 11 + index)"
 file,0xF899,7168,160,,C,"@qslot event quest slot"
 file,0x127899,7168,45,,C,"@qslot challenge quest slot"
 file,0x12C2D6,8,,,D,"shared copy of the linked Nintendo Account ID (S+0x4408), inside challenge slot 2's unused tail (overlay)"
@@ -68,7 +68,7 @@ slot,0x20,4,,,C,play time in seconds (copy)
 slot,0x24,4,,,C,funds (copy)
 slot,0x28,2,,,C,HR (copy)
 slot,0x2A,1,,,C,"slot screen symbol: 2 Prowler, else 1 female, 0 male"
-slot,0x2B,1,,,U,u8 from the writer's argument
+slot,0x2B,1,,,D,"save-transfer flag: 1 when the slot was written by 0x3e11a8 (only caller: the 3DS data transfer steps of 0x2c7b8); 0 from the normal writers 0x3e798c / 0x3e0980; kept by 0x3e7f90 / 0x3e8254. No reader found"
 slot,0x2C,8,,,C,"equipped Hunter Arts 3 x u16, SP Art bits u16 (copy)"
 slot,0x34,216,,,D,"rest of the 224-byte parameter block: Palico fields, no reader for a hunter, zero"
 slot,0x10C,4,7,44,D,"equipped-gear cache: vtable pointer written as is (runtime address, no data)"
@@ -445,13 +445,86 @@ loadout,0x2A,128,,,C,"32 x (u16 item ID, u16 count)"
 #
 # event / challenge quest slot, 0x1C00 B
 qslot,0x00,4,,,C,quest ID (0 = empty)
-qslot,0x04,4,,,C,archive size
-qslot,0x08,7160,,,C,"MT ARC archive (size bytes), then zero padding"
+qslot,0x04,4,,,C,"archive size = downloaded size - 256 (dispatcher 0x39720 / 0x397a8)"
+qslot,0x08,6904,,,C,"MT ARC archive (size bytes), then the 256-byte download trailer as received (stale copy, equal to +0x1B00 in every slot), then zero; written by the receiver 0x3efc4 (max 0x1BF8 bytes)"
+qslot,0x1B00,256,,,D,"download trailer: the last 256 bytes of the downloaded file, moved here by the dispatcher 0x396f0 / 0x39778; no reader found"
 #
 # challenge quest record, 0x800 B
 crec,0x00,4,,,C,quest ID
-crec,0x04,4,,,C,data size
-crec,0x08,2040,,,U,raw challenge record data (fixed loadouts? not decoded)
+crec,0x04,4,,,C,"data size: 942 (hunter Arena, see @arena942) or 169 (Prowler, see @arena169)"
+crec,0x08,4,,,C,record data +0: quest ID (= slot ID)
+crec,0x0C,1,,,U,"record data +4: u8, 2 in every record; not read by the quest setup 0x3c1568 / 0x3c2038"
+crec,0x0D,2035,,,D,"record data +5..: the rest of the Arena equipment record in the ac_pl_equip / ac_ny_equip table format (serializer 0x34c4f4 / 0x331edc; @arena942 / @arena169), then zero to the end of the slot"
+#
+# challenge record data (reference structs, offsets from record data +0)
+arena942,0x000,4,,,C,quest ID (= slot ID)
+arena942,0x004,1,,,U,"u8, 2 in every record (11 game-table, 29 saved); not read by 0x3c1568"
+arena942,0x005,12,,,D,"grade times S/A/B in seconds, 3 x u32 (quest +0xd3c; graded by 0x3b123c)"
+arena942,0x011,12,,,D,"Wycademy points for grade S/A/B, 3 x u32 (quest +0xd48; 0x3b138c picks one, 0x38aec0 adds it to S+0x2c)"
+arena942,0x01D,182,5,,D,"@arenaset equipment sets 1-5"
+arena942,0x3AB,3,,,D,"SP Art flags: byte i = art slot i, bit k = set k's art is an SP Art (0xe7a20)"
+arenaset,0x00,1,,,D,"weapon class = box type 7-21 (0 none); sets sPlayer +0x4D4"
+arenaset,0x01,1,,,D,"weapon level (box level field = value - 1)"
+arenaset,0x02,2,,,D,weapon ID
+arenaset,0x04,6,,,D,"weapon decorations, 3 x u16"
+arenaset,0x0A,1,,,D,"bowgun customisation 1-5, box types 11/13 only: flag from table 0x162a950 / 0x162a970 ORed into box +0x0C (0xdaf90)"
+arenaset,0x0B,1,,,D,"hunting style 0-5 (sPlayer +0x4D9)"
+arenaset,0x0C,6,,,D,"Hunter Arts, 3 x u16 for art slots 0-2 (0xe79b4), limited to the style's art count"
+arenaset,0x12,4,,,D,"talisman skills: tree 1, s8 points 1, tree 2, s8 points 2 (box +0x0C, +0x0E, +0x0D, +0x0F)"
+arenaset,0x16,10,,,D,"Insect Glaive (type 20) kinsect: +0x16 -> box +0x0C, +0x17 -> +0x0D, +0x18..+0x1A (value - 1) -> +0x0E..+0x10, +0x1B..+0x1F -> +0x11..+0x15 (0xdd31c); zero for other weapons"
+arenaset,0x20,9,6,,D,"@arenagear armour head, chest, arms, waist, legs, then talisman (box types 1-6)"
+arenaset,0x56,3,32,,D,"32 x (u16 item ID, u8 count): the set's item pouch, copied to the quest's 32 entries at +0x75c"
+arenagear,0x0,2,,,D,"equipment ID (talisman: its talisman ID)"
+arenagear,0x2,1,,,D,"level (box level field = value - 1)"
+arenagear,0x3,6,,,D,"3 x u16 decorations (a talisman always gets 3 slots)"
+arena169,0x000,4,,,C,quest ID
+arena169,0x004,1,,,U,"u8, 2 in every record; not read by 0x3c2038"
+arena169,0x005,12,,,D,"grade times S/A/B in seconds (quest +0xd3c)"
+arena169,0x011,12,,,D,"Wycademy points per grade (quest +0xd48)"
+arena169,0x01D,28,5,,D,"@arenapal Prowler sets 1-5"
+arenapal,0x00,2,,,D,"Palico weapon ID (box type 22)"
+arenapal,0x02,1,,,D,"weapon level (value - 1)"
+arenapal,0x03,2,,,D,"head armour ID (type 23)"
+arenapal,0x05,1,,,D,head level
+arenapal,0x06,2,,,D,"body armour ID (type 24)"
+arenapal,0x08,1,,,D,body level
+arenapal,0x09,1,,,D,"Palico level (value - 1, 0xe7e50)"
+arenapal,0x0A,1,,,D,"support bias (0xe8460); move slot 0 = the bias's default move (table via 0x25aed4)"
+arenapal,0x0B,1,,,D,"support move for move slot 1 (0 = none)"
+arenapal,0x0C,8,,,D,"further support moves, zeros skipped (0xe9274 + 0xe8710)"
+arenapal,0x14,8,,,D,"skills, zeros skipped (0xe9ea4 + 0xe959c)"
+#
+# DLC item pack record, 104 B (dispatcher type 3, 0x39a9c)
+dlcpack,0x00,40,,,D,"pack name, 40 bytes copied from the DLC text (0x39af8): stale text after the NUL; shown by the Room Service (0x3b288)"
+dlcpack,0x28,4,,,D,"DLC text index of the pack (catalog entry +4; the name is read from it, 0x39ae0)"
+dlcpack,0x2C,2,,,C,catalog number = 507 + record index
+dlcpack,0x2E,40,,,D,"10 x (u16 item ID, u16 count): the items the Room Service hands over (0x78d8b0, 0x78e514)"
+dlcpack,0x56,18,,,D,"unused: the serializer 0x30974 writes 46 bytes; zero in every record"
+#
+# DLC Palico info record, 252 B (dispatcher type 2, 0x39bc4; turned into a Palico by 0x3bcb0)
+dlcpal,0x00,32,,,C,"name (copied from the DLC text, stale bytes after the NUL)"
+dlcpal,0x20,60,,,C,"greeting (Palico +0x60, 0xe7a98)"
+dlcpal,0x5C,32,,,C,"original owner, Capcom (Palico +0x9C, 0xe7ac0)"
+dlcpal,0x7C,4,,,D,"DLC text index v: name, owner, greeting = text entries 3v, 3v+1, 3v+2 (0x3bd10)"
+dlcpal,0x80,1,,,D,"flag: non-zero sets bit 0x100 of the new Palico's flag word (0x3be60); 1 in all three"
+dlcpal,0x81,2,,,C,catalog number = 11 + record index
+dlcpal,0x83,1,,,C,"byte 7 of the Palico ID (Palico +0x58)"
+dlcpal,0x84,4,,,C,"support bias (0xe8460)"
+dlcpal,0x88,1,,,C,"level (stored as level - 1 at Palico +0x24, 0xe7e50)"
+dlcpal,0x89,4,,,C,"target (Palico +0x27, 0xe8470)"
+dlcpal,0x8D,1,,,C,"move point pattern (Palico +0x54, 0xe92a0)"
+dlcpal,0x8E,1,,,C,"skill point pattern (Palico +0x56, 0xe9ed0)"
+dlcpal,0x8F,12,,,C,"support move list (Palico +0x38; empty slots 0 / 57, first two equipped)"
+dlcpal,0x9B,10,,,C,"skill list (Palico +0x48; empty slots 0 / 96)"
+dlcpal,0xA5,4,,,C,coat (look +6)
+dlcpal,0xA9,3,,,C,coat colour RGB (colour 0)
+dlcpal,0xAC,4,,,C,voice (look +1)
+dlcpal,0xB0,4,,,C,eyes (look +2)
+dlcpal,0xB4,3,,,C,left eye colour RGB (colour 1)
+dlcpal,0xB7,3,,,C,right eye colour RGB (colour 2)
+dlcpal,0xBA,4,,,C,ears (look +7)
+dlcpal,0xBE,4,,,C,tail (look +8)
+dlcpal,0xC2,58,,,D,"unused: the serializer 0x32fe4 writes 70 bytes; zero in every record"
 #
 # Guild Card, 6328 B
 card,0x000,22,,,C,"hunter name, UTF-16"

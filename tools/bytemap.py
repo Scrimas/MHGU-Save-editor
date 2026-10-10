@@ -35,8 +35,16 @@ def load(path=R + 'data/save-fields.csv'):
 
 
 def extent(defs, scope):
-    """Size of a struct: the largest size it is embedded with."""
-    return max(r['size'] for rows in defs.values() for r in rows if r['embed'] == scope)
+    """Size of a struct: the largest size it is embedded with; for a reference struct (only named
+    as @name inside a field text, e.g. a variant of a variable record) the end of its last row."""
+    sizes = [r['size'] for rows in defs.values() for r in rows if r['embed'] == scope]
+    if sizes:
+        return max(sizes)
+    return max(r['off'] + (r['count'] - 1) * r['stride'] + r['size'] for r in defs[scope])
+
+
+def referenced(defs, scope):
+    return any('@' + scope in r['field'] for rows in defs.values() for r in rows)
 
 
 def instances(defs):
@@ -135,7 +143,7 @@ def main():
     defs = load()
     inst = instances(defs)
     sizes = {s: (FILE_SIZE if s == 'file' else extent(defs, s)) for s in defs}
-    problems = ['struct %s is never embedded' % s for s in defs if s not in inst]
+    problems = ['struct %s is never used' % s for s in defs if s not in inst and not referenced(defs, s)]
     all_items = {}
     for s in defs:
         items, probs = scope_items(defs, s, sizes[s])
@@ -183,7 +191,10 @@ def main():
         if not items:
             continue
         il = inst.get(s, [])
-        out.append('## Scope `%s` (%d B, %d instance%s)' % (s, sizes[s], len(il), '' if len(il) == 1 else 's'))
+        if il:
+            out.append('## Scope `%s` (%d B, %d instance%s)' % (s, sizes[s], len(il), '' if len(il) == 1 else 's'))
+        else:
+            out.append('## Scope `%s` (%d B, reference struct: its bytes are counted by the row that names it)' % (s, sizes[s]))
         out.append('')
         for it in items:
             spans = list(item_spans(it, il))
