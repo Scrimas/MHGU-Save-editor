@@ -262,17 +262,39 @@ slot,0x22493,4,,,U,"sGameControl +0x3c u32, copied to Guild Card +0x86C"
 #
 # ---- slot: sItem ----
 slot,0x22497,376,,,C,"items obtained, bit = item ID"
-slot,0x2260F,136,3,,U,Trader cargo order (136 B; layout not decoded)
-slot,0x227A7,420,10,,U,"Alchemy request (u8, u8, u16, 3 x equip36, 7 x (u32, u32, equip36))"
-slot,0x2380F,4,,,D,"village tier bytes, Bherna / Kokoto / Pokke / Yukumo"
-slot,0x23813,6,,,U,sItem +0x90 6 bytes after the tier bytes
+slot,0x2260F,136,3,,D,@cargo136 Trader trade request (cart 1-3)
+slot,0x227A7,420,10,,D,@alch420 Melding Pot order (queue slot 0-9)
+slot,0x2380F,4,,,C,"low-rank ticket payout steps, Bherna/Kokoto/Pokke/Yukumo: thresholds 150/300/500 then every 500 passed (0x197284, table 0x173f588); 42 = 20000 points"
+slot,0x23813,1,,,D,"low-rank slot 4: never written (0x197208 skips village 4), only init/load/save"
+slot,0x23814,4,,,C,"G-rank ticket payout steps, same villages: 300/500 then every 800"
+slot,0x23818,1,,,D,"G-rank slot 4: never written"
 slot,0x23819,1,,,D,Trader cargo shipments counter
 slot,0x2381A,1,,,D,low-rank contribution points accumulator
 slot,0x2381B,2,,,C,G-rank contribution points accumulator
 slot,0x2381D,1,,,D,Footbath uses
-slot,0x2381E,23,,,D,"pending village rewards, one count per reward kind (at most 99)"
-slot,0x23835,5,,,D,"staged quest-clear counters 0-4"
-slot,0x2383A,1,,,U,staged quest-clear counter byte 5
+slot,0x2381E,1,,,D,"pending 0: Palico outings (Ranch Paw NPC 620, cond 56): +1 when a Palico's quest count hits 10 and 30, then +5 every 30 (0x262bd0)"
+slot,0x2381F,1,,,D,"pending 1: Trader shipments (NPC 623, cond 57): +5 at the +0x6a steps (0x195758)"
+slot,0x23820,1,,,C,"pending 2: Canteen meals (cond 55): +5 every 30 meals (sKitchen +0x128 bits 0-4, 0x1a61c4)"
+slot,0x23821,1,,,D,"pending 3: Flight Cattendant NPC 9 (cond 58): +2 per 250 low-rank contribution points (0x1973b0)"
+slot,0x23822,1,,,D,"pending 4: Bath Cattendant NPC 323 (cond 59): +3 per 15 Footbath uses (0x197448)"
+slot,0x23823,1,,,D,"pending 5: Bath Cattendant (cond 60): +2 when a footbath visitor request's done flag is set (0x3ef68c)"
+slot,0x23824,1,,,D,"pending 6: Chief Researcher NPC 14 (cond 61): +1 the first time a monster's size record gets the top crown class (0x161ac8)"
+slot,0x23825,4,,,D,"pending 7-10: low-rank village tickets Bherna/Kokoto/Pokke/Yukumo (chiefs, cond 102-105), fed by +0x2380F"
+slot,0x23829,1,,,D,"pending 11: a Palico reached level 20 (Ranch Paw, cond 62; 0x262bd0)"
+slot,0x2382A,1,,,D,pending 12: a Palico reached level 35
+slot,0x2382B,4,,,D,"pending 13-16: G-rank village tickets (cond 151-154), fed by +0x23814"
+slot,0x2382F,1,,,D,"pending 17: Wyventurer NPC 701 (cond 139): villager-request clears via staged counters 1-4"
+slot,0x23830,1,,,D,"pending 18: Chief Researcher (cond 155): G-rank clears via staged counter 0"
+slot,0x23831,1,,,D,"pending 19: Palico level-1 thresholds 64 and 74"
+slot,0x23832,1,,,D,"pending 20: Gourmew Chef NPC 524 (cond 156): +5 every 30 meals once Village 7 star+ / Hub 9 star+ (sKitchen +0x128 bits 16-20)"
+slot,0x23833,1,,,D,"pending 21: Palico outings, alternate of byte 0 (0x262bd0 picks 0 or 21 by a per-Palico toggle)"
+slot,0x23834,1,,,D,"pending 22: Flight Cattendant: +2 per 800 G-rank contribution points (0x1973ec)"
+slot,0x23835,1,,,C,"staged counter 0: G-rank clears; every 10 add 1 to pending 18 (table 0x1625aee)"
+slot,0x23836,1,,,D,"staged counter 1: non-gathering villager-request clears up to 10 (sQuest +0xb8 & 0xb != 0); at 10 a one-off 3 to pending 17, then counter 2 takes over"
+slot,0x23837,1,,,D,"staged counter 2: every 20 such clears add 5 to pending 17"
+slot,0x23838,1,,,D,"staged counter 3: gathering-type villager-request clears up to 10; at 10 a one-off 3 to pending 17"
+slot,0x23839,1,,,D,"staged counter 4: every 30 gathering request clears add 3 to pending 17"
+slot,0x2383A,1,,,D,"staged counter 5: unused; table entry 5 is unreachable, only init/load/save touch it"
 slot,0x2383B,25,,,D,"Combination List recipes combined, bit = itemPreData record"
 slot,0x23854,256,,,D,Combination List order (pouch list)
 slot,0x23954,256,,,D,Combination List order (item box list)
@@ -341,10 +363,14 @@ slot,0x2C65D,24,,,D,per-NPC hold bits C (story announcements)
 slot,0x2C675,4,,,D,random word (talk conditions 106-108)
 slot,0x2C679,4,,,D,second random word
 slot,0x2C67D,13,,,C,"Canteen dishes, 99 bits"
-slot,0x2C68A,3,,,U,sKitchen +0x115: 3 bytes after the dishes
+slot,0x2C68A,3,,,D,"dish map bits 104-127 (u32[4] at sKitchen +0x108): never set, setter 0x1a7288 rejects dish > 98"
 slot,0x2C68D,13,,,D,Canteen dishes viewed
-slot,0x2C69A,3,,,U,sKitchen +0x125: 3 bytes after the viewed map
-slot,0x2C69D,8,,,U,sKitchen +0x128: 8 bytes
+slot,0x2C69A,3,,,D,"viewed map bits 104-127: never set (setter 0x1a7320 rejects > 98)"
+slot,0x2C69D,4,,,C,"sKitchen +0x128 u32: bits 0-4 meal counter 1-30 (at 31: +5 pending 2, back to 1); bits 5-8 voucher counter 1-10 (at 11: Voucher 1771 or Gourmet Voucher 1772); bits 9-10 Rife Roast state 0 none / 1 roasting / 2 done; bit 11 roast is Raw Fish; bits 16-20 second meal counter (Village 7 star+ / Hub 9 star+, at 31: +5 pending 20); other bits unused. Counters +1 per meal in the timeline"
+slot,0x2C6A1,1,,,D,"Rife Roast result count 0: Burnt Meat / Burnt Fish (+0x12c)"
+slot,0x2C6A2,1,,,D,"Rife Roast result count 1: Rare Steak / Rare Fish (+0x12d)"
+slot,0x2C6A3,1,,,D,"Rife Roast result count 2: Well-done Steak / Gourmet Fish (+0x12e)"
+slot,0x2C6A4,1,,,D,"+0x12f padding: no reader or writer besides load/save"
 slot,0x2C6A5,4,,,U,"sFlagChecker +0x20: flags latched from another object"
 slot,0x2C6A9,16,,,D,"sMakeAmulet 128-bit map over a 107-entry table, set at quest end, read by the quest rotation"
 slot,0x2C6B9,4,,,D,"one-time event scenes played, 24 bits"
@@ -417,8 +443,7 @@ equip36,0x0C,2,,,C,talisman skill trees 1-2
 equip36,0x0E,2,,,C,talisman skill points 1-2
 equip36,0x10,1,,,C,talisman slot count
 equip36,0x11,1,,,U,byte +0x11
-equip36,0x12,1,,,C,talisman tier code
-equip36,0x13,1,,,U,"byte +0x13 (1 on every talisman)"
+equip36,0x12,2,,,C,"talisman: u16 item ID of the charm it came from, 353 Mystery, 354 Shining, 355 Timeworn, 356 Enduring (0x14bba8 strh; the old u8 tier code 97-100 is its low byte)"
 equip36,0x14,16,,,U,bytes +0x14..+0x23 (zero in every entry observed)
 #
 # My Set, 136 B (game record; docs/07 offsets - 6)
@@ -617,3 +642,26 @@ guest,0x6D,5,,,U,bytes +0x6D..+0x71
 guest,0x72,12,,,C,appearance
 guest,0x7E,36,,,C,pigment
 guest,0xA2,44,7,,C,@cequip44 equipment
+#
+# Trader trade request, 136 B (sItem +0xea4 / +0xf2c / +0xfb4; UI 0x7a5328, quest result 0x195758)
+cargo136,0x00,1,,,D,"state: 0 locked, 1 cart available/idle, bit 1 trade running or goods waiting, bit 2 running with no goods yet (start writes 6); refresh 0x1955b8: carts 2/3 need progress-map bits 11/12"
+cargo136,0x01,1,,,D,"odds grade 0-4, computed at start by 0x195f48 from points per round, Palico and gratuity"
+cargo136,0x02,1,,,D,"Palico handling the trade: sOtomo index 0-83, 84 = none (0x7a49a8)"
+cargo136,0x03,1,,,D,"trade contact: 0 Sunsnug Farm, 1 Jumbo Shroom Mountain, 2 Moga Bee Yard, 3 Tanzia Fish Market, 4 none"
+cargo136,0x04,2,,,D,"rounds left: -1 per quest result (0x195758); cancel refunds rounds left x points per round (0x1954cc)"
+cargo136,0x06,2,,,D,"rounds ordered; the Palico earns 12 exp per round done (0x1954cc, 0x195b0c)"
+cargo136,0x08,2,,,D,"gratuity: 0 none, n = item 2629+n (Lagniapple, Big, Huge); raises the odds"
+cargo136,0x0A,2,,,D,order item ID
+cargo136,0x0C,4,,,D,"Wycademy points per round (paid x rounds at start 0x7a53a0, refunded on cancel)"
+cargo136,0x10,4,10,,D,"goods list 0: 10 x (u16 item ID, s16 count), the ordered item (0x195758, slot search 0x195dfc)"
+cargo136,0x38,4,10,,D,"goods list 1: the contact's bonus items (table 0x4c90a4 kind 0)"
+cargo136,0x60,4,10,,D,"goods list 2: the contact's rare items (0x4c90a4 kinds 1-3)"
+#
+# Melding Pot order, 420 B (sItem +0x103c; order 0x6de2b8, results 0x196604, clear 0x193430)
+alch420,0x00,1,,,D,"melding style s8: 0 Mystery, 1 Luminous, 2 Ancient, 3 Fabled, 4 Halcyon, 5 Juju; -1 = empty"
+alch420,0x01,1,,,D,"quests until pickup s8: queue position + 1 at order, -1 per quest end (0x196474), 0 = ready; -1 empty"
+alch420,0x02,2,,,D,"random seed drawn at order (0x3f8344); drives the Halcyon / Juju counts and types"
+alch420,0x04,36,3,,D,"@equip36 the three talismans handed in"
+alch420,0x70,4,7,44,D,"result n goods kind: 0 none, 2 equipment"
+alch420,0x74,4,7,44,D,"result n charm item ID: 353 Mystery, 354 Shining, 355 Timeworn, 356 Enduring Charm"
+alch420,0x78,36,7,44,D,"@equip36 result n: the melded talisman (0x14bba8)"

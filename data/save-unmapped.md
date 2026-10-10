@@ -16,12 +16,12 @@ non-zero instance in the live save (first 24 bytes), its absolute offset in brac
 
 | Status | Bytes | Share |
 |---|---|---|
-| C | 3673442 | 71.203% |
-| D | 1222520 | 23.696% |
-| U | 263138 | 5.100% |
+| C | 3688205 | 71.489% |
+| D | 1225565 | 23.755% |
+| U | 245330 | 4.755% |
 | gap | 0 | 0.000% |
 
-Items to resolve: 94 (in 16 scopes).
+Items to resolve: 86 (in 16 scopes).
 
 ## Scope `file` (5159100 B, 1 instance)
 
@@ -66,10 +66,6 @@ Items to resolve: 94 (in 16 scopes).
 - `+0x5EA4` 2 B, **U** S+0x446e, +0x446f control option bytes (target camera, Hunter Art gauge); instances 3 (6 B), nz 0, timeline 1
 - `+0x2246E` 29 B, **U** game options, 29 bytes (per-byte meaning not mapped); instances 3 (87 B), nz 3, timeline 1, sample [0x1AF10A] `07 07 01 00 00 04 00 00 00 01 00 00 01 00 01 00 00 00 00 01 00 04 00 00`
 - `+0x22493` 4 B, **U** sGameControl +0x3c u32, copied to Guild Card +0x86C; instances 3 (12 B), nz 0, timeline 1
-- `+0x2260F` 3 x 136 B (stride 136), **U** Trader cargo order (136 B; layout not decoded); instances 9 (1224 B), nz 9, timeline 1, sample [0x1AF2AB] `01 03 54 00 00 00 0a 00 00 00 10 01 05 00 00 00 00 00 00 00 00 00 00 00`
-- `+0x227A7` 10 x 420 B (stride 420), **U** Alchemy request (u8, u8, u16, 3 x equip36, 7 x (u32, u32, equip36)); instances 30 (12600 B), nz 30, timeline 1, sample [0x1AF443] `ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00`
-- `+0x23813` 6 B, **U** sItem +0x90 6 bytes after the tier bytes; instances 3 (18 B), nz 1, timeline 3, sample [0x1B04AF] `00 1a 01 02 02 00`
-- `+0x2383A` 1 B, **U** staged quest-clear counter byte 5; instances 3 (3 B), nz 0, timeline 1
 - `+0x23A58` 1 B, **U** sPlayer +0x9C5C u8 (Guild Card flags bit 1 comes from it); instances 3 (3 B), nz 0, timeline 1
 - `+0x23B4E` 1 B, **U** appearance byte 7 (edited with the skin colour); instances 3 (3 B), nz 0, timeline 1
 - `+0x23B50` 3 B, **U** appearance bytes 9-11; instances 3 (9 B), nz 0, timeline 1
@@ -77,9 +73,6 @@ Items to resolve: 94 (in 16 scopes).
 - `+0x2C496` 8 B, **U** teaching session: two u32; instances 3 (24 B), nz 0, timeline 1
 - `+0x2C4A1` 3 x 13 B (stride 16), **U** Palico Dojo training slot: bytes 3-15; instances 9 (117 B), nz 0, timeline 1
 - `+0x2C4CE` 6 B, **U** team of up to 5 Palicoes, u8 count + 5 x u8 index (probably Meownster Hunters); instances 3 (18 B), nz 3, timeline 1, sample [0x1B916A] `00 ff ff ff ff ff`
-- `+0x2C68A` 3 B, **U** sKitchen +0x115: 3 bytes after the dishes; instances 3 (9 B), nz 0, timeline 1
-- `+0x2C69A` 3 B, **U** sKitchen +0x125: 3 bytes after the viewed map; instances 3 (9 B), nz 0, timeline 1
-- `+0x2C69D` 8 B, **U** sKitchen +0x128: 8 bytes; instances 3 (24 B), nz 1, timeline 3, sample [0x1B9339] `43 04 13 00 00 01 09 00`
 - `+0x2C6A5` 4 B, **U** sFlagChecker +0x20: flags latched from another object; instances 3 (12 B), nz 1, timeline 1, sample [0x1B9341] `7f 00 00 00`
 - `+0x117129` 50 x 32 B (stride 36), **U** list 2 card info: bytes 4-35; instances 150 (4800 B), nz 0, timeline 1
 - `+0x11AF29` 50 x 36 B (stride 36), **U** Palico inbox info record; instances 150 (5400 B), nz 0, timeline 1
@@ -124,11 +117,10 @@ Items to resolve: 94 (in 16 scopes).
 
 - `+0xC` 1 B, **U** record data +4: u8, 2 in every record; not read by the quest setup 0x3c1568 / 0x3c2038; instances 45 (45 B), nz 40, timeline 1, sample [0x1764A5] `02`
 
-## Scope `equip36` (36 B, 9021 instances)
+## Scope `equip36` (36 B, 9321 instances)
 
-- `+0x11` 1 B, **U** byte +0x11; instances 9021 (9021 B), nz 0, timeline 1
-- `+0x13` 1 B, **U** byte +0x13 (1 on every talisman); instances 9021 (9021 B), nz 391, timeline 3, sample [0x18CEC7] `01`
-- `+0x14` 16 B, **U** bytes +0x14..+0x23 (zero in every entry observed); instances 9021 (144336 B), nz 0, timeline 1
+- `+0x11` 1 B, **U** byte +0x11; instances 9321 (9321 B), nz 0, timeline 1
+- `+0x14` 16 B, **U** bytes +0x14..+0x23 (zero in every entry observed); instances 9321 (149136 B), nz 0, timeline 1
 
 ## Scope `guest` (470 B, 39 instances)
 
