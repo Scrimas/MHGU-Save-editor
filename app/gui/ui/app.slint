@@ -1135,15 +1135,29 @@ export component AppWindow inherits Window {
             Button { text: @tr("Close"); clicked => { root.about-open = false; } }
         }
     }
-    if Api.toast != "": Rectangle {
+    // in the theme's colours (matugen's when on): the accent bar, the slide and the shadow
+    // make it stand out. It stays mounted so it can fade out, keeping its last text.
+    Rectangle {
+        property <string> cur: Api.toast;
+        property <string> last;
+        changed cur => { if cur != "" { last = cur; } }
+        property <bool> shown: cur != "";
+        property <color> tint: Api.toast-error ? Tok.bad : Tok.accent;
         x: (parent.width - self.width) / 2;
-        y: parent.height - self.height - 24px;
+        y: parent.height - self.height - (shown ? 24px : 8px);
         width: min(lay.preferred-width, parent.width - 32px);
         height: lay.preferred-height;
+        opacity: shown ? 1 : 0;
+        visible: shown || self.opacity > 0;
+        animate opacity, y { duration: 180ms; easing: ease-out; }
         border-radius: 8px;
-        background: Api.toast-error ? Tok.bad : Tok.dark ? #f3f3f3 : #2b2b2b;
-        drop-shadow-blur: 16px;
-        drop-shadow-color: #0006;
+        border-width: 1px;
+        border-color: tint.transparentize(0.6);
+        background: Tok.raised;
+        clip: true;
+        drop-shadow-blur: 24px;
+        drop-shadow-color: #0008;
+        Rectangle { x: 0; y: 0; width: 4px; height: parent.height; background: tint; }
         lay := HorizontalLayout {
             padding: 12px;
             padding-left: 18px;
@@ -1151,30 +1165,17 @@ export component AppWindow inherits Window {
             VerticalLayout {
                 alignment: center;
                 Text {
-                    text: Api.toast;
-                    color: Api.toast-error ? #ffffff : Tok.dark ? #1c1c1c : #ffffff;
+                    text: cur != "" ? cur : last;
+                    color: Palette.foreground;
                     font-weight: Api.toast-sub != "" ? 600 : 400;
                     wrap: word-wrap;
                     max-width: 520px;
                 }
-                if Api.toast-sub != "": Text { text: Api.toast-sub; color: Tok.dark ? #1c1c1cb0 : #ffffffb0; font-size: Tok.small; }
+                if Api.toast-sub != "": Text { text: Api.toast-sub; color: Tok.muted; font-size: Tok.small; }
             }
-            // the toast is inverted against the theme, so its button is too
-            if Api.toast-action != "": Rectangle {
-                y: (parent.height - self.height) / 2;
-                width: tb.preferred-width + 28px;
-                height: 32px;
-                border-radius: 4px;
-                border-width: 1px;
-                border-color: Tok.dark ? #0000002e : #ffffff3d;
-                background: tba.pressed ? (Tok.dark ? #e6e6e6 : #4a4a4a) : tba.has-hover ? (Tok.dark ? #f0f0f0 : #444444) : (Tok.dark ? #ffffff : #3a3a3a);
-                accessible-role: button;
-                accessible-label: Api.toast-action;
-                accessible-action-default => { Api.toast-act(); }
-                tk := KeyActivate { activated => { Api.toast-act(); } }
-                FocusRing { shown: tk.has-focus; border-radius: 4px; }
-                tb := Text { text: Api.toast-action; color: Tok.dark ? #1c1c1c : #ffffff; }
-                tba := TouchArea { clicked => { Api.toast-act(); } }
+            if Api.toast-action != "": VerticalLayout {
+                alignment: center;
+                Button { text: Api.toast-action; enabled: shown; clicked => { Api.toast-act(); } }
             }
         }
     }
