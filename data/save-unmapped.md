@@ -16,16 +16,9 @@ non-zero instance in the live save (first 24 bytes), its absolute offset in brac
 
 | Status | Bytes | Share |
 |---|---|---|
-| C | 3691842 | 71.560% |
-| D | 1467243 | 28.440% |
-| U | 15 | 0.000% |
+| C | 3691848 | 71.560% |
+| D | 1467252 | 28.440% |
+| U | 0 | 0.000% |
 | gap | 0 | 0.000% |
 
-Items to resolve: 4 (in 1 scopes).
-
-## Scope `slot` (1177796 B, 3 instances)
-
-- `+0x28FB` 1 B, **U** S+0x110 u8 countdown: talk condition 54 needs 0; talk action 0x1977f8 decrements it and re-rates S+0x116; setter not found; instances 3 (3 B), nz 0, timeline 1
-- `+0x28FD` 2 B, **U** S+0x112 u16: written by the transfer (old +0xdc) only; 1324 in slot 1, no v1.4 writer or reader found; instances 3 (6 B), nz 1, timeline 1, sample [0x18F599] `2c 05`
-- `+0x2F7A` 1 B, **U** progress map bits 24-31: 24-29 Room Service housekeepers 1-6 available (0x78b474; bit 29 = talk condition 85); 30 set by 0x297f24 (uPlayerLobbyAirou, flag 141), read by aVillage02 0x6bc0e0, meaning UNRESOLVED; 31 quest 10646 listed (condition 64); instances 3 (3 B), nz 1, timeline 2, sample [0x18FC16] `bf`
-- `+0x2F7B` 1 B, **U** progress map bits 32-39: 32 Nakarkos in the keyboard dictionary; 33 set at quest end 0x38b904 when 0x25d484 > 0, read by Palico training / Room Service, UNRESOLVED; 34 set by the Smithy 0x6f0c84, UNRESOLVED; 35/36 Palico roster +6 each; 37 Hub 9 star or q10768; 38 Hub 13 star or q111304; 39 Palico level cap 75; instances 3 (3 B), nz 1, timeline 1, sample [0x18FC17] `ff`
+Items to resolve: 0 (in 0 scopes).
