@@ -24,7 +24,7 @@ wins. Write identical bytes to both.
 copy back on exit, silently discarding external edits made while it is running. Any
 tool must require the emulator be fully closed before patching.
 
-`system` and `system_backup` differ only in the header nonce described below; they
+`system` and `system_backup` differ only in the entry key at `0x14` described below; they
 are otherwise byte-identical. `system` is the live file.
 
 ## No encryption
@@ -55,12 +55,27 @@ Every edit described in these documents was subsequently applied by raw byte wri
 and loaded by the game without complaint, across many separate sessions. No
 recalculation of any kind was ever required.
 
-### Header nonce — `0x000014`, u32
+### Container header — `0x00`–`0x23`
 
-**DERIVED.** Changes on every save. Not a checksum: the game loads correctly when it
-is left untouched after arbitrary body edits. Most plausibly a save counter or
-generation marker used to decide which commit slot is newer. An editor should leave
-it alone.
+**CONFIRMED** (2026-10-10, writer `0x877c20`, loader `0x8778cc`, all 46 saves of the
+timeline). The first 36 bytes are not a Switch header but the game's own `sSavedata`
+key/value container: a 16-byte header, a table of entry offsets, then one 16-byte record
+per entry followed by its blob. The save holds one entry, the body.
+
+| Offset | Size | Field |
+|---|---|---|
+| `0x00` | u32 | 0; the loader rejects anything else (error 6) |
+| `0x04` | u32 | container format version, 0; the loader rejects another (error 7) |
+| `0x08` | u32 | size of the offset table = 4 × entry count (4) |
+| `0x0C` | u32 | 0, not checked |
+| `0x10` | u32 | offset of entry 0's record (`0x14`); skipped by the loader |
+| `0x14` | u32 | entry key: JAMCRC (CRC-32 without the final xor, `0x7cbdb4`) of the entry name. `0x36B2EE74` = "system" in `system`, `0xD0819B92` = "system_backup" in `system_backup` |
+| `0x18` | u32 | entry type, 12 = raw blob |
+| `0x1C` | u64 | blob size, `0x4EB898` (file size − `0x24`); the blob is loaded only when it equals the registered size |
+
+Earlier revisions called `0x14` a nonce that changes on every save. It does not: it is
+constant within each file, and `system` and `system_backup` differ there only because
+their entry names differ. An editor leaves the header alone.
 
 ## Practical consequences for an editor
 

@@ -51,8 +51,8 @@ captures.
 
 ## Filtering noise
 
-Even a clean diff carries churn: RNG seeds, timestamps, play counters, the header
-nonce. Two filters do most of the work.
+Even a clean diff carries churn: RNG seeds, timestamps, play counters, uninitialised
+padding. Two filters do most of the work.
 
 **Cross-session intersection.** Take two diffs of the *same* action. Structures
 relevant to that action change in both; noise rarely does.

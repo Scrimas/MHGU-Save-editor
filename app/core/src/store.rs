@@ -2,8 +2,8 @@
 //!
 //! Ryujinx keeps the title's savedata as `<save-id>/0/` and `<save-id>/1/` (a
 //! double-commit scheme), each with `system` and `system_backup`. All four files are
-//! written with the same body; each keeps its own header (the nonce at 0x14 differs
-//! between them and is left alone). See docs/01-container.md.
+//! written with the same body; each keeps its own header (the entry key at 0x14, the
+//! JAMCRC of the file name, differs between them and is left alone). See docs/01-container.md.
 
 use crate::save::{Error, Save, FILE_SIZE};
 use std::fs;

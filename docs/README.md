@@ -36,7 +36,7 @@ slot 1. Per-character offsets move with the slot base; see
 | [08 — Hunter Arts and Canteen](08-progression.md) | Hunter Art unlocks, Canteen ingredients and dishes |
 | [09 — Awards](09-awards.md) | Guild Card award bitfield |
 | [10 — NPC talk data](10-npc-talk.md) | Talk tables: request offers, star-level flags, per-NPC bits |
-| [11 — Whole-file map](11-save-map.md) | Every byte assigned to its game object by running the game's own loader: item box, Palicoes, Guild Cards, downloaded quests |
+| [11 — Whole-file map](11-save-map.md) | Every byte assigned to its game object by running the game's own loader: item box, Palicoes, Guild Cards, downloaded quests. The byte-level field map is [`data/save-fields.csv`](../data/save-fields.csv); what is still unresolved is in [`data/save-unmapped.md`](../data/save-unmapped.md) |
 
 Machine-readable: [`data/monster-index.csv`](../data/monster-index.csv), [`data/quest-index.csv`](../data/quest-index.csv), [`data/request-index.csv`](../data/request-index.csv), [`data/quest-unlock.csv`](../data/quest-unlock.csv), [`data/request-offer.csv`](../data/request-offer.csv), [`data/rotating-quests.csv`](../data/rotating-quests.csv), [`data/npc-index.csv`](../data/npc-index.csv), [`data/hunter-arts.csv`](../data/hunter-arts.csv), [`data/save-map.csv`](../data/save-map.csv), [`data/save-coverage.txt`](../data/save-coverage.txt), [`data/offsets.json`](../data/offsets.json)
 
@@ -44,7 +44,7 @@ Machine-readable: [`data/monster-index.csv`](../data/monster-index.csv), [`data/
 
 | Structure | Offset | Layout |
 |---|---|---|
-| Header nonce | `0x000014` | u32, changes every write, **not** a checksum |
+| Container entry key | `0x000014` | u32 JAMCRC of the entry name ("system"), constant; **not** a checksum |
 | Deviant permit counts | `0x18F4D8` | 18 × u8 |
 | Quests cleared | `base + 0x2C77` | 1509 bits, index = position in `quest_group`, see [`quest-index.csv`](../data/quest-index.csv) |
 | Quests seen (NEW cleared) | `base + 0x2D77` | same indexing, `+0x100` bytes |

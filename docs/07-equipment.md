@@ -10,7 +10,8 @@ absolute. The absolute values quoted are for the first character slot.
 ## Character slots
 
 **CONFIRMED** with three real characters (below). The file starts with a 36-byte
-(`0x24`) Switch header. The MHXX-layout body follows it, and its own header carries a
+(`0x24`) container header ([01](01-container.md#container-header--0x000x23)). The
+MHXX-layout body follows it, and its own header (u32 version 198 at `0x24`) carries a
 slot-use table and slot pointers:
 
 | Absolute | Size | Field |
@@ -75,12 +76,23 @@ Lv 5 given the look of Leather Headgear, ID 1, bits 10–14 = 0): in game the he
 the Leather look, kept its own defense and skills and could be equipped; the game's next
 save kept the field.
 
-**UNRESOLVED — bit 15.** The equipped cache copy of one transmogged helm had it set
-when its box source did not. It is a declared one-bit field: the entry clear and
-construct helpers (`0xdab04`, `0xdaba4`, `0xdac14`) and the builder `0x159b18` keep it
-(`and #0x8000`), so it is metadata that survives a clear. A whole-binary scan for a
-tester (`tst #0x8000`, `lsr #15`, a byte test of `+0x01` bit 7) found none. Leaving it
-at zero is safe.
+**DERIVED — bit 15 is unused.** The entry clear and construct helpers (`0xdab04`,
+`0xdaba4`, `0xdac14`), the copy `0xdadf0` and the builder `0x159b18` keep it
+(`and #0x8000`), nothing sets it, and a whole-binary scan for a tester (`tst #0x8000`,
+`lsr #15`, a byte test of `+0x01` bit 7) found none. It is 0 in every box entry of the
+46 saves. The one set bit seen earlier was in the slot header's equipped cache: the
+header writer `0x3e0ea4` builds its seven cache objects on the stack, so bit 15 there
+is stale stack (the fresh slots' headers show `0x8001` / `0x8004` where the box has
+`0x0001` / `0x0004`).
+
+**DERIVED — Insect Glaive entries (type 20) carry the kinsect** in `+0x0C … +0x21`
+(type-checked accessors `0xdcb8c` … `0xdd4c0`; tables `rInsectData`, `rInsectLevel`,
+`rInsectParam`): `+0x0C` kinsect ID, `+0x0D` kinsect level − 1, `+0x0E … +0x10` stat
+levels 1–3, `+0x11 … +0x15` element levels, `+0x16 … +0x17` two display bytes cleared at
+quest end, `+0x18 … +0x1A` stat feed points (100 = a level), `+0x1B` stat level-ups since
+the last kinsect level-up, `+0x1C … +0x20` element feed points, `+0x21` total element
+levels. Bytes `+0x22 … +0x23` have no accessor. Every other type leaves `+0x0C … +0x23`
+zero, except the talisman fields below.
 
 ### Talisman fields
 
@@ -91,8 +103,8 @@ at zero is safe.
 | `+0x0C` | u8 ×2 | skill-tree ID 1, 2 |
 | `+0x0E` | i8 ×2 | skill points 1, 2 |
 | `+0x10` | u8 | slot count |
-| `+0x12` | u8 | tier code: 97 Mystery, 98 Shining, 99 Timeworn, 100 Enduring |
-| `+0x13` | u8 | 1 on every talisman observed |
+| `+0x11` | u8 | never written for a talisman (0) |
+| `+0x12` | u16 | item ID of the charm the talisman came from: 353 Mystery, 354 Shining, 355 Timeworn, 356 Enduring Charm (`0x14bba8` writes it with `strh`). Earlier revisions read the low byte as a "tier code" 97–100 and the high byte as a constant 1. All 17,929 talisman entries of the timeline hold 353–356 |
 
 ### Charm tables
 

@@ -5,7 +5,7 @@
 //!   +0x02 u16  equipment ID
 //!   +0x04 u16  transmog appearance ID (armor; 0 = own look)
 //!   +0x06 3 x u16 decoration item IDs
-//!   +0x0C 24 B talisman: skill IDs u8 x2, points i8 x2 (+0x0E), slots u8 (+0x10), tier u8 (+0x12), u8 1 (+0x13)
+//!   +0x0C 24 B talisman: skill IDs u8 x2, points i8 x2 (+0x0E), slots u8 (+0x10), u16 charm item ID 353-356 (+0x12; its low byte is the tier 97-100, the high byte 1)
 
 use crate::save::Save;
 
