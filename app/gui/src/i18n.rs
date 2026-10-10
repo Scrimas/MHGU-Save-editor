@@ -13,8 +13,17 @@ use std::sync::OnceLock;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// The lang/ folder (a gettext locale) and the language's own name, English first: the
-/// game's own languages, so its names (assets.rs) match the interface.
-pub const LANGS: [(&str, &str); 5] = [("en", "English"), ("fr", "Français"), ("de", "Deutsch"), ("es", "Español"), ("it", "Italiano")];
+/// game's own languages, so its names (assets.rs) match the interface. The two Chinese ones
+/// came with the game's 1.4 update (its chT and chS text).
+pub const LANGS: [(&str, &str); 7] = [
+    ("en", "English"),
+    ("fr", "Français"),
+    ("de", "Deutsch"),
+    ("es", "Español"),
+    ("it", "Italiano"),
+    ("zh_TW", "繁體中文"),
+    ("zh_CN", "简体中文"),
+];
 
 macro_rules! po {
     ($c:literal) => {
@@ -23,12 +32,13 @@ macro_rules! po {
 }
 
 /// The catalogs in LANGS order (English has none).
-const PO: [&str; 5] = ["", po!("fr"), po!("de"), po!("es"), po!("it")];
+const PO: [&str; 7] = ["", po!("fr"), po!("de"), po!("es"), po!("it"), po!("zh_TW"), po!("zh_CN")];
 
 /// Plural form of count `n` per language, as in the catalogs' Plural-Forms header.
 fn plural(lang: usize, n: i64) -> usize {
     match LANGS[lang].0 {
         "fr" => (n > 1) as usize,
+        "zh_TW" | "zh_CN" => 0,
         _ => (n != 1) as usize,
     }
 }
@@ -49,9 +59,14 @@ pub fn index(code: &str) -> usize {
 }
 
 /// The system's language, matched as Slint does: the whole locale, then its language part.
+/// Chinese goes by script: Traditional for Hant, Taiwan, Hong Kong and Macao, else Simplified.
 pub fn system() -> usize {
     let Some(loc) = sys_locale::get_locale() else { return 0 };
-    let loc = loc.replace('-', "_");
+    let mut loc = loc.replace('-', "_");
+    if loc == "zh" || loc.starts_with("zh_") {
+        let hant = ["Hant", "TW", "HK", "MO"].iter().any(|t| loc.split(['_', '.', '@']).any(|p| p == *t));
+        loc = if hant { "zh_TW" } else { "zh_CN" }.into();
+    }
     let base = |l: &str| l.split(['_', '@', '.']).next().unwrap_or("").to_string();
     LANGS
         .iter()
@@ -63,7 +78,7 @@ pub fn system() -> usize {
 /// The thousands separator of the language in use (a no-break space in French).
 pub fn thousands() -> &'static str {
     match LANGS[current()].0 {
-        "en" => ",",
+        "en" | "zh_TW" | "zh_CN" => ",",
         "fr" => "\u{a0}",
         _ => ".",
     }
@@ -78,6 +93,21 @@ pub fn set(ui: &crate::AppWindow, i: usize) {
         eprintln!("language {}: {e}", LANGS[i].0);
     }
     ui.global::<crate::Fmt>().set_sep(thousands().into());
+    ui.global::<crate::Fmt>().set_font(han_font(LANGS[i].0).into());}
+
+/// The system's font for Chinese text in language `code` ("" for the others). Slint asks
+/// for a fallback font by script alone and gets the system's first Han one, often Japanese,
+/// which lacks many Chinese characters (so does the locale-aware fallback on Linux): the
+/// window's default is the first installed of the usual Chinese UI fonts of Windows, macOS
+/// and Linux instead, else Slint's own choice.
+fn han_font(code: &str) -> String {
+    let families: &[&str] = match code {
+        "zh_TW" => &["Microsoft JhengHei", "Microsoft JhengHei UI", "PingFang TC", "Noto Sans CJK TC", "Noto Sans TC", "Source Han Sans TC", "Source Han Sans TW", "WenQuanYi Micro Hei", "WenQuanYi Zen Hei"],
+        "zh_CN" => &["Microsoft YaHei", "Microsoft YaHei UI", "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "WenQuanYi Micro Hei", "WenQuanYi Zen Hei"],
+        _ => return String::new(),
+    };
+    let mut fonts = fontique::Collection::new(fontique::CollectionOptions { shared: false, system_fonts: true });
+    families.iter().find(|f| fonts.family_id(f).is_some()).map_or(String::new(), |f| f.to_string())
 }
 
 #[derive(Default)]

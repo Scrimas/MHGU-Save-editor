@@ -2736,6 +2736,7 @@ version = "2.8.0"
 dependencies = [
  "chrono",
  "dirs",
+ "fontique",
  "i-slint-backend-testing",
  "i-slint-core",
  "image",

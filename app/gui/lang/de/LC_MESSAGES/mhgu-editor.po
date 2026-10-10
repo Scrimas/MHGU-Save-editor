@@ -306,8 +306,8 @@ msgid "Import… also takes a character from an MHXX save: the system file of a 
 msgstr "Importieren… übernimmt auch einen Charakter aus einem MHXX-Spielstand: die Systemdatei einer JKSM- oder Checkpoint-Sicherung (3DS) oder von JKSV oder Checkpoint (Switch). Ausrüstung, die dem anderen Spiel fehlt, vor dem Verschieben eines Charakters ablegen."
 
 #: app/gui/ui/app.slint
-msgid "Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
-msgstr "Kopien und Importe sind abgeleitet: noch nicht im Spiel geprüft. Löschen lässt den Platz wie nie benutzt zurück; ein neuer Charakter wird dort im Spiel erstellt."
+msgid "An MHXX character is Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
+msgstr "Ein MHXX-Charakter ist abgeleitet: noch nicht im Spiel geprüft. Löschen lässt den Platz wie nie benutzt zurück; ein neuer Charakter wird dort im Spiel erstellt."
 
 #: app/gui/ui/app.slint app/gui/ui/pages/cards.slint
 #: app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
@@ -3081,36 +3081,12 @@ msgstr "Der Händler bietet alles an, was er verkaufen kann."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/goals.rs
-msgid "Puts up for sale the {} the Trader does not offer yet: items, title words, Guild Card scenes and pet costumes, the downloads' ones included."
-msgstr "Bietet die {} zum Verkauf an, die der Händler noch nicht anbietet: Objekte, Titelwörter, Gildenkarten-Hintergründe und Haustierkostüme, auch die aus Downloads."
+msgid "Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included."
+msgstr "Bietet die {} zum Verkauf an, die der Händler noch nicht anbietet: Titelwörter, Gildenkarten-Hintergründe und Haustierkostüme, auch die aus Downloads."
 
 #: app/gui/src/goals.rs
 msgid "Buying still takes Trader points; what you already have is not shown."
 msgstr "Kaufen kostet weiterhin Händlerpunkte; was du schon hast, wird nicht angezeigt."
-
-#: app/gui/src/goals.rs
-msgid "Every Horns Coin trade"
-msgstr "Alle Hörnermünzen-Tauschgeschäfte"
-
-#: app/gui/src/goals.rs
-msgid "The Mewstress offers every Horns Coin trade."
-msgstr "Die Maunzerin bietet alle Hörnermünzen-Tauschgeschäfte an."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/goals.rs
-msgid "Unlocks the {} the Mewstress does not offer yet."
-msgstr "Schaltet die {} frei, die die Maunzerin noch nicht anbietet."
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/src/goals.rs
-msgid "{} Horns Coin trade"
-msgid_plural "{} Horns Coin trades"
-msgstr[0] "{} Hörnermünzen-Tauschgeschäft"
-msgstr[1] "{} Hörnermünzen-Tauschgeschäfte"
-
-#: app/gui/src/goals.rs
-msgid "Trading still takes Horns Coins."
-msgstr "Tauschen kostet weiterhin Hörnermünzen."
 
 #: app/gui/src/goals.rs
 msgid "Every combination recipe combined"
@@ -5794,8 +5770,8 @@ msgid "The Palicoes the game offers for hire: an edited one joins as edited when
 msgstr "Die Kameraden, die das Spiel zum Anheuern anbietet: Ein bearbeiteter kommt beim Anheuern so, wie er ist. Das Spiel zieht von Zeit zu Zeit eine neue Liste."
 
 #: app/gui/src/views/palicoes.rs
-msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). The game gives award 53 from 50 Dojo sessions and title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
-msgstr "Ein Pirscher kämpft mit den Unterstützungsaktionen und Fähigkeiten seines Kameraden (Meine Kameraden). Das Spiel vergibt Auszeichnung 53 ab 50 Dojo-Einheiten und Titelwörter ab 10, 30, 50 und 80 Anheuerungen bei seiner nächsten Prüfung. Dojo und Teams sind schreibgeschützt."
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check; hiring from the Palico Board does not count. The Dojo and the teams are read-only."
+msgstr "Ein Pirscher kämpft mit den Unterstützungsaktionen und Fähigkeiten seines Kameraden (Meine Kameraden). Auszeichnung 53 kommt mit 50 Dojo-Einheiten. Das Spiel vergibt Titelwörter ab 10, 30, 50 und 80 Anheuerungen bei seiner nächsten Prüfung; Anheuern am Kameradenbrett zählt nicht. Dojo und Teams sind schreibgeschützt."
 
 #: app/gui/src/views/palicoes.rs
 msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."
@@ -6024,13 +6000,13 @@ msgstr "Sets {}–{} · unbenutzt"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/sets_ui.rs
-msgid "{} of {} Palico sets used · Derived: not checked in game yet"
-msgstr "{} von {} Kameraden-Sets belegt · Abgeleitet: noch nicht im Spiel geprüft"
+msgid "{} of {} Palico sets used"
+msgstr "{} von {} Kameraden-Sets belegt"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/sets_ui.rs
-msgid "{} of {} My Sets used · Derived except the pigment"
-msgstr "{} von {} Ausrüstungssets belegt · Abgeleitet außer der Färbung"
+msgid "{} of {} My Sets used"
+msgstr "{} von {} Ausrüstungssets belegt"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/sets_ui.rs
@@ -6367,12 +6343,12 @@ msgid "Songs the Hunters' Pub Jukebox plays. The Mewstress unlocks the others wh
 msgstr "Lieder, die die Jukebox der Jägertaverne spielt. Die Maunzerin schaltet die übrigen frei, wenn du mit ihr sprichst."
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Sets the Provision Division can send. Most follow a Lab upgrade: the game gives them back each time the Division opens while the upgrade is installed."
-msgstr "Pakete, die die Versorgungsabteilung schicken kann. Die meisten folgen einer Labor-Verbesserung: Das Spiel gibt sie bei jedem Öffnen der Abteilung zurück, solange die Verbesserung installiert ist."
+msgid "Read only: the Provision Division lists a set once its Lab upgrade or progress allows, whatever the save holds; the save only keeps which sets got their NEW mark."
+msgstr "Nur lesen: Die Versorgungsabteilung führt ein Paket, sobald seine Labor-Verbesserung oder der Fortschritt es erlaubt, was auch immer im Spielstand steht; der Spielstand hält nur fest, welche Pakete ihre NEU-Markierung bekamen."
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Items the Mewstress trades for Horns Coins."
-msgstr "Objekte, die die Maunzerin gegen Hörnermünzen tauscht."
+msgid "Read only: the Mewstress lists a Horns Coin trade once its star level allows, whatever the save holds; the save only keeps which trades got their NEW mark."
+msgstr "Nur lesen: Die Maunzerin bietet einen Hörnermünzen-Tausch an, sobald seine Sternstufe es erlaubt, was auch immer im Spielstand steht; der Spielstand hält nur fest, welche Tausche ihre NEU-Markierung bekamen."
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Costumes for the village pets: Moofy's (the first six) and the Poogies'. Ten, twenty, twenty-eight and every Poogie costume earn the Poogie Ball awards after your next quest."
@@ -6387,12 +6363,12 @@ msgid "What the Trader puts up for sale. An entry for sale can be bought even wi
 msgstr "Was der Händler zum Verkauf anbietet. Ein angebotener Eintrag lässt sich auch ohne den Download kaufen, der ihn verkauft; was du schon hast, wird nicht angezeigt."
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Items the Trader sells for Trader points."
-msgstr "Objekte, die der Händler gegen Händlerpunkte verkauft."
+msgid "Read only: the Trader lists an item once its star level allows, whatever the save holds; the save only keeps which items got their NEW mark."
+msgstr "Nur lesen: Der Händler führt ein Objekt, sobald seine Sternstufe es erlaubt, was auch immer im Spielstand steht; der Spielstand hält nur fest, welche Objekte ihre NEU-Markierung bekamen."
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Delivery requests the Trader offers. The game offers one once its villager's request is raised."
-msgstr "Lieferanfragen, die der Händler anbietet. Das Spiel bietet eine an, sobald die Anfrage ihres Dorfbewohners gestellt ist."
+msgid "Read only: the Trader offers a delivery request once its villager's request is raised, whatever the save holds; the save only keeps which requests got their NEW mark."
+msgstr "Nur lesen: Der Händler bietet eine Lieferanfrage an, sobald die Anfrage ihres Dorfbewohners gestellt ist, was auch immer im Spielstand steht; der Spielstand hält nur fest, welche Anfragen ihre NEU-Markierung bekamen."
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Extra Hunter's Notes entries of the Elder Dragons and deviants. Unlocking one gives the monster's Notes page its NEW mark, as the game does."

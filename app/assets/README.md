@@ -24,7 +24,10 @@ Without the passphrase the blob is useless; nothing else in the repository depen
 Everything works without `gen/`: the build prints a warning and the editor shows
 placeholder icons and `#ID` instead of names. With your own dump of the game:
 
-    python3 tools/build_assets.py path/to/base_romfs.bin
+    python3 tools/build_assets.py path/to/base_romfs.bin app/assets/gen path/to/update_files
+
+The Chinese names come from the 1.4 update only: `path/to/update_files` holds its RomFS
+files extracted loose (`nativeNX/...`), at least `chT/`, `chS/` and `loc/arc/quest/`.
 
 ## Updating it (maintainer)
 

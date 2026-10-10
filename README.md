@@ -184,8 +184,8 @@ only**, which refuses every Derived change (none since 2.0; it guards edits adde
 They are kept in
 `~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
 
-**Language**: English, French, German, Italian or Spanish, the game's own languages; by
-default the system's. Item, equipment, skill and monster names are the game's own in that
+**Language**: English, French, German, Italian, Spanish, Traditional or Simplified Chinese,
+the game's own languages (Chinese since its 1.4 update); by default the system's. Item, equipment, skill and monster names are the game's own in that
 language. The interface text is in
 [`app/gui/lang`](app/gui/lang) (gettext catalogs); after changing strings in the source,
 `python3 tools/i18n.py` updates the template and merges every catalog.

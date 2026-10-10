@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Build the save editor's game-asset pack from a RomFS dump. Pure stdlib.
 
-    build_assets.py [ROMFS] [OUT]
+    build_assets.py [ROMFS] [OUT] [UPDATE]
     ROMFS  plain base-game RomFS image (default scratch/base_romfs.bin)
     OUT    output folder (default app/assets/gen; gitignored, never commit it:
            it holds Capcom's icons and text)
+    UPDATE folder holding the 1.4 update's RomFS files extracted loose (nativeNX/...;
+           default scratch/rom): the Chinese text, which only the update has
 
 Writes:
   names.json       item, equipment, skill, monster, Palico support move and skill names; Guild
@@ -14,8 +16,8 @@ Writes:
                    stage names (data/quest-info.csv); item icon / colour / rarity and
                    pouch carry limit; palettes; equipment type icons; icon cell positions
                    on items.png
-  names.<code>.json  the same names in French, German, Italian and Spanish (fr de it es),
-                   from the game's own text
+  names.<code>.json  the same names in French, German, Italian, Spanish and Traditional and
+                   Simplified Chinese (fr de it es zh_TW zh_CN), from the game's own text
   items.png        the grayscale item icon sheet (HD_cmn_icon_GSM); the editor tints it
   monsters/<i>.png 72x72 icon per save monster index 1-137
   awards/<b>.png   48x48 Guild Card award icon per award bit
@@ -26,10 +28,11 @@ Where things are (all CONFIRMED visually or against a real save unless noted):
   text       eng/arc/resident_eng.arc eng\\table\\*_eng (GMD, names at even indices);
              fre ger ita spa the same; monster names eng\\GUI\\06_msg\\monsterName_eng
              (variants named like their base: see HUB_VARIANTS, FATALIS_VARIANTS);
-             Guild Card texts loose in <lang>/table/ (guild_card)
+             Guild Card texts loose in <lang>/table/ (guild_card); chT chS (update only)
+             elsewhere, see Update
 Tables the game builds in code (EXE, v1.4 main) are copied below with their addresses.
 """
-import csv, json, os, struct, sys, zlib
+import csv, glob, json, os, re, struct, sys, zlib
 
 # ---------------------------------------------------------------- containers
 class RomFS:
@@ -77,6 +80,33 @@ def gmd(d):
     assert d[:4] == b'GMD\0'
     sc, ss = struct.unpack_from('<I', d, 0x18)[0], struct.unpack_from('<I', d, 0x20)[0]
     return [x.decode('utf-8', 'replace') for x in d[len(d) - ss:].split(b'\0')[:sc]]
+
+
+class Update:
+    """The text of a language only the 1.4 update has (chT, chS), from its RomFS files
+    extracted loose under `root`. Read like the base game's: `read` takes a RomFS path,
+    indexing an entry name of resident_<lang>.arc. The base game keeps loose what the update
+    puts in its archives: <lang>/GUI/06_msg and most tables are entries of <lang>/arc/**.arc
+    (resident, title, result, village/common, ...), a quest's text is in
+    loc/arc/quest/q<id>.arc; the item, equipment and skill tables are loose in <lang>/table/."""
+    def __init__(s, root, lang):
+        s.root, s.e = root, {}
+        for p in sorted(glob.glob(os.path.join(root, 'nativeNX', lang, 'arc', '**', '*.arc'), recursive=True)):
+            for k, v in arc(open(p, 'rb').read()).items():
+                s.e.setdefault(k, v)
+
+    def __getitem__(s, k):
+        return s.e[k] if k in s.e else s.read('/nativeNX/%s.gmd' % k.replace('\\', '/'))
+
+    def read(s, name):
+        p = os.path.join(s.root, name.lstrip('/'))
+        if os.path.exists(p):
+            return open(p, 'rb').read()
+        q = re.fullmatch(r'/nativeNX/(\w+)/quest/questData/questData_(\d{7})_\w+\.gmd', name)
+        if q:
+            a = arc(open(os.path.join(s.root, 'nativeNX', 'loc', 'arc', 'quest', 'q%s.arc' % q[2]), 'rb').read())
+            return a['%s\\quest\\questData\\questData_%s_%s' % (q[1], q[2], q[1])]
+        return s.e[name[len('/nativeNX/'):-len('.gmd')].replace('/', '\\')]
 
 # ---------------------------------------------------------------- textures
 def _c565(c):
@@ -188,7 +218,7 @@ def item_rect(icon):
     return ITEM_ICON_EXTRA[icon - 95] if icon - 95 < len(ITEM_ICON_EXTRA) else (288, 608)
 
 
-def main(romfs, out):
+def main(romfs, out, update):
     R = RomFS(romfs)
     for sub in ('monsters', 'awards'):
         os.makedirs(os.path.join(out, sub), exist_ok=True)
@@ -299,13 +329,21 @@ def main(romfs, out):
     json.dump(names, open(P('names.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
     # the same names in the game's other languages, in the same order
     for code, lang in LANGS.items():
-        rl = arc(R.read('/nativeNX/%s/arc/resident_%s.arc' % (lang, lang)))
-        json.dump(text(R, rl, lang, names), open(P('names.%s.json' % code), 'w'), ensure_ascii=False, separators=(',', ':'))
+        if lang in UPDATE_LANGS:
+            if not os.path.isdir(os.path.join(update, 'nativeNX', lang)):
+                print('no %s text in %s: names.%s.json skipped (English names show)' % (lang, update, code))
+                continue
+            src = rl = Update(update, lang)
+        else:
+            src, rl = R, arc(R.read('/nativeNX/%s/arc/resident_%s.arc' % (lang, lang)))
+        json.dump(text(src, rl, lang, names), open(P('names.%s.json' % code), 'w'), ensure_ascii=False, separators=(',', ':'))
     print('asset pack ->', out)
 
 
 # Interface language code (app/gui/src/i18n.rs) -> the game's language folder.
-LANGS = {'fr': 'fre', 'de': 'ger', 'it': 'ita', 'es': 'spa'}
+LANGS = {'fr': 'fre', 'de': 'ger', 'it': 'ita', 'es': 'spa', 'zh_TW': 'chT', 'zh_CN': 'chS'}
+# The languages only the 1.4 update has (read through Update).
+UPDATE_LANGS = ('chT', 'chS')
 
 # Variants monsterName names like their base monster. Four have their own name in the
 # Hunters Hub objective list (<lang>/GUI/06_msg/NetworkVillage_<lang>.gmd), right after
@@ -316,7 +354,9 @@ HUB_VARIANTS = {23: (159, 22), 36: (90, 35), 126: (151, 53), 128: (113, 60)}
 # those names in the nominative singular. DERIVED
 FATALIS_VARIANTS = {'eng': ('Crimson Fatalis', 'Old Fatalis'), 'fre': ('Fatalis rouge', 'Fatalis ancien'),
                     'ger': ('Karmesinroter Fatalis', 'Alter Fatalis'), 'ita': ('Fatalis cremisi', 'Fatalis antico'),
-                    'spa': ('Fatalis Carmesí', 'Fatalis Ancestral')}
+                    'spa': ('Fatalis Carmesí', 'Fatalis Ancestral'),
+                    # the Chinese monsterName has them (entries 118, 119)
+                    'chT': ('紅龍', '祖龍'), 'chS': ('红龙', '祖龙')}
 
 
 def guild_card(R, lang):
@@ -412,6 +452,7 @@ def text(R, r, lang, eng=None):
 if __name__ == '__main__':
     here = os.path.dirname(os.path.abspath(__file__))
     a = sys.argv[1:]
-    if len(a) > 2 or a[:1] in (['-h'], ['--help']): sys.exit(__doc__)
+    if len(a) > 3 or a[:1] in (['-h'], ['--help']): sys.exit(__doc__)
     main(a[0] if a else os.path.join(here, '..', 'scratch', 'base_romfs.bin'),
-         a[1] if len(a) > 1 else os.path.join(here, '..', 'app', 'assets', 'gen'))
+         a[1] if len(a) > 1 else os.path.join(here, '..', 'app', 'assets', 'gen'),
+         a[2] if len(a) > 2 else os.path.join(here, '..', 'scratch', 'rom'))

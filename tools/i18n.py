@@ -26,6 +26,8 @@ PLURALS = {
     'de': 'nplurals=2; plural=(n != 1);',
     'es': 'nplurals=2; plural=(n != 1);',
     'it': 'nplurals=2; plural=(n != 1);',
+    'zh_TW': 'nplurals=1; plural=0;',
+    'zh_CN': 'nplurals=1; plural=0;',
 }
 
 STR = r'"((?:[^"\\]|\\.)*)"'

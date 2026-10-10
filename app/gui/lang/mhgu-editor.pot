@@ -299,7 +299,7 @@ msgid "Import… also takes a character from an MHXX save: the system file of a 
 msgstr ""
 
 #: app/gui/ui/app.slint
-msgid "Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
+msgid "An MHXX character is Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
 msgstr ""
 
 #: app/gui/ui/app.slint app/gui/ui/pages/cards.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
@@ -3020,35 +3020,11 @@ msgstr ""
 
 #: app/gui/src/goals.rs
 #. placeholders: {} in order, {0} {1} by position
-msgid "Puts up for sale the {} the Trader does not offer yet: items, title words, Guild Card scenes and pet costumes, the downloads' ones included."
+msgid "Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included."
 msgstr ""
 
 #: app/gui/src/goals.rs
 msgid "Buying still takes Trader points; what you already have is not shown."
-msgstr ""
-
-#: app/gui/src/goals.rs
-msgid "Every Horns Coin trade"
-msgstr ""
-
-#: app/gui/src/goals.rs
-msgid "The Mewstress offers every Horns Coin trade."
-msgstr ""
-
-#: app/gui/src/goals.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Unlocks the {} the Mewstress does not offer yet."
-msgstr ""
-
-#: app/gui/src/goals.rs
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-msgid "{} Horns Coin trade"
-msgid_plural "{} Horns Coin trades"
-msgstr[0] ""
-msgstr[1] ""
-
-#: app/gui/src/goals.rs
-msgid "Trading still takes Horns Coins."
 msgstr ""
 
 #: app/gui/src/goals.rs
@@ -5729,7 +5705,7 @@ msgid "The Palicoes the game offers for hire: an edited one joins as edited when
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
-msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). The game gives award 53 from 50 Dojo sessions and title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check; hiring from the Palico Board does not count. The Dojo and the teams are read-only."
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
@@ -5959,12 +5935,12 @@ msgstr ""
 
 #: app/gui/src/views/sets_ui.rs
 #. placeholders: {} in order, {0} {1} by position
-msgid "{} of {} Palico sets used · Derived: not checked in game yet"
+msgid "{} of {} Palico sets used"
 msgstr ""
 
 #: app/gui/src/views/sets_ui.rs
 #. placeholders: {} in order, {0} {1} by position
-msgid "{} of {} My Sets used · Derived except the pigment"
+msgid "{} of {} My Sets used"
 msgstr ""
 
 #: app/gui/src/views/sets_ui.rs
@@ -6302,11 +6278,11 @@ msgid "Songs the Hunters' Pub Jukebox plays. The Mewstress unlocks the others wh
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Sets the Provision Division can send. Most follow a Lab upgrade: the game gives them back each time the Division opens while the upgrade is installed."
+msgid "Read only: the Provision Division lists a set once its Lab upgrade or progress allows, whatever the save holds; the save only keeps which sets got their NEW mark."
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Items the Mewstress trades for Horns Coins."
+msgid "Read only: the Mewstress lists a Horns Coin trade once its star level allows, whatever the save holds; the save only keeps which trades got their NEW mark."
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
@@ -6322,11 +6298,11 @@ msgid "What the Trader puts up for sale. An entry for sale can be bought even wi
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Items the Trader sells for Trader points."
+msgid "Read only: the Trader lists an item once its star level allows, whatever the save holds; the save only keeps which items got their NEW mark."
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Delivery requests the Trader offers. The game offers one once its villager's request is raised."
+msgid "Read only: the Trader offers a delivery request once its villager's request is raised, whatever the save holds; the save only keeps which requests got their NEW mark."
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
