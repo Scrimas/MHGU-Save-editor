@@ -57,7 +57,18 @@ pub fn install(window: &slint::Window) {
                 cursor.set(LogicalPoint::new(p.x, p.y));
                 EventResult::Propagate
             }
-            // Slint takes a single winit hook: the click-outside focus rule rides on this one
+            // Slint takes a single winit hook: the click-outside focus rule and the mouse's
+            // Back/Forward buttons ride on this one
+            winit::event::WindowEvent::MouseInput { button: b @ (winit::event::MouseButton::Back | winit::event::MouseButton::Forward), state, .. } => {
+                if *state == winit::event::ElementState::Pressed {
+                    crate::nav::step(*b == winit::event::MouseButton::Forward);
+                }
+                EventResult::PreventDefault
+            }
+            winit::event::WindowEvent::KeyboardInput { event: winit::event::KeyEvent { state: winit::event::ElementState::Pressed, .. }, .. } => {
+                crate::arrows::refocus(w);
+                EventResult::Propagate
+            }
             winit::event::WindowEvent::MouseInput { state: winit::event::ElementState::Pressed, .. } => {
                 crate::focus::press(w, position);
                 EventResult::Propagate

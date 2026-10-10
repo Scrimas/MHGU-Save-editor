@@ -87,8 +87,8 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
         _ => trf("Deviants with every level cleared: {} / {}", &[&devs_done, &DEVIANTS.len()]),
     };
     api.set_checks_summary(trf("{} · confirmed in game except where marked", &[&summary]).into());
-    api.set_checks(model(rows));
-    api.set_arts(model(art_rows));
+    api.set_checks(crate::keep(api.get_checks(), rows));
+    api.set_arts(crate::keep(api.get_arts(), art_rows));
     let devs: Vec<DeviantRow> = DEVIANTS
         .iter()
         .enumerate()
@@ -123,7 +123,7 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
             }
         })
         .collect();
-    api.set_deviants(model(devs));
+    api.set_deviants(crate::keep(api.get_deviants(), devs));
 }
 
 pub(super) fn wire_collections(ui: &AppWindow, st: &Shared) {

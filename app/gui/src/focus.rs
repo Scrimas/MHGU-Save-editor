@@ -16,9 +16,10 @@ use i_slint_core::lengths::{LogicalPoint, LogicalRect};
 use i_slint_core::window::WindowInner;
 
 /// Off Linux; there scroll.rs owns the winit hook (Slint takes one) and calls `press`.
+/// The mouse's Back/Forward buttons ride on it too.
 #[cfg(not(target_os = "linux"))]
 pub fn install(window: &slint::Window) {
-    use slint::winit_030::winit::event::{ElementState, WindowEvent};
+    use slint::winit_030::winit::event::{ElementState, MouseButton, WindowEvent};
     use slint::winit_030::{EventResult, WinitWindowAccessor};
     let cursor = std::cell::Cell::new(LogicalPoint::default());
     window.on_winit_window_event(move |w, event| {
@@ -27,6 +28,13 @@ pub fn install(window: &slint::Window) {
                 let p = position.to_logical::<f32>(w.scale_factor() as f64);
                 cursor.set(LogicalPoint::new(p.x, p.y));
             }
+            WindowEvent::MouseInput { button: b @ (MouseButton::Back | MouseButton::Forward), state, .. } => {
+                if *state == ElementState::Pressed {
+                    crate::nav::step(*b == MouseButton::Forward);
+                }
+                return EventResult::PreventDefault;
+            }
+            WindowEvent::KeyboardInput { event, .. } if event.state == ElementState::Pressed => crate::arrows::refocus(w),
             WindowEvent::MouseInput { state: ElementState::Pressed, .. } => press(w, cursor.get()),
             _ => {}
         }

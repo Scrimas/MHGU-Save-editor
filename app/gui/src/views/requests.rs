@@ -49,7 +49,7 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
         })
         .collect();
     api.set_request_summary(trf("{} open · {} reported",&[&num(open), &num(done_n)]).into());
-    api.set_requests(model(rows));
+    api.set_requests(keep(api.get_requests(), rows));
 }
 
 pub(super) fn wire_requests(ui: &AppWindow, st: &Shared) {

@@ -25,7 +25,7 @@ pub(super) fn fields_page(ui: &AppWindow, st: &State) {
             changed: st.changed(abs(fl), fl.size.min(s.bytes().len() - abs(fl))),
         })
         .collect();
-    api.set_fields(model(rows));
+    api.set_fields(keep(api.get_fields(), rows));
     let sel = view(|v| v.field_sel);
     api.set_field_sel(sel);
     if let Some(fl) = (sel >= 0).then(|| fields.get(sel as usize)).flatten() {

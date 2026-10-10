@@ -1,5 +1,6 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 
+mod arrows;
 mod assets;
 #[cfg(target_os = "linux")]
 mod desktop;
@@ -7,6 +8,7 @@ mod fmt;
 mod focus;
 mod goals;
 mod i18n;
+mod nav;
 #[cfg(target_os = "linux")]
 mod scroll;
 mod settings;
@@ -29,6 +31,24 @@ pub type Shared = Rc<RefCell<State>>;
 
 pub fn model<T: Clone + 'static>(v: Vec<T>) -> ModelRc<T> {
     ModelRc::new(VecModel::from(v))
+}
+
+/// `v` written into the list model `cur` in place when the row count is the same. Every
+/// callback refreshes the page: a new model would make its list drop and rebuild every
+/// row, losing the keyboard focus and re-placing the scrolled view (a virtual ListView
+/// re-estimates its rows). Only the rows that changed update.
+pub fn keep<T: Clone + PartialEq + 'static>(cur: ModelRc<T>, v: Vec<T>) -> ModelRc<T> {
+    if let Some(m) = cur.as_any().downcast_ref::<VecModel<T>>()
+        && m.row_count() == v.len()
+    {
+        for (i, x) in v.into_iter().enumerate() {
+            if m.row_data(i).as_ref() != Some(&x) {
+                m.set_row_data(i, x);
+            }
+        }
+        return cur;
+    }
+    model(v)
 }
 
 pub fn strings(v: impl IntoIterator<Item = String>) -> ModelRc<SharedString> {
@@ -57,6 +77,8 @@ fn main() -> Result<(), slint::PlatformError> {
     let api = ui.global::<Api>();
     api.set_assets_ok(assets::available());
     views::wire(&ui, &st);
+    nav::install(&ui);
+    arrows::install(&ui);
     // quitting with staged changes asks first (S11)
     {
         let w = ui.as_weak();
@@ -617,5 +639,189 @@ mod tests {
         api.invoke_open_confirmed();
         assert_eq!(api.get_change_count(), 0);
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// The sidebar as a list: a click gives it the keyboard, plain arrows open the pages.
+    #[test]
+    fn sidebar_arrows() {
+        i_slint_backend_testing::init_no_event_loop();
+        let ui = AppWindow::new().unwrap();
+        let api = ui.global::<Api>();
+        api.set_loaded(true);
+        api.set_slots(model(vec![SlotInfo { used: true, ..Default::default() }; 3]));
+        sidebar_keys(&ui);
+    }
+
+    /// The same with a save open: every page switch rebuilds the page's models.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn sidebar_arrows_with_save() {
+        use slint::platform::Key;
+        let (ui, _st, dir) = opened("sidebar");
+        nav::install(&ui);
+        arrows::install(&ui);
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let api = ui.global::<Api>();
+        // Ctrl+arrows: the pages and the tabs
+        api.set_page("character".into());
+        press(&ui, Key::DownArrow, true);
+        assert_eq!(api.get_page(), "items");
+        assert_eq!(api.get_item_store(), 0);
+        press(&ui, Key::RightArrow, true);
+        assert_eq!(api.get_item_store(), 1);
+        press(&ui, Key::LeftArrow, true);
+        press(&ui, Key::LeftArrow, true);
+        assert_eq!(api.get_item_store(), 0);
+        sidebar_keys(&ui);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// Plain arrows walk a page's list: the row that gets the keyboard is picked, so its
+    /// detail follows; Up comes back.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn arrows_walk_lists() {
+        use slint::platform::Key;
+        let (ui, _st, dir) = opened("arrows");
+        arrows::install(&ui);
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let api = ui.global::<Api>();
+        let key = |k: Key| press(&ui, k, false);
+        let lists: [(&str, &dyn Fn() -> i32); 2] = [("advanced", &|| api.get_field_sel()), ("palicoes", &|| api.get_palico().index)];
+        for (page, sel) in lists {
+            api.set_page(page.into());
+            slint::platform::update_timers_and_animations();
+            let before = sel();
+            // from the window: through the fields above the list to its rows
+            let mut n = 0;
+            while sel() == before && n < 12 {
+                key(Key::DownArrow);
+                n += 1;
+            }
+            let first = sel();
+            assert_ne!(first, before, "{page}: the arrows reach the list");
+            key(Key::DownArrow);
+            let second = sel();
+            assert_ne!(second, first, "{page}: Down picks the next row");
+            key(Key::UpArrow);
+            assert_eq!(sel(), first, "{page}: Up comes back");
+            // nothing focused for the next page
+            let inner = i_slint_core::window::WindowInner::from_pub(ui.window());
+            let focused = inner.focus_item.borrow().upgrade();
+            if let Some(f) = focused {
+                inner.set_focus_item(&f, false, i_slint_core::input::FocusReason::Programmatic);
+            }
+        }
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// Walking a long list: the view glides ahead of the picked row, keeping at least a
+    /// whole row in sight beyond it, and never jumps back the other way.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn arrows_scroll_margin() {
+        use slint::platform::Key;
+        let (ui, _st, dir) = opened("margin");
+        arrows::install(&ui);
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let api = ui.global::<Api>();
+        let settle = || {
+            for _ in 0..12 {
+                i_slint_backend_testing::testing_backend::mock_elapsed_time(20);
+            }
+        };
+        for page in ["advanced", "database"] {
+            api.set_page(page.into());
+            slint::platform::update_timers_and_animations();
+            let mut last = 0.0;
+            let mut moved = false;
+            for (k, n) in [(Key::DownArrow, 40), (Key::UpArrow, 25)] {
+                let down = k == Key::DownArrow;
+                for i in 0..n {
+                    press(&ui, k, false);
+                    // half way through the glide, then settled
+                    i_slint_backend_testing::testing_backend::mock_elapsed_time(60);
+                    let Some((mid, _, _)) = arrows::probe(&ui) else { continue };
+                    settle();
+                    let (y, row, list) = arrows::probe(&ui).unwrap();
+                    let line = format!("{page} {:?} {i}: view {last:.0} → {mid:.0} → {y:.0}, row {:.0}..{:.0} in {:.0}..{:.0}", k, row.min_y(), row.max_y(), list.min_y(), list.max_y());
+                    if down {
+                        assert!(last <= mid + 0.5 && mid <= y + 0.5, "{line}: moved back");
+                        if y > 0.5 {
+                            assert!(row.max_y() + row.height() <= list.max_y() + 0.5, "{line}: no row in sight below");
+                        }
+                    } else {
+                        assert!(last + 0.5 >= mid && mid + 0.5 >= y, "{line}: moved back");
+                        if y > 0.5 {
+                            assert!(row.min_y() - row.height() >= list.min_y() - 0.5, "{line}: no row in sight above");
+                        }
+                    }
+                    moved |= y > 0.5;
+                    last = y;
+                }
+            }
+            assert!(moved, "{page}: the list scrolled");
+        }
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// A key press as winit hands it over: the focus hook first, Ctrl around it if asked.
+    fn press(ui: &AppWindow, k: slint::platform::Key, ctrl: bool) {
+        use slint::platform::{Key, WindowEvent};
+        let send = |k: Key, down: bool| {
+            let text = SharedString::from(k);
+            ui.window().dispatch_event(if down { WindowEvent::KeyPressed { text } } else { WindowEvent::KeyReleased { text } });
+        };
+        arrows::refocus(ui.window());
+        if ctrl {
+            send(Key::Control, true);
+        }
+        send(k, true);
+        send(k, false);
+        if ctrl {
+            send(Key::Control, false);
+        }
+        slint::platform::update_timers_and_animations();
+    }
+
+    /// Clicks a page of the sidebar as winit does (the focus hook first), then walks the
+    /// pages with plain arrows.
+    fn sidebar_keys(ui: &AppWindow) {
+        use slint::platform::{Key, PointerEventButton, WindowEvent};
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let api = ui.global::<Api>();
+        let tick = || slint::platform::update_timers_and_animations();
+        let key = |k: Key| press(ui, k, false);
+        let at = |i: &str| targets::PAGES.iter().position(|p| p.0 == i);
+        tick();
+        // a click in the middle of the sidebar's pages (a 2 px gap between two misses)
+        for y in [240.0, 244.0] {
+            let position = slint::LogicalPosition::new(60.0, y);
+            ui.window().dispatch_event(WindowEvent::PointerMoved { position });
+            focus::press(ui.window(), i_slint_core::lengths::LogicalPoint::new(60.0, y));
+            ui.window().dispatch_event(WindowEvent::PointerPressed { position, button: PointerEventButton::Left });
+            ui.window().dispatch_event(WindowEvent::PointerReleased { position, button: PointerEventButton::Left });
+            tick();
+        }
+        let i = at(&api.get_page()).expect("the click opens a page of the sidebar");
+        assert!((1..targets::PAGES.len() - 3).contains(&i), "clicked page {i}");
+        key(Key::DownArrow);
+        assert_eq!(at(&api.get_page()), Some(i + 1));
+        key(Key::DownArrow);
+        assert_eq!(at(&api.get_page()), Some(i + 2));
+        key(Key::UpArrow);
+        key(Key::UpArrow);
+        key(Key::UpArrow);
+        assert_eq!(at(&api.get_page()), Some(i - 1));
+        key(Key::End);
+        assert_eq!(api.get_page(), "advanced");
+        key(Key::DownArrow);
+        assert_eq!(api.get_page(), "advanced");
+        key(Key::Home);
+        assert_eq!(api.get_page(), "overview");
     }
 }

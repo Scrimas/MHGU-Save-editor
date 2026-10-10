@@ -16,8 +16,13 @@ component SlotCell inherits Rectangle {
     accessible-label: it.id == 0 ? @tr("Slot {}: empty", it.slot + 1) : @tr("Slot {}: {} ×{}", it.slot + 1, it.name, it.count);
     accessible-action-default => { root.edit(); }
     fk := KeyActivate { activated => { root.edit(); } }
-    FocusRing { shown: fk.has-focus; border-radius: 4px; }
-    ta := TouchArea { clicked => { root.edit(); } }
+    FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+    ta := TouchArea {
+        clicked => {
+            fk.click-focus();
+            root.edit();
+        }
+    }
     if it.changed: StagedBar { x: 0; y: 6px; height: parent.height - 12px; }
     HorizontalLayout {
         padding-left: 6px;

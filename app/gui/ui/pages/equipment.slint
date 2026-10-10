@@ -173,6 +173,8 @@ export component EquipmentPage inherits Rectangle {
                     for e in Api.equip-rows: EquipLine {
                         e: e;
                         selected: e.slot == Api.equip-detail.slot;
+                        // without the detail panel a pick opens the piece or the picker
+                        select-on-focus: root.wide;
                         clicked => {
                             Api.select-equip(e.slot);
                             // no detail panel: an empty slot opens the picker, like the

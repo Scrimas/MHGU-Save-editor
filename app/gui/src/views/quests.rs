@@ -42,7 +42,7 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
     api.set_quest_tab(tab as i32);
     api.set_quest_arena(tab == tabs.len());
     if tab == tabs.len() {
-        api.set_arena(model(arena_rows(st)));
+        api.set_arena(keep(api.get_arena(), arena_rows(st)));
         api.set_quest_summary(tr("Best times and sets of the Arena quests").into());
         api.set_quests(model(vec![]));
         return;
@@ -111,7 +111,7 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
         summary.push_str(&trf("Guild Card completions: {}", &[&counts.join(", ")]));
     }
     api.set_quest_summary(summary.into());
-    api.set_quests(model(rows));
+    api.set_quests(keep(api.get_quests(), rows));
 }
 
 pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {

@@ -741,10 +741,15 @@ export component AppWindow inherits Window {
     animate dk { duration: 180ms; easing: ease-in-out; }
     property <length> review-w: 380px * open * dk;
     property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "unlocks", "monsters", "database", "advanced"];
+    // Up/Down/Home/End on a sidebar page: the one that takes the focus
+    property <int> nav-focus;
+    property <int> nav-focus-seq;
     property <[string]> nav-titles: [@tr("Overview"), @tr("Character"), @tr("Items"), @tr("Equipment"), @tr("Palicoes"), @tr("Quests"), @tr("Requests"), @tr("Collections"), @tr("Unlocks"), @tr("Monsters"), @tr("Database"), @tr("Save map")];
     // Shortcuts: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page,
-    // Ctrl+O open a save, Escape closes Review. Dialogs take the keyboard while open
-    // (Modal); when the last one closes the window takes it back.
+    // Ctrl+O open a save, Ctrl+Up/Down the previous/next page, Ctrl+Left/Right the
+    // previous/next tab of the page, Escape closes Review. Dialogs take the keyboard while
+    // open (Modal); when the last one closes the window takes it back. The mouse's
+    // Back/Forward buttons walk the pages shown (nav.rs).
     forward-focus: keys;
     property <string> page-now: Api.page;
     changed page-now => { Api.page-shown(); }
@@ -757,6 +762,23 @@ export component AppWindow inherits Window {
     // the whole window, so keys a field does not use reach it (its children keep the
     // indentation they had before it)
     keys := FocusScope {
+    // plain arrows, before the focused control: between the page's entries (arrows.rs);
+    // a dialog keeps them for its own controls
+    capture-key-pressed(e) => {
+        if root.any-modal || e.modifiers.control || e.modifiers.alt || e.modifiers.shift || e.modifiers.meta {
+            return reject;
+        }
+        let dx = e.text == Key.LeftArrow ? -1 : e.text == Key.RightArrow ? 1 : 0;
+        let dy = e.text == Key.UpArrow ? -1 : e.text == Key.DownArrow ? 1 : 0;
+        if dx == 0 && dy == 0 {
+            return reject;
+        }
+        let top = Api.loaded ? 52px : 0px;
+        if Api.arrow(dx, dy, side, top, root.width - side - review-w, root.height - top) {
+            return accept;
+        }
+        return reject;
+    }
     key-pressed(e) => {
         if e.modifiers.control && !e.modifiers.alt {
             if e.text == "s" || e.text == "S" {
@@ -776,6 +798,20 @@ export component AppWindow inherits Window {
             }
             if e.text == "o" || e.text == "O" {
                 Api.open-dialog();
+                return accept;
+            }
+        }
+        // Ctrl+Up/Down the sidebar's pages while it lets them be picked, Ctrl+Left/Right the tabs
+        if e.modifiers.control && !e.modifiers.alt && !e.modifiers.shift {
+            if e.text == Key.UpArrow || e.text == Key.DownArrow {
+                if Api.loaded && Api.slots[Api.slot].used {
+                    Api.step-page(e.text == Key.UpArrow ? -1 : 1);
+                }
+                return accept;
+            }
+            if e.text == Key.LeftArrow || e.text == Key.RightArrow {
+                Api.tab-step = e.text == Key.LeftArrow ? -1 : 1;
+                Api.tab-seq += 1;
                 return accept;
             }
         }
@@ -813,6 +849,14 @@ export component AppWindow inherits Window {
                     active: Api.page == id;
                     enabled: Api.loaded && Api.slots[Api.slot].used;
                     clicked => { Api.page = id; }
+                    focus-seq: root.nav-focus-seq;
+                    focus-me: i == root.nav-focus;
+                    // as in a list: the arrows open the page they move to
+                    arrow(d) => {
+                        root.nav-focus = clamp(i + d, 0, root.nav-ids.length - 1);
+                        root.nav-focus-seq += 1;
+                        Api.page = root.nav-ids[root.nav-focus];
+                    }
                 }
                 Rectangle { vertical-stretch: 1; }
                 NavButton {

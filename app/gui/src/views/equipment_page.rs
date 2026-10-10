@@ -175,7 +175,7 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
     {
         jump(ui, Some(row), "");
     }
-    api.set_equip_rows(model(rows));
+    api.set_equip_rows(keep(api.get_equip_rows(), rows));
     let sel = view(|v| v.equip_sel);
     let mut d = EquipDetail { slot: -1, category: -1, ..Default::default() };
     if sel >= 0 && (sel as usize) < owner.len() {

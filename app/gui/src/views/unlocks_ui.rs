@@ -313,7 +313,7 @@ pub(super) fn unlocks_page(ui: &AppWindow, st: &State) {
             }
         })
         .collect();
-    api.set_unlock_rows(model(list));
+    api.set_unlock_rows(keep(api.get_unlock_rows(), list));
     api.set_unlock_sel(sel as i32);
     let r = &rows[sel];
     api.set_unlock_title(row_name(r).into());
@@ -360,7 +360,7 @@ pub(super) fn unlocks_page(ui: &AppWindow, st: &State) {
             })
         })
         .collect();
-    api.set_unlock_cells(model(cells));
+    api.set_unlock_cells(keep(api.get_unlock_cells(), cells));
 }
 
 fn pets_view(ui: &AppWindow, st: &State) {

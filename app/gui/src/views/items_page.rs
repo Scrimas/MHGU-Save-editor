@@ -39,7 +39,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
     api.set_item_used(all.iter().filter(|x| !x.is_empty()).count() as i32);
     api.set_item_total(all.len() as i32);
     api.set_item_free(all.iter().position(|x| x.is_empty()).map_or(-1, |i| i as i32));
-    api.set_item_slots(model(rows));
+    api.set_item_slots(keep(api.get_item_slots(), rows));
     // runs of empty loadouts collapse into one row (C8)
     let mut lrows: Vec<LoadoutRow> = vec![];
     let mut run: Option<(usize, usize)> = None;
@@ -60,7 +60,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
         lrows.push(LoadoutRow { index: k as i32, first: k as i32, last: k as i32, name: l.name.into(), used: true, summary: used.join(", ").into() });
     }
     flush(&mut run, &mut lrows);
-    api.set_loadouts(model(lrows));
+    api.set_loadouts(keep(api.get_loadouts(), lrows));
     // the loadout being edited: its 32 pouch positions
     let sel = view(|v| v.loadout_sel);
     api.set_loadout_sel(sel);
@@ -98,7 +98,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
                 }
             })
             .collect();
-        api.set_loadout_slots(model(slots));
+        api.set_loadout_slots(keep(api.get_loadout_slots(), slots));
     }
     picker(ui);
 }

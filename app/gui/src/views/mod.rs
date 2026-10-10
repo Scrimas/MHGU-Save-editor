@@ -9,7 +9,7 @@ use crate::state::{Conf, Edit, State};
 use crate::system;
 use crate::targets::{self, Mon, Target, PAGES};
 use crate::update::{self, VERSION};
-use crate::{model, strings, Shared};
+use crate::{keep, model, strings, Shared};
 use crate::{
     Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ColourRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow,
     EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, LookRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow, Preview,
@@ -623,6 +623,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let st2 = st.clone();
         api.on_page_shown(move || {
             if let Some(ui) = w.upgrade() {
+                crate::nav::shown(&ui.global::<Api>().get_page());
                 refresh(&ui, &st2.borrow());
             }
         });

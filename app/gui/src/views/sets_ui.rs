@@ -193,7 +193,7 @@ pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
         rows.push(SetRow { index: k as i32, first: k as i32, last: k as i32, name: name.into(), sub: sub.into(), used: on, changed });
     }
     flush(&mut run, &mut rows);
-    api.set_set_rows(model(rows));
+    api.set_set_rows(keep(api.get_set_rows(), rows));
     api.set_equip_summary(
         if palico { trf("{} of {} Palico sets used · Derived: not checked in game yet", &[&used, &n]) } else { trf("{} of {} My Sets used · Derived except the pigment", &[&used, &n]) }
             .into(),

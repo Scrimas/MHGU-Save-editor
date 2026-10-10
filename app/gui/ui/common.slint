@@ -327,6 +327,13 @@ export global Api {
     callback undo-last();               // Ctrl+Z: the latest change
     callback page-shown();              // Api.page changed: build the page's models
     in-out property <int> search-seq;   // Ctrl+F: the page's search field takes focus
+    callback step-page(int);            // Ctrl+Up/Down: the previous/next page of the sidebar
+    // Ctrl+Left/Right: the page's TabBar selects the tab tab-step away (bump tab-seq)
+    in-out property <int> tab-step;
+    in-out property <int> tab-seq;
+    // a plain arrow (dx, dy) inside the page's area (x, y, width, height): the focus moves to
+    // the nearest entry that way (arrows.rs); false leaves the key to the focused control
+    callback arrow(int, int, length, length, length, length) -> bool;
     // open the page of a Review entry at its field
     callback goto(string);
     in property <string> highlight;     // key of the field to flash
@@ -928,6 +935,14 @@ export component Asset inherits Rectangle {
 // its parent; put it before the control's TouchArea.
 export component KeyActivate inherits FocusScope {
     callback activated();
+    // focused by a click (click-focus): no focus ring, as in other toolkits
+    out property <bool> by-mouse;
+    // a click keeps the keyboard here, so the arrows go on from it
+    public function click-focus() {
+        self.by-mouse = true;
+        self.focus();
+    }
+    focus-lost(reason) => { self.by-mouse = false; }
     key-pressed(e) => {
         if e.text == " " || e.text == Key.Return {
             root.activated();
@@ -950,6 +965,19 @@ export component NavButton inherits Rectangle {
     in property <bool> active;
     in property <bool> enabled: true;
     callback clicked;
+    // Up/Down (-1/1), Home/End (-100/100) while it has the focus (with or without Ctrl):
+    // a click gives it the focus, so the arrows go on from the page picked with the mouse
+    callback arrow(int);
+    // takes the focus when focus-seq changes with focus-me set
+    in property <int> focus-seq;
+    in property <bool> focus-me;
+    changed focus-seq => {
+        if root.focus-me {
+            fk.focus();
+        }
+    }
+    // focused by a click: no focus ring, as in other toolkits
+    property <bool> by-mouse;
     height: 34px;
     border-radius: 5px;
     background: active ? Tok.accent-soft : ta.has-hover && enabled ? Tok.hover : transparent;
@@ -984,14 +1012,32 @@ export component NavButton inherits Rectangle {
         }
     }
     accessible-action-default => { root.clicked(); }
-    fk := KeyActivate {
+    fk := FocusScope {
         enabled: root.enabled;
-        activated => { root.clicked(); }
+        key-pressed(e) => {
+            if e.text == " " || e.text == Key.Return {
+                root.clicked();
+                return accept;
+            }
+            if e.modifiers.alt || e.modifiers.shift {
+                return reject;
+            }
+            if e.text == Key.UpArrow { root.arrow(-1); return accept; }
+            if e.text == Key.DownArrow { root.arrow(1); return accept; }
+            if e.text == Key.Home { root.arrow(-100); return accept; }
+            if e.text == Key.End { root.arrow(100); return accept; }
+            return reject;
+        }
+        focus-lost(reason) => { root.by-mouse = false; }
     }
-    FocusRing { shown: fk.has-focus; border-radius: 5px; }
+    FocusRing { shown: fk.has-focus && !root.by-mouse; border-radius: 5px; }
     ta := TouchArea {
         enabled: root.enabled;
-        clicked => { root.clicked(); }
+        clicked => {
+            root.by-mouse = true;
+            fk.focus();
+            root.clicked();
+        }
     }
 }
 
@@ -1028,6 +1074,14 @@ export component TabBar inherits Rectangle {
     in property <int> current;
     callback select(int);
     height: 40px;
+    // Ctrl+Left/Right (a page shows one TabBar at a time)
+    property <int> seq: Api.tab-seq;
+    changed seq => {
+        let i = clamp(root.current + Api.tab-step, 0, root.tabs.length - 1);
+        if i != root.current {
+            root.select(i);
+        }
+    }
     HorizontalLayout {
         alignment: start;
         spacing: 4px;
@@ -1127,15 +1181,29 @@ export component ListRow inherits Rectangle {
     in property <bool> staged;
     in property <bool> selected;
     in property <bool> flash;
+    // the arrows that bring the keyboard here pick the row, as a click does (arrows.rs)
+    in property <bool> select-on-focus: true;
     callback clicked;
     height: root.two-line ? 52px : 40px;
     background: root.flash || root.selected ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
     accessible-role: list-item;
     accessible-item-selected: root.selected;
     accessible-action-default => { root.clicked(); }
-    fk := KeyActivate { activated => { root.clicked(); } }
-    FocusRing { shown: fk.has-focus; }
-    ta := TouchArea { clicked => { root.clicked(); } }
+    fk := KeyActivate {
+        activated => { root.clicked(); }
+        focus-gained(reason) => {
+            if reason == FocusReason.tab-navigation && root.select-on-focus && !root.selected {
+                root.clicked();
+            }
+        }
+    }
+    FocusRing { shown: fk.has-focus && !fk.by-mouse; }
+    ta := TouchArea {
+        clicked => {
+            fk.click-focus();
+            root.clicked();
+        }
+    }
     if root.staged: StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
     @children
     Hairline { y: parent.height - 1px; width: parent.width; }
@@ -1225,6 +1293,19 @@ export component NumberBox inherits Rectangle {
     }
     changed value => { root.show(); }
 
+    // the box without editing it (after Escape): Enter or Space edits it again
+    keep := FocusScope {
+        focus-on-click: false;
+        focus-on-tab-navigation: false;
+        key-pressed(e) => {
+            if e.text == " " || e.text == Key.Return {
+                input.focus();
+                return accept;
+            }
+            return reject;
+        }
+    }
+    FocusRing { shown: keep.has-focus; border-radius: 4px; }
     area := TouchArea {
         enabled: root.enabled;
         mouse-cursor: text;
@@ -1254,9 +1335,11 @@ export component NumberBox inherits Rectangle {
             }
             accepted => { root.commit(); }
             key-pressed(e) => {
-                if e.text == Key.UpArrow { root.step(1); return accept; }
-                if e.text == Key.DownArrow { root.step(-1); return accept; }
-                if e.text == Key.Escape { root.show(); self.clear-focus(); return accept; }
+                // with Ctrl the arrows switch pages
+                if e.text == Key.UpArrow && !e.modifiers.control { root.step(1); return accept; }
+                if e.text == Key.DownArrow && !e.modifiers.control { root.step(-1); return accept; }
+                // stop editing, keeping the keyboard on the box: the arrows go on from it
+                if e.text == Key.Escape { root.show(); keep.focus(); return accept; }
                 reject
             }
         }

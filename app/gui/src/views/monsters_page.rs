@@ -107,7 +107,7 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
     api.set_monster_summary(
         trf("{} large monsters, {} of them on the Guild Card list · {} shown · confirmed in game except where marked", &[&n_large, &listed, &rows.len()]).into(),
     );
-    api.set_monsters(model(rows));
+    api.set_monsters(keep(api.get_monsters(), rows));
 }
 
 pub(super) fn wire_monsters(ui: &AppWindow, st: &Shared) {

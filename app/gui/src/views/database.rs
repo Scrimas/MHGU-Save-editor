@@ -284,7 +284,7 @@ fn equip_tab(ui: &AppWindow, st: &State) {
     api.set_db_equip_kinds(strings(kinds));
     api.set_db_equip_kind(kind as i32);
     api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
-    api.set_db_equips(model(rows));
+    api.set_db_equips(keep(api.get_db_equips(), rows));
     api.set_db_equip(if sel == 0 { DbEquip { index: -1, ..Default::default() } } else { equip(kind, sel as u16, &have, &eq) });
 }
 
@@ -405,7 +405,7 @@ fn skills_tab(ui: &AppWindow, st: &State) {
         view(|v| v.db_skill = sel);
     }
     api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
-    api.set_db_skills(model(rows));
+    api.set_db_skills(keep(api.get_db_skills(), rows));
     api.set_db_skill(if sel == 0 { DbSkill { index: -1, ..Default::default() } } else { skill(st, sel) });
 }
 
@@ -623,7 +623,7 @@ fn items_tab(ui: &AppWindow, st: &State) {
         view(|v| v.db_item = sel);
     }
     api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
-    api.set_db_items(model(rows));
+    api.set_db_items(keep(api.get_db_items(), rows));
     api.set_db_item(if sel == 0 { DbItem { index: -1, ..Default::default() } } else { item(sel as u16, &have) });
 }
 
@@ -749,7 +749,7 @@ fn quests_tab(ui: &AppWindow, st: &State) {
         view(|v| v.db_quest = sel);
     }
     api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
-    api.set_db_quests(model(rows));
+    api.set_db_quests(keep(api.get_db_quests(), rows));
     api.set_db_quest(match tables().quests.iter().find(|q| q.index == sel && sel > 0) {
         Some(q) => quest(st, &c, q),
         None => DbQuest { index: -1, ..Default::default() },
@@ -875,7 +875,7 @@ fn monsters_tab(ui: &AppWindow, st: &State) {
         view(|v| v.db_monster = sel);
     }
     api.set_db_row(rows.iter().position(|r| r.index as usize == sel).unwrap_or(0) as i32);
-    api.set_db_monsters(model(rows));
+    api.set_db_monsters(keep(api.get_db_monsters(), rows));
     api.set_db_monster(if sel == 0 { DbMonster { index: -1, ..Default::default() } } else { monster(st, sel) });
 }
 

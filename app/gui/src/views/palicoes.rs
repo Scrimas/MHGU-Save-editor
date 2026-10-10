@@ -69,7 +69,7 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
         view(|v| v.palico_sel = sel);
     }
     api.set_palico_summary(trn("{n} Palico", "{n} Palicoes", all as i64, &[]).into());
-    api.set_palicoes(model(rows));
+    api.set_palicoes(keep(api.get_palicoes(), rows));
     api.set_biases(strings(palico::BIASES.iter().map(|&s| tr(s).to_string())));
     api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|&s| tr(s).to_string())));
     let names = assets::names();
