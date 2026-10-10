@@ -118,6 +118,32 @@ pub fn pet_costume_name(c: u8) -> String {
     listed(&assets::names().pet_costumes, c as usize)
 }
 
+/// The Housekeeper `i` (`unlocks::HOUSEKEEPER`), as Change Housekeeper names them.
+pub fn housekeeper_name(i: u8) -> String {
+    match i {
+        0 => tr("Chamberlyne").into(),
+        1 => tr("Guildmarm").into(),
+        2 => tr("Moga Sweetheart").into(),
+        3 => tr("Tanzia Sweetheart").into(),
+        4 => tr("Headwhiskress").into(),
+        5 => tr("Lil Miss Forge").into(),
+        6 => tr("Funky Felyne").into(),
+        _ => trf("Housekeeper {}", &[&i]),
+    }
+}
+
+/// A place a load starts in (`unlocks::START_VILLAGE`), as the airship names it.
+pub fn start_place_name(scene: u8) -> String {
+    match scene {
+        1 => tr("Bherna Village").into(),
+        2 => tr("Kokoto Village").into(),
+        3 => tr("Pokke Village").into(),
+        4 => tr("Yukumo Village").into(),
+        6 => tr("Soaratorium").into(),
+        _ => trf("Scene {}", &[&scene]),
+    }
+}
+
 /// Place `p` of the event scene table: 0 the Hub, 1-4 the villages, then the Palico
 /// Ranch, the Wycademy and the Hunters' Pub.
 fn place(p: usize) -> &'static str {
@@ -292,7 +318,9 @@ pub(super) fn unlocks_page(ui: &AppWindow, st: &State) {
     let base = st.base();
     let rows = unlock_rows();
     let sel = sel_row(&rows);
-    let pets_changed = (0..unlocks::PETS).any(|k| !st.was(Target::Pet(k)).is_empty()) || !st.was(Target::Moofahs).is_empty();
+    let pets_changed = (0..unlocks::PETS).any(|k| !st.was(Target::Pet(k)).is_empty())
+        || !st.was(Target::Moofahs).is_empty()
+        || !st.was(Target::MoofahGifts).is_empty();
     let mut last = "";
     let list: Vec<UnlockRow> = rows
         .iter()
@@ -385,6 +413,8 @@ fn pets_view(ui: &AppWindow, st: &State) {
     api.set_pets(model(pets));
     api.set_moofahs(model((0..unlocks::PETS).map(|k| unlocks::moofah(s, base, k) as i32).collect()));
     api.set_was_moofahs(st.was(Target::Moofahs).into());
+    api.set_moofah_gifts(unlocks::moofah_gifts(s, base) as i32);
+    api.set_was_moofah_gifts(st.was(Target::MoofahGifts).into());
 }
 
 /// Every Derived: from code, checked against the save timeline, not yet in game.
@@ -443,5 +473,9 @@ pub(super) fn wire_unlocks(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_set_moofah, |ui, s, k: i32, v: i32| {
         let k = (k.max(0) as usize).min(unlocks::PETS - 1);
         stage(&ui, &mut s, Target::Moofahs, |sv, base| unlocks::set_moofah(sv, base, k, v.clamp(0, 10) as u8));
+    });
+    on!(ui, st, on_set_moofah_gifts, |ui, s, v: i32| {
+        let slot = s.slot;
+        stage(&ui, &mut s, Target::MoofahGifts, |sv, _| unlocks::set_moofah_gifts(sv, slot, v.clamp(0, 10) as u8));
     });
 }

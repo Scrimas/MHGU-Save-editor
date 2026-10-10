@@ -794,6 +794,34 @@ msgstr "Niveau d'étoiles du Grand-Camp"
 msgid "The game raises star levels when every urgent quest of a level is cleared."
 msgstr "Le jeu augmente le niveau d'étoiles quand toutes les quêtes urgentes d'un niveau sont complétées."
 
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Quest counter"
+msgstr "Compteur de quêtes"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Courier points"
+msgstr "Points du Messager"
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed as the Courier counts them, not shown in game; past 210 the count stays between 210 and 419. Each 1,000 Courier points become 10 Special Permits for a deviant, up to 10,000 points."
+msgstr "Quêtes terminées telles que le Messager les compte, non affiché en jeu ; au-delà de 210 le compte reste entre 210 et 419. Chaque tranche de 1 000 points du Messager devient 10 Licences spéciales pour un exotique, jusqu'à 10 000 points."
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Start in"
+msgstr "Départ à"
+
+#: app/gui/ui/pages/character.slint
+msgid "Where the next load starts"
+msgstr "Lieu de départ au prochain chargement"
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Housekeeper"
+msgstr "Room service"
+
+#: app/gui/ui/pages/character.slint
+msgid "Room Service, Change Housekeeper"
+msgstr "Room service, Valet de chambre"
+
 #: app/gui/ui/pages/character.slint
 msgid "As character creation sets it, numbered as the game shows it."
 msgstr "Comme à la création du personnage, numéroté comme dans le jeu."
@@ -1056,6 +1084,10 @@ msgid "Special Permits"
 msgstr "Licences spéciales"
 
 #: app/gui/ui/pages/collections.slint
+msgid "Permit points · at the Courier"
+msgstr "Points de licence · chez le Messager"
+
+#: app/gui/ui/pages/collections.slint
 msgid "Levels cleared"
 msgstr "Niveaux terminés"
 
@@ -1071,6 +1103,16 @@ msgstr "Aucun exotique ne correspond à la recherche."
 #: app/gui/ui/pages/collections.slint
 msgid "Special Permits of {}"
 msgstr "Licences spéciales de {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/collections.slint
+msgid "Special Permit points of {}"
+msgstr "Points de Licence spéciale de {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/pages/collections.slint
+msgid "Points of {} waiting at the Courier"
+msgstr "Points de {} en attente chez le Messager"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/collections.slint
@@ -2155,6 +2197,18 @@ msgstr "Moofah du Ranch Palico 1"
 msgid "Palico Ranch Moofah 2"
 msgstr "Moofah du Ranch Palico 2"
 
+#: app/gui/src/targets.rs app/gui/ui/pages/unlocks.slint
+msgid "Moofah gifts"
+msgstr "Cadeaux des Moofahs"
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."
+msgstr "Un Moofah de Bherna donne une Boule peluche Moofah la première fois qu'il est caressé après une quête, compté jusqu'à 10. À 10 le jeu accorde la distinction Balle en laine de Moofah après la caresse suivante ; une modification à 10 l'accorde tout de suite."
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Fleeceballs received"
+msgstr "Boules peluche reçues"
+
 #: app/gui/ui/pages/unlocks.slint
 msgid "Unlock all…"
 msgstr "Tout débloquer…"
@@ -3183,6 +3237,16 @@ msgstr "{} · Licences spéciales"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs
+msgid "{} · points at the Courier"
+msgstr "{} · points chez le Messager"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} · Special Permit points"
+msgstr "{} · points de Licence spéciale"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
 msgid "{} · levels cleared"
 msgstr "{} · niveaux terminés"
 
@@ -3622,6 +3686,11 @@ msgstr[1] "… {} octets de plus"
 msgid "block {}"
 msgstr "bloc {}"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
+msgid "{} · locked"
+msgstr "{} · verrouillé"
+
 #: app/gui/src/views/character_page.rs
 msgid "Skin Tone"
 msgstr "Peau"
@@ -3631,9 +3700,14 @@ msgid "Clothing Color"
 msgstr "Couleur des vêtements"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
-msgid "{} · locked"
-msgstr "{} · verrouillé"
+#: app/gui/src/views/character_page.rs
+msgid "Not changed: you can't travel to {} yet"
+msgstr "Non modifié : vous ne pouvez pas encore aller à {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/character_page.rs
+msgid "Not changed: {} becomes a Housekeeper once that villager's request is done"
+msgstr "Non modifié : {} devient Room service une fois sa requête terminée"
 
 #: app/gui/src/views/character_page.rs
 msgid "HR below 13 follows the Hub star level: edit Hub ★ instead"
@@ -5134,6 +5208,64 @@ msgstr "{} ({} + {})"
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Recipe {}"
 msgstr "Recette {}"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Chamberlyne"
+msgstr "Chat-bellan"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Guildmarm"
+msgstr "Guilda"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Moga Sweetheart"
+msgstr "Miss Moga"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Tanzia Sweetheart"
+msgstr "Miss Tanzia"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Headwhiskress"
+msgstr "Miaounagère"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Lil Miss Forge"
+msgstr "P'tiote de la Forge"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Funky Felyne"
+msgstr "Funky Felyne"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Housekeeper {}"
+msgstr "Room service {}"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Bherna Village"
+msgstr "Village Bherna"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Kokoto Village"
+msgstr "Village Kokoto"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Pokke Village"
+msgstr "Village Pokke"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Yukumo Village"
+msgstr "Village Yukumo"
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Soaratorium"
+msgstr "Aérolabo"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Scene {}"
+msgstr "Scène {}"
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Hunters Hub"

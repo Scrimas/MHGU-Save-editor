@@ -337,6 +337,86 @@ pub fn set_moofah(s: &mut Save, base: usize, k: usize, v: u8) {
     }
 }
 
+/// Times the Bherna Moofahs gave a Moofah Fleeceball (once per quest), at most 10
+/// (`0x50d7e8`). At 10 the end of the next petting grants award 49 Ball of Moofah Wool
+/// (`0x3f31b8`); nothing else reads it.
+pub const MOOFAH_GIFTS: usize = 0x2C4E2;
+pub const MOOFAH_AWARD: usize = 49;
+
+pub fn moofah_gifts(s: &Save, base: usize) -> u8 {
+    s.u8(base + MOOFAH_GIFTS)
+}
+
+/// The count, and the award the game would grant at 10.
+pub fn set_moofah_gifts(s: &mut Save, slot: usize, v: u8) {
+    let v = v.min(MOOFAH_MAX);
+    let base = s.base(slot);
+    s.set_u8(base + MOOFAH_GIFTS, v);
+    if v == MOOFAH_MAX {
+        Char::new(&mut *s, slot).set_award(MOOFAH_AWARD, true);
+    }
+}
+
+/// The Housekeeper of the Room Service, an index into the NPC table `0x162bde8`
+/// (`0x50c988`): 0 the Chamberlyne, 1-6 the Guildmarm, Moga Sweetheart, Tanzia
+/// Sweetheart, Headwhiskress, Lil Miss Forge and Funky Felyne. Room Service, Change
+/// Housekeeper lists 0 and those whose progress bit 23 + i is set (`0x78b474`); the game
+/// sets the bit once that villager's request is done (`0x3eebb8`). Past 6 no NPC
+/// matches and the Room Service can't be reached.
+pub const HOUSEKEEPER: usize = 0x2C56B;
+pub const HOUSEKEEPERS: usize = 7;
+
+pub fn housekeeper(s: &Save, base: usize) -> u8 {
+    s.u8(base + HOUSEKEEPER)
+}
+
+pub fn housekeeper_available(s: &Save, base: usize, i: usize) -> bool {
+    i == 0 || (i < HOUSEKEEPERS && s.bit(base + PROGRESS, 23 + i))
+}
+
+/// Only a housekeeper the change list offers.
+pub fn set_housekeeper(s: &mut Save, base: usize, i: usize) -> bool {
+    housekeeper_available(s, base, i) && {
+        s.set_u8(base + HOUSEKEEPER, i as u8);
+        true
+    }
+}
+
+/// The place a load starts in, a scene number (`0x6a6e34`). Each village scene start
+/// stores its own (`0x5105dc`): 1 Bherna, 2 Kokoto, 3 Pokke, 4 Yukumo, 6 the
+/// Soaratorium (the Hub, Palico Ranch and Wycademy Hub store 1, or 6 from the
+/// Soaratorium side). The load starts in Bherna past 7.
+pub const START_VILLAGE: usize = 0x2C56C;
+pub const START_PLACES: [u8; 5] = [1, 2, 3, 4, 6];
+/// The airship's gates (`0x557ac4`): Kokoto, Pokke and Yukumo open with event flag 11,
+/// the Soaratorium with 1068.
+const KOKOTO_FLAG: usize = 11;
+const SOARATORIUM_FLAG: usize = 1068;
+
+pub fn start_village(s: &Save, base: usize) -> u8 {
+    s.u8(base + START_VILLAGE)
+}
+
+/// Whether the airship takes the hunter to `scene` yet.
+pub fn place_open(s: &Save, slot: usize, scene: u8) -> bool {
+    let c = Char::new(s, slot);
+    match scene {
+        1 => true,
+        2..=4 => c.flag(KOKOTO_FLAG),
+        6 => c.flag(SOARATORIUM_FLAG),
+        _ => false,
+    }
+}
+
+/// Only a place the game stores and the airship has opened.
+pub fn set_start_village(s: &mut Save, slot: usize, scene: u8) -> bool {
+    START_PLACES.contains(&scene) && place_open(s, slot, scene) && {
+        let base = s.base(slot);
+        s.set_u8(base + START_VILLAGE, scene);
+        true
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -355,6 +435,33 @@ mod tests {
         assert_eq!((n("lab"), n("song"), n("supply"), n("costume"), n("gallery"), n("combos")), (69, 14, 24, 40, 14, 183));
         // DUMMY title words of the Trader are left out
         assert_eq!(n("trader:words"), 396);
+    }
+
+    #[test]
+    fn village_counters_keep_to_what_the_game_offers() {
+        let mut s = blank();
+        let slot = 0;
+        // the airship's gates
+        assert!(set_start_village(&mut s, slot, 1) && !set_start_village(&mut s, slot, 2) && !set_start_village(&mut s, slot, 5));
+        Char::new(&mut s, slot).set_flag(KOKOTO_FLAG, true);
+        assert!(set_start_village(&mut s, slot, 3) && start_village(&s, B) == 3);
+        assert!(!set_start_village(&mut s, slot, 6));
+        // Housekeeper 2 once progress bit 25 is set; none past 6
+        assert!(set_housekeeper(&mut s, B, 0) && !set_housekeeper(&mut s, B, 2) && !set_housekeeper(&mut s, B, 7));
+        s.set_bit(B + PROGRESS, 25, true);
+        assert!(set_housekeeper(&mut s, B, 2) && housekeeper(&s, B) == 2);
+        // gifts capped at 10, the award with them
+        set_moofah_gifts(&mut s, slot, 9);
+        assert!(!Char::new(&s, slot).award(MOOFAH_AWARD));
+        set_moofah_gifts(&mut s, slot, 12);
+        assert!(moofah_gifts(&s, B) == 10 && Char::new(&s, slot).award(MOOFAH_AWARD));
+        // the quest counter takes the Courier's copy along
+        let mut c = Char::new(&mut s, slot);
+        c.set_quest_counter(500);
+        c.set_courier_points(20_000);
+        c.set_permit_points(17, true, 60_000);
+        assert_eq!((c.quest_counter(), c.courier_points(), c.permit_points(17, true)), (500, 10_000, 9999));
+        assert_eq!(s.u32(B + crate::progress::COURIER_TALK), 500);
     }
 
     #[test]

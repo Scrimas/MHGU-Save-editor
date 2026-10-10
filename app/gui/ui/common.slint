@@ -202,6 +202,8 @@ export struct ArtRow { name: string, ids: [int], on: [bool], changed: bool }
 export struct DeviantRow {
     index: int, name: string, permits: int, levels: int, total: int, icon: image, has-icon: bool,
     was-permits: string, was-levels: string,
+    // Special Permit points and those waiting at the Courier (100 make a permit)
+    points: int, waiting: int, was-points: string, was-waiting: string,
     // why G-rank levels are not offered in game yet ("" none)
     gate: string,
 }
@@ -240,6 +242,11 @@ export struct CharacterInfo {
     weapon-use: [WeaponUseRow],
     // quests per hunting style (Guild … Valor)
     style-use: [int], was-style: [string],
+    // the Courier's counts; the place a load starts in and the Room Service's Housekeeper,
+    // as indices into their lists (-1 for a value the game does not store)
+    quest-counter: int, courier-points: int, start-village: int, start-places: [string],
+    housekeeper: int, housekeepers: [string],
+    was-quest-counter: string, was-courier-points: string, was-start-village: string, was-housekeeper: string,
 }
 
 // The own Guild Card's title (word, linking word, word), scene and pose: IDs, the title
@@ -584,6 +591,9 @@ export global Api {
     in property <[PetRow]> pets;
     in property <[int]> moofahs;
     in property <string> was-moofahs;
+    // Moofah Fleeceballs the Bherna Moofahs gave (award 49 at 10)
+    in property <int> moofah-gifts;
+    in property <string> was-moofah-gifts;
     in-out property <string> unlock-search;
     in-out property <bool> unlock-missing;
     callback select-unlock(int);
@@ -591,6 +601,7 @@ export global Api {
     callback set-unlock(int, bool);
     callback set-pet(int, string /* name, costume, adopted */, string);
     callback set-moofah(int, int);
+    callback set-moofah-gifts(int);
 
     // monsters
     in property <[MonsterRow]> monsters;

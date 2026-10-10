@@ -24,6 +24,21 @@ pub const DISHES: usize = 0x2C67D;
 pub const AWARDS_GAME: usize = 0x3157;
 pub const AWARDS_CARD: usize = 0xC8115;
 pub const PERMITS: usize = 0x283C;
+/// Special Permit points per deviant, 18 × u16 (S+0x4424), and the points waiting at
+/// the Courier (S+0x4448); 100 points make one permit.
+pub const PERMIT_POINTS: usize = 0x5E5A;
+pub const PERMIT_WAITING: usize = 0x5E7E;
+pub const MAX_PERMIT_POINTS: u16 = 9999;
+/// The quest counter (S+0x4418): quests completed, not Harvest Tours or Training, not
+/// shown in game. At a talk the Courier gives gifts for the multiples of 3, 7 and 10 the
+/// counter crossed since his last talk (S+0x441c), then stores it there.
+pub const QUEST_COUNTER: usize = 0x5E4E;
+pub const COURIER_TALK: usize = 0x5E52;
+/// Courier points (S+0x4420): earned per quest once the Courier works (flag 92), 1000
+/// make 10 permits for a random deviant; the game caps them at 10,000.
+pub const COURIER_POINTS: usize = 0x5E56;
+pub const MAX_COURIER_POINTS: u32 = 10_000;
+pub const MAX_QUEST_COUNTER: u32 = 9_999_999;
 /// Quest sets that need Arena records and are never set by the bulk completion.
 pub const RANK_SETS: [u32; 5] = [46, 47, 53, 78, 79];
 // i18n: shown through tr() in the GUI
@@ -407,6 +422,40 @@ impl<S: Deref<Target = Save>> Char<S> {
     {
         assert!(d < 18);
         self.s.set_u8(self.base + PERMITS + d, v.min(99))
+    }
+    pub fn quest_counter(&self) -> u32 {
+        self.s.u32(self.base + QUEST_COUNTER)
+    }
+    /// The counter and the Courier's copy of it: no gifts for the quests written (a
+    /// counter below his copy would make him hand out a garbage count).
+    pub fn set_quest_counter(&mut self, v: u32)
+    where
+        S: DerefMut,
+    {
+        let v = v.min(MAX_QUEST_COUNTER);
+        self.s.set_u32(self.base + QUEST_COUNTER, v);
+        self.s.set_u32(self.base + COURIER_TALK, v);
+    }
+    pub fn courier_points(&self) -> u32 {
+        self.s.u32(self.base + COURIER_POINTS)
+    }
+    pub fn set_courier_points(&mut self, v: u32)
+    where
+        S: DerefMut,
+    {
+        self.s.set_u32(self.base + COURIER_POINTS, v.min(MAX_COURIER_POINTS))
+    }
+    /// A deviant's Special Permit points, or those waiting at the Courier.
+    pub fn permit_points(&self, d: usize, waiting: bool) -> u16 {
+        assert!(d < 18);
+        self.s.u16(self.base + if waiting { PERMIT_WAITING } else { PERMIT_POINTS } + 2 * d)
+    }
+    pub fn set_permit_points(&mut self, d: usize, waiting: bool, v: u16)
+    where
+        S: DerefMut,
+    {
+        assert!(d < 18);
+        self.s.set_u16(self.base + if waiting { PERMIT_WAITING } else { PERMIT_POINTS } + 2 * d, v.min(MAX_PERMIT_POINTS))
     }
     /// Whether the board offers G1 and up: the base monster's G-rank gate is open.
     pub fn deviant_gate_open(&self, d: usize) -> bool {

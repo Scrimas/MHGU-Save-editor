@@ -154,6 +154,7 @@ fn main() -> Result<(), slint::PlatformError> {
 ///   goal:<id>  char:<field>:<value>  monster:<index>:<field>:<value>  item:<slot>:<id>:<count>
 ///   set:N  arts:<where>:<field>:<slot>:<value>  pigment:<where>:<part>:<hex>
 ///   unlock:<map * 1024 + bit>:<0|1>  pet:<k>:<name|costume|adopted>:<value>  moofah:<k>:<v>
+///   moofah-gifts:<v>  deviant:<d>:<permits|points|waiting|levels>:<v>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
 ///   theme:light|dark  update (asks GitHub, as Settings' Check now)
 fn steps(ui: &AppWindow, page: &str, list: &str) {
@@ -174,6 +175,8 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             (_, &["unlock", key, on]) => api.invoke_set_unlock(num(key), on == "1"),
             (_, &["pet", k, field, v]) => api.invoke_set_pet(num(k), field.into(), v.into()),
             (_, &["moofah", k, v]) => api.invoke_set_moofah(num(k), num(v)),
+            (_, &["moofah-gifts", v]) => api.invoke_set_moofah_gifts(num(v)),
+            (_, &["deviant", d, what, v]) => api.invoke_set_deviant(num(d), what.into(), num(v)),
             ("unlocks", &["missing"]) => {
                 api.set_unlock_missing(true);
                 api.invoke_filter_unlocks();
@@ -449,6 +452,54 @@ mod tests {
             goals::apply(g, &mut s, slot);
             assert!(goals::plan(g, &s, slot).targets.is_empty(), "{g} twice");
         }
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// The counters: the quest counter takes the Courier's copy along, the caps hold,
+    /// Moofah gifts at 10 grant their award, a locked place or Housekeeper is refused;
+    /// each Undo puts the file's bytes back.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn counters() {
+        use mhgu_save::progress::{self as pg, Char};
+        use mhgu_save::unlocks;
+        let (ui, st, dir) = opened("counters");
+        let api = ui.global::<Api>();
+        let (base, slot) = (st.borrow().base(), st.borrow().slot);
+        api.set_page("character".into());
+        views::refresh(&ui, &st.borrow());
+        let n = api.get_character().quest_counter;
+        api.invoke_set_character("quest-counter".into(), n + 5);
+        api.invoke_set_character("courier-points".into(), 20000);
+        {
+            let b = st.borrow();
+            let c = Char::new(b.save(), slot);
+            assert_eq!(c.quest_counter(), n as u32 + 5);
+            assert_eq!(b.save().u32(base + pg::COURIER_TALK), n as u32 + 5);
+            assert_eq!(c.courier_points(), pg::MAX_COURIER_POINTS);
+        }
+        // Bherna is always open; the Soaratorium only once flag 1068 is set
+        let start = unlocks::start_village(st.borrow().save(), base);
+        api.invoke_set_character("start-village".into(), 4);
+        let open = unlocks::place_open(st.borrow().save(), slot, 6);
+        assert_eq!(unlocks::start_village(st.borrow().save(), base), if open { 6 } else { start });
+        api.invoke_set_character("housekeeper".into(), 6);
+        if !unlocks::housekeeper_available(st.borrow().save(), base, 6) {
+            assert_ne!(unlocks::housekeeper(st.borrow().save(), base), 6);
+        }
+        api.invoke_set_deviant(0, "points".into(), 12345);
+        api.invoke_set_deviant(0, "waiting".into(), 50);
+        api.invoke_set_moofah_gifts(10);
+        {
+            let b = st.borrow();
+            let c = Char::new(b.save(), slot);
+            assert_eq!((c.permit_points(0, false), c.permit_points(0, true)), (pg::MAX_PERMIT_POINTS, 50));
+            assert!(c.award(unlocks::MOOFAH_AWARD));
+        }
+        for key in ["quest-counter", "courier-points", "start-village", "housekeeper", "permit-points:0", "permit-wait:0", "moofah-gifts"] {
+            api.invoke_undo_value(key.into());
+        }
+        assert!(!st.borrow().save().is_dirty(), "{:?}", &st.borrow().save().diff()[..st.borrow().save().diff().len().min(6)]);
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

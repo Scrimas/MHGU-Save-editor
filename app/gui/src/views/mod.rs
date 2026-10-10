@@ -476,7 +476,7 @@ fn goto_target(ui: &AppWindow, st: &State, t: Target, key: &str) {
             api.set_request_filter("all".into());
             api.set_request_search("".into());
         }
-        Target::Art(_) | Target::Dish(_) | Target::Ingredient(_) | Target::Award(_) | Target::Permits(_) | Target::Levels(_) => {
+        Target::Art(_) | Target::Dish(_) | Target::Ingredient(_) | Target::Award(_) | Target::Permits(_) | Target::PermitPoints(..) | Target::Levels(_) => {
             v.collection = match t {
                 Target::Art(_) => 0,
                 Target::Dish(_) => 1,
@@ -490,7 +490,7 @@ fn goto_target(ui: &AppWindow, st: &State, t: Target, key: &str) {
             api.set_check_search("".into());
             api.set_check_missing(false);
         }
-        Target::Unlock(_) | Target::Pet(_) | Target::Moofahs => {
+        Target::Unlock(_) | Target::Pet(_) | Target::Moofahs | Target::MoofahGifts => {
             let rows = unlock_rows();
             v.unlock_sel = match t {
                 Target::Unlock(m) => rows.iter().position(|r| r.maps.contains(&m)).unwrap_or(0),
@@ -765,6 +765,6 @@ use self::{
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
 pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};
-pub use self::unlocks_ui::{pet_costume_name, unlock_map_name, unlock_rows};
+pub use self::unlocks_ui::{housekeeper_name, pet_costume_name, start_place_name, unlock_map_name, unlock_rows};
 pub use self::palicoes::look_label;
 pub use self::{file::*, update_ui::*};

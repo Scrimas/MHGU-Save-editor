@@ -113,11 +113,15 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
                 index: d as i32,
                 name: (*name).into(),
                 permits: c.permits(d) as i32,
+                points: c.permit_points(d, false) as i32,
+                waiting: c.permit_points(d, true) as i32,
                 levels: lv as i32,
                 total: n as i32,
                 icon: img,
                 has_icon: has,
                 was_permits: st.was(Target::Permits(d)).into(),
+                was_points: st.was(Target::PermitPoints(d, false)).into(),
+                was_waiting: st.was(Target::PermitPoints(d, true)).into(),
                 was_levels: st.was(Target::Levels(d)).into(),
                 gate: gate.into(),
             }
@@ -170,12 +174,21 @@ pub(super) fn wire_collections(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_set_deviant, |ui, s, d: i32, what: SharedString, v: i32| {
         let d = d as usize;
         let slot = s.slot;
-        let t = if what == "permits" { Target::Permits(d) } else { Target::Levels(d) };
+        let (t, conf) = match what.as_str() {
+            "permits" => (Target::Permits(d), Conf::Confirmed),
+            "points" | "waiting" => (Target::PermitPoints(d, what == "waiting"), Conf::Derived),
+            _ => (Target::Levels(d), Conf::Confirmed),
+        };
+        if refused(&ui, conf) {
+            return;
+        }
         let title = t.label(s.save(), slot);
-        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, _| {
+        s.edit(Edit::one(t, title, conf), |sv, _| {
             let mut c = Char::new(sv, slot);
             if what == "permits" {
                 c.set_permits(d, v.clamp(0, 99) as u8);
+            } else if let Target::PermitPoints(_, w) = t {
+                c.set_permit_points(d, w, v.clamp(0, mhgu_save::progress::MAX_PERMIT_POINTS as i32) as u16);
             } else {
                 let (q0, n) = Char::deviant_levels(d);
                 for k in 0..n {

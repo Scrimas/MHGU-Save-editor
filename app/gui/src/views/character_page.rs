@@ -3,6 +3,7 @@
 use super::*;
 use mhgu_save::arena;
 use mhgu_save::guildcard as gc;
+use mhgu_save::unlocks;
 
 pub(super) fn character_page(ui: &AppWindow, st: &State) {
     let s = st.save();
@@ -34,6 +35,22 @@ pub(super) fn character_page(ui: &AppWindow, st: &State) {
         weapon_use: model(weapon_use_rows(st)),
         style_use: model((0..character::STYLES.len()).map(|k| character::style_use(s, st.base(), k) as i32).collect()),
         was_style: model((0..character::STYLES.len()).map(|k| was(Target::StyleUse(k))).collect()),
+        quest_counter: p.quest_counter().min(i32::MAX as u32) as i32,
+        courier_points: p.courier_points().min(i32::MAX as u32) as i32,
+        start_village: unlocks::START_PLACES.iter().position(|&v| v == unlocks::start_village(s, st.base())).map_or(-1, |i| i as i32),
+        start_places: strings(unlocks::START_PLACES.iter().map(|&v| {
+            let n = start_place_name(v);
+            if unlocks::place_open(s, st.slot, v) { n } else { trf("{} · locked", &[&n]) }
+        })),
+        housekeeper: Some(unlocks::housekeeper(s, st.base()) as i32).filter(|&i| (i as usize) < unlocks::HOUSEKEEPERS).unwrap_or(-1),
+        housekeepers: strings((0..unlocks::HOUSEKEEPERS).map(|i| {
+            let n = housekeeper_name(i as u8);
+            if unlocks::housekeeper_available(s, st.base(), i) { n } else { trf("{} · locked", &[&n]) }
+        })),
+        was_quest_counter: was(Target::QuestCounter),
+        was_courier_points: was(Target::CourierPoints),
+        was_start_village: was(Target::StartVillage),
+        was_housekeeper: was(Target::Housekeeper),
     });
     guild_card(ui, st);
     appearance(ui, st);
@@ -186,9 +203,68 @@ pub(super) fn weapon_use_rows(st: &State) -> Vec<WeaponUseRow> {
         .collect()
 }
 
+/// The Progress card's Derived fields: the quest counter, Courier points, the place a load
+/// starts in and the Housekeeper (pickers send the index in their list). False for
+/// another key.
+fn set_village_life(ui: &AppWindow, s: &mut State, key: &str, v: i32) -> bool {
+    let t = match key {
+        "quest-counter" => Target::QuestCounter,
+        "courier-points" => Target::CourierPoints,
+        "start-village" => Target::StartVillage,
+        "housekeeper" => Target::Housekeeper,
+        _ => return false,
+    };
+    let (slot, base) = (s.slot, s.base());
+    let v = v.max(0) as u32;
+    let why = match t {
+        Target::StartVillage => {
+            let scene = unlocks::START_PLACES.get(v as usize).copied();
+            match scene {
+                Some(p) if !unlocks::place_open(s.save(), slot, p) => {
+                    Some(trf("Not changed: you can't travel to {} yet",&[&start_place_name(p)]))
+                }
+                None => return true,
+                _ => None,
+            }
+        }
+        Target::Housekeeper if !unlocks::housekeeper_available(s.save(), base, v as usize) => {
+            if v as usize >= unlocks::HOUSEKEEPERS {
+                return true;
+            }
+            Some(trf("Not changed: {} becomes a Housekeeper once that villager's request is done", &[&housekeeper_name(v as u8)]))
+        }
+        _ => None,
+    };
+    if let Some(m) = why {
+        toast(ui, m, true);
+        return true;
+    }
+    if refused(ui, Conf::Derived) {
+        return true;
+    }
+    let title = t.label(s.save(), slot);
+    s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+        match t {
+            Target::QuestCounter => Char::new(&mut *sv, slot).set_quest_counter(v),
+            Target::CourierPoints => Char::new(&mut *sv, slot).set_courier_points(v),
+            Target::StartVillage => {
+                unlocks::set_start_village(sv, slot, unlocks::START_PLACES[v as usize]);
+            }
+            _ => {
+                unlocks::set_housekeeper(sv, base, v as usize);
+            }
+        }
+        vec![]
+    });
+    true
+}
+
 pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
     // character: one value per edit, titled with its name
     on!(ui, st, on_set_character, |ui, s, key: SharedString, v: i32| {
+        if set_village_life(&ui, &mut s, key.as_str(), v) {
+            return;
+        }
         let v = v.max(0) as u32;
         let k = key.as_str();
         let t = match k {

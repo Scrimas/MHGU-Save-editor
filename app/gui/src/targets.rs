@@ -81,6 +81,8 @@ pub enum Target {
     Ingredient(usize),
     Award(usize),
     Permits(usize),
+    /// A deviant's Special Permit points, or those waiting at the Courier.
+    PermitPoints(usize, bool),
     /// Special Permit levels cleared of a deviant.
     Levels(usize),
     Monster(usize, Mon),
@@ -125,6 +127,15 @@ pub enum Target {
     Pet(usize),
     /// The four Moofahs' affection.
     Moofahs,
+    /// Moofah Fleeceballs received, with award 49.
+    MoofahGifts,
+    /// The quest counter with the Courier's copy.
+    QuestCounter,
+    CourierPoints,
+    /// The Room Service's Housekeeper.
+    Housekeeper,
+    /// The place a load starts in.
+    StartVillage,
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -325,15 +336,15 @@ impl Target {
         use Target::*;
         match self {
             Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Appearance | Gender | Greeting | StyleUse(_)
-            | Pigment | Arts => "character",
+            | Pigment | Arts | QuestCounter | CourierPoints | Housekeeper | StartVillage => "character",
             Item(..) | Loadout(_) | Obtained => "items",
             Equip(..) | Smithy(_) | MySet(..) | PalicoSet(_) => "equipment",
             Palico(..) => "palicoes",
             // the card's quest counts follow the cleared quests
             Quest(_) | Arena(_) | CardQuests(_) => "quests",
             Request(_) => "requests",
-            Art(_) | Dish(_) | Ingredient(_) | Award(_) | Permits(_) | Levels(_) => "collections",
-            Unlock(_) | Pet(_) | Moofahs => "unlocks",
+            Art(_) | Dish(_) | Ingredient(_) | Award(_) | Permits(_) | PermitPoints(..) | Levels(_) => "collections",
+            Unlock(_) | Pet(_) | Moofahs | MoofahGifts => "unlocks",
             Monster(..) => "monsters",
             Slot(_) => "overview",
         }
@@ -364,6 +375,7 @@ impl Target {
             Ingredient(i) => format!("check:2:{i}"),
             Award(i) => format!("check:3:{i}"),
             Permits(d) => format!("permits:{d}"),
+            PermitPoints(d, w) => format!("{}:{d}", if w { "permit-wait" } else { "permit-points" }),
             Levels(d) => format!("levels:{d}"),
             Monster(i, f) => format!("mon:{i}:{}", mon_field(f)),
             Obtained => "obtained".into(),
@@ -386,6 +398,11 @@ impl Target {
             Unlock(m) => format!("unlock:{}", unlocks::maps()[m].id),
             Pet(k) => format!("pet:{k}"),
             Moofahs => "moofahs".into(),
+            MoofahGifts => "moofah-gifts".into(),
+            QuestCounter => "quest-counter".into(),
+            CourierPoints => "courier-points".into(),
+            Housekeeper => "housekeeper".into(),
+            StartVillage => "start-village".into(),
         }
     }
 
@@ -445,6 +462,9 @@ impl Target {
             Ingredient(b) => t.canteen.iter().find(|c| c.0 == "ingredient" && c.1 == b).map(|c| c.2.clone()).unwrap_or_default(),
             Award(b) => t.awards.iter().find(|a| a.0 == b).map(|a| a.2.clone()).unwrap_or_default(),
             Permits(d) => trf("{} · Special Permits", &[&tr(DEVIANTS[d])]),
+            PermitPoints(d, w) => {
+                if w { trf("{} · points at the Courier", &[&tr(DEVIANTS[d])]) } else { trf("{} · Special Permit points", &[&tr(DEVIANTS[d])]) }
+            }
             Levels(d) => trf("{} · levels cleared", &[&tr(DEVIANTS[d])]),
             Monster(i, f) => {
                 let what = match f {
@@ -490,6 +510,11 @@ impl Target {
             Unlock(m) => crate::views::unlock_map_name(m),
             Pet(k) => trf("{} pet", &[&tr(["Bherna", "Kokoto", "Pokke", "Yukumo"][k])]),
             Moofahs => tr("Moofah affection").into(),
+            MoofahGifts => tr("Moofah gifts").into(),
+            QuestCounter => tr("Quest counter").into(),
+            CourierPoints => tr("Courier points").into(),
+            Housekeeper => tr("Housekeeper").into(),
+            StartVillage => tr("Start in").into(),
         }
     }
 
@@ -564,6 +589,7 @@ impl Target {
             Ingredient(b) => yes(on(pg::INGREDIENTS, b), tr("Unlocked"), tr("Locked")),
             Award(b) => yes(on(pg::AWARDS_CARD, b), tr("Earned"), tr("Not earned")),
             Permits(d) => num(s.u8(base + pg::PERMITS + d)),
+            PermitPoints(d, w) => num(Char::new(s, slot).permit_points(d, w)),
             Levels(d) => {
                 let (q0, n) = Char::deviant_levels(d);
                 format!("{} / {n}", (0..n).filter(|&k| on(pg::CLEARED, q0 + k)).count())
@@ -644,6 +670,11 @@ impl Target {
                 if unlocks::adopted(s, base, k) { trf("{} · {} · adopted", &[&n, &c]) } else { format!("{n} · {c}") }
             }
             Moofahs => (0..unlocks::PETS).map(|k| unlocks::moofah(s, base, k).to_string()).collect::<Vec<_>>().join(" · "),
+            MoofahGifts => num(unlocks::moofah_gifts(s, base)),
+            QuestCounter => num(Char::new(s, slot).quest_counter()),
+            CourierPoints => num(Char::new(s, slot).courier_points()),
+            Housekeeper => crate::views::housekeeper_name(unlocks::housekeeper(s, base)),
+            StartVillage => crate::views::start_place_name(unlocks::start_village(s, base)),
         }
     }
 
@@ -717,6 +748,7 @@ impl Target {
             Ingredient(b) => vec![bit(base, pg::INGREDIENTS, b)],
             Award(b) => vec![bit(base, pg::AWARDS_CARD, b), bit(base, pg::AWARDS_GAME, b)],
             Permits(d) => range(base + pg::PERMITS + d, 1),
+            PermitPoints(d, w) => range(base + if w { pg::PERMIT_WAITING } else { pg::PERMIT_POINTS } + 2 * d, 2),
             Levels(d) => {
                 let (q0, n) = Char::deviant_levels(d);
                 (q0..q0 + n).flat_map(|q| [bit(base, pg::CLEARED, q), bit(base, pg::SEEN, q)]).collect()
@@ -822,6 +854,14 @@ impl Target {
                 let (on, new, _) = gc::Map::Words.at();
                 [range(base + unlocks::MOOFAHS, unlocks::PETS), vec![bit(base, on, unlocks::MOOFAH_WORD), bit(base, new, unlocks::MOOFAH_WORD)]].concat()
             }
+            MoofahGifts => {
+                let a = unlocks::MOOFAH_AWARD;
+                [range(base + unlocks::MOOFAH_GIFTS, 1), vec![bit(base, pg::AWARDS_CARD, a), bit(base, pg::AWARDS_GAME, a)]].concat()
+            }
+            QuestCounter => [range(base + pg::QUEST_COUNTER, 4), range(base + pg::COURIER_TALK, 4)].concat(),
+            CourierPoints => range(base + pg::COURIER_POINTS, 4),
+            Housekeeper => range(base + unlocks::HOUSEKEEPER, 1),
+            StartVillage => range(base + unlocks::START_VILLAGE, 1),
         }
     }
 

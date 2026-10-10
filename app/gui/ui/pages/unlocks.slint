@@ -84,6 +84,17 @@ component Pets inherits VerticalLayout {
         Text { text: "/ 10"; color: Tok.muted; vertical-alignment: center; }
     }
     if Api.was-moofahs != "": WasLine { was: Api.was-moofahs; key: "moofahs"; }
+    SectionTitle { text: @tr("Moofah gifts"); }
+    Muted { text: @tr("A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."); wrap: word-wrap; }
+    HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 32px;
+        Text { text: @tr("Fleeceballs received"); width: 180px; vertical-alignment: center; overflow: elide; }
+        NumberBox { width: 100px; minimum: 0; maximum: 10; value: Api.moofah-gifts; label: @tr("Moofah gifts"); edited(x) => { Api.set-moofah-gifts(x); } }
+        Text { text: "/ 10"; color: Tok.muted; vertical-alignment: center; }
+    }
+    if Api.was-moofah-gifts != "": WasLine { was: Api.was-moofah-gifts; key: "moofah-gifts"; }
 }
 
 export component UnlocksPage inherits Rectangle {

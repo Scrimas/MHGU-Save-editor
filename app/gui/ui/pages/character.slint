@@ -229,6 +229,52 @@ export component CharacterPage inherits Rectangle {
                         }
                     }
                     Muted { text: @tr("The game raises star levels when every urgent quest of a level is cleared."); }
+                    HorizontalLayout {
+                        spacing: 24px;
+                        alignment: start;
+                        Field {
+                            width: 170px;
+                            label: @tr("Quest counter");
+                            level: Confidence.derived;
+                            was: Api.character.was-quest-counter;
+                            key: "quest-counter";
+                            NumberBox { value: Api.character.quest-counter; maximum: 9999999; label: @tr("Quest counter"); edited(v) => { Api.set-character("quest-counter", v); } }
+                        }
+                        Field {
+                            width: 170px;
+                            label: @tr("Courier points");
+                            level: Confidence.derived;
+                            was: Api.character.was-courier-points;
+                            key: "courier-points";
+                            NumberBox { value: Api.character.courier-points; maximum: 10000; label: @tr("Courier points"); edited(v) => { Api.set-character("courier-points", v); } }
+                        }
+                    }
+                    Muted {
+                        text: @tr("Quests completed as the Courier counts them, not shown in game; past 210 the count stays between 210 and 419. Each 1,000 Courier points become 10 Special Permits for a deviant, up to 10,000 points.");
+                        wrap: word-wrap;
+                    }
+                    HorizontalLayout {
+                        spacing: 24px;
+                        alignment: start;
+                        Field {
+                            width: 240px;
+                            label: @tr("Start in");
+                            level: Confidence.derived;
+                            hint: @tr("Where the next load starts");
+                            was: Api.character.was-start-village;
+                            key: "start-village";
+                            Picker { width: 240px; model: Api.character.start-places; value: Api.character.start-village; picked(i) => { Api.set-character("start-village", i); } }
+                        }
+                        Field {
+                            width: 240px;
+                            label: @tr("Housekeeper");
+                            level: Confidence.derived;
+                            hint: @tr("Room Service, Change Housekeeper");
+                            was: Api.character.was-housekeeper;
+                            key: "housekeeper";
+                            Picker { width: 240px; model: Api.character.housekeepers; value: Api.character.housekeeper; picked(i) => { Api.set-character("housekeeper", i); } }
+                        }
+                    }
                 }
               }
             }

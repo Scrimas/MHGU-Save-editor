@@ -1,8 +1,22 @@
 import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
 import {
     Api, Tabs, Tok, Card, Muted, Chip, Asset, PageHeader, TabBar, ColHead, NumberBox, StagedBar, WasLine, Hairline,
-    EmptyState, PreviewPopup, MoreButton, CheckRow, SearchField, Settle,
+    EmptyState, PreviewPopup, MoreButton, CheckRow, SearchField, Settle, ConfidenceTag, Confidence,
 } from "../common.slint";
+
+// A deviant's permit point count with "was … Undo" under it.
+component PointsCell inherits VerticalLayout {
+    in property <int> value;
+    in property <string> was;
+    in property <string> key;
+    in property <string> label;
+    callback edited(int);
+    width: 150px;
+    alignment: center;
+    spacing: 2px;
+    NumberBox { width: 100px; minimum: 0; maximum: 9999; value: root.value; label: root.label; edited(v) => { root.edited(v); } }
+    if root.was != "": WasLine { was: root.was; key: root.key; }
+}
 
 // Checkbox, icon, name: the order of the in-game lists (H5.4); long names elide (H5.2).
 component CheckCell inherits Rectangle {
@@ -178,7 +192,14 @@ export component CollectionsPage inherits Rectangle {
                             spacing: 12px;
                             Rectangle { width: Api.assets-ok ? 40px : 0px; }
                             ColHead { text: @tr("Deviant"); horizontal-stretch: 1; }
-                            ColHead { text: @tr("Special Permits"); width: 220px; }
+                            ColHead { text: @tr("Special Permits"); width: 150px; }
+                            HorizontalLayout {
+                                width: 312px;
+                                spacing: Tok.tight;
+                                alignment: start;
+                                ColHead { text: @tr("Permit points · at the Courier"); }
+                                ConfidenceTag { level: Confidence.derived; y: 8px; }
+                            }
                             ColHead { text: @tr("Levels cleared"); width: 260px; }
                         }
                         Hairline { y: parent.height - 1px; width: parent.width; }
@@ -187,7 +208,7 @@ export component CollectionsPage inherits Rectangle {
                     ListView {
                         for d in Api.deviants: Rectangle {
                             height: d.gate != "" ? 76px : 60px;
-                            if d.was-permits != "" || d.was-levels != "": StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
+                            if d.was-permits != "" || d.was-levels != "" || d.was-points != "" || d.was-waiting != "": StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
                             HorizontalLayout {
                                 padding-left: 14px;
                                 padding-right: 12px;
@@ -203,11 +224,25 @@ export component CollectionsPage inherits Rectangle {
                                     if d.gate != "": Text { text: d.gate; color: Tok.warn; font-size: Tok.small; wrap: word-wrap; }
                                 }
                                 VerticalLayout {
-                                    width: 220px;
+                                    width: 150px;
                                     alignment: center;
                                     spacing: 2px;
                                     NumberBox { width: 100px; minimum: 0; maximum: 99; value: d.permits; label: @tr("Special Permits of {}", d.name); edited(v) => { Api.set-deviant(d.index, "permits", v); } }
                                     if d.was-permits != "": WasLine { was: d.was-permits; key: "permits:" + d.index; }
+                                }
+                                PointsCell {
+                                    value: d.points;
+                                    was: d.was-points;
+                                    key: "permit-points:" + d.index;
+                                    label: @tr("Special Permit points of {}", d.name);
+                                    edited(v) => { Api.set-deviant(d.index, "points", v); }
+                                }
+                                PointsCell {
+                                    value: d.waiting;
+                                    was: d.was-waiting;
+                                    key: "permit-wait:" + d.index;
+                                    label: @tr("Points of {} waiting at the Courier", d.name);
+                                    edited(v) => { Api.set-deviant(d.index, "waiting", v); }
                                 }
                                 VerticalLayout {
                                     width: 260px;

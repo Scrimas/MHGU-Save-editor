@@ -771,6 +771,34 @@ msgstr ""
 msgid "The game raises star levels when every urgent quest of a level is cleared."
 msgstr ""
 
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Quest counter"
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Courier points"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Quests completed as the Courier counts them, not shown in game; past 210 the count stays between 210 and 419. Each 1,000 Courier points become 10 Special Permits for a deviant, up to 10,000 points."
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Start in"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Where the next load starts"
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
+msgid "Housekeeper"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
+msgid "Room Service, Change Housekeeper"
+msgstr ""
+
 #: app/gui/ui/pages/character.slint
 msgid "As character creation sets it, numbered as the game shows it."
 msgstr ""
@@ -1015,6 +1043,10 @@ msgid "Special Permits"
 msgstr ""
 
 #: app/gui/ui/pages/collections.slint
+msgid "Permit points · at the Courier"
+msgstr ""
+
+#: app/gui/ui/pages/collections.slint
 msgid "Levels cleared"
 msgstr ""
 
@@ -1029,6 +1061,16 @@ msgstr ""
 #: app/gui/ui/pages/collections.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Special Permits of {}"
+msgstr ""
+
+#: app/gui/ui/pages/collections.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "Special Permit points of {}"
+msgstr ""
+
+#: app/gui/ui/pages/collections.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "Points of {} waiting at the Courier"
 msgstr ""
 
 #: app/gui/ui/pages/collections.slint
@@ -2103,6 +2145,18 @@ msgstr ""
 msgid "Palico Ranch Moofah 2"
 msgstr ""
 
+#: app/gui/src/targets.rs app/gui/ui/pages/unlocks.slint
+msgid "Moofah gifts"
+msgstr ""
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."
+msgstr ""
+
+#: app/gui/ui/pages/unlocks.slint
+msgid "Fleeceballs received"
+msgstr ""
+
 #: app/gui/ui/pages/unlocks.slint
 msgid "Unlock all…"
 msgstr ""
@@ -3131,6 +3185,16 @@ msgstr ""
 
 #: app/gui/src/targets.rs
 #. placeholders: {} in order, {0} {1} by position
+msgid "{} · points at the Courier"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · Special Permit points"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
 msgid "{} · levels cleared"
 msgstr ""
 
@@ -3568,6 +3632,11 @@ msgstr[1] ""
 msgid "block {}"
 msgstr ""
 
+#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · locked"
+msgstr ""
+
 #: app/gui/src/views/character_page.rs
 msgid "Skin Tone"
 msgstr ""
@@ -3576,9 +3645,14 @@ msgstr ""
 msgid "Clothing Color"
 msgstr ""
 
-#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
+#: app/gui/src/views/character_page.rs
 #. placeholders: {} in order, {0} {1} by position
-msgid "{} · locked"
+msgid "Not changed: you can't travel to {} yet"
+msgstr ""
+
+#: app/gui/src/views/character_page.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Not changed: {} becomes a Housekeeper once that villager's request is done"
 msgstr ""
 
 #: app/gui/src/views/character_page.rs
@@ -5078,6 +5152,64 @@ msgstr ""
 #: app/gui/src/views/unlocks_ui.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Recipe {}"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Chamberlyne"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Guildmarm"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Moga Sweetheart"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Tanzia Sweetheart"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Headwhiskress"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Lil Miss Forge"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Funky Felyne"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Housekeeper {}"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Bherna Village"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Kokoto Village"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Pokke Village"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Yukumo Village"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+msgid "Soaratorium"
+msgstr ""
+
+#: app/gui/src/views/unlocks_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Scene {}"
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
