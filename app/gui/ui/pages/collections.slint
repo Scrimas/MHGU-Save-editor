@@ -1,6 +1,6 @@
 import { ListView, CheckBox, Button, Palette, LineEdit } from "std-widgets.slint";
 import {
-    Api, Tok, Card, Muted, Chip, Asset, PageHeader, TabBar, ColHead, NumberBox, StagedBar, WasLine, Hairline,
+    Api, Tabs, Tok, Card, Muted, Chip, Asset, PageHeader, TabBar, ColHead, NumberBox, StagedBar, WasLine, Hairline,
     EmptyState, PreviewPopup, MoreButton, CheckRow, SearchField, Settle,
 } from "../common.slint";
 
@@ -61,7 +61,7 @@ export component CollectionsPage inherits Rectangle {
             }
         }
         // the count in each tab (H5.1)
-        TabBar { tabs: Api.collection-tabs; current: Api.collection-tab; select(i) => { Api.select-collection(i); } }
+        TabBar { tabs: Api.collection-tabs; current: Api.collection-tab; select(i) => { Tabs.select("collections", i); } }
         HorizontalLayout {
             spacing: Tok.tight;
             SearchField {

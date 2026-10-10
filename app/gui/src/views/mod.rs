@@ -623,7 +623,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         let st2 = st.clone();
         api.on_page_shown(move || {
             if let Some(ui) = w.upgrade() {
-                crate::nav::shown(&ui.global::<Api>().get_page());
+                crate::nav::shown(&ui);
                 refresh(&ui, &st2.borrow());
             }
         });

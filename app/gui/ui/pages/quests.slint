@@ -1,6 +1,6 @@
 import { ListView, CheckBox, Button, Palette, LineEdit, ScrollView } from "std-widgets.slint";
 import {
-    Api, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField, TextLink,
+    Api, Tabs, Tok, Card, Muted, Chip, QuestRow, PageHeader, TabBar, ColHead, InfoTip, Hairline, EmptyState, ListRow, SearchField, TextLink,
     ConfidenceTag, Confidence, NumberBox, StagedBar, WasLine, Picker,
 } from "../common.slint";
 
@@ -136,7 +136,7 @@ export component QuestsPage inherits Rectangle {
             subtitle: Api.quest-summary;
             staged: Api.page-counts[5];
         }
-        TabBar { tabs: Api.quest-tabs; current: Api.quest-tab; select(i) => { Api.select-quest-tab(i); } }
+        TabBar { tabs: Api.quest-tabs; current: Api.quest-tab; select(i) => { Tabs.select("quests", i); } }
         if Api.quest-arena: ScrollView {
             vertical-stretch: 1;
             HorizontalLayout {

@@ -1,6 +1,6 @@
 import { LineEdit, ListView, Button, Palette } from "std-widgets.slint";
 import {
-    Api, Tok, Fmt, Card, Asset, Muted, ItemSlot, PageHeader, TabBar, NumberBox, StagedBar, WasLine, PreviewPopup,
+    Api, Tabs, Tok, Fmt, Card, Asset, Muted, ItemSlot, PageHeader, TabBar, NumberBox, StagedBar, WasLine, PreviewPopup,
     MoreButton, ListRow, EmptyState, SearchField, KeyActivate, FocusRing, TextLink, Settle,
 } from "../common.slint";
 
@@ -139,10 +139,7 @@ export component ItemsPage inherits Rectangle {
         TabBar {
             tabs: [@tr("Item box"), @tr("Pouch"), @tr("Loadouts")];
             current: Api.item-store;
-            select(i) => {
-                Api.item-store = i;
-                Api.filter-items(Api.item-filter);
-            }
+            select(i) => { Tabs.select("items", i); }
         }
         if Api.item-store < 2: SearchField {
             placeholder-text: Api.item-store == 0 ? @tr("Search the item box") : @tr("Search the pouch");

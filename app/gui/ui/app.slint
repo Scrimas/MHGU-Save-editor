@@ -1,6 +1,6 @@
 import { Button, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator } from "std-widgets.slint";
 import {
-    Api, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
+    Api, Tabs, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
     Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing, Picker,
 } from "common.slint";
 import { OpenPage } from "pages/open.slint";
@@ -17,7 +17,7 @@ import { MonstersPage } from "pages/monsters.slint";
 import { DatabasePage } from "pages/database.slint";
 import { AdvancedPage } from "pages/advanced.slint";
 
-export { Api, Fmt }
+export { Api, Fmt, Tabs }
 
 // One Review entry (mockup A1): old → new per value, Undo, a click opens the field.
 component ReviewEntry inherits VerticalLayout {

@@ -1,6 +1,6 @@
 import { ListView, Button, ScrollView, Palette, LineEdit } from "std-widgets.slint";
 import {
-    Api, Tok, Fmt, Card, Asset, Muted, Chip, EquipRow, ConfidenceTag, Confidence, SectionTitle, PageHeader, TabBar,
+    Api, Tabs, Tok, Fmt, Card, Asset, Muted, Chip, EquipRow, ConfidenceTag, Confidence, SectionTitle, PageHeader, TabBar,
     NumberBox, StagedBar, WasLine, EmptyState, Pill, Hairline, TextLink, Chevron, ListRow, SearchField, KeyActivate,
     FocusRing, Picker,
 } from "../common.slint";
@@ -125,13 +125,7 @@ export component EquipmentPage inherits Rectangle {
         TabBar {
             tabs: [@tr("Hunter"), @tr("Palico"), @tr("My Sets"), @tr("Palico sets")];
             current: Api.equip-owner;
-            select(i) => {
-                Api.equip-owner = i;
-                if i == 1 && Api.equip-filter == "talisman" {
-                    Api.equip-filter = "all";
-                }
-                Api.filter-equip(Api.equip-filter);
-            }
+            select(i) => { Tabs.select("equipment", i); }
         }
         if Api.equip-owner >= 2: SetsView { vertical-stretch: 1; }
         if Api.equip-owner < 2: HorizontalLayout {

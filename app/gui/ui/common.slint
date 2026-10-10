@@ -328,6 +328,7 @@ export global Api {
     callback page-shown();              // Api.page changed: build the page's models
     in-out property <int> search-seq;   // Ctrl+F: the page's search field takes focus
     callback step-page(int);            // Ctrl+Up/Down: the previous/next page of the sidebar
+    callback tab-shown();               // the page's TabBar switched tabs (nav.rs history)
     // Ctrl+Left/Right: the page's TabBar selects the tab tab-step away (bump tab-seq)
     in-out property <int> tab-step;
     in-out property <int> tab-seq;
@@ -1068,12 +1069,50 @@ export component Chip inherits Rectangle {
     ta := TouchArea { clicked => { root.clicked(); } }
 }
 
+// The tabs of the pages that have them, picked the same way from a TabBar and from the
+// mouse's Back/Forward (nav.rs).
+export global Tabs {
+    // the tab `page` shows, -1 when it has none
+    public pure function current(page: string) -> int {
+        return page == "items" ? Api.item-store
+            : page == "equipment" ? Api.equip-owner
+            : page == "quests" ? Api.quest-tab
+            : page == "collections" ? Api.collection-tab
+            : page == "database" ? Api.db-tab
+            : -1;
+    }
+    public function select(page: string, i: int) {
+        if page == "items" {
+            Api.item-store = i;
+            Api.filter-items(Api.item-filter);
+        } else if page == "equipment" {
+            Api.equip-owner = i;
+            if i == 1 && Api.equip-filter == "talisman" {
+                Api.equip-filter = "all";
+            }
+            Api.filter-equip(Api.equip-filter);
+        } else if page == "quests" {
+            Api.select-quest-tab(i);
+        } else if page == "collections" {
+            Api.select-collection(i);
+        } else if page == "database" {
+            // each tab starts unfiltered
+            Api.db-tab = i;
+            Api.db-search = "";
+            Api.db-missing = false;
+            Api.filter-db();
+        }
+    }
+}
+
 // Sub-pages as a tab bar under the title (C3).
 export component TabBar inherits Rectangle {
     in property <[string]> tabs;
     in property <int> current;
     callback select(int);
     height: 40px;
+    // a tab shown, however it was picked: the mouse's Back/Forward come back to it
+    changed current => { Api.tab-shown(); }
     // Ctrl+Left/Right (a page shows one TabBar at a time)
     property <int> seq: Api.tab-seq;
     changed seq => {

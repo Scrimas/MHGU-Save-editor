@@ -1,6 +1,6 @@
 import { ListView, ScrollView } from "std-widgets.slint";
 import {
-    Api, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
+    Api, Tabs, Tok, Card, Asset, Muted, SectionTitle, PageHeader, Chip, TabBar, ListRow, SearchField, EmptyState,
     Pill, TextLink, Hairline, ConfidenceTag, Confidence, DbMonster, CrownOdds, DropTable, DbRow, DbQuest, DbItem, DbSkill, DbLine, DbEquip, DbSource, Settle, Picker,
 } from "../common.slint";
 
@@ -749,13 +749,7 @@ export component DatabasePage inherits Rectangle {
         TabBar {
             tabs: [@tr("Monsters"), @tr("Quests"), @tr("Items"), @tr("Skills"), @tr("Equipment")];
             current: Api.db-tab;
-            // each tab starts unfiltered
-            select(i) => {
-                Api.db-tab = i;
-                Api.db-search = "";
-                Api.db-missing = false;
-                Api.filter-db();
-            }
+            select(i) => { Tabs.select("database", i); }
         }
         if Api.db-tab == 0: MonsterTab { vertical-stretch: 1; }
         if Api.db-tab == 1: QuestTab { vertical-stretch: 1; }

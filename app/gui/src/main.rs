@@ -677,6 +677,43 @@ mod tests {
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
+    /// The mouse's Back/Forward walk the tabs shown as well as the pages.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn back_forward_tabs() {
+        let (ui, _st, dir) = opened("history");
+        nav::install(&ui);
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let (api, tabs) = (ui.global::<Api>(), ui.global::<Tabs>());
+        // an event builds the page shown (its TabBar reports its tab), as input does
+        let tick = || {
+            ui.window().dispatch_event(slint::platform::WindowEvent::PointerMoved { position: slint::LogicalPosition::new(5.0, 5.0) });
+            slint::platform::update_timers_and_animations();
+        };
+        api.set_page("items".into());
+        tick();
+        assert_eq!(api.get_item_store(), 0);
+        tabs.invoke_select("items".into(), 2);
+        tick();
+        api.set_page("database".into());
+        tick();
+        let place = || (api.get_page().to_string(), api.get_item_store());
+        nav::step(false);
+        tick();
+        assert_eq!(place(), ("items".into(), 2));
+        nav::step(false);
+        tick();
+        assert_eq!(place(), ("items".into(), 0));
+        nav::step(true);
+        tick();
+        assert_eq!(place(), ("items".into(), 2));
+        nav::step(true);
+        tick();
+        assert_eq!(api.get_page(), "database");
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
     /// Plain arrows walk a page's list: the row that gets the keyboard is picked, so its
     /// detail follows; Up comes back.
     #[test]

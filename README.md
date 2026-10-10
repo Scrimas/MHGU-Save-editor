@@ -155,7 +155,7 @@ open a save, Ctrl+Up/Down the previous/next page, Ctrl+Left/Right the previous/n
 the page, Escape closes a dialog or Review. The arrows move between the entries of the page
 (a list's rows are picked as you go, Enter opens or edits an entry); a number box being
 edited steps with Up/Down until Escape. In the sidebar, Up/Down/Home/End switch pages. The
-mouse's Back/Forward buttons go back and forth through the pages shown.
+mouse's Back/Forward buttons go back and forth through the pages and tabs shown.
 
 Keep your own backup anyway. This is an unofficial tool.
 
