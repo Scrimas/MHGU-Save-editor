@@ -389,7 +389,7 @@ slot,0x2C4A1,1,3,16,D,"training byte 3: init 0 only"
 slot,0x2C4A2,1,3,16,D,"sessions left (-1 per quest, 0x25c554)"
 slot,0x2C4A3,1,3,16,D,"sessions booked (type 0 course step = booked - left - 1)"
 slot,0x2C4A4,1,3,16,D,"type 2: target value to reach; type 3: 0 support move / 1 skill"
-slot,0x2C4A5,1,3,16,U,"a Palico level (looked up via 0x2641d0 by cUIOOtomo 0x5eb284); init 0"
+slot,0x2C4A5,1,3,16,D,"training slot: the Palico's level - 1 when the course was booked (uUIOtomoExercise 0x76917c); cUIOOtomo 0x5eb284 compares that level's HP / attack / defence (0x2641d0) with the current level for the gain arrows; init 0"
 slot,0x2C4A6,1,3,16,D,"type 3: list slot to fill"
 slot,0x2C4A7,1,3,16,D,"type 3: move / skill ID"
 slot,0x2C4A8,2,3,16,D,no access; 0
@@ -472,28 +472,32 @@ slot,0x11CEA1,152,,,D,"sTutorial +0x1d4: Training quest step-done bits, bit = ba
 #
 # ---- slot: sMonNyan = Meownster Hunters expedition (cMonNyanDataSave, loader 0x1ac014, writer 0x1abc4c) ----
 slot,0x11CF39,4,,,C,"random seed, re-rolled at every quest result (0x1c8cd8 -> 0x1ac30c), read by uUIMonNyan 0x1c8aec"
-slot,0x11CF3D,1,,,D,"expedition under way: 1 at dispatch (0x739770), 0 when ended (0x73b2d4)"
-slot,0x11CF3E,18,,,U,"u8[3][6] flags [k][locale j], set at dispatch (0x1ac470), read by uUIMonNyan 0x1a9510; axis k unnamed"
+slot,0x11CF3D,1,,,D,"expedition state: 0 none, 1 out (dispatch 0x739770), 2 returned with results pending (the quest-end resolution 0x1c8cc8 runs only on 1 and sets 2 at 0x1c935c), 0 again when the results are collected (0x73b2d4)"
+slot,0x11CF3E,18,,,D,"RARE rotation flags u8[3][6], byte 6k + j: k = rank (0 low, 1 high, 2 G), j = locale 0-5 (Lb_MonnyanMsg 3-8). The dispatch 0x7393b4 sets the flag (0x1ac470) of every locale shown RARE; uUIMonNyan 0x1a9364 rolls the next RARE locale per rank among available locales whose flag is 0, clearing the rank's six flags (0x1abbe4) once all are set"
 slot,0x11CF50,4,4,13,D,"expedition member 1-4: Palico index (<= 83; -1 none)"
 slot,0x11CF54,4,4,13,D,"member: position x, f32 stored / 2.05"
 slot,0x11CF58,4,4,13,D,"member: position y, f32 stored / 2.05"
 slot,0x11CF5C,1,4,13,D,"member: reach class, radius table 0x1ba538 (circle test 0x1bb098)"
-slot,0x11CF84,5,,,U,"cSaveDataLocation: 5 x u8 copied from game data +5..+9 at dispatch; byte 3 == 2 selects the result branch (0x1c8d30); byte 2 probably the locale"
-slot,0x11CF89,1,5,15,U,search circle 1-5: u8 +4 (unnamed)
-slot,0x11CF8A,1,5,15,U,search circle: u8 +5 (unnamed)
-slot,0x11CF8B,2,5,15,U,search circle: u16 +6 (unnamed)
-slot,0x11CF8D,1,5,15,U,"search circle: u8 +8, default 10 (unnamed)"
+slot,0x11CF84,1,,,D,"dispatched locale: RARE flag (game location +5, copied at 0x739414; 0x5d7904 shows Lb_MonnyanMsg 15 RARE)"
+slot,0x11CF85,1,,,D,"dispatched locale: WARNING flag (game location +6; second roll in 0x1a9364; 0x1a8700 then draws a MonNyanLotWarning monster into the third advent slot; Lb_MonnyanMsg 16 WARNING)"
+slot,0x11CF86,1,,,D,"dispatched locale index j 0-5 (game location +7, set by 0x1a9a40), 7 = none (init 0x1bafb4)"
+slot,0x11CF87,1,,,D,"dispatched rank k 0-2 (game location +8); the quest-end 0x1c8d30 takes the G-rank experience branch when 2 and the high-rank factor (MonNyanExp +7) when 1"
+slot,0x11CF88,1,,,D,"dispatched locale level 0-4 (game location +9): highest MonNyanLotEnemy tier among the locale's advent monsters (0x1a8978); selects MonNyanVillagePoint row 5k + level = point cost (0x1a9900)"
+slot,0x11CF89,1,5,15,D,"search circle 1-5: in use (1) / unused (0); 0x1b7694 parks an unused circle off screen"
+slot,0x11CF8A,1,5,15,D,"search circle: secret circle flag (0x1b7694 secret icon; the result 0x1b700c animates circles with both flags set)"
+slot,0x11CF8B,2,5,15,D,"search circle: monster code in the circle (table 0x1597ea4), 0 = none"
+slot,0x11CF8D,1,5,15,D,"search circle: material category 0-8 (icon table 0x1625fe4 via 0x1ba6d0, used when there is no monster and the circle is not secret), 10 = none"
 slot,0x11CF8E,1,5,15,D,"search circle: Palico type that gets its bonus (quest end 0x1c8e54); default 5"
 slot,0x11CF8F,1,5,15,D,"search circle size index 0-3 (radius table 0x1bb0ac), > 3 = base radius"
 slot,0x11CF90,4,5,15,D,"search circle centre x, f32 stored / 2.05"
 slot,0x11CF94,4,5,15,D,"search circle centre y, f32 stored / 2.05"
-slot,0x11CFD4,12,3,,D,"three 96-bit maps (bits 0-88) for axis k = 0-2: set 0x1ac340, tested 0x1ac3c0 (uUIMonNyan 0x1a8d44, uUITradeCenter 0x7a8ff8)"
-slot,0x11CFF8,2,36,,D,"u16[3][6][2]: two IDs (0-88, same ID space as the maps) per axis k and locale j, written at dispatch (0x1ac4d8)"
+slot,0x11CFD4,12,3,,D,"monsters hunted per rank k (0 low, 1 high, 2 G; quest rank class = questData byte 0x13 via 0x3a8d68): bit = base monster code 1-88 (table 0x1597ea4; deviants and small monsters excluded); set when killed or captured (quest-end tally 0x38d990 -> 0x1c95a4 -> 0x1ac340); tested 0x1ac3c0 (uUIMonNyan: a MonNyanLotEnemy monster is eligible once hunted at that rank; uUITradeCenter 0x7a8ff8); every slot-1 bit has a nonzero tally"
+slot,0x11CFF8,2,36,,D,"u16[3][6][2] advent monsters [rank k][locale j][0..1]: codes of the location's first two cMonNyanAdventEnemy slots (drawn from MonNyanLotEnemy by 0x1a8700), copied at dispatch (0x1ac4d8); 0x1a8bcc treats a saved code as eligible like a map bit"
 #
 # ---- slot: UI manager (GOT 0x1838bd8, loader 0x55d2c0, writer 0x55d45c): touch-panel settings, chat ----
 slot,0x11D040,6,4,,D,"touch-panel packs 0-3, 6 panel IDs each, 28 = empty (getter 0x55dd48)"
 slot,0x11D058,1,,,D,Shell Selector panel setting (cUIOCPanelShellSelector)
-slot,0x11D059,1,,,U,"+0x1c5: no reader found"
+slot,0x11D059,1,,,D,"UI manager +0x1c5: unused u8: only the loader 0x55d354, the writer and the copy of 0x6aa9b8 (type 9) touch it; init / reset skip it; no reader; 0 in all saves"
 slot,0x11D05A,2,2,,D,"Item Register S panel: 2 x u16 item IDs"
 slot,0x11D05E,2,4,,D,"Item Register L panel: 4 x u16 item IDs"
 slot,0x11D066,1,2,,D,"Support Register S panel: 2 x u8"
@@ -604,12 +608,12 @@ qslot,0x1B00,256,,,D,"download trailer: the last 256 bytes of the downloaded fil
 crec,0x00,4,,,C,quest ID
 crec,0x04,4,,,C,"data size: 942 (hunter Arena, see @arena942) or 169 (Prowler, see @arena169)"
 crec,0x08,4,,,C,record data +0: quest ID (= slot ID)
-crec,0x0C,1,,,U,"record data +4: u8, 2 in every record; not read by the quest setup 0x3c1568 / 0x3c2038"
+crec,0x0C,1,,,D,"record data +4: mEntryCount (u8; MT property name, type 4, in the property lists 0x32c38c / 0x334008; deserializer 0x346544); 2 in every record; no reader: only copied, serialized and listed for reflection"
 crec,0x0D,2035,,,D,"record data +5..: the rest of the Arena equipment record in the ac_pl_equip / ac_ny_equip table format (serializer 0x34c4f4 / 0x331edc; @arena942 / @arena169), then zero to the end of the slot"
 #
 # challenge record data (reference structs, offsets from record data +0)
 arena942,0x000,4,,,C,quest ID (= slot ID)
-arena942,0x004,1,,,U,"u8, 2 in every record (11 game-table, 29 saved); not read by 0x3c1568"
+arena942,0x004,1,,,D,"mEntryCount (u8, MT property name), 2 in every record; no reader (see crec +0x0C)"
 arena942,0x005,12,,,D,"grade times S/A/B in seconds, 3 x u32 (quest +0xd3c; graded by 0x3b123c)"
 arena942,0x011,12,,,D,"Wycademy points for grade S/A/B, 3 x u32 (quest +0xd48; 0x3b138c picks one, 0x38aec0 adds it to S+0x2c)"
 arena942,0x01D,182,5,,D,"@arenaset equipment sets 1-5"
@@ -629,7 +633,7 @@ arenagear,0x0,2,,,D,"equipment ID (talisman: its talisman ID)"
 arenagear,0x2,1,,,D,"level (box level field = value - 1)"
 arenagear,0x3,6,,,D,"3 x u16 decorations (a talisman always gets 3 slots)"
 arena169,0x000,4,,,C,quest ID
-arena169,0x004,1,,,U,"u8, 2 in every record; not read by 0x3c2038"
+arena169,0x004,1,,,D,"mEntryCount (u8, MT property name), 2 in every record; no reader (see crec +0x0C)"
 arena169,0x005,12,,,D,"grade times S/A/B in seconds (quest +0xd3c)"
 arena169,0x011,12,,,D,"Wycademy points per grade (quest +0xd48)"
 arena169,0x01D,28,5,,D,"@arenapal Prowler sets 1-5"

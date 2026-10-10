@@ -17,11 +17,11 @@ non-zero instance in the live save (first 24 bytes), its absolute offset in brac
 | Status | Bytes | Share |
 |---|---|---|
 | C | 3691842 | 71.560% |
-| D | 1467042 | 28.436% |
-| U | 216 | 0.004% |
+| D | 1467243 | 28.440% |
+| U | 15 | 0.000% |
 | gap | 0 | 0.000% |
 
-Items to resolve: 15 (in 4 scopes).
+Items to resolve: 4 (in 1 scopes).
 
 ## Scope `slot` (1177796 B, 3 instances)
 
@@ -29,23 +29,3 @@ Items to resolve: 15 (in 4 scopes).
 - `+0x28FD` 2 B, **U** S+0x112 u16: written by the transfer (old +0xdc) only; 1324 in slot 1, no v1.4 writer or reader found; instances 3 (6 B), nz 1, timeline 1, sample [0x18F599] `2c 05`
 - `+0x2F7A` 1 B, **U** progress map bits 24-31: 24-29 Room Service housekeepers 1-6 available (0x78b474; bit 29 = talk condition 85); 30 set by 0x297f24 (uPlayerLobbyAirou, flag 141), read by aVillage02 0x6bc0e0, meaning UNRESOLVED; 31 quest 10646 listed (condition 64); instances 3 (3 B), nz 1, timeline 2, sample [0x18FC16] `bf`
 - `+0x2F7B` 1 B, **U** progress map bits 32-39: 32 Nakarkos in the keyboard dictionary; 33 set at quest end 0x38b904 when 0x25d484 > 0, read by Palico training / Room Service, UNRESOLVED; 34 set by the Smithy 0x6f0c84, UNRESOLVED; 35/36 Palico roster +6 each; 37 Hub 9 star or q10768; 38 Hub 13 star or q111304; 39 Palico level cap 75; instances 3 (3 B), nz 1, timeline 1, sample [0x18FC17] `ff`
-- `+0x2C4A5` 3 x 1 B (stride 16), **U** a Palico level (looked up via 0x2641d0 by cUIOOtomo 0x5eb284); init 0; instances 9 (9 B), nz 0, timeline 1
-- `+0x11CF3E` 18 B, **U** u8[3][6] flags [k][locale j], set at dispatch (0x1ac470), read by uUIMonNyan 0x1a9510; axis k unnamed; instances 3 (54 B), nz 1, timeline 1, sample [0x2A9BDA] `00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00`
-- `+0x11CF84` 5 B, **U** cSaveDataLocation: 5 x u8 copied from game data +5..+9 at dispatch; byte 3 == 2 selects the result branch (0x1c8d30); byte 2 probably the locale; instances 3 (15 B), nz 3, timeline 1, sample [0x2A9C20] `00 00 05 01 03`
-- `+0x11CF89` 5 x 1 B (stride 15), **U** search circle 1-5: u8 +4 (unnamed); instances 15 (15 B), nz 4, timeline 1, sample [0x2A9C25] `01`
-- `+0x11CF8A` 5 x 1 B (stride 15), **U** search circle: u8 +5 (unnamed); instances 15 (15 B), nz 0, timeline 1
-- `+0x11CF8B` 5 x 2 B (stride 15), **U** search circle: u16 +6 (unnamed); instances 15 (30 B), nz 1, timeline 1, sample [0x2A9C54] `02 00`
-- `+0x11CF8D` 5 x 1 B (stride 15), **U** search circle: u8 +8, default 10 (unnamed); instances 15 (15 B), nz 14, timeline 1, sample [0x2A9C29] `05`
-- `+0x11D059` 1 B, **U** +0x1c5: no reader found; instances 3 (3 B), nz 0, timeline 1
-
-## Scope `arena169` (169 B, reference struct: its bytes are counted by the row that names it)
-
-- `+0x4` 1 B, **U** u8, 2 in every record; not read by 0x3c2038; instances 0 (0 B), nz 0, timeline 1
-
-## Scope `arena942` (942 B, reference struct: its bytes are counted by the row that names it)
-
-- `+0x4` 1 B, **U** u8, 2 in every record (11 game-table, 29 saved); not read by 0x3c1568; instances 0 (0 B), nz 0, timeline 1
-
-## Scope `crec` (2048 B, 45 instances)
-
-- `+0xC` 1 B, **U** record data +4: u8, 2 in every record; not read by the quest setup 0x3c1568 / 0x3c2038; instances 45 (45 B), nz 40, timeline 1, sample [0x1764A5] `02`
