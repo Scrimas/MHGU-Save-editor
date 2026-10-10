@@ -2732,7 +2732,7 @@ dependencies = [
 
 [[package]]
 name = "mhgu-editor"
-version = "2.8.0"
+version = "2.9.0"
 dependencies = [
  "chrono",
  "dirs",
@@ -2755,7 +2755,7 @@ dependencies = [
 
 [[package]]
 name = "mhgu-save"
-version = "2.8.0"
+version = "2.9.0"
 dependencies = [
  "csv",
  "miniz_oxide 0.8.9",
