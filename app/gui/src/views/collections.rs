@@ -174,16 +174,13 @@ pub(super) fn wire_collections(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_set_deviant, |ui, s, d: i32, what: SharedString, v: i32| {
         let d = d as usize;
         let slot = s.slot;
-        let (t, conf) = match what.as_str() {
-            "permits" => (Target::Permits(d), Conf::Confirmed),
-            "points" | "waiting" => (Target::PermitPoints(d, what == "waiting"), Conf::Derived),
-            _ => (Target::Levels(d), Conf::Confirmed),
+        let t = match what.as_str() {
+            "permits" => Target::Permits(d),
+            "points" | "waiting" => Target::PermitPoints(d, what == "waiting"),
+            _ => Target::Levels(d),
         };
-        if refused(&ui, conf) {
-            return;
-        }
         let title = t.label(s.save(), slot);
-        s.edit(Edit::one(t, title, conf), |sv, _| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, _| {
             let mut c = Char::new(sv, slot);
             if what == "permits" {
                 c.set_permits(d, v.clamp(0, 99) as u8);

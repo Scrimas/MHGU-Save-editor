@@ -108,7 +108,8 @@ export component CardsPage inherits Rectangle {
             spacing: 10px;
             alignment: start;
             height: 20px;
-            ConfidenceTag { level: Confidence.derived; }
+            // removing a kept card is Confirmed; the inbox and the blocked list not yet
+            if Api.card-tab != 0: ConfidenceTag { level: Confidence.derived; }
             if Api.was-cards != "": WasLine { was: Api.was-cards; key: Api.was-cards-key; }
         }
         HorizontalLayout {

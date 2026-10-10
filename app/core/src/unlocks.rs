@@ -9,7 +9,12 @@
 //! Most maps are "U + NEW" like the Smithy and Guild Card maps: the game sets the bit and
 //! its NEW copy when it unlocks an entry, and the cursor clears NEW. All DERIVED from code
 //! (subagent RE of 2026-10-09) and checked against the save timeline: no map holds a bit
-//! past its entries, fresh slots hold the defaults named below.
+//! past its entries, fresh slots hold the defaults named below. CONFIRMED in game
+//! (2026-10-10): the maps lab, song, costume, gallery, combos and tips; the pets' names,
+//! costumes and adoption bits; the Moofahs' affection and gifts; the Housekeeper and the
+//! start village. The game fills the Trader's items, the coin trades, the supply sets and
+//! the delivery requests itself (`Kind::Marks`, read only). The Trader's for-sale lists
+//! (words, scenes, costumes), the notes, events and milestones stay DERIVED.
 
 use crate::data::{tables, UnlockEntry};
 use crate::guildcard as gc;
@@ -25,9 +30,12 @@ pub enum Kind {
     Unlock,
     /// One bit per entry, no NEW copy: done, seen or read.
     Flag,
-    /// Shop lists: the shop shows an entry while its star condition holds, whatever the
-    /// bit, which only records that it was listed (and so got its NEW mark once). Read
-    /// only (Market / Guild Store 0x72ef60, Armory 0x6eb9fc).
+    /// Lists the game fills itself: it shows an entry while its condition holds (star
+    /// level, flag, Lab upgrade), whatever the bit, which only records that it was listed
+    /// (and so got its NEW mark once). Read only. The shops (Market / Guild Store
+    /// 0x72ef60, Armory 0x6eb9fc); the Trader's items, the coin trades, the supply drop
+    /// sets and the delivery requests, whose bits the game set back with NEW after an edit
+    /// cleared them (in game, 2026-10-10).
     Marks,
 }
 
@@ -65,16 +73,16 @@ pub fn maps() -> &'static [Map] {
         let mut v = vec![
             m("lab", LAB, Some(LAB_NEW), 12, Kind::Unlock),
             m("song", 0x505B, Some(0x505F), 4, Kind::Unlock),
-            m("supply", SUPPLY, Some(SUPPLY_NEW), 8, Kind::Unlock),
-            m("coin", 0x50A3, Some(0x50AB), 8, Kind::Unlock),
+            m("supply", SUPPLY, Some(SUPPLY_NEW), 8, Kind::Marks),
+            m("coin", 0x50A3, Some(0x50AB), 8, Kind::Marks),
             m("costume", COSTUMES, Some(COSTUMES_NEW), 8, Kind::Unlock),
             m("gallery", 0x2F87, Some(0x2F8B), 4, Kind::Unlock),
-            m("trader:items0", 0x31EF, Some(0x31F3), 4, Kind::Unlock),
-            m("trader:items1", 0x31F7, Some(0x31FB), 4, Kind::Unlock),
+            m("trader:items0", 0x31EF, Some(0x31F3), 4, Kind::Marks),
+            m("trader:items1", 0x31F7, Some(0x31FB), 4, Kind::Marks),
             m("trader:words", 0x31FF, Some(0x3237), 56, Kind::Unlock),
             m("trader:scenes", 0x326F, Some(0x3283), 20, Kind::Unlock),
             m("trader:costumes", 0x3297, Some(0x329B), 4, Kind::Unlock),
-            m("trader:delivery", 0x32A7, Some(0x32AB), 4, Kind::Unlock),
+            m("trader:delivery", 0x32A7, Some(0x32AB), 4, Kind::Marks),
             // talk action 7 sets the bit and the large list's NEW bit (0x55686c)
             m("notes2", 0x32D7, None, 4, Kind::Flag),
             m("tips", 0x32B3, None, 4, Kind::Flag),
@@ -141,22 +149,19 @@ pub fn count(s: &Save, base: usize, m: usize) -> (usize, usize) {
 /// Why entry `bit` can't be set to `v` by an edit, if it can't.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Refusal {
-    /// A shop list: the bit does not change what the shop sells.
+    /// A list the game fills itself (`Kind::Marks`): the bit does not change what it lists.
     Marks,
     /// An Item Box expansion: a smaller box could lose what is stored past it.
     BoxExpansion,
-    /// A supply set the Lab upgrade it follows gives back when the Division opens.
-    FollowsLab(usize),
 }
 
-pub fn refusal(s: &Save, base: usize, m: usize, bit: usize, v: bool) -> Option<Refusal> {
+pub fn refusal(_s: &Save, _base: usize, m: usize, bit: usize, v: bool) -> Option<Refusal> {
     let mp = &maps()[m];
     if mp.kind == Kind::Marks {
         return Some(Refusal::Marks);
     }
     match mp.id.as_str() {
         "lab" if !v && bit < LAB_BOX => Some(Refusal::BoxExpansion),
-        "supply" if !v => supply_lab(bit).filter(|&l| s.bit(base + LAB, l)).map(Refusal::FollowsLab),
         _ => None,
     }
 }
@@ -474,7 +479,7 @@ mod tests {
         s.set_bit(B + SUPPLY, SUPPLY_OPEN, true);
         assert!(set(&mut s, B, lab, 5, true) && s.bit(B + SUPPLY, 4) && s.bit(B + SUPPLY_NEW, 4));
         let supply = find("supply").unwrap();
-        assert_eq!(refusal(&s, B, supply, 4, false), Some(Refusal::FollowsLab(5)));
+        assert_eq!(refusal(&s, B, supply, 4, false), Some(Refusal::Marks));
         assert!(set(&mut s, B, lab, 5, false) && !s.bit(B + SUPPLY, 4) && s.bit(B + LAB_OFFERED, 5));
         // box expansions stay
         assert!(set(&mut s, B, lab, 0, true) && !set(&mut s, B, lab, 0, false) && on(&s, B, lab, 0));

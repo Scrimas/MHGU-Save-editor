@@ -649,6 +649,8 @@ export global Api {
     in property <string> unlock-summary;
     // entries can be edited (not the shops' lists); the pets' form instead of entries
     in property <bool> unlock-editable;
+    // the selected row holds a Derived edit
+    in property <bool> unlock-derived;
     in property <bool> unlock-pets;
     in property <[PetRow]> pets;
     in property <[int]> moofahs;
@@ -750,6 +752,8 @@ export global Win {
 export global Fmt {
     // the language's thousands separator (i18n.rs)
     in property <string> sep: ",";
+    // the window's font: the system's Chinese one for Chinese, "" for Slint's default (i18n.rs)
+    in property <string> font;
     // 1234567 -> "1,234,567"
     public pure function num(v: int) -> string {
         return v < 0 ? "-" + Fmt.pos(-v) : Fmt.pos(v);

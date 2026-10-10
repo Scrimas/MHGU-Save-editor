@@ -1,9 +1,10 @@
 //! Options and chat: the per-character game options (`sGameControl +0x5e`, the Start
 //! Menu's *Options* and *Multiplayer Settings* windows), the control options of the
 //! character data, the chat phrases, and the title menu's settings shared by the three
-//! characters (docs/11-save-map.md, "Smaller managers", "Block A header"). DERIVED from
-//! the option windows' item, get and set functions (`0x5e7558`, `0x5e7d34`, `0x5e8130`,
-//! network `0x5e947c`) run under emulation, and the chat loader `0x1caab8`.
+//! characters (docs/11-save-map.md, "Smaller managers", "Block A header"). From the
+//! option windows' item, get and set functions (`0x5e7558`, `0x5e7d34`, `0x5e8130`,
+//! network `0x5e947c`) run under emulation, and the chat loader `0x1caab8`; CONFIRMED in
+//! game (2026-10-10) except the Simplified Chinese language value (`LANGUAGES`).
 
 use crate::save::Save;
 
@@ -184,9 +185,12 @@ pub const MAX_BRIGHTNESS: u8 = 48;
 /// Rumble: 1 on, anything else off.
 pub const RUMBLE: usize = 0x4D;
 /// Text language, the MT language index: 1 English, 2 French, 3 Spanish, 4 German,
-/// 5 Italian (the title menu's choices); 0 = not set, the loader takes the console's.
+/// 5 Italian, 7 Traditional and 8 Simplified Chinese (the title menu's choices; 7 and 8
+/// came with the 1.4 update); 0 = not set, the loader takes the console's. The index is
+/// the position in the executable's suffix table (jpn eng fre spa ger ita kor chT chS …,
+/// `0x157a68b`): 1-5 and 7 CONFIRMED in game, 8 DERIVED from that table.
 pub const LANGUAGE: usize = 0xB2A4;
-pub const LANGUAGES: [u8; 6] = [0, 1, 2, 3, 4, 5];
+pub const LANGUAGES: [u8; 8] = [0, 1, 2, 3, 4, 5, 7, 8];
 
 pub fn set_brightness(s: &mut Save, v: u8) {
     s.set_u8(BRIGHTNESS, v.min(MAX_BRIGHTNESS));
@@ -243,7 +247,8 @@ mod tests {
 
         set_brightness(&mut s, 90);
         assert_eq!(s.u8(BRIGHTNESS), 48);
-        assert!(!set_language(&mut s, 7));
-        assert!(set_language(&mut s, 4));
+        // 6 is Korean, which the Switch release lacks; 7 and 8 the 1.4 Chinese
+        assert!(!set_language(&mut s, 6) && !set_language(&mut s, 9));
+        assert!(set_language(&mut s, 4) && set_language(&mut s, 8));
     }
 }

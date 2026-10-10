@@ -85,13 +85,13 @@ fn row_note(r: &URow) -> String {
         "" => tr("Names, costumes worn and adoption of Moofy and the three Poogies.").into(),
         "lab" => tr("Upgrades installed at the Soaratorium Lab. Installing one here also offers it, as the game installs only offered ones, and unlocks the supply drop set it gives. The three Item Box expansions stay once installed: a smaller box could lose what is stored past it.").into(),
         "song" => tr("Songs the Hunters' Pub Jukebox plays. The Mewstress unlocks the others when you talk to her.").into(),
-        "supply" => tr("Sets the Provision Division can send. Most follow a Lab upgrade: the game gives them back each time the Division opens while the upgrade is installed.").into(),
-        "coin" => tr("Items the Mewstress trades for Horns Coins.").into(),
+        "supply" => tr("Read only: the Provision Division lists a set once its Lab upgrade or progress allows, whatever the save holds; the save only keeps which sets got their NEW mark.").into(),
+        "coin" => tr("Read only: the Mewstress lists a Horns Coin trade once its star level allows, whatever the save holds; the save only keeps which trades got their NEW mark.").into(),
         "costume" => tr("Costumes for the village pets: Moofy's (the first six) and the Poogies'. Ten, twenty, twenty-eight and every Poogie costume earn the Poogie Ball awards after your next quest.").into(),
         "gallery" => tr("Movies the Housekeeper's Gallery plays. Credits 2 and 3 come back at the next load once the ending is in the Gallery.").into(),
         "trader:words" | "trader:scenes" | "trader:costumes" => tr("What the Trader puts up for sale. An entry for sale can be bought even without the download that sells it; what you already have is not shown.").into(),
-        "trader:items0" | "trader:items1" => tr("Items the Trader sells for Trader points.").into(),
-        "trader:delivery" => tr("Delivery requests the Trader offers. The game offers one once its villager's request is raised.").into(),
+        "trader:items0" | "trader:items1" => tr("Read only: the Trader lists an item once its star level allows, whatever the save holds; the save only keeps which items got their NEW mark.").into(),
+        "trader:delivery" => tr("Read only: the Trader offers a delivery request once its villager's request is raised, whatever the save holds; the save only keeps which requests got their NEW mark.").into(),
         "notes2" => tr("Extra Hunter's Notes entries of the Elder Dragons and deviants. Unlocking one gives the monster's Notes page its NEW mark, as the game does.").into(),
         "tips" => tr("Hunter's Notes tips read. A tip not read shows NEW once the game offers it.").into(),
         "combos" => tr("Recipes combined at least once. A recipe never combined always succeeds the first time; 130 earn an award after your next quest.").into(),
@@ -348,6 +348,8 @@ pub(super) fn unlocks_page(ui: &AppWindow, st: &State) {
     api.set_unlock_note(row_note(r).into());
     api.set_unlock_pets(r.maps.is_empty());
     api.set_unlock_editable(r.maps.iter().any(|&m| unlocks::maps()[m].kind != Kind::Marks));
+    let marks = r.maps.iter().all(|&m| unlocks::maps()[m].kind == Kind::Marks);
+    api.set_unlock_derived(!r.maps.is_empty() && !marks && maps_conf(&r.maps) == Conf::Derived);
     let editable: Vec<usize> = rows.iter().flat_map(|r| r.maps.iter().copied()).filter(|&m| unlocks::maps()[m].kind != Kind::Marks).collect();
     let (k, n) = editable.iter().fold((0, 0), |a, &m| {
         let (k, n) = unlocks::count(s, base, m);
@@ -417,13 +419,22 @@ fn pets_view(ui: &AppWindow, st: &State) {
     api.set_was_moofah_gifts(st.was(Target::MoofahGifts).into());
 }
 
-/// Every Derived: from code, checked against the save timeline, not yet in game.
-fn stage(ui: &AppWindow, s: &mut State, t: Target, f: impl FnOnce(&mut mhgu_save::Save, usize)) {
-    if refused(ui, Conf::Derived) {
+/// The unlock maps checked in game (2026-10-10: an entry locked, or every entry unlocked,
+/// shown so by the game); the others are Derived: from code, checked against the save
+/// timeline.
+const CONFIRMED_MAPS: [&str; 6] = ["lab", "song", "costume", "gallery", "combos", "tips"];
+
+/// Confirmed when every map of `maps` was checked in game.
+pub fn maps_conf(maps: &[usize]) -> Conf {
+    if maps.iter().all(|&m| CONFIRMED_MAPS.contains(&unlocks::maps()[m].id.as_str())) { Conf::Confirmed } else { Conf::Derived }
+}
+
+fn stage(ui: &AppWindow, s: &mut State, conf: Conf, t: Target, f: impl FnOnce(&mut mhgu_save::Save, usize)) {
+    if refused(ui, conf) {
         return;
     }
     let title = t.label(s.save(), s.slot);
-    s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+    s.edit(Edit::one(t, title, conf), |sv, base| {
         f(sv, base);
         vec![]
     });
@@ -454,14 +465,14 @@ pub(super) fn wire_unlocks(ui: &AppWindow, st: &Shared) {
         if m >= unlocks::maps().len() || unlocks::refusal(s.save(), s.base(), m, b, on).is_some() {
             return;
         }
-        stage(&ui, &mut s, Target::Unlock(m), |sv, base| {
+        stage(&ui, &mut s, maps_conf(&[m]), Target::Unlock(m), |sv, base| {
             unlocks::set(sv, base, m, b, on);
         });
     });
     on!(ui, st, on_set_pet, |ui, s, k: i32, field: SharedString, v: SharedString| {
         let k = (k.max(0) as usize).min(unlocks::PETS - 1);
         let slot = s.slot;
-        stage(&ui, &mut s, Target::Pet(k), |sv, base| match field.as_str() {
+        stage(&ui, &mut s, Conf::Confirmed, Target::Pet(k), |sv, base| match field.as_str() {
             "name" => unlocks::set_pet_name(sv, base, k, v.trim()),
             "costume" => {
                 let c = *unlocks::costume_range(k).start() as i32 + v.parse::<i32>().unwrap_or(0);
@@ -472,10 +483,10 @@ pub(super) fn wire_unlocks(ui: &AppWindow, st: &Shared) {
     });
     on!(ui, st, on_set_moofah, |ui, s, k: i32, v: i32| {
         let k = (k.max(0) as usize).min(unlocks::PETS - 1);
-        stage(&ui, &mut s, Target::Moofahs, |sv, base| unlocks::set_moofah(sv, base, k, v.clamp(0, 10) as u8));
+        stage(&ui, &mut s, Conf::Confirmed, Target::Moofahs, |sv, base| unlocks::set_moofah(sv, base, k, v.clamp(0, 10) as u8));
     });
     on!(ui, st, on_set_moofah_gifts, |ui, s, v: i32| {
         let slot = s.slot;
-        stage(&ui, &mut s, Target::MoofahGifts, |sv, _| unlocks::set_moofah_gifts(sv, slot, v.clamp(0, 10) as u8));
+        stage(&ui, &mut s, Conf::Confirmed, Target::MoofahGifts, |sv, _| unlocks::set_moofah_gifts(sv, slot, v.clamp(0, 10) as u8));
     });
 }

@@ -792,7 +792,7 @@ use self::{
 };
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
 pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};
-pub use self::unlocks_ui::{housekeeper_name, pet_costume_name, start_place_name, unlock_map_name, unlock_rows};
+pub use self::unlocks_ui::{housekeeper_name, maps_conf, pet_costume_name, start_place_name, unlock_map_name, unlock_rows};
 pub use self::palicoes::{look_label, request_field_name, request_value_name, role_name};
 pub use self::options_ui::{auto_trigger, chat_group_name, choice_name, language_name, option_name};
 pub use self::{file::*, update_ui::*};

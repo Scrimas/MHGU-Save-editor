@@ -1,9 +1,10 @@
 //! Palico records, 324 B (docs/11-save-map.md "Palico records", from the loader; every
 //! field the editor writes CONFIRMED in game, the lists and looks on 2026-10-09). A
-//! Palico copied or imported into another character (`export`, `import`) is DERIVED.
+//! Palico copied or imported into another character (`export`, `import`) is CONFIRMED in
+//! game (2026-10-10).
 //!
 //! A Palico is named by its place: 0-83 the character's Palicoes, then 24 Palicoes for
-//! hire (the same record; an edited one is hired as edited: DERIVED).
+//! hire (the same record; an edited one is hired as edited: CONFIRMED in game, 2026-10-10).
 //!
 //!   +0x00 char[32] name
 //!   +0x20 224 B parameter block: exp u32 +0, level - 1 u8 +4, support bias +5, +6 UNRESOLVED,

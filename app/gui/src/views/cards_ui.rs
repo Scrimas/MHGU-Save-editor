@@ -1,5 +1,6 @@
 //! The Guild Cards page: the cards kept, the inbox, the Hunters for Hire and the
-//! blocked-user list (`mhgu_save::cards`). Every edit is Derived.
+//! blocked-user list (`mhgu_save::cards`). Removing a kept card is Confirmed, the other
+//! edits Derived.
 
 use super::*;
 use crate::CardRow;
@@ -139,13 +140,14 @@ pub(super) fn cards_page(ui: &AppWindow, st: &State) {
     api.set_cards_summary(summary.into());
 }
 
-/// Every Derived: from code, the test save and a game-made list, not yet in game.
-fn stage(ui: &AppWindow, s: &mut State, targets: Vec<Target>, title: String, f: impl FnOnce(&mut mhgu_save::Save, usize) -> bool) -> bool {
-    if refused(ui, Conf::Derived) {
+/// Removing a kept card is Confirmed in game; the inbox and blocked-list edits are Derived
+/// (from code, the test save and a game-made list).
+fn stage(ui: &AppWindow, s: &mut State, conf: Conf, targets: Vec<Target>, title: String, f: impl FnOnce(&mut mhgu_save::Save, usize) -> bool) -> bool {
+    if refused(ui, conf) {
         return false;
     }
     let mut ok = false;
-    let e = Edit { key: String::new(), title, detail: String::new(), note: String::new(), conf: Conf::Derived, targets };
+    let e = Edit { key: String::new(), title, detail: String::new(), note: String::new(), conf, targets };
     s.edit(e, |sv, base| {
         ok = f(sv, base);
         vec![]
@@ -165,11 +167,12 @@ pub(super) fn wire_cards(ui: &AppWindow, st: &Shared) {
             t @ (0 | 1) => {
                 let l = if t == 0 { List::Stored } else { List::Inbox };
                 let Some(c) = cards::cards(s.save(), base, l).into_iter().find(|c| c.slot == slot) else { return };
-                stage(&ui, &mut s, vec![Target::Cards(t == 1)], trf("Remove the Guild Card of {}", &[&c.name]), |sv, base| cards::remove(sv, base, l, slot));
+                let conf = if t == 0 { Conf::Confirmed } else { Conf::Derived };
+                stage(&ui, &mut s, conf, vec![Target::Cards(t == 1)], trf("Remove the Guild Card of {}", &[&c.name]), |sv, base| cards::remove(sv, base, l, slot));
             }
             3 => {
                 let Some(b) = cards::blacklist(s.save()).into_iter().find(|b| b.slot == slot) else { return };
-                stage(&ui, &mut s, vec![Target::Blacklist], trf("Unblock {}", &[&b.name]), |sv, _| cards::unblock(sv, slot));
+                stage(&ui, &mut s, Conf::Derived, vec![Target::Blacklist], trf("Unblock {}", &[&b.name]), |sv, _| cards::unblock(sv, slot));
             }
             _ => {}
         }
@@ -186,7 +189,7 @@ pub(super) fn wire_cards(ui: &AppWindow, st: &Shared) {
             return;
         }
         let title = trf("Move the Guild Card of {} to the Card List", &[&c.name]);
-        if stage(&ui, &mut s, vec![Target::Cards(false), Target::Cards(true)], title, |sv, base| cards::move_to_stored(sv, base, slot, today).is_some())
+        if stage(&ui, &mut s, Conf::Derived, vec![Target::Cards(false), Target::Cards(true)], title, |sv, base| cards::move_to_stored(sv, base, slot, today).is_some())
             && probe == Some(Moved::Kept)
         {
             toast(&ui, tr("The Card List already holds as recent a card of this hunter: only the inbox card goes"), false);

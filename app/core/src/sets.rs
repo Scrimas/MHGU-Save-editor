@@ -15,6 +15,12 @@
 //! Palico set, 68 B from `PALICO_SETS`: +0x00 char[42] name, +0x2A 3 × u16 Palico box
 //! index (weapon, head, body), +0x30 3 × u8 (1 in every unused set), then zeros.
 //!
+//! CONFIRMED in game (2026-10-10): a My Set's name, pieces with their decoration copies,
+//! pigment, own-colour flags and modes, style, arts and SP bits, and `save_current`; what
+//! the hunter has on (arts and SP bits, style, pigment, own-colour flags and modes, player
+//! and header copies); a Palico set's name and pieces; clearing a set (`clear_my_set`,
+//! `clear_palico_set`).
+//!
 //! Hunter Arts by ID (data/hunter-arts.csv): 1-10 for any weapon, then 12 IDs (four arts
 //! of three tiers) per weapon class in the box's order, 71-82 (class 5) unused. Checked
 //! against the analysed saves: Round Force I (26) on a new character's Sword and Shield,

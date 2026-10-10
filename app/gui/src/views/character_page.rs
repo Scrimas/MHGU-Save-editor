@@ -203,8 +203,8 @@ pub(super) fn weapon_use_rows(st: &State) -> Vec<WeaponUseRow> {
         .collect()
 }
 
-/// The Progress card's Derived fields: the quest counter, Courier points, the place a load
-/// starts in and the Housekeeper (pickers send the index in their list). False for
+/// The Progress card's fields: the quest counter (Derived), Courier points, the place a
+/// load starts in and the Housekeeper (pickers send the index in their list). False for
 /// another key.
 fn set_village_life(ui: &AppWindow, s: &mut State, key: &str, v: i32) -> bool {
     let t = match key {
@@ -239,11 +239,12 @@ fn set_village_life(ui: &AppWindow, s: &mut State, key: &str, v: i32) -> bool {
         toast(ui, m, true);
         return true;
     }
-    if refused(ui, Conf::Derived) {
+    let conf = if t == Target::QuestCounter { Conf::Derived } else { Conf::Confirmed };
+    if refused(ui, conf) {
         return true;
     }
     let title = t.label(s.save(), slot);
-    s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+    s.edit(Edit::one(t, title, conf), |sv, base| {
         match t {
             Target::QuestCounter => Char::new(&mut *sv, slot).set_quest_counter(v),
             Target::CourierPoints => Char::new(&mut *sv, slot).set_courier_points(v),

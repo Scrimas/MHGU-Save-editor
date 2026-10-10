@@ -1,6 +1,7 @@
 //! Other hunters' data: the stored Guild Cards (list 1), the Guild Card inbox (list 2), the
 //! blocked-user list and the Hunters for Hire (docs/11-save-map.md, "Guild Card manager",
-//! the sBlackList and sGuestHunter rows). DERIVED from the game's code.
+//! the sBlackList and sGuestHunter rows). DERIVED from the game's code; removing a card
+//! from the stored list is CONFIRMED in game (2026-10-10).
 //!
 //! A card list is a run of elements: u32 zlib length, a zlib stream of one 6328-byte card,
 //! u32 state (3 card, 1 empty), a 36-byte trailer (u16 HR, 11 UTF-16 name, 8-byte ID, u32

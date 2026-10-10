@@ -3,8 +3,10 @@
 //! A slot is self-contained (docs/11-save-map.md, "File layout"): the three slots share
 //! one layout at a fixed stride, and making a character in game wrote only its own slot
 //! and the slot-use byte (CONFIRMED with two new characters). So a slot's bytes moved to
-//! another slot, or to another save, are that character there. DERIVED: not yet loaded
-//! in game after such a move.
+//! another slot, or to another save, are that character there. Copy, swap, delete (the
+//! slot-use byte and `LAST_PLAYED`) and import of an editor character file (the same write
+//! as a copy) are CONFIRMED in game (2026-10-10); import of an MHXX character stays
+//! DERIVED.
 
 use crate::character;
 use crate::save::{Save, LAST_PLAYED, SLOT_SIZE};

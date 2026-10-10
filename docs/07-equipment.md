@@ -143,7 +143,8 @@ one colour per body part, kept in two places.
 
 ### Current outfit
 
-**DERIVED.**
+**CONFIRMED in game (2026-10-10)** for the pigment, default-colour flags and colour modes,
+written to both copies (slot header and player record, below).
 
 | Offset | Size | Field |
 |---|---|---|
@@ -161,8 +162,10 @@ An editor that dyes the current outfit should write both.
 
 ### My Sets (saved equipment sets)
 
-**CONFIRMED** for the box indices, name and pigment. Set 1 is at `base + 0x208C8`
-(absolute `0x1AD564`), stride `0x88`. The menu shows 5 pages × 8 sets, so there are
+**CONFIRMED** for the box indices, name and pigment; the decoration copies, colour modes,
+default flags, style, arts and SP bits CONFIRMED in game (2026-10-10), as is registering
+what the hunter has on, and clearing a set (the game shows it empty, `---`).
+Set 1 is at `base + 0x208C8` (absolute `0x1AD564`), stride `0x88`. The menu shows 5 pages × 8 sets, so there are
 most likely 40 records. That count is **DERIVED** from the UI.
 
 **Record boundary (from the loader, [11](11-save-map.md#equipment-manager-additions)).**
@@ -177,7 +180,7 @@ within the game's record.
 | `+0x00` | 6 | the previous set's last 6 bytes, see below |
 | `+0x06` | 24 | set name, single-byte text, NUL-padded (`---` when unused) |
 | `+0x30` | 7 × u16 | box index for weapon, head, chest, arms, waist, legs, talisman; `0xFFFF` = empty |
-| `+0x3E` | 7 × 3 × u16 | copy of each piece's decorations (**DERIVED**) |
+| `+0x3E` | 7 × 3 × u16 | copy of each piece's decorations (**CONFIRMED in game, 2026-10-10**) |
 | `+0x6A` | 5 × RGBA | pigment per body part |
 | `+0x7E` | 5 × u8 | per part, a colour mode handed to the dye call with the colour and the flag (`0x26f958`): 0 = the RGBA, 2 and up = preset colour *v* − 2, 1 = a third path ([11](11-save-map.md#slot-header--base--0x0-632-b), header `+0x274`). Zero in every set of all three slots |
 | `+0x83` | 5 × u8 | per-part default flag: 1 = default colour, 0 = custom RGBA |
@@ -186,7 +189,7 @@ within the game's record.
 | `+0x8C` | u8 | bits 0–2: art slot *i* is an **SP Art**, copied to the player's SP Art bits ([11](11-save-map.md#slot-header--base--0x0-632-b), header `+0x32`) |
 | `+0x8D` | u8 | padding |
 
-**DERIVED — the last six bytes (`+0x88 … +0x8D`, the game's record `+0x82 … +0x87`).**
+**CONFIRMED in game (2026-10-10) — the last six bytes (`+0x88 … +0x8D`, the game's record `+0x82 … +0x87`).**
 Loading a set (`0x72d0f8`, from the item box screen) writes the style byte into the
 player data and the three arts with `0xe79b4` to player `+0x240` (the arts the save
 screen shows at slot header `+0x2C`), the three SP Art bits with `0xe7a20`. The copy

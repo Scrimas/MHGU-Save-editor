@@ -49,12 +49,18 @@ fn who(s: &State, k: usize) -> String {
     }
 }
 
+/// A whole-slot edit. Copy, swap, delete and a character file's import are Confirmed in
+/// game; an MHXX character is Derived.
+fn slot_edit(conf: Conf, title: String, targets: Vec<Target>) -> Edit {
+    Edit { key: String::new(), title, detail: tr("Characters").into(), note: String::new(), conf, targets }
+}
+
 /// Stage a whole-slot edit listed under slot `at`; says it in a toast.
-fn stage(ui: &AppWindow, s: &mut State, at: usize, need_char: bool, title: String, targets: Vec<Target>, f: impl FnOnce(&mut mhgu_save::Save)) {
-    let e = Edit { key: String::new(), title: title.clone(), detail: tr("Characters").into(), note: String::new(), conf: Conf::Derived, targets };
+fn stage(ui: &AppWindow, s: &mut State, at: usize, need_char: bool, e: Edit, f: impl FnOnce(&mut mhgu_save::Save)) {
     if refused(ui, e.conf) {
         return;
     }
+    let title = e.title.clone();
     if s.edit_at(at, need_char, e, |sv, _| {
         f(sv);
         vec![]
@@ -71,7 +77,7 @@ pub(super) fn wire_characters(ui: &AppWindow, st: &Shared) {
             return;
         }
         let title = trf("Copy {} to slot {}", &[&who(&s, from), &(to + 1)]);
-        stage(&ui, &mut s, to, false, title, vec![Target::Slot(to)], |sv| slots::copy(sv, from, to));
+        stage(&ui, &mut s, to, false, slot_edit(Conf::Confirmed, title, vec![Target::Slot(to)]), |sv| slots::copy(sv, from, to));
     });
     on!(ui, st, on_slot_swap, |ui, s, a: i32, b: i32| {
         let (Ok(a), Ok(b)) = (usize::try_from(a), usize::try_from(b)) else { return };
@@ -79,7 +85,7 @@ pub(super) fn wire_characters(ui: &AppWindow, st: &Shared) {
             return;
         }
         let title = trf("Swap {} and {}", &[&who(&s, a), &who(&s, b)]);
-        stage(&ui, &mut s, b, false, title, vec![Target::Slot(a), Target::Slot(b)], |sv| slots::swap(sv, a, b));
+        stage(&ui, &mut s, b, false, slot_edit(Conf::Confirmed, title, vec![Target::Slot(a), Target::Slot(b)]), |sv| slots::swap(sv, a, b));
         // the character shown moves with its slot
         if s.slot == a || s.slot == b {
             s.slot = a + b - s.slot;
@@ -91,7 +97,7 @@ pub(super) fn wire_characters(ui: &AppWindow, st: &Shared) {
             return;
         }
         let title = trf("Delete {}", &[&who(&s, k)]);
-        stage(&ui, &mut s, k, true, title, vec![Target::Slot(k)], |sv| slots::delete(sv, k));
+        stage(&ui, &mut s, k, true, slot_edit(Conf::Confirmed, title, vec![Target::Slot(k)]), |sv| slots::delete(sv, k));
     });
     {
         let w = ui.as_weak();
@@ -140,7 +146,7 @@ pub(super) fn wire_characters(ui: &AppWindow, st: &Shared) {
                 {
                     let mut s = st.borrow_mut();
                     let title = trf("Import {} into slot {}", &[&name, &(k + 1)]);
-                    stage(&ui, &mut s, k, false, title, vec![Target::Slot(k)], |sv| {
+                    stage(&ui, &mut s, k, false, slot_edit(Conf::Confirmed, title, vec![Target::Slot(k)]), |sv| {
                         let _ = slots::import(sv, k, &f);
                     });
                 }
@@ -239,7 +245,7 @@ fn import_mhxx(ui: &AppWindow, s: &mut State, x: &Mhxx, j: usize, k: usize) {
     let (name, ..) = x.summary(j);
     let bytes = x.character(j);
     let title = trf("Import {} from MHXX into slot {}", &[&name, &(k + 1)]);
-    stage(ui, s, k, false, title, vec![Target::Slot(k)], |sv| slots::put(sv, k, &bytes));
+    stage(ui, s, k, false, slot_edit(Conf::Derived, title, vec![Target::Slot(k)]), |sv| slots::put(sv, k, &bytes));
 }
 
 /// The character of slot `k` into slot `j` of the MHXX save, written where the user says

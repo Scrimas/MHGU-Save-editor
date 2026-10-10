@@ -78,12 +78,6 @@ export component OptionsPage inherits Rectangle {
             staged: Api.page-counts[11];
         }
         TabBar { tabs: Api.option-tabs; current: Api.option-tab; select(i) => { Tabs.select("options", i); } }
-        HorizontalLayout {
-            spacing: 10px;
-            alignment: start;
-            height: 20px;
-            ConfidenceTag { level: Confidence.derived; }
-        }
         if Api.option-tab == 1: HorizontalLayout {
             spacing: Tok.tight;
             alignment: start;

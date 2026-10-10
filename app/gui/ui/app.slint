@@ -604,7 +604,7 @@ component CharactersDialog inherits Modal {
         }
     }
     Muted { text: @tr("Import… also takes a character from an MHXX save: the system file of a JKSM or Checkpoint backup (3DS), or of JKSV or Checkpoint (Switch). Unequip gear the other game lacks before moving a character."); }
-    Muted { text: @tr("Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."); }
+    Muted { text: @tr("An MHXX character is Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."); }
     HorizontalLayout {
         alignment: end;
         Button { text: @tr("Close"); clicked => { Api.characters-open = false; } }
@@ -834,6 +834,7 @@ component SettingsDialog inherits Modal {
 export component AppWindow inherits Window {
     title: Api.loaded ? @tr("MHGU Save Editor — {}", Api.file-path) : @tr("MHGU Save Editor");
     icon: @image-url("../assets/icon.svg");
+    default-font-family: Fmt.font;
     preferred-width: 1280px;
     preferred-height: 820px;
     min-width: 760px;

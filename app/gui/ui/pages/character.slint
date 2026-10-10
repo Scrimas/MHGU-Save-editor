@@ -243,7 +243,6 @@ export component CharacterPage inherits Rectangle {
                         Field {
                             width: 170px;
                             label: @tr("Courier points");
-                            level: Confidence.derived;
                             was: Api.character.was-courier-points;
                             key: "courier-points";
                             NumberBox { value: Api.character.courier-points; maximum: 10000; label: @tr("Courier points"); edited(v) => { Api.set-character("courier-points", v); } }
@@ -259,7 +258,6 @@ export component CharacterPage inherits Rectangle {
                         Field {
                             width: 240px;
                             label: @tr("Start in");
-                            level: Confidence.derived;
                             hint: @tr("Where the next load starts");
                             was: Api.character.was-start-village;
                             key: "start-village";
@@ -268,7 +266,6 @@ export component CharacterPage inherits Rectangle {
                         Field {
                             width: 240px;
                             label: @tr("Housekeeper");
-                            level: Confidence.derived;
                             hint: @tr("Room Service, Change Housekeeper");
                             was: Api.character.was-housekeeper;
                             key: "housekeeper";
@@ -449,7 +446,6 @@ export component CharacterPage inherits Rectangle {
                         spacing: Tok.gap;
                         alignment: start;
                         SectionTitle { text: @tr("Style and Hunter Arts"); vertical-alignment: center; }
-                        ConfidenceTag { level: Confidence.derived; }
                     }
                     Muted { text: @tr("What you have on now. Loading a My Set in game replaces them with the set's."); wrap: word-wrap; }
                     ArtsEditor { info: Api.char-arts; where: -1; key: "arts"; }
@@ -468,7 +464,6 @@ export component CharacterPage inherits Rectangle {
                         spacing: Tok.gap;
                         alignment: start;
                         SectionTitle { text: @tr("Armor pigment"); vertical-alignment: center; }
-                        ConfidenceTag { level: Confidence.derived; }
                     }
                     Muted { text: @tr("The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets)."); wrap: word-wrap; }
                     PigmentEditor { rows: Api.char-pigment; where: -1; was: Api.was-pigment; key: "pigment"; }

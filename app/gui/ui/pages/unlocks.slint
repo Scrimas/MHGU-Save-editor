@@ -111,7 +111,7 @@ export component UnlocksPage inherits Rectangle {
             title: @tr("Unlocks");
             subtitle: Api.unlock-summary;
             staged: Api.page-counts[8];
-            derived: true;
+            derived: Api.unlock-derived;
             if Api.unlock-editable && !Api.unlock-pets: Button {
                 text: @tr("Unlock all…");
                 clicked => { pv.open("unlocks:all", self.absolute-position.x - root.absolute-position.x + self.width, self.absolute-position.y - root.absolute-position.y + self.height); }

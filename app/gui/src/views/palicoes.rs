@@ -1,6 +1,7 @@
 //! The Palicoes page: its models and the callbacks that edit it. Tabs: the character's
 //! Palicoes and those for hire (one editor), the roles, counters, Dojo and teams, the
-//! StreetPass Palicoes and the scouting request (`mhgu_save::otomo`, all Derived).
+//! StreetPass Palicoes and the scouting request (`mhgu_save::otomo`; the roles Confirmed,
+//! the rest Derived).
 
 use super::*;
 use crate::{CardRow, InfoRow, OptionRow};
@@ -55,10 +56,6 @@ fn own_palicoes(s: &mhgu_save::Save, base: usize) -> Vec<usize> {
     (0..palico::LIST_N).filter(|&i| !palico::is_empty(s, base, i)).collect()
 }
 
-/// A Palico's edits: Confirmed, Derived for one for hire (hired as edited, not checked).
-fn pal_conf(i: usize) -> Conf {
-    if palico::for_hire(i) { Conf::Derived } else { Conf::Confirmed }
-}
 
 /// The Team and Dojo, StreetPass and Scouting tabs.
 fn other_tabs(ui: &AppWindow, st: &State, tab: i32) {
@@ -217,7 +214,7 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
     api.set_palico_note(
         match tab {
             1 => tr("The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."),
-            2 => tr("A Prowler fights with its Palico's support moves and skills (My Palicoes). The game gives award 53 from 50 Dojo sessions and title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."),
+            2 => tr("A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check; hiring from the Palico Board does not count. The Dojo and the teams are read-only."),
             3 => tr("Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."),
             4 => tr("What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."),
             _ => "",
@@ -325,10 +322,11 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         // the tab's first Palico
         view(|v| v.palico_sel = -1);
     });
-    // a role ("pal-role:r", choice 0 = none, else the k-th Palico), a counter or a
-    // scouting field ("scouting:id")
+    // a role ("pal-role:r", choice 0 = none, else the k-th Palico; Confirmed), a counter or
+    // a scouting field ("scouting:id"); the hire count and the scouting are Derived
     on!(ui, st, on_set_palico_field, |ui, s, id: SharedString, v: i32| {
-        if refused(&ui, Conf::Derived) {
+        let conf = if id.starts_with("pal-role:") || id == "dojo-done" { Conf::Confirmed } else { Conf::Derived };
+        if refused(&ui, conf) {
             return;
         }
         type Write = Box<dyn FnOnce(&mut mhgu_save::Save, usize) -> Vec<Target>>;
@@ -344,9 +342,10 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
             (Target::PalRole(r), Box::new(move |sv, base| otomo::set_role(sv, base, r, p).into_iter().map(Target::PalRole).collect()))
         } else {
             let v = v.clamp(0, 255) as u8;
+            let slot = s.slot;
             match id.as_str() {
-                "dojo-done" => (Target::DojoDone, Box::new(move |sv, base| {
-                    otomo::set_dojo_done(sv, base, v);
+                "dojo-done" => (Target::DojoDone, Box::new(move |sv, _| {
+                    otomo::set_dojo_done(sv, slot, v);
                     vec![]
                 })),
                 "palicoes-hired" => (Target::PalicoesHired, Box::new(move |sv, base| {
@@ -363,7 +362,7 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
             }
         };
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Derived), f);
+        s.edit(Edit::one(t, title, conf), f);
     });
     on!(ui, st, on_remove_palico_mail, |ui, s, k: i32| {
         let Ok(k) = usize::try_from(k) else { return };
@@ -384,11 +383,8 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         }
         let i = i as usize;
         let t = Target::Palico(i, targets::pal_of(&f));
-        if refused(&ui, pal_conf(i)) {
-            return;
-        }
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, pal_conf(i)), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
                 "level" => p.level = v.clamp(1, palico::MAX_LEVEL as i32) as u8,
@@ -408,11 +404,8 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         let (Ok(i), Ok(k)) = (usize::try_from(i), usize::try_from(slot)) else { return };
         let moves = kind == "moves";
         let t = Target::Palico(i, if moves { targets::Pal::Moves } else { targets::Pal::Skills });
-        if refused(&ui, pal_conf(i)) {
-            return;
-        }
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, pal_conf(i)), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             let id = id.clamp(0, if moves { palico::NO_MOVE } else { palico::NO_SKILL } as i32 - 1) as u8;
             if moves {
@@ -437,11 +430,8 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         let (Ok(i), Ok(v)) = (usize::try_from(i), u8::try_from(v)) else { return };
         let Some(f) = palico::look_fields().into_iter().find(|f| f.key == key.as_str()) else { return };
         let t = Target::Palico(i, targets::Pal::Looks);
-        if refused(&ui, pal_conf(i)) {
-            return;
-        }
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, pal_conf(i)), |sv, base| {
+        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             f.set(&mut p, if f.colour.is_some() { v } else { v.saturating_add(f.first) });
             palico::set(sv, base, i, &p);
@@ -460,11 +450,8 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         }
         let i = i as usize;
         let tg = Target::Palico(i, targets::pal_of(&f));
-        if refused(&ui, pal_conf(i)) {
-            return;
-        }
         let title = tg.label(s.save(), s.slot);
-        s.edit(Edit::one(tg, title, pal_conf(i)), |sv, base| {
+        s.edit(Edit::one(tg, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
                 "name" => p.name = t.to_string(),
@@ -530,7 +517,7 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
 /// Stage a Palico file's Palico into character `k`'s Palicoes; says why when it does not
 /// fit, and selects it when `k` is the character shown.
 fn add_palico(ui: &AppWindow, s: &mut State, k: usize, file: &[u8], title: String) {
-    let e = Edit { key: String::new(), title: title.clone(), detail: tr("Palicoes").into(), note: String::new(), conf: Conf::Derived, targets: vec![] };
+    let e = Edit { key: String::new(), title: title.clone(), detail: tr("Palicoes").into(), note: String::new(), conf: Conf::Confirmed, targets: vec![] };
     if refused(ui, e.conf) {
         return;
     }

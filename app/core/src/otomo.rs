@@ -1,13 +1,16 @@
 //! The character's Palico data beyond the records (sOtomo, docs/11-save-map.md and
 //! data/save-fields.csv): the Palico played as Prowler and the hunting buddies, the two
 //! counters, the Palico Dojo, the two teams, the StreetPass Palicoes and the scouting
-//! request. Every edit is DERIVED (from the game's code and the analysed saves).
+//! request. The roles (Prowler, hunting buddies 1-2) and the Dojo count are CONFIRMED in
+//! game (2026-10-10); every other edit is DERIVED (from the game's code and the analysed
+//! saves).
 //!
 //! A Prowler has no Hunter Arts of its own: it fights with the support moves and skills
 //! its Palico record has equipped (`palico`).
 
 use crate::data::tables;
 use crate::palico::{self, LIST_N};
+use crate::progress::Char;
 use crate::save::Save;
 
 /// Palico indices: played as Prowler, hunting buddy 1, hunting buddy 2 (`0x25f880`,
@@ -15,12 +18,16 @@ use crate::save::Save;
 pub const ROLES: usize = 0x23B9D;
 pub const ROLE_N: usize = 3;
 pub const NONE: u8 = 0xFF;
-/// Palico Dojo sessions completed, at most 100. The awards check after a quest grants
-/// award 53 from 50 on (`0x3ed174`, a `>=` test), so the count alone is enough.
+/// Palico Dojo sessions completed, at most 100: a session in game raised a written 50 to
+/// 51. Award 53 goes with 50 sessions (`0x3ed174`, a `>=` test), but the game did not give
+/// it after the next quest: `set_dojo_done` sets it.
 pub const DOJO_DONE: usize = 0x23BA0;
 pub const DOJO_MAX: u8 = 100;
+pub const DOJO_AWARD: usize = 53;
+pub const DOJO_AWARD_AT: u8 = 50;
 /// Palicoes hired in total, at most 200 (`0x25e88c`). The title-word check (`0x3f5238`)
-/// adds the words from 10, 30, 50 and 80 on, also a `>=` test.
+/// adds the words from 10, 30, 50 and 80 on, also a `>=` test. Hiring from the Palico
+/// Board did not raise it (in game, 2026-10-10): which hires count is open.
 pub const HIRED: usize = 0x23BA1;
 pub const HIRED_MAX: u8 = 200;
 
@@ -90,8 +97,15 @@ pub fn dojo_done(s: &Save, base: usize) -> u8 {
     s.u8(base + DOJO_DONE)
 }
 
-pub fn set_dojo_done(s: &mut Save, base: usize, v: u8) {
-    s.set_u8(base + DOJO_DONE, v.min(DOJO_MAX));
+/// The count of character `slot`, and from 50 on the award the count stands for: the game
+/// did not give it after a quest at 51 (in game, 2026-10-10).
+pub fn set_dojo_done(s: &mut Save, slot: usize, v: u8) {
+    let v = v.min(DOJO_MAX);
+    let base = s.base(slot);
+    s.set_u8(base + DOJO_DONE, v);
+    if v >= DOJO_AWARD_AT {
+        Char::new(&mut *s, slot).set_award(DOJO_AWARD, true);
+    }
 }
 
 pub fn hired(s: &Save, base: usize) -> u8 {
@@ -255,9 +269,12 @@ mod tests {
     #[test]
     fn counters_stop_at_the_game_limits() {
         let mut s = blank();
-        set_dojo_done(&mut s, B, 150);
+        set_dojo_done(&mut s, 0, 49);
+        assert!(!Char::new(&s, 0).award(DOJO_AWARD));
+        set_dojo_done(&mut s, 0, 150);
         set_hired(&mut s, B, 250);
         assert_eq!((dojo_done(&s, B), hired(&s, B)), (DOJO_MAX, HIRED_MAX));
+        assert!(Char::new(&s, 0).award(DOJO_AWARD), "award 53 with the count");
     }
 
     #[test]

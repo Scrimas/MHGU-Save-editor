@@ -26,9 +26,10 @@ pub struct Def {
 /// poses in game on 2026-10-09) or every field written is CONFIRMED by the save timeline
 /// (awards, money; tools/evidence).
 ///
-/// The unlock goals after them are Derived: from code, checked against the save
-/// timeline, not tried in game yet (`mhgu_save::unlocks`).
-pub const GOALS: [Def; 18] = [
+/// The unlock goals after them follow their maps (`views::maps_conf`, checked in game on
+/// 2026-10-10): the Trader's is Derived, from code and the save timeline
+/// (`mhgu_save::unlocks`).
+pub const GOALS: [Def; 17] = [
     Def { id: "quests", conf: Conf::Confirmed },
     Def { id: "arts", conf: Conf::Confirmed },
     Def { id: "canteen", conf: Conf::Confirmed },
@@ -40,13 +41,12 @@ pub const GOALS: [Def; 18] = [
     Def { id: "obtained", conf: Conf::Confirmed },
     Def { id: "smithy", conf: Conf::Confirmed },
     Def { id: "card", conf: Conf::Confirmed },
-    Def { id: "lab", conf: Conf::Derived },
-    Def { id: "costumes", conf: Conf::Derived },
-    Def { id: "songs", conf: Conf::Derived },
+    Def { id: "lab", conf: Conf::Confirmed },
+    Def { id: "costumes", conf: Conf::Confirmed },
+    Def { id: "songs", conf: Conf::Confirmed },
     Def { id: "trader", conf: Conf::Derived },
-    Def { id: "coins", conf: Conf::Derived },
-    Def { id: "combos", conf: Conf::Derived },
-    Def { id: "gallery", conf: Conf::Derived },
+    Def { id: "combos", conf: Conf::Confirmed },
+    Def { id: "gallery", conf: Conf::Confirmed },
 ];
 
 /// The unlock maps (`unlocks::maps()` ids) a goal unlocks every entry of.
@@ -55,8 +55,7 @@ fn goal_maps(id: &str) -> &'static [&'static str] {
         "lab" => &["lab"],
         "costumes" => &["costume"],
         "songs" => &["song"],
-        "trader" => &["trader:items0", "trader:items1", "trader:words", "trader:scenes", "trader:costumes"],
-        "coins" => &["coin"],
+        "trader" => &["trader:words", "trader:scenes", "trader:costumes"],
         "combos" => &["combos"],
         "gallery" => &["gallery"],
         _ => &[],
@@ -284,7 +283,7 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
                 }
             }
         }
-        ["lab"] | ["costumes"] | ["songs"] | ["trader"] | ["coins"] | ["combos"] | ["gallery"] | ["unlocks", _, _] => {
+        ["lab"] | ["costumes"] | ["songs"] | ["trader"] | ["combos"] | ["gallery"] | ["unlocks", _, _] => {
             let on = parts.get(1) != Some(&"none");
             for m in unlock_maps(&parts) {
                 if unlocks::set_all(s, base, m, on) > 0 {
@@ -599,7 +598,7 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             p.count = slots;
             p.detail = if pouch { tr("Pouch") } else { tr("Item box") }.into();
         }
-        [g @ ("lab" | "costumes" | "songs" | "trader" | "coins" | "combos" | "gallery")] => {
+        [g @ ("lab" | "costumes" | "songs" | "trader" | "combos" | "gallery")] => {
             let k = unlock_changes(s, &c, base, &unlock_maps(&[g]));
             let ki = k as i64;
             let entries = trn("{} entry", "{} entries", ki, &[&num(ki)]);
@@ -625,14 +624,8 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 "trader" => (
                     tr("Everything the Trader sells"),
                     tr("The Trader offers everything it can sell."),
-                    trf("Puts up for sale the {} the Trader does not offer yet: items, title words, Guild Card scenes and pet costumes, the downloads' ones included.", &[&entries]),
+                    trf("Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included.", &[&entries]),
                     tr("Buying still takes Trader points; what you already have is not shown."),
-                ),
-                "coins" => (
-                    tr("Every Horns Coin trade"),
-                    tr("The Mewstress offers every Horns Coin trade."),
-                    trf("Unlocks the {} the Mewstress does not offer yet.", &[&trn("{} Horns Coin trade", "{} Horns Coin trades", ki, &[&num(ki)])]),
-                    tr("Trading still takes Horns Coins."),
                 ),
                 "combos" => (
                     tr("Every combination recipe combined"),
@@ -671,7 +664,7 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 }
             }
             p.count = entries;
-            p.conf = Some(Conf::Derived);
+            p.conf = Some(crate::views::maps_conf(&maps));
             p.detail = tr("Unlocks").into();
         }
         ["deviants", "permits"] => {

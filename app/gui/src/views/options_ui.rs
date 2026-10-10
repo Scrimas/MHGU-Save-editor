@@ -1,5 +1,6 @@
 //! The Options page: the character's game options, its chat phrases and the title menu's
-//! settings shared by the characters (`mhgu_save::options`). Every edit is Derived.
+//! settings shared by the characters (`mhgu_save::options`). Confirmed, except the
+//! Simplified Chinese text language (Derived).
 
 use super::*;
 use crate::{OptionRow, PhraseRow};
@@ -78,7 +79,8 @@ pub fn auto_trigger(i: usize) -> String {
     .into()
 }
 
-/// The text language as the title menu names it (`TitleMsg` 79-83).
+/// The text language as the title menu names it (`TitleMsg` 79-83); the Chinese ones in
+/// their own script, as the 1.4 menu shows them in every language.
 pub fn language_name(v: u8) -> String {
     match v {
         0 => tr("Console language").into(),
@@ -87,6 +89,8 @@ pub fn language_name(v: u8) -> String {
         3 => tr("Spanish").into(),
         4 => tr("German").into(),
         5 => tr("Italian").into(),
+        7 => "繁體中文".into(),
+        8 => "简体中文".into(),
         v => trf("Language {}", &[&v]),
     }
 }
@@ -181,13 +185,12 @@ pub(super) fn options_page(ui: &AppWindow, st: &State) {
     );
 }
 
-/// Every Derived: from the option windows' code run under emulation, not yet in game.
-fn stage(ui: &AppWindow, s: &mut State, t: Target, f: impl FnOnce(&mut mhgu_save::Save, usize)) {
-    if refused(ui, Conf::Derived) {
+fn stage(ui: &AppWindow, s: &mut State, conf: Conf, t: Target, f: impl FnOnce(&mut mhgu_save::Save, usize)) {
+    if refused(ui, conf) {
         return;
     }
     let title = t.label(s.save(), s.slot);
-    s.edit(Edit::one(t, title, Conf::Derived), |sv, base| {
+    s.edit(Edit::one(t, title, conf), |sv, base| {
         f(sv, base);
         vec![]
     });
@@ -201,17 +204,19 @@ pub(super) fn wire_options(ui: &AppWindow, st: &Shared) {
     on!(ui, st, on_set_option, |ui, s, id: SharedString, v: i32| {
         let Ok(v) = u8::try_from(v) else { return };
         match id.as_str() {
-            "brightness" => stage(&ui, &mut s, Target::Brightness, |sv, _| options::set_brightness(sv, v)),
-            "rumble" => stage(&ui, &mut s, Target::Rumble, |sv, _| options::set_rumble(sv, v == 0)),
+            "brightness" => stage(&ui, &mut s, Conf::Confirmed, Target::Brightness, |sv, _| options::set_brightness(sv, v)),
+            "rumble" => stage(&ui, &mut s, Conf::Confirmed, Target::Rumble, |sv, _| options::set_rumble(sv, v == 0)),
             "language" => {
                 let Some(&l) = options::LANGUAGES.get(v as usize) else { return };
-                stage(&ui, &mut s, Target::Language, |sv, _| {
+                // Simplified Chinese is Derived (options::LANGUAGE)
+                let conf = if l == 8 { Conf::Derived } else { Conf::Confirmed };
+                stage(&ui, &mut s, conf, Target::Language, |sv, _| {
                     options::set_language(sv, l);
                 });
             }
             id => {
                 let Some(k) = id.strip_prefix("opt:").and_then(|k| OPTIONS.iter().position(|o| o.id == k)) else { return };
-                stage(&ui, &mut s, Target::Opt(k), |sv, base| {
+                stage(&ui, &mut s, Conf::Confirmed, Target::Opt(k), |sv, base| {
                     options::set_option(sv, base, k, v);
                 });
             }
@@ -223,17 +228,17 @@ pub(super) fn wire_options(ui: &AppWindow, st: &Shared) {
     });
     on!(ui, st, on_set_chat_group, |ui, s, g: i32| {
         let Ok(g) = u16::try_from(g) else { return };
-        stage(&ui, &mut s, Target::ChatGroup, |sv, base| options::set_chat_group(sv, base, g));
+        stage(&ui, &mut s, Conf::Confirmed, Target::ChatGroup, |sv, base| options::set_chat_group(sv, base, g));
     });
     on!(ui, st, on_set_phrase, |ui, s, auto: bool, i: i32, text: SharedString| {
         let g = ui.global::<Api>().get_chat_shown().clamp(0, options::GROUPS as i32 - 1) as usize;
         let n = if auto { options::AUTO_PER_GROUP } else { options::PER_GROUP };
         let Some(i) = usize::try_from(i).ok().filter(|&i| i < n) else { return };
-        stage(&ui, &mut s, Target::Phrase(auto, g, i), |sv, base| options::set_phrase(sv, base, auto, g, i, &text));
+        stage(&ui, &mut s, Conf::Confirmed, Target::Phrase(auto, g, i), |sv, base| options::set_phrase(sv, base, auto, g, i, &text));
     });
     on!(ui, st, on_set_auto_on, |ui, s, i: i32, on: bool| {
         let g = ui.global::<Api>().get_chat_shown().clamp(0, options::GROUPS as i32 - 1) as usize;
         let Some(i) = usize::try_from(i).ok().filter(|&i| i < options::AUTO_PER_GROUP) else { return };
-        stage(&ui, &mut s, Target::AutoOn, |sv, base| options::set_auto_on(sv, base, g, i, on));
+        stage(&ui, &mut s, Conf::Confirmed, Target::AutoOn, |sv, base| options::set_auto_on(sv, base, g, i, on));
     });
 }

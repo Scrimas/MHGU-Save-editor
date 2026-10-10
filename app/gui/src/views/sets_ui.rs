@@ -195,7 +195,7 @@ pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
     flush(&mut run, &mut rows);
     api.set_set_rows(keep(api.get_set_rows(), rows));
     api.set_equip_summary(
-        if palico { trf("{} of {} Palico sets used · Derived: not checked in game yet", &[&used, &n]) } else { trf("{} of {} My Sets used · Derived except the pigment", &[&used, &n]) }
+        if palico { trf("{} of {} Palico sets used", &[&used, &n]) } else { trf("{} of {} My Sets used", &[&used, &n]) }
             .into(),
     );
     let k = sel(palico).min(n - 1);
@@ -272,9 +272,9 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
         let Some(palico) = sets_tab(&ui) else { return };
         let k = sel(palico);
         if palico {
-            stage(&ui, &mut s, Target::PalicoSet(k), Conf::Derived, |sv, base| sets::set_palico_set_name(sv, base, k, &name));
+            stage(&ui, &mut s, Target::PalicoSet(k), Conf::Confirmed, |sv, base| sets::set_palico_set_name(sv, base, k, &name));
         } else if sets::my_set(s.save(), s.base(), k).used() {
-            stage(&ui, &mut s, Target::MySet(k, SetPart::Name), Conf::Derived, |sv, base| sets::set_my_set_name(sv, base, k, &name));
+            stage(&ui, &mut s, Target::MySet(k, SetPart::Name), Conf::Confirmed, |sv, base| sets::set_my_set_name(sv, base, k, &name));
         }
     });
     on!(ui, st, on_set_set_piece, |ui, s, j: i32, pick: i32| {
@@ -289,19 +289,19 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
         let (_, ids) = piece_choices(sv, base, palico, j, held);
         let Some(&i) = usize::try_from(pick).ok().and_then(|p| ids.get(p)) else { return };
         if palico {
-            stage(&ui, &mut s, Target::PalicoSet(k), Conf::Derived, |sv, base| sets::set_palico_set_piece(sv, base, k, j, i));
+            stage(&ui, &mut s, Target::PalicoSet(k), Conf::Confirmed, |sv, base| sets::set_palico_set_piece(sv, base, k, j, i));
         } else if sets::my_set(sv, base, k).used() {
-            stage(&ui, &mut s, Target::MySet(k, SetPart::Gear), Conf::Derived, |sv, base| sets::set_my_set_piece(sv, base, k, j, i));
+            stage(&ui, &mut s, Target::MySet(k, SetPart::Gear), Conf::Confirmed, |sv, base| sets::set_my_set_piece(sv, base, k, j, i));
         }
     });
     // the game's "register": the selected My Set becomes what the hunter has on
     on!(ui, st, on_set_from_current, |ui, s| {
-        if sets_tab(&ui) != Some(false) || refused(&ui, Conf::Derived) {
+        if sets_tab(&ui) != Some(false) {
             return;
         }
         let k = sel(false);
         let targets = SET_PARTS.iter().map(|&p| Target::MySet(k, p)).collect();
-        let e = Edit { key: String::new(), title: trf("My Set {}: what you have on", &[&(k + 1)]), detail: tr("Equipment").into(), note: String::new(), conf: Conf::Derived, targets };
+        let e = Edit { key: String::new(), title: trf("My Set {}: what you have on", &[&(k + 1)]), detail: tr("Equipment").into(), note: String::new(), conf: Conf::Confirmed, targets };
         s.edit(e, |sv, base| {
             sets::save_current(sv, base, k);
             vec![]
@@ -309,16 +309,13 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
     });
     on!(ui, st, on_clear_set, |ui, s| {
         let Some(palico) = sets_tab(&ui) else { return };
-        if refused(&ui, Conf::Derived) {
-            return;
-        }
         let k = sel(palico);
         let (title, targets) = if palico {
             (trf("Palico set {} cleared", &[&(k + 1)]), vec![Target::PalicoSet(k)])
         } else {
             (trf("My Set {} cleared", &[&(k + 1)]), SET_PARTS.iter().map(|&p| Target::MySet(k, p)).collect())
         };
-        let e = Edit { key: String::new(), title, detail: tr("Equipment").into(), note: String::new(), conf: Conf::Derived, targets };
+        let e = Edit { key: String::new(), title, detail: tr("Equipment").into(), note: String::new(), conf: Conf::Confirmed, targets };
         s.edit(e, |sv, base| {
             if palico { sets::clear_palico_set(sv, base, k) } else { sets::clear_my_set(sv, base, k) }
             vec![]
@@ -349,7 +346,7 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
             "sp" => a.set_sp(slot, v != 0),
             _ => return,
         }
-        stage(&ui, &mut s, t, Conf::Derived, |sv, base| if at < 0 { sets::set_arts(sv, base, a) } else { sets::set_my_set_arts(sv, base, k, a) });
+        stage(&ui, &mut s, t, Conf::Confirmed, |sv, base| if at < 0 { sets::set_arts(sv, base, a) } else { sets::set_my_set_arts(sv, base, k, a) });
     });
     // a My Set's colours were checked in game; what the hunter has on not yet
     on!(ui, st, on_set_pigment, |ui, s, at: i32, part: i32, hex: SharedString| {
@@ -359,7 +356,7 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
         };
         let k = sel(false);
         if at < 0 {
-            stage(&ui, &mut s, Target::Pigment, Conf::Derived, |sv, base| sets::set_colour(sv, base, p, rgb));
+            stage(&ui, &mut s, Target::Pigment, Conf::Confirmed, |sv, base| sets::set_colour(sv, base, p, rgb));
         } else if sets::my_set(s.save(), s.base(), k).used() {
             stage(&ui, &mut s, Target::MySet(k, SetPart::Pigment), Conf::Confirmed, |sv, base| sets::set_my_set_colour(sv, base, k, p, rgb));
         }
@@ -368,9 +365,9 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
         let Some(p) = usize::try_from(part).ok().filter(|&p| p < 5) else { return };
         let k = sel(false);
         if at < 0 {
-            stage(&ui, &mut s, Target::Pigment, Conf::Derived, |sv, base| sets::set_own_colour(sv, base, p));
+            stage(&ui, &mut s, Target::Pigment, Conf::Confirmed, |sv, base| sets::set_own_colour(sv, base, p));
         } else if sets::my_set(s.save(), s.base(), k).used() {
-            stage(&ui, &mut s, Target::MySet(k, SetPart::Pigment), Conf::Derived, |sv, base| sets::set_my_set_own_colour(sv, base, k, p));
+            stage(&ui, &mut s, Target::MySet(k, SetPart::Pigment), Conf::Confirmed, |sv, base| sets::set_my_set_own_colour(sv, base, k, p));
         }
     });
 }

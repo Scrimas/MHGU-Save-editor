@@ -16,8 +16,8 @@ non-zero instance in the live save (first 24 bytes), its absolute offset in brac
 
 | Status | Bytes | Share |
 |---|---|---|
-| C | 3691848 | 71.560% |
-| D | 1467252 | 28.440% |
+| C | 3701814 | 71.753% |
+| D | 1457286 | 28.247% |
 | U | 0 | 0.000% |
 | gap | 0 | 0.000% |
 

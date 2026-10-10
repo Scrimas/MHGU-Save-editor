@@ -204,7 +204,8 @@ export component PalicoesPage inherits Rectangle {
         if Api.palico-tab >= 1: HorizontalLayout {
             spacing: 10px;
             alignment: start;
-            ConfidenceTag { level: Confidence.derived; y: 2px; }
+            // for hire is Confirmed; the counters, StreetPass and the scouting are not
+            if Api.palico-tab >= 2: ConfidenceTag { level: Confidence.derived; y: 2px; }
             Muted { text: Api.palico-note; wrap: word-wrap; horizontal-stretch: 1; }
         }
         // the other tabs: roles, counters and scouting fields, read-only lines, StreetPass
@@ -287,7 +288,6 @@ export component PalicoesPage inherits Rectangle {
                             alignment: start;
                             for s in Api.other-characters: Button { text: @tr("Copy to {}", s.name); clicked => { Api.palico-copy(s.slot); } }
                             Button { text: @tr("Export…"); clicked => { Api.palico-export(); } }
-                            ConfidenceTag { level: Confidence.derived; y: 5px; }
                         }
                         if Api.palico.warning != "": Text {
                             text: @tr("The game cannot make this: {}.", Api.palico.warning);

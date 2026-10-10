@@ -25,17 +25,20 @@ pub const AWARDS_GAME: usize = 0x3157;
 pub const AWARDS_CARD: usize = 0xC8115;
 pub const PERMITS: usize = 0x283C;
 /// Special Permit points per deviant, 18 × u16 (S+0x4424), and the points waiting at
-/// the Courier (S+0x4448); 100 points make one permit.
+/// the Courier (S+0x4448); 100 points make one permit. CONFIRMED in game (2026-10-10):
+/// the game turned written waiting points into permits and kept the points.
 pub const PERMIT_POINTS: usize = 0x5E5A;
 pub const PERMIT_WAITING: usize = 0x5E7E;
 pub const MAX_PERMIT_POINTS: u16 = 9999;
 /// The quest counter (S+0x4418): quests completed, not Harvest Tours or Training, not
 /// shown in game. At a talk the Courier gives gifts for the multiples of 3, 7 and 10 the
-/// counter crossed since his last talk (S+0x441c), then stores it there.
+/// counter crossed since his last talk (S+0x441c), then stores it there. Editing them is
+/// DERIVED.
 pub const QUEST_COUNTER: usize = 0x5E4E;
 pub const COURIER_TALK: usize = 0x5E52;
 /// Courier points (S+0x4420): earned per quest once the Courier works (flag 92), 1000
-/// make 10 permits for a random deviant; the game caps them at 10,000.
+/// make 10 permits for a random deviant; the game caps them at 10,000. CONFIRMED in game
+/// (2026-10-10).
 pub const COURIER_POINTS: usize = 0x5E56;
 pub const MAX_COURIER_POINTS: u32 = 10_000;
 pub const MAX_QUEST_COUNTER: u32 = 9_999_999;

@@ -26,8 +26,8 @@ file,0x40,4,,,D,bonus packs loaded: bit N = privilege pack N (S+0x420)
 file,0x44,6,,,D,"3 x u16 vestigial: written only by the transfer 0x52171c, no reader (S+0x3676)"
 file,0x4A,1,,,D,title-menu one-time notice shown (S+0x367c)
 file,0x4B,1,,,D,transfer-server link made (S+0x367d)
-file,0x4C,1,,,D,TV brightness: scale 0.4 + 0.025 x value (S+0x367e)
-file,0x4D,1,,,D,rumble on/off (S+0x367f)
+file,0x4C,1,,,C,TV brightness: scale 0.4 + 0.025 x value (S+0x367e)
+file,0x4D,1,,,C,rumble on/off (S+0x367f)
 file,0x4E,324,50,,C,"@pal324 Palicoes, common pool (DLC Palicoes, owner Capcom)"
 file,0x3F96,40,100,96,D,"blacklist entry: blocked player's network ID (MtNetUniqueId kind 19), big-endian: u32 sub-kind, u32, u64, then sub-kind 5: u64 + u32 / 14: 3 x u64 (import 0x80c958, export 0x80ca9c)"
 file,0x3FBE,24,100,96,D,"blacklist entry: bytes 40-63 of the ID buffer, always zero (the writer clears 64 B, the export fills 40)"
@@ -37,7 +37,7 @@ file,0xB29E,1,,,D,"sGuildCard +0xbca0: StreetPass Setup On/Off, bit i = characte
 file,0xB29F,3,,,D,"uninitialised heap bytes: the writer 0x164320 never writes buffer +0x4d89..+0x4d8b; the loader ignores them (varies between saves)"
 file,0xB2A2,1,,,D,sGameControl +0x5c: written by constructor / reset / transfer only; no reader
 file,0xB2A3,1,,,D,sGameControl +0x5d: 3DS Circle Pad Pro in use
-file,0xB2A4,1,,,D,"text language, 0 = from the system language (sGameControl +0xa5)"
+file,0xB2A4,1,,,C,"text language, 0 = from the system language (sGameControl +0xa5); values 1-5 and 7 (Traditional Chinese) CONFIRMED in game (2026-10-10), 8 (Simplified Chinese) DERIVED from the executable's language table"
 #
 # ---- Block B (shared) ----
 file,0xB2A5,8,,,C,"DLC Palicoes received, 50 bits, bit = DLC Palico info entry (sPrivilege +0xf34)"
@@ -91,7 +91,7 @@ slot,0x264,8,,,D,"colours 6, 7: hair, features (rebuilt by the game on save)"
 slot,0x26C,4,,,C,colour 8: clothing
 slot,0x270,2,,,C,default-colour flags
 slot,0x272,2,,,D,struct padding (stale bytes)
-slot,0x274,4,,,D,"u32: five 5-bit colour modes (0 RGBA, 1 separate path, 2+ preset v-2)"
+slot,0x274,4,,,C,"u32: five 5-bit colour modes (0 RGBA, 1 separate path, 2+ preset v-2)"
 #
 # ---- slot: item box, loadouts, pouch ----
 slot,0x278,5463,,,C,"item box: 2300 x (u12 item ID, u7 count) bit stream (last 4 bits spare)"
@@ -160,12 +160,12 @@ slot,0x2F7A,1,,,D,"progress map bits 24-31: 24-29 Room Service housekeepers 1-6 
 slot,0x2F7B,1,,,D,"progress map bits 32-39: 32 Nakarkos in the keyboard dictionary; 33 Palico Dojo open: set at each quest end (0x38b904) once the hunter owns a Palico (0x25d484 > 0); gates the Room Service's Palico Dojo item (0x78a4d4) and the Dojo screens (uUIOtomoExercise); 34 Limit Break available: the Smithy 0x6f0c84 sets it when event flag 954 is set (the Limit Break announcement lines, Hub 7 star + flag 1401); while clear the Smithy stops equipment at its normal max level (0x702784, 0x70a854); 35/36 Palico roster +6 each; 37 Hub 9 star or q10768; 38 Hub 13 star or q111304; 39 Palico level cap 75"
 slot,0x2F7C,3,,,D,"progress map bits 40-63: 40 Palico level cap 99; 41-43 Palico service tiers 5-6; 44-47 Melding Pot features (q11204, q10768, q11432); 48-51 Lao-Shan Lung, Ahtal-Ka, Bloodbath Diablos, Fatalis in the keyboard dictionary (0x525a9c); 52-63 never referenced"
 slot,0x2F7F,8,,,D,progress map NEW
-slot,0x2F87,4,,,D,"Housekeeper's Gallery movies, 14 bits"
-slot,0x2F8B,4,,,D,Gallery movies NEW
+slot,0x2F87,4,,,C,"Housekeeper's Gallery movies, 14 bits"
+slot,0x2F8B,4,,,C,Gallery movies NEW
 slot,0x2F8F,8,,,C,Canteen ingredients
 slot,0x2F97,8,,,D,Canteen ingredients NEW
 slot,0x2F9F,8,,,C,"Poogie / Moofy costumes owned, 64 bits"
-slot,0x2FA7,8,,,D,costumes NEW
+slot,0x2FA7,8,,,C,costumes NEW
 slot,0x2FAF,4,,,D,deviants: first Special Permit quest unlocked
 slot,0x2FB3,4,,,D,deviants unlocked NEW
 slot,0x2FB7,4,,,D,deviants offered by the Courier
@@ -185,10 +185,10 @@ slot,0x3187,16,,,C,quest sets completed
 slot,0x3197,16,,,D,quest set notices pending
 slot,0x31A7,36,,,D,"Smithy decorations listed, bit = decoCreate record"
 slot,0x31CB,36,,,D,Smithy decorations NEW
-slot,0x31EF,4,,,D,Trader item list 0
-slot,0x31F3,4,,,D,Trader item list 0 NEW
-slot,0x31F7,4,,,D,Trader item list 1
-slot,0x31FB,4,,,D,Trader item list 1 NEW
+slot,0x31EF,4,,,C,"Trader item list 0, entries listed (the game sets a cleared bit again with NEW while the entry's condition holds)"
+slot,0x31F3,4,,,C,Trader item list 0 NEW
+slot,0x31F7,4,,,C,"Trader item list 1, entries listed (set again by the game like list 0)"
+slot,0x31FB,4,,,C,Trader item list 1 NEW
 slot,0x31FF,56,,,D,Trader title words for sale
 slot,0x3237,56,,,D,Trader title words NEW
 slot,0x326F,20,,,D,Trader scenes for sale
@@ -197,10 +197,10 @@ slot,0x3297,4,,,D,Trader pet costumes for sale
 slot,0x329B,4,,,D,Trader pet costumes NEW
 slot,0x329F,4,,,D,"Trader coin-ticket trades, bit = rTradeCoinTicketList entry (transfer only)"
 slot,0x32A3,4,,,D,coin-ticket trades NEW
-slot,0x32A7,4,,,C,Trader delivery requests offered
-slot,0x32AB,4,,,D,delivery requests offered NEW
+slot,0x32A7,4,,,C,"Trader delivery requests offered, entries listed (set again by the game with NEW)"
+slot,0x32AB,4,,,C,delivery requests offered NEW
 slot,0x32AF,4,,,C,delivery requests delivered
-slot,0x32B3,4,,,D,Hunter's Notes tips read
+slot,0x32B3,4,,,C,Hunter's Notes tips read
 slot,0x32B7,16,,,C,"Hunter's Notes, large monsters"
 slot,0x32C7,16,,,D,Hunter's Notes large monsters NEW
 slot,0x32D7,4,,,D,"Hunter's Notes, second list, 30 bits"
@@ -225,17 +225,17 @@ slot,0x4FFB,40,,,D,Arena: cleared with equipment set (bit 5 x quest + set)
 slot,0x5023,40,,,D,Arena equipment sets NEW
 slot,0x504B,8,,,C,rotating quests bitmap
 slot,0x5053,4,,,D,bit 0: Moofah Fleeceball given since the last quest
-slot,0x5057,4,,,D,"auto-chat line enable bits (phrase object +0x2838, loaded inside the S stream), bit = 9 x set + line (0-26), tested at 0x1ca534; a value >= 0 is replaced at load by 0xF8FC7E3F (lines 1-6 of each set on, bit 31 = initialised)"
-slot,0x505B,4,,,D,Jukebox songs unlocked
-slot,0x505F,4,,,D,Jukebox songs NEW
-slot,0x5063,12,,,D,Lab upgrades offered
-slot,0x506F,12,,,D,Lab upgrades offered NEW
-slot,0x507B,12,,,D,Lab upgrades installed
-slot,0x5087,12,,,D,Lab upgrades installed NEW
-slot,0x5093,8,,,D,supply drop sets unlocked
-slot,0x509B,8,,,D,supply drop sets NEW
-slot,0x50A3,8,,,D,Cross coin trades unlocked
-slot,0x50AB,8,,,D,Cross coin trades NEW
+slot,0x5057,4,,,C,"auto-chat line enable bits (phrase object +0x2838, loaded inside the S stream), bit = 9 x set + line (0-26), tested at 0x1ca534; a value >= 0 is replaced at load by 0xF8FC7E3F (lines 1-6 of each set on, bit 31 = initialised)"
+slot,0x505B,4,,,C,Jukebox songs unlocked
+slot,0x505F,4,,,C,Jukebox songs NEW
+slot,0x5063,12,,,C,Lab upgrades offered
+slot,0x506F,12,,,C,Lab upgrades offered NEW
+slot,0x507B,12,,,C,Lab upgrades installed
+slot,0x5087,12,,,C,Lab upgrades installed NEW
+slot,0x5093,8,,,C,"supply drop sets listed (set again by the game with NEW while the set's Lab upgrade or progress holds)"
+slot,0x509B,8,,,C,supply drop sets NEW
+slot,0x50A3,8,,,C,"Cross coin trades listed (set again by the game with NEW while the trade's star level holds)"
+slot,0x50AB,8,,,C,Cross coin trades NEW
 slot,0x50B3,4,,,D,deviants: EX Special Permit quest cleared
 slot,0x50B7,4,,,D,deviant EX cleared NEW
 slot,0x50BB,1,,,D,S+0x3680 u8 (transferred save)
@@ -250,13 +250,13 @@ slot,0x5E46,4,,,D,"S+0x4410 reserved: only save / load touch it"
 slot,0x5E4A,4,,,D,"Courier flags: bits 0-5 one-time gifts at 10, 30, 50, 80, 100, 150 quests"
 slot,0x5E4E,4,,,C,quest counter
 slot,0x5E52,4,,,D,quest counter at the Courier's last talk
-slot,0x5E56,4,,,D,Courier points
-slot,0x5E5A,36,,,D,"Special Permit points per deviant, 18 x u16"
-slot,0x5E7E,36,,,D,"Special Permit points waiting at the Courier, 18 x u16"
-slot,0x5EA2,1,,,D,"S+0x446c option Control Type (StartMenuMsg 530: Types 1-4)"
-slot,0x5EA3,1,,,D,"S+0x446d option + Button Controls (535: Type 1/2 swaps + and -, 0x65f808)"
-slot,0x5EA4,1,,,D,"S+0x446e option L/R Button Controls (545: swap L/R with ZL/ZR, 0x65f8c4)"
-slot,0x5EA5,1,,,D,"S+0x446f option R Stick Controls (551: swap R Stick and directional buttons, 0x65f87c)"
+slot,0x5E56,4,,,C,Courier points
+slot,0x5E5A,36,,,C,"Special Permit points per deviant, 18 x u16"
+slot,0x5E7E,36,,,C,"Special Permit points waiting at the Courier, 18 x u16"
+slot,0x5EA2,1,,,C,"S+0x446c option Control Type (StartMenuMsg 530: Types 1-4)"
+slot,0x5EA3,1,,,C,"S+0x446d option + Button Controls (535: Type 1/2 swaps + and -, 0x65f808)"
+slot,0x5EA4,1,,,C,"S+0x446e option L/R Button Controls (545: swap L/R with ZL/ZR, 0x65f8c4)"
+slot,0x5EA5,1,,,C,"S+0x446f option R Stick Controls (551: swap R Stick and directional buttons, 0x65f87c)"
 slot,0x5EA6,274,,,C,"monster hunt tallies, u16 index 1-137"
 slot,0x5FB8,274,,,C,"monster capture counts, u16 index 1-137"
 slot,0x60CA,548,,,C,"monster size records, (u16 min, u16 max) index 1-137"
@@ -265,38 +265,38 @@ slot,0x60CA,548,,,C,"monster size records, (u16 min, u16 max) index 1-137"
 slot,0x62EE,36,2000,,C,@equip36 equipment box entry
 slot,0x17C2E,36,1000,,C,@equip36 Palico equipment box entry
 slot,0x208CE,136,40,,C,@myset My Set
-slot,0x21E0E,68,24,,D,@palset Palico equipment set
+slot,0x21E0E,68,24,,C,@palset Palico equipment set
 #
 # ---- slot: sGameControl ----
 # game options (sGameControl +0x5e; Game / Chat / Network option windows; value = index of the choice; defaults table 0x162cda8 = the fresh slots)
-slot,0x2246E,1,,,D,"Music Volume (StartMenuMsg 125; 0 Off .. 7 Max), default 5"
-slot,0x2246F,1,,,D,"SFX Volume (126), default 7"
+slot,0x2246E,1,,,C,"Music Volume (StartMenuMsg 125; 0 Off .. 7 Max), default 5"
+slot,0x2246F,1,,,C,"SFX Volume (126), default 7"
 slot,0x22470,1,,,D,"Sound Settings (135: Mono / Stereo / Surround), default 1"
-slot,0x22471,1,,,D,HUD (139)
-slot,0x22472,1,,,D,Map (142)
-slot,0x22473,1,,,D,"Camera Angle (143: Type 1-5), default 3"
-slot,0x22474,1,,,D,Camera Controls (149)
-slot,0x22475,1,,,D,Camera Speed (154)
-slot,0x22476,1,,,D,Scope Controls (158)
-slot,0x22477,1,,,D,"Bowgun Controls (159), default 1"
-slot,0x22478,1,,,D,Quick Aim Controls (160)
-slot,0x22479,1,,,D,Quick Aim Camera (161)
-slot,0x2247A,1,,,D,"Reticle Speed (162), default 1"
-slot,0x2247B,1,,,D,Orientation (163)
-slot,0x2247C,1,,,D,"Bow Controls (164), default 1"
-slot,0x2247D,1,,,D,Bow Aim Mode Cancel (165)
+slot,0x22471,1,,,C,HUD (139)
+slot,0x22472,1,,,C,Map (142)
+slot,0x22473,1,,,C,"Camera Angle (143: Type 1-5), default 3"
+slot,0x22474,1,,,C,Camera Controls (149)
+slot,0x22475,1,,,C,Camera Speed (154)
+slot,0x22476,1,,,C,Scope Controls (158)
+slot,0x22477,1,,,C,"Bowgun Controls (159), default 1"
+slot,0x22478,1,,,C,Quick Aim Controls (160)
+slot,0x22479,1,,,C,Quick Aim Camera (161)
+slot,0x2247A,1,,,C,"Reticle Speed (162), default 1"
+slot,0x2247B,1,,,C,Orientation (163)
+slot,0x2247C,1,,,C,"Bow Controls (164), default 1"
+slot,0x2247D,1,,,C,Bow Aim Mode Cancel (165)
 slot,0x2247E,1,,,D,START: Kick (168)
-slot,0x2247F,1,,,D,Target Cam Controls (170)
-slot,0x22480,1,,,D,Target Cam Behavior (171)
-slot,0x22481,1,,,D,"Terrain-savvy Camera (172), default 1"
+slot,0x2247F,1,,,C,Target Cam Controls (170)
+slot,0x22480,1,,,C,Target Cam Behavior (171)
+slot,0x22481,1,,,C,"Terrain-savvy Camera (172), default 1"
 slot,0x22482,1,,,D,"Circle Pad Pro working copy (sGameControl +0x72): saved but reset at load to (+0x5d == 1) (0x3f8e10)"
 slot,0x22483,1,,,D,"3DS-era option, default 4 (0x162cdbd); no label or reader in v1.4"
-slot,0x22484,1,,,D,Lens Flares (178; uLensFlareCtrl)
-slot,0x22485,1,,,D,Network: Guild Cards / Palicoes receive (479)
-slot,0x22486,1,,,D,Network: Chat (480)
-slot,0x22487,1,,,D,Network: Invites (482)
-slot,0x22488,1,,,D,Network: Palico Chat (492)
-slot,0x22489,1,,,D,Melody Effect Display (180)
+slot,0x22484,1,,,C,Lens Flares (178; uLensFlareCtrl)
+slot,0x22485,1,,,C,Network: Guild Cards / Palicoes receive (479)
+slot,0x22486,1,,,C,Network: Chat (480)
+slot,0x22487,1,,,C,Network: Invites (482)
+slot,0x22488,1,,,C,Network: Palico Chat (492)
+slot,0x22489,1,,,C,Melody Effect Display (180)
 slot,0x2248A,1,,,D,"Chat window: Shoutout Reset Selection (LobbyMenuMsg 65; 0 All Groups, 1-3 Group 1-3)"
 slot,0x2248B,4,,,C,play time in seconds
 slot,0x2248F,4,,,C,f32 play-time remainder in frames
@@ -337,7 +337,7 @@ slot,0x23837,1,,,D,"staged counter 2: every 20 such clears add 5 to pending 17"
 slot,0x23838,1,,,D,"staged counter 3: gathering-type villager-request clears up to 10; at 10 a one-off 3 to pending 17"
 slot,0x23839,1,,,D,"staged counter 4: every 30 gathering request clears add 3 to pending 17"
 slot,0x2383A,1,,,D,"staged counter 5: unused; table entry 5 is unreachable, only init/load/save touch it"
-slot,0x2383B,25,,,D,"Combination List recipes combined, bit = itemPreData record"
+slot,0x2383B,25,,,C,"Combination List recipes combined, bit = itemPreData record"
 slot,0x23854,256,,,D,Combination List order (pouch list)
 slot,0x23954,256,,,D,Combination List order (item box list)
 slot,0x23A54,4,,,D,Horns Coins traded in total
@@ -361,16 +361,16 @@ slot,0x23B53,20,,,C,"current pigment, 5 x RGBA"
 slot,0x23B67,4,,,C,colour 5: skin
 slot,0x23B6B,8,,,D,"colours 6, 7: hair, features"
 slot,0x23B73,4,,,C,colour 8: clothing
-slot,0x23B77,4,,,D,five 5-bit colour modes
+slot,0x23B77,4,,,C,five 5-bit colour modes
 slot,0x23B7B,2,,,C,default-colour flags
 slot,0x23B7D,32,,,C,hunter name
 #
 # ---- slot: sOtomo ----
-slot,0x23B9D,1,,,D,Palico played as Prowler (index; 0xFF = none)
+slot,0x23B9D,1,,,C,Palico played as Prowler (index; 0xFF = none)
 slot,0x23B9E,1,,,C,hunting buddy 1 (index; 0xFF = none)
-slot,0x23B9F,1,,,D,hunting buddy 2
-slot,0x23BA0,1,,,D,"Palico Dojo sessions completed, at most 100"
-slot,0x23BA1,1,,,D,"Palicoes hired in total, at most 200"
+slot,0x23B9F,1,,,C,hunting buddy 2
+slot,0x23BA0,1,,,C,"Palico Dojo sessions completed, at most 100 (a session raised a written 50 to 51; award 53 was not given by the game after the next quest)"
+slot,0x23BA1,1,,,D,"Palicoes hired in total, at most 200 (hiring from the Palico Board did not raise it)"
 slot,0x23BA2,20,,,D,"Palico scouting request (uUIOtomoService; used by new-Palico creation 0x25aee0), LSB-first bits: 0-1 mode (0 none, 1 by ability, 2 by looks); 2-5 forte (0 any, k = forte k-1); 6-8 target (0 any, k = Palico target value k; creation 0x25af48 passes it unchanged); 9-12 coat, 13-16 eyes, 17-20 ears, 21-24 tail, 25-28 voice (0 any, k = choice k-1); 29-156 four u32 RGBA colours (defaults 0xFFF0F0F0, 0xFFFFDE71 x3; which is which not proven); 157-159 spare"
 slot,0x23BB6,324,84,,C,@pal324 Palico of the slot
 slot,0x2A606,324,24,,C,@pal324 Palico for hire
@@ -401,13 +401,13 @@ slot,0x2C4D4,4,,,D,"Palico level milestones: bit 0 level 20, bit 1 level 25"
 slot,0x2C4D8,2,,,D,Dark Piece / Dark Stone counts (cut Cave feature)
 slot,0x2C4DA,2,,,C,Village star level
 slot,0x2C4DC,2,,,C,Hub star level
-slot,0x2C4DE,4,,,D,"Moofah affection, u8 x 4"
-slot,0x2C4E2,1,,,D,Moofah gifts received
+slot,0x2C4DE,4,,,C,"Moofah affection, u8 x 4 (petting raised written values in game)"
+slot,0x2C4E2,1,,,C,"Moofah gifts received (a written 9 became 10 with the next Fleeceball, and award 49 followed)"
 slot,0x2C4E3,128,,,C,"village pet names, 4 x char[32]"
-slot,0x2C563,4,,,D,"village pet costumes, u8 per pet"
-slot,0x2C567,4,,,D,"village pets adopted, bit per pet"
-slot,0x2C56B,1,,,D,Housekeeper (Room Service NPC index)
-slot,0x2C56C,1,,,D,village to start in on load
+slot,0x2C563,4,,,C,"village pet costumes, u8 per pet"
+slot,0x2C567,4,,,C,"village pets adopted, bit per pet"
+slot,0x2C56B,1,,,C,Housekeeper (Room Service NPC index)
+slot,0x2C56C,1,,,C,village to start in on load
 #
 # ---- slot: sNpcTalk, sKitchen, sFlagChecker, sMakeAmulet ----
 slot,0x2C56D,192,,,C,"event flags, 1536 bits"
@@ -511,7 +511,7 @@ slot,0x11D080,4,2,,D,"Key L panel: 2 x f32"
 slot,0x11D088,1,,,D,"bits 0-1: panel preset type 0-2, set at character creation (0x682708 / 0x683630); bits 2-7 stream padding"
 slot,0x11D089,104,72,,C,"chat phrase slot: 3 copies of the 24 shortcut phrases"
 slot,0x11EDC9,104,27,,C,"chat phrase slot: 3 copies of the 9 auto-chat lines"
-slot,0x11F8C1,2,,,D,"active chat set 0-2 (phrase object +0x283c): selects the copy of the 24 shortcut / 9 auto-chat lines (0x1c9df4); cycled mod 3 by cUIOChatFixedPharase 0x576a7c"
+slot,0x11F8C1,2,,,C,"active chat set 0-2 (phrase object +0x283c): selects the copy of the 24 shortcut / 9 auto-chat lines (0x1c9df4); cycled mod 3 by cUIOChatFixedPharase 0x576a7c"
 slot,0x11F8C3,1,,,D,alignment byte (slots 1 and 2; slot 3's is part of the zero tail)
 #
 # ==== structs ====
@@ -576,10 +576,10 @@ equip36,0x22,2,,,D,"no accessor (constructor zeroes); 0"
 # My Set, 136 B (game record; docs/07 offsets - 6)
 myset,0x00,42,,,C,set name
 myset,0x2A,14,,,C,"box index x 7, 0xFFFF = empty"
-myset,0x38,42,,,D,copy of each piece's decorations
+myset,0x38,42,,,C,copy of each piece's decorations
 myset,0x62,2,,,D,"padding (not copied by 0x14709c, not cleared by 0x147250 / 0x141b70); 0"
 myset,0x64,20,,,C,"pigment, 5 x RGBA"
-myset,0x78,5,,,D,colour modes
+myset,0x78,5,,,C,colour modes
 myset,0x7D,5,,,C,default-colour flags
 myset,0x82,1,,,C,hunting style
 myset,0x83,3,,,C,Hunter Arts
@@ -587,8 +587,8 @@ myset,0x86,1,,,C,SP Art bits
 myset,0x87,1,,,D,padding
 #
 # Palico equipment set, 68 B
-palset,0x00,42,,,D,set name
-palset,0x2A,6,,,D,"3 x u16 box index, 0xFFFF = empty"
+palset,0x00,42,,,C,set name
+palset,0x2A,6,,,C,"3 x u16 box index, 0xFFFF = empty"
 palset,0x30,3,,,D,"default-colour flags per piece (weapon, helm, body), 1 = default; set to 1 by clear / fixer 0x148410 / 0x14b2c8"
 palset,0x33,3,,,D,colour modes per piece (as My Set +0x78)
 palset,0x36,2,,,D,padding (never copied); 0

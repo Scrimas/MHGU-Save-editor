@@ -148,7 +148,6 @@ export component SetsView inherits HorizontalLayout {
                         spacing: Tok.tight;
                         alignment: start;
                         SectionTitle { text: @tr("Gear"); }
-                        ConfidenceTag { level: Confidence.derived; }
                     }
                     Muted {
                         text: root.palico ? @tr("Pieces of the Palico box.") : @tr("Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box.");
@@ -170,7 +169,6 @@ export component SetsView inherits HorizontalLayout {
                         spacing: Tok.tight;
                         alignment: start;
                         SectionTitle { text: @tr("Style and Hunter Arts"); }
-                        ConfidenceTag { level: Confidence.derived; }
                     }
                     ArtsEditor { info: Api.set-detail.arts; where: 0; key: root.set-key + ":arts"; }
                 }

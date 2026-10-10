@@ -457,7 +457,7 @@ mod tests {
         assert!(!st.borrow().save().is_dirty(), "{:?}", &st.borrow().save().diff()[..st.borrow().save().diff().len().min(6)]);
         // the unlock goals and a page-wide Unlock all
         let (mut s, slot) = (st.borrow().save().clone(), st.borrow().slot);
-        for g in ["lab", "costumes", "songs", "trader", "coins", "combos", "gallery", "unlocks:all:14"] {
+        for g in ["lab", "costumes", "songs", "trader", "combos", "gallery", "unlocks:all:14"] {
             goals::apply(g, &mut s, slot);
             assert!(goals::plan(g, &s, slot).targets.is_empty(), "{g} twice");
         }
