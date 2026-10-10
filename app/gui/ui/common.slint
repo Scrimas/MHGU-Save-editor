@@ -342,6 +342,9 @@ export global Api {
     callback toast-act();
     callback open-dialog();
     callback open-path(string);
+    // a drag from another app onto the window: whether it carries a file, and its drop (nav.rs)
+    pure callback drag-has-file(data-transfer) -> bool;
+    callback files-dropped(data-transfer);
     callback open-folder();
     callback copy-path();
     in property <[DetectedSave]> detected;

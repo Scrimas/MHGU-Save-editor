@@ -894,7 +894,7 @@ export component AppWindow inherits Window {
     forward-focus: keys;
     property <string> page-now: Api.page;
     changed page-now => { Api.page-shown(); }
-    property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.mhxx-title != "" || Api.diff-title != "" || Api.talisman-text-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
+    out property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.mhxx-title != "" || Api.diff-title != "" || Api.talisman-text-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
     changed any-modal => {
         if !any-modal {
             keys.focus();
@@ -1324,6 +1324,19 @@ export component AppWindow inherits Window {
                 Button { text: Api.toast-action; enabled: shown; clicked => { Api.toast-act(); } }
             }
         }
+    }
+    // A save dragged from the file manager opens (nav.rs), not while a dialog is open.
+    // Slint delivers the OS's drops here where its winit backend supports them (winit
+    // 0.31: Wayland too); with winit 0.30 a hook in scroll.rs/focus.rs takes them.
+    // Copy, never move: the file manager must keep the save.
+    drop := DropArea {
+        enabled: !root.any-modal;
+        can-drop(e) => { Api.drag-has-file(e.data) ? DragAction.copy : DragAction.none }
+        dropped(e) => {
+            Api.files-dropped(e.data);
+            DragAction.copy
+        }
+        if drop.has-drag: Rectangle { border-width: 3px; border-color: Palette.accent-background; }
     }
     }
 }

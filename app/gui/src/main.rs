@@ -797,6 +797,40 @@ mod tests {
         sidebar_keys(&ui);
     }
 
+    /// A file dragged from another app, as a backend delivers it to the DropArea: taken as
+    /// a copy and opened on release (a missing file shows the open error), refused while a
+    /// dialog is open.
+    #[test]
+    fn dropped_file_opens() {
+        use i_slint_core::input::BackendDragEvent;
+        use i_slint_core::items::{AllowedDragActions, DragAction, DropEvent};
+        use i_slint_core::window::WindowInner;
+        i_slint_backend_testing::init_no_event_loop();
+        let ui = AppWindow::new().unwrap();
+        let st: Shared = Rc::new(RefCell::new(State::default()));
+        views::wire(&ui, &st);
+        nav::install(&ui);
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let api = ui.global::<Api>();
+        let p = std::env::temp_dir().join("mhgu-no-such-save").join("system");
+        let drag = |drop: bool| {
+            let mut event = DropEvent::default();
+            event.data.set_file_paths([&p]);
+            event.position = slint::LogicalPosition::new(700.0, 450.0);
+            let allowed = AllowedDragActions { copy: true, move_: true, link: false };
+            let e = if drop { BackendDragEvent::Drop { event, allowed } } else { BackendDragEvent::Move { event, allowed } };
+            WindowInner::from_pub(ui.window()).process_drag_event(e).unwrap_or(DragAction::None)
+        };
+        api.set_settings_open(true);
+        assert_eq!(drag(false), DragAction::None);
+        api.set_settings_open(false);
+        assert_eq!(drag(false), DragAction::Copy, "copy, never move");
+        assert!(api.get_warning().is_empty());
+        assert_eq!(drag(true), DragAction::Copy);
+        assert!(api.get_warning().contains("mhgu-no-such-save"), "{}", api.get_warning());
+    }
+
     /// The same with a save open: every page switch rebuilds the page's models.
     #[test]
     #[ignore = "needs MHGU_TEST_SAVE"]

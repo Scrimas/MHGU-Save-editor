@@ -16,7 +16,7 @@ use i_slint_core::lengths::{LogicalPoint, LogicalRect};
 use i_slint_core::window::WindowInner;
 
 /// Off Linux; there scroll.rs owns the winit hook (Slint takes one) and calls `press`.
-/// The mouse's Back/Forward buttons ride on it too.
+/// The mouse's Back/Forward buttons and dropped files ride on it too.
 #[cfg(not(target_os = "linux"))]
 pub fn install(window: &slint::Window) {
     use slint::winit_030::winit::event::{ElementState, MouseButton, WindowEvent};
@@ -32,6 +32,10 @@ pub fn install(window: &slint::Window) {
                 if *state == ElementState::Pressed {
                     crate::nav::step(*b == MouseButton::Forward);
                 }
+                return EventResult::PreventDefault;
+            }
+            WindowEvent::DroppedFile(p) => {
+                crate::nav::dropped(p);
                 return EventResult::PreventDefault;
             }
             WindowEvent::KeyboardInput { event, .. } if event.state == ElementState::Pressed => crate::arrows::refocus(w),

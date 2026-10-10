@@ -82,6 +82,13 @@ pub fn install(ui: &AppWindow) {
             shown(&ui);
         }
     });
+    ui.global::<Api>().on_drag_has_file(|d| d.has_file_paths());
+    // several files: the first opens
+    ui.global::<Api>().on_files_dropped(|d| {
+        if let Some(p) = d.file_paths().ok().and_then(|mut ps| ps.next()) {
+            dropped(p);
+        }
+    });
 }
 
 /// The page or its tab changed.
@@ -89,6 +96,16 @@ pub fn shown(ui: &AppWindow) {
     let page = ui.global::<Api>().get_page();
     let tab = ui.global::<Tabs>().invoke_current(page.clone());
     HISTORY.with(|h| h.borrow_mut().shown((page.into(), tab)));
+}
+
+/// A file dropped on the window opens as a picked save would (staged changes ask first);
+/// not while a dialog is open. From the window's DropArea, or with winit 0.30 from the
+/// winit hook like the mouse buttons.
+pub fn dropped(p: &std::path::Path) {
+    let Some(ui) = UI.with(|u| u.borrow().upgrade()) else { return };
+    if !ui.get_any_modal() {
+        ui.global::<Api>().invoke_open_path(p.display().to_string().into());
+    }
 }
 
 /// Mouse Back (`forward` false) or Forward button.
