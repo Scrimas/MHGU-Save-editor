@@ -170,6 +170,7 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             ("quests", &["tab", n]) => api.invoke_select_quest_tab(num(n)),
             ("cards", &["tab", n]) => api.invoke_select_card_tab(num(n)),
             ("options", &["tab", n]) => api.invoke_select_option_tab(num(n)),
+            ("palicoes", &["tab", n]) => api.invoke_select_palico_tab(num(n)),
             (_, &["remove-card", n]) => api.invoke_remove_card(num(n)),
             (_, &["option", id, v]) => api.invoke_set_option(id.into(), num(v)),
             (_, &["chat-show", g]) => api.invoke_show_chat_group(num(g)),
@@ -550,6 +551,45 @@ mod tests {
             assert_eq!(options::chat_group(s, base), 0);
         }
         for key in ["cards:stored", "opt:camera-angle", "brightness", "language", "chat:phrase:1:3", "auto-on", "chat-group"] {
+            api.invoke_undo_value(key.into());
+        }
+        assert!(!st.borrow().save().is_dirty(), "{:?}", &st.borrow().save().diff()[..st.borrow().save().diff().len().min(6)]);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn palico_tabs() {
+        use mhgu_save::{otomo, palico};
+        let (ui, st, dir) = opened("palicoes");
+        let api = ui.global::<Api>();
+        let base = st.borrow().base();
+        api.set_page("palicoes".into());
+        // for hire: the same editor, Derived
+        api.invoke_select_palico_tab(1);
+        let first = api.get_palicoes().row_data(0).unwrap().index as usize;
+        assert!(palico::for_hire(first));
+        api.invoke_set_palico("level".into(), 12);
+        assert_eq!(palico::get(st.borrow().save(), base, first).level, 12);
+        // roles: the Palico picked first becomes the Prowler and leaves its other role
+        api.invoke_select_palico_tab(2);
+        assert_eq!(api.get_palico_fields().row_count(), otomo::ROLE_N + 2);
+        let buddy = otomo::role(st.borrow().save(), base, 1);
+        api.invoke_set_palico_field("pal-role:0".into(), 1);
+        api.invoke_set_palico_field("palicoes-hired".into(), 250);
+        api.invoke_select_palico_tab(4);
+        api.invoke_set_palico_field("scouting:mode".into(), 2);
+        {
+            let b = st.borrow();
+            let s = b.save();
+            assert_eq!(otomo::role(s, base, 0), Some(0));
+            if buddy == Some(0) {
+                assert_eq!(otomo::role(s, base, 1), None);
+            }
+            assert_eq!(otomo::hired(s, base), otomo::HIRED_MAX);
+            assert_eq!(otomo::request(s, base, 0), 2);
+        }
+        for key in [format!("palico:{first}:level"), "pal-role:0".into(), "pal-role:1".into(), "palicoes-hired".into(), "scouting:mode".into()] {
             api.invoke_undo_value(key.into());
         }
         assert!(!st.borrow().save().is_dirty(), "{:?}", &st.borrow().save().diff()[..st.borrow().save().diff().len().min(6)]);

@@ -253,7 +253,7 @@ msgid "Copies and imports are Derived: not checked in game yet. Delete leaves th
 msgstr "Las copias y las importaciones son deducidas: aún no se han comprobado en el juego. Eliminar deja la ranura como nunca usada; el nuevo personaje se crea allí en el juego."
 
 #: app/gui/ui/app.slint app/gui/ui/pages/cards.slint
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
 msgid "Remove"
 msgstr "Quitar"
 
@@ -1528,8 +1528,8 @@ msgstr[0] "{} de {n} espacio usado"
 msgstr[1] "{} de {n} espacios usados"
 
 #: app/core/src/palico.rs app/gui/src/targets.rs
-#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/character_page.rs app/gui/src/views/palicoes.rs
+#: app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr "Ninguno"
 
@@ -1906,7 +1906,8 @@ msgstr "Todos los objetivos ya están en esta partida."
 msgid "Already in your save"
 msgstr "Ya en tu partida"
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/pages/palicoes.slint
 msgid "Looks"
 msgstr "Aspecto"
 
@@ -1927,6 +1928,10 @@ msgstr "Innato"
 #: app/gui/ui/pages/palicoes.slint
 msgid "Taught slot"
 msgstr "Espacio enseñado"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "No StreetPass Palicoes."
+msgstr "No hay camaradas de StreetPass."
 
 #: app/gui/ui/pages/palicoes.slint
 msgid "Search Palicoes"
@@ -1961,11 +1966,13 @@ msgstr "Experiencia"
 msgid "Separate from the level: the game does not recompute one from the other."
 msgstr "Independiente del nivel: el juego no recalcula uno a partir del otro."
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/pages/palicoes.slint
 msgid "Forte"
 msgstr "Especialidad"
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/pages/palicoes.slint
 msgid "Target"
 msgstr "Objetivo"
 
@@ -3272,6 +3279,11 @@ msgid "Palico place {} · {}"
 msgstr "Puesto de camarada {} · {}"
 
 #. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} (for hire) · {}"
+msgstr "{} (para contratar) · {}"
+
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/unlocks_ui.rs
 msgid "Delivery request {}"
 msgstr "Petición de entrega {}"
@@ -3391,6 +3403,23 @@ msgstr "Brillo de la pantalla"
 msgid "Rumble"
 msgstr "Vibración"
 
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "Palico Dojo sessions completed"
+msgstr "Sesiones de Camaradojo completadas"
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "Palicoes hired"
+msgstr "Camaradas contratados"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Palico Scout · {}"
+msgstr "Busca camaradas · {}"
+
+#: app/gui/src/targets.rs
+msgid "StreetPass Palicoes"
+msgstr "Camaradas de StreetPass"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
 #: app/gui/src/views/names.rs app/gui/src/views/options_ui.rs
@@ -3463,6 +3492,13 @@ msgid "{n} card"
 msgid_plural "{n} cards"
 msgstr[0] "{n} tarjeta"
 msgstr[1] "{n} tarjetas"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "{n} Palico"
+msgid_plural "{n} Palicoes"
+msgstr[0] "{n} camarada"
+msgstr[1] "{n} camaradas"
 
 #: app/gui/src/update.rs
 msgid "GitHub refused the request (too many in the last hour), try later"
@@ -3870,7 +3906,7 @@ msgstr "Transeúnte"
 msgid "Sweetheart"
 msgstr "Amorcito"
 
-#: app/gui/src/views/cards_ui.rs
+#: app/gui/src/views/cards_ui.rs app/gui/src/views/palicoes.rs
 msgid "StreetPass"
 msgstr "StreetPass"
 
@@ -5370,6 +5406,125 @@ msgstr[0] "{} Cambia {n} valor. No se escribe nada hasta que pulses Escribir."
 msgstr[1] "{} Cambian {n} valores. No se escribe nada hasta que pulses Escribir."
 
 #: app/gui/src/views/palicoes.rs
+msgid "Palico played as Prowler"
+msgstr "Camarada jugado como Gatador"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Hunting buddy 1"
+msgstr "Camarada 1"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Hunting buddy 2"
+msgstr "Camarada 2"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Scout Method"
+msgstr "Criterio"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Any"
+msgstr "Cualquiera"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Ability"
+msgstr "Habilidad"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Roles"
+msgstr "Funciones"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Counters"
+msgstr "Contadores"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Dojo"
+msgstr "Camaradojo"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Training"
+msgstr "Entrenamiento"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} · {} of {} sessions left"
+msgstr "{} · quedan {} de {} sesiones"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "learning {}"
+msgstr "aprende {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Training {}"
+msgstr "Entrenamiento {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} teaches {} to {}"
+msgstr "{} enseña {} a {}"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Teaching session"
+msgstr "Clase"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Board"
+msgstr "Tablón de camaradas"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team"
+msgstr "Equipo"
+
+#: app/gui/src/views/palicoes.rs
+msgid "At home"
+msgstr "En casa"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Out on an expedition"
+msgstr "De expedición"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Back, results waiting"
+msgstr "De vuelta, resultados pendientes"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Meownster Hunters"
+msgstr "Cazamiaunstruos"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Expedition"
+msgstr "Expedición"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Lv {} · {}"
+msgstr "Nv {} · {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "From {}"
+msgstr "De {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Original owner {}"
+msgstr "Dueño original {}"
+
+#: app/gui/src/views/palicoes.rs
+msgid "To send"
+msgstr "Para enviar"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Inbox"
+msgstr "Buzón de entrada"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Scouting Conditions"
+msgstr "Condiciones de búsqueda"
+
+#: app/gui/src/views/palicoes.rs
 msgid "Coat"
 msgstr "Pelo"
 
@@ -5397,17 +5552,37 @@ msgstr "Color del ojo derecho"
 msgid "Ears"
 msgstr "Orejas"
 
-#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
-msgid "Lv {} · {}"
-msgstr "Nv {} · {}"
+msgid "My Palicoes"
+msgstr "Mis camaradas"
 
-#. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/palicoes.rs
-msgid "{n} Palico"
-msgid_plural "{n} Palicoes"
-msgstr[0] "{n} camarada"
-msgstr[1] "{n} camaradas"
+msgid "For hire"
+msgstr "Para contratar"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team and Dojo"
+msgstr "Equipo y dojo"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Scout"
+msgstr "Busca camaradas"
+
+#: app/gui/src/views/palicoes.rs
+msgid "The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."
+msgstr "Los camaradas que el juego ofrece para contratar: uno editado llega tal cual al contratarlo. El juego sortea una lista nueva de vez en cuando."
+
+#: app/gui/src/views/palicoes.rs
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). The game gives award 53 from 50 Dojo sessions and title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
+msgstr "Un Gatador lucha con los movimientos de apoyo y las habilidades de su camarada (Mis camaradas). El juego da el premio 53 a partir de 50 sesiones de dojo y palabras de título a partir de 10, 30, 50 y 80 contrataciones en su próxima comprobación. El dojo y los equipos son de solo lectura."
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."
+msgstr "Los camaradas recibidos por StreetPass esperan en el buzón hasta que se contratan o se despiden; el que se envía sale con la tarjeta del gremio."
+
+#: app/gui/src/views/palicoes.rs
+msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."
+msgstr "Lo que busca Busca camaradas: por habilidad (especialidad, objetivo) o por aspecto. Los colores pedidos se dejan como están."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
@@ -5418,6 +5593,11 @@ msgstr "{} de {} equipados"
 #: app/gui/src/views/palicoes.rs
 msgid "{} of {} skill slots used"
 msgstr "{} de {} espacios de habilidad usados"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Remove the StreetPass Palico {}"
+msgstr "Quitar el camarada de StreetPass {}"
 
 #: app/gui/src/views/palicoes.rs
 msgid "A Palico needs a name"

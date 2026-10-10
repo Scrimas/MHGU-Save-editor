@@ -253,7 +253,7 @@ msgid "Copies and imports are Derived: not checked in game yet. Delete leaves th
 msgstr "Copie e importazioni sono dedotte: non ancora verificate nel gioco. Elimina lascia lo slot come mai usato; un nuovo personaggio si crea lì nel gioco."
 
 #: app/gui/ui/app.slint app/gui/ui/pages/cards.slint
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
 msgid "Remove"
 msgstr "Rimuovi"
 
@@ -1528,8 +1528,8 @@ msgstr[0] "{} di {n} spazio usato"
 msgstr[1] "{} di {n} spazi usati"
 
 #: app/core/src/palico.rs app/gui/src/targets.rs
-#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/character_page.rs app/gui/src/views/palicoes.rs
+#: app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr "Nessuno"
 
@@ -1906,7 +1906,8 @@ msgstr "Ogni obiettivo è già in questo salvataggio."
 msgid "Already in your save"
 msgstr "Già nel tuo salvataggio"
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/pages/palicoes.slint
 msgid "Looks"
 msgstr "Aspetto"
 
@@ -1927,6 +1928,10 @@ msgstr "Innata"
 #: app/gui/ui/pages/palicoes.slint
 msgid "Taught slot"
 msgstr "Slot insegnato"
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "No StreetPass Palicoes."
+msgstr "Nessun compagno StreetPass."
 
 #: app/gui/ui/pages/palicoes.slint
 msgid "Search Palicoes"
@@ -1961,11 +1966,13 @@ msgstr "Esperienza"
 msgid "Separate from the level: the game does not recompute one from the other."
 msgstr "Separata dal livello: il gioco non ricalcola l'uno dall'altra."
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/pages/palicoes.slint
 msgid "Forte"
 msgstr "Tendenza"
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/pages/palicoes.slint
 msgid "Target"
 msgstr "Obiettivo"
 
@@ -3272,6 +3279,11 @@ msgid "Palico place {} · {}"
 msgstr "Posto compagno {} · {}"
 
 #. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "{} (for hire) · {}"
+msgstr "{} (da ingaggiare) · {}"
+
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/unlocks_ui.rs
 msgid "Delivery request {}"
 msgstr "Richiesta di consegna {}"
@@ -3391,6 +3403,23 @@ msgstr "Luminosità TV"
 msgid "Rumble"
 msgstr "Vibrazione"
 
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "Palico Dojo sessions completed"
+msgstr "Sessioni in Palestra compagni completate"
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "Palicoes hired"
+msgstr "Compagni ingaggiati"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs
+msgid "Palico Scout · {}"
+msgstr "Trovacompagni · {}"
+
+#: app/gui/src/targets.rs
+msgid "StreetPass Palicoes"
+msgstr "Compagni StreetPass"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
 #: app/gui/src/views/names.rs app/gui/src/views/options_ui.rs
@@ -3463,6 +3492,13 @@ msgid "{n} card"
 msgid_plural "{n} cards"
 msgstr[0] "{n} tessera"
 msgstr[1] "{n} tessere"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "{n} Palico"
+msgid_plural "{n} Palicoes"
+msgstr[0] "{n} compagno"
+msgstr[1] "{n} compagni"
 
 #: app/gui/src/update.rs
 msgid "GitHub refused the request (too many in the last hour), try later"
@@ -3870,7 +3906,7 @@ msgstr "Passante"
 msgid "Sweetheart"
 msgstr "Zuccherino"
 
-#: app/gui/src/views/cards_ui.rs
+#: app/gui/src/views/cards_ui.rs app/gui/src/views/palicoes.rs
 msgid "StreetPass"
 msgstr "StreetPass"
 
@@ -5370,6 +5406,125 @@ msgstr[0] "{} Cambia {n} valore. Non viene scritto nulla finché non premi Scriv
 msgstr[1] "{} Cambiano {n} valori. Non viene scritto nulla finché non premi Scrivi."
 
 #: app/gui/src/views/palicoes.rs
+msgid "Palico played as Prowler"
+msgstr "Compagno usato come Cacciamiao"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Hunting buddy 1"
+msgstr "Compagno 1"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Hunting buddy 2"
+msgstr "Compagno 2"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Scout Method"
+msgstr "Metodo ricerca"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Any"
+msgstr "Qualsiasi"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Ability"
+msgstr "Capacità"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Roles"
+msgstr "Ruoli"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Counters"
+msgstr "Contatori"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Dojo"
+msgstr "Palestra compagni"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Training"
+msgstr "Addestramento"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} · {} of {} sessions left"
+msgstr "{} · {} sessioni rimaste su {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "learning {}"
+msgstr "impara {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Training {}"
+msgstr "Addestramento {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "{} teaches {} to {}"
+msgstr "{} insegna {} a {}"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Teaching session"
+msgstr "Lezione"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Board"
+msgstr "Bacheca compagni"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team"
+msgstr "Squadra"
+
+#: app/gui/src/views/palicoes.rs
+msgid "At home"
+msgstr "A casa"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Out on an expedition"
+msgstr "In spedizione"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Back, results waiting"
+msgstr "Di ritorno, risultati in attesa"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Meownster Hunters"
+msgstr "Cacciatori di miaostri"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Expedition"
+msgstr "Spedizione"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Lv {} · {}"
+msgstr "Lv {} · {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "From {}"
+msgstr "Da {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Original owner {}"
+msgstr "Proprietario originale {}"
+
+#: app/gui/src/views/palicoes.rs
+msgid "To send"
+msgstr "Da inviare"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Inbox"
+msgstr "Dati ricevuti"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Scouting Conditions"
+msgstr "Condizioni di ricerca"
+
+#: app/gui/src/views/palicoes.rs
 msgid "Coat"
 msgstr "Pelo"
 
@@ -5397,17 +5552,37 @@ msgstr "Colore occhio destro"
 msgid "Ears"
 msgstr "Orecchie"
 
-#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
-msgid "Lv {} · {}"
-msgstr "Lv {} · {}"
+msgid "My Palicoes"
+msgstr "I miei compagni"
 
-#. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/palicoes.rs
-msgid "{n} Palico"
-msgid_plural "{n} Palicoes"
-msgstr[0] "{n} compagno"
-msgstr[1] "{n} compagni"
+msgid "For hire"
+msgstr "Da ingaggiare"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team and Dojo"
+msgstr "Squadra e palestra"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Scout"
+msgstr "Trovacompagni"
+
+#: app/gui/src/views/palicoes.rs
+msgid "The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."
+msgstr "I compagni che il gioco offre da ingaggiare: uno modificato arriva così com'è quando lo ingaggi. Il gioco estrae una nuova lista di tanto in tanto."
+
+#: app/gui/src/views/palicoes.rs
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). The game gives award 53 from 50 Dojo sessions and title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
+msgstr "Un Cacciamiao combatte con le mosse di supporto e le abilità del suo compagno (I miei compagni). Il gioco assegna il premio 53 da 50 sessioni in palestra e le parole del titolo da 10, 30, 50 e 80 ingaggi al suo prossimo controllo. La palestra e le squadre sono in sola lettura."
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."
+msgstr "I compagni ricevuti via StreetPass attendono nei dati ricevuti finché non vengono ingaggiati o congedati; quello da inviare parte con la tessera Gilda."
+
+#: app/gui/src/views/palicoes.rs
+msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."
+msgstr "Ciò che cerca il Trovacompagni: per capacità (tendenza, obiettivo) o per aspetto. I colori richiesti restano come sono."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
@@ -5418,6 +5593,11 @@ msgstr "{} di {} equipaggiate"
 #: app/gui/src/views/palicoes.rs
 msgid "{} of {} skill slots used"
 msgstr "{} di {} slot abilità usati"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/palicoes.rs
+msgid "Remove the StreetPass Palico {}"
+msgstr "Rimuovi il compagno StreetPass {}"
 
 #: app/gui/src/views/palicoes.rs
 msgid "A Palico needs a name"

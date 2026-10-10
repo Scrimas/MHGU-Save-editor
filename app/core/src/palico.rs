@@ -2,6 +2,9 @@
 //! field the editor writes CONFIRMED in game, the lists and looks on 2026-10-09). A
 //! Palico copied or imported into another character (`export`, `import`) is DERIVED.
 //!
+//! A Palico is named by its place: 0-83 the character's Palicoes, then 24 Palicoes for
+//! hire (the same record; an edited one is hired as edited: DERIVED).
+//!
 //!   +0x00 char[32] name
 //!   +0x20 224 B parameter block: exp u32 +0, level - 1 u8 +4, support bias +5, +6 UNRESOLVED,
 //!         target +7, 8 equipped support moves +8 (0 = none), 8 equipped skills +0x10
@@ -27,6 +30,8 @@ pub const LIST: usize = 0x23BB6;
 pub const LIST_N: usize = 84;
 pub const HIRE_LIST: usize = 0x2A606;
 pub const HIRE_N: usize = 24;
+/// Places: the character's Palicoes, then those for hire.
+pub const PLACES: usize = LIST_N + HIRE_N;
 pub const RECORD: usize = 324;
 pub const NAME: usize = 32;
 /// 7 x u16 equipment references: Palico equipment box indices, 0xFFFF = none.
@@ -246,18 +251,26 @@ pub fn set_list_skill(p: &mut Palico, k: usize, id: u8) {
     }
 }
 
-fn at(base: usize, list: usize, i: usize) -> usize {
-    let n = if list == HIRE_LIST { HIRE_N } else { LIST_N };
-    assert!(i < n, "Palico {i} out of range");
-    base + list + RECORD * i
+/// The record of place `i`, from the character base.
+pub fn offset(i: usize) -> usize {
+    assert!(i < PLACES, "Palico {i} out of range");
+    if i < LIST_N { LIST + RECORD * i } else { HIRE_LIST + RECORD * (i - LIST_N) }
+}
+
+pub fn for_hire(i: usize) -> bool {
+    i >= LIST_N
+}
+
+fn at(base: usize, i: usize) -> usize {
+    base + offset(i)
 }
 
 pub fn is_empty(s: &Save, base: usize, i: usize) -> bool {
-    s.get(at(base, LIST, i), NAME)[0] == 0
+    s.get(at(base, i), NAME)[0] == 0
 }
 
 pub fn get(s: &Save, base: usize, i: usize) -> Palico {
-    let o = at(base, LIST, i);
+    let o = at(base, i);
     Palico {
         name: s.str(o, NAME),
         exp: s.u32(o + EXP),
@@ -279,7 +292,7 @@ pub fn get(s: &Save, base: usize, i: usize) -> Palico {
 
 /// Palico equipment box indices of Palico `i`'s equipment references (none skipped).
 pub fn gear(s: &Save, base: usize, i: usize) -> Vec<usize> {
-    let o = at(base, LIST, i);
+    let o = at(base, i);
     (0..GEAR_N).map(|k| s.u16(o + GEAR + 2 * k)).filter(|&r| r != NO_GEAR && (r as usize) < PALICO_BOX_N).map(usize::from).collect()
 }
 
@@ -307,7 +320,7 @@ impl std::error::Error for ImportError {}
 
 /// Palico `i` and the equipment it wears, as a file.
 pub fn export(s: &Save, base: usize, i: usize) -> Vec<u8> {
-    let o = at(base, LIST, i);
+    let o = at(base, i);
     let mut v = [MAGIC.as_slice(), s.get(o, RECORD)].concat();
     for k in 0..GEAR_N {
         let r = s.u16(o + GEAR + 2 * k);
@@ -349,7 +362,7 @@ pub fn import(s: &mut Save, base: usize, file: &[u8]) -> Result<usize, ImportErr
         equipment::set(s, base, Owner::Palico, j, &equipment::Entry { raw: e.try_into().unwrap() });
         rec[GEAR + 2 * k..GEAR + 2 * k + 2].copy_from_slice(&(j as u16).to_le_bytes());
     }
-    s.put(at(base, LIST, i), &rec);
+    s.put(at(base, i), &rec);
     Ok(i)
 }
 
@@ -357,7 +370,7 @@ pub fn import(s: &mut Save, base: usize, file: &[u8]) -> Result<usize, ImportErr
 /// left as read stay byte for byte. An empty name is refused: a record without a name
 /// is an empty slot.
 pub fn set(s: &mut Save, base: usize, i: usize, p: &Palico) {
-    let o = at(base, LIST, i);
+    let o = at(base, i);
     let old = get(s, base, i);
     if old.name != p.name && !p.name.trim().is_empty() {
         s.set_str(o, NAME, &p.name);
@@ -541,8 +554,24 @@ mod tests {
     }
 
     #[test]
+    fn places_past_the_list_are_for_hire() {
+        let mut s = blank();
+        s.set_str(SLOT1_BASE + HIRE_LIST + RECORD, NAME, "Nick");
+        let i = LIST_N + 1;
+        assert!(for_hire(i) && !for_hire(LIST_N - 1));
+        assert_eq!(get(&s, SLOT1_BASE, i).name, "Nick");
+        let mut p = get(&s, SLOT1_BASE, i);
+        p.level = 40;
+        set(&mut s, SLOT1_BASE, i, &p);
+        assert_eq!(s.u8(SLOT1_BASE + HIRE_LIST + RECORD + LEVEL), 39);
+        // an import goes into the character's own places only
+        let f = export(&s, SLOT1_BASE, i);
+        assert_eq!(import(&mut s, SLOT1_BASE, &f), Ok(0));
+    }
+
+    #[test]
     #[should_panic]
     fn index_past_the_list_panics() {
-        get(&blank(), SLOT1_BASE, LIST_N);
+        get(&blank(), SLOT1_BASE, PLACES);
     }
 }

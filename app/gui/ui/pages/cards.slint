@@ -46,8 +46,8 @@ component RowAction inherits Rectangle {
 }
 
 // One card, blocked user or hunter for hire: name, what the game shows about it, then the
-// tab's actions.
-component Row inherits Rectangle {
+// tab's actions. Also the StreetPass Palicoes' rows (palicoes.slint).
+export component Row inherits Rectangle {
     in property <string> name;
     in property <string> tag;
     in property <string> line1;

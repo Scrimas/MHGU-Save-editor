@@ -11,7 +11,7 @@ use mhgu_save::equipment::{self, Owner};
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, cards, monsters, options, palico, save, sets, slots, smithy, unlocks, Save};
+use mhgu_save::{arena, cards, monsters, options, otomo, palico, save, sets, slots, smithy, unlocks, Save};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -152,6 +152,16 @@ pub enum Target {
     Brightness,
     Rumble,
     Language,
+    /// The Palico in a role (`otomo::ROLES`): played as Prowler, hunting buddy 1 or 2.
+    PalRole(usize),
+    /// Palico Dojo sessions completed.
+    DojoDone,
+    /// Palicoes hired in total.
+    PalicoesHired,
+    /// A field of the Palico scouting request (`otomo::REQUEST_FIELDS`).
+    Scouting(usize),
+    /// The StreetPass Palico inbox with its info records.
+    PalInbox,
 }
 
 /// Pages in nav order; `Target::page` returns one of these ids. The titles are English:
@@ -359,7 +369,7 @@ impl Target {
             | Pigment | Arts | QuestCounter | CourierPoints | Housekeeper | StartVillage => "character",
             Item(..) | Loadout(_) | Obtained => "items",
             Equip(..) | Smithy(_) | MySet(..) | PalicoSet(_) => "equipment",
-            Palico(..) => "palicoes",
+            Palico(..) | PalRole(_) | DojoDone | PalicoesHired | Scouting(_) | PalInbox => "palicoes",
             // the card's quest counts follow the cleared quests
             Quest(_) | Arena(_) | CardQuests(_) => "quests",
             Request(_) => "requests",
@@ -434,6 +444,11 @@ impl Target {
             Brightness => "brightness".into(),
             Rumble => "rumble".into(),
             Language => "language".into(),
+            PalRole(r) => format!("pal-role:{r}"),
+            DojoDone => "dojo-done".into(),
+            PalicoesHired => "palicoes-hired".into(),
+            Scouting(k) => format!("scouting:{}", otomo::REQUEST_FIELDS[k].0),
+            PalInbox => "pal-inbox".into(),
         }
     }
 
@@ -479,7 +494,13 @@ impl Target {
                     Pal::Looks => tr("Looks"),
                     Pal::All => tr("Whole Palico"),
                 };
-                if n.is_empty() { trf("Palico place {} · {}", &[&(i + 1), &what]) } else { format!("{n} · {what}") }
+                if n.is_empty() {
+                    trf("Palico place {} · {}", &[&(i + 1), &what])
+                } else if palico::for_hire(i) {
+                    trf("{} (for hire) · {}", &[&n, &what])
+                } else {
+                    format!("{n} · {what}")
+                }
             }
             Quest(i) => t.quests.iter().find(|q| q.index == i).map(|q| q.name.clone()).unwrap_or_else(|| trf("Quest {}", &[&i])),
             Request(i) => t
@@ -558,6 +579,11 @@ impl Target {
             ChatGroup => tr("Chat group in use").into(),
             Brightness => tr("TV Brightness").into(),
             Rumble => tr("Rumble").into(),
+            PalRole(r) => crate::views::role_name(r),
+            DojoDone => tr("Palico Dojo sessions completed").into(),
+            PalicoesHired => tr("Palicoes hired").into(),
+            Scouting(k) => trf("Palico Scout · {}",&[&crate::views::request_field_name(k)]),
+            PalInbox => tr("StreetPass Palicoes").into(),
             Language => tr("Language").into(),
         }
     }
@@ -745,6 +771,15 @@ impl Target {
             Brightness => num(s.u8(options::BRIGHTNESS)),
             Rumble => crate::views::choice_name(options::Choices::OnOff, !options::rumble(s) as u8),
             Language => crate::views::language_name(s.u8(options::LANGUAGE)),
+            PalRole(r) => otomo::role(s, base, r).map_or_else(|| tr("None").into(), |i| palico::get(s, base, i).name),
+            DojoDone => num(otomo::dojo_done(s, base)),
+            PalicoesHired => num(otomo::hired(s, base)),
+            Scouting(k) => crate::views::request_value_name(k, otomo::request(s, base, k)),
+            PalInbox => {
+                let b = otomo::inbox(s, base);
+                let n = trn("{n} Palico", "{n} Palicoes", b.len() as i64, &[]);
+                if b.is_empty() { n } else { format!("{n}: {}", b.iter().map(|(_, p)| p.name.as_str()).collect::<Vec<_>>().join(", ")) }
+            }
         }
     }
 
@@ -773,7 +808,7 @@ impl Target {
             Loadout(k) => range(base + items::LOADOUTS + items::LOADOUT_SZ * k, items::LOADOUT_SZ),
             Equip(o, i) => range(base + if o == Owner::Palico { equipment::PALICO_BOX } else { equipment::BOX } + equipment::ENTRY * i, equipment::ENTRY),
             Palico(i, f) => {
-                let o = base + palico::LIST + palico::RECORD * i;
+                let o = base + palico::offset(i);
                 match f {
                     Pal::Name => range(o, palico::NAME),
                     Pal::Level => range(o + palico::LEVEL, 1),
@@ -948,6 +983,14 @@ impl Target {
             Brightness => range(options::BRIGHTNESS, 1),
             Rumble => range(options::RUMBLE, 1),
             Language => range(options::LANGUAGE, 1),
+            PalRole(r) => range(base + otomo::ROLES + r, 1),
+            DojoDone => range(base + otomo::DOJO_DONE, 1),
+            PalicoesHired => range(base + otomo::HIRED, 1),
+            Scouting(k) => {
+                let (_, pos, width) = otomo::REQUEST_FIELDS[k];
+                bits(base + otomo::REQUEST, pos, width)
+            }
+            PalInbox => [range(base + otomo::INBOX, otomo::INBOX_N * otomo::SP_LEN), range(base + otomo::INBOX_INFO, otomo::INBOX_N * otomo::INFO_LEN)].concat(),
         }
     }
 

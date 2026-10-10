@@ -1,8 +1,45 @@
 import { ListView, LineEdit, ScrollView, Palette, CheckBox, Button } from "std-widgets.slint";
 import {
-    Api, Tok, Card, Muted, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
-    Confidence, SearchField, PalicoEntry, LookRow, Pair, Picker,
+    Api, Tabs, Tok, Card, Muted, SectionTitle, PageHeader, TabBar, NumberBox, StagedBar, WasLine, Hairline, EmptyState, ListRow, ConfidenceTag,
+    Confidence, SearchField, PalicoEntry, LookRow, Pair, Picker, OptionRow, InfoRow,
 } from "../common.slint";
+import { Row as MailRow } from "cards.slint";
+
+// A role, counter or scouting field: name, its choices or a number, "was … Undo" under it.
+component FieldLine inherits VerticalLayout {
+    in property <OptionRow> r;
+    padding-left: 14px;
+    padding-right: 12px;
+    spacing: 2px;
+    if r.head != "": SectionTitle { text: r.head; height: 34px; vertical-alignment: bottom; }
+    HorizontalLayout {
+        spacing: 10px;
+        alignment: start;
+        height: 38px;
+        Text { text: r.name; width: 240px; vertical-alignment: center; overflow: elide; }
+        if !r.number: Picker { y: 3px; width: 220px; height: 32px; model: r.choices; value: r.value; picked(i) => { Api.set-palico-field(r.id, i); } }
+        if r.number: NumberBox { y: 3px; width: 120px; height: 32px; minimum: 0; maximum: r.max; value: r.value; label: r.name; edited(v) => { Api.set-palico-field(r.id, v); } }
+    }
+    if r.was != "": HorizontalLayout {
+        padding-left: 250px;
+        WasLine { was: r.was; key: r.id; }
+    }
+}
+
+// A read-only line under its section title.
+component InfoLine inherits VerticalLayout {
+    in property <InfoRow> r;
+    padding-left: 14px;
+    padding-right: 12px;
+    spacing: 2px;
+    if r.head != "": SectionTitle { text: r.head; height: 34px; vertical-alignment: bottom; }
+    HorizontalLayout {
+        spacing: 10px;
+        min-height: 30px;
+        Text { text: r.name; width: 240px; vertical-alignment: center; overflow: elide; color: Tok.muted; }
+        Text { text: r.value; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+    }
+}
 
 // Label, control, "was … Undo" under it when staged.
 component Row inherits Rectangle {
@@ -163,7 +200,44 @@ export component PalicoesPage inherits Rectangle {
             subtitle: Api.palico-summary;
             staged: Api.page-counts[4];
         }
-        HorizontalLayout {
+        TabBar { tabs: Api.palico-tabs; current: Api.palico-tab; select(i) => { Tabs.select("palicoes", i); } }
+        if Api.palico-tab >= 1: HorizontalLayout {
+            spacing: 10px;
+            alignment: start;
+            ConfidenceTag { level: Confidence.derived; y: 2px; }
+            Muted { text: Api.palico-note; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+        // the other tabs: roles, counters and scouting fields, read-only lines, StreetPass
+        if Api.palico-tab >= 2: HorizontalLayout {
+            vertical-stretch: 1;
+            alignment: start;
+            Card {
+                width: min(root.width - 2 * Tok.margin, Tok.row-max);
+                // two lists one after the other: an inline layout sizes the scroll area
+                if Api.palico-tab != 3: ScrollView {
+                    VerticalLayout {
+                        alignment: start;
+                        padding-bottom: 12px;
+                        for r in Api.palico-fields: FieldLine { r: r; }
+                        for r in Api.palico-info: InfoLine { r: r; }
+                    }
+                }
+                if Api.palico-tab == 3 && Api.palico-mail.length == 0: EmptyState { text: @tr("No StreetPass Palicoes."); }
+                if Api.palico-tab == 3: ListView {
+                    for r in Api.palico-mail: MailRow {
+                        name: r.name;
+                        tag: r.tag;
+                        line1: r.line1;
+                        line2: r.line2;
+                        greeting: r.greeting;
+                        can-remove: r.slot >= 0;
+                        remove-text: @tr("Remove");
+                        remove => { Api.remove-palico-mail(r.slot); }
+                    }
+                }
+            }
+        }
+        if Api.palico-tab <= 1: HorizontalLayout {
             spacing: Tok.pad;
             vertical-stretch: 1;
             VerticalLayout {
@@ -195,7 +269,7 @@ export component PalicoesPage inherits Rectangle {
                     }
                 }
             }
-                Button { text: @tr("Import Palico…"); clicked => { Api.palico-import(); } }
+                if Api.palico-tab == 0: Button { text: @tr("Import Palico…"); clicked => { Api.palico-import(); } }
             }
             Card {
                 horizontal-stretch: 1;

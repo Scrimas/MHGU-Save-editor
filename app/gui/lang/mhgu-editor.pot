@@ -246,7 +246,7 @@ msgstr ""
 msgid "Copies and imports are Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
 msgstr ""
 
-#: app/gui/ui/app.slint app/gui/ui/pages/cards.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/app.slint app/gui/ui/pages/cards.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
 msgid "Remove"
 msgstr ""
 
@@ -1476,7 +1476,7 @@ msgid_plural "{} of {n} slots used"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/core/src/palico.rs app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
+#: app/core/src/palico.rs app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/src/views/palicoes.rs app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
 msgid "None"
 msgstr ""
 
@@ -1852,7 +1852,7 @@ msgstr ""
 msgid "Already in your save"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs app/gui/ui/pages/palicoes.slint
 msgid "Looks"
 msgstr ""
 
@@ -1872,6 +1872,10 @@ msgstr ""
 
 #: app/gui/ui/pages/palicoes.slint
 msgid "Taught slot"
+msgstr ""
+
+#: app/gui/ui/pages/palicoes.slint
+msgid "No StreetPass Palicoes."
 msgstr ""
 
 #: app/gui/ui/pages/palicoes.slint
@@ -1907,11 +1911,11 @@ msgstr ""
 msgid "Separate from the level: the game does not recompute one from the other."
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs app/gui/ui/pages/palicoes.slint
 msgid "Forte"
 msgstr ""
 
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs app/gui/ui/pages/palicoes.slint
 msgid "Target"
 msgstr ""
 
@@ -3217,6 +3221,11 @@ msgstr ""
 msgid "Palico place {} · {}"
 msgstr ""
 
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} (for hire) · {}"
+msgstr ""
+
 #: app/gui/src/targets.rs app/gui/src/views/unlocks_ui.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Delivery request {}"
@@ -3337,6 +3346,23 @@ msgstr ""
 msgid "Rumble"
 msgstr ""
 
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "Palico Dojo sessions completed"
+msgstr ""
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+msgid "Palicoes hired"
+msgstr ""
+
+#: app/gui/src/targets.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Palico Scout · {}"
+msgstr ""
+
+#: app/gui/src/targets.rs
+msgid "StreetPass Palicoes"
+msgstr ""
+
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs app/gui/src/views/names.rs app/gui/src/views/options_ui.rs app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Type {}"
@@ -3405,6 +3431,13 @@ msgstr ""
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 msgid "{n} card"
 msgid_plural "{n} cards"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "{n} Palico"
+msgid_plural "{n} Palicoes"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -3813,7 +3846,7 @@ msgstr ""
 msgid "Sweetheart"
 msgstr ""
 
-#: app/gui/src/views/cards_ui.rs
+#: app/gui/src/views/cards_ui.rs app/gui/src/views/palicoes.rs
 msgid "StreetPass"
 msgstr ""
 
@@ -5312,6 +5345,125 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: app/gui/src/views/palicoes.rs
+msgid "Palico played as Prowler"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Hunting buddy 1"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Hunting buddy 2"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Scout Method"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Any"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Ability"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Roles"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Counters"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Dojo"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Training"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} · {} of {} sessions left"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "learning {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Training {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} teaches {} to {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Teaching session"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Board"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "At home"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Out on an expedition"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Back, results waiting"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Meownster Hunters"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Expedition"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Lv {} · {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "From {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Original owner {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "To send"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Inbox"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Scouting Conditions"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
 msgid "Coat"
 msgstr ""
 
@@ -5340,16 +5492,36 @@ msgid "Ears"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Lv {} · {}"
+msgid "My Palicoes"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-msgid "{n} Palico"
-msgid_plural "{n} Palicoes"
-msgstr[0] ""
-msgstr[1] ""
+msgid "For hire"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team and Dojo"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Scout"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). The game gives award 53 from 50 Dojo sessions and title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."
+msgstr ""
 
 #: app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
@@ -5359,6 +5531,11 @@ msgstr ""
 #: app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} of {} skill slots used"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Remove the StreetPass Palico {}"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs

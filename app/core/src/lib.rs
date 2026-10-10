@@ -13,6 +13,7 @@ pub mod guildcard;
 pub mod items;
 pub mod monsters;
 pub mod options;
+pub mod otomo;
 pub mod palico;
 pub mod progress;
 pub mod save;

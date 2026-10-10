@@ -371,7 +371,7 @@ slot,0x23B9E,1,,,C,hunting buddy 1 (index; 0xFF = none)
 slot,0x23B9F,1,,,D,hunting buddy 2
 slot,0x23BA0,1,,,D,"Palico Dojo sessions completed, at most 100"
 slot,0x23BA1,1,,,D,"Palicoes hired in total, at most 200"
-slot,0x23BA2,20,,,D,"Palico scouting request (uUIOtomoService; used by new-Palico creation 0x25aee0), LSB-first bits: 0-1 mode (0 none, 1 by ability, 2 by looks); 2-5 forte (0 any, k = forte k-1); 6-8 target (0 any); 9-12 coat, 13-16 eyes, 17-20 ears, 21-24 tail, 25-28 voice (0 any, k = choice k-1); 29-156 four u32 RGBA colours (defaults 0xFFF0F0F0, 0xFFFFDE71 x3; which is which not proven); 157-159 spare"
+slot,0x23BA2,20,,,D,"Palico scouting request (uUIOtomoService; used by new-Palico creation 0x25aee0), LSB-first bits: 0-1 mode (0 none, 1 by ability, 2 by looks); 2-5 forte (0 any, k = forte k-1); 6-8 target (0 any, k = Palico target value k; creation 0x25af48 passes it unchanged); 9-12 coat, 13-16 eyes, 17-20 ears, 21-24 tail, 25-28 voice (0 any, k = choice k-1); 29-156 four u32 RGBA colours (defaults 0xFFF0F0F0, 0xFFFFDE71 x3; which is which not proven); 157-159 spare"
 slot,0x23BB6,324,84,,C,@pal324 Palico of the slot
 slot,0x2A606,324,24,,C,@pal324 Palico for hire
 slot,0x2C466,8,5,,D,ID of a Palico that reached level 50

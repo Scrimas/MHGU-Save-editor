@@ -223,6 +223,9 @@ export struct CardRow { slot: int, name: string, tag: string, line1: string, lin
 // An option: its choices in a picker, or a number up to `max`; `head` starts a section
 export struct OptionRow { id: string, head: string, name: string, choices: [string], value: int, number: bool, max: int, was: string }
 
+// A read-only line: `head` starts a section
+export struct InfoRow { head: string, name: string, value: string }
+
 // A chat phrase of the group shown: a shoutout, or an auto-shoutout with its trigger and
 // whether it is on; `head` starts a section
 export struct PhraseRow { auto: bool, index: int, head: string, label: string, text: string, on: bool, was: string }
@@ -553,6 +556,19 @@ export global Api {
     callback palico-copy(int /* slot */);
     callback palico-export();
     callback palico-import();
+    // tabs: My Palicoes, For hire (both the list and editor above), Team and Dojo,
+    // StreetPass, Scouting request
+    in-out property <int> palico-tab;
+    in property <[string]> palico-tabs;
+    callback select-palico-tab(int);
+    in property <string> palico-note;
+    // Team and Dojo: roles and counters; Scouting request: its fields (OptionRow.id)
+    in property <[OptionRow]> palico-fields;
+    callback set-palico-field(string, int);
+    in property <[InfoRow]> palico-info;
+    // StreetPass: the Palico to send (slot -1), then the inbox
+    in property <[CardRow]> palico-mail;
+    callback remove-palico-mail(int);
 
     // quests
     in property <[string]> quest-tabs;
@@ -1135,6 +1151,7 @@ export global Tabs {
             : page == "database" ? Api.db-tab
             : page == "cards" ? Api.card-tab
             : page == "options" ? Api.option-tab
+            : page == "palicoes" ? Api.palico-tab
             : -1;
     }
     public function select(page: string, i: int) {
@@ -1161,6 +1178,8 @@ export global Tabs {
             Api.select-card-tab(i);
         } else if page == "options" {
             Api.select-option-tab(i);
+        } else if page == "palicoes" {
+            Api.select-palico-tab(i);
         }
     }
 }
