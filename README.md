@@ -177,7 +177,8 @@ with matugen ([setup](app/README.md#colours-from-matugen)).
 
 The editor rests on notes about the save format, written up from controlled experiments
 in game: [docs/](docs/README.md). Building from source and the repository layout:
-[app/README.md](app/README.md).
+[app/README.md](app/README.md). Bug reports, in-game checks and pull requests:
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 
