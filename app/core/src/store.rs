@@ -144,29 +144,38 @@ pub fn snapshot(loc: &Location, dest_root: &Path, stamp: &str) -> std::io::Resul
 }
 
 /// Writes every (file, bytes) pair through a temporary file each, then renames them all
-/// and reads each back: nothing is renamed until every temporary file is on disk, and
-/// the temporary files are removed when that fails.
+/// and reads each back: nothing is renamed until every temporary file is on disk. On any
+/// failure the temporary files left are removed; a failure after the first rename is
+/// `PartlyWritten`, naming the files already replaced.
 fn replace_all(files: &[(PathBuf, Vec<u8>)], body_from: usize) -> Result<(), Error> {
     let tmp = |p: &Path| p.with_extension("mhgu-editor-tmp");
-    let mut made = vec![];
+    let clean = |from: usize| {
+        for (p, _) in &files[from..] {
+            let _ = fs::remove_file(tmp(p));
+        }
+    };
     for (p, b) in files {
         let t = tmp(p);
-        made.push(t.clone());
         let r = fs::File::create(&t).and_then(|mut f| {
             f.write_all(b)?;
             f.sync_all()
         });
         if let Err(e) = r {
-            for t in &made {
-                let _ = fs::remove_file(t);
-            }
+            clean(0);
             return Err(Error::File(t, e));
         }
     }
-    for (p, b) in files {
-        fs::rename(tmp(p), p).map_err(|e| Error::File(p.clone(), e))?;
-        if fs::read(p).map_err(|e| Error::File(p.clone(), e))?[body_from..] != b[body_from..] {
-            return Err(Error::File(p.clone(), std::io::Error::other("read-back mismatch")));
+    for (k, (p, b)) in files.iter().enumerate() {
+        let r = fs::rename(tmp(p), p).and_then(|_| fs::read(p)).and_then(|r| match r.get(body_from..) == b.get(body_from..) {
+            true => Ok(()),
+            false => Err(std::io::Error::other("read-back mismatch")),
+        });
+        if let Err(e) = r {
+            clean(k);
+            return Err(match k {
+                0 => Error::File(p.clone(), e),
+                _ => Error::PartlyWritten(p.clone(), e, files[..k].iter().map(|(p, _)| p.clone()).collect()),
+            });
         }
     }
     // the renames themselves are durable once the folder is synced (not on Windows)
@@ -312,6 +321,23 @@ mod tests {
             assert_eq!(fs::read(dir.join(f)).unwrap()[0x18CC9C + 0x28], 0, "{f} untouched");
         }
         assert!(!dir.join("0/system.mhgu-editor-tmp").exists());
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn a_failed_rename_names_the_replaced_copies_and_leaves_no_temporary_file() {
+        let dir = tmp_dir("rename");
+        fs::create_dir_all(dir.join("b")).unwrap();
+        fs::write(dir.join("a"), b"old a").unwrap();
+        fs::write(dir.join("c"), b"old c").unwrap();
+        // a folder where the second file goes: its rename fails
+        let files: Vec<_> = ["a", "b", "c"].iter().map(|f| (dir.join(f), b"new".to_vec())).collect();
+        assert!(matches!(replace_all(&files, 0), Err(Error::PartlyWritten(p, _, done)) if p == dir.join("b") && done == [dir.join("a")]));
+        assert_eq!(fs::read(dir.join("a")).unwrap(), b"new");
+        assert_eq!(fs::read(dir.join("c")).unwrap(), b"old c");
+        for f in ["a", "b", "c"] {
+            assert!(!dir.join(f).with_extension("mhgu-editor-tmp").exists(), "{f}: temporary file left");
+        }
         fs::remove_dir_all(&dir).unwrap();
     }
 

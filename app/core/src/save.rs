@@ -33,6 +33,9 @@ pub enum Error {
     CopySize(PathBuf, usize),
     /// A copy changed on disk since the save was opened (the game saved meanwhile).
     ChangedOnDisk(PathBuf),
+    /// Writing failed at a file after the files listed were already replaced: the copies
+    /// of the save now differ until the write is redone or a snapshot restored.
+    PartlyWritten(PathBuf, std::io::Error, Vec<PathBuf>),
 }
 
 impl fmt::Display for Error {
@@ -44,6 +47,10 @@ impl fmt::Display for Error {
             Error::File(p, e) => write!(f, "{}: {e}", p.display()),
             Error::CopySize(p, n) => write!(f, "{} is {n} bytes, not a save copy", p.display()),
             Error::ChangedOnDisk(p) => write!(f, "{} changed on disk since it was opened", p.display()),
+            Error::PartlyWritten(p, e, done) => {
+                let done: Vec<_> = done.iter().map(|d| d.display().to_string()).collect();
+                write!(f, "{}: {e}; already written: {}", p.display(), done.join(", "))
+            }
         }
     }
 }
