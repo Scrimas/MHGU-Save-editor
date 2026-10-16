@@ -9,15 +9,15 @@ Offsets are relative to their scope: `file` = absolute, `slot` = character base 
 `0x18CC9C`, slot 2 `0x2AC560`, slot 3 `0x3CBE24`), a struct name = start of that record.
 For each item: instances = how many copies the file holds (all slots, all records);
 `nz` = instances with a non-zero byte in the live save; `timeline` = distinct contents
-over the 46 saves of the timeline (1 = never changed); `sample` = bytes of the first
+over the 40 saves of the timeline (1 = never changed); `sample` = bytes of the first
 non-zero instance in the live save (first 24 bytes), its absolute offset in brackets.
 
 ## Totals (whole file, 5159100 bytes)
 
 | Status | Bytes | Share |
 |---|---|---|
-| C | 3701814 | 71.753% |
-| D | 1457286 | 28.247% |
+| C | 3702138 | 71.759% |
+| D | 1456962 | 28.241% |
 | U | 0 | 0.000% |
 | gap | 0 | 0.000% |
 

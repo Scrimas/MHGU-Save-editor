@@ -95,7 +95,9 @@ pub fn deco_used(e: &equipment::Entry) -> u8 {
 }
 
 /// Whether armor `p` can give its look to `src` worn by a hunter of body `gender` (0
-/// type 1): same part, a class the piece's own allows, a body that can wear it. DERIVED.
+/// type 1): same part, a class the piece's own allows, a body that can wear it. CONFIRMED
+/// in game (2026-10-16): the Soaratorium Lab offers no look of the other class. A look of
+/// the other class still shows in game when written; the editor keeps to the Lab's rule.
 pub(super) fn transmog_fits(src: &assets::Piece, p: &assets::Piece, gender: u8) -> bool {
     let class = (src.blade == Some(1) && p.blade == Some(1)) || (src.gunner == Some(1) && p.gunner == Some(1));
     let body = if gender == 0 { p.male != Some(0) } else { p.female != Some(0) };

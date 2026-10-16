@@ -12,13 +12,14 @@
 //! past its entries, fresh slots hold the defaults named below. CONFIRMED in game
 //! (2026-10-10): the maps lab, song, costume, gallery, combos and tips; the pets' names,
 //! costumes and adoption bits; the Moofahs' affection and gifts; the Housekeeper and the
-//! start village. The game fills the Trader's items, the coin trades, the supply sets and
-//! the delivery requests itself (`Kind::Marks`, read only). The Trader's for-sale lists
-//! (words, scenes, costumes), the notes, events and milestones stay DERIVED.
+//! start village; on 2026-10-16 the events. The game fills the Trader's items and for-sale
+//! lists (words, scenes, costumes), the coin trades, the supply sets and the delivery
+//! requests itself (`Kind::Marks`, read only), and the Notes second list did nothing seen
+//! in game (read only too). The milestones stay DERIVED: every award they feed was already
+//! held in the checked save.
 
 use crate::data::{UnlockEntry, tables};
 use crate::guildcard as gc;
-use crate::monsters;
 use crate::progress::{Char, PROGRESS, QuestBit};
 use crate::save::Save;
 use std::collections::HashMap;
@@ -35,7 +36,9 @@ pub enum Kind {
     /// (and so got its NEW mark once). Read only. The shops (Market / Guild Store
     /// 0x72ef60, Armory 0x6eb9fc); the Trader's items, the coin trades, the supply drop
     /// sets and the delivery requests, whose bits the game set back with NEW after an edit
-    /// cleared them (in game, 2026-10-10).
+    /// cleared them (in game, 2026-10-10); the Trader's for-sale lists, likewise
+    /// (2026-10-16). Also the Hunter's Notes second list: a cleared bit left the monster's
+    /// Notes page shown (2026-10-16), so what it changes is not known.
     Marks,
 }
 
@@ -79,12 +82,12 @@ pub fn maps() -> &'static [Map] {
             m("gallery", 0x2F87, Some(0x2F8B), 4, Kind::Unlock),
             m("trader:items0", 0x31EF, Some(0x31F3), 4, Kind::Marks),
             m("trader:items1", 0x31F7, Some(0x31FB), 4, Kind::Marks),
-            m("trader:words", 0x31FF, Some(0x3237), 56, Kind::Unlock),
-            m("trader:scenes", 0x326F, Some(0x3283), 20, Kind::Unlock),
-            m("trader:costumes", 0x3297, Some(0x329B), 4, Kind::Unlock),
+            m("trader:words", 0x31FF, Some(0x3237), 56, Kind::Marks),
+            m("trader:scenes", 0x326F, Some(0x3283), 20, Kind::Marks),
+            m("trader:costumes", 0x3297, Some(0x329B), 4, Kind::Marks),
             m("trader:delivery", 0x32A7, Some(0x32AB), 4, Kind::Marks),
             // talk action 7 sets the bit and the large list's NEW bit (0x55686c)
-            m("notes2", 0x32D7, None, 4, Kind::Flag),
+            m("notes2", 0x32D7, None, 4, Kind::Marks),
             m("tips", 0x32B3, None, 4, Kind::Flag),
             m("combos", 0x2383B, None, 25, Kind::Flag),
             m("events", 0x2C6B9, None, 4, Kind::Flag),
@@ -193,25 +196,17 @@ pub fn set(s: &mut Save, base: usize, m: usize, bit: usize, v: bool) -> bool {
     if let Some(n) = mp.new {
         s.set_bit(base + n, bit, v);
     }
-    match mp.id.as_str() {
-        "lab" => {
-            if v && !s.bit(base + LAB_OFFERED, bit) {
-                s.set_bit(base + LAB_OFFERED, bit, true);
-                s.set_bit(base + LAB_OFFERED_NEW, bit, true);
-            }
-            if let Some(k) = (1..=24).find(|&k| supply_lab(k) == Some(bit))
-                && (!v || s.bit(base + SUPPLY, SUPPLY_OPEN))
-            {
-                s.set_bit(base + SUPPLY, k, v);
-                s.set_bit(base + SUPPLY_NEW, k, v);
-            }
+    if mp.id == "lab" {
+        if v && !s.bit(base + LAB_OFFERED, bit) {
+            s.set_bit(base + LAB_OFFERED, bit, true);
+            s.set_bit(base + LAB_OFFERED_NEW, bit, true);
         }
-        "notes2" if v => {
-            if let Some(e) = entry(m, bit) {
-                s.set_bit(base + monsters::NOTES_NEW, e.id as usize, true);
-            }
+        if let Some(k) = (1..=24).find(|&k| supply_lab(k) == Some(bit))
+            && (!v || s.bit(base + SUPPLY, SUPPLY_OPEN))
+        {
+            s.set_bit(base + SUPPLY, k, v);
+            s.set_bit(base + SUPPLY_NEW, k, v);
         }
-        _ => {}
     }
     true
 }
@@ -490,9 +485,10 @@ mod tests {
         let mut s = blank();
         let shop = find("shop:0").unwrap();
         assert!(!set(&mut s, B, shop, 0, true) && !on(&s, B, shop, 0));
-        let notes = find("notes2").unwrap();
-        assert!(set(&mut s, B, notes, 12, true));
-        assert!(s.bit(B + monsters::NOTES_NEW, 95), "Kirin's Notes page gets NEW");
+        for id in ["notes2", "trader:words", "trader:scenes", "trader:costumes"] {
+            let m = find(id).unwrap();
+            assert!(!set(&mut s, B, m, 0, true) && !on(&s, B, m, 0), "{id} read only");
+        }
         let tips = find("tips").unwrap();
         assert!(is_new(&s, B, tips, 3) && set(&mut s, B, tips, 3, true) && !is_new(&s, B, tips, 3));
     }

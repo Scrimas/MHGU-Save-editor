@@ -1,7 +1,7 @@
 //! The Palicoes page: its models and the callbacks that edit it. Tabs: the character's
 //! Palicoes and those for hire (one editor), the roles, counters, Dojo and teams, the
-//! StreetPass Palicoes and the scouting request (`mhgu_save::otomo`; the roles Confirmed,
-//! the rest Derived).
+//! StreetPass Palicoes and the scouting request (`mhgu_save::otomo`; Confirmed, but the
+//! Dojo count and removing a StreetPass Palico, Derived).
 
 use super::*;
 use crate::{CardRow, InfoRow, OptionRow};
@@ -230,8 +230,8 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
     api.set_palico_note(
         match tab {
             1 => tr("The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."),
-            2 => tr("A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check; hiring from the Palico Board does not count. The Dojo and the teams are read-only."),
-            3 => tr("Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."),
+            2 => tr("A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."),
+            3 => tr("Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card. MHGU on Switch has no StreetPass: only a save carried over from the 3DS holds such Palicoes, so removing one can't be checked in game and stays Derived."),
             4 => tr("What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."),
             _ => "",
         }
@@ -337,10 +337,10 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
         // the tab's first Palico
         view(|v| v.palico_sel = -1);
     });
-    // a role ("pal-role:r", choice 0 = none, else the k-th Palico; Confirmed), a counter or
-    // a scouting field ("scouting:id"); the hire count and the scouting are Derived
+    // a role ("pal-role:r", choice 0 = none, else the k-th Palico), a counter or a scouting
+    // field ("scouting:id"); all Confirmed but the Dojo count
     on!(ui, st, on_set_palico_field, |ui, s, id: SharedString, v: i32| {
-        let conf = if id.starts_with("pal-role:") || id == "dojo-done" { Conf::Confirmed } else { Conf::Derived };
+        let conf = if id == "dojo-done" { Conf::Derived } else { Conf::Confirmed };
         if refused(&ui, conf) {
             return;
         }

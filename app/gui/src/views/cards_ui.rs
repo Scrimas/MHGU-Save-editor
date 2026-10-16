@@ -1,6 +1,6 @@
 //! The Guild Cards page: the cards kept, the inbox, the Hunters for Hire and the
-//! blocked-user list (`mhgu_save::cards`). Removing a kept card is Confirmed, the other
-//! edits Derived.
+//! blocked-user list (`mhgu_save::cards`). Removing a kept card and moving an inbox card
+//! are Confirmed; removing an inbox card and unblocking are Derived.
 
 use super::*;
 use crate::CardRow;
@@ -161,7 +161,7 @@ pub(super) fn cards_page(ui: &AppWindow, st: &State) {
     let summary: String = match tab {
         0 => tr("Cards received from other hunters. The game keeps them at the front of the list: removing one moves the later ones up, as its Delete does.")
             .into(),
-        1 => tr("Cards the Courier Service received. Move one to the Card List, as the Post Office does, or remove it.").into(),
+        1 => tr("Cards received by StreetPass on the 3DS. Move one to the Card List, as the Post Office does, or remove it. MHGU on Switch has no StreetPass and no way to open this list, so removing a card can't be checked in game: it stays Derived.").into(),
         2 => match cards::hired_quests(s, base) {
             Some(n) => trn(
                 "The party is hired for {n} more quest. The game picks new offers after every quest, so this list is read-only.",
@@ -171,13 +171,14 @@ pub(super) fn cards_page(ui: &AppWindow, st: &State) {
             ),
             None => tr("No one is hired. The game picks new offers after every quest, so this list is read-only.").into(),
         },
-        _ => tr("Hunters you blocked online, shared by the three characters.").into(),
+        _ => tr("Hunters you blocked online, shared by the three characters. The game shows this list only online, so unblocking can't be checked offline: it stays Derived.").into(),
     };
     api.set_cards_summary(summary.into());
 }
 
-/// Removing a kept card is Confirmed in game; the inbox and blocked-list edits are Derived
-/// (from code, the test save and a game-made list).
+/// Removing a kept card and moving an inbox card to the list are Confirmed in game;
+/// removing an inbox card and unblocking are Derived (from code, the test save and a
+/// game-made list): the Switch game opens neither list offline.
 fn stage(ui: &AppWindow, s: &mut State, conf: Conf, targets: Vec<Target>, title: String, f: impl FnOnce(&mut mhgu_save::Save, usize) -> bool) -> bool {
     if refused(ui, conf) {
         return false;
@@ -227,7 +228,7 @@ pub(super) fn wire_cards(ui: &AppWindow, st: &Shared) {
             return;
         }
         let title = trf("Move the Guild Card of {} to the Card List", &[&c.name]);
-        if stage(&ui, &mut s, Conf::Derived, vec![Target::Cards(false), Target::Cards(true)], title, |sv, base| {
+        if stage(&ui, &mut s, Conf::Confirmed, vec![Target::Cards(false), Target::Cards(true)], title, |sv, base| {
             cards::move_to_stored(sv, base, slot, today).is_some()
         }) && probe == Some(Moved::Kept)
         {

@@ -1,9 +1,11 @@
 //! The character's Palico data beyond the records (sOtomo, docs/11-save-map.md and
 //! data/save-fields.csv): the Palico played as Prowler and the hunting buddies, the two
 //! counters, the Palico Dojo, the two teams, the StreetPass Palicoes and the scouting
-//! request. The roles (Prowler, hunting buddies 1-2) and the Dojo count are CONFIRMED in
-//! game (2026-10-10); every other edit is DERIVED (from the game's code and the analysed
-//! saves).
+//! request. The roles (Prowler, hunting buddies 1-2), the hire count and the scouting
+//! request are CONFIRMED in game (2026-10-10, 2026-10-16); the Dojo count and removing a
+//! StreetPass Palico are DERIVED (from the game's code and the analysed saves). MHGU on
+//! Switch has no StreetPass: only a save carried over from the 3DS holds such Palicoes, so
+//! their removal can't be checked in game.
 //!
 //! A Prowler has no Hunter Arts of its own: it fights with the support moves and skills
 //! its Palico record has equipped (`palico`).
@@ -18,24 +20,26 @@ use crate::save::Save;
 pub const ROLES: usize = 0x23B9D;
 pub const ROLE_N: usize = 3;
 pub const NONE: u8 = 0xFF;
-/// Palico Dojo sessions completed, at most 100: a session in game raised a written 50 to
-/// 51. Award 53 goes with 50 sessions (`0x3ed174`, a `>=` test), but the game did not give
-/// it after the next quest: `set_dojo_done` sets it.
-pub const DOJO_DONE: usize = 0x23BA0;
+/// Palico Dojo sessions completed, at most 100 (sOtomo `+0x1384b`). Award 53 goes with
+/// 50 sessions (`0x3ed174`, a `>=` test); `set_dojo_done` gives it with the count. The
+/// byte after the hire count: DERIVED (no session finished in a checked save).
+pub const DOJO_DONE: usize = 0x23BA1;
 pub const DOJO_MAX: u8 = 100;
 pub const DOJO_AWARD: usize = 53;
 pub const DOJO_AWARD_AT: u8 = 50;
-/// Palicoes hired in total, at most 200 (`0x25e88c`). The title-word check (`0x3f5238`)
-/// adds the words from 10, 30, 50 and 80 on, also a `>=` test. Hiring from the Palico
-/// Board did not raise it (in game, 2026-10-10): which hires count is open.
-pub const HIRED: usize = 0x23BA1;
+/// Palicoes hired in total, at most 200 (sOtomo `+0x1384c`, raised by `0x25e88c`). The
+/// title-word check (`0x3f5238`) adds the words from 10, 30, 50 and 80 on, also a `>=`
+/// test. CONFIRMED in game: a hire from the Palico Board raised a written 50 to 51
+/// (2026-10-10) and 51 to 52 (2026-10-16).
+pub const HIRED: usize = 0x23BA0;
 pub const HIRED_MAX: u8 = 200;
 
 /// The scouting request (uUIOtomoService), a 20-byte LSB-first bit stream that new-Palico
 /// creation follows (`0x25aee0`): fields (id, bit, width). Mode 0 none, 1 by ability (forte,
 /// target), 2 by looks; forte k = forte k - 1; target k = the Palico target value k; a look
 /// k = its choice k - 1; 0 = any. Four RGBA colours follow at bit 29 (which is which is
-/// not proven): left as they are.
+/// not proven): left as they are. CONFIRMED in game: after a written request (by ability
+/// 2026-10-14, by looks 2026-10-16) every new Palico for hire followed it.
 pub const REQUEST: usize = 0x23BA2;
 pub const REQUEST_FIELDS: [(&str, usize, usize); 8] =
     [("mode", 0, 2), ("forte", 2, 4), ("target", 6, 3), ("coat", 9, 4), ("eyes", 13, 4), ("ears", 17, 4), ("tail", 21, 4), ("voice", 25, 4)];
@@ -104,8 +108,8 @@ pub fn dojo_done(s: &Save, base: usize) -> u8 {
     s.u8(base + DOJO_DONE)
 }
 
-/// The count of character `slot`, and from 50 on the award the count stands for: the game
-/// did not give it after a quest at 51 (in game, 2026-10-10).
+/// The count of character `slot`, and from 50 on the award the count stands for, as the
+/// game's next award check would.
 pub fn set_dojo_done(s: &mut Save, slot: usize, v: u8) {
     let v = v.min(DOJO_MAX);
     let base = s.base(slot);

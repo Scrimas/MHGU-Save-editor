@@ -274,9 +274,12 @@ def main(romfs, out, update):
              'level_slots': [slots.get(k, {}).get(n, 0) for n in range(1, max(slots.get(k, {0: 0})) + 1)]}
             for k in range(cnt)]
     # armor: armorSeriesData 127-B records, armor ID = series index; bytes 6-10 parts present,
-    # 13/14 male/female, 103 mRare; names entry 10k + part - 1. DERIVED: 15/16 Blademaster /
-    # Gunner (Hunter's Helm 1/0, Hunter's Cap 0/1, Leather 1/1); 108 + part - 1 decoration
-    # slots (every decorated armor piece of 79 saves fills them exactly)
+    # 13/14 male/female, 103 mRare; names entry 10k + part - 1. 15/16 Blademaster / Gunner
+    # of the series (Hunter's Helm 1/0, Hunter's Cap 0/1, Leather 1/1), but every head is
+    # worn by both: the game shows Blade/Gunner on the heads of Blademaster-only series
+    # (CONFIRMED in game 2026-10-16, Silver Solhelm Z). 108 + part - 1 decoration slots
+    # (every decorated armor piece of 79 saves fills them exactly; CONFIRMED in game
+    # 2026-10-16 on five pieces of 1-3 slots)
     a = res['table\\armorSeriesData']; cnt = struct.unpack_from('<I', a, 4)[0]
     an = gmd(reng['eng\\table\\armorSeriesData_eng'])
     names['armor'] = {}
@@ -284,7 +287,8 @@ def main(romfs, out, update):
         names['armor'][str(p + 1)] = [
             {'id': k, 'name': an[10 * k + p], 'rarity': a[8 + k * 127 + 103] + 1,
              'male': a[8 + k * 127 + 13], 'female': a[8 + k * 127 + 14],
-             'blade': a[8 + k * 127 + 15], 'gunner': a[8 + k * 127 + 16], 'slots': a[8 + k * 127 + 108 + p]}
+             'blade': 1 if p == 0 else a[8 + k * 127 + 15], 'gunner': 1 if p == 0 else a[8 + k * 127 + 16],
+             'slots': a[8 + k * 127 + 108 + p]}
             for k in range(cnt) if a[8 + k * 127 + 6 + p]]
     # decorations: decoData 5-B records [size, skill, points, skill, points], record k =
     # item 2638 + k (sizes match every "Jwl N" name). DERIVED

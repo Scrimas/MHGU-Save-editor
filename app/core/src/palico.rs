@@ -21,7 +21,8 @@
 //! that taught moves fill (3 for Charisma, else 2); a skill list is the two innate
 //! skills, random skills, then 2 taught slots. Equipped moves: at most the level's free
 //! slots + 2 (+1 with skill 21); equipped skills: their slot costs at most the level's
-//! skill slots.
+//! skill slots. The equip limits and the innate moves are CONFIRMED in game (2026-10-16:
+//! Lv 99 with Support Move +1, 8 moves and 8 skill slots; Lv 6 Charisma, 4 and 3).
 
 use crate::data::tables;
 use crate::equipment::{self, Owner, PALICO_BOX_N};
@@ -68,8 +69,8 @@ pub const TAUGHT_SKILLS: usize = 2;
 pub const LOOKS: usize = 0x10E;
 pub const COLOURS: usize = 0x11A;
 
-/// Target byte -> the game's menu text (OtMenuMsg 56-61, in this order). 4 = Large First
-/// was read off in game; the rest follow the menu order (DERIVED). 0 is not offered.
+/// Target byte -> the game's menu text (OtMenuMsg 56-61, in this order), CONFIRMED in game
+/// for 1-5 (2026-10-16). 0 is not offered.
 // i18n: shown through tr() in the GUI
 pub const TARGETS: [&str; 6] = ["None", "Small Only", "Small First", "Balanced", "Large First", "Large Only"];
 

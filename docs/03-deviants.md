@@ -131,7 +131,10 @@ G-rank.** This gate is *not* stored in the deviant bitmaps. Setting every level 
 leaves affected deviants displaying "Lv10 cleared" with no G1 or higher quest
 offered. Hunting the corresponding base monster once at G-rank immediately releases
 them; this was verified by hunting G-rank Arzuros, after which Redhelm's EX quest
-appeared without any further save edit.
+appeared without any further save edit. Writing the cleared bits works both ways
+(CONFIRMED in game, 2026-10-16): with both of Redhelm Arzuros' gate quests set back to
+not cleared, its G-rank quests left the board; Stonefist Hermitaur, with one of its two
+left cleared, kept them.
 
 **Where it is recorded: nowhere of its own.** The board asks the unlock script of
 [05 — Quests § Board visibility](05-quests.md#board-visibility--scriptcheck_quest_unlocked)

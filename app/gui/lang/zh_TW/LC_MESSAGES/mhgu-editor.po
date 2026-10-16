@@ -3037,23 +3037,6 @@ msgid_plural "{} songs"
 msgstr[0] "{}首歌曲"
 
 #: app/gui/src/goals.rs
-msgid "Everything the Trader sells"
-msgstr "交易窗口出售的全部商品"
-
-#: app/gui/src/goals.rs
-msgid "The Trader offers everything it can sell."
-msgstr "交易窗口已提供所有可出售的商品。"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/goals.rs
-msgid "Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included."
-msgstr "上架交易窗口尚未提供的{}：稱號詞、公會名片背景和寵物服裝，包括下載內容中的商品。"
-
-#: app/gui/src/goals.rs
-msgid "Buying still takes Trader points; what you already have is not shown."
-msgstr "購買仍需消耗交易窗口點數；已擁有的商品不會顯示。"
-
-#: app/gui/src/goals.rs
 msgid "Every combination recipe combined"
 msgstr "調合過全部調合配方"
 
@@ -4099,8 +4082,8 @@ msgid "Cards received from other hunters. The game keeps them at the front of th
 msgstr "從其他獵人處收到的名片。遊戲將它們放在清單前端：移除一張後，其後的名片會依序上移，與遊戲中的刪除操作相同。"
 
 #: app/gui/src/views/cards_ui.rs
-msgid "Cards the Courier Service received. Move one to the Card List, as the Post Office does, or remove it."
-msgstr "郵差收到的名片。可以像在郵差處那樣將其移至名片清單，或將其移除。"
+msgid "Cards received by StreetPass on the 3DS. Move one to the Card List, as the Post Office does, or remove it. MHGU on Switch has no StreetPass and no way to open this list, so removing a card can't be checked in game: it stays Derived."
+msgstr "在 3DS 上透過擦身而過收到的名片。可以像在郵差處那樣將其移至名片清單，或將其移除。Switch 版 MHGU 沒有擦身而過，也無法開啟此清單，因此移除名片無法在遊戲中確認：仍為推導。"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/cards_ui.rs
@@ -4113,8 +4096,8 @@ msgid "No one is hired. The game picks new offers after every quest, so this lis
 msgstr "目前沒有委託任何人。遊戲在每個任務後都會挑選新的人選，因此此清單為唯讀。"
 
 #: app/gui/src/views/cards_ui.rs
-msgid "Hunters you blocked online, shared by the three characters."
-msgstr "你在連線時拒收的獵人，三個角色共用。"
+msgid "Hunters you blocked online, shared by the three characters. The game shows this list only online, so unblocking can't be checked offline: it stays Derived."
+msgstr "你在連線時拒收的獵人，三個角色共用。遊戲只在連線時顯示此清單，因此解除拒收無法在離線時確認：仍為推導。"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/cards_ui.rs
@@ -5704,12 +5687,12 @@ msgid "The Palicoes the game offers for hire: an edited one joins as edited when
 msgstr "遊戲提供雇用的隨從：經過編輯的隨從在雇用後會保持編輯後的樣子。遊戲會不時刷新這份清單。"
 
 #: app/gui/src/views/palicoes.rs
-msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check; hiring from the Palico Board does not count. The Dojo and the teams are read-only."
-msgstr "獵喵使用其隨從的支援行動和隨從技能戰鬥（見「我的隨從」）。道場修行滿 50 次時一併獲得勛章 53。雇用滿 10、30、50、80 次可獲得稱號詞語，於遊戲下次檢查時發放；在隨從看板雇用不計入。道場和隊伍為唯讀。"
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
+msgstr "獵喵使用其隨從的支援行動和隨從技能戰鬥（見「我的隨從」）。道場修行滿 50 次時一併獲得勛章 53。雇用滿 10、30、50、80 次可獲得稱號詞語，於遊戲下次檢查時發放。道場和隊伍為唯讀。"
 
 #: app/gui/src/views/palicoes.rs
-msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."
-msgstr "透過擦身而過收到的隨從會在收取箱中等待，直到被雇用或放走；待發送的隨從會隨公會名片一同送出。"
+msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card. MHGU on Switch has no StreetPass: only a save carried over from the 3DS holds such Palicoes, so removing one can't be checked in game and stays Derived."
+msgstr "透過擦身而過收到的隨從會在收取箱中等待，直到被雇用或放走；待發送的隨從會隨公會名片一同送出。Switch 版 MHGU 沒有擦身而過：只有從 3DS 轉移過來的存檔才會有這類隨從，因此移除無法在遊戲中確認，仍為推導。"
 
 #: app/gui/src/views/palicoes.rs
 msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."
@@ -6289,8 +6272,8 @@ msgid "Movies the Housekeeper's Gallery plays. Credits 2 and 3 come back at the 
 msgstr "管家畫廊播放的影片。結尾動畫進入畫廊後，工作人員名單2和3會在下次讀取時恢復。"
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "What the Trader puts up for sale. An entry for sale can be bought even without the download that sells it; what you already have is not shown."
-msgstr "交易窗口上架販售的內容。上架的條目即使沒有對應的下載內容也能購買；已擁有的不會顯示。"
+msgid "Read only: the Trader puts an entry up for sale once its condition holds, whatever the save holds; the save only keeps which entries got their NEW mark."
+msgstr "唯讀：只要條件達成，交易窗口就會上架該條目，與存檔內容無關；存檔只記錄哪些條目已顯示過 NEW 標記。"
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Read only: the Trader lists an item once its star level allows, whatever the save holds; the save only keeps which items got their NEW mark."
@@ -6301,8 +6284,8 @@ msgid "Read only: the Trader offers a delivery request once its villager's reque
 msgstr "唯讀：村民的委託提出後，交易窗口就會提供對應的繳納委託，與存檔內容無關；存檔只記錄哪些委託已顯示過 NEW 標記。"
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Extra Hunter's Notes entries of the Elder Dragons and deviants. Unlocking one gives the monster's Notes page its NEW mark, as the game does."
-msgstr "古龍種和別名魔物的額外獵人筆記條目。解鎖後，該魔物的筆記頁面會如遊戲中一樣顯示 NEW 標記。"
+msgid "Read only: the game sets these during a talk. Clearing one left the monster's Notes page shown, so what they change is not known."
+msgstr "唯讀：遊戲會在對話時設定這些位元。清除其中一個後，該魔物的筆記頁面仍然顯示，因此不清楚它們的作用。"
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Hunter's Notes tips read. A tip not read shows NEW once the game offers it."

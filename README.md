@@ -8,8 +8,9 @@ emulator saves and console backups).
 
 Every value it shows is read where the game itself keeps it, and every change is
 described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") before
-anything touches the file. Every edit has been checked in game (**Confirmed**); an edit
-added later that has not been yet is marked **Derived** until it is.
+anything touches the file. Every edit has been checked in game (**Confirmed**), but for
+the few the Switch game can't show ([listed below](#what-it-edits)); an edit added later
+that has not been checked yet is marked **Derived** until it is.
 
 ## Download
 
@@ -47,24 +48,30 @@ extracted first.
 
 | Page | |
 |---|---|
-| Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points, every item obtained, every Smithy entry listed, every Guild Card title word, scene and pose; and, Derived: every Soaratorium Lab upgrade, Poogie and Moofy costume, Jukebox song, Trader ware, Horns Coin trade, combination recipe and Gallery movie |
-| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, appearance: body type, face, hairstyle, voice, features, clothing, skin and clothing colours; Guild Card title, scene, pose and greeting, Guild Card weapon usage, quests completed per hunting style; and, Derived: the hunting style, Hunter Arts (SP too) and armor pigment you have on, the Courier's quest counter and points, the village a load starts in and the Room Service's Housekeeper (only those the game offers) |
+| Overview | One-click goals: complete every quest, all Hunter Arts, Canteen dishes and ingredients, all Guild Card awards, Hunter's Notes, every crown, HR 999, max zenny and points, every item obtained, every Smithy entry listed, every Guild Card title word, scene and pose, every Soaratorium Lab upgrade, Poogie and Moofy costume, Jukebox song, combination recipe and Gallery movie |
+| Character | Name, Hunter Rank and HR points, zenny, Wycademy points, Village and Hub star levels, play time, appearance: body type, face, hairstyle, voice, features, clothing, skin and clothing colours; Guild Card title, scene, pose and greeting, Guild Card weapon usage, quests completed per hunting style; the hunting style, Hunter Arts (SP too) and armor pigment you have on, the Courier's quest counter and points, the village a load starts in and the Room Service's Housekeeper (only those the game offers) |
 | Items | Item box, pouch and loadouts (name and pouch layout); add, sort and merge, max counts; the item box exported to and imported from a CSV file (slot, ID, name, count). A pouch stack above the item's carry limit is written with a warning |
-| Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables); each box exported to and imported from a CSV file (entries worn or in a set stay); talismans copied as text in the charm list format of Athena's Armor Set Search, and pasted in to add; My Sets: pigment, and, Derived: name, gear, hunting style and Hunter Arts (checked against the weapon, the style's slots and the arts unlocked), a set made from what you have on; Palico equipment sets (Derived): name and gear |
-| Palicoes | Name, level and experience, forte, target, greeting, original owner; support moves and skills: the list and what is equipped, checked against the forte's innate entries and the level's slots; looks: coat, eyes, ears, tail, voice, clothing and their colours from the game's palettes; and, Derived: a Palico copied with the equipment it wears to another character, or exported to a file and imported into any save; the Palicoes for hire (same editor); the Palico played as Prowler and the two hunting buddies, Dojo sessions completed and Palicoes hired; the Palico Scout's conditions; StreetPass Palicoes (remove from the inbox); the Dojo, Palico Board and Meownster Hunters read-only |
+| Equipment | Hunter and Palico equipment boxes: add, replace and remove pieces, levels, decorations (those that do not fit the free slots with a warning), transmog, talismans (checked against the game's charm tables); each box exported to and imported from a CSV file (entries worn or in a set stay); talismans copied as text in the charm list format of Athena's Armor Set Search, and pasted in to add; My Sets: name, gear, pigment, hunting style and Hunter Arts (checked against the weapon, the style's slots and the arts unlocked), a set made from what you have on; Palico equipment sets: name and gear |
+| Palicoes | Name, level and experience, forte, target, greeting, original owner; support moves and skills: the list and what is equipped, checked against the forte's innate entries and the level's slots; looks: coat, eyes, ears, tail, voice, clothing and their colours from the game's palettes; a Palico copied with the equipment it wears to another character, or exported to a file and imported into any save; the Palicoes for hire (same editor); the Palico played as Prowler and the two hunting buddies, Palicoes hired and (Derived) Dojo sessions completed; the Palico Scout's conditions; StreetPass Palicoes (remove from the inbox, Derived); the Dojo, Palico Board and Meownster Hunters read-only |
 | Quests | Every quest cleared or not (seen and quest sets follow, as in game, and so do the Guild Card's quests-completed counts); says what unlocks a quest that is not on the board yet. Arena records: best time and equipment set per Arena quest, ranked by the quest's times. History: the Guild Card's last ten records (date, result, quest, party), read-only |
 | Requests | Villager requests: accepted (quest posted on the board) and reported |
-| Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt; Derived: Special Permit points and those waiting at the Courier) |
-| Unlocks | Derived, entry by entry, each with what unlocks it in game: Soaratorium Lab upgrades (the supply drop sets follow), Jukebox songs, supply drop sets, Horns Coin trades, Poogie and Moofy costumes; the village pets (names, costumes worn, adoption), Moofah affection and Moofah gifts (with their award); what the Trader sells (items, title words, Guild Card scenes, pet costumes, delivery requests); the Housekeeper's Gallery, the Hunter's Notes second list and tips read, the Combination List recipes combined, one-time event scenes and the milestones the award checks read. The Market, Guild Store and Armory lists are shown read-only: the game sells by star level, whatever the save holds |
+| Collections | Hunter Arts, Canteen dishes and ingredients, Guild Card awards, Deviants (Special Permits and levels cleared; says when G-rank levels still wait for a G-rank hunt; Special Permit points and those waiting at the Courier) |
+| Unlocks | Entry by entry, each with what unlocks it in game: Soaratorium Lab upgrades (the supply drop sets follow), Jukebox songs, Poogie and Moofy costumes; the village pets (names, costumes worn, adoption), Moofah affection and Moofah gifts (with their award); the Housekeeper's Gallery, tips read, the Combination List recipes combined, one-time event scenes and (Derived) the milestones the award checks read. Shown read-only, as the game fills them itself whatever the save holds: the supply drop sets, Horns Coin trades, what the Trader sells, the Hunter's Notes second list, and the Market, Guild Store and Armory lists |
 | Monsters | Hunted and captured counts, smallest and largest sizes (checked against the sizes the game's quests give), Hunter's Notes |
-| Guild Cards | Derived: the Guild Cards stored (HR, type, Unity, title, weapon, greeting) and the Guild Card Inbox: remove a card, move an inbox card to the Card List as the Post Office does; the blocked-user list (unblock); the Hunters for Hire offered and hired, read-only |
-| Options | Derived: the Start Menu's Options and Multiplayer Settings, the shoutouts and auto-shoutouts of the three chat groups and the group in use; the title screen's TV brightness, rumble and language (shared by the characters) |
+| Guild Cards | The Guild Cards stored (HR, type, Unity, title, weapon, greeting) and the Guild Card Inbox: remove a card (Derived for the inbox), move an inbox card to the Card List as the Post Office does; the blocked-user list (unblock, Derived); the Hunters for Hire offered and hired, read-only |
+| Options | The Start Menu's Options and Multiplayer Settings, the shoutouts and auto-shoutouts of the three chat groups and the group in use; the title screen's TV brightness, rumble and language (shared by the characters) |
 | Database | The game's own data next to the save, read-only: monsters, quests, items, skills and equipment ([below](#database)) |
 | Save map | Every byte range of the save, named from the game's own loader (read-only) |
 
-All three character slots are supported. **Characters…** (Derived) copies, swaps and
-deletes whole characters, and exports one to a file to import it into a slot of any save.
-It also moves characters to and from **MHXX** saves (3DS, or the Japanese Switch release).
+All three character slots are supported. **Characters…** copies, swaps and deletes whole
+characters, and exports one to a file to import it into a slot of any save. It also moves
+characters to and from **MHXX** saves (3DS, or the Japanese Switch release; Derived).
+
+**Still Derived**, because the Switch game can't show them: removing a StreetPass Palico
+or an inbox Guild Card (MHGU on Switch has no StreetPass), unblocking a hunter (the list
+only opens online), the milestones (every award they feed was already held in the checked
+save), the Dojo sessions count (no session finished in a checked save), the MHXX moves
+(they need a 3DS), and the Database's crown chances.
 
 **Values the game cannot produce** (a stack above its limit, a decoration that does not
 fit, a talisman outside the charm tables, a weapon above its top level, a locked Guild

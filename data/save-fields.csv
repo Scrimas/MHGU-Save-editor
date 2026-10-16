@@ -37,7 +37,7 @@ file,0xB29E,1,,,D,"sGuildCard +0xbca0: StreetPass Setup On/Off, bit i = characte
 file,0xB29F,3,,,D,"uninitialised heap bytes: the writer 0x164320 never writes buffer +0x4d89..+0x4d8b; the loader ignores them (varies between saves)"
 file,0xB2A2,1,,,D,sGameControl +0x5c: written by constructor / reset / transfer only; no reader
 file,0xB2A3,1,,,D,sGameControl +0x5d: 3DS Circle Pad Pro in use
-file,0xB2A4,1,,,C,"text language, 0 = from the system language (sGameControl +0xa5); values 1-5 and 7 (Traditional Chinese) CONFIRMED in game (2026-10-10), 8 (Simplified Chinese) DERIVED from the executable's language table"
+file,0xB2A4,1,,,C,"text language, 0 = from the system language (sGameControl +0xa5); values 1-5 and 7 (Traditional Chinese) CONFIRMED in game (2026-10-10), 8 (Simplified Chinese) on 2026-10-16"
 #
 # ---- Block B (shared) ----
 file,0xB2A5,8,,,C,"DLC Palicoes received, 50 bits, bit = DLC Palico info entry (sPrivilege +0xf34)"
@@ -189,11 +189,11 @@ slot,0x31EF,4,,,C,"Trader item list 0, entries listed (the game sets a cleared b
 slot,0x31F3,4,,,C,Trader item list 0 NEW
 slot,0x31F7,4,,,C,"Trader item list 1, entries listed (set again by the game like list 0)"
 slot,0x31FB,4,,,C,Trader item list 1 NEW
-slot,0x31FF,56,,,D,Trader title words for sale
+slot,0x31FF,56,,,C,"Trader title words for sale; the game sets a cleared bit back with NEW once the entry's condition holds (in game, 2026-10-16)"
 slot,0x3237,56,,,D,Trader title words NEW
-slot,0x326F,20,,,D,Trader scenes for sale
+slot,0x326F,20,,,C,"Trader scenes for sale; the game sets a cleared bit back with NEW (in game, 2026-10-16)"
 slot,0x3283,20,,,D,Trader scenes NEW
-slot,0x3297,4,,,D,Trader pet costumes for sale
+slot,0x3297,4,,,C,"Trader pet costumes for sale; the game sets a cleared bit back with NEW (in game, 2026-10-16)"
 slot,0x329B,4,,,D,Trader pet costumes NEW
 slot,0x329F,4,,,D,"Trader coin-ticket trades, bit = rTradeCoinTicketList entry (transfer only)"
 slot,0x32A3,4,,,D,coin-ticket trades NEW
@@ -203,7 +203,7 @@ slot,0x32AF,4,,,C,delivery requests delivered
 slot,0x32B3,4,,,C,Hunter's Notes tips read
 slot,0x32B7,16,,,C,"Hunter's Notes, large monsters"
 slot,0x32C7,16,,,D,Hunter's Notes large monsters NEW
-slot,0x32D7,4,,,D,"Hunter's Notes, second list, 30 bits"
+slot,0x32D7,4,,,D,"Hunter's Notes, second list, 30 bits (a cleared bit left the monster's Notes page shown, 2026-10-16: effect unknown)"
 slot,0x32DB,8,,,C,DLC item packs taken from the Room Service
 slot,0x32E3,4,,,D,"S+0x3668 flags: bit 0 Hunter Search on (mirrored to sFestaNetwork +0x1624e at load 0x2282a8; info panel 0x5c90fc shows CommonMsg 120 Hunter Search); bit 1 today's quest-counter daily bonus received; other bits unused"
 slot,0x32E7,32,,,D,"Market listed, bit = shopList00 record"
@@ -249,7 +249,7 @@ slot,0x5E3E,8,,,D,u64 Nintendo Account ID linked to the save-transfer server
 slot,0x5E46,4,,,D,"S+0x4410 reserved: only save / load touch it"
 slot,0x5E4A,4,,,D,"Courier flags: bits 0-5 one-time gifts at 10, 30, 50, 80, 100, 150 quests"
 slot,0x5E4E,4,,,C,quest counter
-slot,0x5E52,4,,,D,quest counter at the Courier's last talk
+slot,0x5E52,4,,,C,"quest counter at the Courier's last talk (a talk set it 400 -> 413 with gifts for the difference, 2026-10-16)"
 slot,0x5E56,4,,,C,Courier points
 slot,0x5E5A,36,,,C,"Special Permit points per deviant, 18 x u16"
 slot,0x5E7E,36,,,C,"Special Permit points waiting at the Courier, 18 x u16"
@@ -369,9 +369,9 @@ slot,0x23B7D,32,,,C,hunter name
 slot,0x23B9D,1,,,C,Palico played as Prowler (index; 0xFF = none)
 slot,0x23B9E,1,,,C,hunting buddy 1 (index; 0xFF = none)
 slot,0x23B9F,1,,,C,hunting buddy 2
-slot,0x23BA0,1,,,C,"Palico Dojo sessions completed, at most 100 (a session raised a written 50 to 51; award 53 was not given by the game after the next quest)"
-slot,0x23BA1,1,,,D,"Palicoes hired in total, at most 200 (hiring from the Palico Board did not raise it)"
-slot,0x23BA2,20,,,D,"Palico scouting request (uUIOtomoService; used by new-Palico creation 0x25aee0), LSB-first bits: 0-1 mode (0 none, 1 by ability, 2 by looks); 2-5 forte (0 any, k = forte k-1); 6-8 target (0 any, k = Palico target value k; creation 0x25af48 passes it unchanged); 9-12 coat, 13-16 eyes, 17-20 ears, 21-24 tail, 25-28 voice (0 any, k = choice k-1); 29-156 four u32 RGBA colours (defaults 0xFFF0F0F0, 0xFFFFDE71 x3; which is which not proven); 157-159 spare"
+slot,0x23BA0,1,,,C,"Palicoes hired in total, at most 200 (sOtomo +0x1384c; a Palico Board hire raised a written 50 to 51 on 2026-10-10 and 51 to 52 on 2026-10-16)"
+slot,0x23BA1,1,,,D,"Palico Dojo sessions completed, at most 100 (sOtomo +0x1384b; award 53 at 50, 0x3ed174); no session finished in a checked save"
+slot,0x23BA2,20,,,C,"Palico scouting request (new Palicoes for hire followed a written request by ability and by looks, 2026-10-14/16; uUIOtomoService; used by new-Palico creation 0x25aee0), LSB-first bits: 0-1 mode (0 none, 1 by ability, 2 by looks); 2-5 forte (0 any, k = forte k-1); 6-8 target (0 any, k = Palico target value k; creation 0x25af48 passes it unchanged); 9-12 coat, 13-16 eyes, 17-20 ears, 21-24 tail, 25-28 voice (0 any, k = choice k-1); 29-156 four u32 RGBA colours (defaults 0xFFF0F0F0, 0xFFFFDE71 x3; which is which not proven); 157-159 spare"
 slot,0x23BB6,324,84,,C,@pal324 Palico of the slot
 slot,0x2A606,324,24,,C,@pal324 Palico for hire
 slot,0x2C466,8,5,,D,ID of a Palico that reached level 50
@@ -427,7 +427,7 @@ slot,0x2C6A3,1,,,D,"Rife Roast result count 2: Well-done Steak / Gourmet Fish (+
 slot,0x2C6A4,1,,,D,"+0x12f padding: no reader or writer besides load/save"
 slot,0x2C6A5,4,,,C,"sFlagChecker +0x20: bits 0-6 star-tier notices latched (0x3f1778; tables 0x162ae28 -> event flags 233-237, 0x162ae50 -> 238-239); the transfer ORs the old save's bits (0x3f43e8). Slot 1 0x7f with flags 237 and 239 set, 233-236 and 238 clear, as the code leaves them"
 slot,0x2C6A9,16,,,D,"sMakeAmulet 128-bit map over a 107-entry table, set at quest end, read by the quest rotation"
-slot,0x2C6B9,4,,,D,"one-time event scenes played, 24 bits"
+slot,0x2C6B9,4,,,C,"one-time event scenes played, 24 bits (a cleared bit played Bherna's first visit again, 2026-10-16)"
 #
 # ---- slot: sGuildCard ----
 slot,0x2C6BD,633600,,,C,"Guild Card list 1: 100 x (u32 len, zlib card, u32 state, 36 B trailer), then heap padding"

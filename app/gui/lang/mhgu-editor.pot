@@ -3011,23 +3011,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: app/gui/src/goals.rs
-msgid "Everything the Trader sells"
-msgstr ""
-
-#: app/gui/src/goals.rs
-msgid "The Trader offers everything it can sell."
-msgstr ""
-
-#: app/gui/src/goals.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included."
-msgstr ""
-
-#: app/gui/src/goals.rs
-msgid "Buying still takes Trader points; what you already have is not shown."
-msgstr ""
-
-#: app/gui/src/goals.rs
 msgid "Every combination recipe combined"
 msgstr ""
 
@@ -4079,7 +4062,7 @@ msgid "Cards received from other hunters. The game keeps them at the front of th
 msgstr ""
 
 #: app/gui/src/views/cards_ui.rs
-msgid "Cards the Courier Service received. Move one to the Card List, as the Post Office does, or remove it."
+msgid "Cards received by StreetPass on the 3DS. Move one to the Card List, as the Post Office does, or remove it. MHGU on Switch has no StreetPass and no way to open this list, so removing a card can't be checked in game: it stays Derived."
 msgstr ""
 
 #: app/gui/src/views/cards_ui.rs
@@ -4094,7 +4077,7 @@ msgid "No one is hired. The game picks new offers after every quest, so this lis
 msgstr ""
 
 #: app/gui/src/views/cards_ui.rs
-msgid "Hunters you blocked online, shared by the three characters."
+msgid "Hunters you blocked online, shared by the three characters. The game shows this list only online, so unblocking can't be checked offline: it stays Derived."
 msgstr ""
 
 #: app/gui/src/views/cards_ui.rs
@@ -5705,11 +5688,11 @@ msgid "The Palicoes the game offers for hire: an edited one joins as edited when
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
-msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check; hiring from the Palico Board does not count. The Dojo and the teams are read-only."
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
-msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."
+msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card. MHGU on Switch has no StreetPass: only a save carried over from the 3DS holds such Palicoes, so removing one can't be checked in game and stays Derived."
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
@@ -6294,7 +6277,7 @@ msgid "Movies the Housekeeper's Gallery plays. Credits 2 and 3 come back at the 
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "What the Trader puts up for sale. An entry for sale can be bought even without the download that sells it; what you already have is not shown."
+msgid "Read only: the Trader puts an entry up for sale once its condition holds, whatever the save holds; the save only keeps which entries got their NEW mark."
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
@@ -6306,7 +6289,7 @@ msgid "Read only: the Trader offers a delivery request once its villager's reque
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Extra Hunter's Notes entries of the Elder Dragons and deviants. Unlocking one gives the monster's Notes page its NEW mark, as the game does."
+msgid "Read only: the game sets these during a talk. Clearing one left the monster's Notes page shown, so what they change is not known."
 msgstr ""
 
 #: app/gui/src/views/unlocks_ui.rs

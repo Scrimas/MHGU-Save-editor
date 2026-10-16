@@ -3072,23 +3072,6 @@ msgstr[0] "{} musique"
 msgstr[1] "{} musiques"
 
 #: app/gui/src/goals.rs
-msgid "Everything the Trader sells"
-msgstr "Tout ce que vend le marchand"
-
-#: app/gui/src/goals.rs
-msgid "The Trader offers everything it can sell."
-msgstr "Le marchand propose tout ce qu'il peut vendre."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/goals.rs
-msgid "Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included."
-msgstr "Met en vente les {} que le marchand ne propose pas encore : mots de titre, décors de la Carte Guilde et costumes d'animaux, y compris ceux des téléchargements."
-
-#: app/gui/src/goals.rs
-msgid "Buying still takes Trader points; what you already have is not shown."
-msgstr "L'achat coûte toujours des points du marchand ; ce que vous avez déjà n'est pas affiché."
-
-#: app/gui/src/goals.rs
 msgid "Every combination recipe combined"
 msgstr "Toutes les recettes de synthèse réalisées"
 
@@ -4143,8 +4126,8 @@ msgid "Cards received from other hunters. The game keeps them at the front of th
 msgstr "Cartes reçues d'autres chasseurs. Le jeu les garde en tête de liste : en retirer une fait remonter les suivantes, comme sa commande Supprimer."
 
 #: app/gui/src/views/cards_ui.rs
-msgid "Cards the Courier Service received. Move one to the Card List, as the Post Office does, or remove it."
-msgstr "Cartes reçues par le service de courrier. Déplacez-en une vers la Liste de cartes, comme le fait le bureau de poste, ou retirez-la."
+msgid "Cards received by StreetPass on the 3DS. Move one to the Card List, as the Post Office does, or remove it. MHGU on Switch has no StreetPass and no way to open this list, so removing a card can't be checked in game: it stays Derived."
+msgstr "Cartes reçues par StreetPass sur 3DS. Déplacez-en une vers la Liste de cartes, comme le fait le bureau de poste, ou retirez-la. MHGU sur Switch n'a ni StreetPass ni moyen d'ouvrir cette liste : le retrait d'une carte ne peut pas être vérifié en jeu et reste Déduit."
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/cards_ui.rs
@@ -4158,8 +4141,8 @@ msgid "No one is hired. The game picks new offers after every quest, so this lis
 msgstr "Personne n'est recruté. Le jeu choisit de nouvelles offres après chaque quête, cette liste est donc en lecture seule."
 
 #: app/gui/src/views/cards_ui.rs
-msgid "Hunters you blocked online, shared by the three characters."
-msgstr "Chasseurs que vous avez bloqués en ligne, partagés par les trois personnages."
+msgid "Hunters you blocked online, shared by the three characters. The game shows this list only online, so unblocking can't be checked offline: it stays Derived."
+msgstr "Chasseurs que vous avez bloqués en ligne, partagés par les trois personnages. Le jeu n'affiche cette liste qu'en ligne : le déblocage ne peut pas être vérifié hors ligne et reste Déduit."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/cards_ui.rs
@@ -5770,12 +5753,12 @@ msgid "The Palicoes the game offers for hire: an edited one joins as edited when
 msgstr "Les Palicos que le jeu propose au recrutement : un Palico modifié arrive tel quel une fois recruté. Le jeu tire une nouvelle liste de temps en temps."
 
 #: app/gui/src/views/palicoes.rs
-msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check; hiring from the Palico Board does not count. The Dojo and the teams are read-only."
-msgstr "Un Miaroudeur combat avec les habiletés et talents de son Palico (Mes Palicos). La récompense 53 vient avec 50 séances au dojo. Le jeu donne les mots de titre à partir de 10, 30, 50 et 80 recrutements à sa prochaine vérification ; recruter au tableau des Palicos ne compte pas. Le dojo et les équipes sont en lecture seule."
+msgid "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."
+msgstr "Un Miaroudeur combat avec les habiletés et talents de son Palico (Mes Palicos). La récompense 53 vient avec 50 séances au dojo. Le jeu donne les mots de titre à partir de 10, 30, 50 et 80 recrutements à sa prochaine vérification. Le dojo et les équipes sont en lecture seule."
 
 #: app/gui/src/views/palicoes.rs
-msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card."
-msgstr "Les Palicos reçus par StreetPass attendent dans la boîte aux lettres jusqu'à être recrutés ou renvoyés ; celui à envoyer part avec la Carte de Guilde."
+msgid "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card. MHGU on Switch has no StreetPass: only a save carried over from the 3DS holds such Palicoes, so removing one can't be checked in game and stays Derived."
+msgstr "Les Palicos reçus par StreetPass attendent dans la boîte aux lettres jusqu'à être recrutés ou renvoyés ; celui à envoyer part avec la Carte de Guilde. MHGU sur Switch n'a pas de StreetPass : seule une sauvegarde venue de la 3DS contient de tels Palicos, donc en retirer un ne peut pas être vérifié en jeu et reste Déduit."
 
 #: app/gui/src/views/palicoes.rs
 msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."
@@ -6359,8 +6342,8 @@ msgid "Movies the Housekeeper's Gallery plays. Credits 2 and 3 come back at the 
 msgstr "Films que joue la Galerie du Room service. Crédits 2 et 3 reviennent au chargement suivant une fois la fin dans la Galerie."
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "What the Trader puts up for sale. An entry for sale can be bought even without the download that sells it; what you already have is not shown."
-msgstr "Ce que le marchand met en vente. Une entrée en vente peut être achetée même sans le téléchargement qui la vend ; ce que vous avez déjà n'est pas affiché."
+msgid "Read only: the Trader puts an entry up for sale once its condition holds, whatever the save holds; the save only keeps which entries got their NEW mark."
+msgstr "Lecture seule : le marchand met une entrée en vente dès que sa condition est remplie, quoi que contienne la sauvegarde ; celle-ci garde seulement quelles entrées ont eu leur marque NEW."
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Read only: the Trader lists an item once its star level allows, whatever the save holds; the save only keeps which items got their NEW mark."
@@ -6371,8 +6354,8 @@ msgid "Read only: the Trader offers a delivery request once its villager's reque
 msgstr "Lecture seule : le marchand propose une requête de livraison une fois la requête de son villageois lancée, quoi que contienne la sauvegarde ; celle-ci garde seulement quelles requêtes ont eu leur marque NEW."
 
 #: app/gui/src/views/unlocks_ui.rs
-msgid "Extra Hunter's Notes entries of the Elder Dragons and deviants. Unlocking one gives the monster's Notes page its NEW mark, as the game does."
-msgstr "Entrées supplémentaires du Compendium pour les dragons anciens et les monstres exotiques. En débloquer une donne la marque NEW à la page du monstre, comme le fait le jeu."
+msgid "Read only: the game sets these during a talk. Clearing one left the monster's Notes page shown, so what they change is not known."
+msgstr "Lecture seule : le jeu les active lors d'une conversation. En retirer une a laissé la page du monstre affichée dans le Compendium : on ne sait pas ce qu'elles changent."
 
 #: app/gui/src/views/unlocks_ui.rs
 msgid "Hunter's Notes tips read. A tip not read shows NEW once the game offers it."

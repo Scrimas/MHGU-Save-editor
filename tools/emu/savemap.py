@@ -230,7 +230,7 @@ LABELS = [
     ('char', 0x2248B, 0x4, 'play time in seconds (sGameControl +0x34; slot header +0x20, Guild Card +0x914)', 'CONFIRMED'),
     ('char', 0x2248F, 0x4, 'f32 play-time remainder in frames, carried into the seconds at 60 (sGameControl +0x38, 0x3f83a8)', 'CONFIRMED'),
     ('char', 0x22493, 0x4, 'u32 copied to the Guild Card +0x86C (sGameControl +0x3c)', 'DERIVED'),
-    ('char', 0x23B9D, 0x5, 'Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Dojo sessions done, Palicoes hired (sOtomo +0x13848)', 'DERIVED'),
+    ('char', 0x23B9D, 0x5, 'Palico manager: Prowler Palico, buddy 1, buddy 2 (index, 0xFF = none), Palicoes hired, Dojo sessions done (sOtomo +0x13848)', 'DERIVED'),
     ('char', 0x23B9E, 0x1, 'hunting buddy 1: Palico list index, 0xFF = none', 'CONFIRMED'),
     ('char', 0x23BA2, 0x14, 'Palico service settings (uUIOtomoService): u2 mode, seven small levels (max 9, 6, then 10 each), four u32 (sOtomo +0x138f6)', 'DERIVED'),
     ('char', 0x2C466, 0x28, 'Palicoes that reached level 50: 5 x 8 B ID; award 50 (sOtomo +0x13910)', 'DERIVED'),

@@ -89,10 +89,10 @@ fn row_note(r: &URow) -> String {
         "coin" => tr("Read only: the Mewstress lists a Horns Coin trade once its star level allows, whatever the save holds; the save only keeps which trades got their NEW mark.").into(),
         "costume" => tr("Costumes for the village pets: Moofy's (the first six) and the Poogies'. Ten, twenty, twenty-eight and every Poogie costume earn the Poogie Ball awards after your next quest.").into(),
         "gallery" => tr("Movies the Housekeeper's Gallery plays. Credits 2 and 3 come back at the next load once the ending is in the Gallery.").into(),
-        "trader:words" | "trader:scenes" | "trader:costumes" => tr("What the Trader puts up for sale. An entry for sale can be bought even without the download that sells it; what you already have is not shown.").into(),
+        "trader:words" | "trader:scenes" | "trader:costumes" => tr("Read only: the Trader puts an entry up for sale once its condition holds, whatever the save holds; the save only keeps which entries got their NEW mark.").into(),
         "trader:items0" | "trader:items1" => tr("Read only: the Trader lists an item once its star level allows, whatever the save holds; the save only keeps which items got their NEW mark.").into(),
         "trader:delivery" => tr("Read only: the Trader offers a delivery request once its villager's request is raised, whatever the save holds; the save only keeps which requests got their NEW mark.").into(),
-        "notes2" => tr("Extra Hunter's Notes entries of the Elder Dragons and deviants. Unlocking one gives the monster's Notes page its NEW mark, as the game does.").into(),
+        "notes2" => tr("Read only: the game sets these during a talk. Clearing one left the monster's Notes page shown, so what they change is not known.").into(),
         "tips" => tr("Hunter's Notes tips read. A tip not read shows NEW once the game offers it.").into(),
         "combos" => tr("Recipes combined at least once. A recipe never combined always succeeds the first time; 130 earn an award after your next quest.").into(),
         "events" => tr("Scenes that play once. Clearing one plays it again the next time its place loads.").into(),
@@ -283,7 +283,7 @@ fn need_text(need: &str) -> String {
 fn entry_sub(st: &State, m: usize, e: &UnlockEntry) -> String {
     let mp = &unlocks::maps()[m];
     let need = need_text(&e.need);
-    if mp.kind == Kind::Marks {
+    if mp.kind == Kind::Marks && mp.id != "notes2" {
         return match unlocks::need_holds(st.save(), st.slot, &e.need) {
             Some(true) => trf("On sale · {}", &[&need]),
             _ => trf("Not yet · {}", &[&need]),
@@ -423,10 +423,10 @@ fn pets_view(ui: &AppWindow, st: &State) {
     api.set_was_moofah_gifts(st.was(Target::MoofahGifts).into());
 }
 
-/// The unlock maps checked in game (2026-10-10: an entry locked, or every entry unlocked,
-/// shown so by the game); the others are Derived: from code, checked against the save
-/// timeline.
-const CONFIRMED_MAPS: [&str; 6] = ["lab", "song", "costume", "gallery", "combos", "tips"];
+/// The unlock maps checked in game (2026-10-10, events 2026-10-16: an entry locked, or
+/// every entry unlocked, shown so by the game); the milestones are Derived: from code,
+/// checked against the save timeline.
+const CONFIRMED_MAPS: [&str; 7] = ["lab", "song", "costume", "gallery", "combos", "tips", "events"];
 
 /// Confirmed when every map of `maps` was checked in game.
 pub fn maps_conf(maps: &[usize]) -> Conf {

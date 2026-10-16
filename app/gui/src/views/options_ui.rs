@@ -1,6 +1,5 @@
 //! The Options page: the character's game options, its chat phrases and the title menu's
-//! settings shared by the characters (`mhgu_save::options`). Confirmed, except the
-//! Simplified Chinese text language (Derived).
+//! settings shared by the characters (`mhgu_save::options`). All Confirmed in game.
 
 use super::*;
 use crate::{OptionRow, PhraseRow};
@@ -210,9 +209,7 @@ pub(super) fn wire_options(ui: &AppWindow, st: &Shared) {
             "rumble" => stage(&ui, &mut s, Conf::Confirmed, Target::Rumble, |sv, _| options::set_rumble(sv, v == 0)),
             "language" => {
                 let Some(&l) = options::LANGUAGES.get(v as usize) else { return };
-                // Simplified Chinese is Derived (options::LANGUAGE)
-                let conf = if l == 8 { Conf::Derived } else { Conf::Confirmed };
-                stage(&ui, &mut s, conf, Target::Language, |sv, _| {
+                stage(&ui, &mut s, Conf::Confirmed, Target::Language, |sv, _| {
                     options::set_language(sv, l);
                 });
             }

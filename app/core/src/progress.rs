@@ -32,8 +32,9 @@ pub const PERMIT_WAITING: usize = 0x5E7E;
 pub const MAX_PERMIT_POINTS: u16 = 9999;
 /// The quest counter (S+0x4418): quests completed, not Harvest Tours or Training, not
 /// shown in game. At a talk the Courier gives gifts for the multiples of 3, 7 and 10 the
-/// counter crossed since his last talk (S+0x441c), then stores it there. Editing them is
-/// DERIVED.
+/// counter crossed since his last talk (S+0x441c), then stores it there. CONFIRMED in game
+/// (2026-10-14/16): the game counted on from a written 400, and a talk took the Courier's
+/// copy from 400 to the counter's 413 with gifts for the difference.
 pub const QUEST_COUNTER: usize = 0x5E4E;
 pub const COURIER_TALK: usize = 0x5E52;
 /// Courier points (S+0x4420): earned per quest once the Courier works (flag 92), 1000
@@ -166,10 +167,11 @@ impl<S: Deref<Target = Save>> Char<S> {
         }
     }
     /// The Guild Card's quests-completed count of the quest's kind follows its cleared bit:
-    /// one clear more when it becomes cleared, one fewer when it no longer is, never fewer
-    /// than the quests of that kind cleared. The counts include repeats (a played card has
-    /// more Village low rank clears than there are such quests), so they are kept, not
-    /// recomputed. DERIVED
+    /// one clear more when it becomes cleared, at least the quests of that kind cleared;
+    /// one fewer when it no longer is, never fewer than those, and never more than it was.
+    /// The counts include repeats (a played card has more Village low rank clears than
+    /// there are such quests), so they are kept, not recomputed. The game shows the stored
+    /// count: CONFIRMED in game (2026-10-16).
     fn count_clear(&mut self, index: usize, on: bool)
     where
         S: DerefMut,
@@ -178,8 +180,9 @@ impl<S: Deref<Target = Save>> Char<S> {
         let Some(k) = t.quests.iter().find(|q| q.index == index).and_then(crate::character::card_kind) else { return };
         let cleared = t.quests.iter().filter(|q| crate::character::card_kind(q) == Some(k) && self.quest(QuestBit::Cleared, q.index)).count() as u16;
         let n = crate::character::card_quests(&self.s, self.base, k);
-        let n = if on { n.saturating_add(1) } else { n.saturating_sub(1) };
-        crate::character::set_card_quests(&mut self.s, self.base, k, n.max(cleared));
+        // a count already below the cleared quests (a bulk edit) stays as it is on an un-clear
+        let n = if on { n.saturating_add(1).max(cleared) } else { n.saturating_sub(1).max(cleared.min(n)) };
+        crate::character::set_card_quests(&mut self.s, self.base, k, n);
     }
     fn cleared_id(&self, id: u32) -> bool {
         tables().quest_index(id).is_some_and(|i| self.quest(QuestBit::Cleared, i))

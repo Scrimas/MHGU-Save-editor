@@ -384,7 +384,13 @@ mod tests {
         c.set_quest(QuestBit::Cleared, b, true);
         set_card_quests(c.s, SLOT1_BASE, 0, 0);
         c.set_quest(QuestBit::Cleared, b, false);
-        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 1, "never below the cleared quests");
+        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 0, "an un-clear never raises the count");
+        c.set_quest(QuestBit::Cleared, b, true);
+        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 2, "a clear lifts it to the cleared quests");
+        set_card_quests(c.s, SLOT1_BASE, 0, 5);
+        c.set_quest(QuestBit::Cleared, b, false);
+        c.set_quest(QuestBit::Cleared, a, false);
+        assert_eq!(card_quests(c.s, SLOT1_BASE, 0), 3);
     }
 
     #[test]

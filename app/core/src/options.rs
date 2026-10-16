@@ -188,7 +188,7 @@ pub const RUMBLE: usize = 0x4D;
 /// 5 Italian, 7 Traditional and 8 Simplified Chinese (the title menu's choices; 7 and 8
 /// came with the 1.4 update); 0 = not set, the loader takes the console's. The index is
 /// the position in the executable's suffix table (jpn eng fre spa ger ita kor chT chS …,
-/// `0x157a68b`): 1-5 and 7 CONFIRMED in game, 8 DERIVED from that table.
+/// `0x157a68b`): every one CONFIRMED in game (8 on 2026-10-16).
 pub const LANGUAGE: usize = 0xB2A4;
 pub const LANGUAGES: [u8; 8] = [0, 1, 2, 3, 4, 5, 7, 8];
 

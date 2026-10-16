@@ -36,10 +36,11 @@ pub struct Piece {
     /// Armor: wearable by hunter type 1 (male) / type 2 (female); absent for weapons.
     pub male: Option<u8>,
     pub female: Option<u8>,
-    /// Armor: a Blademaster / Gunner piece (both for either). DERIVED.
+    /// Armor: a Blademaster / Gunner piece (both for either; every head is both).
+    /// CONFIRMED in game (2026-10-16).
     pub blade: Option<u8>,
     pub gunner: Option<u8>,
-    /// Armor: decoration slots. DERIVED.
+    /// Armor: decoration slots. CONFIRMED in game (2026-10-16, five pieces of 1-3 slots).
     pub slots: Option<u8>,
     /// Weapons: decoration slots at level 1, 2, … DERIVED.
     #[serde(default)]
