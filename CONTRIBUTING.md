@@ -75,9 +75,23 @@ updates the template and every catalog.
 
 ## Game assets (names, icons, text)
 
-The game's names, icons and text are Capcom's. The editor embeds them at build time from
-`app/assets/gen/`, which `tools/build_assets.py` extracts from your own dump of the game;
-that folder is gitignored and never committed in readable form. The release builds get it
+The game's names, icons and text are Capcom's, so a clone of this repository has none of
+them. They make up the **asset pack**, a folder `app/assets/gen/` that does not exist
+until you create it from your own dump of the game:
+
+```bash
+python3 tools/build_assets.py path/to/base_romfs.bin
+```
+
+It writes `names.json` (item, equipment, skill, monster and other names, item icons and
+rarities, colour palettes), `names.<language>.json` (the same names in the other
+languages), `items.png` (the item icon sheet), and `monsters/` and `awards/` (one icon
+per monster and per Guild Card award). The header of `tools/build_assets.py` lists every
+entry and the game file it comes from. At build time the editor embeds the folder
+(`app/gui/build.rs`) and reads it in `app/gui/src/assets.rs`; without it, the editor
+shows placeholder icons and `#ID` instead of names.
+
+The folder is gitignored and never committed in readable form. The release builds get it
 from `app/assets/gen.tar.gz.gpg`, the same pack encrypted with a passphrase that only the
 maintainer and the repository's CI hold ([app/assets/README.md](app/assets/README.md)).
 
@@ -86,11 +100,11 @@ commit them:
 
 - change `tools/build_assets.py` so that it extracts them, and say in the pull request
   which files of the RomFS they come from (and whether the 1.4 update is needed);
-- make the editor read them from `gen/` like the existing ones, and keep it working
-  without them: a placeholder icon, `#ID` instead of a name. CI on a fork's pull request
-  has no pack, and neither has anyone building without a dump;
-- check the result with a pack built from your own dump (`python3 tools/build_assets.py
-  path/to/base_romfs.bin`); a screenshot in the pull request helps;
+- read them in `app/gui/src/assets.rs` next to the existing entries, and keep the editor
+  working without them: a placeholder icon, `#ID` instead of a name. CI on a fork's pull
+  request has no pack, and neither has anyone building without a dump;
+- check the result with the pack built from your own dump; a screenshot in the pull
+  request helps;
 - leave `gen.tar.gz.gpg` alone: it cannot be resealed without the passphrase, and a pack
   sealed with another one breaks CI. Once the pull request is merged, the maintainer
   rebuilds the pack from their dump and reseals it.
