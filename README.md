@@ -1,51 +1,47 @@
 # MHGU Save Editor
 
 A desktop save editor for **Monster Hunter Generations Ultimate** (Nintendo Switch,
-emulator saves), and the reverse-engineering notes and data it is built on.
+emulator saves and console backups).
 
 ![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-dark.png#gh-dark-mode-only)
 ![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-light.png#gh-light-mode-only)
 
 Every value it shows is read where the game itself keeps it, and every change is
 described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") before
-anything touches the file. Every edit the editor makes has been checked in game
-(**Confirmed**); an edit added later that has not been yet is marked **Derived** (from
-the format notes) until it is.
+anything touches the file. Every edit has been checked in game (**Confirmed**); an edit
+added later that has not been yet is marked **Derived** until it is.
 
 ## Download
 
-Single-file builds are attached to each [release](https://github.com/Scrimas/MHGU-Save-editor/releases):
+Get the latest file from the [releases](https://github.com/Scrimas/MHGU-Save-editor/releases):
 
 | File | Runs on |
 |---|---|
-| `MHGU-Save-Editor-<version>-x86_64.AppImage` | Linux x86-64, glibc 2.28 or newer (distros from 2019 on) |
 | `MHGU-Save-Editor-<version>-x86_64.exe` | Windows 10 / 11, nothing to install |
+| `MHGU-Save-Editor-<version>-x86_64.AppImage` | Linux x86-64 (distros from 2019 on) |
 
 The `.exe` is not code-signed, so Windows SmartScreen warns the first time: **More info → Run anyway**.
+The AppImage adds itself to the application menu when started.
 
-The AppImage adds itself to the application menu when started (`~/.local/share/applications`);
-the newest version on disk keeps the entry, and menus hide it once that AppImage is deleted.
+The editor checks for a newer version when it starts and asks before downloading it
+(Settings → Updates turns this off).
 
-Both builds update themselves: on start they ask GitHub for a newer release (Settings →
-Updates turns this off, or checks now). Nothing is downloaded until you choose to; the new
-file is checked against the release's SHA-256 sums and takes the place of the old one.
-The sums come from the same release, so they catch a broken download, not a release
-published by someone else; a download can be cancelled.
+Version numbers: the first number goes up once every edit has been checked in game, so a
+release *N*.0.0 has no Derived edit; the second adds features, whose new edits may be
+Derived; the third fixes bugs.
 
-Version numbers follow the edits' status: the major number goes up once every edit has
-been checked in game, so a release *N*.0.0 has no Derived edit; a minor version adds
-features, whose new edits may be Derived; a patch version fixes bugs.
+## Opening your save
 
-Saves are found automatically for Ryujinx (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
-Flatpak folders) and for yuzu and its forks: suyu, Sudachi, Citron, Eden, torzu
-(`~/.local/share/<name>`, `%APPDATA%\<name>`, `~/.var/app/<any app>/data/<name>`).
-For a portable install or another emulator, add its folder in **Settings…** or use
-**Open save…** on its `system` file. Title ID `0100770008DD8000` (EU / western release).
+Saves are found automatically for **Ryujinx** and for **yuzu** and its forks (suyu,
+Sudachi, Citron, Eden, torzu), Flatpak installs included. For a portable install or
+another emulator, add its folder in **Settings…** or use **Open save…** on its `system`
+file (title ID `0100770008DD8000`, EU / western release). On Windows you can also drag
+the file onto the window.
 
-A save from a real Switch works too: back it up with JKSV or Checkpoint, open the
-`system` file of the backup folder on the SD card (found automatically while the card is
-mounted), write, then restore the backup on the console with the same tool. A JKSV ZIP
-backup has to be extracted first. Details in [docs/01-container.md](docs/01-container.md#saves-from-a-real-switch).
+**From a real Switch**: back the save up with JKSV or Checkpoint, open the `system` file of
+the backup folder on the SD card (found automatically while the card is mounted), write,
+then restore the backup on the console with the same tool. A JKSV ZIP backup has to be
+extracted first.
 
 ## What it edits
 
@@ -68,10 +64,7 @@ backup has to be extracted first. Details in [docs/01-container.md](docs/01-cont
 
 All three character slots are supported. **Characters…** (Derived) copies, swaps and
 deletes whole characters, and exports one to a file to import it into a slot of any save.
-It also moves characters from and to **MHXX**: Import… takes a character from the
-`system` file of an MHXX save (3DS, from a JKSM or Checkpoint backup, or the Japanese
-Switch release), and Export to an MHXX save… puts one into a copy of such a save
-([docs/01-container.md](docs/01-container.md#mhxx-saves-3ds-and-the-japanese-switch-release)).
+It also moves characters to and from **MHXX** saves (3DS, or the Japanese Switch release).
 
 **Values the game cannot produce** (a stack above its limit, a decoration that does not
 fit, a talisman outside the charm tables, a weapon above its top level, a locked Guild
@@ -111,24 +104,20 @@ value and in Review and Write. They work offline; online, other hunters can see 
 
 ## Database
 
-The **Database** page puts the game's own tables next to the save, so you can see what is
+The **Database** page puts the game's own tables next to your save, so you can see what is
 left to get and where to get it. Nothing on it is edited; its links lead to the page that
-edits the value, and the Monsters, Quests and Items pages link back to it.
+edits the value.
 
-- **Monsters**: the size record against the mini and gold crown sizes and the sizes its
-  quests give; the chance of a crown in each quest, best first (Derived); carves per rank,
-  with what the item box holds.
-- **Quests**: what the quest board shows (objective, subquest, locale, reward, HRP, fee),
-  the monsters with their sizes and crown chances (Derived), and the reward tables: the
-  Base rows A to D, with the item A and B always give, and the subquest's.
+- **Monsters**: your size record against the mini and gold crown sizes; the chance of a
+  crown in each quest, best first (Derived); carves per rank, with what your box holds.
+- **Quests**: what the quest board shows, the monsters with their sizes and crown chances
+  (Derived), and the reward tables.
 - **Items**: every carve, quest reward and combination that gives the item, with its chance;
-  every Smithy recipe and combination that takes it; its value as Smithy provisions.
-- **Skills**: the skills a tree activates and at how many points, and the decorations,
-  talismans and armor pieces that give those points. Search finds a tree by its own name,
-  the skills it activates or its decorations ("Razor Sharp", "Razor Jwl 3", "Sharpness").
-- **Equipment**: for every weapon, armor piece and decoration, what forging, upgrading and
-  each level take against the item box ("ready" when the box holds enough), and the
-  weapon's upgrade tree.
+  every Smithy recipe and combination that takes it.
+- **Skills**: what a skill tree activates, and the decorations, talismans and armor that
+  give its points ("Razor Sharp", "Razor Jwl 3" and "Sharpness" all find it).
+- **Equipment**: what forging, upgrading and each level take against your item box, and
+  the weapon's upgrade tree.
 
 ![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-dark.png#gh-dark-mode-only)
 ![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-light.png#gh-light-mode-only)
@@ -152,115 +141,48 @@ edits the value, and the Monsters, Quests and Items pages link back to it.
 
 ## Keeping your save safe
 
-- **Nothing is written until you press Write.** Edits are staged; Review lists them
-  in game terms, each one can be undone, and the page shows what each value was.
-- **Write refuses while an emulator is running**: Ryujinx (and others) overwrite the
-  save when they exit.
-- **Write refuses a save the game saved again after it was opened**, so that play is
-  not lost; Reload reads it again and keeps the staged changes.
-- **A snapshot is taken before every write** (and before every restore). Snapshots
-  restores the whole save folder from any of them, and only into the save it was
-  taken of; Compare lists what differs, in game terms, between a snapshot and the open
-  save or another snapshot.
-- The emulator keeps two copies of the save, each with a backup; all four files get
-  the same bytes and keep their own headers. Every copy is checked before any is
-  written, and each write is checked by reading it back.
-
-Keyboard: Ctrl+S Write…, Ctrl+Z undo the latest change, Ctrl+F search the page, Ctrl+O
-open a save, Ctrl+Up/Down the previous/next page, Ctrl+Left/Right the previous/next tab of
-the page, Escape closes a dialog or Review. The arrows move between the entries of the page
-(a list's rows are picked as you go, Enter opens or edits an entry); a number box being
-edited steps with Up/Down until Escape. In the sidebar, Up/Down/Home/End switch pages. The
-mouse's Back/Forward buttons go back and forth through the pages and tabs shown.
+- **Nothing is written until you press Write.** Review lists every change in game terms;
+  each one can be undone.
+- **Write refuses while the emulator is running** (it would overwrite the save when it
+  exits), and **refuses a save the game saved again after you opened it**, so no play is
+  lost; Reload reads it again and keeps your changes.
+- **A snapshot is taken before every write.** **Snapshots** puts any of them back, and
+  Compare shows what differs between two of them, in game terms.
+- Every copy of the save the emulator keeps is written, and checked by reading it back.
 
 Keep your own backup anyway. This is an unofficial tool.
 
 ![Write dialog: the changes in game terms, the emulator check and the snapshot](docs/screenshots/06-write-dark.png#gh-dark-mode-only)
 ![Write dialog: the changes in game terms, the emulator check and the snapshot](docs/screenshots/06-write-light.png#gh-light-mode-only)
 
+**Keyboard**: Ctrl+S write, Ctrl+Z undo, Ctrl+F search, Ctrl+O open, Ctrl+Up/Down change
+page, Ctrl+Left/Right change tab, the arrows move between entries and Enter edits one,
+Escape closes. The mouse's Back/Forward buttons go through the pages you saw.
+
 ## Settings
 
-**Settings…** in the sidebar: language, theme and interface size; snapshot folder, how many
-snapshots to keep per save, and whether Write takes one by default; extra folders to
-search for saves (portable installs, other folders); recent saves and reopening the
-last one; extra emulator process names for the running check; and **Confirmed changes
-only**, which refuses every Derived change (none since 2.0; it guards edits added later).
-They are kept in
-`~/.config/mhgu-save-editor/settings.json` (Windows: `%APPDATA%\mhgu-save-editor`).
+**Settings…** in the sidebar: language, theme and interface size; where snapshots go, how
+many to keep and whether Write takes one; extra folders to search for saves; recent saves;
+and **Confirmed changes only**, which refuses every Derived change.
 
-**Language**: English, French, German, Italian, Spanish, Traditional or Simplified Chinese,
-the game's own languages (Chinese since its 1.4 update); by default the system's. Item, equipment, skill and monster names are the game's own in that
-language. The interface text is in
-[`app/gui/lang`](app/gui/lang) (gettext catalogs); after changing strings in the source,
-`python3 tools/i18n.py` updates the template and merges every catalog.
-
-**Colours from [matugen](https://github.com/InioX/matugen)** (Linux): the editor follows
-the wallpaper's palette when `~/.config/mhgu-save-editor/matugen.json` exists, and picks
-up a new one within two seconds of matugen writing it. **Save template** in Settings puts
-the template next to it; then add to `~/.config/matugen/config.toml`:
-
-```toml
-[templates.mhgu-save-editor]
-input_path = '~/.config/mhgu-save-editor/matugen-template.json'
-output_path = '~/.config/mhgu-save-editor/matugen.json'
-```
-
-Any template or tool will do that writes the same file: a `dark` and a `light` object,
-each with the Material roles `primary`, `on_surface`, `on_surface_variant`,
-`surface_container_lowest` … `surface_container_highest` and `error` as `#rrggbb`
-([`app/packaging/matugen`](app/packaging/matugen/mhgu-save-editor.json)). Light, Dark
-and System still choose which of the two is shown.
+The editor speaks the game's own languages: English, French, German, Italian, Spanish,
+Traditional and Simplified Chinese (the system's by default), with item, equipment, skill
+and monster names as the game writes them. On Linux it can follow your wallpaper's colours
+with matugen ([setup](app/README.md#colours-from-matugen)).
 
 ![Settings dialog](docs/screenshots/07-settings-dark.png#gh-dark-mode-only)
 ![Settings dialog](docs/screenshots/07-settings-light.png#gh-light-mode-only)
 
-## Building from source
+## How it works
 
-Needs a stable Rust toolchain (edition 2024).
-
-```bash
-cd app
-cargo build --release
-```
-
-The binary is `app/target/release/mhgu-editor`. `app/packaging/build.sh` makes the
-AppImage and the Windows `.exe` (see its header for the toolchain).
-
-**Game assets.** Item, equipment, skill and monster names and icons come from the
-game's own files. They are Capcom's and are not in this repository in readable form.
-Without them the editor still works, with `#ID` names and placeholder icons. With
-your own dump of the game:
-
-```bash
-python3 tools/build_assets.py path/to/base_romfs.bin
-```
-
-then rebuild. [`app/assets/README.md`](app/assets/README.md) explains how the release
-builds get them.
-
-## Repository layout
-
-| Path | |
-|---|---|
-| [`app/core`](app/core) | `mhgu-save`: the save format as a Rust library (read, edit, write every copy, snapshots) |
-| [`app/gui`](app/gui) | The editor (Rust + [Slint](https://slint.dev)) |
-| [`app/packaging`](app/packaging) | Release builds, asset pack sealing |
-| [`docs/`](docs/README.md) | **The save format notes**: container, quests, monsters, equipment, items, awards, NPC talk, a whole-file map |
-| [`docs/screenshots`](docs/screenshots) | The editor's screenshots in this README, light and dark |
-| [`data/`](data) | Machine-readable tables: quest, request, monster and NPC indexes, unlock rules, the whole-file map |
-| [`tools/`](tools) | Python scripts the notes use: readers, the quest unlock evaluator, the asset builder, the loader emulation |
-
-Start with [docs/README.md](docs/README.md) for the format itself, its quick-reference
-table and how each claim was established.
+The editor rests on notes about the save format, written up from controlled experiments
+in game: [docs/](docs/README.md). Building from source and the repository layout:
+[app/README.md](app/README.md).
 
 ## Licence
 
-Copyright © 2026 Scrimas.
-
-This program is free software: you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software Foundation,
-either version 3 of the License, or (at your option) any later version. It is
-distributed WITHOUT ANY WARRANTY; see [`LICENSE`](LICENSE). This covers the whole
+Copyright © 2026 Scrimas. Free software under the GNU General Public License, version 3
+or any later version ([`LICENSE`](LICENSE)), with no warranty. This covers the whole
 repository: the editor, the tools, the notes and the data.
 
 Monster Hunter and its assets are © CAPCOM. This is an unofficial fan project, not
