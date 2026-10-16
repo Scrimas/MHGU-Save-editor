@@ -74,7 +74,7 @@ pub const COLOURS: usize = 0x11A;
 pub const TARGETS: [&str; 6] = ["None", "Small Only", "Small First", "Balanced", "Large First", "Large Only"];
 
 // i18n: shown through tr() in the GUI
-pub const BIASES: [&str; 8] =["Charisma", "Fighting", "Protection", "Assisting", "Healing", "Bombing", "Gathering", "Beast"];
+pub const BIASES: [&str; 8] = ["Charisma", "Fighting", "Protection", "Assisting", "Healing", "Bombing", "Gathering", "Beast"];
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Palico {
@@ -351,7 +351,11 @@ pub fn name_of(file: &[u8]) -> Result<String, ImportError> {
 pub fn import(s: &mut Save, base: usize, file: &[u8]) -> Result<usize, ImportError> {
     let (rec, entries) = parts(file)?;
     let i = (0..LIST_N).find(|&i| is_empty(s, base, i)).ok_or(ImportError::ListFull)?;
-    let worn: Vec<(usize, &[u8])> = entries.chunks(equipment::ENTRY).enumerate().filter(|(k, e)| u16::from_le_bytes([rec[GEAR + 2 * k], rec[GEAR + 2 * k + 1]]) != NO_GEAR && e.iter().any(|&x| x != 0)).collect();
+    let worn: Vec<(usize, &[u8])> = entries
+        .chunks(equipment::ENTRY)
+        .enumerate()
+        .filter(|(k, e)| u16::from_le_bytes([rec[GEAR + 2 * k], rec[GEAR + 2 * k + 1]]) != NO_GEAR && e.iter().any(|&x| x != 0))
+        .collect();
     let free = (0..PALICO_BOX_N).filter(|&j| equipment::get(s, base, Owner::Palico, j).is_empty()).count();
     if free < worn.len() {
         return Err(ImportError::BoxFull);
@@ -417,7 +421,7 @@ pub fn set(s: &mut Save, base: usize, i: usize, p: &Palico) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE};
+    use crate::save::{SLOT1_BASE, blank};
 
     #[test]
     fn set_writes_only_what_changed() {

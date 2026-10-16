@@ -21,7 +21,7 @@
 use i_slint_core::input::{BackendMouseEvent, TouchPhase};
 use i_slint_core::lengths::LogicalPoint;
 use slint::platform::WindowEvent;
-use slint::winit_030::{winit, EventResult, WinitWindowAccessor};
+use slint::winit_030::{EventResult, WinitWindowAccessor, winit};
 use std::cell::Cell;
 use std::rc::Rc;
 

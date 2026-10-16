@@ -31,10 +31,9 @@ pub(super) fn update_available(ui: &AppWindow) {
             &[&VERSION, &mb(n), &file_name(&t)],
         ),
         (Some(_), None) => trf("You have {}. This release has no file for this system: see its page.", &[&VERSION]),
-        (None, _) => trf(
-            "You have {}. Only the AppImage and the Windows .exe replace themselves: download the new version from the release page.",
-            &[&VERSION],
-        ),
+        (None, _) => {
+            trf("You have {}. Only the AppImage and the Windows .exe replace themselves: download the new version from the release page.", &[&VERSION])
+        }
     };
     set_update(ui, "available", trf("{} is available", &[&r.version]), body, 0.0);
 }
@@ -92,9 +91,7 @@ pub(super) fn wire_update(ui: &AppWindow, st: &Shared) {
                 let pct = done * 100 / u64::max(total, 1);
                 if pct != last.replace(pct) && !cancel.load(Ordering::Relaxed) {
                     let (v, body) = (r.version.clone(), trf("Downloading… {} of {}", &[&mb(done), &mb(total)]));
-                    let _ = w.upgrade_in_event_loop(move |ui| {
-                        set_update(&ui, "downloading", trf("downloading {}…", &[&v]), body, pct as f32 / 100.0)
-                    });
+                    let _ = w.upgrade_in_event_loop(move |ui| set_update(&ui, "downloading", trf("downloading {}…", &[&v]), body, pct as f32 / 100.0));
                 }
             };
             let res = update::install(&r, &old, progress, &cancel);
@@ -114,7 +111,9 @@ pub(super) fn wire_update(ui: &AppWindow, st: &Shared) {
                         set_update(&ui, "ready", trf("{} installed, restart to use it", &[&r.version]), body, 1.0);
                     }
                     Err(_) if cancelled => update_available(&ui),
-                    Err(e) => set_update(&ui, "failed", tr("update failed").into(), trf("Not updated: {}. The editor you are running is unchanged.", &[&e]), 0.0),
+                    Err(e) => {
+                        set_update(&ui, "failed", tr("update failed").into(), trf("Not updated: {}. The editor you are running is unchanged.", &[&e]), 0.0)
+                    }
                 }
             });
         });

@@ -7,23 +7,24 @@ use crate::i18n::{tr, trf, trn};
 use crate::settings;
 use crate::state::{Conf, Edit, State};
 use crate::system;
-use crate::targets::{self, Mon, Target, PAGES};
+use crate::targets::{self, Mon, PAGES, Target};
 use crate::update::{self, VERSION};
-use crate::{keep, model, strings, Shared};
 use crate::{
-    Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ColourRow, ChangeRow, CharacterInfo, CheckRow, Confidence, DecoRow, DetectedSave, DeviantRow,
-    EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, MonsterRow, LookRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow, Preview,
-    PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SetRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
+    Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ChangeRow, CharacterInfo, CheckRow, ColourRow, Confidence, DecoRow, DetectedSave,
+    DeviantRow, EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, LookRow, MonsterRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow,
+    Preview, PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SetRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow,
+    WriteRow,
 };
+use crate::{Shared, keep, model, strings};
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Kind, Owner};
 use mhgu_save::items::{self, Stack, Store};
-use mhgu_save::progress::{Char, Lock, QuestBit, DEVIANTS};
+use mhgu_save::progress::{Char, DEVIANTS, Lock, QuestBit};
 use mhgu_save::{character, monsters, palico, store};
 use slint::{ComponentHandle, Image, Model, SharedString, Weak};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 fn conf(c: Conf) -> Confidence {
     match c {
@@ -75,7 +76,13 @@ fn toast_full(ui: &AppWindow, msg: impl Into<SharedString>, sub: &str, action: &
     });
     let seq = view(|v| v.toast_seq);
     let w = ui.as_weak();
-    let ms = if !action.is_empty() { 9000 } else if error { 6000 } else { 3000 };
+    let ms = if !action.is_empty() {
+        9000
+    } else if error {
+        6000
+    } else {
+        3000
+    };
     slint::Timer::single_shot(std::time::Duration::from_millis(ms), move || {
         if let Some(ui) = w.upgrade()
             && view(|v| v.toast_seq) == seq
@@ -262,13 +269,12 @@ pub fn refresh(ui: &AppWindow, st: &State) {
     review(ui, st);
     // paths elided in the middle, so the part that differs stays visible (02.4)
     api.set_write_targets(strings(doc.loc.copies.iter().map(|p| fmt::elide_path(&p.display().to_string(), 64))));
-    let warn: Vec<String> = doc
-        .copies
-        .iter()
-        .filter(|(_, c)| *c != store::CopyState::Same)
-        .map(|(p, c)| format!("{}: {:?}", p.display(), c))
-        .collect();
-    api.set_warning(if warn.is_empty() { "".into() } else { trf("These copies differ from the opened file and will be overwritten: {}", &[&warn.join("; ")]).into() });
+    let warn: Vec<String> = doc.copies.iter().filter(|(_, c)| *c != store::CopyState::Same).map(|(p, c)| format!("{}: {:?}", p.display(), c)).collect();
+    api.set_warning(if warn.is_empty() {
+        "".into()
+    } else {
+        trf("These copies differ from the opened file and will be overwritten: {}", &[&warn.join("; ")]).into()
+    });
 
     if !s.slot_used(st.slot) {
         return;
@@ -313,12 +319,8 @@ fn review(ui: &AppWindow, st: &State) {
     api.set_value_count(staged.len() as i32);
     api.set_change_count(st.ops.len() as i32);
     api.set_review_summary(
-        if st.ops.is_empty() {
-            tr("Nothing staged").to_string()
-        } else {
-            trf("{} · {} · not written yet", &[&changes(st.ops.len()), &values(staged.len())])
-        }
-        .into(),
+        if st.ops.is_empty() { tr("Nothing staged").to_string() } else { trf("{} · {} · not written yet", &[&changes(st.ops.len()), &values(staged.len())]) }
+            .into(),
     );
     let label = |t: &Target, slot: usize| t.label(&doc.save, slot);
     // what Write would put in the save, not the value right after the edit
@@ -352,7 +354,12 @@ fn review(ui: &AppWindow, st: &State) {
             o.values
                 .iter()
                 .take(8)
-                .map(|(t, v)| ValueLine { label: label(t, o.slot).into(), old: t.read(&doc.orig, o.slot).into(), new: v.into(), warning: warn(t, o.slot).into() })
+                .map(|(t, v)| ValueLine {
+                    label: label(t, o.slot).into(),
+                    old: t.read(&doc.orig, o.slot).into(),
+                    new: v.into(),
+                    warning: warn(t, o.slot).into(),
+                })
                 .collect()
         };
         let sub = if single {
@@ -713,7 +720,14 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     let r = st.borrow_mut().reload_keep();
                     refresh(&ui, &st.borrow());
                     match r {
-                        Ok(n) => toast_full(&ui, tr("Read the save again"), &trn("{n} staged change kept", "{n} staged changes kept", n as i64, &[]), "", ToastAct::None, false),
+                        Ok(n) => toast_full(
+                            &ui,
+                            tr("Read the save again"),
+                            &trn("{n} staged change kept", "{n} staged changes kept", n as i64, &[]),
+                            "",
+                            ToastAct::None,
+                            false,
+                        ),
                         Err(e) => toast(&ui, trf("Could not read the save again: {}", &[&e]), true),
                     }
                 }
@@ -786,13 +800,13 @@ mod transfer_ui;
 mod unlocks_ui;
 mod update_ui;
 
-use self::{
-    advanced::*, cards_ui::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*, options_ui::*, overview::*,
-    palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, transfer_ui::*, unlocks_ui::*,
-};
 pub use self::names::{armor_parts, deco_slots, deco_used, equip_value, piece, weapon_classes};
+pub use self::options_ui::{auto_trigger, chat_group_name, choice_name, language_name, option_name};
+pub use self::palicoes::{look_label, request_field_name, request_value_name, role_name};
 pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};
 pub use self::unlocks_ui::{housekeeper_name, maps_conf, pet_costume_name, start_place_name, unlock_map_name, unlock_rows};
-pub use self::palicoes::{look_label, request_field_name, request_value_name, role_name};
-pub use self::options_ui::{auto_trigger, chat_group_name, choice_name, language_name, option_name};
+use self::{
+    advanced::*, cards_ui::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*,
+    options_ui::*, overview::*, palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, transfer_ui::*, unlocks_ui::*,
+};
 pub use self::{file::*, update_ui::*};

@@ -117,7 +117,9 @@ const EQUIP_LINK: usize = 10000;
 /// The pieces of kind `k`: (ID, name, rarity), decorations by item.
 fn equip_pieces(k: EquipKind) -> Vec<(u16, String, u32)> {
     let n = assets::names();
-    let real = |v: Option<&'static Vec<assets::Piece>>| v.map_or(&[][..], Vec::as_slice).iter().filter(|p| p.is_real()).map(|p| (p.id as u16, p.name.clone(), p.rarity)).collect();
+    let real = |v: Option<&'static Vec<assets::Piece>>| {
+        v.map_or(&[][..], Vec::as_slice).iter().filter(|p| p.is_real()).map(|p| (p.id as u16, p.name.clone(), p.rarity)).collect()
+    };
     match k {
         EquipKind::Weapon(c) => real(n.weapons.get(&c.to_string())),
         EquipKind::Armor(p) => real(n.armor.get(&p.to_string())),
@@ -305,7 +307,14 @@ fn equip(kind: usize, id: u16, have: &HashMap<u16, u32>, eq: &HashMap<(u8, u16),
     let line = |c: u8, w: u16, sub: String| {
         let p = piece(Owner::Hunter, Kind::Weapon(c), w);
         let (img, has) = icon(assets::equip_icon(Kind::Weapon(c).code(), p.map_or(1, |p| p.rarity)));
-        DbLine { name: p.map_or_else(|| format!("#{w}"), |p| p.name.clone()).into(), sub: sub.into(), icon: img, has_icon: has, link: (kind * EQUIP_LINK + w as usize) as i32, ..Default::default() }
+        DbLine {
+            name: p.map_or_else(|| format!("#{w}"), |p| p.name.clone()).into(),
+            sub: sub.into(),
+            icon: img,
+            has_icon: has,
+            link: (kind * EQUIP_LINK + w as usize) as i32,
+            ..Default::default()
+        }
     };
     match k {
         EquipKind::Weapon(c) => {
@@ -419,7 +428,9 @@ fn skill(st: &State, k: usize) -> DbSkill {
     };
     let tiers: Vec<DbLine> = tiers(k).into_iter().map(|(at, id)| line(activated(id), String::new(), trf("{} points", &[&points(at)]), None)).collect();
     // the other skill of a decoration or piece: "Expert +2"
-    let others = |rows: &mut dyn Iterator<Item = (u8, i8)>| rows.filter(|r| r.0 as usize != k).map(|(s, p)| format!("{} {}", skill_name(s), points(p))).collect::<Vec<_>>();
+    let others = |rows: &mut dyn Iterator<Item = (u8, i8)>| {
+        rows.filter(|r| r.0 as usize != k).map(|(s, p)| format!("{} {}", skill_name(s), points(p))).collect::<Vec<_>>()
+    };
     // only what raises it: the decorations that lower it are counted, armor that does is left out
     let lower = t.decorations.iter().filter(|d| d.2 as usize == k && d.3 < 0).count();
     let mut decos: Vec<_> = t.decorations.iter().filter(|d| d.2 as usize == k && d.3 > 0).collect();
@@ -589,7 +600,15 @@ fn item_uses(id: u16) -> (Vec<DbSource>, String) {
                     1 if r.kind.starts_with("weapon") => tr("Upgrade").to_string(),
                     l => trf("Level {}", &[&l]),
                 };
-                let src = DbSource { kind: if link > 0 { "equip" } else { "" }.into(), index: link, r#where: name.into(), how: how.into(), chance: format!("×{count}").into(), icon: img, has_icon: has };
+                let src = DbSource {
+                    kind: if link > 0 { "equip" } else { "" }.into(),
+                    index: link,
+                    r#where: name.into(),
+                    how: how.into(),
+                    chance: format!("×{count}").into(),
+                    icon: img,
+                    has_icon: has,
+                };
                 (1 + r.level.min(1), src)
             }
         })
@@ -669,7 +688,13 @@ fn item(id: u16, have: &HashMap<u16, u32>) -> DbItem {
                     (count, chance, src)
                 }
                 Source::Reward(q, slot, count, chance) => {
-                    let src = DbSource { kind: "quest".into(), index: q.index as i32, r#where: q.name.clone().into(), how: reward_row(slot).into(), ..Default::default() };
+                    let src = DbSource {
+                        kind: "quest".into(),
+                        index: q.index as i32,
+                        r#where: q.name.clone().into(),
+                        how: reward_row(slot).into(),
+                        ..Default::default()
+                    };
                     (count, chance, src)
                 }
                 Source::Combo(a, b, chance) => {
@@ -820,7 +845,10 @@ fn quest(st: &State, c: &Char<&mhgu_save::save::Save>, q: &mhgu_save::data::Ques
         sub: format!("#{} · {}", q.id, quest_sub(c, q)).into(),
         objective: text.map_or("", |x| x[0].as_str()).into(),
         subquest: text.map_or("", |x| x[1].as_str()).into(),
-        sub_reward: info.filter(|i| i.sub_reward > 0).map_or(String::new(), |i| if hrp { trf("{} · {} HRP", &[&z(i.sub_reward), &num(i.sub_hrp as i64)]) } else { z(i.sub_reward) }).into(),
+        sub_reward: info
+            .filter(|i| i.sub_reward > 0)
+            .map_or(String::new(), |i| if hrp { trf("{} · {} HRP", &[&z(i.sub_reward), &num(i.sub_hrp as i64)]) } else { z(i.sub_reward) })
+            .into(),
         facts: model(facts),
         monsters: model(monsters),
         note: if slots.is_empty() {

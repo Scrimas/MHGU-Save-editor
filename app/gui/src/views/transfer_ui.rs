@@ -2,9 +2,9 @@
 //! (core `transfer`).
 
 use super::*;
+use mhgu_save::Save;
 use mhgu_save::equipment::Talisman;
 use mhgu_save::transfer::{self, LineError, Problem};
-use mhgu_save::Save;
 
 /// What is wrong with an imported file, for a toast.
 fn problem(e: &LineError) -> String {
@@ -89,7 +89,9 @@ fn talisman_text(st: &State, selected: bool) -> String {
 fn talisman_type(t: &Talisman) -> (u16, u8) {
     let rows = &tables().talisman;
     let fits = |tier: u8| {
-        let ok = |kind: &str, skill: u8, pts: i8| skill == 0 || rows.iter().any(|r| r.tier == tier && r.kind == kind && r.skill == skill && (r.min..=r.max).contains(&pts));
+        let ok = |kind: &str, skill: u8, pts: i8| {
+            skill == 0 || rows.iter().any(|r| r.tier == tier && r.kind == kind && r.skill == skill && (r.min..=r.max).contains(&pts))
+        };
         let top = rows.iter().find(|r| r.tier == tier && r.kind == "slots").map_or(3, |r| r.max as u8);
         ok("skill1", t.skills[0], t.points[0]) && ok("skill2", t.skills[1], t.points[1]) && t.slots <= top
     };
@@ -130,7 +132,9 @@ pub(super) fn wire_transfer(ui: &AppWindow, st: &Shared) {
             {
                 let mut s = st.borrow_mut();
                 let all = (0..items::BOX_N).map(|i| Target::Item(Store::Box, i)).collect();
-                stage_many(&ui, &mut s, tr("Import the item box").into(), tr("Item box"), Conf::Confirmed, all, |sv, base| items::set_all(sv, base, Store::Box, &v));
+                stage_many(&ui, &mut s, tr("Import the item box").into(), tr("Item box"), Conf::Confirmed, all, |sv, base| {
+                    items::set_all(sv, base, Store::Box, &v)
+                });
             }
             refresh(&ui, &st.borrow());
         });
@@ -223,7 +227,11 @@ pub(super) fn wire_transfer(ui: &AppWindow, st: &Shared) {
                 (0..Owner::Hunter.len()).filter(|&i| equipment::get(sv, base, Owner::Hunter, i).is_empty() && !used.contains(&i)).take(ts.len()).collect()
             };
             if free.len() < ts.len() {
-                return toast(&ui, trn("Not added: the box has room for {n} talisman", "Not added: the box has room for {n} talismans", free.len() as i64, &[]), true);
+                return toast(
+                    &ui,
+                    trn("Not added: the box has room for {n} talisman", "Not added: the box has room for {n} talismans", free.len() as i64, &[]),
+                    true,
+                );
             }
             {
                 let mut s = st.borrow_mut();

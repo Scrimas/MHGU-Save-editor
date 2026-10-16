@@ -6,8 +6,8 @@
 //! own: its bytes go back to the file's inside that edit.
 
 use crate::targets::Target;
-use mhgu_save::store::{self, CopyState, Location};
 use mhgu_save::Save;
+use mhgu_save::store::{self, CopyState, Location};
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -363,10 +363,20 @@ mod tests {
         st.open(&d.join("0/system")).unwrap();
         let base = st.base();
         // a goal sets zenny; then a spin box goes +1 and back: the goal's value stays
-        st.edit(Edit { key: "goal:money".into(), title: "Max zenny".into(), detail: String::new(), note: String::new(), conf: Conf::Confirmed, targets: vec![Target::Funds] }, |sv, base| {
-            character::set_funds(sv, base, 9_000);
-            vec![]
-        });
+        st.edit(
+            Edit {
+                key: "goal:money".into(),
+                title: "Max zenny".into(),
+                detail: String::new(),
+                note: String::new(),
+                conf: Conf::Confirmed,
+                targets: vec![Target::Funds],
+            },
+            |sv, base| {
+                character::set_funds(sv, base, 9_000);
+                vec![]
+            },
+        );
         assert!(funds(&mut st, 9_001));
         assert!(!funds(&mut st, 9_000));
         assert_eq!(st.ops.len(), 1);

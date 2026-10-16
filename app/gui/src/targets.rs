@@ -8,10 +8,10 @@ use crate::i18n::{tr, trf, trn};
 use mhgu_save::character as ch;
 use mhgu_save::data::tables;
 use mhgu_save::equipment::{self, Owner};
+use mhgu_save::guildcard as gc;
 use mhgu_save::items::{self, Store};
 use mhgu_save::progress::{self as pg, Char, DEVIANTS, VILLAGES};
-use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, cards, monsters, options, otomo, palico, save, sets, slots, smithy, unlocks, Save};
+use mhgu_save::{Save, arena, cards, monsters, options, otomo, palico, save, sets, slots, smithy, unlocks};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mon {
@@ -365,8 +365,8 @@ impl Target {
     pub fn page(&self) -> &'static str {
         use Target::*;
         match self {
-            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_) | Appearance | Gender | Greeting | StyleUse(_)
-            | Pigment | Arts | QuestCounter | CourierPoints | Housekeeper | StartVillage => "character",
+            Name | Hr | HrPoints | Funds | Wycademy | Playtime | VillageStar | HubStar | Points(..) | WeaponUse(..) | Title | Scene | Pose | CardMap(_)
+            | Appearance | Gender | Greeting | StyleUse(_) | Pigment | Arts | QuestCounter | CourierPoints | Housekeeper | StartVillage => "character",
             Item(..) | Loadout(_) | Obtained => "items",
             Equip(..) | Smithy(_) | MySet(..) | PalicoSet(_) => "equipment",
             Palico(..) | PalRole(_) | DojoDone | PalicoesHired | Scouting(_) | PalInbox => "palicoes",
@@ -474,11 +474,29 @@ impl Target {
             Playtime => tr("Play time").into(),
             VillageStar => tr("Village ★").into(),
             HubStar => tr("Hub ★").into(),
-            Points(v, g) => if g { trf("{} · G rank points", &[&tr(VILLAGES[v])]) } else { trf("{} · Low rank points", &[&tr(VILLAGES[v])]) },
+            Points(v, g) => {
+                if g {
+                    trf("{} · G rank points", &[&tr(VILLAGES[v])])
+                } else {
+                    trf("{} · Low rank points", &[&tr(VILLAGES[v])])
+                }
+            }
             WeaponUse(v, w) => trf("{} · {} quests", &[&tr(ch::USE_WEAPONS[w]), &tr(ch::VENUES[v])]),
-            Item(st, i) => if st == Store::Pouch { trf("Pouch slot {}", &[&(i + 1)]) } else { trf("Item box slot {}", &[&(i + 1)]) },
+            Item(st, i) => {
+                if st == Store::Pouch {
+                    trf("Pouch slot {}", &[&(i + 1)])
+                } else {
+                    trf("Item box slot {}", &[&(i + 1)])
+                }
+            }
             Loadout(k) => trf("Item loadout {}", &[&(k + 1)]),
-            Equip(o, i) => if o == Owner::Palico { trf("Palico box slot {}", &[&(i + 1)]) } else { trf("Box slot {}", &[&(i + 1)]) },
+            Equip(o, i) => {
+                if o == Owner::Palico {
+                    trf("Palico box slot {}", &[&(i + 1)])
+                } else {
+                    trf("Box slot {}", &[&(i + 1)])
+                }
+            }
             Palico(i, f) => {
                 let n = palico::get(s, s.base(slot), i).name;
                 let what = match f {
@@ -515,7 +533,11 @@ impl Target {
             Award(b) => t.awards.iter().find(|a| a.0 == b).map(|a| a.2.clone()).unwrap_or_default(),
             Permits(d) => trf("{} · Special Permits", &[&tr(DEVIANTS[d])]),
             PermitPoints(d, w) => {
-                if w { trf("{} · points at the Courier", &[&tr(DEVIANTS[d])]) } else { trf("{} · Special Permit points", &[&tr(DEVIANTS[d])]) }
+                if w {
+                    trf("{} · points at the Courier", &[&tr(DEVIANTS[d])])
+                } else {
+                    trf("{} · Special Permit points", &[&tr(DEVIANTS[d])])
+                }
             }
             Levels(d) => trf("{} · levels cleared", &[&tr(DEVIANTS[d])]),
             Monster(i, f) => {
@@ -554,7 +576,11 @@ impl Target {
                     SetPart::Arts => tr("Style and Hunter Arts"),
                 };
                 let m = sets::my_set(s, s.base(slot), k);
-                if m.used() { format!("{} · {what}", trf("My Set {} “{}”", &[&(k + 1), &m.name])) } else { format!("{} · {what}", trf("My Set {}", &[&(k + 1)])) }
+                if m.used() {
+                    format!("{} · {what}", trf("My Set {} “{}”", &[&(k + 1), &m.name]))
+                } else {
+                    format!("{} · {what}", trf("My Set {}", &[&(k + 1)]))
+                }
             }
             PalicoSet(k) => trf("Palico set {}", &[&(k + 1)]),
             Pigment => tr("Armor pigment").into(),
@@ -582,7 +608,7 @@ impl Target {
             PalRole(r) => crate::views::role_name(r),
             DojoDone => tr("Palico Dojo sessions completed").into(),
             PalicoesHired => tr("Palicoes hired").into(),
-            Scouting(k) => trf("Palico Scout · {}",&[&crate::views::request_field_name(k)]),
+            Scouting(k) => trf("Palico Scout · {}", &[&crate::views::request_field_name(k)]),
             PalInbox => tr("StreetPass Palicoes").into(),
             Language => tr("Language").into(),
         }
@@ -612,7 +638,11 @@ impl Target {
             Loadout(k) => {
                 let l = items::loadout(s, base, k);
                 let n = l.items.iter().filter(|x| x.0 != 0).count();
-                if l.name.is_empty() && n == 0 { tr("Empty").into() } else { format!("{} · {}", l.name, trn("{} item", "{} items", n as i64, &[&num(n as i64)])) }
+                if l.name.is_empty() && n == 0 {
+                    tr("Empty").into()
+                } else {
+                    format!("{} · {}", l.name, trn("{} item", "{} items", n as i64, &[&num(n as i64)]))
+                }
             }
             Equip(o, i) => crate::views::equip_value(o, &equipment::get(s, base, o, i)),
             Palico(i, f) => {
@@ -713,7 +743,8 @@ impl Target {
                 match p {
                     SetPart::Name => m.name,
                     SetPart::Gear => {
-                        let v: Vec<String> = m.gear.iter().filter(|&&g| g != sets::NO_BOX).map(|&g| crate::views::box_piece_value(s, base, Owner::Hunter, g)).collect();
+                        let v: Vec<String> =
+                            m.gear.iter().filter(|&&g| g != sets::NO_BOX).map(|&g| crate::views::box_piece_value(s, base, Owner::Hunter, g)).collect();
                         if v.is_empty() { tr("None").into() } else { v.join(", ") }
                     }
                     SetPart::Pigment => crate::views::pigment_value(&m.pigment),
@@ -844,7 +875,8 @@ impl Target {
         let base = s.base(slot);
         let hr_copies = || [range(base + ch::HDR_HR, 2), range(base + ch::CARD_HR, 2)].concat();
         match *self {
-            Name => [range(base + ch::HDR_NAME, ch::NAME_LEN), range(base + ch::PLAYER_NAME, ch::NAME_LEN), range(base + ch::CARD, 2 * ch::CARD_NAME_UNITS)].concat(),
+            Name => [range(base + ch::HDR_NAME, ch::NAME_LEN), range(base + ch::PLAYER_NAME, ch::NAME_LEN), range(base + ch::CARD, 2 * ch::CARD_NAME_UNITS)]
+                .concat(),
             Hr => [
                 range(base + ch::HR_POINTS, 4),
                 vec![bit(base, ch::PROGRESS, ch::HR_RELEASED_BIT), bit(base, ch::PROGRESS_NEW, ch::HR_RELEASED_BIT)],
@@ -971,7 +1003,12 @@ impl Target {
             PalicoSet(k) => range(base + sets::PALICO_SETS + sets::PALICO_SET * k, sets::PALICO_SET),
             Pigment => {
                 let colours = ch::LOOK_COLOURS.iter().flat_map(|&c| range(base + c, 20));
-                [sets::PLAYER_OWN, sets::HDR_OWN].iter().flat_map(|&a| range(base + a, 2)).chain([sets::PLAYER_MODES, sets::HDR_MODES].iter().flat_map(|&a| range(base + a, 4))).chain(colours).collect()
+                [sets::PLAYER_OWN, sets::HDR_OWN]
+                    .iter()
+                    .flat_map(|&a| range(base + a, 2))
+                    .chain([sets::PLAYER_MODES, sets::HDR_MODES].iter().flat_map(|&a| range(base + a, 4)))
+                    .chain(colours)
+                    .collect()
             }
             Arts => [
                 range(base + sets::PLAYER_ARTS, 8),
@@ -1003,8 +1040,14 @@ impl Target {
             // the adoption's default costume and event flags; 769 is every pet's (restore)
             Pet(k) => {
                 let c = unlocks::PET_DEFAULT[k] as usize;
-                let mut f = [range(base + unlocks::PET_NAMES + unlocks::PET_NAME_LEN * k, unlocks::PET_NAME_LEN), range(base + unlocks::PET_COSTUMES + k, 1)].concat();
-                f.extend([bit(base, unlocks::PETS_ADOPTED, k), bit(base, unlocks::COSTUMES, c), bit(base, unlocks::COSTUMES_NEW, c), bit(base, pg::FLAGS, unlocks::ADOPT_FLAG)]);
+                let mut f =
+                    [range(base + unlocks::PET_NAMES + unlocks::PET_NAME_LEN * k, unlocks::PET_NAME_LEN), range(base + unlocks::PET_COSTUMES + k, 1)].concat();
+                f.extend([
+                    bit(base, unlocks::PETS_ADOPTED, k),
+                    bit(base, unlocks::COSTUMES, c),
+                    bit(base, unlocks::COSTUMES_NEW, c),
+                    bit(base, pg::FLAGS, unlocks::ADOPT_FLAG),
+                ]);
                 if k > 0 {
                     f.push(bit(base, pg::FLAGS, unlocks::POOGIE_FLAGS + k));
                 }
@@ -1045,7 +1088,9 @@ impl Target {
                 let (_, pos, width) = otomo::REQUEST_FIELDS[k];
                 bits(base + otomo::REQUEST, pos, width)
             }
-            PalInbox => [range(base + otomo::INBOX, otomo::INBOX_N * otomo::SP_LEN), range(base + otomo::INBOX_INFO, otomo::INBOX_N * otomo::INFO_LEN)].concat(),
+            PalInbox => {
+                [range(base + otomo::INBOX, otomo::INBOX_N * otomo::SP_LEN), range(base + otomo::INBOX_INFO, otomo::INBOX_N * otomo::INFO_LEN)].concat()
+            }
         }
     }
 

@@ -21,8 +21,8 @@ const FILLED: u32 = 3;
 const EMPTY: u32 = 1;
 /// The zlib stream of 6328 zeros the game writes in an empty element.
 const EMPTY_Z: [u8; 29] = [
-    0x78, 0x9c, 0xed, 0xc1, 0x31, 0x01, 0x00, 0x00, 0x00, 0xc2, 0xa0, 0xf5, 0x4f, 0x6d, 0x0d, 0x0f, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3e,
-    0x0c, 0x18, 0xb8, 0x00, 0x01,
+    0x78, 0x9c, 0xed, 0xc1, 0x31, 0x01, 0x00, 0x00, 0x00, 0xc2, 0xa0, 0xf5, 0x4f, 0x6d, 0x0d, 0x0f, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3e, 0x0c, 0x18,
+    0xb8, 0x00, 0x01,
 ];
 /// Card type of a card moved in from the inbox (*StreetPass*, `GuildCardMsg` 263).
 pub const STREETPASS: i8 = 25;
@@ -191,16 +191,7 @@ pub fn cards(s: &Save, base: usize, l: List) -> Vec<Card> {
             let mut data = miniz_oxide::inflate::decompress_to_vec_zlib(&e.z).unwrap_or_default();
             data.resize(CARD_LEN, 0);
             let t = &e.trailer;
-            Card {
-                list: l,
-                slot,
-                name: utf16(&t[2..24]),
-                hr: u16_at(t, 0),
-                id: t[24..32].try_into().unwrap(),
-                playtime: u32_at(t, 32),
-                data,
-                info,
-            }
+            Card { list: l, slot, name: utf16(&t[2..24]), hr: u16_at(t, 0), id: t[24..32].try_into().unwrap(), playtime: u32_at(t, 32), data, info }
         })
         .collect()
 }
@@ -385,7 +376,7 @@ pub fn guests(s: &Save, base: usize) -> Vec<Guest> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE};
+    use crate::save::{SLOT1_BASE, blank};
 
     fn card(name: &str, id: u8, play: u32, extra: usize) -> Elem {
         let mut d = vec![0u8; CARD_LEN];

@@ -56,7 +56,6 @@ fn own_palicoes(s: &mhgu_save::Save, base: usize) -> Vec<usize> {
     (0..palico::LIST_N).filter(|&i| !palico::is_empty(s, base, i)).collect()
 }
 
-
 /// The Team and Dojo, StreetPass and Scouting tabs.
 fn other_tabs(ui: &AppWindow, st: &State, tab: i32) {
     let api = ui.global::<Api>();
@@ -77,14 +76,31 @@ fn other_tabs(ui: &AppWindow, st: &State, tab: i32) {
                 let t = Target::PalRole(r);
                 let at = otomo::role(s, base, r).and_then(|i| own.iter().position(|&x| x == i)).map_or(0, |k| k as i32 + 1);
                 let head = if r == 0 { tr("Roles") } else { "" };
-                fields.push(OptionRow { id: t.key().into(), head: head.into(), name: role_name(r).into(), choices: strings(choices.clone()), value: at, was: was(t), ..Default::default() });
+                fields.push(OptionRow {
+                    id: t.key().into(),
+                    head: head.into(),
+                    name: role_name(r).into(),
+                    choices: strings(choices.clone()),
+                    value: at,
+                    was: was(t),
+                    ..Default::default()
+                });
             }
             for (t, n, v, max) in [
                 (Target::DojoDone, tr("Palico Dojo sessions completed"), otomo::dojo_done(s, base), otomo::DOJO_MAX),
                 (Target::PalicoesHired, tr("Palicoes hired"), otomo::hired(s, base), otomo::HIRED_MAX),
             ] {
                 let head = if t == Target::DojoDone { tr("Counters") } else { "" };
-                fields.push(OptionRow { id: t.key().into(), head: head.into(), name: n.into(), value: v as i32, number: true, max: max as i32, was: was(t), ..Default::default() });
+                fields.push(OptionRow {
+                    id: t.key().into(),
+                    head: head.into(),
+                    name: n.into(),
+                    value: v as i32,
+                    number: true,
+                    max: max as i32,
+                    was: was(t),
+                    ..Default::default()
+                });
             }
             let move_or_skill = |skill: bool, id: u8| {
                 let n = &assets::names();
@@ -228,13 +244,11 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
         .filter(|&i| !palico::is_empty(s, base, i))
         .map(|i| (i, palico::get(s, base, i)))
         .filter(|(_, p)| q.is_empty() || p.name.to_lowercase().contains(&q))
-        .map(|(i, p)| {
-            PalicoRow {
-                index: i as i32,
-                name: p.name.into(),
-                sub: trf("Lv {} · {}", &[&p.level, &palico::BIASES.get(p.bias as usize).map_or("?", |&b| tr(b))]).into(),
-                changed: st.changed(base + palico::offset(i), palico::RECORD),
-            }
+        .map(|(i, p)| PalicoRow {
+            index: i as i32,
+            name: p.name.into(),
+            sub: trf("Lv {} · {}", &[&p.level, &palico::BIASES.get(p.bias as usize).map_or("?", |&b| tr(b))]).into(),
+            changed: st.changed(base + palico::offset(i), palico::RECORD),
         })
         .collect();
     let mut sel = view(|v| v.palico_sel);
@@ -268,7 +282,8 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
         let i = sel as usize;
         let p = palico::get(s, base, i);
         let was = |f: targets::Pal| -> SharedString { st.was(Target::Palico(i, f)).into() };
-        let warning: Vec<String> = [targets::Pal::Level, targets::Pal::Bias, targets::Pal::Target].into_iter().filter_map(|f| crate::warnings::palico(&p, f)).collect();
+        let warning: Vec<String> =
+            [targets::Pal::Level, targets::Pal::Bias, targets::Pal::Target].into_iter().filter_map(|f| crate::warnings::palico(&p, f)).collect();
         let warn = |f: targets::Pal| -> SharedString { crate::warnings::palico(&p, f).unwrap_or_default().into() };
         let equipped = p.moves.iter().filter(|&&x| x != 0).count();
         PalicoDetail {
@@ -344,20 +359,29 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
             let v = v.clamp(0, 255) as u8;
             let slot = s.slot;
             match id.as_str() {
-                "dojo-done" => (Target::DojoDone, Box::new(move |sv, _| {
-                    otomo::set_dojo_done(sv, slot, v);
-                    vec![]
-                })),
-                "palicoes-hired" => (Target::PalicoesHired, Box::new(move |sv, base| {
-                    otomo::set_hired(sv, base, v);
-                    vec![]
-                })),
+                "dojo-done" => (
+                    Target::DojoDone,
+                    Box::new(move |sv, _| {
+                        otomo::set_dojo_done(sv, slot, v);
+                        vec![]
+                    }),
+                ),
+                "palicoes-hired" => (
+                    Target::PalicoesHired,
+                    Box::new(move |sv, base| {
+                        otomo::set_hired(sv, base, v);
+                        vec![]
+                    }),
+                ),
                 id => {
                     let Some(k) = id.strip_prefix("scouting:").and_then(|f| otomo::REQUEST_FIELDS.iter().position(|x| x.0 == f)) else { return };
-                    (Target::Scouting(k), Box::new(move |sv, base| {
-                        otomo::set_request(sv, base, k, v);
-                        vec![]
-                    }))
+                    (
+                        Target::Scouting(k),
+                        Box::new(move |sv, base| {
+                            otomo::set_request(sv, base, k, v);
+                            vec![]
+                        }),
+                    )
                 }
             }
         };
@@ -489,7 +513,14 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
                 }
                 (palico::get(s.save(), s.base(), i).name, palico::export(s.save(), s.base(), i))
             };
-            save_file(&ui, tr("Export Palico"), (tr("MHGU Palico"), PALICO_EXT), &name, &bytes, (trf("Exported {}", &[&name]), tr("With the equipment it wears")));
+            save_file(
+                &ui,
+                tr("Export Palico"),
+                (tr("MHGU Palico"), PALICO_EXT),
+                &name,
+                &bytes,
+                (trf("Exported {}", &[&name]), tr("With the equipment it wears")),
+            );
         });
     }
     {

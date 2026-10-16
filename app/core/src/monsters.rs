@@ -9,7 +9,7 @@
 //!
 //! Per-monster thresholds, families and positions: data/monster-sizes.csv.
 
-use crate::data::{tables, MonsterMeta};
+use crate::data::{MonsterMeta, tables};
 use crate::save::Save;
 
 pub const HUNTS: usize = 0x5EA4;
@@ -104,7 +104,13 @@ pub fn crowns(i: usize, r: Record) -> Crowns {
     }
     Crowns {
         mini: r.min > 0 && r.min <= m.mini_le,
-        large: if r.max >= m.gold_ge { 2 } else if r.max >= m.silver_ge { 1 } else { 0 },
+        large: if r.max >= m.gold_ge {
+            2
+        } else if r.max >= m.silver_ge {
+            1
+        } else {
+            0
+        },
     }
 }
 
@@ -236,11 +242,8 @@ pub fn card_entry(s: &Save, base: usize, head: usize) -> [u8; 8] {
     let fam: Vec<usize> = std::iter::once(head).chain(tables().monster_meta.iter().filter(|m| m.family_of == Some(head)).map(|m| m.index)).collect();
     let sum = |f: fn(&Record) -> u16| fam.iter().map(|&k| f(&get(s, base, k)) as u32).sum::<u32>().min(MAX_COUNT as u32);
     let c = crowns(head, r);
-    let w = sum(|r| r.hunts)
-        | sum(|r| r.captures) << 14
-        | (notes(s, base, head).unwrap_or(false) as u32) << 28
-        | (c.large as u32) << 29
-        | (c.mini as u32) << 31;
+    let w =
+        sum(|r| r.hunts) | sum(|r| r.captures) << 14 | (notes(s, base, head).unwrap_or(false) as u32) << 28 | (c.large as u32) << 29 | (c.mini as u32) << 31;
     let mut e = [0u8; 8];
     e[0..2].copy_from_slice(&r.max.to_le_bytes());
     e[2..4].copy_from_slice(&r.min.to_le_bytes());
@@ -260,7 +263,7 @@ pub fn sync_card(s: &mut Save, base: usize, i: usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE as B};
+    use crate::save::{SLOT1_BASE as B, blank};
 
     #[test]
     fn size_record_is_whole_and_ordered() {

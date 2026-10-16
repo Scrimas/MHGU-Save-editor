@@ -154,7 +154,7 @@ pub fn set_loadout(s: &mut Save, base: usize, k: usize, l: &Loadout) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE};
+    use crate::save::{SLOT1_BASE, blank};
 
     #[test]
     fn slots_pack_at_the_field_limits() {
@@ -184,12 +184,7 @@ mod tests {
 
     #[test]
     fn compact_merges_and_sorts() {
-        let v = [
-            Stack { id: 5, count: 60 },
-            Stack::default(),
-            Stack { id: 2, count: 1 },
-            Stack { id: 5, count: 60 },
-        ];
+        let v = [Stack { id: 5, count: 60 }, Stack::default(), Stack { id: 2, count: 1 }, Stack { id: 5, count: 60 }];
         let c = compact(&v, true, Store::Box, |_| MAX_COUNT);
         assert_eq!(c, vec![Stack { id: 2, count: 1 }, Stack { id: 5, count: 99 }, Stack { id: 5, count: 21 }, Stack::default()]);
     }

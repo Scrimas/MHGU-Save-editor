@@ -400,11 +400,7 @@ pub fn tables() -> &'static Tables {
                 .collect(),
             smithy: rows(include_str!("../../../data/smithy-lists.csv"))
                 .iter()
-                .map(|r| SmithyList {
-                    list: r["list"].clone(),
-                    records: num(&r["records"]) as usize,
-                    ids: r["ids"].bytes().map(|b| b - b'0').collect(),
-                })
+                .map(|r| SmithyList { list: r["list"].clone(), records: num(&r["records"]) as usize, ids: r["ids"].bytes().map(|b| b - b'0').collect() })
                 .collect(),
             talisman: rows(include_str!("../../../data/talisman-tables.csv"))
                 .iter()
@@ -438,7 +434,17 @@ pub fn tables() -> &'static Tables {
                 .iter()
                 .map(|r| {
                     let n = |c: &str| num(&r[c]) as u32;
-                    (n("quest_id"), QuestInfo { stage: n("stage") as u16, reward: n("reward"), hrp: n("hrp"), fee: n("fee"), sub_reward: n("sub_reward"), sub_hrp: n("sub_hrp") })
+                    (
+                        n("quest_id"),
+                        QuestInfo {
+                            stage: n("stage") as u16,
+                            reward: n("reward"),
+                            hrp: n("hrp"),
+                            fee: n("fee"),
+                            sub_reward: n("sub_reward"),
+                            sub_hrp: n("sub_hrp"),
+                        },
+                    )
                 })
                 .collect(),
             skill_trees: rows(include_str!("../../../data/skill-trees.csv"))
@@ -459,10 +465,7 @@ pub fn tables() -> &'static Tables {
                     kind: r["kind"].clone(),
                     id: num(&r["id"]) as u16,
                     level: num(&r["level"]) as u8,
-                    items: (1..=4)
-                        .map(|j| (num(&r[&format!("item{j}")]) as u16, num(&r[&format!("count{j}")]) as u8))
-                        .filter(|m| m.0 != 0)
-                        .collect(),
+                    items: (1..=4).map(|j| (num(&r[&format!("item{j}")]) as u16, num(&r[&format!("count{j}")]) as u8)).filter(|m| m.0 != 0).collect(),
                     group: num(&r["group"]) as u16,
                     value: num(&r["value"]) as u8,
                 })
@@ -507,7 +510,10 @@ pub fn tables() -> &'static Tables {
                     }
                 })
                 .collect(),
-            palico_levels: rows(include_str!("../../../data/palico-levels.csv")).iter().map(|r| (num(&r["support_slots"]) as u8, num(&r["skill_slots"]) as u8)).collect(),
+            palico_levels: rows(include_str!("../../../data/palico-levels.csv"))
+                .iter()
+                .map(|r| (num(&r["support_slots"]) as u8, num(&r["skill_slots"]) as u8))
+                .collect(),
             palico_moves: palico_actions("move"),
             palico_skills: palico_actions("skill"),
             palico_fortes: rows(include_str!("../../../data/palico-fortes.csv"))
@@ -566,7 +572,9 @@ mod tests {
         assert_eq!(t.skill_trees.len(), 206);
         assert!(t.armor_skills.iter().chain(&t.decorations).all(|r| (r.2 as usize) < 206));
         // every upgraded weapon has its upgrade, every provision group has materials
-        assert!(t.weapon_tree.iter().all(|w| t.recipes.iter().any(|r| r.kind == format!("weapon:{}", w.0) && r.id == w.1 && r.level == 1 && !r.items.is_empty())));
+        assert!(
+            t.weapon_tree.iter().all(|w| t.recipes.iter().any(|r| r.kind == format!("weapon:{}", w.0) && r.id == w.1 && r.level == 1 && !r.items.is_empty()))
+        );
         assert!(t.recipes.iter().filter(|r| r.group != 0).all(|r| t.provisions.values().any(|p| p.1.contains(&r.group))));
         assert!(t.recipes.iter().all(|r| r.items.iter().all(|m| m.1 > 0)));
         assert_eq!(t.combinations.len(), 183);

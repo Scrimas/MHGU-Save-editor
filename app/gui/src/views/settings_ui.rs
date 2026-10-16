@@ -79,7 +79,10 @@ fn matugen(ui: &AppWindow, force: bool) {
             Ok(t) => (Some(t), trf("Following {}, read again each time matugen writes it.", &[&theme::tilde(p)])),
             Err(e) => (None, trf("{} could not be read ({}); the built-in colours are shown.", &[&theme::tilde(p), &e])),
         },
-        _ => (None, tr("No colours from matugen yet. Save the template, add these lines to matugen's config.toml and run matugen (or change the wallpaper):").into()),
+        _ => (
+            None,
+            tr("No colours from matugen yet. Save the template, add these lines to matugen's config.toml and run matugen (or change the wallpaper):").into(),
+        ),
     };
     let ok = loaded.is_some();
     let was = MATUGEN.with(|m| m.borrow().applied);
@@ -195,7 +198,11 @@ pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
         detected(&ui);
         settings_ui(&ui);
         let n = ui.global::<Api>().get_detected().row_count().saturating_sub(before);
-        toast(&ui, if n == 0 { tr("No new save found in that folder").to_string() } else { trn("Found {n} new save", "Found {n} new saves", n as i64, &[]) }, false);
+        toast(
+            &ui,
+            if n == 0 { tr("No new save found in that folder").to_string() } else { trn("Found {n} new save", "Found {n} new saves", n as i64, &[]) },
+            false,
+        );
     });
     let w = ui.as_weak();
     api.on_remove_save_folder(move |i| {

@@ -105,7 +105,8 @@ pub(super) fn monsters_page(ui: &AppWindow, st: &State) {
         })
         .collect();
     api.set_monster_summary(
-        trf("{} large monsters, {} of them on the Guild Card list · {} shown · confirmed in game except where marked", &[&n_large, &listed, &rows.len()]).into(),
+        trf("{} large monsters, {} of them on the Guild Card list · {} shown · confirmed in game except where marked", &[&n_large, &listed, &rows.len()])
+            .into(),
     );
     api.set_monsters(keep(api.get_monsters(), rows));
 }

@@ -4,7 +4,7 @@
 use crate::i18n::{tr, trf, trn};
 use crate::targets::{self, Target};
 use mhgu_save::data::tables;
-use mhgu_save::{character, save, slots, store, Save};
+use mhgu_save::{Save, character, save, slots, store};
 
 /// A value that differs; heading lines (an empty label) open each group.
 #[derive(Debug, Clone, PartialEq, Eq)]

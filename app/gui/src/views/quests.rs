@@ -157,7 +157,8 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
     kinds.dedup();
     let mut summary = trf("{}: {} / {} cleared · confirmed in game except where marked", &[&cat, &num(done as i64), &num(total as i64)]);
     if !kinds.is_empty() {
-        let counts: Vec<String> = kinds.iter().map(|&k| format!("{} {}", tr(character::QUEST_KINDS[k]), num(character::card_quests(st.save(), base, k)))).collect();
+        let counts: Vec<String> =
+            kinds.iter().map(|&k| format!("{} {}", tr(character::QUEST_KINDS[k]), num(character::card_quests(st.save(), base, k)))).collect();
         summary.push_str(" · ");
         summary.push_str(&trf("Guild Card completions: {}", &[&counts.join(", ")]));
     }
@@ -211,13 +212,23 @@ pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {
         let tabs = quest_tabs();
         let cat = tabs.get(view(|v| v.quest_tab)).cloned().unwrap_or_default();
         let slot = s.slot;
-        let members: Vec<usize> = Char::real_quests(true).into_iter().filter(|q| q.category == cat && quest_group(q) == group.as_str()).map(|q| q.index).collect();
+        let members: Vec<usize> =
+            Char::real_quests(true).into_iter().filter(|q| q.category == cat && quest_group(q) == group.as_str()).map(|q| q.index).collect();
         let label = match group.split_once(':') {
-            Some(("dev", d)) => trf("{} quests marked cleared", &[&d.parse::<usize>().ok().and_then(|d| DEVIANTS.get(d)).map(|&d| tr(d)).unwrap_or(tr("Deviant"))]),
+            Some(("dev", d)) => {
+                trf("{} quests marked cleared", &[&d.parse::<usize>().ok().and_then(|d| DEVIANTS.get(d)).map(|&d| tr(d)).unwrap_or(tr("Deviant"))])
+            }
             Some((_, r)) if !r.is_empty() => trf("{} {}★ quests marked cleared", &[&cat, &r]),
             _ => trf("{} quests marked cleared", &[&cat]),
         };
-        let e = Edit { key: String::new(), title: label, detail: tr("Quests").into(), note: tr("Completed quest sets are recorded too, as the game does").into(), conf: Conf::Confirmed, targets: vec![] };
+        let e = Edit {
+            key: String::new(),
+            title: label,
+            detail: tr("Quests").into(),
+            note: tr("Completed quest sets are recorded too, as the game does").into(),
+            conf: Conf::Confirmed,
+            targets: vec![],
+        };
         s.edit(e, |sv, _| {
             let mut c = Char::new(sv, slot);
             let todo: Vec<usize> = members.iter().copied().filter(|&i| !c.quest(QuestBit::Cleared, i)).collect();

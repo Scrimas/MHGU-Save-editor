@@ -16,10 +16,10 @@
 //! the delivery requests itself (`Kind::Marks`, read only). The Trader's for-sale lists
 //! (words, scenes, costumes), the notes, events and milestones stay DERIVED.
 
-use crate::data::{tables, UnlockEntry};
+use crate::data::{UnlockEntry, tables};
 use crate::guildcard as gc;
 use crate::monsters;
-use crate::progress::{Char, QuestBit, PROGRESS};
+use crate::progress::{Char, PROGRESS, QuestBit};
 use crate::save::Save;
 use std::collections::HashMap;
 use std::sync::OnceLock;
@@ -425,7 +425,7 @@ pub fn set_start_village(s: &mut Save, slot: usize, scene: u8) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE as B};
+    use crate::save::{SLOT1_BASE as B, blank};
 
     #[test]
     fn maps_hold_their_entries() {

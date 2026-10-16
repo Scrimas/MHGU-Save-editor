@@ -178,7 +178,9 @@ pub(super) fn options_page(ui: &AppWindow, st: &State) {
     api.set_options_summary(
         match tab {
             0 => tr("The Start Menu's Options and Multiplayer Settings of this character."),
-            1 => tr("Each chat group holds 24 shoutouts and 9 auto-shoutouts, said when their event happens while they are on. A phrase holds up to 26 characters."),
+            1 => tr(
+                "Each chat group holds 24 shoutouts and 9 auto-shoutouts, said when their event happens while they are on. A phrase holds up to 26 characters.",
+            ),
             _ => tr("The title screen's settings, shared by the three characters."),
         }
         .into(),

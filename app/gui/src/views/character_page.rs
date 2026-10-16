@@ -126,7 +126,8 @@ pub(super) fn arena_rows(st: &State) -> Vec<ArenaRow> {
                 let name = if a.prowler { palico::BIASES.get(w as usize) } else { character::USE_WEAPONS.get(w as usize) };
                 tr(name.copied().unwrap_or("?")).into()
             };
-            let grades = a.grades.iter().enumerate().map(|(g, &secs)| format!("{} ≤ {}:{:02}", targets::arena_grade(g as u8), secs / 60, secs % 60)).collect::<Vec<_>>();
+            let grades =
+                a.grades.iter().enumerate().map(|(g, &secs)| format!("{} ≤ {}:{:02}", targets::arena_grade(g as u8), secs / 60, secs % 60)).collect::<Vec<_>>();
             ArenaRow {
                 index: q as i32,
                 quest: targets::arena_quest(q).into(),
@@ -220,9 +221,7 @@ fn set_village_life(ui: &AppWindow, s: &mut State, key: &str, v: i32) -> bool {
         Target::StartVillage => {
             let scene = unlocks::START_PLACES.get(v as usize).copied();
             match scene {
-                Some(p) if !unlocks::place_open(s.save(), slot, p) => {
-                    Some(trf("Not changed: you can't travel to {} yet",&[&start_place_name(p)]))
-                }
+                Some(p) if !unlocks::place_open(s.save(), slot, p) => Some(trf("Not changed: you can't travel to {} yet", &[&start_place_name(p)])),
                 None => return true,
                 _ => None,
             }
@@ -412,10 +411,13 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         let _ = &ui;
     });
     on!(ui, st, on_set_name, |ui, s, name: SharedString| {
-        s.edit(Edit::one(Target::Name, tr("Name").into(), Conf::Confirmed).note(tr("Written to the save, the player record and the Guild Card")), |sv, base| {
-            character::set_name(sv, base, &name);
-            vec![]
-        });
+        s.edit(
+            Edit::one(Target::Name, tr("Name").into(), Conf::Confirmed).note(tr("Written to the save, the player record and the Guild Card")),
+            |sv, base| {
+                character::set_name(sv, base, &name);
+                vec![]
+            },
+        );
         let _ = &ui;
     });
 }

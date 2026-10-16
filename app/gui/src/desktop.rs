@@ -4,7 +4,7 @@
 //! keeps the entry: an older AppImage takes it only when the one it names is gone.
 //! `TryExec` hides the entry once that AppImage is deleted.
 
-use crate::update::{version, VERSION};
+use crate::update::{VERSION, version};
 use std::path::Path;
 
 const NAME: &str = "mhgu-save-editor";

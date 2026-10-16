@@ -5,7 +5,7 @@
 //! written with the same body; each keeps its own header (the entry key at 0x14, the
 //! JAMCRC of the file name, differs between them and is left alone). See docs/01-container.md.
 
-use crate::save::{Error, Save, FILE_SIZE};
+use crate::save::{Error, FILE_SIZE, Save};
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};

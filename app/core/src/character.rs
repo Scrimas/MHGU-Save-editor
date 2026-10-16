@@ -73,7 +73,8 @@ pub const FEATURES: u8 = 15;
 /// in this order, and a Village ★5 and a G★4 clear each added one to their kind.
 pub const CARD_QUESTS: usize = CARD + 0x85E;
 // i18n: shown through tr() in the GUI
-pub const QUEST_KINDS: [&str; 7] = ["Village · Low rank", "Village · High rank", "Hub · Low rank", "Hub · High rank", "Hub · G rank", "Special Permit", "Arena"];
+pub const QUEST_KINDS: [&str; 7] =
+    ["Village · Low rank", "Village · High rank", "Hub · Low rank", "Hub · High rank", "Hub · G rank", "Special Permit", "Arena"];
 /// The card greeting (card editor), UTF-16, up to the owner ID at `+0x8B0`.
 pub const CARD_GREETING: usize = CARD + 0x878;
 pub const GREETING_UNITS: usize = 28;
@@ -164,9 +165,9 @@ pub fn set_look_colour(s: &mut Save, base: usize, c: usize, [r, g, b]: [u8; 3]) 
 
 /// HR points for HR 1-51 (table 0x162c058).
 const NEED_LOW: [u32; 51] = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32050, 33470, 34960, 36520, 38150, 39850, 41620, 43460, 45370, 47350, 49400, 51520,
-    53710, 55970, 58300, 60700, 63170, 65710, 68320, 71000, 73750, 76570, 79460, 82420, 85450, 88550, 91720, 94960, 98270,
-    101650, 105100, 108620, 112210, 115870, 119600, 123400, 127270, 131210,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32050, 33470, 34960, 36520, 38150, 39850, 41620, 43460, 45370, 47350, 49400, 51520, 53710, 55970, 58300, 60700,
+    63170, 65710, 68320, 71000, 73750, 76570, 79460, 82420, 85450, 88550, 91720, 94960, 98270, 101650, 105100, 108620, 112210, 115870, 119600, 123400, 127270,
+    131210,
 ];
 /// HR 52-999: (first HR, points at it, points per HR) of the game's linear bands (0x523390).
 const BANDS: [(u32, u32, u32); 10] = [
@@ -310,8 +311,21 @@ pub const VENUES: [&str; 3] = ["Village", "Hub", "Arena"];
 /// Storage order (the classic internal one).
 // i18n: shown through tr() in the GUI
 pub const USE_WEAPONS: [&str; 15] = [
-    "Great Sword", "Sword and Shield", "Hammer", "Lance", "Heavy Bowgun", "Light Bowgun", "Long Sword", "Switch Axe",
-    "Gunlance", "Bow", "Dual Blades", "Hunting Horn", "Insect Glaive", "Charge Blade", "Prowler",
+    "Great Sword",
+    "Sword and Shield",
+    "Hammer",
+    "Lance",
+    "Heavy Bowgun",
+    "Light Bowgun",
+    "Long Sword",
+    "Switch Axe",
+    "Gunlance",
+    "Bow",
+    "Dual Blades",
+    "Hunting Horn",
+    "Insect Glaive",
+    "Charge Blade",
+    "Prowler",
 ];
 /// The order the Guild Card draws them in, as storage indices.
 pub const USE_SHOWN: [usize; 15] = [0, 6, 1, 10, 2, 11, 3, 8, 7, 13, 12, 5, 4, 9, 14];
@@ -340,7 +354,7 @@ pub fn set_playtime(s: &mut Save, base: usize, secs: u32) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE};
+    use crate::save::{SLOT1_BASE, blank};
 
     #[test]
     fn card_counts_follow_cleared_quests() {

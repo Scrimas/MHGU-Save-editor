@@ -15,7 +15,7 @@
 //! counter, and the game's next save kept them.
 
 use crate::character::CARD;
-use crate::data::{tables, ArenaQuest};
+use crate::data::{ArenaQuest, tables};
 use crate::save::Save;
 
 pub const LOG: usize = CARD + 0x1224;
@@ -153,7 +153,7 @@ pub fn clear(s: &mut Save, base: usize, q: usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE as B};
+    use crate::save::{SLOT1_BASE as B, blank};
 
     #[test]
     fn table_has_the_counter_quests() {

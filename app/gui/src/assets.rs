@@ -56,7 +56,13 @@ impl Piece {
 impl Piece {
     /// The weapon's name at in-game level `lv` (0x126dd8).
     pub fn name_at(&self, lv: u32) -> &str {
-        let k = if self.names.len() < 3 || lv < self.max_lv { 0 } else if lv < self.max_lv + self.lim { 1 } else { 2 };
+        let k = if self.names.len() < 3 || lv < self.max_lv {
+            0
+        } else if lv < self.max_lv + self.lim {
+            1
+        } else {
+            2
+        };
         self.names.get(k).map(String::as_str).filter(|s| !s.is_empty()).unwrap_or(&self.name)
     }
 }

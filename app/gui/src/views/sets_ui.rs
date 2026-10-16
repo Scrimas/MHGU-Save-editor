@@ -2,7 +2,7 @@
 //! hunting style, Hunter Arts and armor pigment the hunter has on (Character page).
 
 use super::*;
-use crate::targets::{SetPart, SET_PARTS};
+use crate::targets::{SET_PARTS, SetPart};
 use mhgu_save::sets::{self, Arts, Pigment};
 
 /// Which sets the Equipment page shows: My Sets (false) or Palico sets (true), none on
@@ -126,7 +126,12 @@ fn pigment_rows(p: &Pigment) -> Vec<PigmentRow> {
     (0..5)
         .map(|k| {
             let [r, g, b, _] = p.rgba[k];
-            PigmentRow { part: tr(sets::PIGMENT_PARTS[k]).into(), colour: slint::Color::from_rgb_u8(r, g, b), hex: format!("#{r:02X}{g:02X}{b:02X}").into(), own: p.own[k] }
+            PigmentRow {
+                part: tr(sets::PIGMENT_PARTS[k]).into(),
+                colour: slint::Color::from_rgb_u8(r, g, b),
+                hex: format!("#{r:02X}{g:02X}{b:02X}").into(),
+                own: p.own[k],
+            }
         })
         .collect()
 }
@@ -194,10 +199,7 @@ pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
     }
     flush(&mut run, &mut rows);
     api.set_set_rows(keep(api.get_set_rows(), rows));
-    api.set_equip_summary(
-        if palico { trf("{} of {} Palico sets used", &[&used, &n]) } else { trf("{} of {} My Sets used", &[&used, &n]) }
-            .into(),
-    );
+    api.set_equip_summary(if palico { trf("{} of {} Palico sets used", &[&used, &n]) } else { trf("{} of {} My Sets used", &[&used, &n]) }.into());
     let k = sel(palico).min(n - 1);
     let d = if palico {
         let p = sets::palico_set(s, base, k);
@@ -301,7 +303,14 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
         }
         let k = sel(false);
         let targets = SET_PARTS.iter().map(|&p| Target::MySet(k, p)).collect();
-        let e = Edit { key: String::new(), title: trf("My Set {}: what you have on", &[&(k + 1)]), detail: tr("Equipment").into(), note: String::new(), conf: Conf::Confirmed, targets };
+        let e = Edit {
+            key: String::new(),
+            title: trf("My Set {}: what you have on", &[&(k + 1)]),
+            detail: tr("Equipment").into(),
+            note: String::new(),
+            conf: Conf::Confirmed,
+            targets,
+        };
         s.edit(e, |sv, base| {
             sets::save_current(sv, base, k);
             vec![]
@@ -317,7 +326,11 @@ pub(super) fn wire_sets(ui: &AppWindow, st: &Shared) {
         };
         let e = Edit { key: String::new(), title, detail: tr("Equipment").into(), note: String::new(), conf: Conf::Confirmed, targets };
         s.edit(e, |sv, base| {
-            if palico { sets::clear_palico_set(sv, base, k) } else { sets::clear_my_set(sv, base, k) }
+            if palico {
+                sets::clear_palico_set(sv, base, k)
+            } else {
+                sets::clear_my_set(sv, base, k)
+            }
             vec![]
         });
     });

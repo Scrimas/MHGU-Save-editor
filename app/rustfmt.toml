@@ -1,0 +1,4 @@
+# The code keeps one statement per line where it fits in 160 columns; CI checks it
+# (cargo fmt --all --check).
+max_width = 160
+use_small_heuristics = "Max"

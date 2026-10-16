@@ -5,8 +5,20 @@ use super::*;
 /// Box type 7 + NN, NN = the game's weaponNN tables (no 05).
 pub fn weapon_classes() -> [&'static str; 15] {
     [
-        tr("Great Sword"), tr("Sword and Shield"), tr("Hammer"), tr("Lance"), tr("Heavy Bowgun"), tr("Weapon"), tr("Light Bowgun"),
-        tr("Long Sword"), tr("Switch Axe"), tr("Gunlance"), tr("Bow"), tr("Dual Blades"), tr("Hunting Horn"), tr("Insect Glaive"),
+        tr("Great Sword"),
+        tr("Sword and Shield"),
+        tr("Hammer"),
+        tr("Lance"),
+        tr("Heavy Bowgun"),
+        tr("Weapon"),
+        tr("Light Bowgun"),
+        tr("Long Sword"),
+        tr("Switch Axe"),
+        tr("Gunlance"),
+        tr("Bow"),
+        tr("Dual Blades"),
+        tr("Hunting Horn"),
+        tr("Insect Glaive"),
         tr("Charge Blade"),
     ]
 }
@@ -104,14 +116,10 @@ pub(super) fn equip_name(owner: Owner, e: &equipment::Entry) -> String {
     let k = e.kind();
     match k {
         Kind::Empty => tr("Empty").into(),
-        Kind::Talisman => assets::names()
-            .talismans
-            .get(e.id() as usize)
-            .map(|p| p.name.clone())
-            .unwrap_or_else(|| tier_name(e.talisman().unwrap().tier).to_string()),
-        _ => piece(owner, k, e.id())
-            .map(|p| p.name_at(e.level() as u32).to_string())
-            .unwrap_or_else(|| format!("{} #{}", kind_label(k), e.id())),
+        Kind::Talisman => {
+            assets::names().talismans.get(e.id() as usize).map(|p| p.name.clone()).unwrap_or_else(|| tier_name(e.talisman().unwrap().tier).to_string())
+        }
+        _ => piece(owner, k, e.id()).map(|p| p.name_at(e.level() as u32).to_string()).unwrap_or_else(|| format!("{} #{}", kind_label(k), e.id())),
     }
 }
 

@@ -216,7 +216,7 @@ pub fn set_language(s: &mut Save, v: u8) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE};
+    use crate::save::{SLOT1_BASE, blank};
 
     #[test]
     fn options_and_chat_keep_to_the_game() {

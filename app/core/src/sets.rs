@@ -26,7 +26,7 @@
 //! against the analysed saves: Round Force I (26) on a new character's Sword and Shield,
 //! Wolf's Maw (150, 151) on Dual Blades, Energy Blade I (179) on a Charge Blade.
 
-use crate::character::{LOOKS, LOOK_COLOURS};
+use crate::character::{LOOK_COLOURS, LOOKS};
 use crate::equipment::{self, Owner};
 use crate::save::Save;
 
@@ -390,7 +390,7 @@ pub fn set_own_colour(s: &mut Save, base: usize, p: usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE};
+    use crate::save::{SLOT1_BASE, blank};
 
     #[test]
     fn art_numbering() {

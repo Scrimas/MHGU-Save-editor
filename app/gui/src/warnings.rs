@@ -7,15 +7,17 @@ use crate::fmt::num;
 use crate::i18n::{tr, trf};
 use crate::targets::{Mon, Pal, SetPart, Target};
 use crate::views::{deco_slots, deco_used, piece};
+use mhgu_save::data::{TalismanRow, tables};
 use mhgu_save::equipment::{self, Entry, Kind, Owner};
-use mhgu_save::items::{self, Store};
-use mhgu_save::data::{tables, TalismanRow};
 use mhgu_save::guildcard as gc;
-use mhgu_save::{arena, character, monsters, palico, progress, sets, Save};
+use mhgu_save::items::{self, Store};
+use mhgu_save::{Save, arena, character, monsters, palico, progress, sets};
 
 /// Why a warning matters, shown once next to the list of warnings.
 pub fn why() -> &'static str {
-    tr("The game never makes these values. They work offline; online, other hunters see your Guild Card, gear and Palicoes and may take them for a hacked save.")
+    tr(
+        "The game never makes these values. They work offline; online, other hunters see your Guild Card, gear and Palicoes and may take them for a hacked save.",
+    )
 }
 
 /// Whether the asset pack names item `id`: false for the tables' gaps and placeholders.
@@ -424,7 +426,17 @@ mod tests {
             greeting: String::new(),
             owner: String::new(),
             looks: [15, 1, 4, 1, 0, 0, 1, 4, 3, 0, 0, 0],
-            colours: [[0xf0, 0xf0, 0xf0, 0xff], [0xed, 0x87, 0x40, 0xff], [0xed, 0x87, 0x40, 0xff], [0xa1, 0x76, 0x4f, 0xff], [0xff; 4], [0xff; 4], [0, 0, 0, 0xff], [0, 0, 0, 0xff], [0, 0, 0, 0xff]],
+            colours: [
+                [0xf0, 0xf0, 0xf0, 0xff],
+                [0xed, 0x87, 0x40, 0xff],
+                [0xed, 0x87, 0x40, 0xff],
+                [0xa1, 0x76, 0x4f, 0xff],
+                [0xff; 4],
+                [0xff; 4],
+                [0, 0, 0, 0xff],
+                [0, 0, 0, 0xff],
+                [0, 0, 0, 0xff],
+            ],
         };
         assert_eq!(palico(&p, Pal::Looks), None);
         assert_eq!((palico(&p, Pal::Moves), palico(&p, Pal::Skills)), (None, None));

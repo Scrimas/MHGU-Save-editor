@@ -2,7 +2,7 @@
 //! bitfields. Ports tools/quest_unlock.py, tools/request_offer.py and
 //! tools/complete_quests.py; layouts in docs/05, 08, 09, 10.
 
-use crate::data::{tables, Quest};
+use crate::data::{Quest, tables};
 use crate::save::Save;
 use std::ops::{Deref, DerefMut};
 
@@ -48,10 +48,24 @@ pub const RANK_SETS: [u32; 5] = [46, 47, 53, 78, 79];
 pub const VILLAGES: [&str; 4] = ["Bherna", "Kokoto", "Pokke", "Yukumo"];
 // i18n: shown through tr() in the GUI
 pub const DEVIANTS: [&str; 18] = [
-    "Redhelm Arzuros", "Snowbaron Lagombi", "Stonefist Hermitaur", "Dreadqueen Rathian", "Drilltusk Tetsucabra",
-    "Silverwind Nargacuga", "Crystalbeard Uragaan", "Deadeye Yian Garuga", "Dreadking Rathalos", "Thunderlord Zinogre",
-    "Grimclaw Tigrex", "Hellblade Glavenus", "Nightcloak Malfestio", "Rustrazor Ceanataur", "Soulseer Mizutsune",
-    "Boltreaver Astalos", "Elderfrost Gammoth", "Bloodbath Diablos",
+    "Redhelm Arzuros",
+    "Snowbaron Lagombi",
+    "Stonefist Hermitaur",
+    "Dreadqueen Rathian",
+    "Drilltusk Tetsucabra",
+    "Silverwind Nargacuga",
+    "Crystalbeard Uragaan",
+    "Deadeye Yian Garuga",
+    "Dreadking Rathalos",
+    "Thunderlord Zinogre",
+    "Grimclaw Tigrex",
+    "Hellblade Glavenus",
+    "Nightcloak Malfestio",
+    "Rustrazor Ceanataur",
+    "Soulseer Mizutsune",
+    "Boltreaver Astalos",
+    "Elderfrost Gammoth",
+    "Bloodbath Diablos",
 ];
 /// First quest index of the deviant level bits (Special Permit quests 947-1174).
 pub const DEVIANT_QUEST0: usize = 947;
@@ -202,8 +216,7 @@ impl<S: Deref<Target = Save>> Char<S> {
             Some(r) if r.is_empty() => return Lock::Event,
             Some(r) => r,
         };
-        let needs: Vec<Vec<String>> =
-            rule.split(" OR ").map(|alt| alt.split(" AND ").filter_map(|p| self.quest_missing(p)).collect()).collect();
+        let needs: Vec<Vec<String>> = rule.split(" OR ").map(|alt| alt.split(" AND ").filter_map(|p| self.quest_missing(p)).collect()).collect();
         if needs.iter().any(Vec::is_empty) {
             match t.rotating.get(&id) {
                 Some(&b) if !self.bit(ROTATION, b) => Lock::Rotated,
@@ -475,23 +488,13 @@ impl Char<&Save> {
     pub fn set_members(set: u32) -> Vec<usize> {
         let t = tables();
         let mut seen = std::collections::HashSet::new();
-        t.quests
-            .iter()
-            .filter(|q| seen.insert(q.id))
-            .filter(|q| q.sets.contains(&set))
-            .map(|q| q.index)
-            .collect()
+        t.quests.iter().filter(|q| seen.insert(q.id)).filter(|q| q.sets.contains(&set)).map(|q| q.index).collect()
     }
 
     /// Real quests of the board (placeholders, unused event slots and repeated IDs skipped).
     pub fn real_quests(events: bool) -> Vec<&'static Quest> {
         let mut seen = std::collections::HashSet::new();
-        tables()
-            .quests
-            .iter()
-            .filter(|q| q.is_real() && seen.insert(q.id))
-            .filter(|q| events || !q.category.starts_with("Event"))
-            .collect()
+        tables().quests.iter().filter(|q| q.is_real() && seen.insert(q.id)).filter(|q| events || !q.category.starts_with("Event")).collect()
     }
 
     /// (first quest index, number of levels) of deviant `d`: 16 for the first 12, 6 after.

@@ -156,7 +156,7 @@ impl Mhxx {
 mod tests {
     use super::*;
     use crate::options;
-    use crate::save::{blank, Save};
+    use crate::save::{Save, blank};
 
     /// A 3DS save with the slot pointers of a clean one and character 1 in use.
     fn ds() -> Mhxx {

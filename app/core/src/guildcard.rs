@@ -135,7 +135,7 @@ pub fn history(s: &Save, base: usize) -> Vec<Record> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE as B};
+    use crate::save::{SLOT1_BASE as B, blank};
 
     #[test]
     fn history_records_read_and_skip_unset() {

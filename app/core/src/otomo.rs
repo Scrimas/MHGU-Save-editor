@@ -37,7 +37,8 @@ pub const HIRED_MAX: u8 = 200;
 /// k = its choice k - 1; 0 = any. Four RGBA colours follow at bit 29 (which is which is
 /// not proven): left as they are.
 pub const REQUEST: usize = 0x23BA2;
-pub const REQUEST_FIELDS: [(&str, usize, usize); 8] = [("mode", 0, 2), ("forte", 2, 4), ("target", 6, 3), ("coat", 9, 4), ("eyes", 13, 4), ("ears", 17, 4), ("tail", 21, 4), ("voice", 25, 4)];
+pub const REQUEST_FIELDS: [(&str, usize, usize); 8] =
+    [("mode", 0, 2), ("forte", 2, 4), ("target", 6, 3), ("coat", 9, 4), ("eyes", 13, 4), ("ears", 17, 4), ("tail", 21, 4), ("voice", 25, 4)];
 
 /// Palico Dojo teaching session: teacher, students 1-3, kind (1 skill, else support
 /// move), skill / move ID, u16 in progress.
@@ -83,7 +84,13 @@ pub fn set_role(s: &mut Save, base: usize, r: usize, p: Option<usize>) -> Vec<us
     }
     let mut changed = vec![];
     for k in 0..ROLE_N {
-        let v = if k == r { p } else if p.is_some() && role(s, base, k) == p { None } else { continue };
+        let v = if k == r {
+            p
+        } else if p.is_some() && role(s, base, k) == p {
+            None
+        } else {
+            continue;
+        };
         let b = v.map_or(NONE, |i| i as u8);
         if s.u8(base + ROLES + k) != b {
             s.set_u8(base + ROLES + k, b);
@@ -242,7 +249,7 @@ pub fn remove_inbox(s: &mut Save, base: usize, k: usize) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE as B};
+    use crate::save::{SLOT1_BASE as B, blank};
 
     fn with_palicoes(n: usize) -> Save {
         let mut s = blank();

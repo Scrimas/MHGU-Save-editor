@@ -1,7 +1,7 @@
 //! Opening saves, the Open screen, Write, snapshots and Restore.
 
 use super::*;
-use crate::{diff, DiffRow};
+use crate::{DiffRow, diff};
 use mhgu_save::Save;
 
 /// A running emulator overwrites the save when it exits: Write and Restore wait for it.
@@ -149,7 +149,8 @@ fn compare(ui: &AppWindow, st: &State, dir: &str, other: i32) {
     // a whole box changed is thousands of lines: the dialog shows the first ones
     const SHOWN: usize = 1500;
     let more = lines.len().saturating_sub(SHOWN);
-    let mut rows: Vec<DiffRow> = lines.into_iter().take(SHOWN).map(|l| DiffRow { group: l.group.into(), label: l.label.into(), old: l.old.into(), new: l.new.into() }).collect();
+    let mut rows: Vec<DiffRow> =
+        lines.into_iter().take(SHOWN).map(|l| DiffRow { group: l.group.into(), label: l.label.into(), old: l.old.into(), new: l.new.into() }).collect();
     if more > 0 {
         let label = trn("{n} more line not shown", "{n} more lines not shown", more as i64, &[]);
         rows.push(DiffRow { group: "".into(), label: label.into(), old: "".into(), new: "".into() });
@@ -279,7 +280,14 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
             // the snapshot just taken puts every file back
             Err(e) => {
                 match kept {
-                    Some((p, when, _)) => toast_full(&ui, trf("Write failed: {}", &[&e]), tr("The snapshot taken first restores the save"), tr("Restore…"), ToastAct::Restore(p, when), true),
+                    Some((p, when, _)) => toast_full(
+                        &ui,
+                        trf("Write failed: {}", &[&e]),
+                        tr("The snapshot taken first restores the save"),
+                        tr("Restore…"),
+                        ToastAct::Restore(p, when),
+                        true,
+                    ),
                     None => toast(&ui, trf("Write failed: {}", &[&e]), true),
                 }
                 false

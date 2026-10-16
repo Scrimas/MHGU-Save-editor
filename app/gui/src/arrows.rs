@@ -87,7 +87,10 @@ fn step(ui: &AppWindow, d: (i32, i32), area: LogicalRect, may_scroll: bool) -> b
         return true;
     }
     // the next row may not be built yet: scroll a step, then look again
-    if may_scroll && let Some(f) = &scroller && scroll(f, d, &o) {
+    if may_scroll
+        && let Some(f) = &scroller
+        && scroll(f, d, &o)
+    {
         let w = ui.as_weak();
         slint::Timer::single_shot(std::time::Duration::from_millis(40), move || {
             if let Some(ui) = w.upgrade() {
@@ -188,10 +191,18 @@ fn set_y(f: &ItemRc, y: f32) {
 fn score(o: &LogicalRect, c: &LogicalRect, d: (i32, i32), overlap: bool) -> Option<f32> {
     let (oc, cc) = (o.center(), c.center());
     let (along, side, size) = match d {
-        (0, 1) if cc.y > oc.y + 1.0 && c.min_y() > o.min_y() => (c.min_y() - o.max_y(), gap(o.min_x(), o.max_x(), c.min_x(), c.max_x()), (c.width() - o.width()).abs()),
-        (0, -1) if cc.y < oc.y - 1.0 && c.max_y() < o.max_y() => (o.min_y() - c.max_y(), gap(o.min_x(), o.max_x(), c.min_x(), c.max_x()), (c.width() - o.width()).abs()),
-        (1, 0) if cc.x > oc.x + 1.0 && c.min_x() > o.min_x() => (c.min_x() - o.max_x(), gap(o.min_y(), o.max_y(), c.min_y(), c.max_y()), (c.height() - o.height()).abs()),
-        (-1, 0) if cc.x < oc.x - 1.0 && c.max_x() < o.max_x() => (o.min_x() - c.max_x(), gap(o.min_y(), o.max_y(), c.min_y(), c.max_y()), (c.height() - o.height()).abs()),
+        (0, 1) if cc.y > oc.y + 1.0 && c.min_y() > o.min_y() => {
+            (c.min_y() - o.max_y(), gap(o.min_x(), o.max_x(), c.min_x(), c.max_x()), (c.width() - o.width()).abs())
+        }
+        (0, -1) if cc.y < oc.y - 1.0 && c.max_y() < o.max_y() => {
+            (o.min_y() - c.max_y(), gap(o.min_x(), o.max_x(), c.min_x(), c.max_x()), (c.width() - o.width()).abs())
+        }
+        (1, 0) if cc.x > oc.x + 1.0 && c.min_x() > o.min_x() => {
+            (c.min_x() - o.max_x(), gap(o.min_y(), o.max_y(), c.min_y(), c.max_y()), (c.height() - o.height()).abs())
+        }
+        (-1, 0) if cc.x < oc.x - 1.0 && c.max_x() < o.max_x() => {
+            (o.min_x() - c.max_x(), gap(o.min_y(), o.max_y(), c.min_y(), c.max_y()), (c.height() - o.height()).abs())
+        }
         _ => return None,
     };
     if overlap && side > 0.0 {

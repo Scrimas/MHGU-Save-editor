@@ -15,10 +15,13 @@ pub(super) fn overview(ui: &AppWindow, st: &State) {
     // the same total as Collections: every award of the card (07.1)
     let missing: Vec<String> = t.awards.iter().filter(|a| !c.award(a.0)).map(|a| a.2.clone()).collect();
     let listed: Vec<usize> = (1..=monsters::N).filter(|&i| monsters::meta(i).crown_awards).collect();
-    let met = listed.iter().filter(|&&i| {
-        let r = monsters::get(s, base, i);
-        r.hunts + r.captures > 0
-    }).count();
+    let met = listed
+        .iter()
+        .filter(|&&i| {
+            let r = monsters::get(s, base, i);
+            r.hunts + r.captures > 0
+        })
+        .count();
     let gold = listed.iter().filter(|&&i| monsters::crowns(i, monsters::get(s, base, i)).large == 2).count();
     let mini = listed.iter().filter(|&&i| monsters::crowns(i, monsters::get(s, base, i)).mini).count();
     let chs = character::get(s, base);
@@ -124,10 +127,17 @@ pub(super) fn wire_overview(ui: &AppWindow, st: &Shared) {
                     trf("Nothing to change. {}", &[&p.summary]).into()
                 } else if goals::GOALS.iter().any(|g| g.id == id) {
                     let n = p.lines.len() as i64;
-                    trn("{n} value changes. Nothing is written until you press Write.", "{n} values change. Nothing is written until you press Write.", n, &[]).into()
+                    trn("{n} value changes. Nothing is written until you press Write.", "{n} values change. Nothing is written until you press Write.", n, &[])
+                        .into()
                 } else {
                     let n = p.lines.len() as i64;
-                    trn("{} {n} value changes. Nothing is written until you press Write.", "{} {n} values change. Nothing is written until you press Write.", n, &[&p.summary]).into()
+                    trn(
+                        "{} {n} value changes. Nothing is written until you press Write.",
+                        "{} {n} values change. Nothing is written until you press Write.",
+                        n,
+                        &[&p.summary],
+                    )
+                    .into()
                 },
                 confidence: conf(p.conf.unwrap_or(Conf::Confirmed)),
                 lines: model(lines),

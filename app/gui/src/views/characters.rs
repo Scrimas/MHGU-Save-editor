@@ -42,11 +42,7 @@ pub(super) fn open_file(ui: &AppWindow, title: &str, filter: &str, ext: &str) ->
 /// "Scrimas (slot 1)", or "slot 3" for an empty one.
 fn who(s: &State, k: usize) -> String {
     let sv = s.save();
-    if sv.slot_used(k) {
-        trf("{} (slot {})", &[&character::get(sv, sv.base(k)).name, &(k + 1)])
-    } else {
-        trf("slot {}", &[&(k + 1)])
-    }
+    if sv.slot_used(k) { trf("{} (slot {})", &[&character::get(sv, sv.base(k)).name, &(k + 1)]) } else { trf("slot {}", &[&(k + 1)]) }
 }
 
 /// A whole-slot edit. Copy, swap, delete and a character file's import are Confirmed in
@@ -177,7 +173,10 @@ pub(super) fn wire_characters(ui: &AppWindow, st: &Shared) {
                 return;
             }
             let name = who(&st.borrow(), k);
-            let Some(p) = rfd::FileDialog::new().set_title(trf("MHXX save to put {} in", &[&name])).add_filter(tr("MHXX save (system)"), &["*"]).pick_file() else { return };
+            let Some(p) = rfd::FileDialog::new().set_title(trf("MHXX save to put {} in", &[&name])).add_filter(tr("MHXX save (system)"), &["*"]).pick_file()
+            else {
+                return;
+            };
             match std::fs::read(&p).map(Mhxx::from_bytes) {
                 Ok(Ok(x)) => ask_mhxx(&ui, MhxxPick { file: x, path: p, export: Some(k), into: 0 }),
                 Ok(Err(e)) => toast(&ui, trf("Not an MHXX save: {}", &[&e]), true),

@@ -20,8 +20,7 @@ fn ryujinx_roots() -> Vec<PathBuf> {
 }
 
 /// The yuzu family: data folder name and the name shown for it.
-const YUZU_FORKS: [(&str, &str); 6] =
-    [("yuzu", "yuzu"), ("suyu", "suyu"), ("sudachi", "Sudachi"), ("citron", "Citron"), ("eden", "Eden"), ("torzu", "torzu")];
+const YUZU_FORKS: [(&str, &str); 6] = [("yuzu", "yuzu"), ("suyu", "suyu"), ("sudachi", "Sudachi"), ("citron", "Citron"), ("eden", "Eden"), ("torzu", "torzu")];
 
 /// The yuzu family keeps its data in `<data>/<name>` (Linux ~/.local/share, Windows
 /// %APPDATA%, macOS Application Support), or as a Flatpak in
@@ -282,8 +281,7 @@ pub fn known_emulator(save: &std::path::Path) -> Option<&'static str> {
     if save.to_string_lossy().to_lowercase().contains("ryujinx") {
         return Some("Ryujinx");
     }
-    save.components()
-        .find_map(|c| YUZU_FORKS.iter().find(|(n, _)| c.as_os_str().to_string_lossy().eq_ignore_ascii_case(n)).map(|(_, shown)| *shown))
+    save.components().find_map(|c| YUZU_FORKS.iter().find(|(n, _)| c.as_os_str().to_string_lossy().eq_ignore_ascii_case(n)).map(|(_, shown)| *shown))
 }
 
 /// `known_emulator`, else a generic name.

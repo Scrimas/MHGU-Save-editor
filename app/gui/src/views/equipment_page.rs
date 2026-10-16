@@ -158,7 +158,17 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
                 }
             };
             let warning = crate::warnings::equip(owner, &e).unwrap_or_default();
-            Some(EquipRow { slot: i as i32, kind_code: k.code() as i32, title: title.into(), sub: sub.into(), icon: img, has_icon: has, changed, status: status.into(), warning: warning.into() })
+            Some(EquipRow {
+                slot: i as i32,
+                kind_code: k.code() as i32,
+                title: title.into(),
+                sub: sub.into(),
+                icon: img,
+                has_icon: has,
+                changed,
+                status: status.into(),
+                warning: warning.into(),
+            })
         })
         .collect();
     api.set_equip_summary(
@@ -191,12 +201,8 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
             .map(|j| DecoRow { index: j as i32, name: assets::item_name(ds[j]).into(), size: assets::deco_size(ds[j]).unwrap_or(1) as i32 })
             .collect();
         let slots = deco_slots(owner, &e);
-        let field = tables()
-            .fields
-            .iter()
-            .find(|fl| fl.block == "char1" && fl.rel <= off && off < fl.rel + fl.size)
-            .map(|fl| fl.label.clone())
-            .unwrap_or_default();
+        let field =
+            tables().fields.iter().find(|fl| fl.block == "char1" && fl.rel <= off && off < fl.rel + fl.size).map(|fl| fl.label.clone()).unwrap_or_default();
         let was_e = equipment::get(orig, base, owner, i);
         let staged = st.changed(base + off + equipment::ENTRY * i, equipment::ENTRY);
         d = EquipDetail {
@@ -206,7 +212,8 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
             name: if k == Kind::Talisman { talisman_skills(&e) } else { equip_name(owner, &e) }.into(),
             id: e.id() as i32,
             level: e.level() as i32,
-            was_level: if staged && was_e.kind() == k && was_e.id() == e.id() && was_e.level() != e.level() { num(was_e.level()) } else { String::new() }.into(),
+            was_level: if staged && was_e.kind() == k && was_e.id() == e.id() && was_e.level() != e.level() { num(was_e.level()) } else { String::new() }
+                .into(),
             decos: model(decos),
             transmog: if e.transmog() == 0 {
                 "".into()

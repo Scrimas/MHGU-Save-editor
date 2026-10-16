@@ -15,15 +15,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 /// The lang/ folder (a gettext locale) and the language's own name, English first: the
 /// game's own languages, so its names (assets.rs) match the interface. The two Chinese ones
 /// came with the game's 1.4 update (its chT and chS text).
-pub const LANGS: [(&str, &str); 7] = [
-    ("en", "English"),
-    ("fr", "Français"),
-    ("de", "Deutsch"),
-    ("es", "Español"),
-    ("it", "Italiano"),
-    ("zh_TW", "繁體中文"),
-    ("zh_CN", "简体中文"),
-];
+pub const LANGS: [(&str, &str); 7] =
+    [("en", "English"), ("fr", "Français"), ("de", "Deutsch"), ("es", "Español"), ("it", "Italiano"), ("zh_TW", "繁體中文"), ("zh_CN", "简体中文")];
 
 macro_rules! po {
     ($c:literal) => {
@@ -68,11 +61,7 @@ pub fn system() -> usize {
         loc = if hant { "zh_TW" } else { "zh_CN" }.into();
     }
     let base = |l: &str| l.split(['_', '@', '.']).next().unwrap_or("").to_string();
-    LANGS
-        .iter()
-        .position(|l| l.0 == loc)
-        .or_else(|| LANGS.iter().position(|l| base(l.0) == base(&loc)))
-        .unwrap_or(0)
+    LANGS.iter().position(|l| l.0 == loc).or_else(|| LANGS.iter().position(|l| base(l.0) == base(&loc))).unwrap_or(0)
 }
 
 /// The thousands separator of the language in use (a no-break space in French).
@@ -93,7 +82,8 @@ pub fn set(ui: &crate::AppWindow, i: usize) {
         eprintln!("language {}: {e}", LANGS[i].0);
     }
     ui.global::<crate::Fmt>().set_sep(thousands().into());
-    ui.global::<crate::Fmt>().set_font(han_font(LANGS[i].0).into());}
+    ui.global::<crate::Fmt>().set_font(han_font(LANGS[i].0).into());
+}
 
 /// The system's font for Chinese text in language `code` ("" for the others). Slint asks
 /// for a fallback font by script alone and gets the system's first Han one, often Japanese,
@@ -102,8 +92,28 @@ pub fn set(ui: &crate::AppWindow, i: usize) {
 /// and Linux instead, else Slint's own choice.
 fn han_font(code: &str) -> String {
     let families: &[&str] = match code {
-        "zh_TW" => &["Microsoft JhengHei", "Microsoft JhengHei UI", "PingFang TC", "Noto Sans CJK TC", "Noto Sans TC", "Source Han Sans TC", "Source Han Sans TW", "WenQuanYi Micro Hei", "WenQuanYi Zen Hei"],
-        "zh_CN" => &["Microsoft YaHei", "Microsoft YaHei UI", "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "WenQuanYi Micro Hei", "WenQuanYi Zen Hei"],
+        "zh_TW" => &[
+            "Microsoft JhengHei",
+            "Microsoft JhengHei UI",
+            "PingFang TC",
+            "Noto Sans CJK TC",
+            "Noto Sans TC",
+            "Source Han Sans TC",
+            "Source Han Sans TW",
+            "WenQuanYi Micro Hei",
+            "WenQuanYi Zen Hei",
+        ],
+        "zh_CN" => &[
+            "Microsoft YaHei",
+            "Microsoft YaHei UI",
+            "PingFang SC",
+            "Noto Sans CJK SC",
+            "Noto Sans SC",
+            "Source Han Sans SC",
+            "Source Han Sans CN",
+            "WenQuanYi Micro Hei",
+            "WenQuanYi Zen Hei",
+        ],
         _ => return String::new(),
     };
     let mut fonts = fontique::Collection::new(fontique::CollectionOptions { shared: false, system_fonts: true });
@@ -322,7 +332,8 @@ mod tests {
     #[test]
     fn catalogs_keep_placeholders() {
         fn marks(s: &str) -> Vec<String> {
-            let mut v: Vec<String> = s.replace("{{", "").replace("}}", "").split('{').skip(1).filter_map(|p| p.split_once('}').map(|x| x.0.to_string())).collect();
+            let mut v: Vec<String> =
+                s.replace("{{", "").replace("}}", "").split('{').skip(1).filter_map(|p| p.split_once('}').map(|x| x.0.to_string())).collect();
             v.sort();
             v
         }

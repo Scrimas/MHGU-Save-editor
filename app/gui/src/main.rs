@@ -963,7 +963,14 @@ mod tests {
                     let Some((mid, _, _)) = arrows::probe(&ui) else { continue };
                     settle();
                     let (y, row, list) = arrows::probe(&ui).unwrap();
-                    let line = format!("{page} {:?} {i}: view {last:.0} → {mid:.0} → {y:.0}, row {:.0}..{:.0} in {:.0}..{:.0}", k, row.min_y(), row.max_y(), list.min_y(), list.max_y());
+                    let line = format!(
+                        "{page} {:?} {i}: view {last:.0} → {mid:.0} → {y:.0}, row {:.0}..{:.0} in {:.0}..{:.0}",
+                        k,
+                        row.min_y(),
+                        row.max_y(),
+                        list.min_y(),
+                        list.max_y()
+                    );
                     if down {
                         assert!(last <= mid + 0.5 && mid <= y + 0.5, "{line}: moved back");
                         if y > 0.5 {

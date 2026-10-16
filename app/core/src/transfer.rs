@@ -11,7 +11,7 @@
 //! Talismans: the charm list of Athena's Armor Set Search (`mycharms.txt`):
 //! `Slots,Skill1,Points1,Skill2,Points2` with the game's English skill names.
 
-use crate::equipment::{self, Entry, Kind, Owner, Talisman, ENTRY};
+use crate::equipment::{self, ENTRY, Entry, Kind, Owner, Talisman};
 use crate::items::{self, Stack};
 use crate::save::Save;
 use crate::{palico, sets};
@@ -268,7 +268,7 @@ pub fn read_talismans(text: &str, lookup: impl Fn(&str) -> Option<u8>) -> Result
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::save::{blank, SLOT1_BASE as B};
+    use crate::save::{SLOT1_BASE as B, blank};
 
     #[test]
     fn item_box_round_trip_and_hand_written_lines() {

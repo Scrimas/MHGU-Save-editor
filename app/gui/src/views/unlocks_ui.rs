@@ -174,11 +174,14 @@ fn group_name(g: &str) -> &'static str {
 fn event_name(bit: usize, ev: u32) -> String {
     let at = place;
     match bit {
-        0..=5 | 18 | 19 => trf("{}: first visit", &[&at(match bit {
-            18 => 6,
-            19 => 7,
-            b => b,
-        })]),
+        0..=5 | 18 | 19 => trf(
+            "{}: first visit",
+            &[&at(match bit {
+                18 => 6,
+                19 => 7,
+                b => b,
+            })],
+        ),
         6..=8 | 20 => trf("Palico Ranch: event {}", &[&ev]),
         9..=12 => trf("{}: Village ★4", &[&at(bit - 8)]),
         13..=16 => trf("{}: first urgent quests", &[&at(bit - 12)]),
@@ -231,7 +234,9 @@ pub fn entry_name(m: usize, e: &UnlockEntry) -> String {
         "events" => event_name(b, e.id),
         "milestones" => milestone_name(b, id),
         _ => match mp.strip_prefix("armory:").and_then(|t| t.parse::<usize>().ok()) {
-            Some(t) if t <= 5 => n.armor.get(&t.to_string()).and_then(|v| v.iter().find(|p| p.id as usize == id)).map_or_else(|| format!("#{id}"), |p| p.name.clone()),
+            Some(t) if t <= 5 => {
+                n.armor.get(&t.to_string()).and_then(|v| v.iter().find(|p| p.id as usize == id)).map_or_else(|| format!("#{id}"), |p| p.name.clone())
+            }
             Some(t) => n.weapons.get(&(t - 7).to_string()).and_then(|v| v.get(id)).map_or_else(|| format!("#{id}"), |p| p.name.clone()),
             None => format!("#{b}"),
         },
@@ -318,9 +323,8 @@ pub(super) fn unlocks_page(ui: &AppWindow, st: &State) {
     let base = st.base();
     let rows = unlock_rows();
     let sel = sel_row(&rows);
-    let pets_changed = (0..unlocks::PETS).any(|k| !st.was(Target::Pet(k)).is_empty())
-        || !st.was(Target::Moofahs).is_empty()
-        || !st.was(Target::MoofahGifts).is_empty();
+    let pets_changed =
+        (0..unlocks::PETS).any(|k| !st.was(Target::Pet(k)).is_empty()) || !st.was(Target::Moofahs).is_empty() || !st.was(Target::MoofahGifts).is_empty();
     let mut last = "";
     let list: Vec<UnlockRow> = rows
         .iter()

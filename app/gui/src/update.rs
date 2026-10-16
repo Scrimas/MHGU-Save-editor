@@ -122,12 +122,7 @@ fn fetch(url: &str) -> Result<Release, String> {
     let l: Latest = serde_json::from_reader(get(url)?.into_reader()).map_err(|e| trf("Unexpected answer from GitHub ({})", &[&e]))?;
     let pick = |f: &dyn Fn(&str) -> bool| l.assets.iter().find(|a| f(&a.name)).cloned();
     let version = l.tag_name.trim_start_matches('v').to_string();
-    Ok(Release {
-        page: l.html_url.clone(),
-        file: pick(&|n| n.ends_with(SUFFIX)),
-        sums: pick(&|n| is_sums(n, &version)),
-        version,
-    })
+    Ok(Release { page: l.html_url.clone(), file: pick(&|n| n.ends_with(SUFFIX)), sums: pick(&|n| is_sums(n, &version)), version })
 }
 
 /// The file an update replaces: the AppImage or the .exe; None when run another way.

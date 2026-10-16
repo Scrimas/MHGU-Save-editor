@@ -8,10 +8,10 @@ use crate::state::Conf;
 use crate::targets::{Mon, Target};
 use mhgu_save::character as ch;
 use mhgu_save::data::tables;
-use mhgu_save::items::{self, Stack, Store};
-use mhgu_save::progress::{Char, QuestBit, DEVIANTS, VILLAGES};
-use mhgu_save::save::Save;
 use mhgu_save::guildcard as gc;
+use mhgu_save::items::{self, Stack, Store};
+use mhgu_save::progress::{Char, DEVIANTS, QuestBit, VILLAGES};
+use mhgu_save::save::Save;
 use mhgu_save::{monsters, smithy, unlocks};
 
 pub struct Def {
@@ -274,7 +274,8 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
             for (k, &m) in gc::MAPS.iter().enumerate() {
                 let names = card_names(m);
                 let (_, _, n) = m.at();
-                let todo: Vec<usize> = (0..n).filter(|&i| !names.is_empty() && crate::warnings::card_entry(names, m, i) && !gc::unlocked(s, base, m, i)).collect();
+                let todo: Vec<usize> =
+                    (0..n).filter(|&i| !names.is_empty() && crate::warnings::card_entry(names, m, i) && !gc::unlocked(s, base, m, i)).collect();
                 for &i in &todo {
                     gc::set_unlocked(s, base, m, i, true);
                 }
@@ -376,7 +377,8 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 trf("Clears the {} not cleared yet ({}).", &[&quests, &cats])
             };
             let k = q.max(r);
-            p.count = if q > 0 { trn("{} quest", "{} quests", k as i64, &[&num(k as i64)]) } else { trn("{} request", "{} requests", k as i64, &[&num(k as i64)]) };
+            p.count =
+                if q > 0 { trn("{} quest", "{} quests", k as i64, &[&num(k as i64)]) } else { trn("{} request", "{} requests", k as i64, &[&num(k as i64)]) };
             p.note = tr("Star levels and story events stay to the game: they follow after your next quest. Completed quest sets are recorded too.").into();
         }
         ["arts"] => {
@@ -411,15 +413,21 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 trf("Unlocks the {} you're missing: {}.", &[&awards, &list(&names(&|_| true), 3)])
             };
             p.count = awards;
-            p.note = tr("Veteran Hunter's Prize comes only from a save transfer and stays as it is. Both of the game's award lists are written, as the game does.").into();
+            p.note =
+                tr("Veteran Hunter's Prize comes only from a save transfer and stays as it is. Both of the game's award lists are written, as the game does.")
+                    .into();
         }
         ["notes"] => {
             p.title = tr("Hunter's Notes").into();
-            let mons: Vec<String> = p.targets.iter().filter_map(|t| if let Target::Monster(i, _) = t { Some(tables().monsters[i - 1].name.clone()) } else { None }).collect();
+            let mons: Vec<String> =
+                p.targets.iter().filter_map(|t| if let Target::Monster(i, _) = t { Some(tables().monsters[i - 1].name.clone()) } else { None }).collect();
             p.summary = if n == 0 {
                 tr("Every Hunter's Notes page is unlocked.").into()
             } else {
-                trf("Unlocks the {} you're missing: {}.", &[&trn("{} Hunter's Notes page", "{} Hunter's Notes pages", n as i64, &[&num(n as i64)]), &list(&mons, 3)])
+                trf(
+                    "Unlocks the {} you're missing: {}.",
+                    &[&trn("{} Hunter's Notes page", "{} Hunter's Notes pages", n as i64, &[&num(n as i64)]), &list(&mons, 3)],
+                )
             };
             p.count = trn("{} page", "{} pages", n as i64, &[&num(n as i64)]);
             p.note = tr("Each page gets its NEW mark, as the game's own unlock does.").into();
@@ -463,8 +471,16 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             let (lr, g) = (vills(false), vills(true));
             let mut doing = vec![];
             let mut done = vec![];
-            if has(Target::Funds) { doing.push(tr("zenny to 9,999,999").to_string()) } else { done.push(tr("zenny").to_string()) }
-            if has(Target::Wycademy) { doing.push(tr("Wycademy points to 9,999,999").to_string()) } else { done.push(tr("Wycademy points").to_string()) }
+            if has(Target::Funds) {
+                doing.push(tr("zenny to 9,999,999").to_string())
+            } else {
+                done.push(tr("zenny").to_string())
+            }
+            if has(Target::Wycademy) {
+                doing.push(tr("Wycademy points to 9,999,999").to_string())
+            } else {
+                done.push(tr("Wycademy points").to_string())
+            }
             match g.len() {
                 0 => done.push(tr("G rank points").into()),
                 4 => doing.push(tr("G rank village points to 20,000 in all four villages").into()),
@@ -504,23 +520,35 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             } else if k == 0 {
                 p.summary = tr("Every item of the game is marked obtained.").into();
             } else {
-                p.summary = trf("Marks the {} you never had as obtained, as picking one up does. The Smithy then shows every material's name and the equipment those materials make.", &[&its]);
+                p.summary = trf(
+                    "Marks the {} you never had as obtained, as picking one up does. The Smithy then shows every material's name and the equipment those materials make.",
+                    &[&its],
+                );
                 p.count = its;
             }
-            p.note = tr("A Smithy entry also needs the game's progress to allow it. Items obtained are read by the shop, the Trader and some villagers' requests too.").into();
+            p.note = tr(
+                "A Smithy entry also needs the game's progress to allow it. Items obtained are read by the shop, the Trader and some villagers' requests too.",
+            )
+            .into();
         }
         ["smithy"] => {
             p.title = tr("List every Smithy entry").into();
             let gender = ch::get(s, base).gender;
-            let k: usize = smithy::lists().iter().map(|l| {
-                let (a, b) = smithy::count(s, base, l, gender);
-                b - a
-            }).sum();
+            let k: usize = smithy::lists()
+                .iter()
+                .map(|l| {
+                    let (a, b) = smithy::count(s, base, l, gender);
+                    b - a
+                })
+                .sum();
             let entries = trn("{} entry", "{} entries", k as i64, &[&num(k as i64)]);
             p.summary = if n == 0 {
                 tr("The Smithy lists every weapon, armor piece, decoration and Palico item.").into()
             } else {
-                trf("Lists the {} the Smithy does not show yet, in {}, each with its NEW mark, as the game does when it first lists one.", &[&entries, &trn("{} list", "{} lists", n as i64, &[&num(n as i64)])])
+                trf(
+                    "Lists the {} the Smithy does not show yet, in {}, each with its NEW mark, as the game does when it first lists one.",
+                    &[&entries, &trn("{} list", "{} lists", n as i64, &[&num(n as i64)])],
+                )
             };
             p.count = entries;
             p.note = tr("Making them still takes their materials. Armor for the other body type stays unlisted, as in game.").into();
@@ -542,7 +570,10 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             } else if k == 0 {
                 p.summary = tr("Every title word, scene and pose is unlocked.").into();
             } else {
-                p.summary = trf("Unlocks the {} still locked for the Guild Card editor: title words, linking words, scenes and poses, each with its NEW mark.", &[&entries]);
+                p.summary = trf(
+                    "Unlocks the {} still locked for the Guild Card editor: title words, linking words, scenes and poses, each with its NEW mark.",
+                    &[&entries],
+                );
                 p.count = entries;
             }
             p.note = tr("Some come from downloads, the Trader or collaborations in game.").into();
@@ -550,7 +581,11 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
         ["monsters", "hunts"] => {
             let mons = trn("{} monster", "{} monsters", n as i64, &[&num(n as i64)]);
             p.title = tr("Max hunts").into();
-            p.summary = if n == 0 { tr("Every monster is hunted 9,999 times.").into() } else { trf("Sets Hunted to 9,999 for the {} below it. Also rebuilds the Guild Card monster log.", &[&mons]) };
+            p.summary = if n == 0 {
+                tr("Every monster is hunted 9,999 times.").into()
+            } else {
+                trf("Sets Hunted to 9,999 for the {} below it. Also rebuilds the Guild Card monster log.", &[&mons])
+            };
             p.count = mons;
             p.review = tr("Every monster hunted 9,999 times").into();
             p.detail = tr("Monsters · also rebuilds the Guild Card monster log").into();
@@ -566,7 +601,10 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                     p.summary = match (n, pouch) {
                         (0, true) => tr("The pouch is already sorted.").into(),
                         (0, false) => tr("The item box is already sorted.").into(),
-                        (_, true) => trf("Sorts the pouch by item and merges stacks of the same item into one, up to its carry limit (the rest is dropped); {} change.", &[&slots]),
+                        (_, true) => trf(
+                            "Sorts the pouch by item and merges stacks of the same item into one, up to its carry limit (the rest is dropped); {} change.",
+                            &[&slots],
+                        ),
                         (_, false) => trf("Sorts the item box by item and merges stacks of the same item; {} change.", &[&slots]),
                     };
                     p.review = if pouch { tr("Pouch: sorted and merged") } else { tr("Item box: sorted and merged") }.into();
@@ -575,10 +613,18 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                     let k = trn("{} stack", "{} stacks", n as i64, &[&num(n as i64)]);
                     p.title = tr("Max counts").into();
                     if pouch {
-                        p.summary = if n == 0 { tr("Every stack in the pouch is at its carry limit.").into() } else { trf("Sets the {} in the pouch to the most the game lets you carry (Potion 10, Max Potion 2, Ancient Potion 1…).", &[&k]) };
+                        p.summary = if n == 0 {
+                            tr("Every stack in the pouch is at its carry limit.").into()
+                        } else {
+                            trf("Sets the {} in the pouch to the most the game lets you carry (Potion 10, Max Potion 2, Ancient Potion 1…).", &[&k])
+                        };
                         p.review = tr("Pouch: every stack at its carry limit").into();
                     } else {
-                        p.summary = if n == 0 { tr("Every stack in the item box is at 99.").into() } else { trf("Raises the {} below 99 in the item box to 99.", &[&k]) };
+                        p.summary = if n == 0 {
+                            tr("Every stack in the item box is at 99.").into()
+                        } else {
+                            trf("Raises the {} below 99 in the item box to 99.", &[&k])
+                        };
                         p.review = tr("Item box: every stack ×99").into();
                     }
                 }
@@ -606,7 +652,10 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 "lab" => (
                     tr("Every Soaratorium Lab upgrade"),
                     tr("Every Lab upgrade is installed."),
-                    trf("Installs the {} not installed yet, without spending Wycademy points or materials: the Item Box grows to its largest size and the Provision Division gets every supply drop set.", &[&trn("{} Lab upgrade", "{} Lab upgrades", ki, &[&num(ki)])]),
+                    trf(
+                        "Installs the {} not installed yet, without spending Wycademy points or materials: the Item Box grows to its largest size and the Provision Division gets every supply drop set.",
+                        &[&trn("{} Lab upgrade", "{} Lab upgrades", ki, &[&num(ki)])],
+                    ),
                     tr("Each upgrade is offered too, as the game installs only offered ones. Box expansions can't be removed again here."),
                 ),
                 "costumes" => (
@@ -624,13 +673,19 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
                 "trader" => (
                     tr("Everything the Trader sells"),
                     tr("The Trader offers everything it can sell."),
-                    trf("Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included.", &[&entries]),
+                    trf(
+                        "Puts up for sale the {} the Trader does not offer yet: title words, Guild Card scenes and pet costumes, the downloads' ones included.",
+                        &[&entries],
+                    ),
                     tr("Buying still takes Trader points; what you already have is not shown."),
                 ),
                 "combos" => (
                     tr("Every combination recipe combined"),
                     tr("Every combination recipe has been combined."),
-                    trf("Marks the {} never combined as combined. The award for 130 recipes follows after your next quest.", &[&trn("{} recipe", "{} recipes", ki, &[&num(ki)])]),
+                    trf(
+                        "Marks the {} never combined as combined. The award for 130 recipes follows after your next quest.",
+                        &[&trn("{} recipe", "{} recipes", ki, &[&num(ki)])],
+                    ),
                     tr("A recipe never combined always succeeds the first time; these lose that bonus."),
                 ),
                 _ => (
@@ -655,7 +710,11 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
             });
             if on == "all" {
                 p.title = trf("Unlock all · {}", &[&what]);
-                p.summary = if k == 0 { tr("Every entry is unlocked.").into() } else { trf("Unlocks the {} not unlocked yet, each with its NEW mark where the game keeps one.", &[&entries]) };
+                p.summary = if k == 0 {
+                    tr("Every entry is unlocked.").into()
+                } else {
+                    trf("Unlocks the {} not unlocked yet, each with its NEW mark where the game keeps one.", &[&entries])
+                };
             } else {
                 p.title = trf("Lock all · {}", &[&what]);
                 p.summary = if k == 0 { tr("No entry is unlocked.").into() } else { trf("Locks the {} unlocked now.", &[&entries]) };
@@ -670,7 +729,8 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
         ["deviants", "permits"] => {
             let devs = trn("{} deviant", "{} deviants", n as i64, &[&num(n as i64)]);
             p.title = tr("Max Special Permits").into();
-            p.summary = if n == 0 { tr("Every deviant has 99 Special Permits.").into() } else { trf("Sets Special Permits to 99 for the {} below it.", &[&devs]) };
+            p.summary =
+                if n == 0 { tr("Every deviant has 99 Special Permits.").into() } else { trf("Sets Special Permits to 99 for the {} below it.", &[&devs]) };
             p.count = devs;
             p.review = tr("Every deviant: 99 Special Permits").into();
             p.detail = tr("Collections").into();
@@ -678,7 +738,11 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
         ["deviants", "levels"] => {
             let devs = trn("{} deviant", "{} deviants", n as i64, &[&num(n as i64)]);
             p.title = tr("Every deviant level").into();
-            p.summary = if n == 0 { tr("Every deviant has every level cleared.").into() } else { trf("Marks every level of the {} cleared: {}.", &[&devs, &list(&names(&|_| true), 3)]) };
+            p.summary = if n == 0 {
+                tr("Every deviant has every level cleared.").into()
+            } else {
+                trf("Marks every level of the {} cleared: {}.", &[&devs, &list(&names(&|_| true), 3)])
+            };
             p.count = devs;
             p.note = tr("G-rank levels appear in game only once a G-rank quest against the base monster is cleared; each row says which.").into();
             p.review = tr("Every deviant level cleared").into();

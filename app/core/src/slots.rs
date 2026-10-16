@@ -9,7 +9,7 @@
 //! DERIVED.
 
 use crate::character;
-use crate::save::{Save, LAST_PLAYED, SLOT_SIZE};
+use crate::save::{LAST_PLAYED, SLOT_SIZE, Save};
 use std::fmt;
 
 /// Bytes of a slot: the stride's last byte is alignment, and slot 3 ends before it.

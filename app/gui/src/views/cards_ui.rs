@@ -10,9 +10,30 @@ use mhgu_save::cards::{self, List, Moved, Role};
 /// Card type `k` as the list's *Change Card Type* names it (`GuildCardMsg` 211-234, 263).
 pub fn card_type_name(k: i8) -> String {
     let names = [
-        tr("Partner"), tr("Friend"), tr("Classmate"), tr("Teammate"), tr("Bandmate"), tr("Roommate"), tr("Family"), tr("Special"),
-        tr("Co-worker"), tr("Colleague"), tr("VIP"), tr("Rival"), tr("Elite"), tr("Best Bud"), tr("Sensei"), tr("Online"), tr("Guild"),
-        tr("Soldier"), tr("Scrivener"), tr("Team 1"), tr("Team 2"), tr("Team 3"), tr("Passerby"), tr("Sweetheart"),
+        tr("Partner"),
+        tr("Friend"),
+        tr("Classmate"),
+        tr("Teammate"),
+        tr("Bandmate"),
+        tr("Roommate"),
+        tr("Family"),
+        tr("Special"),
+        tr("Co-worker"),
+        tr("Colleague"),
+        tr("VIP"),
+        tr("Rival"),
+        tr("Elite"),
+        tr("Best Bud"),
+        tr("Sensei"),
+        tr("Online"),
+        tr("Guild"),
+        tr("Soldier"),
+        tr("Scrivener"),
+        tr("Team 1"),
+        tr("Team 2"),
+        tr("Team 3"),
+        tr("Passerby"),
+        tr("Sweetheart"),
     ];
     match k {
         cards::STREETPASS => tr("StreetPass").into(),
@@ -47,7 +68,9 @@ fn hired_name(t: u8) -> String {
 /// The weapon of a card or a hunter for hire: its name, else its class.
 fn weapon_name(t: u8, id: u16) -> String {
     match Kind::from_code(t) {
-        k @ Kind::Weapon(c) => piece(Owner::Hunter, k, id).map(|p| p.name.clone()).unwrap_or_else(|| weapon_classes().get(c as usize).copied().unwrap_or("?").to_string()),
+        k @ Kind::Weapon(c) => {
+            piece(Owner::Hunter, k, id).map(|p| p.name.clone()).unwrap_or_else(|| weapon_classes().get(c as usize).copied().unwrap_or("?").to_string())
+        }
         _ => String::new(),
     }
 }
@@ -76,7 +99,14 @@ fn card_row(c: &cards::Card) -> CardRow {
         fmt::playtime(c.playtime),
         if c.comment().is_empty() { String::new() } else { format!("“{}”", c.comment()) },
     ]);
-    CardRow { slot: c.slot as i32, name: c.name.clone().into(), tag: SharedString::new(), line1: line1.into(), line2: line2.into(), greeting: c.greeting().into() }
+    CardRow {
+        slot: c.slot as i32,
+        name: c.name.clone().into(),
+        tag: SharedString::new(),
+        line1: line1.into(),
+        line2: line2.into(),
+        greeting: c.greeting().into(),
+    }
 }
 
 pub(super) fn cards_page(ui: &AppWindow, st: &State) {
@@ -129,10 +159,16 @@ pub(super) fn cards_page(ui: &AppWindow, st: &State) {
     };
     api.set_card_rows(model(rows));
     let summary: String = match tab {
-        0 => tr("Cards received from other hunters. The game keeps them at the front of the list: removing one moves the later ones up, as its Delete does.").into(),
+        0 => tr("Cards received from other hunters. The game keeps them at the front of the list: removing one moves the later ones up, as its Delete does.")
+            .into(),
         1 => tr("Cards the Courier Service received. Move one to the Card List, as the Post Office does, or remove it.").into(),
         2 => match cards::hired_quests(s, base) {
-            Some(n) => trn("The party is hired for {n} more quest. The game picks new offers after every quest, so this list is read-only.", "The party is hired for {n} more quests. The game picks new offers after every quest, so this list is read-only.", n as i64, &[]),
+            Some(n) => trn(
+                "The party is hired for {n} more quest. The game picks new offers after every quest, so this list is read-only.",
+                "The party is hired for {n} more quests. The game picks new offers after every quest, so this list is read-only.",
+                n as i64,
+                &[],
+            ),
             None => tr("No one is hired. The game picks new offers after every quest, so this list is read-only.").into(),
         },
         _ => tr("Hunters you blocked online, shared by the three characters.").into(),
@@ -168,7 +204,9 @@ pub(super) fn wire_cards(ui: &AppWindow, st: &Shared) {
                 let l = if t == 0 { List::Stored } else { List::Inbox };
                 let Some(c) = cards::cards(s.save(), base, l).into_iter().find(|c| c.slot == slot) else { return };
                 let conf = if t == 0 { Conf::Confirmed } else { Conf::Derived };
-                stage(&ui, &mut s, conf, vec![Target::Cards(t == 1)], trf("Remove the Guild Card of {}", &[&c.name]), |sv, base| cards::remove(sv, base, l, slot));
+                stage(&ui, &mut s, conf, vec![Target::Cards(t == 1)], trf("Remove the Guild Card of {}", &[&c.name]), |sv, base| {
+                    cards::remove(sv, base, l, slot)
+                });
             }
             3 => {
                 let Some(b) = cards::blacklist(s.save()).into_iter().find(|b| b.slot == slot) else { return };
@@ -189,8 +227,9 @@ pub(super) fn wire_cards(ui: &AppWindow, st: &Shared) {
             return;
         }
         let title = trf("Move the Guild Card of {} to the Card List", &[&c.name]);
-        if stage(&ui, &mut s, Conf::Derived, vec![Target::Cards(false), Target::Cards(true)], title, |sv, base| cards::move_to_stored(sv, base, slot, today).is_some())
-            && probe == Some(Moved::Kept)
+        if stage(&ui, &mut s, Conf::Derived, vec![Target::Cards(false), Target::Cards(true)], title, |sv, base| {
+            cards::move_to_stored(sv, base, slot, today).is_some()
+        }) && probe == Some(Moved::Kept)
         {
             toast(&ui, tr("The Card List already holds as recent a card of this hunter: only the inbox card goes"), false);
         }

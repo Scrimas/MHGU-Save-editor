@@ -14,7 +14,11 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
         .filter_map(|r| {
             let acc = r.accept_flag.is_some_and(|x| c.flag(x));
             let done = r.done_flag.is_some_and(|x| c.flag(x));
-            if done { done_n += 1 } else { open += 1 }
+            if done {
+                done_n += 1
+            } else {
+                open += 1
+            }
             let keep = match f.as_str() {
                 "open" => !done,
                 "done" => done,
@@ -34,12 +38,8 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
             Some(RequestRow {
                 index: r.index as i32,
                 name: name.into(),
-                sub: if waiting.is_empty() {
-                    format!("{village} · #{}", r.index)
-                } else {
-                    trf("{} · #{} · waits for: {}", &[&village, &r.index, &waiting])
-                }
-                .into(),
+                sub: if waiting.is_empty() { format!("{village} · #{}", r.index) } else { trf("{} · #{} · waits for: {}", &[&village, &r.index, &waiting]) }
+                    .into(),
                 accepted: acc,
                 completed: done,
                 has_flags: r.accept_flag.is_some(),
@@ -48,7 +48,7 @@ pub(super) fn requests_page(ui: &AppWindow, st: &State) {
             })
         })
         .collect();
-    api.set_request_summary(trf("{} open · {} reported",&[&num(open), &num(done_n)]).into());
+    api.set_request_summary(trf("{} open · {} reported", &[&num(open), &num(done_n)]).into());
     api.set_requests(keep(api.get_requests(), rows));
 }
 

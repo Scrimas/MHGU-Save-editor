@@ -13,7 +13,10 @@ pub(super) fn fields_page(ui: &AppWindow, st: &State) {
         .iter()
         .enumerate()
         .filter(|(_, fl)| {
-            f.is_empty() || fl.label.to_lowercase().contains(&f) || fl.manager.to_lowercase().contains(&f) || format!("{:x}", abs(fl)).contains(f.trim_start_matches("0x"))
+            f.is_empty()
+                || fl.label.to_lowercase().contains(&f)
+                || fl.manager.to_lowercase().contains(&f)
+                || format!("{:x}", abs(fl)).contains(f.trim_start_matches("0x"))
         })
         .map(|(i, fl)| FieldRow {
             index: i as i32,

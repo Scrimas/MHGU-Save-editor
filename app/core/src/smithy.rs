@@ -8,7 +8,7 @@
 //! bit = 4 x record + armor ID slot. CONFIRMED in game 2026-10-09 (every list written
 //! showed with its NEW marks).
 
-use crate::data::{tables, SmithyList};
+use crate::data::{SmithyList, tables};
 use crate::save::Save;
 
 /// Weapon lists, classes 0-14: 15 x (20 B listed, 20 B NEW).
@@ -108,7 +108,7 @@ mod tests {
 
     #[test]
     fn list_all_sets_listed_and_new() {
-        use crate::save::{blank, SLOT1_BASE as B};
+        use crate::save::{SLOT1_BASE as B, blank};
         let mut s = blank();
         let l = lists().iter().find(|l| l.list == "deco").unwrap();
         assert_eq!(count(&s, B, l, 0), (0, l.records));
