@@ -43,6 +43,11 @@ image itself. Back to the [main page](../../README.md).
 ![Collections: the deviants, their Special Permits, permit points and levels cleared](1x/13-collections-dark.png#gh-dark-mode-only)
 ![Collections: the deviants, their Special Permits, permit points and levels cleared](1x/13-collections-light.png#gh-light-mode-only)
 
+## Unlocks
+
+![Unlocks: the Soaratorium Lab upgrades, entry by entry, with what unlocks each in game](1x/15-unlocks-dark.png#gh-dark-mode-only)
+![Unlocks: the Soaratorium Lab upgrades, entry by entry, with what unlocks each in game](1x/15-unlocks-light.png#gh-light-mode-only)
+
 ## Database: monster
 
 ![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](1x/08-database-monster-dark.png#gh-dark-mode-only)

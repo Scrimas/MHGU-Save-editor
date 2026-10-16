@@ -120,11 +120,13 @@ value and in Review and Write. They work offline; online, other hunters can see 
     <td>
       <a href="docs/screenshots/README.md#collections-deviants"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/13-collections-dark.png"><img alt="Collections: the deviants, their Special Permits, permit points and levels cleared" src="docs/screenshots/13-collections-light.png"></picture></a>
     </td>
-    <td></td>
+    <td>
+      <a href="docs/screenshots/README.md#unlocks"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/15-unlocks-dark.png"><img alt="Unlocks: the Soaratorium Lab upgrades, entry by entry, with what unlocks each in game" src="docs/screenshots/15-unlocks-light.png"></picture></a>
+    </td>
   </tr>
   <tr>
     <td align="center">Collections: deviants</td>
-    <td></td>
+    <td align="center">Unlocks</td>
   </tr>
 </table>
 
