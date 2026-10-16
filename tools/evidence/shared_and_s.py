@@ -5,10 +5,15 @@ SPLIT_CHECKS    : sub-fields of the S+0x20 block (funds, Wycademy points).
 CORRECTED_CHECKS: entries relabelled because the data contradicted the code reading.
 Game text (title words, scenes) comes from scratch/gtxt.pkl or the RomFS dump in scratch/.
 """
-import os, sys, csv, json, re, pickle
+import os, sys, csv, json, re, pickle, functools
 from timeline import *
 
-NAMES = json.load(open(R + 'app/assets/gen/names.json'))['items']
+
+@functools.cache
+def item_names():
+    """Item names of the asset pack: read when a check runs, so that importing the checks
+    (sources.py, in CI) needs no pack."""
+    return json.load(open(R + 'app/assets/gen/names.json'))['items']
 
 
 def _by(S):
@@ -92,7 +97,7 @@ def chk_loadouts(S):
                 ok &= all(a == q for a, q in zip(its[0], p) if a[0]) and all(not a[0] for a, q in zip(its[0], p) if a != q)
                 equal += its[0] == p
                 ok &= all(e[:42].rstrip(b'\0') == b'---' and not any(x for x, c in it) for e, it in zip(ent[1:], its[1:]))
-                det = '%d items, first %s x%d' % (sum(1 for x, c in its[0] if x), NAMES[its[0][0][0]], its[0][0][1])
+                det = '%d items, first %s x%d' % (sum(1 for x, c in its[0] if x), item_names()[its[0][0][0]], its[0][0][1])
             else:
                 ok &= all(e[:42].rstrip(b'\0') == b'---' for e in ent) and not any(x for x, c in p)
     ok &= equal == len(S) - 6
@@ -291,7 +296,7 @@ def chk_dlc_item_list(S):
         pairs = [p for p in pairs if p[0]]
         ok &= 'Pack' in nm or 'Provisions' in nm
         ok &= u32(r, 0x28) == i - 32 and u16(r, 0x2C) == 507 + i
-        ok &= len(pairs) > 0 and all(0 < it < len(NAMES) and NAMES[it] and 0 < c <= 99 for it, c in pairs)
+        ok &= len(pairs) > 0 and all(0 < it < len(item_names()) and item_names()[it] and 0 < c <= 99 for it, c in pairs)
     ok &= used == list(range(32, 49))
     return ok, 'entries %d-%d decode (names, catalog 539-555, items)' % (used[0], used[-1])
 
