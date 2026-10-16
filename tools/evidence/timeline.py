@@ -1,13 +1,16 @@
 """The save timeline behind the CONFIRMED tags of data/save-map.csv (run.py). Read-only.
 
-Saves, oldest first: snapshots/ (repo, never committed), the editor's own pre-write snapshots and
-the live Ryujinx save. NOTES says what happened between each save and the one before it: the
-in-game actions and tool writes that the checks tie the fields to. A save added later needs a note.
+Saves, oldest first: snapshots/ (repo, never committed) and the editor's own pre-write snapshots,
+2026-09-05 to 2026-10-05. NOTES says what happened between each save and the one before it: the
+in-game actions and tool writes that the checks tie the fields to. The timeline is the saves
+NOTES names, and nothing else: a later snapshot stays out of it (run.py lists those) until it
+gets a note and the checks expect it. It ends at END, a frozen copy of the live save of the day
+the checks were written; the live save itself keeps changing, so it is not part of it.
 """
 import os, csv, bisect, struct, time
 R = os.path.dirname(os.path.abspath(__file__)) + '/../../'
 A = os.path.expanduser('~/.local/share/mhgu-save-editor/snapshots/0000000000000001/')
-LIVE = os.path.expanduser('~/.config/Ryujinx/bis/user/save/0000000000000001/0/system')
+END = 'derived-0-pre-check'
 
 # What happened between the previous save (time order) and this one. backup-...-pre-X is taken
 # BEFORE the tool wrote X, so X's write shows up in the NEXT save. Notes marked '?' are guesses.
@@ -51,20 +54,27 @@ NOTES = {
  'confirm-1-test-write': 'editor core code wrote on Scrimas: Rathian Notes page locked, HR 500, Hunter\'s Knife in box slot 557',
  'confirm-2-after-game': 'GAME SESSION: seen in game: Rathian gone from the Notes, HR 500, the knife in the box and equippable; saved',
  'confirm-3-restore-write': 'editor core code wrote HR 999 (goal hr999) and Rathian\'s Notes page (goal notes); knife kept',
- 'LIVE': 'latest live save',
+ END: 'identical to confirm-3-restore-write: the live save when the checks were written (2026-10-05 evening); the timeline ends here',
 }
 
-def saves():
-    """[(mtime, name, bytes)] in time order: snapshots/, the app's snapshots, the live save."""
+def files():
+    """[(mtime, name, path)] of every save on disk, in time order: snapshots/ and the app's snapshots."""
     out = []
     for n in os.listdir(R + 'snapshots'):
         p = R + 'snapshots/%s/0/system' % n
         if os.path.isfile(p): out.append((os.stat(p).st_mtime, n, p))
     for n in os.listdir(A):
-        p = A + n + '/0/system'; out.append((os.stat(p).st_mtime, 'app-' + n, p))
-    out.append((os.stat(LIVE).st_mtime, 'LIVE', LIVE))
-    out.sort()
-    return [(t, n, open(p, 'rb').read()) for t, n, p in out]
+        p = A + n + '/0/system'
+        if os.path.isfile(p): out.append((os.stat(p).st_mtime, 'app-' + n, p))
+    return sorted(out)
+
+def outside():
+    """The saves on disk that NOTES does not name: not part of the timeline."""
+    return [n for t, n, p in files() if n not in NOTES]
+
+def saves():
+    """[(mtime, name, bytes)] of the timeline (the saves NOTES names), in time order."""
+    return [(t, n, open(p, 'rb').read()) for t, n, p in files() if n in NOTES]
 
 def base(b, slot=1): return 0x24 + int.from_bytes(b[0x34 + 4 * (slot - 1):0x38 + 4 * (slot - 1)], 'little')
 def u8(b, o): return b[o]

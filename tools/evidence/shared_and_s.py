@@ -54,7 +54,7 @@ def chk_header(S):
     ok = names == [b'Scrimas', b'Scrimas2', b'Scrimas3']
     ncache = nset = nsets = 0
     for t, n, b in S:
-        for s in ((1, 2, 3) if n == 'LIVE' else (1,)):
+        for s in ((1, 2, 3) if n == END else (1,)):
             B = base(b, s)
             gear = [u16(b, B + 0x23B39 + 2 * k) for k in range(7)]
             for k, g in enumerate(gear):
@@ -87,7 +87,7 @@ def chk_loadouts(S):
     """Item loadout 1 ('Set 01') is the CONFIRMED pouch slot for slot: its 20 items (valid names, counts) sit in the same pouch slots in all 36 saves, the pouch being equal to it except for a few extra stacks in empty slots in the six oldest saves (gathered material); loadouts 2-24 and both fresh slots are '---' and empty"""
     ok = True; det = ''; equal = 0
     for t, n, b in S:
-        for s in ((1, 2, 3) if n == 'LIVE' else (1,)):
+        for s in ((1, 2, 3) if n == END else (1,)):
             L = base(b, s) + 0x17CF
             ent = [b[L + 170 * k:L + 170 * (k + 1)] for k in range(24)]
             its = [[(u16(e, 0x2A + 4 * i), u16(e, 0x2C + 4 * i)) for i in range(32)] for e in ent]
@@ -146,7 +146,7 @@ def chk_awards_game(S):
     ok &= 130 in c('capture-A')
     ok &= g('backup-20260919-151405-pre-questtest') == g('backup-20260919-143350-pre-allawards')  # tool wrote the card copy only
     ok &= len(c('backup-20260919-151405-pre-questtest')) == 131
-    ok &= g('LIVE', 2) == c('LIVE', 2) == g('LIVE', 3) == {101}
+    ok &= g(END, 2) == c(END, 2) == g(END, 3) == {101}
     lag = [n for t, n, b in S if not _bits(b, base(b) + 0xC8115, 17) >= _bits(b, base(b) + 0x3157, 20)]
     ok &= lag == ['backup-20260919-130939-pre-dish76']   # card copy rebuilt one save later
     return ok, 'first save G == card (73); +130 in game then card; fresh {101}'
@@ -181,8 +181,8 @@ def chk_poogie(S):
     ok &= u('complete-1-after-talks') - u('complete-0-pre-full-completion') == {4, 15, 22, 25}
     ch = [n for (t0, n0, a), (t1, n, b) in zip(S, S[1:]) if a[base(a) + 0x2F9F:base(a) + 0x2FA7] != b[base(b) + 0x2F9F:base(b) + 0x2FA7]]
     ok &= ch == ['req-3-after-captain', 'complete-1-after-talks']
-    q = [i for i in u('LIVE') if 6 <= i <= 39 and i not in (28, 35, 36, 39)]
-    ok &= len(q) >= 10 and bit(D['LIVE'], base(D['LIVE']) + 0xC8115, 68) == 1
+    q = [i for i in u(END) if 6 <= i <= 39 and i not in (28, 35, 36, 39)]
+    ok &= len(q) >= 10 and bit(D[END], base(D[END]) + 0xC8115, 68) == 1
     return ok, 'changes only at %s; qualifying %d' % (ch, len(q))
 
 

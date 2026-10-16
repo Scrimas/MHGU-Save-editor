@@ -75,11 +75,12 @@ stays DERIVED.
 ## Confirmed by the save timeline
 
 A field named from the code is DERIVED. It becomes CONFIRMED when real saves agree with
-it, independently of the code. The timeline is 36 saves of the same file, 2026-09-05 to
+it, independently of the code. The timeline is 40 saves of the same file, 2026-09-05 to
 2026-10-05:
 - the snapshots of [06](06-methodology.md);
 - the editor's own pre-write snapshots;
-- the live save.
+- a frozen copy of the live save of 2026-10-05, the last one (the live save itself keeps
+  changing, so the checks do not read it).
 
 Each step between two saves is a known in-game action or a tool write:
 - a counted quest, the Harvest Tour, a round of NPC reports;

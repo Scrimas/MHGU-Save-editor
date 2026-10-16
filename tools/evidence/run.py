@@ -12,7 +12,7 @@ entry is not tagged CONFIRMED in LABELS.
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../emu')
-from timeline import saves
+from timeline import saves, outside
 import shared_and_s, managers, cards, goals
 from savemap import LABELS
 
@@ -35,6 +35,9 @@ def main():
             print('%-4s %-22s %-24s %s' % ('ok' if ok else 'FAIL', k, f.__name__, detail))
             if tag not in ('goal', 'CONFIRMED'): print('     tagged %s in LABELS' % tag)
     print('%d saves, %d checks failed' % (len(S), bad))
+    out = outside()
+    if out:
+        print('%d later saves are not in the timeline (no note in timeline.py): %s' % (len(out), ', '.join(out)))
     sys.exit(1 if bad else 0)
 
 

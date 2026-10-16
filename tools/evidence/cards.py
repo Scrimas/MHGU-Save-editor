@@ -135,7 +135,7 @@ def _cardconv(c):
 def chk_card_equipment(S):
     """Own card +0x54, 7 x 44 B: fresh Scrimas2/3 cards = the CONFIRMED box entries at the equipped indices (type, ID, level, decorations, transmog); slot 1's 5 armor + talisman entries equal box entries 38/49/55/61/67/179 field for field in all 36 saves (an older equipped set: the card is not refreshed on gear change)"""
     fresh = []
-    for n in ('char2-2-after-scrimas3', 'LIVE'):
+    for n in ('char2-2-after-scrimas3', END):
         b = _s(S, n)
         for sl in (2, 3):
             B = base(b, sl)
