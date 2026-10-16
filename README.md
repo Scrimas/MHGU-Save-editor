@@ -3,8 +3,10 @@
 A desktop save editor for **Monster Hunter Generations Ultimate** (Nintendo Switch,
 emulator saves and console backups).
 
-![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-dark.png#gh-dark-mode-only)
-![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-light.png#gh-light-mode-only)
+[![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-dark.png#gh-dark-mode-only)](docs/screenshots/1x/01-overview-dark.png)
+[![Overview: progress of the character and one-click goals, two of them staged for Review](docs/screenshots/01-overview-light.png#gh-light-mode-only)](docs/screenshots/1x/01-overview-light.png)
+
+Click a screenshot to see it at full size (1920×1080 at 1x scale).
 
 Every value it shows is read where the game itself keeps it, and every change is
 described in game terms ("Mega Potion ×10", "HR 999", "every quest cleared") before
@@ -81,12 +83,26 @@ value and in Review and Write. They work offline; online, other hunters can see 
 <table>
   <tr>
     <td width="50%">
-      <img alt="Items: the item box with game icons" src="docs/screenshots/02-items-dark.png#gh-dark-mode-only">
-      <img alt="Items: the item box with game icons" src="docs/screenshots/02-items-light.png#gh-light-mode-only">
+      <a href="docs/screenshots/1x/11-character-dark.png"><img alt="Character: name, rank, points, play time, progress and the Courier's counters" src="docs/screenshots/11-character-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/11-character-light.png"><img alt="Character: name, rank, points, play time, progress and the Courier's counters" src="docs/screenshots/11-character-light.png#gh-light-mode-only"></a>
     </td>
     <td width="50%">
-      <img alt="Equipment: the hunter box and a talisman with its skills, slots and decorations" src="docs/screenshots/03-equipment-dark.png#gh-dark-mode-only">
-      <img alt="Equipment: the hunter box and a talisman with its skills, slots and decorations" src="docs/screenshots/03-equipment-light.png#gh-light-mode-only">
+      <a href="docs/screenshots/1x/12-palicoes-dark.png"><img alt="Palicoes: a Palico's level, forte, target, looks, support moves and skills" src="docs/screenshots/12-palicoes-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/12-palicoes-light.png"><img alt="Palicoes: a Palico's level, forte, target, looks, support moves and skills" src="docs/screenshots/12-palicoes-light.png#gh-light-mode-only"></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">Character</td>
+    <td align="center">Palicoes</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="docs/screenshots/1x/02-items-dark.png"><img alt="Items: the item box with game icons" src="docs/screenshots/02-items-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/02-items-light.png"><img alt="Items: the item box with game icons" src="docs/screenshots/02-items-light.png#gh-light-mode-only"></a>
+    </td>
+    <td>
+      <a href="docs/screenshots/1x/03-equipment-dark.png"><img alt="Equipment: the hunter box and a talisman with its skills, slots and decorations" src="docs/screenshots/03-equipment-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/03-equipment-light.png"><img alt="Equipment: the hunter box and a talisman with its skills, slots and decorations" src="docs/screenshots/03-equipment-light.png#gh-light-mode-only"></a>
     </td>
   </tr>
   <tr>
@@ -95,17 +111,28 @@ value and in Review and Write. They work offline; online, other hunters can see 
   </tr>
   <tr>
     <td>
-      <img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-dark.png#gh-dark-mode-only">
-      <img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-light.png#gh-light-mode-only">
+      <a href="docs/screenshots/1x/04-monsters-dark.png"><img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/04-monsters-light.png"><img alt="Monsters: hunts, captures, sizes and crowns" src="docs/screenshots/04-monsters-light.png#gh-light-mode-only"></a>
     </td>
     <td>
-      <img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-dark.png#gh-dark-mode-only">
-      <img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-light.png#gh-light-mode-only">
+      <a href="docs/screenshots/1x/05-quests-dark.png"><img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/05-quests-light.png"><img alt="Quests: the Hub quests, cleared, seen and failed" src="docs/screenshots/05-quests-light.png#gh-light-mode-only"></a>
     </td>
   </tr>
   <tr>
     <td align="center">Monsters</td>
     <td align="center">Quests</td>
+  </tr>
+  <tr>
+    <td>
+      <a href="docs/screenshots/1x/13-collections-dark.png"><img alt="Collections: the deviants, their Special Permits, permit points and levels cleared" src="docs/screenshots/13-collections-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/13-collections-light.png"><img alt="Collections: the deviants, their Special Permits, permit points and levels cleared" src="docs/screenshots/13-collections-light.png#gh-light-mode-only"></a>
+    </td>
+    <td></td>
+  </tr>
+  <tr>
+    <td align="center">Collections: deviants</td>
+    <td></td>
   </tr>
 </table>
 
@@ -126,18 +153,18 @@ edits the value.
 - **Equipment**: what forging, upgrading and each level take against your item box, and
   the weapon's upgrade tree.
 
-![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-dark.png#gh-dark-mode-only)
-![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-light.png#gh-light-mode-only)
+[![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-dark.png#gh-dark-mode-only)](docs/screenshots/1x/08-database-monster-dark.png)
+[![Database: Rathalos's size record against its crown sizes and the chance of a gold crown in each quest](docs/screenshots/08-database-monster-light.png#gh-light-mode-only)](docs/screenshots/1x/08-database-monster-light.png)
 
 <table>
   <tr>
     <td width="50%">
-      <img alt="Database: where to get a Rathalos Ruby, carves and quest rewards with their chances" src="docs/screenshots/09-database-item-dark.png#gh-dark-mode-only">
-      <img alt="Database: where to get a Rathalos Ruby, carves and quest rewards with their chances" src="docs/screenshots/09-database-item-light.png#gh-light-mode-only">
+      <a href="docs/screenshots/1x/09-database-item-dark.png"><img alt="Database: where to get a Rathalos Ruby, carves and quest rewards with their chances" src="docs/screenshots/09-database-item-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/09-database-item-light.png"><img alt="Database: where to get a Rathalos Ruby, carves and quest rewards with their chances" src="docs/screenshots/09-database-item-light.png#gh-light-mode-only"></a>
     </td>
     <td width="50%">
-      <img alt="Database: the Sharpness skill tree, its skills and the talismans, decorations and armor that give its points" src="docs/screenshots/10-database-skill-dark.png#gh-dark-mode-only">
-      <img alt="Database: the Sharpness skill tree, its skills and the talismans, decorations and armor that give its points" src="docs/screenshots/10-database-skill-light.png#gh-light-mode-only">
+      <a href="docs/screenshots/1x/10-database-skill-dark.png"><img alt="Database: the Sharpness skill tree, its skills and the talismans, decorations and armor that give its points" src="docs/screenshots/10-database-skill-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/10-database-skill-light.png"><img alt="Database: the Sharpness skill tree, its skills and the talismans, decorations and armor that give its points" src="docs/screenshots/10-database-skill-light.png#gh-light-mode-only"></a>
     </td>
   </tr>
   <tr>
@@ -159,8 +186,22 @@ edits the value.
 
 Keep your own backup anyway. This is an unofficial tool.
 
-![Write dialog: the changes in game terms, the emulator check and the snapshot](docs/screenshots/06-write-dark.png#gh-dark-mode-only)
-![Write dialog: the changes in game terms, the emulator check and the snapshot](docs/screenshots/06-write-light.png#gh-light-mode-only)
+<table>
+  <tr>
+    <td width="50%">
+      <a href="docs/screenshots/1x/06-write-dark.png"><img alt="Write dialog: the changes in game terms, the emulator check and the snapshot" src="docs/screenshots/06-write-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/06-write-light.png"><img alt="Write dialog: the changes in game terms, the emulator check and the snapshot" src="docs/screenshots/06-write-light.png#gh-light-mode-only"></a>
+    </td>
+    <td width="50%">
+      <a href="docs/screenshots/1x/14-snapshots-dark.png"><img alt="Snapshots: the copies taken before each write, to compare or restore" src="docs/screenshots/14-snapshots-dark.png#gh-dark-mode-only"></a>
+      <a href="docs/screenshots/1x/14-snapshots-light.png"><img alt="Snapshots: the copies taken before each write, to compare or restore" src="docs/screenshots/14-snapshots-light.png#gh-light-mode-only"></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">Write</td>
+    <td align="center">Snapshots</td>
+  </tr>
+</table>
 
 **Keyboard**: Ctrl+S write, Ctrl+Z undo, Ctrl+F search, Ctrl+O open, Ctrl+Up/Down change
 page, Ctrl+Left/Right change tab, the arrows move between entries and Enter edits one,
@@ -177,8 +218,8 @@ Traditional and Simplified Chinese (the system's by default), with item, equipme
 and monster names as the game writes them. On Linux it can follow your wallpaper's colours
 with matugen ([setup](app/README.md#colours-from-matugen)).
 
-![Settings dialog](docs/screenshots/07-settings-dark.png#gh-dark-mode-only)
-![Settings dialog](docs/screenshots/07-settings-light.png#gh-light-mode-only)
+[![Settings dialog](docs/screenshots/07-settings-dark.png#gh-dark-mode-only)](docs/screenshots/1x/07-settings-dark.png)
+[![Settings dialog](docs/screenshots/07-settings-light.png#gh-light-mode-only)](docs/screenshots/1x/07-settings-light.png)
 
 ## How it works
 
