@@ -1,0 +1,41 @@
+# cargo deny: known vulnerabilities (RustSec), the licences of every dependency, and
+# where crates come from. CI runs it; locally: cargo deny --manifest-path app/Cargo.toml check
+
+[graph]
+# the two release builds, and the Windows CI tests (MSVC)
+targets = ["x86_64-unknown-linux-gnu", "x86_64-pc-windows-gnu", "x86_64-pc-windows-msvc"]
+
+[advisories]
+# an unmaintained crate deep in Slint's tree is not ours to replace: only our direct
+# dependencies fail the check
+unmaintained = "workspace"
+
+[licenses]
+# compatible with the GPL-3.0-or-later of this repo; Slint is used under its
+# Royalty-free 2.0 licence (see Cargo.toml)
+allow = [
+    "0BSD",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "CC0-1.0",
+    "CDLA-Permissive-2.0",
+    "GPL-3.0-or-later",
+    "ISC",
+    "LicenseRef-Slint-Royalty-free-2.0",
+    "MIT",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+]
+
+[bans]
+# Slint and winit pull several versions of the same crates
+multiple-versions = "allow"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

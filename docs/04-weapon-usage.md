@@ -48,7 +48,7 @@ Arena    0x25474F + 2*13 = 0x254769
 
 ## Verification
 
-The layout was validated end to end. All 15 weapons were read from the three venue
+**CONFIRMED.** The layout was validated end to end. All 15 weapons were read from the three venue
 arrays, summed, and compared against the "All" tab as rendered by the game — **15 of
 15 matched exactly**, including four weapons with non-zero counts split across
 venues in different proportions.

@@ -1,6 +1,6 @@
 name: CI
 
-# Tests and clippy on every push and pull request, in the Arch Linux container the release
+# Tests, clippy and formatting on every push and pull request, in the Arch Linux container the release
 # builds use, and the tests again on Windows (the .exe's file and update handling). The
 # tests that need a real save get the sealed copy app/assets/test-save.tar.xz.gpg and the
 # game-asset pack (the UI test picks equipment by name); see app/assets/README.md. Without
@@ -32,7 +32,7 @@ jobs:
           # a font: the headless UI test lays out text (fontconfig finds none otherwise)
           pacman -Syu --noconfirm --needed git rustup fontconfig ttf-dejavu python gettext
           rustup default stable
-          rustup component add clippy
+          rustup component add clippy rustfmt
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
       - uses: actions/checkout@v7
@@ -41,9 +41,17 @@ jobs:
         with:
           workspaces: app
 
+      - name: Formatting
+        working-directory: app
+        run: cargo fmt --all --check
+
       # the translation template matches the source and every catalog is valid
       - name: Translations
         run: python3 tools/i18n.py --check
+
+      # every CONFIRMED tag of the save map has a check or a written-up source
+      - name: Evidence sources
+        run: python3 tools/evidence/sources.py
 
       - name: Asset pack and test save
         env:
@@ -79,6 +87,22 @@ jobs:
       - name: Clippy
         working-directory: app
         run: cargo clippy --workspace --all-targets -- -D warnings
+
+  # licences, bans and crate sources of every dependency (app/deny.toml), and known
+  # vulnerabilities apart: a new advisory deep in Slint's tree shows as a warning instead of
+  # failing a push that changed nothing (the fix is a Slint update or an ignore entry)
+  deny:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        checks: [advisories, bans licenses sources]
+    continue-on-error: ${{ matrix.checks == 'advisories' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: app/Cargo.toml
+          command: check ${{ matrix.checks }}
 
   windows:
     runs-on: windows-latest

@@ -16,14 +16,16 @@ from timeline import saves
 import shared_and_s, managers, cards, goals
 from savemap import LABELS
 
+# every check, as (key, function); sources.py reads the keys
+LISTS = [shared_and_s.CHECKS, shared_and_s.SPLIT_CHECKS, shared_and_s.CORRECTED_CHECKS,
+         managers.CHECKS, managers.PROPOSED, cards.CHECKS, cards.SPLIT_CHECKS, goals.CHECKS]
+
 
 def main():
     S = saves()
     tagged = {(sc, o): c for sc, o, n, l, c in LABELS} | {(sc, o, n): c for sc, o, n, l, c in LABELS}
-    lists = [shared_and_s.CHECKS, shared_and_s.SPLIT_CHECKS, shared_and_s.CORRECTED_CHECKS,
-             managers.CHECKS, managers.PROPOSED, cards.CHECKS, cards.SPLIT_CHECKS, goals.CHECKS]
     bad = 0
-    for lst in lists:
+    for lst in LISTS:
         for key, f in lst:
             ok, detail = f(S)
             tag = 'goal' if key[0] == 'goal' else tagged.get(key, 'no LABELS entry')

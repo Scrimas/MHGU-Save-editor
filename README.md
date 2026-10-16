@@ -32,6 +32,10 @@ file is checked against the release's SHA-256 sums and takes the place of the ol
 The sums come from the same release, so they catch a broken download, not a release
 published by someone else; a download can be cancelled.
 
+Version numbers follow the edits' status: the major number goes up once every edit has
+been checked in game, so a release *N*.0.0 has no Derived edit; a minor version adds
+features, whose new edits may be Derived; a patch version fixes bugs.
+
 Saves are found automatically for Ryujinx (`~/.config/Ryujinx`, `%APPDATA%\Ryujinx`, the
 Flatpak folders) and for yuzu and its forks: suyu, Sudachi, Citron, Eden, torzu
 (`~/.local/share/<name>`, `%APPDATA%\<name>`, `~/.var/app/<any app>/data/<name>`).

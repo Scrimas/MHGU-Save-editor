@@ -6,7 +6,8 @@ Every byte or bit read of the game's loader becomes a row. Repeated reads (same 
 pc sequence at a constant stride) collapse into one array row. Rows are labelled from
 LABELS (offsets relative to the character base or absolute, see docs/11-save-map.md); a
 single-copy row that holds smaller labelled fields is cut at their edges. A CONFIRMED tag
-that rests on the save timeline has its check in tools/evidence/run.py.
+that rests on the save timeline has its check in tools/evidence/run.py; any other has its
+source in tools/evidence/sources.py.
 """
 import os, sys, pickle, csv, collections
 
