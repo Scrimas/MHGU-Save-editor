@@ -162,7 +162,10 @@ is a villager request. See [Villager requests](#villager-requests--tableactivity
 
 ## Quest sets — `base + 0x3187`
 
-**DERIVED from code, checked against the save; bit 48 CONFIRMED by write.** A 16-byte
+**CONFIRMED in game as read by the game**: bit 48 by a controlled write, and the set
+bits written by the bulk completion granted the set awards at the next quest (see
+Evidence). The membership comes from the game's own code; that the game sets a bit
+itself at the last clear is from the code only, not yet seen in a save. A 16-byte
 bitmap (`+0xc70` of the save object, file `0x18FE23` in slot 1): bit N is set when
 **every quest of set N has been cleared**. There are 100 sets (bits 0–99). The column
 `sets` of [`data/quest-index.csv`](../data/quest-index.csv) lists the sets of each
@@ -224,7 +227,11 @@ counter each quest raised.
 all cleared (0, 13, 74–77, 80–97), and every set with an uncleared member has its bit
 clear: 81 of the 96 sets with members agree in both directions. Bit 48 was set by hand for the
 [controlled write](10-npc-talk.md#per-npc-bits--base--0x2c62d) with 75 of its 153
-quests still open, and the chiefs offered their requests. The other 14 sets (26–37,
+quests still open, and the chiefs offered their requests. The 66 set bits written by the
+[bulk completion](#what-all-quests-completed-takes) made the award check grant the set
+awards 0–6 and 10 at the next quest, a Harvest Tour that completed no set. No save of
+the timeline shows the game itself setting a bit: every change in it came from a tool
+write. In the analysed save, the other 14 sets (26–37,
 72, 73) are complete but their bit is clear. **UNRESOLVED**: the code gives no second
 condition, and emulating `0x3b85d8` with 40115 as the last open quest of set 26 does
 put 26 into the slots, so a normal last clear would have set the bit. The likely

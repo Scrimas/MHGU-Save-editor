@@ -58,7 +58,8 @@ def saves():
     """[(mtime, name, bytes)] in time order: snapshots/, the app's snapshots, the live save."""
     out = []
     for n in os.listdir(R + 'snapshots'):
-        p = R + 'snapshots/%s/0/system' % n; out.append((os.stat(p).st_mtime, n, p))
+        p = R + 'snapshots/%s/0/system' % n
+        if os.path.isfile(p): out.append((os.stat(p).st_mtime, n, p))
     for n in os.listdir(A):
         p = A + n + '/0/system'; out.append((os.stat(p).st_mtime, 'app-' + n, p))
     out.append((os.stat(LIVE).st_mtime, 'LIVE', LIVE))
