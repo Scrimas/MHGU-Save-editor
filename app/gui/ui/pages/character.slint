@@ -235,7 +235,6 @@ export component CharacterPage inherits Rectangle {
                         Field {
                             width: 170px;
                             label: @tr("Quest counter");
-                            level: Confidence.derived;
                             was: Api.character.was-quest-counter;
                             key: "quest-counter";
                             NumberBox { value: Api.character.quest-counter; maximum: 9999999; label: @tr("Quest counter"); edited(v) => { Api.set-character("quest-counter", v); } }

@@ -204,8 +204,9 @@ export component PalicoesPage inherits Rectangle {
         if Api.palico-tab >= 1: HorizontalLayout {
             spacing: 10px;
             alignment: start;
-            // for hire is Confirmed; the counters, StreetPass and the scouting are not
-            if Api.palico-tab >= 2: ConfidenceTag { level: Confidence.derived; y: 2px; }
+            // the Dojo count (Team and Dojo) and removing a StreetPass Palico are Derived; the
+            // rest is Confirmed
+            if Api.palico-tab == 2 || Api.palico-tab == 3: ConfidenceTag { level: Confidence.derived; y: 2px; }
             Muted { text: Api.palico-note; wrap: word-wrap; horizontal-stretch: 1; }
         }
         // the other tabs: roles, counters and scouting fields, read-only lines, StreetPass
@@ -343,9 +344,7 @@ export component PalicoesPage inherits Rectangle {
                             label: @tr("Target");
                             was: Api.palico.was-target;
                             key: root.key + "target";
-                            note: @tr("Large First is checked in game; the others follow the game's menu order.");
                             Picker { width: 200px; model: Api.palico-targets; value: Api.palico.target - 1; picked(i) => { Api.set-palico("target", i + 1); } }
-                            ConfidenceTag { level: Confidence.derived; y: 5px; }
                             Rectangle { horizontal-stretch: 1; }
                         }
                         TextRow { label: @tr("Greeting"); field: "greeting"; value: Api.palico.greeting; was: Api.palico.was-greeting; key: root.key + "greeting"; }

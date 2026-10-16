@@ -2047,10 +2047,6 @@ msgstr "Ausrichtung"
 msgid "Target"
 msgstr "Ziel"
 
-#: app/gui/ui/pages/palicoes.slint
-msgid "Large First is checked in game; the others follow the game's menu order."
-msgstr "„Lieber Große“ ist im Spiel geprüft; die anderen folgen der Menüreihenfolge des Spiels."
-
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Original owner"
 msgstr "Erster Besitzer"

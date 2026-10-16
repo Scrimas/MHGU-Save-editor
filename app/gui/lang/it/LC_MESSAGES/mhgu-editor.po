@@ -2047,10 +2047,6 @@ msgstr "Tendenza"
 msgid "Target"
 msgstr "Obiettivo"
 
-#: app/gui/ui/pages/palicoes.slint
-msgid "Large First is checked in game; the others follow the game's menu order."
-msgstr "Prima grandi è verificato nel gioco; gli altri seguono l'ordine del menu del gioco."
-
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Original owner"
 msgstr "Proprietario originale"

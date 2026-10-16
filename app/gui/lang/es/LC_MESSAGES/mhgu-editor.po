@@ -2047,10 +2047,6 @@ msgstr "Especialidad"
 msgid "Target"
 msgstr "Objetivo"
 
-#: app/gui/ui/pages/palicoes.slint
-msgid "Large First is checked in game; the others follow the game's menu order."
-msgstr "Pref. grandes está comprobado en el juego; los demás siguen el orden del menú del juego."
-
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Original owner"
 msgstr "Dueño original"

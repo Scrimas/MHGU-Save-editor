@@ -2033,10 +2033,6 @@ msgstr "支援倾向"
 msgid "Target"
 msgstr "目标"
 
-#: app/gui/ui/pages/palicoes.slint
-msgid "Large First is checked in game; the others follow the game's menu order."
-msgstr "“大型优先”已在游戏中确认；其余选项按游戏菜单的顺序排列。"
-
 #: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
 msgid "Original owner"
 msgstr "原主人"
