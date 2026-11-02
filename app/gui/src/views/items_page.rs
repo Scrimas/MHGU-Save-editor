@@ -40,27 +40,16 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
     api.set_item_total(all.len() as i32);
     api.set_item_free(all.iter().position(|x| x.is_empty()).map_or(-1, |i| i as i32));
     api.set_item_slots(keep(api.get_item_slots(), rows));
-    // runs of empty loadouts collapse into one row (C8)
-    let mut lrows: Vec<LoadoutRow> = vec![];
-    let mut run: Option<(usize, usize)> = None;
-    let flush = |run: &mut Option<(usize, usize)>, lrows: &mut Vec<LoadoutRow>| {
-        if let Some((a, b)) = run.take() {
-            let name = if a == b { trf("Loadout {} · empty", &[&(a + 1)]) } else { trf("Loadouts {}–{} · empty", &[&(a + 1), &(b + 1)]) };
-            lrows.push(LoadoutRow { index: -1, first: a as i32, last: b as i32, name: name.into(), summary: "".into(), used: false });
-        }
-    };
-    for k in 0..items::LOADOUT_N {
-        let l = items::loadout(s, base, k);
-        let used: Vec<String> = l.items.iter().filter(|x| x.0 != 0).map(|x| format!("{} ×{}", assets::item_name(x.0), x.1)).collect();
-        if used.is_empty() {
-            run = Some(run.map_or((k, k), |(a, _)| (a, k)));
-            continue;
-        }
-        flush(&mut run, &mut lrows);
-        lrows.push(LoadoutRow { index: k as i32, first: k as i32, last: k as i32, name: l.name.into(), used: true, summary: used.join(", ").into() });
-    }
-    flush(&mut run, &mut lrows);
-    api.set_loadouts(keep(api.get_loadouts(), lrows));
+    // runs of empty loadouts fold into one row (C8, reorder.rs)
+    let slots = (0..items::LOADOUT_N)
+        .map(|k| {
+            let l = items::loadout(s, base, k);
+            let used: Vec<String> = l.items.iter().filter(|x| x.0 != 0).map(|x| format!("{} ×{}", assets::item_name(x.0), x.1)).collect();
+            let changed = st.changed(base + items::LOADOUTS + items::LOADOUT_SZ * k, items::LOADOUT_SZ);
+            reorder::Slot { name: l.name, sub: used.join(", "), used: !used.is_empty(), changed }
+        })
+        .collect();
+    reorder::show(ui, reorder::List::Loadouts, slots);
     // the loadout being edited: its 32 pouch positions
     let sel = view(|v| v.loadout_sel);
     api.set_loadout_sel(sel);

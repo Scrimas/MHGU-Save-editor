@@ -1582,8 +1582,8 @@ msgstr "Armi"
 
 #: app/gui/src/diff.rs app/gui/src/targets.rs
 #: app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs
-#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/items.slint
+#: app/gui/src/views/names.rs app/gui/src/views/reorder.rs
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Empty"
 msgstr "Vuoto"
 
@@ -4985,16 +4985,6 @@ msgstr "Il salvataggio precedente al ripristino è conservato come istantanea"
 msgid "Restore failed: {}"
 msgstr "Ripristino non riuscito: {}"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/items_page.rs
-msgid "Loadout {} · empty"
-msgstr "Set {} · vuoto"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/items_page.rs
-msgid "Loadouts {}–{} · empty"
-msgstr "Set {}–{} · vuoti"
-
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs
 msgid "{n} change"
@@ -5961,6 +5951,45 @@ msgstr "{} missioni {}★ segnate come completate"
 msgid "Completed quest sets are recorded too, as the game does"
 msgstr "Vengono registrati anche i set di missioni completati, come fa il gioco"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Loadout {} · empty"
+msgstr "Set {} · vuoto"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Loadouts {}–{} · empty"
+msgstr "Set {}–{} · vuoti"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Set {} · unused"
+msgstr "Set {} · inutilizzato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Sets {}–{} · unused"
+msgstr "Set {}–{} · inutilizzati"
+
+#: app/gui/src/views/reorder.rs app/gui/src/views/sets_ui.rs
+msgid "Unused"
+msgstr "Inutilizzato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Move My Set {} to {}"
+msgstr "Sposta Set equipaggiamento {} in {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Move Palico set {} to {}"
+msgstr "Sposta Set compagno {} in {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Move item loadout {} to {}"
+msgstr "Sposta Set di oggetti {} in {}"
+
 #: app/gui/src/views/requests.rs
 msgid "Delivery request"
 msgstr "Richiesta di consegna"
@@ -5983,10 +6012,6 @@ msgstr "Il paesano non consegna la ricompensa nel gioco"
 msgid "own colour"
 msgstr "colore originale"
 
-#: app/gui/src/views/sets_ui.rs
-msgid "Unused"
-msgstr "Inutilizzato"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/sets_ui.rs
 msgid "{} (SP)"
@@ -5995,16 +6020,6 @@ msgstr "{} (SP)"
 #: app/gui/src/views/sets_ui.rs
 msgid "no arts"
 msgstr "nessuna arte"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/sets_ui.rs
-msgid "Set {} · unused"
-msgstr "Set {} · inutilizzato"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/sets_ui.rs
-msgid "Sets {}–{} · unused"
-msgstr "Set {}–{} · inutilizzati"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/sets_ui.rs

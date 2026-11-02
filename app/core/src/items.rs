@@ -151,6 +151,12 @@ pub fn set_loadout(s: &mut Save, base: usize, k: usize, l: &Loadout) {
     }
 }
 
+/// Loadout `from` moves to place `to`, the loadouts between shifting one place.
+pub fn move_loadout(s: &mut Save, base: usize, from: usize, to: usize) {
+    assert!(from < LOADOUT_N && to < LOADOUT_N, "loadout {from} -> {to}");
+    s.move_record(base + LOADOUTS, LOADOUT_SZ, from, to);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -168,6 +174,17 @@ mod tests {
         assert_eq!(get(&s, SLOT1_BASE, Store::Box, 1), Stack::default());
         set(&mut s, SLOT1_BASE, Store::Pouch, POUCH_N - 1, Stack { id: 7, count: 3 });
         assert_eq!(all(&s, SLOT1_BASE, Store::Box).iter().filter(|x| !x.is_empty()).count(), 0, "pouch apart from the box");
+    }
+
+    #[test]
+    fn moving_a_loadout_keeps_its_items() {
+        let mut s = blank();
+        let l = Loadout { name: "Capture".into(), items: vec![(5, 2)] };
+        set_loadout(&mut s, SLOT1_BASE, 1, &l);
+        move_loadout(&mut s, SLOT1_BASE, 1, LOADOUT_N - 1);
+        let r = loadout(&s, SLOT1_BASE, LOADOUT_N - 1);
+        assert_eq!((r.name.as_str(), r.items[0]), ("Capture", (5, 2)));
+        assert_eq!(loadout(&s, SLOT1_BASE, 1), loadout(&blank(), SLOT1_BASE, 2), "the next one moved up");
     }
 
     #[test]

@@ -1,0 +1,225 @@
+// A list of the game's fixed slots (My Sets, Palico sets, item loadouts) that a drag
+// reorders. Each row keeps its record (reorder.rs) and sits at the y it is given: runs of
+// unused slots folded into one row; while a row is dragged every slot shows, the empty
+// ones thin, and the others slide (160 ms) to where the drop would put them, the slot
+// numbers following. The dropped row glides into its place. Alt+Up/Down moves the row
+// focused by one slot.
+
+import { Palette } from "std-widgets.slint";
+import { Api, Tok, Muted, FocusRing, StagedBar, Hairline, SlotRow } from "common.slint";
+
+// six dots, two columns of three: what a row is held by
+component Grip inherits Rectangle {
+    width: 6px;
+    height: 10px;
+    for d in 6: Rectangle {
+        x: mod(d, 2) * 4px;
+        y: floor(d / 2) * 4px;
+        width: 2px;
+        height: 2px;
+        border-radius: 1px;
+        background: Tok.muted;
+    }
+}
+
+export component SlotList inherits Flickable {
+    in property <[SlotRow]> rows;
+    // "myset", "palset" or "loadout" (reorder.rs)
+    in property <string> list;
+    // the slot selected
+    in property <int> sel;
+    // the rows' height (they are placed, not laid out)
+    in property <length> total;
+    callback select(int);
+
+    // the row (model index) pressed, and once it moved past 4 px, dragged
+    property <int> drag: -1;
+    property <bool> started;
+    // the dragged row's y and height, and where in it the pointer holds it
+    property <length> drag-y;
+    property <length> drag-h;
+    property <length> grab;
+    // the pointer, from the top of the view (scrolls the list near its edges)
+    property <length> pointer: root.drag-y + root.grab + root.content-y;
+    // the list's height while a row is dragged: kept, the opened runs scroll inside it
+    property <length> kept-h;
+    // the runs open or fold at once (start, drop) while the view keeps the rows near the
+    // pointer in place; `dropped` still glides into its slot
+    property <bool> snap;
+    property <int> dropped: -1;
+    content-width: self.width;
+    content-height: root.total;
+    preferred-height: root.started ? root.kept-h : root.total;
+
+    function follow(d: length) {
+        root.drag-y = clamp(root.drag-y + d, 0, max(0px, root.total - root.drag-h));
+        Api.reorder-drag(root.list, root.drag-y);
+    }
+    // the view moved by `d` (down positive) without the dragged row moving on screen
+    function scroll-by(d: length) {
+        let vy = clamp(root.content-y - d, min(0px, root.kept-h - root.total), 0px);
+        root.drag-y += root.content-y - vy;
+        root.content-y = vy;
+    }
+    function start(i: int, at: length, h: length, slot: int) {
+        root.kept-h = root.height;
+        root.snap = true;
+        Api.reorder-start(root.list, slot);
+        // the runs above it opened: the view follows, so the row stays under the pointer
+        root.drag-y = at;
+        root.drag-h = h;
+        root.started = true;
+        root.scroll-by(root.rows[i].y - at);
+    }
+    function drop(i: int) {
+        let open-y = root.rows[i].y;
+        root.snap = true;
+        root.dropped = i;
+        Api.reorder-drop(root.list);
+        // the runs folded: the view keeps the row's slot where its gap was, the row glides
+        // there from the pointer
+        let cy = root.content-y;
+        let vy = clamp(cy + open-y - root.rows[i].y, min(0px, root.kept-h - root.total), 0px);
+        root.content-y = vy;
+        root.drag-y += cy - vy;
+        root.drag = -1;
+        root.started = false;
+    }
+
+    Timer {
+        interval: 50ms;
+        running: root.snap;
+        triggered => {
+            root.snap = false;
+            root.dropped = -1;
+        }
+    }
+
+    // near the top or bottom edge the list scrolls, faster the closer the pointer
+    Timer {
+        interval: 16ms;
+        running: root.started && (root.pointer < 36px || root.pointer > root.height - 36px);
+        triggered => {
+            let d = root.pointer < 36px ? -ceil((36px - root.pointer) / 4px) * 1px : ceil((root.pointer - root.height + 36px) / 4px) * 1px;
+            let vy = clamp(root.content-y - d, min(0px, root.height - root.content-height), 0px);
+            let scrolled = root.content-y - vy;
+            root.content-y = vy;
+            root.follow(scrolled);
+        }
+    }
+
+    for r[i] in root.rows: row := Rectangle {
+        property <bool> lifted: i == root.drag && root.started;
+        property <bool> selected: root.sel >= r.first && root.sel <= r.last;
+        property <bool> movable: r.used && !r.run;
+        property <duration> slide: self.lifted || (root.snap && i != root.dropped) ? 0ms : 160ms;
+        width: parent.width;
+        y: self.lifted ? root.drag-y : r.y;
+        animate y { duration: slide; easing: ease; }
+        height: r.h;
+        animate height { duration: root.snap ? 0ms : 160ms; easing: ease; }
+        visible: self.height > 0.5px;
+        clip: true;
+        z: self.lifted ? 10 : 0;
+        border-radius: self.lifted ? 4px : 0px;
+        background: self.lifted ? Tok.raised : self.selected ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+        animate background { duration: 100ms; }
+        drop-shadow-blur: self.lifted ? 24px : 0px;
+        drop-shadow-offset-y: 8px;
+        drop-shadow-color: #0006;
+        accessible-role: list-item;
+        accessible-label: r.name;
+        accessible-item-selected: self.selected;
+        accessible-action-default => { root.select(r.first); }
+
+        fk := FocusScope {
+            property <bool> by-mouse;
+            focus-lost(reason) => { self.by-mouse = false; }
+            focus-gained(reason) => {
+                if reason == FocusReason.tab-navigation && !parent.selected {
+                    root.select(r.first);
+                }
+            }
+            key-pressed(e) => {
+                if e.text == " " || e.text == Key.Return {
+                    root.select(r.first);
+                    return accept;
+                }
+                if e.modifiers.alt && !e.modifiers.control && !e.modifiers.shift && (e.text == Key.UpArrow || e.text == Key.DownArrow) {
+                    if parent.movable {
+                        Api.reorder-key(root.list, r.first, e.text == Key.UpArrow ? -1 : 1);
+                    }
+                    return accept;
+                }
+                return reject;
+            }
+        }
+        FocusRing { shown: fk.has-focus && !fk.by-mouse; }
+        if r.changed: StagedBar { x: 2px; y: 8px; height: parent.height - 16px; }
+        if row.movable && (ta.has-hover || row.lifted || fk.has-focus): Grip {
+            x: 4px;
+            y: (parent.height - self.height) / 2;
+        }
+        HorizontalLayout {
+            padding-left: 14px;
+            padding-right: 14px;
+            spacing: 10px;
+            Text {
+                text: r.num;
+                width: 28px;
+                color: r.moved ? Tok.accent-text : Tok.muted;
+                animate color { duration: 100ms; }
+                font-weight: r.moved ? 600 : 400;
+                font-size: Tok.small;
+                vertical-alignment: center;
+            }
+            VerticalLayout {
+                alignment: center;
+                Text {
+                    text: r.name;
+                    color: r.used ? Palette.foreground : Tok.faint;
+                    font-size: r.thin ? Tok.small : Tok.body;
+                    overflow: elide;
+                }
+                if r.used && r.sub != "": Muted { text: r.sub; wrap: no-wrap; overflow: elide; }
+            }
+        }
+        if !row.lifted: Hairline { y: parent.height - 1px; width: parent.width; }
+        ta := TouchArea {
+            mouse-cursor: parent.lifted ? MouseCursor.grabbing : parent.movable && self.mouse-x < 14px ? MouseCursor.grab : MouseCursor.default;
+            pointer-event(e) => {
+                if e.button != PointerEventButton.left {
+                    return;
+                }
+                if e.kind == PointerEventKind.down {
+                    fk.by-mouse = true;
+                    fk.focus();
+                    root.drag = parent.movable ? i : -1;
+                    root.started = false;
+                    root.grab = self.mouse-y;
+                }
+                if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
+                    if root.drag == i && root.started {
+                        root.drop(i);
+                    } else if e.kind == PointerEventKind.up {
+                        root.select(r.first);
+                    }
+                    root.drag = -1;
+                    root.started = false;
+                }
+            }
+            moved => {
+                if root.drag != i || !self.pressed {
+                    return;
+                }
+                if !root.started {
+                    if abs(self.mouse-y - root.grab) < 4px {
+                        return;
+                    }
+                    root.start(i, parent.y, parent.height, r.first);
+                }
+                root.follow(self.mouse-y - root.grab);
+            }
+        }
+    }
+}

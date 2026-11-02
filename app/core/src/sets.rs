@@ -318,6 +318,18 @@ pub fn set_palico_set_piece(s: &mut Save, base: usize, k: usize, p: usize, i: Op
 }
 
 /// Palico set `k` unused again, as a new character's.
+/// My Set `from` moves to place `to`, the sets between shifting one place (records are
+/// self-contained: nothing else in the save points at a set's place).
+pub fn move_my_set(s: &mut Save, base: usize, from: usize, to: usize) {
+    assert!(from < MY_SETS_N && to < MY_SETS_N, "My Set {from} -> {to}");
+    s.move_record(base + MY_SETS, MY_SET, from, to);
+}
+
+pub fn move_palico_set(s: &mut Save, base: usize, from: usize, to: usize) {
+    assert!(from < PALICO_SETS_N && to < PALICO_SETS_N, "Palico set {from} -> {to}");
+    s.move_record(base + PALICO_SETS, PALICO_SET, from, to);
+}
+
 pub fn clear_palico_set(s: &mut Save, base: usize, k: usize) {
     let o = palico_set_at(base, k);
     let mut v = [0u8; PALICO_SET];
@@ -391,6 +403,25 @@ pub fn set_own_colour(s: &mut Save, base: usize, p: usize) {
 mod tests {
     use super::*;
     use crate::save::{SLOT1_BASE, blank};
+
+    #[test]
+    fn moving_a_set_shifts_the_ones_between() {
+        let mut s = blank();
+        for k in 0..4 {
+            set_palico_set_name(&mut s, SLOT1_BASE, k, &format!("P{k}"));
+            clear_my_set(&mut s, SLOT1_BASE, k);
+            set_my_set_name(&mut s, SLOT1_BASE, k, &format!("M{k}"));
+        }
+        let names = |s: &Save| (0..4).map(|k| my_set(s, SLOT1_BASE, k).name).collect::<Vec<_>>();
+        move_my_set(&mut s, SLOT1_BASE, 0, 2);
+        assert_eq!(names(&s), ["M1", "M2", "M0", "M3"]);
+        move_my_set(&mut s, SLOT1_BASE, 3, 0);
+        assert_eq!(names(&s), ["M3", "M1", "M2", "M0"]);
+        move_palico_set(&mut s, SLOT1_BASE, 1, 0);
+        assert_eq!(palico_set(&s, SLOT1_BASE, 0).name, "P1");
+        assert_eq!(palico_set(&s, SLOT1_BASE, 1).name, "P0");
+        assert_eq!(palico_set(&s, SLOT1_BASE, 4).name, palico_set(&blank(), SLOT1_BASE, 4).name, "the rest untouched");
+    }
 
     #[test]
     fn art_numbering() {

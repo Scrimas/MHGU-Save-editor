@@ -11,9 +11,8 @@ use crate::targets::{self, Mon, PAGES, Target};
 use crate::update::{self, VERSION};
 use crate::{
     Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ChangeRow, CharacterInfo, CheckRow, ColourRow, Confidence, DecoRow, DetectedSave,
-    DeviantRow, EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LoadoutRow, LookRow, MonsterRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow,
-    Preview, PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SetRow, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow,
-    WriteRow,
+    DeviantRow, EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LookRow, MonsterRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow, Preview,
+    PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
 };
 use crate::{Shared, keep, model, strings};
 use mhgu_save::data::tables;
@@ -647,6 +646,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_options(ui, st);
     wire_database(ui, st);
     wire_advanced(ui, st);
+    reorder::wire_reorder(ui, st);
 
     // a Picker's search (common.slint): the choices that hold the text, any case
     api.on_filter_choices(|choices, q| {
@@ -816,6 +816,7 @@ mod options_ui;
 mod overview;
 mod palicoes;
 mod quests;
+mod reorder;
 mod requests;
 mod sets_ui;
 mod settings_ui;

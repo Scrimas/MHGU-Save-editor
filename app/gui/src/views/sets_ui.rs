@@ -162,20 +162,13 @@ fn sel(palico: bool) -> usize {
     view(|v| if palico { v.palset_sel } else { v.set_sel }).max(0) as usize
 }
 
-/// The set list (unused runs collapsed, like the item loadouts) and the set selected.
+/// The set list (unused runs folded, reorder.rs) and the set selected.
 pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
     let api = ui.global::<Api>();
     let (s, base) = (st.save(), st.base());
     let n = if palico { sets::PALICO_SETS_N } else { sets::MY_SETS_N };
     let (at, size) = if palico { (sets::PALICO_SETS, sets::PALICO_SET) } else { (sets::MY_SETS, sets::MY_SET) };
-    let mut rows: Vec<SetRow> = vec![];
-    let mut run: Option<(usize, usize)> = None;
-    let flush = |run: &mut Option<(usize, usize)>, rows: &mut Vec<SetRow>| {
-        if let Some((a, b)) = run.take() {
-            let name = if a == b { trf("Set {} · unused", &[&(a + 1)]) } else { trf("Sets {}–{} · unused", &[&(a + 1), &(b + 1)]) };
-            rows.push(SetRow { index: -1, first: a as i32, last: b as i32, name: name.into(), sub: "".into(), used: false, changed: false });
-        }
-    };
+    let mut slots = Vec::with_capacity(n);
     let mut used = 0;
     for k in 0..n {
         let changed = st.changed(base + at + size * k, size);
@@ -189,16 +182,10 @@ pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
             let style = character::STYLES.get(m.arts.style as usize).map(|x| tr(x));
             (m.name.clone(), [weapon, style].into_iter().flatten().collect::<Vec<_>>().join(" · "), m.used())
         };
-        if !on && !changed {
-            run = Some(run.map_or((k, k), |(a, _)| (a, k)));
-            continue;
-        }
         used += on as usize;
-        flush(&mut run, &mut rows);
-        rows.push(SetRow { index: k as i32, first: k as i32, last: k as i32, name: name.into(), sub: sub.into(), used: on, changed });
+        slots.push(reorder::Slot { name, sub: if on { sub } else { String::new() }, used: on, changed });
     }
-    flush(&mut run, &mut rows);
-    api.set_set_rows(keep(api.get_set_rows(), rows));
+    reorder::show(ui, if palico { reorder::List::PalicoSets } else { reorder::List::MySets }, slots);
     api.set_equip_summary(if palico { trf("{} of {} Palico sets used", &[&used, &n]) } else { trf("{} of {} My Sets used", &[&used, &n]) }.into());
     let k = sel(palico).min(n - 1);
     let d = if palico {

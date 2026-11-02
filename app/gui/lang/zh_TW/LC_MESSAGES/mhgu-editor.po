@@ -1571,8 +1571,8 @@ msgstr "武器"
 
 #: app/gui/src/diff.rs app/gui/src/targets.rs
 #: app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs
-#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/items.slint
+#: app/gui/src/views/names.rs app/gui/src/views/reorder.rs
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Empty"
 msgstr "空"
 
@@ -4929,16 +4929,6 @@ msgstr "還原前的存檔已保存為快照"
 msgid "Restore failed: {}"
 msgstr "還原失敗：{}"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/items_page.rs
-msgid "Loadout {} · empty"
-msgstr "個人組合道具 {} · 空"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/items_page.rs
-msgid "Loadouts {}–{} · empty"
-msgstr "個人組合道具 {}–{} · 空"
-
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs
 msgid "{n} change"
@@ -5895,6 +5885,45 @@ msgstr "已將 {} 個 {}★ 任務標記為已過關"
 msgid "Completed quest sets are recorded too, as the game does"
 msgstr "已完成的任務組也會被記錄，與遊戲一致"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Loadout {} · empty"
+msgstr "個人組合道具 {} · 空"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Loadouts {}–{} · empty"
+msgstr "個人組合道具 {}–{} · 空"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Set {} · unused"
+msgstr "組合 {} · 未使用"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Sets {}–{} · unused"
+msgstr "組合 {}–{} · 未使用"
+
+#: app/gui/src/views/reorder.rs app/gui/src/views/sets_ui.rs
+msgid "Unused"
+msgstr "未使用"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Move My Set {} to {}"
+msgstr "將個人組合裝備{}移到{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Move Palico set {} to {}"
+msgstr "將隨從個人組合{}移到{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/reorder.rs
+msgid "Move item loadout {} to {}"
+msgstr "將個人組合道具{}移到{}"
+
 #: app/gui/src/views/requests.rs
 msgid "Delivery request"
 msgstr "繳納委託"
@@ -5917,10 +5946,6 @@ msgstr "遊戲中不會發放該村民的報酬"
 msgid "own colour"
 msgstr "原本顏色"
 
-#: app/gui/src/views/sets_ui.rs
-msgid "Unused"
-msgstr "未使用"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/sets_ui.rs
 msgid "{} (SP)"
@@ -5929,16 +5954,6 @@ msgstr "{}（SP）"
 #: app/gui/src/views/sets_ui.rs
 msgid "no arts"
 msgstr "無狩技"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/sets_ui.rs
-msgid "Set {} · unused"
-msgstr "組合 {} · 未使用"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/sets_ui.rs
-msgid "Sets {}–{} · unused"
-msgstr "組合 {}–{} · 未使用"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/sets_ui.rs

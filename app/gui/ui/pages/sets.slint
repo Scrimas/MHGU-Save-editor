@@ -3,6 +3,7 @@ import {
     Api, Tok, Card, Muted, SectionTitle, WasLine, ListRow, Picker, ArtsInfo, PigmentRow, ConfidenceTag, Confidence,
 } from "../common.slint";
 import { ColourField } from "../colour.slint";
+import { SlotList } from "../slots.slint";
 
 // Hunting style and Hunter Arts: the style, then per art slot of it the art and SP.
 export component ArtsEditor inherits VerticalLayout {
@@ -60,8 +61,8 @@ export component PigmentEditor inherits VerticalLayout {
     if root.was != "": WasLine { was: root.was; key: root.key; }
 }
 
-// The Equipment page's My Sets and Palico sets: the list (unused runs collapsed), then
-// the set picked.
+// The Equipment page's My Sets and Palico sets: the list (unused runs folded, a drag
+// reorders it), then the set picked.
 export component SetsView inherits HorizontalLayout {
     property <bool> palico: Api.set-detail.palico;
     property <int> k: Api.set-detail.index;
@@ -72,30 +73,12 @@ export component SetsView inherits HorizontalLayout {
         alignment: start;
         Card {
             max-height: list.preferred-height + 2px;
-            Flickable {
-                // the card's width, so long names elide instead of scrolling sideways
-                content-width: self.width;
-                content-height: list.preferred-height;
-                list := VerticalLayout {
-                    for r in Api.set-rows: ListRow {
-                        two-line: r.used && r.sub != "";
-                        staged: r.changed;
-                        selected: r.first == root.k || (r.index < 0 && root.k >= r.first && root.k <= r.last);
-                        accessible-label: r.name;
-                        clicked => { Api.select-set(r.first); }
-                        HorizontalLayout {
-                            padding-left: 14px;
-                            padding-right: 14px;
-                            spacing: 10px;
-                            Text { text: r.index >= 0 ? r.index + 1 : ""; width: 28px; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
-                            VerticalLayout {
-                                alignment: center;
-                                Text { text: r.name; color: r.used ? Palette.foreground : Tok.faint; overflow: elide; }
-                                if r.used && r.sub != "": Muted { text: r.sub; wrap: no-wrap; overflow: elide; }
-                            }
-                        }
-                    }
-                }
+            list := SlotList {
+                rows: Api.set-rows;
+                total: Api.set-rows-h;
+                list: root.palico ? "palset" : "myset";
+                sel: root.k;
+                select(k) => { Api.select-set(k); }
             }
         }
     }

@@ -144,9 +144,6 @@ export struct ItemSlot { slot: int, id: int, name: string, count: int, max: int,
 
 export struct PickItem { id: int, name: string, icon: image, has-icon: bool, sub: string, max: int }
 
-// A loadout, or a run of empty ones (index -1, loadouts first to last).
-export struct LoadoutRow { index: int, first: int, last: int, name: string, summary: string, used: bool }
-
 export struct EquipRow {
     slot: int, kind-code: int, title: string, sub: string,
     icon: image, has-icon: bool, changed: bool, status: string,
@@ -297,7 +294,12 @@ export struct ArtsInfo {
 export struct PigmentRow { part: string, colour: color, hex: string, own: bool }
 
 // A row of the set list; runs of unused sets collapse into one (index -1).
-export struct SetRow { index: int, first: int, last: int, name: string, sub: string, used: bool, changed: bool }
+// A row of a fixed-slot list (slots.slint): slots `first`..`last` (a folded run of unused
+// ones, or one slot), placed at `y` with height `h` (0 folded away) by reorder.rs.
+export struct SlotRow {
+    first: int, last: int, num: string, moved: bool, name: string, sub: string,
+    used: bool, changed: bool, run: bool, thin: bool, y: length, h: length,
+}
 
 // A piece of a set: the box entry picked (index into `choices`, 0 = none).
 export struct SetPiece { part: string, pick: int, choices: [string] }
@@ -346,6 +348,13 @@ export global Api {
     pure callback drag-has-file(data-transfer) -> bool;
     // a Picker's search: the positions of the choices that hold the text (all when empty)
     pure callback filter-choices([string], string) -> [int];
+    // the fixed-slot lists' drag and drop (slots.slint, reorder.rs): list "myset" "palset"
+    // "loadout"; a drag starts on a slot, follows the dragged row's top, drops; Alt+Up/Down
+    // moves a slot by one
+    callback reorder-start(string, int);
+    callback reorder-drag(string, length);
+    callback reorder-drop(string);
+    callback reorder-key(string, int, int);
     // the colour picker (colour.slint): "#RRGGBB" typed -> the colour, transparent when it
     // is not one; the colours applied, newest first (settings), and one more applied
     pure callback parse-colour(string) -> color;
@@ -489,7 +498,8 @@ export global Api {
     callback item-bulk(string);
     // first empty slot of the box or pouch shown (-1: full)
     in property <int> item-free;
-    in property <[LoadoutRow]> loadouts;
+    in property <[SlotRow]> loadouts;
+    in property <length> loadouts-h;
     // the loadout being edited (-1 none): its name, 32 pouch positions, staged value
     in property <int> loadout-sel: -1;
     in property <string> loadout-name;
@@ -503,7 +513,8 @@ export global Api {
     in property <[EquipRow]> equip-rows;
     in-out property <int> equip-owner: 0;  // 0 hunter box, 1 Palico box, 2 My Sets, 3 Palico sets
     // My Sets and Palico sets (equip-owner 2, 3)
-    in property <[SetRow]> set-rows;
+    in property <[SlotRow]> set-rows;
+    in property <length> set-rows-h;
     in property <SetDetail> set-detail;
     callback select-set(int);
     callback set-set-name(string);

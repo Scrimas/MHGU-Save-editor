@@ -141,6 +141,20 @@ impl Save {
         self.buf[abs..abs + data.len()].copy_from_slice(data);
     }
 
+    /// Moves record `from` of a table of `size`-byte records at `at` to place `to`, the
+    /// records between shifting one place towards `from` (a list's drag and drop).
+    pub fn move_record(&mut self, at: usize, size: usize, from: usize, to: usize) {
+        let (a, b) = (from.min(to), from.max(to));
+        let o = at + size * a;
+        let mut v = self.get(o, size * (b - a + 1)).to_vec();
+        if from < to {
+            v.rotate_left(size);
+        } else {
+            v.rotate_right(size);
+        }
+        self.put(o, &v);
+    }
+
     pub fn u8(&self, abs: usize) -> u8 {
         self.buf[abs]
     }

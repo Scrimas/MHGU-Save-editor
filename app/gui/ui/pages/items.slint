@@ -3,6 +3,7 @@ import {
     Api, Tabs, Tok, Fmt, Card, Asset, Muted, ItemSlot, PageHeader, TabBar, NumberBox, StagedBar, WasLine, PreviewPopup,
     MoreButton, ListRow, EmptyState, SearchField, KeyActivate, FocusRing, TextLink, Settle,
 } from "../common.slint";
+import { SlotList } from "../slots.slint";
 
 // One slot of the box grid: number, icon, name, count; staged slots show what they held.
 component SlotCell inherits Rectangle {
@@ -189,8 +190,8 @@ export component ItemsPage inherits Rectangle {
             }
           }
         }
-        // at most 24 rows (runs of empty loadouts collapse into one), so no virtualized
-        // ListView: the card hugs its rows and scrolls only when the window is shorter
+        // at most 24 rows (runs of empty loadouts fold into one), placed by reorder.rs: the
+        // card hugs its rows and scrolls only when the window is shorter
         if Api.item-store == 2: HorizontalLayout {
           vertical-stretch: 1;
           spacing: Tok.pad;
@@ -199,30 +200,12 @@ export component ItemsPage inherits Rectangle {
           alignment: start;
           Card {
             max-height: loadouts.preferred-height + 2px;
-            Flickable {
-              // the width of the card, so long summaries elide instead of scrolling sideways
-              content-width: self.width;
-              content-height: loadouts.preferred-height;
-              loadouts := VerticalLayout {
-                for l in Api.loadouts: ListRow {
-                    two-line: l.used;
-                    selected: l.first == Api.loadout-sel || (l.index < 0 && Api.loadout-sel >= l.first && Api.loadout-sel <= l.last);
-                    accessible-role: list-item;
-                    accessible-label: l.name;
-                    clicked => { Api.select-loadout(l.first); }
-                    HorizontalLayout {
-                        padding-left: 14px;
-                        padding-right: 14px;
-                        spacing: 10px;
-                        Text { text: l.index >= 0 ? l.index + 1 : ""; width: 28px; color: Tok.muted; font-size: Tok.small; vertical-alignment: center; }
-                        VerticalLayout {
-                            alignment: center;
-                            Text { text: l.name; color: l.used ? Palette.foreground : Tok.faint; overflow: elide; }
-                            if l.used: Muted { text: l.summary; wrap: no-wrap; overflow: elide; }
-                        }
-                    }
-                }
-              }
+            loadouts := SlotList {
+                rows: Api.loadouts;
+                total: Api.loadouts-h;
+                list: "loadout";
+                sel: Api.loadout-sel;
+                select(k) => { Api.select-loadout(k); }
             }
           }
           }
