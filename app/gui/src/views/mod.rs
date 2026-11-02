@@ -648,6 +648,12 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_database(ui, st);
     wire_advanced(ui, st);
 
+    // a Picker's search (common.slint): the choices that hold the text, any case
+    api.on_filter_choices(|choices, q| {
+        let q = q.trim().to_lowercase();
+        model(choices.iter().enumerate().filter(|(_, c)| q.is_empty() || c.to_lowercase().contains(&q)).map(|(i, _)| i as i32).collect())
+    });
+
     // page switches refresh their model (the window calls this when Api.page changes)
     {
         let w = ui.as_weak();

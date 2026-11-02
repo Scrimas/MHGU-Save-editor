@@ -282,6 +282,8 @@ export component ItemsPage inherits Rectangle {
         width: root.pick-w;
         height: root.pick-h;
         close-policy: close-on-click-outside;
+        // the search has the keyboard when the editor opens
+        forward-focus: search;
         Rectangle {
             background: Tok.raised;
             border-radius: 8px;
@@ -314,7 +316,7 @@ export component ItemsPage inherits Rectangle {
                     }
                 }
                 if root.edit-was != "" && !root.loadout-mode: WasLine { was: root.edit-was; key: (Api.item-store == 0 ? "item:box:" : "item:pouch:") + root.edit-slot; }
-                LineEdit {
+                search := LineEdit {
                     text <=> root.pick-search;
                     placeholder-text: @tr("Search items");
                     edited(t) => { Api.search-picker(t); }
@@ -350,6 +352,7 @@ export component ItemsPage inherits Rectangle {
                                 }
                                 if e.text == Key.Return {
                                     root.pick(p.id, p.max);
+                                    count.flush();
                                     root.commit(p.id, root.edit-count);
                                     return accept;
                                 }
@@ -361,6 +364,7 @@ export component ItemsPage inherits Rectangle {
                             clicked => { root.pick(p.id, p.max); }
                             double-clicked => {
                                 root.pick(p.id, p.max);
+                                count.flush();
                                 root.commit(p.id, root.edit-count);
                             }
                         }
@@ -370,7 +374,7 @@ export component ItemsPage inherits Rectangle {
                     spacing: 10px;
                     alignment: start;
                     Text { text: @tr("Count"); vertical-alignment: center; }
-                    NumberBox {
+                    count := NumberBox {
                         width: 120px;
                         value: root.edit-count;
                         minimum: 1;
@@ -379,6 +383,12 @@ export component ItemsPage inherits Rectangle {
                         label: @tr("Count");
                         enabled: root.edit-id != 0;
                         edited(v) => { root.edit-count = v; }
+                        // Enter applies the slot, like Done
+                        accepted => {
+                            if root.edit-id != 0 {
+                                root.commit(root.edit-id, root.edit-count);
+                            }
+                        }
                     }
                     Text {
                         text: Api.item-store == 0 && !root.loadout-mode ? @tr("of {}", 99)
@@ -403,7 +413,11 @@ export component ItemsPage inherits Rectangle {
                         text: @tr("Done");
                         primary: true;
                         enabled: root.edit-id != 0;
-                        clicked => { root.commit(root.edit-id, root.edit-count); }
+                        // the count typed: a Button click leaves the keyboard in the field
+                        clicked => {
+                            count.flush();
+                            root.commit(root.edit-id, root.edit-count);
+                        }
                     }
                 }
             }

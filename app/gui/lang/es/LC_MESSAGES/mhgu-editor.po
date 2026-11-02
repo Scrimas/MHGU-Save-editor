@@ -727,6 +727,15 @@ msgstr[1] "{n} valores cambiados en esta página"
 msgid "was {}"
 msgstr "antes {}"
 
+#: app/gui/ui/common.slint
+msgid "No match"
+msgstr "Sin resultados"
+
+#: app/gui/ui/common.slint app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/unlocks.slint
+msgid "Search"
+msgstr "Buscar"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/common.slint
 msgid "{}: {}, complete"
@@ -1135,11 +1144,6 @@ msgstr "Todos los niveles…"
 #: app/gui/ui/pages/collections.slint
 msgid "Max permits…"
 msgstr "Licencias al máximo…"
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/unlocks.slint
-msgid "Search"
-msgstr "Buscar"
 
 #: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
 #: app/gui/ui/pages/unlocks.slint

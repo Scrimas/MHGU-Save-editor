@@ -709,6 +709,14 @@ msgid "was {}"
 msgstr ""
 
 #: app/gui/ui/common.slint
+msgid "No match"
+msgstr ""
+
+#: app/gui/ui/common.slint app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/unlocks.slint
+msgid "Search"
+msgstr ""
+
+#: app/gui/ui/common.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "{}: {}, complete"
 msgstr ""
@@ -1092,10 +1100,6 @@ msgstr ""
 
 #: app/gui/ui/pages/collections.slint
 msgid "Max permits…"
-msgstr ""
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/unlocks.slint
-msgid "Search"
 msgstr ""
 
 #: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint app/gui/ui/pages/unlocks.slint

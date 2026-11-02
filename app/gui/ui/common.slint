@@ -1,5 +1,5 @@
 // Shared structs, the Rust bridge, design tokens and small widgets.
-import { Palette, Button, LineEdit, ComboBox } from "std-widgets.slint";
+import { Palette, Button, LineEdit, ListView } from "std-widgets.slint";
 
 export enum Confidence { confirmed, derived, unresolved }
 
@@ -344,6 +344,8 @@ export global Api {
     callback open-path(string);
     // a drag from another app onto the window: whether it carries a file, and its drop (nav.rs)
     pure callback drag-has-file(data-transfer) -> bool;
+    // a Picker's search: the positions of the choices that hold the text (all when empty)
+    pure callback filter-choices([string], string) -> [int];
     callback files-dropped(data-transfer);
     callback open-folder();
     callback copy-path();
@@ -887,23 +889,6 @@ export component Settle {
 
 // --- small widgets -------------------------------------------------------------------
 
-// A ComboBox that always shows `value`. The std ComboBox sets its own current-index when
-// a choice is picked and when its model is set again, which cuts a `current-index: <data>`
-// binding: it then kept showing an old choice (a Palico's forte after picking another
-// Palico). A pick goes to `picked`; what the data says afterwards is shown.
-export component Picker inherits ComboBox {
-    in property <int> value;
-    callback picked(int);
-    current-index: root.value;
-    // a new model of another length can clamp the index too
-    property <string> sync: root.value + ":" + root.model.length;
-    changed sync => { self.current-index = root.value; }
-    selected => {
-        root.picked(self.current-index);
-        self.current-index = root.value;
-    }
-}
-
 export component Hairline inherits Rectangle {
     height: 1px;
     background: Tok.line;
@@ -1405,6 +1390,8 @@ export component Chevron inherits Path {
 // A number field with thousands separators: shows "9,999,999", edits as plain digits.
 // Enter or leaving the field stages the value. The arrows step by one; unlike the
 // standard SpinBox the mouse wheel never changes it, so lists scroll safely.
+// Slint's Button takes no focus when clicked, so a click on Done leaves the digits typed
+// unread: a form's confirm button calls flush() first.
 export component NumberBox inherits Rectangle {
     in property <int> value;
     in property <int> minimum: 0;
@@ -1418,6 +1405,8 @@ export component NumberBox inherits Rectangle {
     in property <TextHorizontalAlignment> align: left;
     in property <int> font-weight: 400;
     callback edited(int);
+    // Enter: the digits typed are staged (edited first)
+    callback accepted();
     out property <bool> has-focus: input.has-focus;
     min-width: 56px;
     height: 32px;
@@ -1446,6 +1435,12 @@ export component NumberBox inherits Rectangle {
         root.show();
     }
     function commit() { root.set(root.typed()); }
+    // stages the digits typed now, not when the field loses the keyboard
+    public function flush() {
+        if input.has-focus {
+            root.commit();
+        }
+    }
     // from the digits being typed, not the value before them; unfocused, the text is
     // formatted ("1,234 %") and not read
     function step(d: int) {
@@ -1493,8 +1488,17 @@ export component NumberBox inherits Rectangle {
                     root.commit();
                 }
             }
-            accepted => { root.commit(); }
+            accepted => {
+                root.commit();
+                root.accepted();
+            }
             key-pressed(e) => {
+                // the window's shortcuts (Ctrl+S Write, Ctrl+O, Ctrl+arrows pages and tabs)
+                // see the value typed: staged before the key goes on to the window
+                if e.modifiers.control && (e.text == "s" || e.text == "S" || e.text == "o" || e.text == "O" || e.text == Key.UpArrow || e.text == Key.DownArrow || e.text == Key.LeftArrow || e.text == Key.RightArrow) {
+                    root.commit();
+                    return reject;
+                }
                 // with Ctrl the arrows switch pages
                 if e.text == Key.UpArrow && !e.modifiers.control { root.step(1); return accept; }
                 if e.text == Key.DownArrow && !e.modifiers.control { root.step(-1); return accept; }
@@ -1522,6 +1526,242 @@ export component NumberBox inherits Rectangle {
         height: input.has-focus ? 2px : 1px;
         border-radius: 1px;
         background: input.has-focus ? Tok.accent : Tok.input-edge;
+    }
+}
+
+// The card of a Picker's popup.
+component PickerFrame inherits Rectangle {
+    background: Tok.raised;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: Tok.line;
+    drop-shadow-blur: 16px;
+    drop-shadow-color: #0006;
+    @children
+}
+
+// A Picker's choices: `shown` (positions in `model`), the current one marked, the
+// highlighted one (`hi`, an entry of `shown`) shaded like the hovered one.
+component PickerRows inherits Rectangle {
+    in property <[string]> model;
+    in property <[int]> shown;
+    in property <int> value;
+    in property <int> hi;
+    // the height of the list (the popup's, known before it is laid out)
+    in property <length> view-h;
+    callback choose(int);
+    vertical-stretch: 1;
+    // the highlighted row in view; on opening, the current choice a few rows down
+    public function reveal() {
+        let top = root.hi * 32px;
+        if top < -lv.content-y {
+            lv.content-y = -top;
+        } else if top + 32px > -lv.content-y + lv.visible-height {
+            lv.content-y = -(top + 32px - lv.visible-height);
+        }
+    }
+    init => { lv.content-y = -clamp((root.hi - 3) * 32px, 0px, max(0px, root.shown.length * 32px - root.view-h)); }
+    if root.shown.length == 0: Text {
+        width: parent.width;
+        height: 32px;
+        text: @tr("No match");
+        color: Tok.muted;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    lv := ListView {
+        for i[k] in root.shown: Rectangle {
+            height: 32px;
+            border-radius: 4px;
+            background: k == root.hi || ta.has-hover ? Tok.hover : transparent;
+            accessible-role: list-item;
+            accessible-label: root.model[i];
+            accessible-item-selected: i == root.value;
+            accessible-action-default => { root.choose(i); }
+            // the current choice: an accent bar, as in the Fluent ComboBox
+            if i == root.value: Rectangle {
+                x: 0;
+                y: 9px;
+                width: 3px;
+                height: 14px;
+                border-radius: 1.5px;
+                background: Tok.accent;
+            }
+            Text {
+                x: 12px;
+                width: parent.width - 20px;
+                height: parent.height;
+                text: root.model[i];
+                vertical-alignment: center;
+                overflow: elide;
+                font-weight: i == root.value ? 600 : 400;
+            }
+            ta := TouchArea { clicked => { root.choose(i); } }
+        }
+    }
+}
+
+// A dropdown that always shows `value`: a pick goes to `picked`, and what the data says
+// afterwards is shown (a std ComboBox kept its own index and could show an old choice).
+// Its list opens like the item picker's: past 8 choices a search field on top, with the
+// keyboard, filters it. Up/Down move the highlight, Enter picks, Escape closes.
+export component Picker inherits Rectangle {
+    in property <[string]> model;
+    in property <int> value;
+    in property <bool> enabled: true;
+    out property <bool> has-focus: fk.has-focus;
+    callback picked(int);
+    property <bool> searchable: root.model.length > 8;
+    property <string> query;
+    // the positions in `model` of the choices shown (all while the query is empty)
+    property <[int]> shown: Api.filter-choices(root.model, root.query);
+    // the highlighted entry of `shown`
+    property <int> hi;
+    property <int> rows: min(10, max(1, root.model.length));
+    property <length> pop-h: root.rows * 32px + 12px + (root.searchable ? 38px : 0px);
+    min-width: 80px;
+    min-height: 32px;
+    preferred-width: 160px;
+    preferred-height: 32px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+    border-radius: 4px;
+    background: !root.enabled ? transparent : area.pressed ? Tok.input-active : area.has-hover ? Tok.hover : Tok.input;
+    border-width: 1px;
+    border-color: Tok.input-border;
+    accessible-role: combobox;
+    accessible-enabled: root.enabled;
+    accessible-value: root.model[root.value];
+    accessible-expandable: true;
+    accessible-action-expand => { root.open(); }
+
+    public function open() {
+        if !root.enabled || root.model.length == 0 {
+            return;
+        }
+        root.query = "";
+        root.hi = clamp(root.value, 0, root.model.length - 1);
+        if root.searchable {
+            search-pop.show();
+        } else {
+            list-pop.show();
+        }
+    }
+    function choose(i: int) {
+        search-pop.close();
+        list-pop.close();
+        if i >= 0 && i != root.value {
+            root.picked(i);
+        }
+    }
+    function step(d: int) {
+        root.hi = clamp(root.hi + d, 0, max(0, root.shown.length - 1));
+    }
+    function enter() {
+        if root.shown.length > 0 {
+            root.choose(root.shown[clamp(root.hi, 0, root.shown.length - 1)]);
+        }
+    }
+
+    fk := KeyActivate {
+        enabled: root.enabled;
+        activated => { root.open(); }
+    }
+    FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+    area := TouchArea {
+        enabled: root.enabled;
+        clicked => {
+            fk.click-focus();
+            root.open();
+        }
+    }
+    HorizontalLayout {
+        padding-left: 11px;
+        padding-right: 11px;
+        spacing: 8px;
+        Text {
+            text: root.model[root.value];
+            horizontal-stretch: 1;
+            vertical-alignment: center;
+            overflow: elide;
+            color: root.enabled ? Palette.foreground : Tok.faint;
+            font-size: Tok.body;
+            accessible-role: none;
+        }
+        Chevron { y: (parent.height - self.height) / 2; dir: "down"; }
+    }
+
+    // the list with a search field, which has the keyboard
+    search-pop := PopupWindow {
+        x: 0;
+        y: root.height + 2px;
+        width: max(root.width, 220px);
+        height: root.pop-h;
+        close-policy: close-on-click-outside;
+        forward-focus: search;
+        PickerFrame {
+            fs := FocusScope {
+                capture-key-pressed(e) => {
+                    if e.text == Key.DownArrow { root.step(1); rows-s.reveal(); return accept; }
+                    if e.text == Key.UpArrow { root.step(-1); rows-s.reveal(); return accept; }
+                    if e.text == Key.Return { root.enter(); return accept; }
+                    if e.text == Key.Escape { search-pop.close(); return accept; }
+                    return reject;
+                }
+                VerticalLayout {
+                    padding: 6px;
+                    spacing: 6px;
+                    search := LineEdit {
+                        height: 32px;
+                        text <=> root.query;
+                        placeholder-text: @tr("Search");
+                        edited => {
+                            root.hi = 0;
+                            rows-s.reveal();
+                        }
+                    }
+                    rows-s := PickerRows {
+                        model: root.model;
+                        shown: root.shown;
+                        value: root.value;
+                        hi: root.hi;
+                        view-h: root.rows * 32px;
+                        choose(i) => { root.choose(i); }
+                    }
+                }
+            }
+        }
+    }
+    // a short list: no search field, the list has the keyboard
+    list-pop := PopupWindow {
+        x: 0;
+        y: root.height + 2px;
+        width: max(root.width, 160px);
+        height: root.pop-h;
+        close-policy: close-on-click-outside;
+        forward-focus: fl;
+        PickerFrame {
+            fl := FocusScope {
+                key-pressed(e) => {
+                    if e.text == Key.DownArrow { root.step(1); rows-l.reveal(); return accept; }
+                    if e.text == Key.UpArrow { root.step(-1); rows-l.reveal(); return accept; }
+                    if e.text == Key.Return || e.text == " " { root.enter(); return accept; }
+                    if e.text == Key.Escape { list-pop.close(); return accept; }
+                    return reject;
+                }
+                VerticalLayout {
+                    padding: 6px;
+                    rows-l := PickerRows {
+                        model: root.model;
+                        shown: root.shown;
+                        value: root.value;
+                        hi: root.hi;
+                        view-h: root.rows * 32px;
+                        choose(i) => { root.choose(i); }
+                    }
+                }
+            }
+        }
     }
 }
 

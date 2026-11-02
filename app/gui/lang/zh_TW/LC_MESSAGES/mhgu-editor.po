@@ -716,6 +716,15 @@ msgstr[0] "此頁面有 {n} 個值已變更"
 msgid "was {}"
 msgstr "原為 {}"
 
+#: app/gui/ui/common.slint
+msgid "No match"
+msgstr "沒有符合的項目"
+
+#: app/gui/ui/common.slint app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/unlocks.slint
+msgid "Search"
+msgstr "搜尋"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/common.slint
 msgid "{}: {}, complete"
@@ -1124,11 +1133,6 @@ msgstr "全部等級…"
 #: app/gui/ui/pages/collections.slint
 msgid "Max permits…"
 msgstr "許可券設為上限…"
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/unlocks.slint
-msgid "Search"
-msgstr "搜尋"
 
 #: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
 #: app/gui/ui/pages/unlocks.slint
