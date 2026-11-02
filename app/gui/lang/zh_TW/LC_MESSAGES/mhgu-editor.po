@@ -136,7 +136,7 @@ msgstr "顯示路徑"
 msgid "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."
 msgstr "模擬器會保存兩份存檔，各附一份備份；每份都寫入相同的位元組，並保留各自的檔頭。"
 
-#: app/gui/ui/app.slint app/gui/ui/common.slint
+#: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
 #: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "取消"
@@ -669,6 +669,39 @@ msgstr "基於 MHGU-Save-editor 專案（github.com/Scrimas/MHGU-Save-editor）�
 #: app/gui/ui/app.slint
 msgid "Copyright © 2026 Scrimas. Free software under the GNU General Public License, version 3 or later, with ABSOLUTELY NO WARRANTY."
 msgstr "Copyright © 2026 Scrimas。自由軟體，依據 GNU 通用公共授權條款第 3 版或任何更新版本發布，完全不提供任何擔保。"
+
+#: app/gui/ui/colour.slint
+msgid "Hex"
+msgstr "十六進位"
+
+#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
+#: app/gui/ui/colour.slint
+msgid "A colour is six hex digits, like #E9D6CC"
+msgstr "顏色為六位十六進位數，例如 #E9D6CC"
+
+#: app/gui/ui/colour.slint
+msgid "Red"
+msgstr "紅"
+
+#: app/gui/ui/colour.slint
+msgid "Green"
+msgstr "綠"
+
+#: app/gui/ui/colour.slint
+msgid "Blue"
+msgstr "藍"
+
+#: app/gui/ui/colour.slint app/gui/ui/pages/open.slint
+msgid "Recent"
+msgstr "最近"
+
+#: app/gui/ui/colour.slint
+msgid "Presets"
+msgstr "預設"
+
+#: app/gui/ui/colour.slint
+msgid "Apply"
+msgstr "套用"
 
 #: app/gui/ui/common.slint
 msgid "More information"
@@ -1913,10 +1946,6 @@ msgstr "開啟存檔"
 #: app/gui/ui/pages/open.slint
 msgid "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit."
 msgstr "選擇 Monster Hunter Generations Ultimate（Switch）的 system 檔案。在 Ryujinx 中，它位於 bis/user/save/<id>/0/。寫入前請關閉模擬器：模擬器結束時會覆蓋存檔。"
-
-#: app/gui/ui/pages/open.slint
-msgid "Recent"
-msgstr "最近"
 
 #: app/gui/ui/pages/open.slint
 msgid "Also on this computer"
@@ -4148,10 +4177,6 @@ msgstr "未變更：完成該村民的委託後，{} 才能成為管家"
 #: app/gui/src/views/character_page.rs
 msgid "HR below 13 follows the Hub star level: edit Hub ★ instead"
 msgstr "HR 低於 13 時由集會所星級決定：請改為編輯集會所 ★"
-
-#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
-msgid "A colour is six hex digits, like #E9D6CC"
-msgstr "顏色為六位十六進位數，例如 #E9D6CC"
 
 #: app/gui/src/views/character_page.rs
 msgid "Written to the save, the player record and the Guild Card"

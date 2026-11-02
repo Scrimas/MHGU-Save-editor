@@ -2,6 +2,7 @@ import { Button, ScrollView, LineEdit, CheckBox, Palette } from "std-widgets.sli
 import {
     Api, Tok, Card, Muted, SectionTitle, WasLine, ListRow, Picker, ArtsInfo, PigmentRow, ConfidenceTag, Confidence,
 } from "../common.slint";
+import { ColourField } from "../colour.slint";
 
 // Hunting style and Hunter Arts: the style, then per art slot of it the art and SP.
 export component ArtsEditor inherits VerticalLayout {
@@ -52,8 +53,7 @@ export component PigmentEditor inherits VerticalLayout {
         alignment: start;
         height: 32px;
         Text { text: r.part; width: 80px; vertical-alignment: center; }
-        Rectangle { width: 32px; height: 32px; border-radius: 4px; background: r.colour; border-width: 1px; border-color: Tok.input-border; opacity: r.own ? 0.4 : 1; }
-        LineEdit { width: 110px; text: r.hex; accessible-label: r.part; accepted(t) => { Api.set-pigment(root.where, k, t); } }
+        ColourField { colour: r.colour; dim: r.own; label: r.part; picked(t) => { Api.set-pigment(root.where, k, t); } }
         if r.own: Muted { text: @tr("the armor's own colour"); vertical-alignment: center; }
         if !r.own: Button { text: @tr("Armor's own colour"); clicked => { Api.own-pigment(root.where, k); } }
     }

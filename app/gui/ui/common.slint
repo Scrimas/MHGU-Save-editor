@@ -346,6 +346,11 @@ export global Api {
     pure callback drag-has-file(data-transfer) -> bool;
     // a Picker's search: the positions of the choices that hold the text (all when empty)
     pure callback filter-choices([string], string) -> [int];
+    // the colour picker (colour.slint): "#RRGGBB" typed -> the colour, transparent when it
+    // is not one; the colours applied, newest first (settings), and one more applied
+    pure callback parse-colour(string) -> color;
+    in property <[color]> recent-colours;
+    callback colour-used(string);
     callback files-dropped(data-transfer);
     callback open-folder();
     callback copy-path();
@@ -1530,7 +1535,7 @@ export component NumberBox inherits Rectangle {
 }
 
 // The card of a Picker's popup.
-component PickerFrame inherits Rectangle {
+export component PickerFrame inherits Rectangle {
     background: Tok.raised;
     border-radius: 6px;
     border-width: 1px;

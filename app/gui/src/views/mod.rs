@@ -654,6 +654,23 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         model(choices.iter().enumerate().filter(|(_, c)| q.is_empty() || c.to_lowercase().contains(&q)).map(|(i, _)| i as i32).collect())
     });
 
+    // the colour picker (colour.slint): the hex typed, and the colours applied lately
+    api.on_parse_colour(|t| character_page::parse_rgb(&t).map_or(slint::Color::from_argb_u8(0, 0, 0, 0), |[r, g, b]| slint::Color::from_rgb_u8(r, g, b)));
+    let recent_colours = |api: &Api| {
+        let c = settings::get().recent_colours.into_iter().filter_map(|h| character_page::parse_rgb(&h)).map(|[r, g, b]| slint::Color::from_rgb_u8(r, g, b));
+        api.set_recent_colours(model(c.collect()));
+    };
+    recent_colours(&api);
+    {
+        let w = ui.as_weak();
+        api.on_colour_used(move |hex| {
+            settings::update(|s| s.add_colour(hex.to_string()));
+            if let Some(ui) = w.upgrade() {
+                recent_colours(&ui.global::<Api>());
+            }
+        });
+    }
+
     // page switches refresh their model (the window calls this when Api.page changes)
     {
         let w = ui.as_weak();

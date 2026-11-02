@@ -140,7 +140,7 @@ msgstr "Mostra percorsi"
 msgid "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."
 msgstr "L'emulatore conserva due copie del salvataggio, ognuna con un backup; tutte ricevono gli stessi byte e mantengono la propria intestazione."
 
-#: app/gui/ui/app.slint app/gui/ui/common.slint
+#: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
 #: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "Annulla"
@@ -678,6 +678,39 @@ msgstr "Basato sulle note sul formato di salvataggio del progetto MHGU-Save-edit
 #: app/gui/ui/app.slint
 msgid "Copyright © 2026 Scrimas. Free software under the GNU General Public License, version 3 or later, with ABSOLUTELY NO WARRANTY."
 msgstr "Copyright © 2026 Scrimas. Software libero distribuito sotto la GNU General Public License, versione 3 o successiva, SENZA ALCUNA GARANZIA."
+
+#: app/gui/ui/colour.slint
+msgid "Hex"
+msgstr "Hex"
+
+#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
+#: app/gui/ui/colour.slint
+msgid "A colour is six hex digits, like #E9D6CC"
+msgstr "Un colore sono sei cifre esadecimali, come #E9D6CC"
+
+#: app/gui/ui/colour.slint
+msgid "Red"
+msgstr "Rosso"
+
+#: app/gui/ui/colour.slint
+msgid "Green"
+msgstr "Verde"
+
+#: app/gui/ui/colour.slint
+msgid "Blue"
+msgstr "Blu"
+
+#: app/gui/ui/colour.slint app/gui/ui/pages/open.slint
+msgid "Recent"
+msgstr "Recenti"
+
+#: app/gui/ui/colour.slint
+msgid "Presets"
+msgstr "Predefiniti"
+
+#: app/gui/ui/colour.slint
+msgid "Apply"
+msgstr "Applica"
 
 #: app/gui/ui/common.slint
 msgid "More information"
@@ -1927,10 +1960,6 @@ msgstr "Apri un salvataggio"
 #: app/gui/ui/pages/open.slint
 msgid "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit."
 msgstr "Scegli il file system di Monster Hunter Generations Ultimate (Switch). In Ryujinx si trova in bis/user/save/<id>/0/. Chiudi l'emulatore prima di scrivere: sovrascrive il salvataggio all'uscita."
-
-#: app/gui/ui/pages/open.slint
-msgid "Recent"
-msgstr "Recenti"
 
 #: app/gui/ui/pages/open.slint
 msgid "Also on this computer"
@@ -4193,10 +4222,6 @@ msgstr "Non modificato: {} diventa attendente quando la sua richiesta è complet
 #: app/gui/src/views/character_page.rs
 msgid "HR below 13 follows the Hub star level: edit Hub ★ instead"
 msgstr "Il GC sotto 13 segue il livello di stelle della base di caccia: modifica invece Base di caccia ★"
-
-#: app/gui/src/views/character_page.rs app/gui/src/views/sets_ui.rs
-msgid "A colour is six hex digits, like #E9D6CC"
-msgstr "Un colore sono sei cifre esadecimali, come #E9D6CC"
 
 #: app/gui/src/views/character_page.rs
 msgid "Written to the save, the player record and the Guild Card"

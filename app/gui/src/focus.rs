@@ -11,7 +11,7 @@
 
 use i_slint_core::input::FocusReason;
 use i_slint_core::item_tree::{ItemRc, ParentItemTraversalMode::StopAtPopups};
-use i_slint_core::items::FocusScope;
+use i_slint_core::items::{AccessibleRole, FocusScope};
 use i_slint_core::lengths::{LogicalPoint, LogicalRect};
 use i_slint_core::window::WindowInner;
 
@@ -54,9 +54,7 @@ pub fn press(window: &slint::Window, position: LogicalPoint) {
         return;
     }
     let Some(focused) = inner.focus_item.borrow().upgrade() else { return };
-    // the control around the focused item: a NumberBox with its arrows, a LineEdit's frame
-    let control = focused.parent_item(StopAtPopups).unwrap_or_else(|| focused.clone());
-    if window_rect(&control).contains(position) {
+    if window_rect(&control(&focused)).contains(position) {
         return;
     }
     let mut up = focused.parent_item(StopAtPopups);
@@ -68,6 +66,26 @@ pub fn press(window: &slint::Window, position: LogicalPoint) {
         up = item.parent_item(StopAtPopups);
     }
     inner.set_focus_item(&focused, false, FocusReason::PointerClick);
+}
+
+/// The control around the focused item, whose whole frame counts as "inside": the widget
+/// root above it that has an accessible role (a LineEdit, with its clear button beside the
+/// text area), else the item's parent (a NumberBox with its arrows). Measuring only the
+/// text area moved the focus off a LineEdit on a click on its clear button, which hides
+/// the button before Slint delivers the click.
+fn control(focused: &ItemRc) -> ItemRc {
+    let parent = focused.parent_item(StopAtPopups);
+    let mut up = parent.clone();
+    while let Some(item) = up {
+        if item.downcast::<FocusScope>().is_some() {
+            break;
+        }
+        if item.accessible_role() != AccessibleRole::None {
+            return item;
+        }
+        up = item.parent_item(StopAtPopups);
+    }
+    parent.unwrap_or_else(|| focused.clone())
 }
 
 fn window_rect(item: &ItemRc) -> LogicalRect {

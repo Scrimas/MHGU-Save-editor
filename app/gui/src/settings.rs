@@ -13,6 +13,8 @@ pub const KEEPS: [u32; 5] = [0, 5, 10, 20, 50];
 pub const THEMES: [&str; 3] = ["system", "light", "dark"];
 /// Recent saves remembered.
 const RECENT: usize = 5;
+/// Colours the picker remembers (one row of its chips).
+const RECENT_COLOURS: usize = 12;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
@@ -45,6 +47,8 @@ pub struct Settings {
     pub check_updates: bool,
     /// The .exe an update renamed aside (Windows), deleted on the next start.
     pub update_leftover: Option<PathBuf>,
+    /// Colours applied with the colour picker, "#RRGGBB", newest first.
+    pub recent_colours: Vec<String>,
 }
 
 impl Default for Settings {
@@ -64,6 +68,7 @@ impl Default for Settings {
             confirmed_only: false,
             check_updates: true,
             update_leftover: None,
+            recent_colours: vec![],
         }
     }
 }
@@ -73,6 +78,12 @@ impl Settings {
         self.recent.retain(|x| *x != p);
         self.recent.insert(0, p);
         self.recent.truncate(RECENT);
+    }
+
+    pub fn add_colour(&mut self, hex: String) {
+        self.recent_colours.retain(|x| !x.eq_ignore_ascii_case(&hex));
+        self.recent_colours.insert(0, hex);
+        self.recent_colours.truncate(RECENT_COLOURS);
     }
 }
 

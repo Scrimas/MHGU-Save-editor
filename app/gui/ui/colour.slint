@@ -1,0 +1,380 @@
+// The colour field: a swatch and #RRGGBB; a click opens the picker (a saturation and
+// brightness square, a hue strip, R G B, hex, the colours applied lately and presets).
+// The picker previews on its own: Apply (or Enter in the hex box) hands the colour to
+// `picked`, Cancel, Escape or a click outside leaves the save as it was.
+
+import { LineEdit, Button, Palette } from "std-widgets.slint";
+import { Api, Tok, Muted, NumberBox, KeyActivate, FocusRing, PickerFrame } from "common.slint";
+
+// "#RRGGBB" of a colour's 8-bit channels.
+export global Hex {
+    public pure function digit(n: int) -> string {
+        return n < 10 ? "" + n : n == 10 ? "A" : n == 11 ? "B" : n == 12 ? "C" : n == 13 ? "D" : n == 14 ? "E" : "F";
+    }
+    public pure function byte(n: int) -> string {
+        return Hex.digit(floor(n / 16)) + Hex.digit(mod(n, 16));
+    }
+    public pure function of(c: color) -> string {
+        return "#" + Hex.byte(c.red) + Hex.byte(c.green) + Hex.byte(c.blue);
+    }
+}
+
+// 12 hues in four tones, then 12 greys
+global Presets {
+    out property <[color]> all: [
+        #F22424, #F28B24, #F2D024, #8BF224, #24F269, #24F2F2, #249CF2, #2447F2, #7A24F2, #F224F2, #F2248B, #F22435,
+        #BF3939, #BF7C39, #BFA939, #7CBF39, #39BF66, #39BFBF, #3987BF, #3950BF, #7139BF, #BF39BF, #BF397C, #BF3945,
+        #803333, #805933, #807333, #598033, #33804D, #338080, #336080, #334080, #533380, #803380, #803359, #803339,
+        #4C2626, #4C3926, #4C4626, #394C26, #264C33, #264C4C, #263D4C, #262D4C, #36264C, #4C264C, #4C2639, #4C2629,
+        #FFFFFF, #E0E0E0, #BFBFBF, #9E9E9E, #808080, #666666, #525252, #404040, #2E2E2E, #1F1F1F, #121212, #000000,
+    ];
+}
+
+component Chip inherits Rectangle {
+    in property <color> colour;
+    in property <bool> on;
+    callback clicked;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    background: root.colour;
+    border-width: 1px;
+    border-color: ta.has-hover ? Palette.foreground : Tok.input-border;
+    accessible-role: button;
+    accessible-label: Hex.of(root.colour);
+    accessible-action-default => { root.clicked(); }
+    if root.on: Rectangle {
+        x: -3px;
+        y: -3px;
+        width: parent.width + 6px;
+        height: parent.height + 6px;
+        border-radius: 5px;
+        border-width: 2px;
+        border-color: Palette.foreground;
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+// the ring on the square and the hue strip
+component Knob inherits Rectangle {
+    in property <color> fill;
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background: #0008;
+    Rectangle {
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        background: root.fill;
+        border-width: 2px;
+        border-color: #fff;
+    }
+}
+
+export component ColourField inherits Rectangle {
+    in property <color> colour;
+    // the armor's own colour: the swatch faded
+    in property <bool> dim;
+    in property <string> label;
+    in property <bool> enabled: true;
+    callback picked(string /* #RRGGBB */);
+
+    // the picker's colour: hue in degrees, saturation and value 0..1, kept apart so the
+    // hue survives grey and black
+    property <float> h;
+    property <float> s;
+    property <float> v;
+    property <color> now: hsv(root.h, root.s, root.v);
+    property <color> was;
+    property <string> hex-text;
+    // the hex typed is not a colour
+    property <bool> bad;
+    width: 152px;
+    height: 32px;
+    accessible-role: button;
+    accessible-label: root.label;
+    accessible-value: Hex.of(root.colour);
+    accessible-action-default => { root.open(); }
+
+    public function open() {
+        if !root.enabled {
+            return;
+        }
+        root.was = root.colour;
+        root.take(root.colour);
+        pop.show();
+    }
+    // the picker's colour from RGB, the hex box left as typed
+    function set(c: color) {
+        let t = c.to-hsv();
+        if t.value > 0 {
+            if t.saturation > 0 {
+                root.h = t.hue;
+            }
+            root.s = t.saturation;
+        }
+        root.v = t.value;
+    }
+    function take(c: color) {
+        root.set(c);
+        root.show();
+    }
+    function show() {
+        root.hex-text = Hex.of(root.now);
+        root.bad = false;
+    }
+    function sv-at(x: float, y: float) {
+        root.s = clamp(x, 0, 1);
+        root.v = 1 - clamp(y, 0, 1);
+        root.show();
+    }
+    function hue-at(x: float) {
+        root.h = clamp(x, 0, 1) * 359.9;
+        root.show();
+    }
+    function typed(t: string) {
+        let c = Api.parse-colour(t);
+        root.bad = c.alpha == 0;
+        if !root.bad {
+            root.set(c);
+        }
+    }
+    function apply() {
+        pop.close();
+        let hex = Hex.of(root.now);
+        if hex != Hex.of(root.colour) || root.dim {
+            Api.colour-used(hex);
+            root.picked(hex);
+        }
+    }
+
+    fk := KeyActivate {
+        enabled: root.enabled;
+        activated => { root.open(); }
+    }
+    HorizontalLayout {
+        spacing: 10px;
+        Rectangle {
+            width: 32px;
+            border-radius: 4px;
+            background: root.colour;
+            opacity: root.dim ? 0.4 : 1;
+            border-width: 1px;
+            border-color: Tok.input-border;
+        }
+        Rectangle {
+            border-radius: 4px;
+            background: !root.enabled ? transparent : ta.has-hover ? Tok.hover : Tok.input;
+            border-width: 1px;
+            border-color: Tok.input-border;
+            Text {
+                x: 11px;
+                height: parent.height;
+                text: Hex.of(root.colour);
+                vertical-alignment: center;
+                color: root.enabled ? Palette.foreground : Tok.faint;
+                font-size: Tok.body;
+                accessible-role: none;
+            }
+        }
+    }
+    FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => {
+            fk.click-focus();
+            root.open();
+        }
+    }
+
+    pop := PopupWindow {
+        x: 0;
+        y: root.height + 4px;
+        width: 308px;
+        close-policy: close-on-click-outside;
+        forward-focus: hex-ed;
+        PickerFrame {
+            FocusScope {
+                capture-key-pressed(e) => {
+                    if e.text == Key.Escape {
+                        pop.close();
+                        return accept;
+                    }
+                    return reject;
+                }
+                VerticalLayout {
+                    padding: 12px;
+                    spacing: 10px;
+                    HorizontalLayout {
+                        spacing: 10px;
+                        alignment: start;
+                        // was | now; a click on "was" puts it back
+                        Rectangle {
+                            width: 64px;
+                            height: 32px;
+                            border-radius: 4px;
+                            clip: true;
+                            border-width: 1px;
+                            border-color: Tok.input-border;
+                            HorizontalLayout {
+                                Rectangle {
+                                    background: root.was;
+                                    TouchArea {
+                                        mouse-cursor: pointer;
+                                        clicked => { root.take(root.was); }
+                                    }
+                                }
+                                Rectangle { background: root.now; }
+                            }
+                        }
+                        hex-ed := LineEdit {
+                            width: 130px;
+                            text <=> root.hex-text;
+                            accessible-label: @tr("Hex");
+                            edited(t) => { root.typed(t); }
+                            accepted => { root.apply(); }
+                        }
+                    }
+                    if root.bad: Text {
+                        text: @tr("A colour is six hex digits, like #E9D6CC");
+                        color: Tok.bad;
+                        font-size: Tok.small;
+                        wrap: word-wrap;
+                    }
+                    Rectangle {
+                        height: 150px;
+                        border-radius: 4px;
+                        background: hsv(root.h, 1, 1);
+                        Rectangle {
+                            border-radius: 4px;
+                            background: @linear-gradient(90deg, #ffffff 0%, #ffffff00 100%);
+                        }
+                        Rectangle {
+                            border-radius: 4px;
+                            background: @linear-gradient(0deg, #000000 0%, #00000000 100%);
+                        }
+                        Knob {
+                            x: root.s * parent.width - 7px;
+                            y: (1 - root.v) * parent.height - 7px;
+                            fill: root.now;
+                        }
+                        TouchArea {
+                            mouse-cursor: crosshair;
+                            pointer-event(e) => {
+                                if e.kind == PointerEventKind.down && e.button == PointerEventButton.left {
+                                    root.sv-at(self.mouse-x / self.width, self.mouse-y / self.height);
+                                }
+                            }
+                            moved => {
+                                if self.pressed {
+                                    root.sv-at(self.mouse-x / self.width, self.mouse-y / self.height);
+                                }
+                            }
+                        }
+                    }
+                    Rectangle {
+                        height: 14px;
+                        border-radius: 7px;
+                        background: @linear-gradient(90deg, #ff0000 0%, #ffff00 16.67%, #00ff00 33.33%, #00ffff 50%, #0000ff 66.67%, #ff00ff 83.33%, #ff0000 100%);
+                        Knob {
+                            x: root.h / 360 * parent.width - 7px;
+                            y: 0;
+                            fill: hsv(root.h, 1, 1);
+                        }
+                        TouchArea {
+                            mouse-cursor: pointer;
+                            pointer-event(e) => {
+                                if e.kind == PointerEventKind.down && e.button == PointerEventButton.left {
+                                    root.hue-at(self.mouse-x / self.width);
+                                }
+                            }
+                            moved => {
+                                if self.pressed {
+                                    root.hue-at(self.mouse-x / self.width);
+                                }
+                            }
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 6px;
+                        alignment: start;
+                        Muted { text: "R"; vertical-alignment: center; }
+                        NumberBox {
+                            width: 60px;
+                            spin: false;
+                            maximum: 255;
+                            value: root.now.red;
+                            label: @tr("Red");
+                            edited(x) => { root.take(rgb(x, root.now.green, root.now.blue)); }
+                        }
+                        Rectangle { width: 6px; }
+                        Muted { text: "G"; vertical-alignment: center; }
+                        NumberBox {
+                            width: 60px;
+                            spin: false;
+                            maximum: 255;
+                            value: root.now.green;
+                            label: @tr("Green");
+                            edited(x) => { root.take(rgb(root.now.red, x, root.now.blue)); }
+                        }
+                        Rectangle { width: 6px; }
+                        Muted { text: "B"; vertical-alignment: center; }
+                        NumberBox {
+                            width: 60px;
+                            spin: false;
+                            maximum: 255;
+                            value: root.now.blue;
+                            label: @tr("Blue");
+                            edited(x) => { root.take(rgb(root.now.red, root.now.green, x)); }
+                        }
+                    }
+                    if Api.recent-colours.length > 0: VerticalLayout {
+                        spacing: 6px;
+                        Muted { text: @tr("Recent"); }
+                        HorizontalLayout {
+                            spacing: 4px;
+                            alignment: start;
+                            for c in Api.recent-colours: Chip {
+                                colour: c;
+                                on: c == root.now;
+                                clicked => { root.take(c); }
+                            }
+                        }
+                    }
+                    VerticalLayout {
+                        spacing: 6px;
+                        Muted { text: @tr("Presets"); }
+                        Rectangle {
+                            height: 5 * 24px + 4px;
+                            for c[i] in Presets.all: Chip {
+                                x: mod(i, 12) * 24px;
+                                y: floor(i / 12) * 24px + (i >= 48 ? 4px : 0px);
+                                colour: c;
+                                on: c == root.now;
+                                clicked => { root.take(c); }
+                            }
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: end;
+                        Button {
+                            text: @tr("Cancel");
+                            clicked => { pop.close(); }
+                        }
+                        Button {
+                            text: @tr("Apply");
+                            primary: true;
+                            clicked => { root.apply(); }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

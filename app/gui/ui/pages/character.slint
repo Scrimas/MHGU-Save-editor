@@ -1,6 +1,7 @@
 import { LineEdit, ScrollView, Palette } from "std-widgets.slint";
 import { Api, Tok, Card, Muted, ConfidenceTag, Confidence, SectionTitle, PageHeader, NumberBox, StagedBar, WasLine, ColHead, Hairline, TextLink, Pair, Picker } from "../common.slint";
 import { ArtsEditor, PigmentEditor } from "sets.slint";
+import { ColourField } from "../colour.slint";
 
 // Label, control, then "was … Undo" when staged (or the hint). Only the exceptions carry
 // a confidence tag (06); the page header states the rule.
@@ -347,12 +348,10 @@ export component CharacterPage inherits Rectangle {
                         for c in Api.appearance.colours: Field {
                             width: 190px;
                             label: c.label;
-                            Rectangle { width: 32px; height: 32px; border-radius: 4px; background: c.colour; border-width: 1px; border-color: Tok.input-border; }
-                            LineEdit {
-                                width: 110px;
-                                text: c.hex;
-                                accessible-label: c.label;
-                                accepted(t) => { Api.set-look-colour(c.key, t); }
+                            ColourField {
+                                colour: c.colour;
+                                label: c.label;
+                                picked(t) => { Api.set-look-colour(c.key, t); }
                             }
                         }
                     }
