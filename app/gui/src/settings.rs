@@ -1,6 +1,11 @@
 //! User settings, kept as JSON in the config folder (`~/.config/mhgu-save-editor` on
 //! Linux, `%APPDATA%\mhgu-save-editor` on Windows). Read once, written on every change.
 //! Tests start from the defaults and never write the file.
+//!
+//! Before going back to an older version (Settings, Updates and versions), the file is
+//! copied to `settings-<this version>.json`: the older one rewrites it without the
+//! settings it does not know. The next start of that version or a newer one merges the
+//! copy back and deletes it.
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -11,6 +16,10 @@ pub const SCALES: [u32; 6] = [0, 100, 125, 150, 175, 200];
 /// Snapshots kept per save (0 = all).
 pub const KEEPS: [u32; 5] = [0, 5, 10, 20, 50];
 pub const THEMES: [&str; 3] = ["system", "light", "dark"];
+/// Where a save opens: the Overview, or the page used last.
+pub const START_PAGES: [&str; 2] = ["overview", "last"];
+/// How the window is drawn: Slint's choice (OpenGL), or the software renderer.
+pub const RENDERERS: [&str; 2] = ["", "software"];
 /// Recent saves remembered.
 const RECENT: usize = 5;
 /// Colours the picker remembers (one row of its chips).
@@ -49,6 +58,20 @@ pub struct Settings {
     pub update_leftover: Option<PathBuf>,
     /// Colours applied with the colour picker, "#RRGGBB", newest first.
     pub recent_colours: Vec<String>,
+    /// Layout moves, slides and fades.
+    pub animations: bool,
+    /// Where a save opens: one of START_PAGES.
+    pub start_page: String,
+    /// The page shown when the editor was last closed (for start_page "last").
+    pub last_page: String,
+    /// Take a snapshot when a save opens, unless it has one from that day.
+    pub snapshot_on_open: bool,
+    /// On the first start after an update, list what changed since the version before.
+    pub show_changes: bool,
+    /// The version that ran last.
+    pub last_version: String,
+    /// One of RENDERERS, read on start.
+    pub renderer: String,
 }
 
 impl Default for Settings {
@@ -69,6 +92,13 @@ impl Default for Settings {
             check_updates: true,
             update_leftover: None,
             recent_colours: vec![],
+            animations: true,
+            start_page: "overview".into(),
+            last_page: String::new(),
+            snapshot_on_open: false,
+            show_changes: true,
+            last_version: String::new(),
+            renderer: String::new(),
         }
     }
 }
@@ -87,7 +117,7 @@ impl Settings {
     }
 }
 
-fn path() -> Option<PathBuf> {
+pub fn path() -> Option<PathBuf> {
     dirs::config_dir().map(|d| d.join("mhgu-save-editor").join("settings.json"))
 }
 
@@ -95,7 +125,78 @@ fn load() -> Settings {
     if cfg!(test) {
         return Settings::default();
     }
-    path().and_then(|p| std::fs::read(p).ok()).and_then(|b| serde_json::from_slice(&b).ok()).unwrap_or_default()
+    let Some(p) = path() else { return Settings::default() };
+    let read = |p: &std::path::Path| std::fs::read(p).ok().and_then(|b| serde_json::from_slice::<Value>(&b).ok());
+    let mut now = read(&p);
+    let kept = kept(&p);
+    for k in &kept {
+        if let Some(k) = read(k) {
+            now = Some(merge_kept(k, now));
+        }
+    }
+    if let Some(v) = now.as_ref().filter(|_| !kept.is_empty())
+        && write(&p, &serde_json::to_string_pretty(v).unwrap())
+    {
+        for k in &kept {
+            let _ = std::fs::remove_file(k);
+        }
+    }
+    now.and_then(|v| serde_json::from_value(v).ok()).unwrap_or_default()
+}
+
+use serde_json::Value;
+
+/// The copies kept before going back (`settings-<version>.json`) that this version takes
+/// back: of this version or an older one, oldest first.
+fn kept(p: &std::path::Path) -> Vec<PathBuf> {
+    let Ok(dir) = std::fs::read_dir(p.parent().unwrap()) else { return vec![] };
+    let mut v: Vec<_> = dir
+        .flatten()
+        .filter_map(|e| {
+            let name = e.file_name().into_string().ok()?;
+            let ver = crate::update::version(name.strip_prefix("settings-")?.strip_suffix(".json")?)?;
+            (Some(ver) <= crate::update::version(crate::update::VERSION)).then_some((ver, e.path()))
+        })
+        .collect();
+    v.sort();
+    v.into_iter().map(|(_, p)| p).collect()
+}
+
+/// The copy kept before going back, with the file the older version left: its values
+/// win, the settings it did not know come back, and so does the update check it was
+/// told to skip.
+fn merge_kept(kept: Value, now: Option<Value>) -> Value {
+    match (kept, now) {
+        (Value::Object(mut k), Some(Value::Object(n))) => {
+            for (key, v) in n {
+                if key != "check_updates" {
+                    k.insert(key, v);
+                }
+            }
+            Value::Object(k)
+        }
+        (k, None) => k,
+        (_, Some(n)) => n,
+    }
+}
+
+/// Before going back to an older version: a copy of the file for this version to merge
+/// back. False when there is a file and it could not be copied.
+pub fn keep_for_rollback() -> bool {
+    let Some(p) = path().filter(|p| p.exists()) else { return true };
+    std::fs::copy(&p, p.with_file_name(format!("settings-{}.json", crate::update::VERSION))).is_ok()
+}
+
+/// Through a temporary file: a crash mid-write must not reset every setting.
+fn write(p: &std::path::Path, text: &str) -> bool {
+    let _ = std::fs::create_dir_all(p.parent().unwrap());
+    let tmp = p.with_extension("json.tmp");
+    let r = std::fs::write(&tmp, text).and_then(|_| std::fs::rename(&tmp, p));
+    if let Err(e) = &r {
+        let _ = std::fs::remove_file(&tmp);
+        eprintln!("settings: {}: {e}", p.display());
+    }
+    r.is_ok()
 }
 
 // Per thread on purpose: only the UI thread reads and writes them (workers hand their
@@ -117,15 +218,17 @@ pub fn update(f: impl FnOnce(&mut Settings)) {
     if cfg!(test) {
         return;
     }
-    let Some(p) = path() else { return };
-    let _ = std::fs::create_dir_all(p.parent().unwrap());
-    // through a temporary file: a crash mid-write must not reset every setting
-    let tmp = p.with_extension("json.tmp");
-    let r = std::fs::write(&tmp, serde_json::to_string_pretty(&s).unwrap()).and_then(|_| std::fs::rename(&tmp, &p));
-    if let Err(e) = r {
-        let _ = std::fs::remove_file(&tmp);
-        eprintln!("settings: {}: {e}", p.display());
+    if let Some(p) = path() {
+        write(&p, &serde_json::to_string_pretty(&s).unwrap());
     }
+}
+
+/// Back to the defaults, but for what the editor keeps for itself.
+pub fn reset() {
+    update(|s| {
+        let d = Settings { update_leftover: s.update_leftover.take(), last_version: std::mem::take(&mut s.last_version), ..Settings::default() };
+        *s = d;
+    });
 }
 
 thread_local! {
@@ -159,6 +262,16 @@ mod tests {
     fn missing_fields_take_defaults() {
         let s: Settings = serde_json::from_str(r#"{"theme":"dark","keep_snapshots":10}"#).unwrap();
         assert_eq!((s.theme.as_str(), s.keep_snapshots, s.snapshot_first), ("dark", 10, true));
+    }
+
+    #[test]
+    fn a_kept_copy_brings_back_what_an_older_version_dropped() {
+        let kept = serde_json::json!({"theme": "dark", "animations": false, "check_updates": true, "language": "fr"});
+        // the older version: no "animations", the theme changed, update checks turned off
+        let now = serde_json::json!({"theme": "light", "check_updates": false, "language": "fr"});
+        let m = merge_kept(kept.clone(), Some(now));
+        assert_eq!(m, serde_json::json!({"theme": "light", "animations": false, "check_updates": true, "language": "fr"}));
+        assert_eq!(merge_kept(kept.clone(), None), kept);
     }
 
     #[test]

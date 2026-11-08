@@ -10,9 +10,10 @@ use crate::system;
 use crate::targets::{self, Mon, PAGES, Target};
 use crate::update::{self, VERSION};
 use crate::{
-    Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ChangeRow, CharacterInfo, CheckRow, ColourRow, Confidence, DecoRow, DetectedSave,
-    DeviantRow, EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LookRow, MonsterRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow, Preview,
-    PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, WeaponUseRow, WriteRow,
+    Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ChangeLine, ChangeRow, CharacterInfo, CheckRow, ColourRow, Confidence, DecoRow,
+    DetectedSave, DeviantRow, EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LookRow, MonsterRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow,
+    Preview, PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, VersionRow,
+    WeaponUseRow, WriteRow,
 };
 use crate::{Shared, keep, model, strings};
 use mhgu_save::data::tables;
@@ -169,8 +170,17 @@ struct View {
     jump_seq: i32,
     /// the user chose to quit with staged changes
     quitting: bool,
-    /// a newer release, once checked
+    /// the release the update dialog is about: the newer one found, or one picked in
+    /// Settings' version list
     update: Option<update::Release>,
+    /// the newer release found by the last check, and that check's state and status
+    latest: Option<update::Release>,
+    checked: (String, String),
+    /// Settings' version list (newest first) once read, and whether it is being read
+    versions: Option<Vec<update::Release>>,
+    versions_loading: bool,
+    /// what changed up to each version of the list, from this one, once read
+    changes: std::collections::HashMap<String, Result<update::Changes, String>>,
     /// the updated file, to restart on
     update_exe: Option<PathBuf>,
     /// set to stop the download running

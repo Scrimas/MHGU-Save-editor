@@ -315,12 +315,81 @@ msgid "Remove"
 msgstr "Entfernen"
 
 #: app/gui/ui/app.slint
-msgid "Settings"
-msgstr "Einstellungen"
+msgid "current"
+msgstr "aktuell"
+
+#: app/gui/ui/app.slint
+msgid "latest"
+msgstr "neueste"
+
+#: app/gui/ui/app.slint
+msgid "no self-update"
+msgstr "ohne Selbstupdate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Install {}…"
+msgstr "{} installieren…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Update to {}…"
+msgstr "Auf {} aktualisieren…"
+
+#: app/gui/ui/app.slint
+msgid "This is the version you are running."
+msgstr "Diese Version läuft gerade."
+
+#: app/gui/ui/app.slint
+msgid "Only the AppImage and the Windows .exe replace themselves: download this version from the release page."
+msgstr "Nur das AppImage und die Windows-.exe ersetzen sich selbst: diese Version von der Release-Seite laden."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+msgid "{} cannot update itself: to come back, download a newer version from the release page."
+msgstr "{} kann sich nicht selbst aktualisieren: Zum Zurückkehren eine neuere Version von der Release-Seite laden."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Going back to {} removes:"
+msgstr "Zurück zu {} entfernt:"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Going to {} adds:"
+msgstr "Wechsel zu {} bringt:"
+
+#: app/gui/ui/app.slint
+msgid "Release page ↗"
+msgstr "Release-Seite ↗"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Appearance"
 msgstr "Aussehen"
+
+#: app/gui/ui/app.slint
+msgid "Saves"
+msgstr "Spielstände"
+
+#: app/gui/ui/app.slint
+msgid "Emulator check"
+msgstr "Emulatorprüfung"
+
+#: app/gui/ui/app.slint
+msgid "Safety"
+msgstr "Sicherheit"
+
+#: app/gui/ui/app.slint
+msgid "Updates and versions"
+msgstr "Updates und Versionen"
+
+#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+msgid "Advanced"
+msgstr "Erweitert"
+
+#: app/gui/ui/app.slint
+msgid "Settings"
+msgstr "Einstellungen"
 
 #: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
 msgid "Language"
@@ -347,6 +416,18 @@ msgid "Colours from matugen (the wallpaper's palette)"
 msgstr "Farben von matugen (Palette des Hintergrundbilds)"
 
 #: app/gui/ui/app.slint
+msgid "Hide setup"
+msgstr "Einrichtung ausblenden"
+
+#: app/gui/ui/app.slint
+msgid "Show setup…"
+msgstr "Einrichtung zeigen…"
+
+#: app/gui/ui/app.slint
+msgid "Copy lines"
+msgstr "Zeilen kopieren"
+
+#: app/gui/ui/app.slint
 msgid "Template saved"
 msgstr "Vorlage gespeichert"
 
@@ -358,43 +439,29 @@ msgstr "Vorlage speichern"
 msgid "Interface size"
 msgstr "Oberflächengröße"
 
-#: app/gui/src/views/settings_ui.rs app/gui/ui/app.slint
-msgid "Snapshot folder"
-msgstr "Snapshot-Ordner"
+#: app/gui/ui/app.slint
+msgid "Start on"
+msgstr "Start auf"
 
 #: app/gui/ui/app.slint
-msgid "Change…"
-msgstr "Ändern…"
+msgid "The page shown when a save opens"
+msgstr "Die Seite, die beim Öffnen eines Spielstands erscheint"
 
-#: app/gui/src/views/options_ui.rs app/gui/ui/app.slint
-msgid "Default"
-msgstr "Standard"
-
-#: app/gui/ui/app.slint
-msgid "Keep per save"
-msgstr "Pro Spielstand behalten"
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/overview.slint
+msgid "Overview"
+msgstr "Übersicht"
 
 #: app/gui/ui/app.slint
-msgid "After each new snapshot, the oldest beyond this number are deleted."
-msgstr "Nach jedem neuen Snapshot werden die ältesten über dieser Anzahl gelöscht."
-
-#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/requests.slint
-msgid "All"
-msgstr "Alle"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
-msgid "Last {}"
-msgstr "Letzte {}"
+msgid "The last page used"
+msgstr "Die zuletzt benutzte Seite"
 
 #: app/gui/ui/app.slint
-msgid "Tick \"Take a snapshot first\" in the Write dialog"
-msgstr "„Zuerst einen Snapshot anlegen“ im Schreiben-Dialog ankreuzen"
+msgid "Animations"
+msgstr "Animationen"
 
 #: app/gui/ui/app.slint
-msgid "Saves"
-msgstr "Spielstände"
+msgid "Page switches, cards moving to their new place, slides and fades."
+msgstr "Seitenwechsel, Karten, die an ihren neuen Platz gleiten, Einblenden und Ausblenden."
 
 #: app/gui/ui/app.slint
 msgid "Open the last save on start"
@@ -431,9 +498,47 @@ msgstr "Zusätzlich zu den von selbst gefundenen Ordnern (Ryujinx, yuzu-Familie)
 msgid "Add folder…"
 msgstr "Ordner hinzufügen…"
 
+#: app/gui/src/views/settings_ui.rs app/gui/ui/app.slint
+msgid "Snapshot folder"
+msgstr "Snapshot-Ordner"
+
 #: app/gui/ui/app.slint
-msgid "Emulator check"
-msgstr "Emulatorprüfung"
+msgid "Change…"
+msgstr "Ändern…"
+
+#: app/gui/src/views/options_ui.rs app/gui/ui/app.slint
+msgid "Default"
+msgstr "Standard"
+
+#: app/gui/ui/app.slint
+msgid "Keep per save"
+msgstr "Pro Spielstand behalten"
+
+#: app/gui/ui/app.slint
+msgid "After each new snapshot, the oldest beyond this number are deleted."
+msgstr "Nach jedem neuen Snapshot werden die ältesten über dieser Anzahl gelöscht."
+
+#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/requests.slint
+msgid "All"
+msgstr "Alle"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Last {}"
+msgstr "Letzte {}"
+
+#: app/gui/ui/app.slint
+msgid "Tick \"Take a snapshot first\" in the Write dialog"
+msgstr "„Zuerst einen Snapshot anlegen“ im Schreiben-Dialog ankreuzen"
+
+#: app/gui/ui/app.slint
+msgid "Take a snapshot when a save opens"
+msgstr "Beim Öffnen eines Spielstands einen Snapshot anlegen"
+
+#: app/gui/ui/app.slint
+msgid "Once per save and day: the save as it was before the day's changes is always kept."
+msgstr "Einmal pro Spielstand und Tag: Der Spielstand vor den Änderungen des Tages bleibt immer erhalten."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint
@@ -449,24 +554,12 @@ msgid "Add"
 msgstr "Hinzufügen"
 
 #: app/gui/ui/app.slint
-msgid "Safety"
-msgstr "Sicherheit"
-
-#: app/gui/ui/app.slint
 msgid "Confirmed changes only"
 msgstr "Nur bestätigte Änderungen"
 
 #: app/gui/ui/app.slint
 msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."
 msgstr "Als „Abgeleitet“ markierte Änderungen (aus dem Spielcode erschlossen, noch nicht im Spiel geprüft) werden abgelehnt. Änderungen, die bereits in der Prüfung sind, bleiben."
-
-#: app/gui/ui/app.slint
-msgid "Updates"
-msgstr "Updates"
-
-#: app/gui/ui/app.slint
-msgid "Check for a new version on start"
-msgstr "Beim Start nach neuer Version suchen"
 
 #: app/gui/ui/app.slint
 msgid "Version"
@@ -485,8 +578,84 @@ msgid "Update…"
 msgstr "Aktualisieren…"
 
 #: app/gui/ui/app.slint
+msgid "Check for a new version on start"
+msgstr "Beim Start nach neuer Version suchen"
+
+#: app/gui/ui/app.slint
 msgid "Asks GitHub for the latest release. Nothing is downloaded until you choose to update."
 msgstr "Fragt GitHub nach dem neuesten Release. Heruntergeladen wird erst, wenn die Aktualisierung gewählt wird."
+
+#: app/gui/ui/app.slint
+msgid "Show what changed after an update"
+msgstr "Nach einem Update zeigen, was sich geändert hat"
+
+#: app/gui/ui/app.slint
+msgid "Once, on the first start of a new version: the changes since the version before, from GitHub."
+msgstr "Einmal, beim ersten Start einer neuen Version: die Änderungen seit der vorherigen Version, von GitHub."
+
+#: app/gui/ui/app.slint
+msgid "Other versions"
+msgstr "Andere Versionen"
+
+#: app/gui/ui/app.slint
+msgid "Go back to an older release, or forward again. Downloaded from GitHub and checked like an update."
+msgstr "Zu einer älteren Version zurück oder wieder vor. Von GitHub geladen und wie ein Update geprüft."
+
+#: app/gui/ui/app.slint
+msgid "Try again"
+msgstr "Erneut versuchen"
+
+#: app/gui/ui/app.slint
+msgid "Drawing"
+msgstr "Darstellung"
+
+#: app/gui/ui/app.slint
+msgid "Software is slower: for graphics drivers that fail or draw badly."
+msgstr "Software ist langsamer: für Grafiktreiber, die versagen oder falsch zeichnen."
+
+#: app/gui/ui/app.slint
+msgid "Automatic (OpenGL)"
+msgstr "Automatisch (OpenGL)"
+
+#: app/gui/ui/app.slint
+msgid "Software"
+msgstr "Software"
+
+#: app/gui/ui/app.slint
+msgid "Settings file"
+msgstr "Einstellungsdatei"
+
+#: app/gui/ui/app.slint
+msgid "System info"
+msgstr "Systeminfo"
+
+#: app/gui/ui/app.slint
+msgid "For a bug report: version, system, drawing, size and language."
+msgstr "Für einen Fehlerbericht: Version, System, Darstellung, Größe und Sprache."
+
+#: app/gui/ui/app.slint
+msgid "Reset settings"
+msgstr "Einstellungen zurücksetzen"
+
+#: app/gui/ui/app.slint
+msgid "Every setting goes back to its default, recent saves, save folders and emulators included."
+msgstr "Jede Einstellung kehrt zum Standard zurück, zuletzt geöffnete Spielstände, Spielstandordner und Emulatoren eingeschlossen."
+
+#: app/gui/ui/app.slint
+msgid "Every setting back to its default"
+msgstr "Jede Einstellung auf den Standard"
+
+#: app/gui/ui/app.slint
+msgid "Reset…"
+msgstr "Zurücksetzen…"
+
+#: app/gui/ui/app.slint
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: app/gui/ui/app.slint
+msgid "Release notes"
+msgstr "Versionshinweise"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint
@@ -496,10 +665,6 @@ msgstr "MHGU Save Editor — {}"
 #: app/gui/ui/app.slint
 msgid "MHGU Save Editor"
 msgstr "MHGU Save Editor"
-
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/overview.slint
-msgid "Overview"
-msgstr "Übersicht"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Character"
@@ -609,17 +774,27 @@ msgid "Version {} is installed"
 msgstr "Version {} ist installiert"
 
 #. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Go back to {}?"
+msgstr "Zurück zu {}?"
+
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
 msgid "Version {} is available"
 msgstr "Version {} ist verfügbar"
 
 #: app/gui/ui/app.slint
-msgid "Write or undo the staged changes before restarting."
-msgstr "Vor dem Neustart die vorgemerkten Änderungen schreiben oder rückgängig machen."
+msgid "Stop offering newer versions on start"
+msgstr "Beim Start keine neueren Versionen mehr anbieten"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Turns off “Check for a new version on start”, so {} does not ask to update right away."
+msgstr "Schaltet „Beim Start nach neuer Version suchen“ aus, damit {} nicht sofort ein Update anbietet."
 
 #: app/gui/ui/app.slint
-msgid "Release notes"
-msgstr "Versionshinweise"
+msgid "Write or undo the staged changes before restarting."
+msgstr "Vor dem Neustart die vorgemerkten Änderungen schreiben oder rückgängig machen."
 
 #: app/gui/ui/app.slint
 msgid "Later"
@@ -629,9 +804,10 @@ msgstr "Später"
 msgid "Not now"
 msgstr "Nicht jetzt"
 
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint
-msgid "Try again"
-msgstr "Erneut versuchen"
+msgid "Install {}"
+msgstr "{} installieren"
 
 #: app/gui/ui/app.slint
 msgid "Download and install"
@@ -1697,10 +1873,6 @@ msgstr "Dekorations-Slots"
 #: app/gui/ui/pages/equipment.slint
 msgid "Share as text…"
 msgstr "Als Text teilen…"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Advanced"
-msgstr "Erweitert"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "The 36 bytes of this box entry. Select to copy."
@@ -4851,6 +5023,11 @@ msgstr[1] "Spielstand geöffnet: {n} Charaktere"
 msgid "Could not open {}: {}"
 msgstr "{} konnte nicht geöffnet werden: {}"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Snapshot failed: {}"
+msgstr "Snapshot fehlgeschlagen: {}"
+
 #: app/gui/src/views/file.rs
 msgid "Before a write"
 msgstr "Vor einem Schreibvorgang"
@@ -6054,6 +6231,10 @@ msgstr "Durch SLINT_SCALE_FACTOR in der Umgebung festgelegt"
 msgid "Applies the next time the editor starts"
 msgstr "Gilt ab dem nächsten Start des Editors"
 
+#: app/gui/src/views/settings_ui.rs
+msgid "Set by SLINT_BACKEND in the environment"
+msgstr "Durch SLINT_BACKEND in der Umgebung festgelegt"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/settings_ui.rs
 msgid "Version {} · EU/western build (0100770008DD8000) · {}"
@@ -6095,6 +6276,10 @@ msgstr "Vorlage gespeichert unter {}"
 #: app/gui/src/views/settings_ui.rs
 msgid "Could not save {}: {}"
 msgstr "{} konnte nicht gespeichert werden: {}"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "Settings are back to their defaults"
+msgstr "Einstellungen auf Standard zurückgesetzt"
 
 #: app/gui/src/views/settings_ui.rs
 msgid "New snapshots go to the new folder; earlier ones stay where they are"
@@ -6700,6 +6885,11 @@ msgstr "{} von {} Einträgen freigeschaltet"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
+msgid "You have {}. Version {} ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves and snapshots are not touched."
+msgstr "Installiert: {}. Version {} ({}) wird von GitHub geladen, mit den SHA-256-Prüfsummen des Releases abgeglichen und ersetzt {}. Spielstände und Snapshots bleiben unberührt."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
 msgid "You have {}. The new version ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves, snapshots and settings are not touched."
 msgstr "Installiert: {}. Die neue Version ({}) wird von GitHub geladen, mit den SHA-256-Prüfsummen des Releases abgeglichen und ersetzt {}. Spielstände, Snapshots und Einstellungen bleiben unberührt."
 
@@ -6710,8 +6900,20 @@ msgstr "Installiert: {}. Dieses Release hat keine Datei für dieses System: sieh
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
-msgid "You have {}. Only the AppImage and the Windows .exe replace themselves: download the new version from the release page."
-msgstr "Installiert: {}. Nur das AppImage und die Windows-.exe ersetzen sich selbst: neue Version von der Release-Seite herunterladen."
+msgid "You have {}. Only the AppImage and the Windows .exe replace themselves: download this version from the release page."
+msgstr "Installiert: {}. Nur das AppImage und die Windows-.exe ersetzen sich selbst: diese Version von der Release-Seite laden."
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/update_ui.rs
+msgid "What came in the {n} later release is gone until you update again. Your settings are copied first and come back when you return to {} or a newer version."
+msgid_plural "What came in the {n} later releases is gone until you update again. Your settings are copied first and come back when you return to {} or a newer version."
+msgstr[0] "Was die {n} spätere Version gebracht hat, fehlt bis zum nächsten Update. Die Einstellungen werden vorher kopiert und kehren zurück, sobald wieder {} oder neuer läuft."
+msgstr[1] "Was die {n} späteren Versionen gebracht haben, fehlt bis zum nächsten Update. Die Einstellungen werden vorher kopiert und kehren zurück, sobald wieder {} oder neuer läuft."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "going back to {}"
+msgstr "zurück zu {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
@@ -6725,6 +6927,14 @@ msgstr "wird geprüft…"
 #: app/gui/src/views/update_ui.rs
 msgid "up to date"
 msgstr "aktuell"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Not installed: the settings file could not be copied. The editor you are running is unchanged."
+msgstr "Nicht installiert: Die Einstellungsdatei konnte nicht kopiert werden. Der laufende Editor ist unverändert."
+
+#: app/gui/src/views/update_ui.rs
+msgid "update failed"
+msgstr "Aktualisierung fehlgeschlagen"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
@@ -6746,10 +6956,6 @@ msgstr "{} ist bereit. Zum Verwenden neu starten."
 msgid "{} installed, restart to use it"
 msgstr "{} installiert, zum Verwenden neu starten"
 
-#: app/gui/src/views/update_ui.rs
-msgid "update failed"
-msgstr "Aktualisierung fehlgeschlagen"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
 msgid "Not updated: {}. The editor you are running is unchanged."
@@ -6763,6 +6969,23 @@ msgstr "Aktualisierung abgebrochen"
 #: app/gui/src/views/update_ui.rs
 msgid "Could not start {}: {}"
 msgstr "{} konnte nicht gestartet werden: {}"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Asking GitHub…"
+msgstr "Frage bei GitHub an…"
+
+#: app/gui/src/views/update_ui.rs
+msgid "No list of changes for this version"
+msgstr "Keine Änderungsliste für diese Version"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Fixes and upkeep"
+msgstr "Korrekturen und Pflege"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "What changed since {}"
+msgstr "Was sich seit {} geändert hat"
 
 #: app/core/src/character.rs
 msgid "Village · Low rank"

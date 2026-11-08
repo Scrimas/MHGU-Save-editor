@@ -64,7 +64,12 @@ fn main() -> Result<(), slint::PlatformError> {
     update::cleanup();
     // Wayland app id / X11 class, so the desktop can match the window to its icon and
     // rules: it needs the platform to exist and no window yet.
-    slint::BackendSelector::new().select()?;
+    // Settings' "Drawing": the software renderer, unless the environment picks one
+    let mut backend = slint::BackendSelector::new();
+    if settings::get().renderer == "software" && std::env::var_os("SLINT_BACKEND").is_none() {
+        backend = backend.renderer_name("software".into());
+    }
+    backend.select()?;
     #[cfg(all(unix, not(target_os = "macos")))]
     slint::set_xdg_app_id("mhgu-save-editor")?;
     let ui = AppWindow::new()?;
@@ -110,8 +115,11 @@ fn main() -> Result<(), slint::PlatformError> {
         // the "Save opened" toast would cover the page; toasts of the steps stay
         api.set_toast("".into());
         steps(&ui, page, args.get(2).map_or("", String::as_str));
-    } else if settings::get().check_updates && std::env::var_os("MHGU_SNAPSHOT").is_none() {
-        views::check_update(&ui, false);
+    } else if std::env::var_os("MHGU_SNAPSHOT").is_none() {
+        if settings::get().check_updates {
+            views::check_update(&ui, false);
+        }
+        views::show_changes(&ui);
     }
     // MHGU_SNAPSHOT=out.png: render the window to a PNG and quit (for checking the UI
     // without capturing the screen). Waits until the compositor has sized the window:
@@ -147,7 +155,13 @@ fn main() -> Result<(), slint::PlatformError> {
             let _ = slint::quit_event_loop();
         });
     }
-    ui.run()
+    let r = ui.run();
+    // where "Start on: the last page used" opens the next time
+    let page = api.get_page();
+    if std::env::var_os("MHGU_SNAPSHOT").is_none() && targets::PAGES.iter().any(|p| p.0 == page.as_str()) {
+        settings::update(|s| s.last_page = page.into());
+    }
+    r
 }
 
 /// Put the UI in a given state for a screenshot: comma-separated steps run in order.
@@ -159,6 +173,8 @@ fn main() -> Result<(), slint::PlatformError> {
 ///   remove-card:<slot>  option:<id>:<v>  chat-show:<g>  phrase:<auto|phrase>:<i>:<text>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
 ///   theme:light|dark  update (asks GitHub, as Settings' Check now)
+///   section:<n> (the Settings section shown, with popup:settings)  install:<n> (with
+///   section:5, the install dialog for version n of the list once GitHub listed it)
 fn steps(ui: &AppWindow, page: &str, list: &str) {
     let api = ui.global::<Api>();
     for step in list.split(',').filter(|s| !s.is_empty()) {
@@ -279,6 +295,11 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
                 api.set_snapshots_open(true);
             }
             (_, &["quit"]) => api.set_quit_open(true),
+            (_, &["install", n]) => views::install_when_listed(ui, num(n)),
+            (_, &["section", n]) => {
+                api.set_settings_section(num(n));
+                views::settings_section(ui);
+            }
             (_, &["update"]) => views::check_update(ui, true),
             // write with a snapshot (point XDG_DATA_HOME elsewhere for tests), then press
             // the toast's button

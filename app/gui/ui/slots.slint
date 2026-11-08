@@ -112,12 +112,12 @@ export component SlotList inherits Flickable {
         property <bool> lifted: i == root.drag && root.started;
         property <bool> selected: root.sel >= r.first && root.sel <= r.last;
         property <bool> movable: r.used && !r.run;
-        property <duration> slide: self.lifted || (root.snap && i != root.dropped) ? 0ms : 160ms;
+        property <duration> slide: !Api.animate || self.lifted || (root.snap && i != root.dropped) ? 0ms : 160ms;
         width: parent.width;
         y: self.lifted ? root.drag-y : r.y;
         animate y { duration: slide; easing: ease; }
         height: r.h;
-        animate height { duration: root.snap ? 0ms : 160ms; easing: ease; }
+        animate height { duration: root.snap || !Api.animate ? 0ms : 160ms; easing: ease; }
         visible: self.height > 0.5px;
         clip: true;
         z: self.lifted ? 10 : 0;

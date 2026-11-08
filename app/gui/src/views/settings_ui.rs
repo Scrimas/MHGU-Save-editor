@@ -15,6 +15,16 @@ pub(super) fn settings_ui(ui: &AppWindow) {
         Some(_) => String::new(),
     };
     let dir = system::snapshot_root();
+    // the renderer this run started with: a new choice waits for a restart
+    static RENDERER: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    let started = RENDERER.get_or_init(|| s.renderer.clone());
+    let renderer_now = if std::env::var_os("SLINT_BACKEND").is_some() {
+        tr("Set by SLINT_BACKEND in the environment").to_string()
+    } else if *started != s.renderer {
+        tr("Applies the next time the editor starts").to_string()
+    } else {
+        String::new()
+    };
     let api = ui.global::<Api>();
     api.set_build_info(
         trf(
@@ -46,7 +56,46 @@ pub(super) fn settings_ui(ui: &AppWindow) {
         matugen_hint: MATUGEN.with(|m| m.borrow().hint.clone()).into(),
         matugen_template: theme::template_path().is_some_and(|p| p.exists()),
         matugen_snippet: theme::snippet().into(),
+        animations: s.animations,
+        start_page: settings::START_PAGES.iter().position(|p| *p == s.start_page).unwrap_or(0) as i32,
+        snapshot_on_open: s.snapshot_on_open,
+        show_changes: s.show_changes,
+        renderer: settings::RENDERERS.iter().position(|r| *r == s.renderer).unwrap_or(0) as i32,
+        renderer_now: renderer_now.into(),
+        settings_file: settings::path().map_or(String::new(), |p| theme::tilde(&p)).into(),
+        system_info: system_info(&s).into(),
     });
+    api.set_animate(s.animations);
+}
+
+/// For a bug report: what the editor runs on, in English.
+fn system_info(s: &settings::Settings) -> String {
+    let mut os = format!("{} {}", std::env::consts::OS, std::env::consts::ARCH);
+    #[cfg(target_os = "linux")]
+    {
+        let pretty = std::fs::read_to_string("/etc/os-release")
+            .ok()
+            .and_then(|t| t.lines().find_map(|l| l.strip_prefix("PRETTY_NAME=").map(|v| v.trim_matches('"').to_string())));
+        let var = |k: &str| std::env::var(k).unwrap_or_default();
+        os = format!("{} ({os}), {} {}", pretty.unwrap_or_default(), var("XDG_CURRENT_DESKTOP"), var("XDG_SESSION_TYPE"));
+    }
+    let drawing = match std::env::var("SLINT_BACKEND") {
+        Ok(b) => format!("SLINT_BACKEND={b}"),
+        Err(_) if s.renderer == "software" => "software".into(),
+        Err(_) => "automatic".into(),
+    };
+    let scale = match settings::scale_started() {
+        None => format!("SLINT_SCALE_FACTOR={}", std::env::var("SLINT_SCALE_FACTOR").unwrap_or_default()),
+        Some(0) => "system".into(),
+        Some(n) => format!("{n} %"),
+    };
+    let packaged = if update::target().is_some() { if cfg!(windows) { ".exe" } else { "AppImage" } } else { "other" };
+    format!(
+        "MHGU Save Editor {}\nSystem: {os}\nRun as: {packaged}\nDrawing: {drawing}\nInterface size: {scale}\nLanguage: {}\nGame assets: {}",
+        VERSION,
+        i18n::LANGS[i18n::index(&s.language)].0,
+        if assets::available() { "included" } else { "not included" },
+    )
 }
 
 /// What the matugen colours were last read from.
@@ -110,6 +159,18 @@ fn matugen(ui: &AppWindow, force: bool) {
     }
 }
 
+/// After the language (or every setting) changed: the text made here is made again; the
+/// .slint text follows on its own.
+fn relabel(ui: &AppWindow, st: &Shared) {
+    i18n::set(ui, i18n::index(&settings::get().language));
+    matugen(ui, true);
+    detected(ui);
+    if ui.global::<Api>().get_update().state == "available" {
+        update_available(ui);
+    }
+    refresh(ui, &st.borrow());
+}
+
 pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
     matugen(ui, true);
@@ -142,7 +203,7 @@ pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
         settings_ui(&ui);
     });
     let w = ui.as_weak();
-    let st = st.clone();
+    let shared = st.clone();
     api.on_set_setting(move |key, v| {
         let Some(ui) = w.upgrade() else { return };
         let on = v != 0;
@@ -158,6 +219,11 @@ pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
             "reopen" => s.reopen_last = on,
             "confirmed-only" => s.confirmed_only = on,
             "check-updates" => s.check_updates = on,
+            "animations" => s.animations = on,
+            "start-page" => s.start_page = settings::START_PAGES.get(v as usize).unwrap_or(&"overview").to_string(),
+            "snapshot-on-open" => s.snapshot_on_open = on,
+            "show-changes" => s.show_changes = on,
+            "renderer" => s.renderer = settings::RENDERERS.get(v as usize).unwrap_or(&"").to_string(),
             _ => eprintln!("unknown setting {key:?}"),
         });
         if key == "theme" {
@@ -167,14 +233,25 @@ pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
             matugen(&ui, true);
         }
         if key == "language" {
-            // the .slint text follows at once; the text made here is made again
-            i18n::set(&ui, i18n::index(&settings::get().language));
-            matugen(&ui, true);
-            detected(&ui);
-            update_available(&ui);
-            refresh(&ui, &st.borrow());
+            relabel(&ui, &shared);
         }
         settings_ui(&ui);
+    });
+    let w = ui.as_weak();
+    let st = st.clone();
+    api.on_reset_settings(move || {
+        let Some(ui) = w.upgrade() else { return };
+        settings::reset();
+        let s = settings::get();
+        ui.global::<Api>().set_force_scheme(s.theme.into());
+        relabel(&ui, &st);
+        settings_ui(&ui);
+        toast(&ui, tr("Settings are back to their defaults"), false);
+    });
+    api.on_open_settings_folder(|| {
+        if let Some(d) = settings::path().as_ref().and_then(|p| p.parent()) {
+            system::open_folder(d);
+        }
     });
     let w = ui.as_weak();
     api.on_pick_snapshot_dir(move || {

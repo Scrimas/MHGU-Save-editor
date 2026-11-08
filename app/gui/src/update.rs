@@ -6,6 +6,9 @@
 //!
 //! The checksums come from the same release as the file: they catch a broken download,
 //! not a release published by someone else (there is no signature).
+//!
+//! Settings also lists every published release, to go back to an older one (or forward
+//! again) the same way, with what changed in between: the commit titles between the tags.
 
 use crate::i18n::{tr, trf};
 use serde::Deserialize;
@@ -15,7 +18,10 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
+const REPO: &str = "https://api.github.com/repos/Scrimas/MHGU-Save-editor";
 const LATEST: &str = "https://api.github.com/repos/Scrimas/MHGU-Save-editor/releases/latest";
+/// The first version that updates itself: an older one can only be left by hand.
+const SELF_UPDATE: &str = "0.7.0";
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[cfg(windows)]
 const SUFFIX: &str = "-x86_64.exe";
@@ -34,14 +40,22 @@ struct Latest {
     tag_name: String,
     html_url: String,
     assets: Vec<Asset>,
+    #[serde(default)]
+    published_at: String,
+    #[serde(default)]
+    draft: bool,
+    #[serde(default)]
+    prerelease: bool,
 }
 
-/// A release newer than this one.
+/// A published release: the newer one an update installs, or any of the list.
 #[derive(Clone, Debug)]
 pub struct Release {
     pub version: String,
     /// Its page on GitHub, with the notes.
     pub page: String,
+    /// Published, "2026-11-02" (UTC); empty when GitHub leaves it out.
+    pub date: String,
     file: Option<Asset>,
     sums: Option<Asset>,
 }
@@ -50,6 +64,11 @@ impl Release {
     /// Download size, when this platform's file is in the release.
     pub fn size(&self) -> Option<u64> {
         self.file.as_ref().map(|a| a.size)
+    }
+
+    /// Whether this version, once installed, can update itself (and so come back).
+    pub fn updates_itself(&self) -> bool {
+        version(&self.version) >= version(SELF_UPDATE)
     }
 }
 
@@ -118,11 +137,125 @@ pub struct Installed {
     pub aside: Option<PathBuf>,
 }
 
-fn fetch(url: &str) -> Result<Release, String> {
-    let l: Latest = serde_json::from_reader(get(url)?.into_reader()).map_err(|e| trf("Unexpected answer from GitHub ({})", &[&e]))?;
+fn json<T: serde::de::DeserializeOwned>(url: &str) -> Result<T, String> {
+    serde_json::from_reader(get(url)?.into_reader()).map_err(|e| trf("Unexpected answer from GitHub ({})", &[&e]))
+}
+
+fn release_of(l: &Latest) -> Release {
     let pick = |f: &dyn Fn(&str) -> bool| l.assets.iter().find(|a| f(&a.name)).cloned();
     let version = l.tag_name.trim_start_matches('v').to_string();
-    Ok(Release { page: l.html_url.clone(), file: pick(&|n| n.ends_with(SUFFIX)), sums: pick(&|n| is_sums(n, &version)), version })
+    Release {
+        page: l.html_url.clone(),
+        date: l.published_at.get(..10).unwrap_or_default().to_string(),
+        file: pick(&|n| n.ends_with(SUFFIX)),
+        sums: pick(&|n| is_sums(n, &version)),
+        version,
+    }
+}
+
+fn fetch(url: &str) -> Result<Release, String> {
+    json::<Latest>(url).map(|l| release_of(&l))
+}
+
+/// Every published release (drafts and pre-releases left out), newest first.
+pub fn list() -> Result<Vec<Release>, String> {
+    let all: Vec<Latest> = json(&format!("{REPO}/releases?per_page=100"))?;
+    let mut v: Vec<Release> = all.iter().filter(|l| !l.draft && !l.prerelease).map(release_of).filter(|r| version(&r.version).is_some()).collect();
+    v.sort_by_key(|r| std::cmp::Reverse(version(&r.version)));
+    Ok(v)
+}
+
+#[derive(Deserialize)]
+struct Tag {
+    name: String,
+    commit: Sha,
+}
+
+#[derive(Deserialize)]
+struct Sha {
+    sha: String,
+}
+
+#[derive(Deserialize)]
+struct Compare {
+    commits: Vec<Commit>,
+}
+
+#[derive(Deserialize)]
+struct Commit {
+    sha: String,
+    commit: Message,
+}
+
+#[derive(Deserialize)]
+struct Message {
+    message: String,
+}
+
+/// Each release's version and the titles of its changes, newest first.
+pub type Changes = Vec<(String, Vec<String>)>;
+
+/// What changed between versions `a` and `b` (either order), per release of `published`
+/// between them, newest first: the titles of its commits. Going back removes them.
+pub fn changes(a: &str, b: &str, published: &[String]) -> Result<Changes, String> {
+    let (lo, hi) = if version(a) <= version(b) { (a, b) } else { (b, a) };
+    let tags: Vec<Tag> = json(&format!("{REPO}/tags?per_page=100"))?;
+    let cmp: Compare = json(&format!("{REPO}/compare/v{lo}...v{hi}"))?;
+    // the releases in (lo, hi] end at their tag's commit; unpublished tags do not split
+    let ends: Vec<(String, String)> = tags
+        .into_iter()
+        .map(|t| (t.commit.sha, t.name.trim_start_matches('v').to_string()))
+        .filter(|(_, v)| published.contains(v) && version(v) > version(lo) && version(v) <= version(hi))
+        .collect();
+    let commits: Vec<(String, String)> = cmp.commits.into_iter().map(|c| (c.sha, c.commit.message)).collect();
+    Ok(group(&commits, &ends, hi))
+}
+
+/// Commits (oldest first, as GitHub's compare gives them) put under the release whose tag
+/// closes them; housekeeping (README, CI, translations…) is left out.
+fn group(commits: &[(String, String)], ends: &[(String, String)], hi: &str) -> Changes {
+    let mut out = vec![];
+    let mut pending = vec![];
+    for (sha, message) in commits {
+        let title = message.lines().next().unwrap_or_default().replace("[skip ci]", "");
+        let title = title.trim();
+        if shown(title) {
+            pending.push(title.to_string());
+        }
+        if let Some((_, v)) = ends.iter().find(|(s, _)| s == sha) {
+            out.push((v.clone(), std::mem::take(&mut pending)));
+        }
+    }
+    if !pending.is_empty() {
+        match out.last_mut().filter(|(v, _)| v == hi) {
+            Some((_, l)) => l.append(&mut pending),
+            None => out.push((hi.to_string(), pending)),
+        }
+    }
+    out.reverse();
+    out
+}
+
+/// A commit title worth telling a player.
+fn shown(title: &str) -> bool {
+    const SKIP: [&str; 15] = [
+        "README",
+        "CI",
+        "Docs",
+        "docs",
+        "CONTRIBUTING",
+        "tools/",
+        "Cargo.lock",
+        "Merge ",
+        "Reseal",
+        "Translat",
+        "Added TODO",
+        "Release ",
+        "Version ",
+        "Bump ",
+        "Evidence",
+    ];
+    !title.is_empty() && !SKIP.iter().any(|p| title.starts_with(p))
 }
 
 /// The file an update replaces: the AppImage or the .exe; None when run another way.
@@ -274,6 +407,38 @@ mod tests {
         // the list itself: as build.sh names it, or the plain copy
         assert!(is_sums("SHA256SUMS-0.8.0", "0.8.0") && is_sums("SHA256SUMS", "0.8.0"));
         assert!(!is_sums("SHA256SUMS-0.7.0", "0.8.0") && !is_sums("SHA256SUMS-0.8.0.sig", "0.8.0") && !is_sums("SHA256SUMS.sig", "0.8.0"));
+    }
+
+    #[test]
+    fn commits_go_under_the_release_that_ends_them() {
+        let c = |sha: &str, m: &str| (sha.to_string(), m.to_string());
+        let commits = [
+            c("a", "Guild Cards page\n\nbody"),
+            c("b", "README: screenshots [skip ci]"),
+            c("t1", "Fix the Options page"),
+            c("d", "CI: cache"),
+            c("t2", "Palicoes tabs"),
+            c("e", "Translate the new strings"),
+        ];
+        let ends = [("t1".to_string(), "2.6.0".to_string()), ("t2".to_string(), "2.7.0".to_string())];
+        let g = group(&commits, &ends, "2.7.0");
+        assert_eq!(
+            g,
+            [
+                ("2.7.0".to_string(), vec!["Palicoes tabs".to_string()]),
+                ("2.6.0".to_string(), vec!["Guild Cards page".to_string(), "Fix the Options page".to_string()])
+            ]
+        );
+        // commits after the last tag belong to the newest version asked
+        let g = group(&[c("x", "Chinese interface")], &[], "2.9.0");
+        assert_eq!(g, [("2.9.0".to_string(), vec!["Chinese interface".to_string()])]);
+    }
+
+    #[test]
+    fn old_versions_cannot_update_themselves() {
+        let r = |v: &str| Release { version: v.into(), page: String::new(), date: String::new(), file: None, sums: None };
+        assert!(!r("0.5.0").updates_itself());
+        assert!(r("0.7.0").updates_itself() && r("3.1.0").updates_itself());
     }
 
     #[test]

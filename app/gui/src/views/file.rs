@@ -70,7 +70,7 @@ pub(super) fn open_now(ui: &AppWindow, st: &Shared, p: &Path) {
     match r {
         Ok(()) => {
             let api = ui.global::<Api>();
-            api.set_page("overview".into());
+            api.set_page(start_page(&api.get_page()).into());
             api.set_toast("".into());
             view(|v| {
                 v.equip_sel = -1;
@@ -86,11 +86,43 @@ pub(super) fn open_now(ui: &AppWindow, st: &Shared, p: &Path) {
             refresh(ui, &st.borrow());
             let n = st.borrow().doc.as_ref().map(|d| (0..3).filter(|&k| d.save.slot_used(k)).count()).unwrap_or(0);
             toast(ui, trn("Save opened: {n} character", "Save opened: {n} characters", n as i64, &[]), false);
+            if settings::get().snapshot_on_open {
+                snapshot_on_open(ui, &st.borrow());
+            }
         }
         Err(e) => {
             ui.global::<Api>().set_warning(trf("Could not open {}: {}", &[&p.display(), &e]).into());
             toast(ui, e, true);
         }
+    }
+}
+
+/// The page a save opens on (Settings, "Start on"): the Overview, or the page in use
+/// (`now`, when it is one of a save) or else the one used last.
+fn start_page(now: &str) -> String {
+    let s = settings::get();
+    let page = |p: &str| PAGES.iter().any(|x| x.0 == p);
+    match s.start_page.as_str() {
+        "last" if page(now) => now.into(),
+        "last" if page(&s.last_page) => s.last_page,
+        _ => "overview".into(),
+    }
+}
+
+/// Settings' "Take a snapshot when a save opens": one, unless the save has one from today.
+fn snapshot_on_open(ui: &AppWindow, st: &State) {
+    let Some(doc) = st.doc.as_ref() else { return };
+    let dir = system::snapshot_dir(&doc.loc);
+    let now = chrono::Local::now();
+    if system::snapshots(&dir).iter().any(|x| x.time.date_naive() == now.date_naive()) {
+        return;
+    }
+    match store::snapshot(&doc.loc, &dir, &now.format(system::STAMP).to_string()) {
+        Ok(p) => {
+            system::write_note(&p, "When the save was opened", &doc.loc);
+            system::prune_snapshots(&dir, &p);
+        }
+        Err(e) => toast(ui, trf("Snapshot failed: {}", &[&e]), true),
     }
 }
 

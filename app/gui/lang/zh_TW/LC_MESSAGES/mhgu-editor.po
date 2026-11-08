@@ -310,12 +310,81 @@ msgid "Remove"
 msgstr "移除"
 
 #: app/gui/ui/app.slint
-msgid "Settings"
-msgstr "設定"
+msgid "current"
+msgstr "目前"
+
+#: app/gui/ui/app.slint
+msgid "latest"
+msgstr "最新"
+
+#: app/gui/ui/app.slint
+msgid "no self-update"
+msgstr "無法自動更新"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Install {}…"
+msgstr "安裝 {}…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Update to {}…"
+msgstr "更新至 {}…"
+
+#: app/gui/ui/app.slint
+msgid "This is the version you are running."
+msgstr "這是目前使用的版本。"
+
+#: app/gui/ui/app.slint
+msgid "Only the AppImage and the Windows .exe replace themselves: download this version from the release page."
+msgstr "只有 AppImage 和 Windows .exe 能自行替換：請從發行頁面下載此版本。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+msgid "{} cannot update itself: to come back, download a newer version from the release page."
+msgstr "{} 無法自動更新：若要回來，請從發行頁面下載較新的版本。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Going back to {} removes:"
+msgstr "回到 {} 會移除："
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Going to {} adds:"
+msgstr "更新至 {} 會加入："
+
+#: app/gui/ui/app.slint
+msgid "Release page ↗"
+msgstr "發行頁面 ↗"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Appearance"
 msgstr "外觀"
+
+#: app/gui/ui/app.slint
+msgid "Saves"
+msgstr "存檔"
+
+#: app/gui/ui/app.slint
+msgid "Emulator check"
+msgstr "模擬器偵測"
+
+#: app/gui/ui/app.slint
+msgid "Safety"
+msgstr "安全"
+
+#: app/gui/ui/app.slint
+msgid "Updates and versions"
+msgstr "更新與版本"
+
+#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+msgid "Advanced"
+msgstr "進階"
+
+#: app/gui/ui/app.slint
+msgid "Settings"
+msgstr "設定"
 
 #: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
 msgid "Language"
@@ -342,6 +411,18 @@ msgid "Colours from matugen (the wallpaper's palette)"
 msgstr "使用 matugen 的配色（桌布調色盤）"
 
 #: app/gui/ui/app.slint
+msgid "Hide setup"
+msgstr "隱藏設定方式"
+
+#: app/gui/ui/app.slint
+msgid "Show setup…"
+msgstr "顯示設定方式…"
+
+#: app/gui/ui/app.slint
+msgid "Copy lines"
+msgstr "複製這幾行"
+
+#: app/gui/ui/app.slint
 msgid "Template saved"
 msgstr "範本已儲存"
 
@@ -352,6 +433,64 @@ msgstr "儲存範本"
 #: app/gui/ui/app.slint
 msgid "Interface size"
 msgstr "介面大小"
+
+#: app/gui/ui/app.slint
+msgid "Start on"
+msgstr "開啟於"
+
+#: app/gui/ui/app.slint
+msgid "The page shown when a save opens"
+msgstr "開啟存檔時顯示的頁面"
+
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/overview.slint
+msgid "Overview"
+msgstr "總覽"
+
+#: app/gui/ui/app.slint
+msgid "The last page used"
+msgstr "上次使用的頁面"
+
+#: app/gui/ui/app.slint
+msgid "Animations"
+msgstr "動畫"
+
+#: app/gui/ui/app.slint
+msgid "Page switches, cards moving to their new place, slides and fades."
+msgstr "切換頁面、卡片移到新位置、滑動與淡入淡出。"
+
+#: app/gui/ui/app.slint
+msgid "Open the last save on start"
+msgstr "啟動時開啟上次的存檔"
+
+#: app/gui/ui/app.slint
+msgid "Recent saves"
+msgstr "最近的存檔"
+
+#: app/gui/ui/app.slint
+msgid "None yet"
+msgstr "尚無"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/app.slint
+msgid "{n} save listed on the Open page"
+msgid_plural "{n} saves listed on the Open page"
+msgstr[0] "開啟頁面中列出了 {n} 個存檔"
+
+#: app/gui/ui/app.slint app/gui/ui/pages/quests.slint
+msgid "Clear"
+msgstr "清除"
+
+#: app/gui/ui/app.slint
+msgid "Save folders"
+msgstr "存檔資料夾"
+
+#: app/gui/ui/app.slint
+msgid "Searched for saves besides the folders found on their own (Ryujinx, the yuzu family): portable installs or any other folder."
+msgstr "除自動找到的資料夾（Ryujinx、yuzu 系列）外，也會在這些資料夾中搜尋存檔：免安裝版或任何其他資料夾。"
+
+#: app/gui/ui/app.slint
+msgid "Add folder…"
+msgstr "新增資料夾…"
 
 #: app/gui/src/views/settings_ui.rs app/gui/ui/app.slint
 msgid "Snapshot folder"
@@ -388,46 +527,12 @@ msgid "Tick \"Take a snapshot first\" in the Write dialog"
 msgstr "在寫入對話方塊中勾選「先建立快照」"
 
 #: app/gui/ui/app.slint
-msgid "Saves"
-msgstr "存檔"
+msgid "Take a snapshot when a save opens"
+msgstr "開啟存檔時建立快照"
 
 #: app/gui/ui/app.slint
-msgid "Open the last save on start"
-msgstr "啟動時開啟上次的存檔"
-
-#: app/gui/ui/app.slint
-msgid "Recent saves"
-msgstr "最近的存檔"
-
-#: app/gui/ui/app.slint
-msgid "None yet"
-msgstr "尚無"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
-msgid "{n} save listed on the Open page"
-msgid_plural "{n} saves listed on the Open page"
-msgstr[0] "開啟頁面中列出了 {n} 個存檔"
-
-#: app/gui/ui/app.slint app/gui/ui/pages/quests.slint
-msgid "Clear"
-msgstr "清除"
-
-#: app/gui/ui/app.slint
-msgid "Save folders"
-msgstr "存檔資料夾"
-
-#: app/gui/ui/app.slint
-msgid "Searched for saves besides the folders found on their own (Ryujinx, the yuzu family): portable installs or any other folder."
-msgstr "除自動找到的資料夾（Ryujinx、yuzu 系列）外，也會在這些資料夾中搜尋存檔：免安裝版或任何其他資料夾。"
-
-#: app/gui/ui/app.slint
-msgid "Add folder…"
-msgstr "新增資料夾…"
-
-#: app/gui/ui/app.slint
-msgid "Emulator check"
-msgstr "模擬器偵測"
+msgid "Once per save and day: the save as it was before the day's changes is always kept."
+msgstr "每個存檔每天一次：一定會保留當天修改前的存檔。"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint
@@ -443,24 +548,12 @@ msgid "Add"
 msgstr "新增"
 
 #: app/gui/ui/app.slint
-msgid "Safety"
-msgstr "安全"
-
-#: app/gui/ui/app.slint
 msgid "Confirmed changes only"
 msgstr "僅限已確認的變更"
 
 #: app/gui/ui/app.slint
 msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."
 msgstr "標記為推導（根據遊戲程式碼推算得出，尚未在遊戲中驗證）的變更將被拒絕。已在審閱中的變更保留不變。"
-
-#: app/gui/ui/app.slint
-msgid "Updates"
-msgstr "更新"
-
-#: app/gui/ui/app.slint
-msgid "Check for a new version on start"
-msgstr "啟動時檢查新版本"
 
 #: app/gui/ui/app.slint
 msgid "Version"
@@ -479,8 +572,84 @@ msgid "Update…"
 msgstr "更新…"
 
 #: app/gui/ui/app.slint
+msgid "Check for a new version on start"
+msgstr "啟動時檢查新版本"
+
+#: app/gui/ui/app.slint
 msgid "Asks GitHub for the latest release. Nothing is downloaded until you choose to update."
 msgstr "向 GitHub 查詢最新版本。在你選擇更新之前不會下載任何內容。"
+
+#: app/gui/ui/app.slint
+msgid "Show what changed after an update"
+msgstr "更新後顯示變更內容"
+
+#: app/gui/ui/app.slint
+msgid "Once, on the first start of a new version: the changes since the version before, from GitHub."
+msgstr "新版本第一次啟動時顯示一次：自上一個版本以來的變更，取自 GitHub。"
+
+#: app/gui/ui/app.slint
+msgid "Other versions"
+msgstr "其他版本"
+
+#: app/gui/ui/app.slint
+msgid "Go back to an older release, or forward again. Downloaded from GitHub and checked like an update."
+msgstr "回到較舊的發行版，或再往前更新。從 GitHub 下載，並像更新一樣驗證。"
+
+#: app/gui/ui/app.slint
+msgid "Try again"
+msgstr "重試"
+
+#: app/gui/ui/app.slint
+msgid "Drawing"
+msgstr "繪製方式"
+
+#: app/gui/ui/app.slint
+msgid "Software is slower: for graphics drivers that fail or draw badly."
+msgstr "軟體繪製較慢：用於無法運作或顯示異常的顯示卡驅動程式。"
+
+#: app/gui/ui/app.slint
+msgid "Automatic (OpenGL)"
+msgstr "自動（OpenGL）"
+
+#: app/gui/ui/app.slint
+msgid "Software"
+msgstr "軟體"
+
+#: app/gui/ui/app.slint
+msgid "Settings file"
+msgstr "設定檔"
+
+#: app/gui/ui/app.slint
+msgid "System info"
+msgstr "系統資訊"
+
+#: app/gui/ui/app.slint
+msgid "For a bug report: version, system, drawing, size and language."
+msgstr "回報錯誤用：版本、系統、繪製方式、大小和語言。"
+
+#: app/gui/ui/app.slint
+msgid "Reset settings"
+msgstr "重設設定"
+
+#: app/gui/ui/app.slint
+msgid "Every setting goes back to its default, recent saves, save folders and emulators included."
+msgstr "所有設定都會恢復預設值，包括最近的存檔、存檔資料夾和模擬器。"
+
+#: app/gui/ui/app.slint
+msgid "Every setting back to its default"
+msgstr "所有設定恢復預設值"
+
+#: app/gui/ui/app.slint
+msgid "Reset…"
+msgstr "重設…"
+
+#: app/gui/ui/app.slint
+msgid "Reset"
+msgstr "重設"
+
+#: app/gui/ui/app.slint
+msgid "Release notes"
+msgstr "更新說明"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint
@@ -490,10 +659,6 @@ msgstr "MHGU 存檔編輯器 — {}"
 #: app/gui/ui/app.slint
 msgid "MHGU Save Editor"
 msgstr "MHGU 存檔編輯器"
-
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/overview.slint
-msgid "Overview"
-msgstr "總覽"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
 msgid "Character"
@@ -602,17 +767,27 @@ msgid "Version {} is installed"
 msgstr "已安裝版本 {}"
 
 #. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Go back to {}?"
+msgstr "要回到 {} 嗎？"
+
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
 msgid "Version {} is available"
 msgstr "版本 {} 已推出"
 
 #: app/gui/ui/app.slint
-msgid "Write or undo the staged changes before restarting."
-msgstr "重新啟動前，請寫入或復原暫存的變更。"
+msgid "Stop offering newer versions on start"
+msgstr "啟動時不再提示較新版本"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/app.slint
+msgid "Turns off “Check for a new version on start”, so {} does not ask to update right away."
+msgstr "關閉「啟動時檢查新版本」，讓 {} 不會馬上要求更新。"
 
 #: app/gui/ui/app.slint
-msgid "Release notes"
-msgstr "更新說明"
+msgid "Write or undo the staged changes before restarting."
+msgstr "重新啟動前，請寫入或復原暫存的變更。"
 
 #: app/gui/ui/app.slint
 msgid "Later"
@@ -622,9 +797,10 @@ msgstr "稍後"
 msgid "Not now"
 msgstr "暫不"
 
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint
-msgid "Try again"
-msgstr "重試"
+msgid "Install {}"
+msgstr "安裝 {}"
 
 #: app/gui/ui/app.slint
 msgid "Download and install"
@@ -1684,10 +1860,6 @@ msgstr "裝飾品插槽"
 #: app/gui/ui/pages/equipment.slint
 msgid "Share as text…"
 msgstr "以文字分享…"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Advanced"
-msgstr "進階"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "The 36 bytes of this box entry. Select to copy."
@@ -4799,6 +4971,11 @@ msgstr[0] "已開啟存檔：{n} 個角色"
 msgid "Could not open {}: {}"
 msgstr "無法開啟 {}：{}"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
+msgid "Snapshot failed: {}"
+msgstr "快照失敗：{}"
+
 #: app/gui/src/views/file.rs
 msgid "Before a write"
 msgstr "寫入前"
@@ -5988,6 +6165,10 @@ msgstr "由環境變數 SLINT_SCALE_FACTOR 設定"
 msgid "Applies the next time the editor starts"
 msgstr "下次啟動編輯器時生效"
 
+#: app/gui/src/views/settings_ui.rs
+msgid "Set by SLINT_BACKEND in the environment"
+msgstr "由環境變數 SLINT_BACKEND 設定"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/settings_ui.rs
 msgid "Version {} · EU/western build (0100770008DD8000) · {}"
@@ -6029,6 +6210,10 @@ msgstr "範本已儲存至 {}"
 #: app/gui/src/views/settings_ui.rs
 msgid "Could not save {}: {}"
 msgstr "無法儲存 {}：{}"
+
+#: app/gui/src/views/settings_ui.rs
+msgid "Settings are back to their defaults"
+msgstr "設定已恢復預設值"
 
 #: app/gui/src/views/settings_ui.rs
 msgid "New snapshots go to the new folder; earlier ones stay where they are"
@@ -6630,6 +6815,11 @@ msgstr "已解鎖 {}/{} 個條目"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
+msgid "You have {}. Version {} ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves and snapshots are not touched."
+msgstr "目前版本為 {}。版本 {}（{}）將從 GitHub 下載，經發行版的 SHA-256 檢查碼驗證後取代 {}。存檔和快照不受影響。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
 msgid "You have {}. The new version ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves, snapshots and settings are not touched."
 msgstr "目前版本為 {}。新版本（{}）將從 GitHub 下載，經發行版的 SHA-256 檢查碼驗證後取代 {}。存檔、快照和設定不受影響。"
 
@@ -6640,8 +6830,19 @@ msgstr "目前版本為 {}。此發行版沒有適用於本系統的檔案：請
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
-msgid "You have {}. Only the AppImage and the Windows .exe replace themselves: download the new version from the release page."
-msgstr "目前版本為 {}。只有 AppImage 和 Windows .exe 能自我取代：請從發行頁面下載新版本。"
+msgid "You have {}. Only the AppImage and the Windows .exe replace themselves: download this version from the release page."
+msgstr "目前版本為 {}。只有 AppImage 和 Windows .exe 能自行替換：請從發行頁面下載此版本。"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/update_ui.rs
+msgid "What came in the {n} later release is gone until you update again. Your settings are copied first and come back when you return to {} or a newer version."
+msgid_plural "What came in the {n} later releases is gone until you update again. Your settings are copied first and come back when you return to {} or a newer version."
+msgstr[0] "之後 {n} 個發行版帶來的內容會消失，直到再次更新。設定會先複製一份，回到 {} 或更新的版本時就會恢復。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "going back to {}"
+msgstr "正在回到 {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
@@ -6655,6 +6856,14 @@ msgstr "正在檢查…"
 #: app/gui/src/views/update_ui.rs
 msgid "up to date"
 msgstr "已是最新"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Not installed: the settings file could not be copied. The editor you are running is unchanged."
+msgstr "未安裝：無法複製設定檔。目前執行的編輯器未變更。"
+
+#: app/gui/src/views/update_ui.rs
+msgid "update failed"
+msgstr "更新失敗"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
@@ -6676,10 +6885,6 @@ msgstr "{} 已就緒。重新啟動後即可使用。"
 msgid "{} installed, restart to use it"
 msgstr "{} 已安裝，重新啟動後即可使用"
 
-#: app/gui/src/views/update_ui.rs
-msgid "update failed"
-msgstr "更新失敗"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
 msgid "Not updated: {}. The editor you are running is unchanged."
@@ -6693,6 +6898,23 @@ msgstr "更新已取消"
 #: app/gui/src/views/update_ui.rs
 msgid "Could not start {}: {}"
 msgstr "無法啟動 {}：{}"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Asking GitHub…"
+msgstr "正在詢問 GitHub…"
+
+#: app/gui/src/views/update_ui.rs
+msgid "No list of changes for this version"
+msgstr "此版本沒有變更清單"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Fixes and upkeep"
+msgstr "修正與維護"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "What changed since {}"
+msgstr "自 {} 以來的變更"
 
 #: app/core/src/character.rs
 msgid "Village · Low rank"

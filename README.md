@@ -26,7 +26,8 @@ The `.exe` is not code-signed, so Windows SmartScreen warns the first time: **Mo
 The AppImage adds itself to the application menu when started.
 
 The editor checks for a newer version when it starts and asks before downloading it
-(Settings → Updates turns this off).
+(Settings → Updates and versions turns this off). The same section lists every release to
+go back to an older one, or forward again, with what changes in between.
 
 Version numbers: the first number goes up once every edit has been checked in game, so a
 release *N*.0.0 has no Derived edit; the second adds features, whose new edits may be
@@ -198,9 +199,11 @@ Escape closes. The mouse's Back/Forward buttons go through the pages you saw.
 
 ## Settings
 
-**Settings…** in the sidebar: language, theme and interface size; where snapshots go, how
-many to keep and whether Write takes one; extra folders to search for saves; recent saves;
-and **Confirmed changes only**, which refuses every Derived change.
+**Settings…** in the sidebar: language, theme, interface size, the page a save opens on and
+animations; where snapshots go, how many to keep, whether Write takes one and whether opening
+a save takes one a day; extra folders to search for saves; recent saves; **Confirmed changes
+only**, which refuses every Derived change; updates and other versions; and software drawing,
+system info for bug reports and a reset under Advanced.
 
 The editor speaks the game's own languages: English, French, German, Italian, Spanish,
 Traditional and Simplified Chinese (the system's by default), with item, equipment, skill

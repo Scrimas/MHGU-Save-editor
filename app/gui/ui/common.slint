@@ -51,6 +51,29 @@ export struct SettingsInfo {
     // lines for matugen's config.toml
     matugen-offered: bool, matugen: bool, matugen-hint: string,
     matugen-template: bool, matugen-snippet: string,
+    animations: bool,
+    start-page: int,       // Overview, the last page used
+    snapshot-on-open: bool,
+    show-changes: bool,
+    renderer: int,         // Automatic (OpenGL), Software
+    renderer-now: string,  // when a new choice waits for a restart
+    settings-file: string,
+    system-info: string,   // for a bug report
+}
+
+// A published release in Settings' version list.
+export struct VersionRow {
+    version: string, date: string, size: string,
+    current: bool, latest: bool,
+    older: bool,           // than this one
+    updates-itself: bool,  // false before 0.7.0
+    installable: bool,     // this copy can replace itself with it
+}
+
+// What changed between two versions: a release ("head"), then its changes.
+export struct ChangeLine {
+    head: bool,
+    text: string,
 }
 
 // The colours of one scheme (Tok): built in, or from matugen. Text keeps the widgets'
@@ -72,6 +95,8 @@ export struct UpdateInfo {
     body: string,          // the dialog's text
     progress: float,       // 0-1 while downloading
     can-install: bool,     // this copy can replace itself
+    older: bool,           // going back to an older version (picked in Settings)
+    updates-itself: bool,  // the version installed can update itself
 }
 
 export struct MonsterRow {
@@ -575,6 +600,30 @@ export global Api {
     callback add-emulator(string);
     callback remove-emulator(int);
     callback clear-recent();
+    callback reset-settings();
+    callback open-settings-folder();
+    // the Settings section shown (the rail's order), kept while the editor runs
+    in-out property <int> settings-section;
+    callback settings-section-shown();
+    // layout moves, slides and fades (Settings)
+    in property <bool> animate: true;
+    // Settings' version list: every published release, newest first; the status says
+    // why it is empty (asking GitHub, or the error)
+    in property <[VersionRow]> versions;
+    in property <string> versions-status;
+    in property <bool> versions-loading;
+    in-out property <int> version-sel: -1;
+    in property <[ChangeLine]> version-changes;
+    in property <string> version-changes-status;
+    callback pick-version(int);
+    callback install-version(int);
+    callback version-page(int);
+    // going back: turn off the update check, so the older version does not offer this one
+    in-out property <bool> rollback-stop-checks: true;
+    // after an update: what changed since the version that ran before (opens when set)
+    in-out property <string> news-title;
+    in property <[ChangeLine]> news;
+    callback news-page();
     // updates
     in-out property <bool> update-open;
     in property <UpdateInfo> update;
@@ -583,6 +632,7 @@ export global Api {
     callback cancel-update();
     callback restart-update();
     callback update-page();       // the release page in the browser
+    callback update-closed();     // the dialog closed without installing
 
     // palicoes
     in property <[PalicoRow]> palicoes;
@@ -842,6 +892,8 @@ export global Tok {
     out property <length> gap: 12px;
     out property <length> tight: 8px;
     out property <length> radius: 6px;
+    // layout moves, slides and fades; none when Settings turns animations off
+    out property <duration> anim: Api.animate ? 180ms : 0ms;
     // rows are capped so labels stay near their values (09)
     out property <length> row-max: 1600px;
     // a list beside a detail pane: 320 px, a little more on a wide page, never past 38 %
@@ -867,7 +919,7 @@ export component Pair {
     in property <length> b-h;
     out property <bool> side: w >= a-min + b-min + gap;
     out property <float> p: side ? 1 : 0;
-    animate p { duration: 180ms; easing: ease-in-out; }
+    animate p { duration: Tok.anim; easing: ease-in-out; }
     property <length> b-beside: b-min + max(0px, w - a-min - b-min - gap) * b-share;
     property <length> row-h: max(a-h, b-h);
     out property <length> a-w: w - p * (b-beside + gap);
@@ -897,7 +949,7 @@ export component Settle {
         low when root.low: {
             o: 0.3;
             out {
-                animate o { duration: 180ms; easing: ease-out; }
+                animate o { duration: Tok.anim; easing: ease-out; }
             }
         }
     ]
@@ -1103,7 +1155,7 @@ export component NavButton inherits Rectangle {
         height: active ? 16px : 0px;
         border-radius: 2px;
         background: Tok.accent;
-        animate height { duration: 120ms; }
+        animate height { duration: Api.animate ? 120ms : 0ms; }
     }
     HorizontalLayout {
         padding-left: 14px;

@@ -1,7 +1,7 @@
 import { Button, ListView, CheckBox, ScrollView, Palette, AboutSlint, LineEdit, ProgressIndicator, TextEdit } from "std-widgets.slint";
 import {
     Api, Tabs, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
-    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing, Picker,
+    Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing, Picker, ListRow, VersionRow, ChangeLine,
 } from "common.slint";
 import { OpenPage } from "pages/open.slint";
 import { OverviewPage } from "pages/overview.slint";
@@ -611,11 +611,12 @@ component CharactersDialog inherits Modal {
     }
 }
 
-// One setting: what it is on the left, its controls on the right.
+// One setting: what it is on the left, its controls on the right, in one column as wide
+// for every row.
 component SettingRow inherits HorizontalLayout {
     in property <string> title;
     in property <string> hint;
-    spacing: Tok.tight;
+    spacing: Tok.gap;
     VerticalLayout {
         alignment: center;
         horizontal-stretch: 1;
@@ -629,10 +630,30 @@ component SettingRow inherits HorizontalLayout {
     // controls keep their own height beside a two-line hint
     VerticalLayout {
         alignment: center;
+        min-width: 220px;
         HorizontalLayout {
+            alignment: end;
             spacing: Tok.tight;
             @children
         }
+    }
+}
+
+// A ticked setting with what it does under it.
+component SettingCheck inherits VerticalLayout {
+    in property <string> text;
+    in property <string> hint;
+    in property <bool> checked;
+    callback toggled(bool);
+    spacing: 2px;
+    CheckBox {
+        text: root.text;
+        checked: root.checked;
+        toggled => { root.toggled(self.checked); }
+    }
+    if root.hint != "": HorizontalLayout {
+        padding-left: 28px;
+        Muted { text: root.hint; }
     }
 }
 
@@ -646,188 +667,477 @@ component RemovableRow inherits HorizontalLayout {
     Button { text: @tr("Remove"); clicked => { root.remove(); } }
 }
 
+// Selectable text in a box (lines for a config file, the system info), to copy.
+component CopyBox inherits Rectangle {
+    in property <string> text;
+    background: Tok.input;
+    border-radius: Tok.radius;
+    border-width: 1px;
+    border-color: Tok.input-border;
+    height: t.preferred-height + 16px;
+    public function copy() {
+        t.select-all();
+        t.copy();
+        t.clear-selection();
+    }
+    t := TextInput {
+        x: 10px;
+        y: 8px;
+        width: parent.width - 20px;
+        text: root.text;
+        read-only: true;
+        single-line: false;
+        wrap: char-wrap;
+        font-size: Tok.small;
+        font-family: "monospace";
+        color: Palette.foreground;
+    }
+}
+
+// A short label beside a version: current, latest, no self-update.
+component VersionTag inherits Rectangle {
+    in property <string> text;
+    in property <bool> warn;
+    width: t.preferred-width + 14px;
+    height: 18px;
+    border-radius: 9px;
+    background: root.warn ? transparent : Tok.accent-soft;
+    border-width: root.warn ? 1px : 0px;
+    border-color: Tok.warn;
+    t := Text {
+        text: root.text;
+        font-size: 11px;
+        color: root.warn ? Tok.warn : Tok.accent-text;
+        vertical-alignment: center;
+        horizontal-alignment: center;
+    }
+}
+
+// What changed between two versions: each release, then its changes.
+component ChangeList inherits VerticalLayout {
+    in property <[ChangeLine]> lines;
+    spacing: 3px;
+    // each line straight in the layout: a wrapped Text nested in a row is given the
+    // height of one line
+    for l in root.lines: Text {
+        text: l.head ? l.text : "•  " + l.text;
+        wrap: word-wrap;
+        font-size: Tok.small;
+        font-weight: l.head ? 600 : 400;
+        color: l.head ? Tok.muted : Palette.foreground;
+    }
+}
+
+// A warning on its own, with a bar on the left.
+component Callout inherits Rectangle {
+    in property <string> text;
+    background: Tok.hover;
+    border-radius: 4px;
+    HorizontalLayout {
+        Rectangle { width: 3px; background: Tok.warn; }
+        HorizontalLayout {
+            padding: 8px;
+            padding-left: 12px;
+            Text { text: root.text; wrap: word-wrap; font-size: Tok.small; }
+        }
+    }
+}
+
+// Every published release, to pick one.
+component VersionList inherits Rectangle {
+    border-radius: Tok.radius;
+    border-width: 1px;
+    border-color: Tok.line;
+    clip: true;
+    ListView {
+        width: parent.width;
+        height: parent.height;
+        for r[i] in Api.versions: ListRow {
+            two-line: false;
+            height: 36px;
+            selected: i == Api.version-sel;
+            accessible-label: r.version;
+            clicked => { Api.pick-version(i); }
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 10px;
+                spacing: 8px;
+                Text { text: r.version; font-weight: 600; min-width: 40px; vertical-alignment: center; }
+                Muted { text: r.date + " · " + r.size; wrap: no-wrap; overflow: elide; vertical-alignment: center; horizontal-stretch: 1; }
+                if r.current: VerticalLayout { alignment: center; VersionTag { text: @tr("current"); } }
+                if r.latest && !r.current: VerticalLayout { alignment: center; VersionTag { text: @tr("latest"); } }
+                if !r.updates-itself: VerticalLayout { alignment: center; VersionTag { text: @tr("no self-update"); warn: true; } }
+            }
+        }
+    }
+}
+
+// The version picked: what going there adds or removes, and the way to install it.
+component VersionDetails inherits VerticalLayout {
+    property <int> i: Api.version-sel;
+    property <VersionRow> v: Api.versions[root.i];
+    alignment: start;
+    spacing: Tok.tight;
+    if root.i >= 0: HorizontalLayout {
+        spacing: Tok.tight;
+        Text { text: root.v.version + " · " + root.v.date; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; wrap: word-wrap; }
+        if !root.v.current: Button {
+            text: root.v.older ? @tr("Install {}…", root.v.version) : @tr("Update to {}…", root.v.version);
+            primary: true;
+            enabled: root.v.installable;
+            clicked => { Api.install-version(root.i); }
+        }
+    }
+    if root.i >= 0 && root.v.current: Muted { text: @tr("This is the version you are running."); }
+    if root.i >= 0 && !root.v.current && !root.v.installable: Muted {
+        text: @tr("Only the AppImage and the Windows .exe replace themselves: download this version from the release page.");
+    }
+    if root.i >= 0 && !root.v.current && !root.v.updates-itself: Callout {
+        text: @tr("{} cannot update itself: to come back, download a newer version from the release page.", root.v.version);
+    }
+    if root.i >= 0 && !root.v.current: Muted {
+        text: Api.version-changes-status != "" ? Api.version-changes-status : root.v.older ? @tr("Going back to {} removes:", root.v.version) : @tr("Going to {} adds:", root.v.version);
+    }
+    ChangeList { lines: Api.version-changes; }
+    if root.i >= 0: HorizontalLayout {
+        alignment: start;
+        padding-top: 4px;
+        TextLink { text: @tr("Release page ↗"); clicked => { Api.version-page(root.i); } }
+    }
+}
+
 component SettingsDialog inherits Modal {
     property <SettingsInfo> s: Api.settings;
     property <string> emulator;
-    card-width: 600px;
+    property <bool> matugen-setup;
+    property <bool> confirm-reset;
+    property <int> section: Api.settings-section;
+    // moves the keyboard focus with the arrows on the rail
+    property <int> focus-seq;
+    property <[string]> sections: [
+        @tr("Appearance"), @tr("Saves"), @tr("Snapshots"), @tr("Emulator check"), @tr("Safety"), @tr("Updates and versions"), @tr("Advanced"),
+    ];
+    card-width: 920px;
+    // the rail and the pane, from the window (the pane's own width would loop)
+    property <length> rail-w: Win.width < 1000px ? 170px : 210px;
+    property <length> pane-w: min(920px, Win.width - 32px) - 40px - root.rail-w - 2 * Tok.pad - 1px;
     dismiss => { Api.settings-open = false; }
+    init => { Api.settings-section-shown(); }
+    function show(i: int) {
+        Api.settings-section = clamp(i, 0, root.sections.length - 1);
+        root.confirm-reset = false;
+        pane.content-y = 0;
+        Api.settings-section-shown();
+    }
     Text { text: @tr("Settings"); font-size: 20px; font-weight: 600; }
-    Flickable {
-        height: min(body.preferred-height, Win.height - 190px);
-        content-height: body.preferred-height;
-        body := VerticalLayout {
-            spacing: Tok.gap;
-            SectionTitle { text: @tr("Appearance"); }
-            SettingRow {
-                title: @tr("Language");
-                Picker {
-                    width: 210px;
-                    model: s.languages;
-                    value: s.language;
-                    picked(i) => { Api.set-setting("language", i); }
+    HorizontalLayout {
+        height: min(560px, Win.height - 170px);
+        spacing: Tok.pad;
+        VerticalLayout {
+            width: root.rail-w;
+            spacing: 2px;
+            alignment: start;
+            for t[i] in root.sections: NavButton {
+                text: t;
+                active: i == root.section;
+                focus-seq: root.focus-seq;
+                focus-me: i == root.section;
+                clicked => { root.show(i); }
+                arrow(d) => {
+                    root.show(d == -100 ? 0 : d == 100 ? root.sections.length - 1 : root.section + d);
+                    root.focus-seq += 1;
                 }
             }
-            SettingRow {
-                title: @tr("Theme");
-                Picker {
-                    width: 170px;
-                    model: [@tr("System"), @tr("Light"), @tr("Dark")];
-                    value: s.theme;
-                    picked(i) => { Api.set-setting("theme", i); }
-                }
-            }
-            if s.matugen-offered: VerticalLayout {
-                spacing: Tok.tight;
-                CheckBox {
-                    text: @tr("Colours from matugen (the wallpaper's palette)");
-                    checked: s.matugen;
-                    toggled => { Api.set-setting("matugen", self.checked ? 1 : 0); }
-                }
-                if s.matugen && s.matugen-hint != "": Muted { text: s.matugen-hint; }
-                if s.matugen && !Api.colors-on: HorizontalLayout {
-                    spacing: Tok.tight;
-                    Rectangle {
-                        horizontal-stretch: 1;
-                        background: Tok.input;
-                        border-radius: Tok.radius;
-                        border-width: 1px;
-                        border-color: Tok.input-border;
-                        height: snippet.preferred-height + 16px;
-                        // selectable, to copy into config.toml
-                        snippet := TextInput {
-                            x: 10px;
-                            y: 8px;
-                            width: parent.width - 20px;
-                            text: s.matugen-snippet;
-                            read-only: true;
-                            single-line: false;
-                            wrap: char-wrap;
-                            font-size: Tok.small;
-                            font-family: "monospace";
-                            color: Palette.foreground;
+        }
+        Rectangle { width: 1px; background: Tok.line; }
+        pane := Flickable {
+            content-height: body.preferred-height;
+            body := VerticalLayout {
+                padding-right: 12px;
+                spacing: Tok.gap;
+                SectionTitle { text: root.sections[root.section]; }
+                // Appearance
+                if root.section == 0: VerticalLayout {
+                    spacing: Tok.gap;
+                    SettingRow {
+                        title: @tr("Language");
+                        Picker {
+                            width: 220px;
+                            model: s.languages;
+                            value: s.language;
+                            picked(i) => { Api.set-setting("language", i); }
                         }
                     }
-                    Button {
-                        text: s.matugen-template ? @tr("Template saved") : @tr("Save template");
-                        enabled: !s.matugen-template;
-                        clicked => { Api.save-matugen-template(); }
+                    SettingRow {
+                        title: @tr("Theme");
+                        Picker {
+                            width: 220px;
+                            model: [@tr("System"), @tr("Light"), @tr("Dark")];
+                            value: s.theme;
+                            picked(i) => { Api.set-setting("theme", i); }
+                        }
+                    }
+                    if s.matugen-offered: VerticalLayout {
+                        spacing: Tok.tight;
+                        CheckBox {
+                            text: @tr("Colours from matugen (the wallpaper's palette)");
+                            checked: s.matugen;
+                            toggled => { Api.set-setting("matugen", self.checked ? 1 : 0); }
+                        }
+                        if s.matugen && s.matugen-hint != "": HorizontalLayout {
+                            padding-left: 28px;
+                            spacing: Tok.tight;
+                            Muted { text: s.matugen-hint; horizontal-stretch: 1; }
+                            if !Api.colors-on: VerticalLayout {
+                                alignment: start;
+                                TextLink {
+                                    text: root.matugen-setup ? @tr("Hide setup") : @tr("Show setup…");
+                                    clicked => { root.matugen-setup = !root.matugen-setup; }
+                                }
+                            }
+                        }
+                        if s.matugen && !Api.colors-on && root.matugen-setup: VerticalLayout {
+                            padding-left: 28px;
+                            spacing: Tok.tight;
+                            snippet := CopyBox { text: s.matugen-snippet; }
+                            HorizontalLayout {
+                                alignment: end;
+                                spacing: Tok.tight;
+                                Button { text: @tr("Copy lines"); clicked => { snippet.copy(); } }
+                                Button {
+                                    text: s.matugen-template ? @tr("Template saved") : @tr("Save template");
+                                    enabled: !s.matugen-template;
+                                    clicked => { Api.save-matugen-template(); }
+                                }
+                            }
+                        }
+                    }
+                    SettingRow {
+                        title: @tr("Interface size");
+                        hint: s.scale-now;
+                        Picker {
+                            width: 220px;
+                            model: [@tr("System"), "100 %", "125 %", "150 %", "175 %", "200 %"];
+                            value: s.scale;
+                            picked(i) => { Api.set-setting("scale", i); }
+                        }
+                    }
+                    SettingRow {
+                        title: @tr("Start on");
+                        hint: @tr("The page shown when a save opens");
+                        Picker {
+                            width: 220px;
+                            model: [@tr("Overview"), @tr("The last page used")];
+                            value: s.start-page;
+                            picked(i) => { Api.set-setting("start-page", i); }
+                        }
+                    }
+                    SettingCheck {
+                        text: @tr("Animations");
+                        hint: @tr("Page switches, cards moving to their new place, slides and fades.");
+                        checked: s.animations;
+                        toggled(on) => { Api.set-setting("animations", on ? 1 : 0); }
+                    }
+                }
+                // Saves
+                if root.section == 1: VerticalLayout {
+                    spacing: Tok.gap;
+                    CheckBox {
+                        text: @tr("Open the last save on start");
+                        checked: s.reopen;
+                        toggled => { Api.set-setting("reopen", self.checked ? 1 : 0); }
+                    }
+                    SettingRow {
+                        title: @tr("Recent saves");
+                        hint: s.recent == 0 ? @tr("None yet") : @tr("{n} save listed on the Open page" | "{n} saves listed on the Open page" % s.recent);
+                        Button { text: @tr("Clear"); enabled: s.recent > 0; clicked => { Api.clear-recent(); } }
+                    }
+                    SettingRow {
+                        title: @tr("Save folders");
+                        hint: @tr("Searched for saves besides the folders found on their own (Ryujinx, the yuzu family): portable installs or any other folder.");
+                        Button { text: @tr("Add folder…"); clicked => { Api.add-save-folder(); } }
+                    }
+                    for f[i] in s.folders: RemovableRow {
+                        text: f;
+                        remove => { Api.remove-save-folder(i); }
+                    }
+                }
+                // Snapshots
+                if root.section == 2: VerticalLayout {
+                    spacing: Tok.gap;
+                    SettingRow {
+                        title: @tr("Snapshot folder");
+                        hint: s.snapshot-dir;
+                        Button { text: @tr("Change…"); clicked => { Api.pick-snapshot-dir(); } }
+                        Button { text: @tr("Default"); enabled: s.snapshot-custom; clicked => { Api.set-setting("snapshot-default-dir", 0); } }
+                    }
+                    SettingRow {
+                        title: @tr("Keep per save");
+                        hint: @tr("After each new snapshot, the oldest beyond this number are deleted.");
+                        Picker {
+                            width: 220px;
+                            model: [@tr("All"), @tr("Last {}", 5), @tr("Last {}", 10), @tr("Last {}", 20), @tr("Last {}", 50)];
+                            value: s.keep;
+                            picked(i) => { Api.set-setting("keep", i); }
+                        }
+                    }
+                    CheckBox {
+                        text: @tr("Tick \"Take a snapshot first\" in the Write dialog");
+                        checked: s.snapshot-first;
+                        toggled => { Api.set-setting("snapshot-first", self.checked ? 1 : 0); }
+                    }
+                    SettingCheck {
+                        text: @tr("Take a snapshot when a save opens");
+                        hint: @tr("Once per save and day: the save as it was before the day's changes is always kept.");
+                        checked: s.snapshot-on-open;
+                        toggled(on) => { Api.set-setting("snapshot-on-open", on ? 1 : 0); }
+                    }
+                }
+                // Emulator check
+                if root.section == 3: VerticalLayout {
+                    spacing: Tok.gap;
+                    Muted { text: @tr("Write and Restore wait while an emulator runs, since it overwrites the save when it exits. Always checked: {}.", s.builtin); }
+                    HorizontalLayout {
+                        spacing: Tok.tight;
+                        LineEdit {
+                            placeholder-text: @tr("Another process name");
+                            text <=> root.emulator;
+                            accepted => {
+                                Api.add-emulator(root.emulator);
+                                root.emulator = "";
+                            }
+                        }
+                        Button {
+                            text: @tr("Add");
+                            enabled: root.emulator != "";
+                            clicked => {
+                                Api.add-emulator(root.emulator);
+                                root.emulator = "";
+                            }
+                        }
+                    }
+                    for e[i] in s.emulators: RemovableRow {
+                        text: e;
+                        remove => { Api.remove-emulator(i); }
+                    }
+                }
+                // Safety
+                if root.section == 4: SettingCheck {
+                    text: @tr("Confirmed changes only");
+                    hint: @tr("Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay.");
+                    checked: s.confirmed-only;
+                    toggled(on) => { Api.set-setting("confirmed-only", on ? 1 : 0); }
+                }
+                // Updates and versions
+                if root.section == 5: VerticalLayout {
+                    spacing: Tok.gap;
+                    SettingRow {
+                        title: @tr("Version");
+                        hint: Api.update.status;
+                        Button {
+                            text: @tr("Check now");
+                            enabled: Api.update.state != "checking" && Api.update.state != "downloading" && Api.update.state != "ready";
+                            clicked => { Api.check-update(); }
+                        }
+                        if (Api.update.state == "available" && !Api.update.older) || Api.update.state == "failed" || Api.update.state == "ready": Button {
+                            text: Api.update.state == "ready" ? @tr("Restart…") : @tr("Update…");
+                            clicked => { Api.update-open = true; }
+                        }
+                    }
+                    SettingCheck {
+                        text: @tr("Check for a new version on start");
+                        hint: @tr("Asks GitHub for the latest release. Nothing is downloaded until you choose to update.");
+                        checked: s.check-updates;
+                        toggled(on) => { Api.set-setting("check-updates", on ? 1 : 0); }
+                    }
+                    SettingCheck {
+                        text: @tr("Show what changed after an update");
+                        hint: @tr("Once, on the first start of a new version: the changes since the version before, from GitHub.");
+                        checked: s.show-changes;
+                        toggled(on) => { Api.set-setting("show-changes", on ? 1 : 0); }
+                    }
+                    Hairline { }
+                    Text { text: @tr("Other versions"); font-weight: 600; }
+                    Muted { text: @tr("Go back to an older release, or forward again. Downloaded from GitHub and checked like an update."); }
+                    if Api.versions-status != "": HorizontalLayout {
+                        spacing: Tok.tight;
+                        Muted { text: Api.versions-status; vertical-alignment: center; horizontal-stretch: 1; }
+                        if !Api.versions-loading: Button { text: @tr("Try again"); clicked => { Api.settings-section-shown(); } }
+                    }
+                    if Api.versions.length > 0 && root.pane-w >= 600px: HorizontalLayout {
+                        spacing: Tok.pad;
+                        VersionList { width: 280px; height: 300px; }
+                        VersionDetails { }
+                    }
+                    if Api.versions.length > 0 && root.pane-w < 600px: VerticalLayout {
+                        spacing: Tok.gap;
+                        VersionList { height: 220px; }
+                        VersionDetails { }
+                    }
+                }
+                // Advanced
+                if root.section == 6: VerticalLayout {
+                    spacing: Tok.gap;
+                    SettingRow {
+                        title: @tr("Drawing");
+                        hint: s.renderer-now != "" ? s.renderer-now : @tr("Software is slower: for graphics drivers that fail or draw badly.");
+                        Picker {
+                            width: 220px;
+                            model: [@tr("Automatic (OpenGL)"), @tr("Software")];
+                            value: s.renderer;
+                            picked(i) => { Api.set-setting("renderer", i); }
+                        }
+                    }
+                    SettingRow {
+                        title: @tr("Settings file");
+                        hint: s.settings-file;
+                        Button { text: @tr("Open folder"); clicked => { Api.open-settings-folder(); } }
+                    }
+                    SettingRow {
+                        title: @tr("System info");
+                        hint: @tr("For a bug report: version, system, drawing, size and language.");
+                        Button { text: @tr("Copy"); clicked => { info.copy(); } }
+                    }
+                    info := CopyBox { text: s.system-info; }
+                    SettingRow {
+                        title: @tr("Reset settings");
+                        hint: root.confirm-reset ? @tr("Every setting goes back to its default, recent saves, save folders and emulators included.") : @tr("Every setting back to its default");
+                        if !root.confirm-reset: Button { text: @tr("Reset…"); clicked => { root.confirm-reset = true; } }
+                        if root.confirm-reset: Button { text: @tr("Cancel"); clicked => { root.confirm-reset = false; } }
+                        if root.confirm-reset: Button {
+                            text: @tr("Reset");
+                            primary: true;
+                            clicked => {
+                                root.confirm-reset = false;
+                                Api.reset-settings();
+                            }
+                        }
                     }
                 }
             }
-            SettingRow {
-                title: @tr("Interface size");
-                hint: s.scale-now;
-                Picker {
-                    width: 170px;
-                    model: [@tr("System"), "100 %", "125 %", "150 %", "175 %", "200 %"];
-                    value: s.scale;
-                    picked(i) => { Api.set-setting("scale", i); }
-                }
-            }
-            Hairline { }
-            SectionTitle { text: @tr("Snapshots"); }
-            SettingRow {
-                title: @tr("Snapshot folder");
-                hint: s.snapshot-dir;
-                Button { text: @tr("Change…"); clicked => { Api.pick-snapshot-dir(); } }
-                Button { text: @tr("Default"); enabled: s.snapshot-custom; clicked => { Api.set-setting("snapshot-default-dir", 0); } }
-            }
-            SettingRow {
-                title: @tr("Keep per save");
-                hint: @tr("After each new snapshot, the oldest beyond this number are deleted.");
-                Picker {
-                    width: 170px;
-                    model: [@tr("All"), @tr("Last {}", 5), @tr("Last {}", 10), @tr("Last {}", 20), @tr("Last {}", 50)];
-                    value: s.keep;
-                    picked(i) => { Api.set-setting("keep", i); }
-                }
-            }
-            CheckBox {
-                text: @tr("Tick \"Take a snapshot first\" in the Write dialog");
-                checked: s.snapshot-first;
-                toggled => { Api.set-setting("snapshot-first", self.checked ? 1 : 0); }
-            }
-            Hairline { }
-            SectionTitle { text: @tr("Saves"); }
-            CheckBox {
-                text: @tr("Open the last save on start");
-                checked: s.reopen;
-                toggled => { Api.set-setting("reopen", self.checked ? 1 : 0); }
-            }
-            SettingRow {
-                title: @tr("Recent saves");
-                hint: s.recent == 0 ? @tr("None yet") : @tr("{n} save listed on the Open page" | "{n} saves listed on the Open page" % s.recent);
-                Button { text: @tr("Clear"); enabled: s.recent > 0; clicked => { Api.clear-recent(); } }
-            }
-            SettingRow {
-                title: @tr("Save folders");
-                hint: @tr("Searched for saves besides the folders found on their own (Ryujinx, the yuzu family): portable installs or any other folder.");
-                Button { text: @tr("Add folder…"); clicked => { Api.add-save-folder(); } }
-            }
-            for f[i] in s.folders: RemovableRow {
-                text: f;
-                remove => { Api.remove-save-folder(i); }
-            }
-            Hairline { }
-            SectionTitle { text: @tr("Emulator check"); }
-            Muted { text: @tr("Write and Restore wait while an emulator runs, since it overwrites the save when it exits. Always checked: {}.", s.builtin); }
-            HorizontalLayout {
-                spacing: Tok.tight;
-                LineEdit {
-                    placeholder-text: @tr("Another process name");
-                    text <=> root.emulator;
-                    accepted => {
-                        Api.add-emulator(root.emulator);
-                        root.emulator = "";
-                    }
-                }
-                Button {
-                    text: @tr("Add");
-                    enabled: root.emulator != "";
-                    clicked => {
-                        Api.add-emulator(root.emulator);
-                        root.emulator = "";
-                    }
-                }
-            }
-            for e[i] in s.emulators: RemovableRow {
-                text: e;
-                remove => { Api.remove-emulator(i); }
-            }
-            Hairline { }
-            SectionTitle { text: @tr("Safety"); }
-            CheckBox {
-                text: @tr("Confirmed changes only");
-                checked: s.confirmed-only;
-                toggled => { Api.set-setting("confirmed-only", self.checked ? 1 : 0); }
-            }
-            Muted { text: @tr("Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."); }
-            Hairline { }
-            SectionTitle { text: @tr("Updates"); }
-            CheckBox {
-                text: @tr("Check for a new version on start");
-                checked: s.check-updates;
-                toggled => { Api.set-setting("check-updates", self.checked ? 1 : 0); }
-            }
-            SettingRow {
-                title: @tr("Version");
-                hint: Api.update.status;
-                Button {
-                    text: @tr("Check now");
-                    enabled: Api.update.state != "checking" && Api.update.state != "downloading" && Api.update.state != "ready";
-                    clicked => { Api.check-update(); }
-                }
-                if Api.update.state == "available" || Api.update.state == "failed" || Api.update.state == "ready": Button {
-                    text: Api.update.state == "ready" ? @tr("Restart…") : @tr("Update…");
-                    clicked => { Api.update-open = true; }
-                }
-            }
-            Muted { text: @tr("Asks GitHub for the latest release. Nothing is downloaded until you choose to update."); }
         }
     }
     HorizontalLayout {
         alignment: end;
         Button { text: @tr("Close"); primary: true; clicked => { Api.settings-open = false; } }
+    }
+}
+
+// After an update: what changed since the version that ran before.
+component NewsDialog inherits Modal {
+    card-width: 560px;
+    dismiss => { Api.news-title = ""; }
+    Text { text: Api.news-title; font-size: 20px; font-weight: 600; wrap: word-wrap; }
+    Flickable {
+        height: min(news.preferred-height, Win.height - 220px);
+        content-height: news.preferred-height;
+        news := ChangeList { lines: Api.news; }
+    }
+    HorizontalLayout {
+        alignment: end;
+        spacing: Tok.tight;
+        Button { text: @tr("Release notes"); clicked => { Api.news-page(); } }
+        Button { text: @tr("Close"); primary: true; clicked => { Api.news-title = ""; } }
     }
 }
 
@@ -844,7 +1154,7 @@ export component AppWindow inherits Window {
     // would feed back into the window's own size constraints.
     property <bool> dock: root.width >= 1440px;
     property <length> side: root.width >= 1000px ? 220px : 188px;
-    animate side { duration: 180ms; easing: ease-in-out; }
+    animate side { duration: Tok.anim; easing: ease-in-out; }
     property <bool> about-open;
     init => {
         Win.width = self.width;
@@ -877,9 +1187,9 @@ export component AppWindow inherits Window {
     }
     // Review slides in and out (open), and the pages make room for it while docked (dk)
     property <float> open: Api.review-open ? 1 : 0;
-    animate open { duration: 180ms; easing: ease-in-out; }
+    animate open { duration: Tok.anim; easing: ease-in-out; }
     property <float> dk: dock ? 1 : 0;
-    animate dk { duration: 180ms; easing: ease-in-out; }
+    animate dk { duration: Tok.anim; easing: ease-in-out; }
     property <length> review-w: 380px * open * dk;
     property <[string]> nav-ids: ["overview", "character", "items", "equipment", "palicoes", "quests", "requests", "collections", "unlocks", "monsters", "cards", "options", "database", "advanced"];
     // Up/Down/Home/End on a sidebar page: the one that takes the focus
@@ -894,7 +1204,7 @@ export component AppWindow inherits Window {
     forward-focus: keys;
     property <string> page-now: Api.page;
     changed page-now => { Api.page-shown(); }
-    out property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.mhxx-title != "" || Api.diff-title != "" || Api.talisman-text-open || Api.settings-open || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
+    out property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.mhxx-title != "" || Api.diff-title != "" || Api.talisman-text-open || Api.settings-open || Api.news-title != "" || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
     changed any-modal => {
         if !any-modal {
             keys.focus();
@@ -1165,19 +1475,39 @@ export component AppWindow inherits Window {
     if Api.diff-title != "": DiffDialog { }
     if Api.talisman-text-open: TalismanTextDialog { }
     if Api.settings-open: SettingsDialog { }
+    if Api.news-title != "": NewsDialog { }
     if Api.update-open: Modal {
         property <string> state: Api.update.state;
         card-width: 480px;
         dismiss => {
-            if state != "downloading" { Api.update-open = false; }
+            if state != "downloading" {
+                Api.update-open = false;
+                Api.update-closed();
+            }
         }
         Text {
-            text: state == "ready" ? @tr("Version {} is installed", Api.update.version) : @tr("Version {} is available", Api.update.version);
+            text: state == "ready" ? @tr("Version {} is installed", Api.update.version) : Api.update.older ? @tr("Go back to {}?", Api.update.version) : @tr("Version {} is available", Api.update.version);
+            wrap: word-wrap;
             font-size: 20px;
             font-weight: 600;
         }
         VerticalLayout {
             Muted { text: Api.update.body; }
+            Reveal {
+                shown: Api.update.older && Api.update.updates-itself && Api.update.can-install && (state == "available" || state == "failed");
+                gap: Tok.gap;
+                VerticalLayout {
+                    spacing: 2px;
+                    CheckBox {
+                        text: @tr("Stop offering newer versions on start");
+                        checked <=> Api.rollback-stop-checks;
+                    }
+                    HorizontalLayout {
+                        padding-left: 28px;
+                        Muted { text: @tr("Turns off “Check for a new version on start”, so {} does not ask to update right away.", Api.update.version); }
+                    }
+                }
+            }
             Reveal {
                 shown: state == "downloading";
                 gap: Tok.gap;
@@ -1200,11 +1530,12 @@ export component AppWindow inherits Window {
                         Api.cancel-update();
                     } else {
                         Api.update-open = false;
+                        Api.update-closed();
                     }
                 }
             }
             if Api.update.can-install && state != "ready": Button {
-                text: state == "failed" ? @tr("Try again") : @tr("Download and install");
+                text: state == "failed" ? @tr("Try again") : Api.update.older ? @tr("Install {}", Api.update.version) : @tr("Download and install");
                 primary: true;
                 enabled: state != "downloading";
                 clicked => { Api.install-update(); }
@@ -1295,7 +1626,7 @@ export component AppWindow inherits Window {
         height: lay.preferred-height;
         opacity: shown ? 1 : 0;
         visible: shown || self.opacity > 0;
-        animate opacity, y { duration: 180ms; easing: ease-out; }
+        animate opacity, y { duration: Tok.anim; easing: ease-out; }
         border-radius: 8px;
         border-width: 1px;
         border-color: tint.transparentize(0.6);
