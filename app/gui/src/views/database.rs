@@ -140,7 +140,7 @@ fn recipes() -> &'static HashMap<(&'static str, u16), Vec<&'static mhgu_save::da
     static R: std::sync::OnceLock<HashMap<(&str, u16), Vec<&mhgu_save::data::Recipe>>> = std::sync::OnceLock::new();
     R.get_or_init(|| {
         let mut m: HashMap<(&str, u16), Vec<_>> = HashMap::new();
-        for r in &tables().recipes {
+        for r in tables().recipes.iter() {
             m.entry((r.kind.as_str(), r.id)).or_default().push(r);
         }
         m
@@ -152,7 +152,7 @@ fn provision_groups() -> &'static HashMap<u16, Vec<(u16, u8)>> {
     static G: std::sync::OnceLock<HashMap<u16, Vec<(u16, u8)>>> = std::sync::OnceLock::new();
     G.get_or_init(|| {
         let mut m: HashMap<u16, Vec<(u16, u8)>> = HashMap::new();
-        for (&item, &(value, groups)) in &tables().provisions {
+        for (&item, &(value, groups)) in tables().provisions.iter() {
             for g in groups.into_iter().filter(|&g| g != 0) {
                 m.entry(g).or_default().push((item, value));
             }
@@ -499,7 +499,7 @@ fn sources() -> &'static HashMap<u16, Vec<Source>> {
     S.get_or_init(|| {
         let t = tables();
         let mut m: HashMap<u16, Vec<Source>> = HashMap::new();
-        for c in &t.carves {
+        for c in t.carves.iter() {
             m.entry(c.item).or_default().push(Source::Carve(c.monster, &c.rank, &c.kind, c.count, c.chance));
         }
         for q in Char::real_quests(true) {
@@ -509,7 +509,7 @@ fn sources() -> &'static HashMap<u16, Vec<Source>> {
                 }
             }
         }
-        for &(a, b, result, chance) in &t.combinations {
+        for &(a, b, result, chance) in t.combinations.iter() {
             m.entry(result).or_default().push(Source::Combo(a, b, chance));
         }
         m
@@ -529,12 +529,12 @@ fn uses() -> &'static HashMap<u16, Vec<Use>> {
     U.get_or_init(|| {
         let t = tables();
         let mut m: HashMap<u16, Vec<Use>> = HashMap::new();
-        for r in &t.recipes {
+        for r in t.recipes.iter() {
             for &(item, count) in &r.items {
                 m.entry(item).or_default().push(Use::Recipe(r, count));
             }
         }
-        for &(a, b, result, chance) in &t.combinations {
+        for &(a, b, result, chance) in t.combinations.iter() {
             m.entry(a).or_default().push(Use::Combo(b, result, chance));
             if b != a {
                 m.entry(b).or_default().push(Use::Combo(a, result, chance));

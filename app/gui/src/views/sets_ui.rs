@@ -92,7 +92,7 @@ pub fn arts_value(a: &Arts) -> String {
 fn art_choices(s: &mhgu_save::Save, base: usize, w: Option<u8>, held: [u8; 3]) -> (Vec<String>, Vec<u8>) {
     let mut labels = vec![tr("None").to_string()];
     let mut ids = vec![0u8];
-    for &(id, ref name) in &tables().arts {
+    for &(id, ref name) in tables().arts.iter() {
         let id = id as u8;
         let takes = match sets::art_class(id) {
             Some(sets::ArtFor::Any) => true,

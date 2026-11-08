@@ -188,7 +188,7 @@ impl LookField {
 
 pub fn look_fields() -> Vec<LookField> {
     let mut v = vec![];
-    for l in &tables().palico_looks {
+    for l in tables().palico_looks.iter() {
         let f = |key: &'static str, colour: Option<usize>| LookField {
             key,
             byte: l.byte,

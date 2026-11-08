@@ -133,7 +133,7 @@ pub fn apply(id: &str, s: &mut Save, slot: usize) -> Vec<Target> {
             c.clear_quests(&todo);
             out.extend(todo.iter().map(|&i| Target::Quest(i)));
             let mut seen = std::collections::HashSet::new();
-            for o in &tables().offers {
+            for o in tables().offers.iter() {
                 if o.quest_id.is_none() || !seen.insert(o.index) || c.flag(o.accept_flag) {
                     continue;
                 }
@@ -343,7 +343,7 @@ pub fn plan(id: &str, s: &Save, slot: usize) -> Plan {
     }
     // only values that show a change count; the rest are copies written alongside
     p.targets = targets.into_iter().filter(|t| t.read(s, slot) != t.read(&c, slot)).collect();
-    let changed: Vec<usize> = c.bytes().iter().zip(s.bytes()).enumerate().filter(|(_, (a, b))| a != b).map(|(i, _)| i).collect();
+    let changed = c.changed_from(s);
     p.bytes = changed.len();
     p.tech = tech(&changed, s.base(slot));
     let n = p.targets.len();

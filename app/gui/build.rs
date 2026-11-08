@@ -16,6 +16,14 @@ fn walk(dir: &Path, root: &Path, out: &mut Vec<(String, PathBuf)>) {
     }
 }
 
+/// `src` zlib-compressed (best level) into `dest`; returns `dest`.
+fn compressed(src: &Path, dest: &Path) -> PathBuf {
+    let data = std::fs::read(src).unwrap();
+    std::fs::create_dir_all(dest.parent().unwrap()).unwrap();
+    std::fs::write(dest, miniz_oxide::deflate::compress_to_vec_zlib(&data, 10)).unwrap();
+    dest.to_path_buf()
+}
+
 fn main() {
     // Fluent on both platforms: it follows the system light/dark setting. The @tr strings'
     // translations are bundled from lang/ (tools/i18n.py), without the component name as
@@ -31,16 +39,30 @@ fn main() {
     println!("cargo:rerun-if-changed={}", pack.display());
     let mut files = vec![];
     walk(&pack, &pack, &mut files);
-    let mut src = String::from("pub static FILES: &[(&str, &[u8])] = &[\n");
+    // (name, zlib-compressed, bytes): the JSON name tables compress about 5x; the PNGs
+    // are compressed already and go in as they are.
+    let out = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    let mut src = String::from("pub static FILES: &[(&str, bool, &[u8])] = &[\n");
     for (rel, p) in &files {
         println!("cargo:rerun-if-changed={}", p.display());
-        writeln!(src, "    ({rel:?}, include_bytes!({:?})),", p.canonicalize().unwrap()).unwrap();
+        let (z, path) =
+            if rel.ends_with(".json") { (true, compressed(p, &out.join("gen").join(format!("{rel}.z")))) } else { (false, p.canonicalize().unwrap()) };
+        writeln!(src, "    ({rel:?}, {z}, include_bytes!({path:?})),").unwrap();
     }
     src.push_str("];\n");
     if files.is_empty() {
         println!("cargo:warning=no game assets in {}: building with placeholders", pack.display());
     }
     std::fs::write(Path::new(&std::env::var("OUT_DIR").unwrap()).join("assets.rs"), src).unwrap();
+
+    // The .po catalogs src/i18n.rs parses (Slint bundles its own copy from lang/ above).
+    for e in std::fs::read_dir("lang").unwrap().flatten() {
+        let po = e.path().join("LC_MESSAGES/mhgu-editor.po");
+        if po.is_file() {
+            println!("cargo:rerun-if-changed={}", po.display());
+            compressed(&po, &out.join("po").join(format!("{}.po.z", e.file_name().to_string_lossy())));
+        }
+    }
 
     // Windows: icon and DPI-aware manifest.
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {

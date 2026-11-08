@@ -8,7 +8,15 @@ license.workspace = true
 [dependencies]
 mhgu-save = { path = "../core" }
 # Pinned: src/scroll.rs and src/focus.rs use i-slint-core's internals, which must match.
-slint = { version = "=1.18.1", features = ["unstable-winit-030"] }
+# Slint's defaults without system-tray (unused) and accessibility (opt-in feature below).
+slint = { version = "=1.18.1", default-features = false, features = [
+    "std",
+    "backend-default",
+    "renderer-femtovg",
+    "renderer-software",
+    "compat-1-2",
+    "unstable-winit-030",
+] }
 i-slint-core = "=1.18.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -22,9 +30,18 @@ sha2 = "0.10"
 sys-locale = "0.3"
 # Slint's own font library (same version): the system's Chinese font (i18n.rs)
 fontique = "=0.11.1"
+# the embedded name tables and .po catalogs are zlib-compressed by build.rs
+miniz_oxide = "0.8"
+
+[features]
+# Screen-reader support (AccessKit; AT-SPI over D-Bus on Linux). Off to keep the binary
+# small; `cargo build --features accessibility` turns it back on, the .slint files keep
+# their accessible-* properties either way.
+accessibility = ["slint/accessibility"]
 
 [build-dependencies]
 slint-build = "1.18.1"
+miniz_oxide = "0.8"
 winresource = "0.1"
 
 [dev-dependencies]

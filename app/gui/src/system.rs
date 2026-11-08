@@ -349,7 +349,8 @@ pub fn save_info(p: &std::path::Path) -> Option<std::rc::Rc<SaveInfo>> {
 }
 
 fn read_info(p: &std::path::Path) -> Option<SaveInfo> {
-    let s = mhgu_save::Save::from_bytes(std::fs::read(p).ok()?).ok()?;
+    // the header and each slot's start only: names, HR and play time, not the whole file
+    let s = mhgu_save::Save::read_partial(p, mhgu_save::character::SUMMARY_BYTES).ok()?;
     let names = (0..3)
         .filter(|&k| s.slot_used(k))
         .map(|k| {

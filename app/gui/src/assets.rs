@@ -11,12 +11,14 @@ use std::sync::OnceLock;
 
 include!(concat!(env!("OUT_DIR"), "/assets.rs"));
 
-fn file(name: &str) -> Option<&'static [u8]> {
-    FILES.iter().find(|(n, _)| *n == name).map(|(_, b)| *b)
+/// An embedded file, unpacked if build.rs compressed it.
+fn file(name: &str) -> Option<std::borrow::Cow<'static, [u8]>> {
+    let &(_, z, b) = FILES.iter().find(|(n, ..)| *n == name)?;
+    Some(if z { miniz_oxide::inflate::decompress_to_vec_zlib(b).ok()?.into() } else { b.into() })
 }
 
 pub fn available() -> bool {
-    file("names.json").is_some()
+    FILES.iter().any(|(n, ..)| *n == "names.json")
 }
 
 /// One equipment piece of the game's tables.
@@ -274,9 +276,9 @@ pub fn english() -> &'static Names {
 fn names_in(lang: usize) -> &'static Names {
     static N: [OnceLock<Names>; crate::i18n::LANGS.len()] = [const { OnceLock::new() }; crate::i18n::LANGS.len()];
     N[lang].get_or_init(|| {
-        let mut n: Names = file("names.json").and_then(|b| serde_json::from_slice(b).ok()).unwrap_or_default();
+        let mut n: Names = file("names.json").and_then(|b| serde_json::from_slice(&b).ok()).unwrap_or_default();
         let code = crate::i18n::LANGS[lang].0;
-        if let Some(t) = file(&format!("names.{code}.json")).and_then(|b| serde_json::from_slice::<Text>(b).ok()) {
+        if let Some(t) = file(&format!("names.{code}.json")).and_then(|b| serde_json::from_slice::<Text>(&b).ok()) {
             n.translate(t);
         }
         n
@@ -320,7 +322,7 @@ thread_local! {
 }
 
 pub fn monster_icon(i: usize) -> Option<Image> {
-    MONSTERS.with_borrow_mut(|m| m.entry(i).or_insert_with(|| file(&format!("monsters/{i}.png")).and_then(decode).map(|i| to_slint(&i))).clone())
+    MONSTERS.with_borrow_mut(|m| m.entry(i).or_insert_with(|| file(&format!("monsters/{i}.png")).and_then(|b| decode(&b)).map(|i| to_slint(&i))).clone())
 }
 
 /// Icon `icon` of the grayscale sheet multiplied by `rgb` (the game tints its icons).
@@ -333,7 +335,7 @@ pub fn sheet_icon(icon: u32, rgb: [u8; 3]) -> Option<Image> {
                 let [x, y] = *n.icon_rects.get(icon as usize)?;
                 let cell = n.icon_cell;
                 SHEET.with_borrow_mut(|s| {
-                    let sheet = s.get_or_insert_with(|| file("items.png").and_then(decode)).as_ref()?;
+                    let sheet = s.get_or_insert_with(|| file("items.png").and_then(|b| decode(&b))).as_ref()?;
                     if x + cell > sheet.width() || y + cell > sheet.height() {
                         return None;
                     }
@@ -362,7 +364,7 @@ pub fn rarity_rgb(r: u32) -> [u8; 3] {
 }
 
 pub fn award_icon(bit: usize) -> Option<Image> {
-    AWARDS.with_borrow_mut(|m| m.entry(bit).or_insert_with(|| file(&format!("awards/{bit}.png")).and_then(decode).map(|i| to_slint(&i))).clone())
+    AWARDS.with_borrow_mut(|m| m.entry(bit).or_insert_with(|| file(&format!("awards/{bit}.png")).and_then(|b| decode(&b)).map(|i| to_slint(&i))).clone())
 }
 
 pub fn equip_icon(type_code: u8, rarity: u32) -> Option<Image> {

@@ -1,7 +1,7 @@
 //! The repo's machine-readable tables (../../data/*.csv), compiled in.
 
 use std::collections::HashMap;
-use std::sync::OnceLock;
+use std::sync::LazyLock;
 
 fn rows(src: &'static str) -> Vec<HashMap<String, String>> {
     let mut r = csv::Reader::from_reader(src.as_bytes());
@@ -12,6 +12,11 @@ fn rows(src: &'static str) -> Vec<HashMap<String, String>> {
             head.iter().cloned().zip(rec.iter().map(str::to_owned)).collect()
         })
         .collect()
+}
+
+/// A number cell; empty is None.
+fn opt(s: &str) -> Option<i64> {
+    (!s.is_empty()).then(|| num(s))
 }
 
 /// A number cell; empty is 0. A typo in a table fails debug builds (and `tables_load`)
@@ -239,63 +244,65 @@ pub struct TalismanRow {
     pub max: i8,
 }
 
+// the field types are the tables' own shapes, each wrapped for parsing on first use
+#[allow(clippy::type_complexity)]
 pub struct Tables {
-    pub quests: Vec<Quest>,
-    pub unlock: HashMap<u32, String>,
-    pub rotating: HashMap<u32, usize>,
-    pub requests: Vec<Request>,
-    pub offers: Vec<Offer>,
-    pub npc_bit: HashMap<String, usize>,
+    pub quests: LazyLock<Vec<Quest>>,
+    pub unlock: LazyLock<HashMap<u32, String>>,
+    pub rotating: LazyLock<HashMap<u32, usize>>,
+    pub requests: LazyLock<Vec<Request>>,
+    pub offers: LazyLock<Vec<Offer>>,
+    pub npc_bit: LazyLock<HashMap<String, usize>>,
     /// data/npc-index.csv: NPC ID -> name.
-    pub npc_name: HashMap<u32, String>,
-    pub monsters: Vec<Monster>,
+    pub npc_name: LazyLock<HashMap<u32, String>>,
+    pub monsters: LazyLock<Vec<Monster>>,
     /// Indexed by monster index - 1.
-    pub monster_meta: Vec<MonsterMeta>,
-    pub arts: Vec<(u32, String)>,
+    pub monster_meta: LazyLock<Vec<MonsterMeta>>,
+    pub arts: LazyLock<Vec<(u32, String)>>,
     /// (kind, bit, name, category)
-    pub canteen: Vec<(String, usize, String, String)>,
+    pub canteen: LazyLock<Vec<(String, usize, String, String)>>,
     /// (bit, grid, name)
-    pub awards: Vec<(usize, String, String)>,
-    pub fields: Vec<Field>,
-    pub smithy: Vec<SmithyList>,
-    pub talisman: Vec<TalismanRow>,
+    pub awards: LazyLock<Vec<(usize, String, String)>>,
+    pub fields: LazyLock<Vec<Field>>,
+    pub smithy: LazyLock<Vec<SmithyList>>,
+    pub talisman: LazyLock<Vec<TalismanRow>>,
     /// data/quest-sizes.csv: monster index -> (smallest, largest) size % its quests give.
-    pub quest_sizes: HashMap<usize, (u16, u16)>,
+    pub quest_sizes: LazyLock<HashMap<usize, (u16, u16)>>,
     /// data/quest-monsters.csv: (quest ID, monster index, size %, variation table).
-    pub quest_monsters: Vec<(u32, usize, u16, usize)>,
+    pub quest_monsters: LazyLock<Vec<(u32, usize, u16, usize)>>,
     /// data/size-variation.csv by table: (scale rate in hundredths, chance %).
-    pub size_variation: Vec<Vec<(u16, u8)>>,
-    pub carves: Vec<Carve>,
+    pub size_variation: LazyLock<Vec<Vec<(u16, u8)>>>,
+    pub carves: LazyLock<Vec<Carve>>,
     /// data/skill-trees.csv by tree: (kind: 1 Soul, 2 Soul X; skill at -20, -15, -10, +10,
     /// +15, +20 points, 0 none).
-    pub skill_trees: Vec<(u8, [u16; 6])>,
+    pub skill_trees: LazyLock<Vec<(u8, [u16; 6])>>,
     /// data/armor-skills.csv: (series, part 1-5, tree, points).
-    pub armor_skills: Vec<(u16, u8, u8, i8)>,
+    pub armor_skills: LazyLock<Vec<(u16, u8, u8, i8)>>,
     /// data/decorations.csv: (item, slots, tree, points).
-    pub decorations: Vec<(u16, u8, u8, i8)>,
-    pub recipes: Vec<Recipe>,
+    pub decorations: LazyLock<Vec<(u16, u8, u8, i8)>>,
+    pub recipes: LazyLock<Vec<Recipe>>,
     /// data/weapon-tree.csv: (class, weapon, parent, level the parent must reach).
-    pub weapon_tree: Vec<(u8, u16, u16, u8)>,
+    pub weapon_tree: LazyLock<Vec<(u8, u16, u16, u8)>>,
     /// data/provisions.csv: item -> (value, groups, 0 none).
-    pub provisions: HashMap<u16, (u8, [u16; 3])>,
+    pub provisions: LazyLock<HashMap<u16, (u8, [u16; 3])>>,
     /// data/combinations.csv: (item, item, result, chance %).
-    pub combinations: Vec<(u16, u16, u16, u8)>,
+    pub combinations: LazyLock<Vec<(u16, u16, u16, u8)>>,
     /// data/quest-rewards.csv: quest ID -> (slot, reward table).
-    pub quest_rewards: HashMap<u32, Vec<(u8, u32)>>,
+    pub quest_rewards: LazyLock<HashMap<u32, Vec<(u8, u32)>>>,
     /// data/rewards.csv: reward table -> (item, count, chance %).
-    pub rewards: HashMap<u32, Vec<(u16, u8, u8)>>,
+    pub rewards: LazyLock<HashMap<u32, Vec<(u16, u8, u8)>>>,
     /// data/quest-info.csv: quest ID -> what the quest board shows.
-    pub quest_info: HashMap<u32, QuestInfo>,
-    pub arena: Vec<ArenaQuest>,
+    pub quest_info: LazyLock<HashMap<u32, QuestInfo>>,
+    pub arena: LazyLock<Vec<ArenaQuest>>,
     /// data/palico-levels.csv, by level - 1: (free support move slots, skill slots).
-    pub palico_levels: Vec<(u8, u8)>,
+    pub palico_levels: LazyLock<Vec<(u8, u8)>>,
     /// data/palico-actions.csv by ID.
-    pub palico_moves: Vec<PalicoAction>,
-    pub palico_skills: Vec<PalicoAction>,
+    pub palico_moves: LazyLock<Vec<PalicoAction>>,
+    pub palico_skills: LazyLock<Vec<PalicoAction>>,
     /// By forte.
-    pub palico_fortes: Vec<PalicoForte>,
-    pub palico_looks: Vec<PalicoLook>,
-    pub unlock_lists: Vec<UnlockEntry>,
+    pub palico_fortes: LazyLock<Vec<PalicoForte>>,
+    pub palico_looks: LazyLock<Vec<PalicoLook>>,
+    pub unlock_lists: LazyLock<Vec<UnlockEntry>>,
 }
 
 impl Tables {
@@ -306,11 +313,10 @@ impl Tables {
 }
 
 pub fn tables() -> &'static Tables {
-    static T: OnceLock<Tables> = OnceLock::new();
-    T.get_or_init(|| {
-        let opt = |s: &String| (!s.is_empty()).then(|| num(s));
-        Tables {
-            quests: rows(include_str!("../../../data/quest-index.csv"))
+    // each table is parsed the first time it is used, not all of them at once
+    static T: Tables = Tables {
+        quests: LazyLock::new(|| {
+            rows(include_str!("../../../data/quest-index.csv"))
                 .iter()
                 .map(|r| Quest {
                     index: num(&r["index"]) as usize,
@@ -324,10 +330,16 @@ pub fn tables() -> &'static Tables {
                     sets: r["sets"].split_whitespace().map(|s| num(s) as u32).collect(),
                     notes: r["notes"].clone(),
                 })
-                .collect(),
-            unlock: rows(include_str!("../../../data/quest-unlock.csv")).iter().map(|r| (num(&r["quest_id"]) as u32, r["rule"].clone())).collect(),
-            rotating: rows(include_str!("../../../data/rotating-quests.csv")).iter().map(|r| (num(&r["quest_id"]) as u32, num(&r["bit"]) as usize)).collect(),
-            requests: rows(include_str!("../../../data/request-index.csv"))
+                .collect()
+        }),
+        unlock: LazyLock::new(|| {
+            rows(include_str!("../../../data/quest-unlock.csv")).iter().map(|r| (num(&r["quest_id"]) as u32, r["rule"].clone())).collect()
+        }),
+        rotating: LazyLock::new(|| {
+            rows(include_str!("../../../data/rotating-quests.csv")).iter().map(|r| (num(&r["quest_id"]) as u32, num(&r["bit"]) as usize)).collect()
+        }),
+        requests: LazyLock::new(|| {
+            rows(include_str!("../../../data/request-index.csv"))
                 .iter()
                 .map(|r| Request {
                     index: num(&r["index"]) as usize,
@@ -337,8 +349,10 @@ pub fn tables() -> &'static Tables {
                     accept_flag: opt(&r["accept_flag"]).map(|v| v as usize),
                     done_flag: opt(&r["done_flag"]).map(|v| v as usize),
                 })
-                .collect(),
-            offers: rows(include_str!("../../../data/request-offer.csv"))
+                .collect()
+        }),
+        offers: LazyLock::new(|| {
+            rows(include_str!("../../../data/request-offer.csv"))
                 .iter()
                 .map(|r| Offer {
                     index: num(&r["index"]) as usize,
@@ -350,10 +364,12 @@ pub fn tables() -> &'static Tables {
                     also: r["also"].split_whitespace().map(num).collect(),
                     offer: r["offer"].clone(),
                 })
-                .collect(),
-            npc_bit: rows(include_str!("../../../data/npc-index.csv")).iter().map(|r| (r["npc_id"].clone(), num(&r["bit"]) as usize)).collect(),
-            npc_name: rows(include_str!("../../../data/npc-index.csv")).iter().map(|r| (num(&r["npc_id"]) as u32, r["name"].clone())).collect(),
-            monsters: rows(include_str!("../../../data/monster-index.csv"))
+                .collect()
+        }),
+        npc_bit: LazyLock::new(|| rows(include_str!("../../../data/npc-index.csv")).iter().map(|r| (r["npc_id"].clone(), num(&r["bit"]) as usize)).collect()),
+        npc_name: LazyLock::new(|| rows(include_str!("../../../data/npc-index.csv")).iter().map(|r| (num(&r["npc_id"]) as u32, r["name"].clone())).collect()),
+        monsters: LazyLock::new(|| {
+            rows(include_str!("../../../data/monster-index.csv"))
                 .iter()
                 .map(|r| Monster {
                     index: num(&r["index"]) as usize,
@@ -362,8 +378,10 @@ pub fn tables() -> &'static Tables {
                     has_size: r["has_size_record"] == "yes",
                     confidence: r["confidence"].clone(),
                 })
-                .collect(),
-            monster_meta: rows(include_str!("../../../data/monster-sizes.csv"))
+                .collect()
+        }),
+        monster_meta: LazyLock::new(|| {
+            rows(include_str!("../../../data/monster-sizes.csv"))
                 .iter()
                 .map(|r| MonsterMeta {
                     index: num(&r["index"]) as usize,
@@ -379,14 +397,20 @@ pub fn tables() -> &'static Tables {
                     notes_bit: opt(&r["notes_bit"]).map(|v| v as usize),
                     class: r["class"].clone(),
                 })
-                .collect(),
-            arts: rows(include_str!("../../../data/hunter-arts.csv")).iter().map(|r| (num(&r["id"]) as u32, r["name"].clone())).collect(),
-            canteen: rows(include_str!("../../../data/canteen.csv"))
+                .collect()
+        }),
+        arts: LazyLock::new(|| rows(include_str!("../../../data/hunter-arts.csv")).iter().map(|r| (num(&r["id"]) as u32, r["name"].clone())).collect()),
+        canteen: LazyLock::new(|| {
+            rows(include_str!("../../../data/canteen.csv"))
                 .iter()
                 .map(|r| (r["kind"].clone(), num(&r["bit"]) as usize, r["name"].clone(), r["category"].clone()))
-                .collect(),
-            awards: rows(include_str!("../../../data/awards.csv")).iter().map(|r| (num(&r["bit"]) as usize, r["grid"].clone(), r["name"].clone())).collect(),
-            fields: rows(include_str!("../../../data/save-map.csv"))
+                .collect()
+        }),
+        awards: LazyLock::new(|| {
+            rows(include_str!("../../../data/awards.csv")).iter().map(|r| (num(&r["bit"]) as usize, r["grid"].clone(), r["name"].clone())).collect()
+        }),
+        fields: LazyLock::new(|| {
+            rows(include_str!("../../../data/save-map.csv"))
                 .iter()
                 .map(|r| Field {
                     abs: num(&r["offset"]) as usize,
@@ -397,12 +421,16 @@ pub fn tables() -> &'static Tables {
                     label: r["label"].clone(),
                     confidence: r["confidence"].clone(),
                 })
-                .collect(),
-            smithy: rows(include_str!("../../../data/smithy-lists.csv"))
+                .collect()
+        }),
+        smithy: LazyLock::new(|| {
+            rows(include_str!("../../../data/smithy-lists.csv"))
                 .iter()
                 .map(|r| SmithyList { list: r["list"].clone(), records: num(&r["records"]) as usize, ids: r["ids"].bytes().map(|b| b - b'0').collect() })
-                .collect(),
-            talisman: rows(include_str!("../../../data/talisman-tables.csv"))
+                .collect()
+        }),
+        talisman: LazyLock::new(|| {
+            rows(include_str!("../../../data/talisman-tables.csv"))
                 .iter()
                 .map(|r| TalismanRow {
                     kind: r["kind"].clone(),
@@ -411,26 +439,36 @@ pub fn tables() -> &'static Tables {
                     min: num(&r["min"]) as i8,
                     max: num(&r["max"]) as i8,
                 })
-                .collect(),
-            quest_monsters: rows(include_str!("../../../data/quest-monsters.csv"))
+                .collect()
+        }),
+        quest_monsters: LazyLock::new(|| {
+            rows(include_str!("../../../data/quest-monsters.csv"))
                 .iter()
                 .map(|r| (num(&r["quest_id"]) as u32, num(&r["monster"]) as usize, num(&r["size"]) as u16, num(&r["table"]) as usize))
-                .collect(),
-            size_variation: rows(include_str!("../../../data/size-variation.csv")).iter().fold(Vec::new(), |mut t, r| {
+                .collect()
+        }),
+        size_variation: LazyLock::new(|| {
+            rows(include_str!("../../../data/size-variation.csv")).iter().fold(Vec::new(), |mut t, r| {
                 let k = num(&r["table"]) as usize;
                 t.resize_with(t.len().max(k + 1), Vec::new);
                 t[k].push((num(&r["rate"]) as u16, num(&r["chance"]) as u8));
                 t
-            }),
-            quest_rewards: rows(include_str!("../../../data/quest-rewards.csv")).iter().fold(HashMap::new(), |mut m, r| {
+            })
+        }),
+        quest_rewards: LazyLock::new(|| {
+            rows(include_str!("../../../data/quest-rewards.csv")).iter().fold(HashMap::new(), |mut m, r| {
                 m.entry(num(&r["quest_id"]) as u32).or_insert_with(Vec::new).push((num(&r["slot"]) as u8, num(&r["rem"]) as u32));
                 m
-            }),
-            rewards: rows(include_str!("../../../data/rewards.csv")).iter().fold(HashMap::new(), |mut m, r| {
+            })
+        }),
+        rewards: LazyLock::new(|| {
+            rows(include_str!("../../../data/rewards.csv")).iter().fold(HashMap::new(), |mut m, r| {
                 m.entry(num(&r["rem"]) as u32).or_insert_with(Vec::new).push((num(&r["item"]) as u16, num(&r["count"]) as u8, num(&r["chance"]) as u8));
                 m
-            }),
-            quest_info: rows(include_str!("../../../data/quest-info.csv"))
+            })
+        }),
+        quest_info: LazyLock::new(|| {
+            rows(include_str!("../../../data/quest-info.csv"))
                 .iter()
                 .map(|r| {
                     let n = |c: &str| num(&r[c]) as u32;
@@ -446,20 +484,28 @@ pub fn tables() -> &'static Tables {
                         },
                     )
                 })
-                .collect(),
-            skill_trees: rows(include_str!("../../../data/skill-trees.csv"))
+                .collect()
+        }),
+        skill_trees: LazyLock::new(|| {
+            rows(include_str!("../../../data/skill-trees.csv"))
                 .iter()
                 .map(|r| (num(&r["kind"]) as u8, ["m20", "m15", "m10", "p10", "p15", "p20"].map(|c| num(&r[c]) as u16)))
-                .collect(),
-            armor_skills: rows(include_str!("../../../data/armor-skills.csv"))
+                .collect()
+        }),
+        armor_skills: LazyLock::new(|| {
+            rows(include_str!("../../../data/armor-skills.csv"))
                 .iter()
                 .map(|r| (num(&r["series"]) as u16, num(&r["part"]) as u8, num(&r["tree"]) as u8, num(&r["points"]) as i8))
-                .collect(),
-            decorations: rows(include_str!("../../../data/decorations.csv"))
+                .collect()
+        }),
+        decorations: LazyLock::new(|| {
+            rows(include_str!("../../../data/decorations.csv"))
                 .iter()
                 .map(|r| (num(&r["item"]) as u16, num(&r["slots"]) as u8, num(&r["tree"]) as u8, num(&r["points"]) as i8))
-                .collect(),
-            recipes: rows(include_str!("../../../data/recipes.csv"))
+                .collect()
+        }),
+        recipes: LazyLock::new(|| {
+            rows(include_str!("../../../data/recipes.csv"))
                 .iter()
                 .map(|r| Recipe {
                     kind: r["kind"].clone(),
@@ -469,20 +515,28 @@ pub fn tables() -> &'static Tables {
                     group: num(&r["group"]) as u16,
                     value: num(&r["value"]) as u8,
                 })
-                .collect(),
-            weapon_tree: rows(include_str!("../../../data/weapon-tree.csv"))
+                .collect()
+        }),
+        weapon_tree: LazyLock::new(|| {
+            rows(include_str!("../../../data/weapon-tree.csv"))
                 .iter()
                 .map(|r| (num(&r["class"]) as u8, num(&r["weapon"]) as u16, num(&r["parent"]) as u16, num(&r["level"]) as u8))
-                .collect(),
-            provisions: rows(include_str!("../../../data/provisions.csv"))
+                .collect()
+        }),
+        provisions: LazyLock::new(|| {
+            rows(include_str!("../../../data/provisions.csv"))
                 .iter()
                 .map(|r| (num(&r["item"]) as u16, (num(&r["value"]) as u8, ["group1", "group2", "group3"].map(|c| num(&r[c]) as u16))))
-                .collect(),
-            combinations: rows(include_str!("../../../data/combinations.csv"))
+                .collect()
+        }),
+        combinations: LazyLock::new(|| {
+            rows(include_str!("../../../data/combinations.csv"))
                 .iter()
                 .map(|r| (num(&r["item1"]) as u16, num(&r["item2"]) as u16, num(&r["result"]) as u16, num(&r["chance"]) as u8))
-                .collect(),
-            carves: rows(include_str!("../../../data/monster-carves.csv"))
+                .collect()
+        }),
+        carves: LazyLock::new(|| {
+            rows(include_str!("../../../data/monster-carves.csv"))
                 .iter()
                 .map(|r| Carve {
                     monster: num(&r["monster"]) as usize,
@@ -493,12 +547,16 @@ pub fn tables() -> &'static Tables {
                     count: num(&r["count"]) as u8,
                     chance: num(&r["chance"]) as u8,
                 })
-                .collect(),
-            quest_sizes: rows(include_str!("../../../data/quest-sizes.csv"))
+                .collect()
+        }),
+        quest_sizes: LazyLock::new(|| {
+            rows(include_str!("../../../data/quest-sizes.csv"))
                 .iter()
                 .map(|r| (num(&r["index"]) as usize, (num(&r["min"]) as u16, num(&r["max"]) as u16)))
-                .collect(),
-            arena: rows(include_str!("../../../data/arena.csv"))
+                .collect()
+        }),
+        arena: LazyLock::new(|| {
+            rows(include_str!("../../../data/arena.csv"))
                 .iter()
                 .map(|r| {
                     let sets: Vec<u8> = r["sets"].split_whitespace().map(|v| num(v) as u8).collect();
@@ -509,21 +567,24 @@ pub fn tables() -> &'static Tables {
                         sets: sets.try_into().expect("arena.csv: five sets"),
                     }
                 })
-                .collect(),
-            palico_levels: rows(include_str!("../../../data/palico-levels.csv"))
-                .iter()
-                .map(|r| (num(&r["support_slots"]) as u8, num(&r["skill_slots"]) as u8))
-                .collect(),
-            palico_moves: palico_actions("move"),
-            palico_skills: palico_actions("skill"),
-            palico_fortes: rows(include_str!("../../../data/palico-fortes.csv"))
+                .collect()
+        }),
+        palico_levels: LazyLock::new(|| {
+            rows(include_str!("../../../data/palico-levels.csv")).iter().map(|r| (num(&r["support_slots"]) as u8, num(&r["skill_slots"]) as u8)).collect()
+        }),
+        palico_moves: LazyLock::new(|| palico_actions("move")),
+        palico_skills: LazyLock::new(|| palico_actions("skill")),
+        palico_fortes: LazyLock::new(|| {
+            rows(include_str!("../../../data/palico-fortes.csv"))
                 .iter()
                 .map(|r| {
                     let ids = |k: &str| r[k].split_whitespace().map(|v| num(v) as u8).collect::<Vec<u8>>();
                     PalicoForte { moves: ids("move"), moves2: ids("moves2"), skills: ids("skills").try_into().expect("palico-fortes.csv: two skills") }
                 })
-                .collect(),
-            palico_looks: rows(include_str!("../../../data/palico-looks.csv"))
+                .collect()
+        }),
+        palico_looks: LazyLock::new(|| {
+            rows(include_str!("../../../data/palico-looks.csv"))
                 .iter()
                 .map(|r| {
                     let slot = &r["slot"];
@@ -539,13 +600,16 @@ pub fn tables() -> &'static Tables {
                         palette: r["palette"].split_whitespace().map(rgb).collect(),
                     }
                 })
-                .collect(),
-            unlock_lists: rows(include_str!("../../../data/unlock-lists.csv"))
+                .collect()
+        }),
+        unlock_lists: LazyLock::new(|| {
+            rows(include_str!("../../../data/unlock-lists.csv"))
                 .iter()
                 .map(|r| UnlockEntry { map: r["map"].clone(), bit: num(&r["bit"]) as usize, id: opt(&r["id"]).unwrap_or(0) as u32, need: r["need"].clone() })
-                .collect(),
-        }
-    })
+                .collect()
+        }),
+    };
+    &T
 }
 
 #[cfg(test)]
@@ -565,12 +629,12 @@ mod tests {
         assert!(t.quest_monsters.iter().all(|&(_, _, _, k)| k < 52));
         // every carve table sums to 100 %
         let mut sums: std::collections::HashMap<(usize, &str, &str), u32> = Default::default();
-        for c in &t.carves {
+        for c in t.carves.iter() {
             *sums.entry((c.monster, &c.rank, &c.kind)).or_default() += c.chance as u32;
         }
         assert!(sums.iter().all(|(k, &v)| v == 100 || k.2 == "other"), "carve tables");
         assert_eq!(t.skill_trees.len(), 206);
-        assert!(t.armor_skills.iter().chain(&t.decorations).all(|r| (r.2 as usize) < 206));
+        assert!(t.armor_skills.iter().chain(t.decorations.iter()).all(|r| (r.2 as usize) < 206));
         // every upgraded weapon has its upgrade, every provision group has materials
         assert!(
             t.weapon_tree.iter().all(|w| t.recipes.iter().any(|r| r.kind == format!("weapon:{}", w.0) && r.id == w.1 && r.level == 1 && !r.items.is_empty()))

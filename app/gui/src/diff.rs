@@ -80,7 +80,7 @@ pub fn diff(a: &Save, b: &Save) -> Vec<Line> {
     }
     // the rest, by the save map's field (fields of a slot repeat in every slot)
     let mut rest: Vec<(String, usize)> = vec![];
-    for f in &tables().fields {
+    for f in tables().fields.iter() {
         let starts: Vec<usize> = if f.block == "char1" { (0..3).map(|k| b.base(k) + f.rel).collect() } else { vec![f.abs] };
         for a0 in starts {
             let end = (a0 + f.size).min(changed.len());

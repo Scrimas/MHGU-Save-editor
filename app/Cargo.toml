@@ -11,6 +11,10 @@ license = "GPL-3.0-or-later"
 
 [profile.release]
 opt-level = 3
-lto = "thin"
+lto = "fat"
 codegen-units = 1
 strip = true
+# No unwinding tables or landing pads. Nothing catches a panic outside the tests (which
+# keep unwinding): one on the UI thread already ended the program; the update workers
+# return their errors instead of panicking.
+panic = "abort"

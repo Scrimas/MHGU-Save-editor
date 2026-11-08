@@ -159,7 +159,7 @@ pub fn crown_odds(i: usize) -> Vec<CrownOdds> {
     let t = tables();
     let fam = |j: usize| j == i || meta(j).family_of == Some(i);
     let mut out: Vec<CrownOdds> = Vec::new();
-    for &(quest_id, j, size, table) in &t.quest_monsters {
+    for &(quest_id, j, size, table) in t.quest_monsters.iter() {
         if !fam(j) {
             continue;
         }

@@ -34,12 +34,28 @@ fn env_factor(name: &str) -> Option<f32> {
     std::env::var(name).ok().and_then(|v| v.parse::<f32>().ok()).filter(|v| *v > 0.0)
 }
 
-/// Hyprland's input:scroll_factor, when running under Hyprland.
+/// Hyprland's input:scroll_factor, when running under Hyprland. Asked on Hyprland's
+/// request socket, as hyprctl does, without starting hyprctl (20-30 ms at startup).
+#[cfg(unix)]
 fn compositor_wheel_factor() -> Option<f32> {
-    std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE")?;
-    let out = std::process::Command::new("hyprctl").args(["-j", "getoption", "input:scroll_factor"]).output().ok()?;
-    let v: serde_json::Value = serde_json::from_slice(&out.stdout).ok()?;
+    use std::io::{Read, Write};
+    let sig = std::env::var_os("HYPRLAND_INSTANCE_SIGNATURE")?;
+    // $XDG_RUNTIME_DIR/hypr since Hyprland 0.40, /tmp/hypr before
+    let dirs = [std::env::var_os("XDG_RUNTIME_DIR").map(|d| std::path::PathBuf::from(d).join("hypr")), Some("/tmp/hypr".into())];
+    let mut sock = dirs.into_iter().flatten().find_map(|d| std::os::unix::net::UnixStream::connect(d.join(&sig).join(".socket.sock")).ok())?;
+    let wait = Some(std::time::Duration::from_millis(200));
+    sock.set_read_timeout(wait).ok()?;
+    sock.set_write_timeout(wait).ok()?;
+    sock.write_all(b"j/getoption input:scroll_factor").ok()?;
+    let mut out = vec![];
+    sock.read_to_end(&mut out).ok()?;
+    let v: serde_json::Value = serde_json::from_slice(&out).ok()?;
     v.get("float").and_then(|f| f.as_f64()).map(|f| f as f32).filter(|f| *f > 0.0)
+}
+
+#[cfg(not(unix))]
+fn compositor_wheel_factor() -> Option<f32> {
+    None
 }
 
 pub fn install(window: &slint::Window) {

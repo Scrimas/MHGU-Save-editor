@@ -20,12 +20,21 @@ pub const LANGS: [(&str, &str); 7] =
 
 macro_rules! po {
     ($c:literal) => {
-        include_str!(concat!("../lang/", $c, "/LC_MESSAGES/mhgu-editor.po"))
+        include_bytes!(concat!(env!("OUT_DIR"), "/po/", $c, ".po.z"))
     };
 }
 
-/// The catalogs in LANGS order (English has none).
-const PO: [&str; 7] = ["", po!("fr"), po!("de"), po!("es"), po!("it"), po!("zh_TW"), po!("zh_CN")];
+/// The catalogs in LANGS order (English has none), zlib-compressed by build.rs.
+const PO_Z: [&[u8]; 7] = [b"", po!("fr"), po!("de"), po!("es"), po!("it"), po!("zh_TW"), po!("zh_CN")];
+
+/// Catalog `i` as text; empty for English.
+fn po_text(i: usize) -> String {
+    if PO_Z[i].is_empty() {
+        return String::new();
+    }
+    let b = miniz_oxide::inflate::decompress_to_vec_zlib(PO_Z[i]).expect("build.rs compresses the catalogs");
+    String::from_utf8(b).expect("the catalogs are UTF-8")
+}
 
 /// Plural form of count `n` per language, as in the catalogs' Plural-Forms header.
 fn plural(lang: usize, n: i64) -> usize {
@@ -128,7 +137,7 @@ struct Catalog {
 
 fn catalog(i: usize) -> &'static Catalog {
     static C: [OnceLock<Catalog>; LANGS.len()] = [const { OnceLock::new() }; LANGS.len()];
-    C[i].get_or_init(|| parse(PO[i]))
+    C[i].get_or_init(|| parse(&po_text(i)))
 }
 
 fn unquote(s: &str) -> String {
@@ -338,7 +347,7 @@ mod tests {
             v
         }
         for (i, (code, _)) in LANGS.iter().enumerate().skip(1) {
-            let c = parse(PO[i]);
+            let c = parse(&po_text(i));
             for (id, t) in &c.one {
                 assert_eq!(marks(id), marks(t), "{code}: {id:?} -> {t:?}");
             }

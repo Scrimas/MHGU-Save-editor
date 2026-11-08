@@ -63,11 +63,13 @@ EOF
 chmod 755 "$appdir/AppRun"
 
 out="$dist/MHGU-Save-Editor-$ver-x86_64.AppImage"
+# zstd at level 19 with 1 MiB blocks: a smaller file, unpacked as fast as the default
 if command -v appimagetool >/dev/null; then
-    ARCH=x86_64 appimagetool --no-appstream "$appdir" "$out"
+    ARCH=x86_64 appimagetool --no-appstream --comp zstd \
+        --mksquashfs-opt -Xcompression-level --mksquashfs-opt 19 --mksquashfs-opt -b --mksquashfs-opt 1M "$appdir" "$out"
 elif [ -n "${APPIMAGE_RUNTIME:-}" ]; then
     sq=$(mktemp)
-    mksquashfs "$appdir" "$sq" -root-owned -noappend -comp zstd -quiet -no-progress
+    mksquashfs "$appdir" "$sq" -root-owned -noappend -comp zstd -Xcompression-level 19 -b 1M -quiet -no-progress
     cat "$APPIMAGE_RUNTIME" "$sq" > "$out"
     chmod 755 "$out"
     rm -f "$sq"

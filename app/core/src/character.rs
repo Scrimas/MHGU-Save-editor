@@ -36,6 +36,9 @@ pub const PROGRESS: usize = 0x2F77;
 pub const PROGRESS_NEW: usize = 0x2F7F;
 pub const HR_RELEASED_BIT: usize = 20;
 pub const HUB_STAR: usize = 0x2C4DC;
+/// Bytes from a slot's base holding what `get` reads for name, hr and playtime (for
+/// `Save::read_partial`).
+pub const SUMMARY_BYTES: usize = HUB_STAR + 2;
 pub const MAX_FUNDS: u32 = 9_999_999;
 pub const MAX_POINTS: u32 = 9_999_999;
 pub const MAX_VILLAGE_POINTS: u32 = 20_000;
@@ -355,6 +358,26 @@ pub fn set_playtime(s: &mut Save, base: usize, secs: u32) {
 mod tests {
     use super::*;
     use crate::save::{SLOT1_BASE, blank};
+
+    #[test]
+    fn partial_read_gives_the_summary() {
+        let mut s = blank();
+        s.set_slot_used(0, true);
+        set_name(&mut s, SLOT1_BASE, "Partial");
+        s.set_u32(SLOT1_BASE + PLAYTIME, 123_456);
+        s.set_u32(SLOT1_BASE + HR_POINTS, 9_999_999);
+        s.set_u16(SLOT1_BASE + HUB_STAR, 7);
+        s.set_bit(SLOT1_BASE + PROGRESS, HR_RELEASED_BIT, true);
+        let p = std::env::temp_dir().join(format!("mhgu-partial-{}", std::process::id()));
+        std::fs::write(&p, s.bytes()).unwrap();
+        let part = Save::read_partial(&p, SUMMARY_BYTES);
+        let _ = std::fs::remove_file(&p);
+        let part = part.unwrap();
+        let (a, b) = (get(&s, s.base(0)), get(&part, part.base(0)));
+        assert_eq!((a.name.as_str(), a.hr, a.playtime), (b.name.as_str(), b.hr, b.playtime));
+        assert_eq!(b.name, "Partial");
+        assert!(b.hr >= 13, "HR read as {}", b.hr);
+    }
 
     #[test]
     fn card_counts_follow_cleared_quests() {

@@ -28,8 +28,20 @@ pub fn install() {
         }
     }
     let icons = data.join("icons/hicolor");
+    // NixOS: the menu starts the unpacked binary through a small launcher script
+    let launcher = nixos_unpacked().and_then(|bin| {
+        let script = data.join(NAME).join("nixos-launch.sh");
+        let text = launcher_script(path, &bin.to_string_lossy(), &stamp(Path::new(path))?);
+        match write(&script, text.as_bytes()).and_then(|_| executable(&script)) {
+            Ok(()) => script.to_str().map(str::to_owned),
+            Err(e) => {
+                eprintln!("desktop entry: {}: {e}", script.display());
+                None
+            }
+        }
+    });
     for (p, b) in [
-        (file, entry(path, VERSION).into_bytes()),
+        (file, entry(path, launcher.as_deref(), VERSION).into_bytes()),
         (icons.join(format!("256x256/apps/{NAME}.png")), PNG.to_vec()),
         (icons.join(format!("scalable/apps/{NAME}.svg")), SVG.to_vec()),
     ] {
@@ -50,23 +62,77 @@ pub fn moved(appimage: &Path, version: &str) {
     if field(&cur, "TryExec").map(unescape).as_deref() != old.to_str() {
         return;
     }
-    if let Err(e) = write(&file, entry(path, version).as_bytes()) {
+    // straight at the new AppImage: started once (the restart after the update), it points
+    // the entry at its own unpacked binary again on NixOS
+    if let Err(e) = write(&file, entry(path, None, version).as_bytes()) {
         eprintln!("desktop entry: {}: {e}", file.display());
     }
 }
 
-/// The packaged entry with `Exec` on the AppImage of `version`.
-fn entry(appimage: &str, version: &str) -> String {
+/// The packaged entry with `Exec` on the AppImage of `version`, or on `launcher` (NixOS);
+/// `TryExec` stays on the AppImage, so the entry goes once the AppImage is deleted.
+fn entry(appimage: &str, launcher: Option<&str>, version: &str) -> String {
     let mut out = String::new();
     for l in ENTRY.lines() {
         if l.starts_with("Exec=") {
-            out += &format!("Exec={} %f\nTryExec={}\n", quote(appimage), appimage.replace('\\', "\\\\"));
+            out += &format!("Exec={} %f\nTryExec={}\n", quote(launcher.unwrap_or(appimage)), appimage.replace('\\', "\\\\"));
         } else {
             out += l;
             out += "\n";
         }
     }
     out + &format!("X-AppImage-Version={version}\n")
+}
+
+/// NixOS runs an AppImage through appimage-run, which unpacks it once into
+/// `~/.cache/appimage-run/<sha256>/` but then hashes it and builds a bubblewrap sandbox on
+/// every start (~250 ms). Where nix-ld is on, the unpacked binary runs without them: this
+/// is that binary when the editor runs that way, None anywhere else (other distributions,
+/// NixOS without nix-ld, an AppImage started by other means).
+fn nixos_unpacked() -> Option<std::path::PathBuf> {
+    std::env::var_os("NIX_LD")?;
+    let os = std::fs::read_to_string("/etc/os-release").ok()?;
+    if !os.lines().any(|l| matches!(l.trim(), "ID=nixos" | "ID=\"nixos\"")) {
+        return None;
+    }
+    let exe = std::env::current_exe().ok()?;
+    exe.components().any(|c| c.as_os_str() == "appimage-run").then_some(exe)
+}
+
+/// Size and modification time of `p`, as `stat -Lc %s:%Y` prints them.
+fn stamp(p: &Path) -> Option<String> {
+    let m = std::fs::metadata(p).ok()?;
+    Some(format!("{}:{}", m.len(), m.modified().ok()?.duration_since(std::time::UNIX_EPOCH).ok()?.as_secs()))
+}
+
+/// Starts `bin` (unpacked from `appimage`) while the AppImage is still the file it came
+/// from (`stamp`), as if appimage-run had started it; otherwise, or when the binary cannot
+/// start at all, the AppImage the usual way. The shell reports a binary that could not
+/// start as 127 (no loader: NixOS without nix-ld; a library missing) or 126 (not
+/// executable, a bad interpreter).
+fn launcher_script(appimage: &str, bin: &str, stamp: &str) -> String {
+    let sq = |s: &str| format!("'{}'", s.replace('\'', "'\\''"));
+    format!(
+        "#!/bin/sh\n\
+         # Written by MHGU Save Editor on NixOS: skips appimage-run's sandbox on each start.\n\
+         app={}\n\
+         bin={}\n\
+         if [ -x \"$bin\" ] && [ \"$(stat -Lc %s:%Y \"$app\" 2>/dev/null)\" = {} ]; then\n\
+         \x20   APPIMAGE=\"$app\" \"$bin\" \"$@\"\n\
+         \x20   status=$?\n\
+         \x20   case \"$status\" in 126 | 127) ;; *) exit \"$status\" ;; esac\n\
+         fi\n\
+         exec \"$app\" \"$@\"\n",
+        sq(appimage),
+        sq(bin),
+        sq(stamp)
+    )
+}
+
+#[cfg(unix)]
+fn executable(p: &Path) -> std::io::Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+    std::fs::set_permissions(p, std::fs::Permissions::from_mode(0o755))
 }
 
 /// An `Exec` argument: double quotes with `"` `` ` `` `$` `\` escaped, then the string
@@ -109,7 +175,7 @@ mod tests {
 
     #[test]
     fn exec_points_at_the_appimage() {
-        let e = entry("/home/a b/MHGU 100%.AppImage", VERSION);
+        let e = entry("/home/a b/MHGU 100%.AppImage", None, VERSION);
         assert!(e.contains("Exec=\"/home/a b/MHGU 100%%.AppImage\" %f\n"));
         assert_eq!(field(&e, "TryExec"), Some("/home/a b/MHGU 100%.AppImage"));
         assert_eq!(field(&e, "X-AppImage-Version"), Some(VERSION));
@@ -117,8 +183,50 @@ mod tests {
     }
 
     #[test]
+    fn nixos_entry_runs_the_launcher() {
+        let e = entry("/home/a/MHGU.AppImage", Some("/home/a/.local/share/mhgu-save-editor/nixos-launch.sh"), VERSION);
+        assert!(e.contains("Exec=\"/home/a/.local/share/mhgu-save-editor/nixos-launch.sh\" %f\n"));
+        assert_eq!(field(&e, "TryExec"), Some("/home/a/MHGU.AppImage"));
+    }
+
+    #[test]
+    fn launcher_script_runs_in_sh() {
+        let dir = std::env::temp_dir().join(format!("mhgu-launch-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let (app, bin) = (dir.join("it's.AppImage"), dir.join("bin"));
+        std::fs::write(&app, "#!/bin/sh\necho app \"$@\"\n").unwrap();
+        std::fs::write(&bin, "#!/bin/sh\necho bin \"$APPIMAGE\" \"$@\"\n").unwrap();
+        executable(&app).unwrap();
+        executable(&bin).unwrap();
+        let run = |stamp: &str| {
+            let script = dir.join("launch.sh");
+            std::fs::write(&script, launcher_script(app.to_str().unwrap(), bin.to_str().unwrap(), stamp)).unwrap();
+            let out = std::process::Command::new("sh").arg(&script).arg("a b").output().unwrap();
+            String::from_utf8(out.stdout).unwrap()
+        };
+        let fresh = run(&stamp(&app).unwrap());
+        let stale = run("1:2");
+        // the binary cannot start: no loader or library (127), a bad interpreter (126)
+        std::fs::write(&bin, "#!/bin/sh\nexit 127\n").unwrap();
+        let no_lib = run(&stamp(&app).unwrap());
+        std::fs::write(&bin, "#!/nonexistent/ld.so\n").unwrap();
+        let no_loader = run(&stamp(&app).unwrap());
+        // the app's own exit status goes back to the desktop as it is
+        std::fs::write(&bin, "#!/bin/sh\nexit 3\n").unwrap();
+        let script = dir.join("launch.sh");
+        std::fs::write(&script, launcher_script(app.to_str().unwrap(), bin.to_str().unwrap(), &stamp(&app).unwrap())).unwrap();
+        let code = std::process::Command::new("sh").arg(&script).status().unwrap().code();
+        let _ = std::fs::remove_dir_all(&dir);
+        assert_eq!(fresh, format!("bin {} a b\n", app.display()));
+        assert_eq!(stale, "app a b\n");
+        assert_eq!(no_lib, "app a b\n");
+        assert_eq!(no_loader, "app a b\n");
+        assert_eq!(code, Some(3));
+    }
+
+    #[test]
     fn reserved_characters_are_escaped() {
         assert_eq!(quote(r#"/a"$`\b"#), r#""/a\\"\\$\\`\\\\b""#);
-        assert_eq!(unescape(&entry(r"/a\b", "9.9.9").lines().find(|l| l.starts_with("TryExec=")).unwrap()[8..]), r"/a\b");
+        assert_eq!(unescape(&entry(r"/a\b", None, "9.9.9").lines().find(|l| l.starts_with("TryExec=")).unwrap()[8..]), r"/a\b");
     }
 }

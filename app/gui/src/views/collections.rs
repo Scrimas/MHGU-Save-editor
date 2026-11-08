@@ -62,7 +62,7 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
     };
     // Hunter Arts grouped by art: I, II and III on one row (H5.3)
     let mut arts: Vec<(String, Vec<u32>)> = vec![];
-    for (id, n) in &t.arts {
+    for (id, n) in t.arts.iter() {
         let b = art_base(n);
         match arts.last_mut() {
             Some(last) if last.0 == b && n != b => last.1.push(*id),
