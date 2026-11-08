@@ -333,6 +333,11 @@ export component CharacterPage inherits Rectangle {
                         alignment: start;
                         Field {
                             width: 170px;
+                            label: @tr("Eye colour");
+                            Picker { width: 120px; model: Api.look-eye-colours; value: Api.appearance.eyes; picked(i) => { Api.set-look("eyes", i); } }
+                        }
+                        Field {
+                            width: 170px;
                             label: @tr("Features");
                             Picker { width: 120px; model: Api.look-features; value: Api.appearance.features; picked(i) => { Api.set-look("features", i); } }
                         }

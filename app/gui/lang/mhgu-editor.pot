@@ -1140,6 +1140,10 @@ msgid "Voice"
 msgstr ""
 
 #: app/gui/ui/pages/character.slint
+msgid "Eye colour"
+msgstr ""
+
+#: app/gui/ui/pages/character.slint
 msgid "Features"
 msgstr ""
 
@@ -3941,6 +3945,11 @@ msgstr ""
 #: app/gui/src/warnings.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "a face past the game's {}"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "an eye colour past the game's {}"
 msgstr ""
 
 #: app/gui/src/warnings.rs

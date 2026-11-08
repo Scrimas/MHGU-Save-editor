@@ -304,7 +304,7 @@ export struct ColourRow { key: string, label: string, colour: color, hex: string
 // The hunter's creation choices (indices into the "Type n" lists; voice 1-based) and
 // colours, with "was" and warnings for the appearance and the body type.
 export struct AppearanceInfo {
-    gender: int, face: int, hair: int, features: int, voice: int, clothing: int, colours: [ColourRow],
+    gender: int, face: int, eyes: int, hair: int, features: int, voice: int, clothing: int, colours: [ColourRow],
     was-appearance: string, was-gender: string, warn-appearance: string, warn-gender: string,
 }
 
@@ -500,11 +500,12 @@ export global Api {
     callback set-greeting(string);
     in property <AppearanceInfo> appearance;
     in property <[string]> look-faces;
+    in property <[string]> look-eye-colours;
     in property <[string]> look-hairstyles;
     in property <[string]> look-voices;
     in property <[string]> look-features;
     in property <[string]> look-clothing;
-    callback set-look(string /* gender face hair features voice clothing */, int);
+    callback set-look(string /* gender face eyes hair features voice clothing */, int);
     callback set-look-colour(string /* skin clothing */, string /* #RRGGBB */);
     in property <[ArenaRow]> arena;
     callback set-arena(int /* quest */, int /* set */, int /* time, 1/100 s */);

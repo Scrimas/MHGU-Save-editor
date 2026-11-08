@@ -1169,6 +1169,10 @@ msgid "Voice"
 msgstr "Voz"
 
 #: app/gui/ui/pages/character.slint
+msgid "Eye colour"
+msgstr "Ojos"
+
+#: app/gui/ui/pages/character.slint
 msgid "Features"
 msgstr "Rasgos"
 
@@ -4007,6 +4011,11 @@ msgstr "un arma que el equipo no tiene"
 #: app/gui/src/warnings.rs
 msgid "a face past the game's {}"
 msgstr "una cara más allá de las {} del juego"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "an eye colour past the game's {}"
+msgstr "un color de ojos más allá de los {} del juego"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs

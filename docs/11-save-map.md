@@ -229,18 +229,18 @@ pairs three of them with a colour:
 | Byte | Content | Evidence |
 |---|---|---|
 | `+1` | voice, 1–20 | `player/com/<m\|f>/vo/01`–`20`; the step plays a voice preview; analysed save 1 |
-| `+2` | **eye colour** (DERIVED 2026-10-10; earlier revisions and the editor call it the face) | written by the creation step *Eye Color* (`0x685c20`; step = menu item + 1, `0x68796c`) |
+| `+2` | **eye colour**, 10 (DERIVED 2026-10-10; editors up to 3.2.0 called it the face) | the creation step *Eye Color* lists 10 entries from it (`0x687cb8`) and writes it (`0x685c20`; step = menu item + 1, `0x68796c`). Issue #4: the old Face picker, writing this byte, changed the eye colour in game |
 | `+3` | clothing | the Palico block keeps clothing at the same byte |
 | `+4` | gender | read by the Smithy, the Armory and the talk conditions |
 | `+5` | hunting style | |
 | `+6` | hairstyle, 30 | `m_hair000`–`029`; edited with colour 6 (hair); analysed save 26 |
-| `+7` | **face**, 18 (DERIVED 2026-10-10) | written by the creation step *Face* (`0x685af8`); the model loader `0x276478` loads bytes 6 and 7 as model parts 5 and 6, and part 6 takes the `m_face` / `f_face` path (`0x2875c0`, `0x154424`). 0 in all three slots |
+| `+7` | **face**, 18 (DERIVED 2026-10-10) | the creation step *Face* lists 18 entries from it (`0x687b90`) and writes it (`0x685af8`); the model loader `0x276478` loads bytes 6 and 7 as model parts 5 and 6, and part 6 takes the `m_face` / `f_face` path (`0x2875c0`, `0x154424`). 0 in all three slots |
 | `+8` | features | edited with colour 7 (feature colour) |
 | `+9 … +11` | no reader | only copied (`0x26e600`, `0x1623b4`, `0x159b18` …) and zeroed (`0x26e1ec`); 0 |
 
-The 2026-10-09 in-game check wrote byte 2 as "Face 2" and read the edit as shown; the
-code says byte 2 is the eye colour and byte 7 the face, so that reading needs a recheck
-(the editor's Face picker writes byte 2).
+The 2026-10-09 in-game check wrote byte 2 as "Face 2" and read the edit as shown; what
+it showed was the eye colour (issue #4). After 3.2.0 the editor's Face picker writes
+byte 7 and a separate Eye colour picker writes byte 2, both DERIVED until checked in game.
 
 Colour 8 stands alone: in game it colours the clothing (the analysis above had it as the
 eye colour). The menu's own words are `CharMakeMsg` (Gender, Face, Skin Tone, Eye Color,

@@ -1158,6 +1158,10 @@ msgid "Voice"
 msgstr "語音"
 
 #: app/gui/ui/pages/character.slint
+msgid "Eye colour"
+msgstr "眼睛顏色"
+
+#: app/gui/ui/pages/character.slint
 msgid "Features"
 msgstr "化妝"
 
@@ -3965,6 +3969,11 @@ msgstr "該套裝備沒有的武器"
 #: app/gui/src/warnings.rs
 msgid "a face past the game's {}"
 msgstr "超出遊戲的 {} 種臉型"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "an eye colour past the game's {}"
+msgstr "超出遊戲的 {} 種眼睛顏色"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs

@@ -66,6 +66,7 @@ fn appearance(ui: &AppWindow, st: &State) {
     let (s, base) = (st.save(), st.base());
     let types = |n: u8, first: u8| strings((first..first + n).map(|k| trf("Type {}", &[&k])));
     api.set_look_faces(types(character::FACES, 1));
+    api.set_look_eye_colours(types(character::EYE_COLOURS, 1));
     api.set_look_hairstyles(types(character::HAIRSTYLES, 1));
     api.set_look_voices(types(character::VOICES, 1));
     api.set_look_clothing(types(character::CLOTHING, 1));
@@ -76,6 +77,7 @@ fn appearance(ui: &AppWindow, st: &State) {
     api.set_appearance(AppearanceInfo {
         gender: l(character::LOOK_GENDER),
         face: l(character::LOOK_FACE),
+        eyes: l(character::LOOK_EYES),
         hair: l(character::LOOK_HAIR),
         features: l(character::LOOK_FEATURES),
         voice: l(character::LOOK_VOICE),
@@ -351,12 +353,13 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
         });
         let _ = &ui;
     });
-    // a creation choice of the hunter: "gender", or face / hair / features / voice / clothing
+    // a creation choice of the hunter: "gender", or face / eyes / hair / features / voice / clothing
     on!(ui, st, on_set_look, |ui, s, key: SharedString, v: i32| {
         let Ok(v) = u8::try_from(v) else { return };
         let (t, k) = match key.as_str() {
             "gender" => (Target::Gender, character::LOOK_GENDER),
             "face" => (Target::Appearance, character::LOOK_FACE),
+            "eyes" => (Target::Appearance, character::LOOK_EYES),
             "hair" => (Target::Appearance, character::LOOK_HAIR),
             "features" => (Target::Appearance, character::LOOK_FEATURES),
             "voice" => (Target::Appearance, character::LOOK_VOICE),
@@ -364,7 +367,9 @@ pub(super) fn wire_character(ui: &AppWindow, st: &Shared) {
             _ => return,
         };
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+        // face and eye colour: from the creation code (issue #4), not yet checked in game
+        let conf = if matches!(k, character::LOOK_FACE | character::LOOK_EYES) { Conf::Derived } else { Conf::Confirmed };
+        s.edit(Edit::one(t, title, conf), |sv, base| {
             character::set_look(sv, base, k, v);
             vec![]
         });

@@ -99,7 +99,7 @@ pub enum Target {
     /// An Arena quest of the counter's table: the card's times, the counter's best time
     /// and the sets it was cleared with.
     Arena(usize),
-    /// The hunter's face, hairstyle, features, voice, clothing and colours.
+    /// The hunter's face, eye colour, hairstyle, features, voice, clothing and colours.
     Appearance,
     /// The hunter's body type (gender).
     Gender,
@@ -979,7 +979,8 @@ impl Target {
                 .into_iter()
                 .zip(ch::LOOK_COLOURS)
                 .flat_map(|(a, c)| {
-                    let bytes = [ch::LOOK_VOICE, ch::LOOK_FACE, ch::LOOK_CLOTHING, ch::LOOK_HAIR, ch::LOOK_FEATURES].map(|k| (base + a + k, 0xFF));
+                    let bytes =
+                        [ch::LOOK_VOICE, ch::LOOK_EYES, ch::LOOK_CLOTHING, ch::LOOK_HAIR, ch::LOOK_FACE, ch::LOOK_FEATURES].map(|k| (base + a + k, 0xFF));
                     [bytes.to_vec(), range(base + c + 4 * ch::COLOUR_SKIN, 4), range(base + c + 4 * ch::COLOUR_CLOTHING, 4)].concat()
                 })
                 .collect(),

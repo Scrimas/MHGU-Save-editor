@@ -246,12 +246,14 @@ pub fn arena_best(q: usize, e: &arena::Entry) -> Option<String> {
     }
 }
 
-/// The hunter's creation choices: faces, hairstyles and voices the game has models for.
+/// The hunter's creation choices: faces, eye colours, hairstyles and voices the game has.
 fn appearance(s: &Save, base: usize) -> Option<String> {
     use character as ch;
     let l = |k| ch::look(s, base, k);
     if l(ch::LOOK_FACE) >= ch::FACES {
         Some(trf("a face past the game's {}", &[&ch::FACES]))
+    } else if l(ch::LOOK_EYES) >= ch::EYE_COLOURS {
+        Some(trf("an eye colour past the game's {}", &[&ch::EYE_COLOURS]))
     } else if l(ch::LOOK_HAIR) >= ch::HAIRSTYLES {
         Some(trf("a hairstyle past the game's {}", &[&ch::HAIRSTYLES]))
     } else if !(1..=ch::VOICES).contains(&l(ch::LOOK_VOICE)) {

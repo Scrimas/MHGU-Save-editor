@@ -77,12 +77,12 @@ slot,0x110,36,7,44,C,"@equip36 equipped-gear cache: box entry copy"
 slot,0x134,4,7,44,D,"equipped-gear cache: object +0x28 = heap pointer to its 44-B skill cache (alloc 0xdadc4); the writer's stack objects have it 0 and 0xdadf0 does not copy it; 0 in all saves"
 slot,0x240,1,,,C,weapon class (15 = Prowler)
 slot,0x241,1,,,C,"voice, 1-20"
-slot,0x242,1,,,D,"eye colour (creation step Eye Color writes it, 0x685c20); earlier rows and the editor call it face, which the code contradicts (2026-10-09 in-game reading to recheck)"
+slot,0x242,1,,,D,"eye colour, 10 (creation step Eye Color lists 10 and writes it, 0x687cb8 / 0x685c20); editors up to 3.2.0 wrote their Face picker here, which changed the eye colour in game (issue #4)"
 slot,0x243,1,,,C,clothing
 slot,0x244,1,,,C,gender / body type
 slot,0x245,1,,,C,hunting style
 slot,0x246,1,,,C,hairstyle
-slot,0x247,1,,,D,"face, model m_face / f_face 000-017 (creation step Face, 0x685af8; model part loaded by 0x276478 / 0x2875c0)"
+slot,0x247,1,,,D,"face, 18, model m_face / f_face 000-017 (creation step Face lists 18 and writes it, 0x687b90 / 0x685af8; model part loaded by 0x276478 / 0x2875c0)"
 slot,0x248,1,,,C,features
 slot,0x249,3,,,D,"appearance bytes 9-11: no reader, only copied (0x26e600, 0x1623b4, 0x159b18 ...), zeroed by 0x26e1ec; 0"
 slot,0x24C,20,,,C,"current pigment, 5 x RGBA (chest, arms, waist, legs, head)"

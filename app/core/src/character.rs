@@ -47,23 +47,28 @@ pub const MAX_PLAYTIME: u32 = 35_999_999;
 /// The character-creation block (12 B, `BODY` in the player record, the copy the game
 /// loads; summaries in the slot header and the own Guild Card) and its 9 RGBA colours
 /// right after it (docs/11-save-map.md, "Hunter appearance"): +0 weapon class, +1 voice
-/// (1-20, player/com/<m|f>/vo/01-20), +2 face (18 models), +3 clothing, +4 body type,
-/// +5 hunting style, +6 hairstyle (30 models), +8 features; the game shows a byte as
-/// "Type byte + 1". Colours: 0-4 the equipped pieces' pigment (chest, arms, waist, legs,
-/// head), 5 skin, 6 and 7 rebuilt by the game on save (the hair and features colours
-/// are kept elsewhere, not found), 8 clothing. CONFIRMED in game 2026-10-09: every byte
-/// edit shows and is kept, skin and clothing too; eye colour is not in this block.
+/// (1-20, player/com/<m|f>/vo/01-20), +2 eye colour (10), +3 clothing, +4 body type,
+/// +5 hunting style, +6 hairstyle (30 models), +7 face (18 models), +8 features; the game
+/// shows a byte as "Type byte + 1". The creation steps Face and Eye Color list 18 and 10
+/// entries and write bytes 7 and 2 (0x687b90, 0x687cb8; 0x685af8, 0x685c20); byte 2 was
+/// called the face here until issue #4 (editing it changed the eye colour in game).
+/// Colours: 0-4 the equipped pieces' pigment (chest, arms, waist, legs, head), 5 skin,
+/// 6 and 7 rebuilt by the game on save (the hair and features colours are kept
+/// elsewhere, not found), 8 clothing. CONFIRMED in game 2026-10-09: voice, clothing,
+/// body type, hairstyle and features edits show and are kept, skin and clothing too.
 pub const LOOKS: [usize; 3] = [BODY, 0x240, CARD + 0x18];
 pub const LOOK_COLOURS: [usize; 3] = [BODY + 12, 0x24C, CARD + 0x24];
 pub const LOOK_VOICE: usize = 1;
-pub const LOOK_FACE: usize = 2;
+pub const LOOK_EYES: usize = 2;
 pub const LOOK_CLOTHING: usize = 3;
 pub const LOOK_GENDER: usize = 4;
 pub const LOOK_HAIR: usize = 6;
+pub const LOOK_FACE: usize = 7;
 pub const LOOK_FEATURES: usize = 8;
 pub const COLOUR_SKIN: usize = 5;
 pub const COLOUR_CLOTHING: usize = 8;
 pub const FACES: u8 = 18;
+pub const EYE_COLOURS: u8 = 10;
 pub const HAIRSTYLES: u8 = 30;
 pub const VOICES: u8 = 20;
 pub const CLOTHING: u8 = 7;
