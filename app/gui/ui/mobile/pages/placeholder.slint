@@ -1,0 +1,14 @@
+// A page the phone and tablet interface does not have yet.
+import { M } from "../theme.slint";
+import { Muted } from "../widgets.slint";
+
+export component PlaceholderPage inherits Rectangle {
+    in property <string> name;
+    VerticalLayout {
+        alignment: center;
+        padding: 32px;
+        spacing: 8px;
+        Text { text: root.name; color: M.on-surface; font-size: M.title-large; horizontal-alignment: center; wrap: word-wrap; }
+        Muted { text: @tr("This page is not on phones and tablets yet: the desktop editor has it."); horizontal-alignment: center; }
+    }
+}

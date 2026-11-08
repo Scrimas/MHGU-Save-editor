@@ -20,23 +20,28 @@ pub(super) fn file_name(name: &str, ext: &str) -> String {
 /// Ask where to save `bytes` (filter name and extension of the file) and write them
 /// there; `said` is the toast when it worked.
 pub(super) fn save_file(ui: &AppWindow, title: &str, (filter, ext): (&str, &str), name: &str, bytes: &[u8], said: (String, &str)) {
-    let Some(p) = rfd::FileDialog::new().set_title(title).add_filter(filter, &[ext]).set_file_name(file_name(name, ext)).save_file() else { return };
-    match std::fs::write(&p, bytes) {
-        Ok(()) => toast_full(ui, said.0, said.1, "", ToastAct::None, false),
-        Err(e) => toast(ui, trf("Could not write {}: {}", &[&p.display(), &e]), true),
-    }
+    let w = ui.as_weak();
+    let said = (said.0, said.1.to_string());
+    crate::platform::save_file(title, (filter, &[ext]), &file_name(name, ext), None, bytes.to_vec(), move |r| {
+        let Some(ui) = w.upgrade() else { return };
+        match r {
+            Ok(()) => toast_full(&ui, said.0, &said.1, "", ToastAct::None, false),
+            Err(e) => toast(&ui, e, true),
+        }
+    });
 }
 
-/// Ask for a file to read; None when cancelled or unreadable (said in a toast).
-pub(super) fn open_file(ui: &AppWindow, title: &str, filter: &str, ext: &str) -> Option<Vec<u8>> {
-    let p = rfd::FileDialog::new().set_title(title).add_filter(filter, &[ext]).pick_file()?;
-    match std::fs::read(&p) {
-        Ok(b) => Some(b),
-        Err(e) => {
-            toast(ui, trf("Could not read {}: {}", &[&p.display(), &e]), true);
-            None
+/// Ask for a file to read and hand its bytes to `done`; a file that cannot be read is
+/// said in a toast.
+pub(super) fn open_file(ui: &AppWindow, title: &str, filter: &str, ext: &str, done: impl FnOnce(&AppWindow, Vec<u8>) + 'static) {
+    let w = ui.as_weak();
+    crate::platform::open_file(title, &[(filter, &[ext])], None, move |r| {
+        let Some(ui) = w.upgrade() else { return };
+        match r {
+            Ok((_, b)) => done(&ui, b),
+            Err(e) => toast(&ui, e, true),
         }
-    }
+    });
 }
 
 /// "Scrimas (slot 1)", or "slot 3" for an empty one.
@@ -117,71 +122,46 @@ pub(super) fn wire_characters(ui: &AppWindow, st: &Shared) {
         let w = ui.as_weak();
         let st = st.clone();
         api.on_slot_import(move |k| {
-            let Some(ui) = w.upgrade() else { return };
+            if w.upgrade().is_none() {
+                return;
+            }
             let Ok(k) = usize::try_from(k) else { return };
             if k > 2 || st.borrow().doc.is_none() {
                 return;
             }
             // an exported character, or an MHXX save (`system`, no extension)
-            let Some(p) = rfd::FileDialog::new()
-                .set_title(tr("Import character"))
-                .add_filter(tr("MHGU character"), &[CHARACTER_EXT])
-                .add_filter(tr("MHXX save (system)"), &["*"])
-                .pick_file()
-            else {
-                return;
-            };
-            let f = match std::fs::read(&p) {
-                Ok(b) => b,
-                Err(e) => return toast(&ui, trf("Could not read {}: {}", &[&p.display(), &e]), true),
-            };
-            if f.starts_with(slots::MAGIC) {
-                let Ok(name) = slots::name_of(&f) else {
-                    return toast(&ui, tr("Not imported: the file is not a character exported by this editor"), true);
-                };
-                {
-                    let mut s = st.borrow_mut();
-                    let title = trf("Import {} into slot {}", &[&name, &(k + 1)]);
-                    stage(&ui, &mut s, k, false, slot_edit(Conf::Confirmed, title, vec![Target::Slot(k)]), |sv| {
-                        let _ = slots::import(sv, k, &f);
-                    });
+            let kinds = [(tr("MHGU character"), &[CHARACTER_EXT][..]), (tr("MHXX save (system)"), &["*"][..])];
+            let (w, st) = (w.clone(), st.clone());
+            crate::platform::open_file(tr("Import character"), &kinds, None, move |r| {
+                let Some(ui) = w.upgrade() else { return };
+                match r {
+                    Ok((p, f)) => import_character(&ui, &st, k, p, f),
+                    Err(e) => toast(&ui, e, true),
                 }
-                return refresh(&ui, &st.borrow());
-            }
-            let x = match Mhxx::from_bytes(f) {
-                Ok(x) => x,
-                Err(_) => return toast(&ui, tr("Not imported: the file is neither a character exported by this editor nor an MHXX save"), true),
-            };
-            let used: Vec<usize> = (0..3).filter(|&j| x.slot_used(j)).collect();
-            match used[..] {
-                [] => toast(&ui, tr("Not imported: that MHXX save holds no character"), true),
-                [j] => {
-                    import_mhxx(&ui, &mut st.borrow_mut(), &x, j, k);
-                    refresh(&ui, &st.borrow());
-                }
-                _ => ask_mhxx(&ui, MhxxPick { file: x, path: p, export: None, into: k }),
-            }
+            });
         });
     }
     {
         let w = ui.as_weak();
         let st = st.clone();
         api.on_mhxx_export_start(move |k| {
-            let Some(ui) = w.upgrade() else { return };
+            if w.upgrade().is_none() {
+                return;
+            }
             let Ok(k) = usize::try_from(k) else { return };
             if k > 2 || st.borrow().doc.is_none() || !st.borrow().save().slot_used(k) {
                 return;
             }
             let name = who(&st.borrow(), k);
-            let Some(p) = rfd::FileDialog::new().set_title(trf("MHXX save to put {} in", &[&name])).add_filter(tr("MHXX save (system)"), &["*"]).pick_file()
-            else {
-                return;
-            };
-            match std::fs::read(&p).map(Mhxx::from_bytes) {
-                Ok(Ok(x)) => ask_mhxx(&ui, MhxxPick { file: x, path: p, export: Some(k), into: 0 }),
-                Ok(Err(e)) => toast(&ui, trf("Not an MHXX save: {}", &[&e]), true),
-                Err(e) => toast(&ui, trf("Could not read {}: {}", &[&p.display(), &e]), true),
-            }
+            let w = w.clone();
+            crate::platform::open_file(&trf("MHXX save to put {} in", &[&name]), &[(tr("MHXX save (system)"), &["*"])], None, move |r| {
+                let Some(ui) = w.upgrade() else { return };
+                match r.map(|(p, b)| (p, Mhxx::from_bytes(b))) {
+                    Ok((p, Ok(x))) => ask_mhxx(&ui, MhxxPick { file: x, path: p, export: Some(k), into: 0 }),
+                    Ok((_, Err(e))) => toast(&ui, trf("Not an MHXX save: {}", &[&e]), true),
+                    Err(e) => toast(&ui, e, true),
+                }
+            });
         });
     }
     {
@@ -202,6 +182,40 @@ pub(super) fn wire_characters(ui: &AppWindow, st: &Shared) {
                 Some(k) => export_mhxx(&ui, &st.borrow(), pick, k, j),
             }
         });
+    }
+}
+
+/// A file picked to import into slot `k`: a character exported by this editor, or an MHXX
+/// save (its only character, or the question of which one).
+fn import_character(ui: &AppWindow, st: &Shared, k: usize, p: PathBuf, f: Vec<u8>) {
+    if st.borrow().doc.is_none() {
+        return;
+    }
+    if f.starts_with(slots::MAGIC) {
+        let Ok(name) = slots::name_of(&f) else {
+            return toast(ui, tr("Not imported: the file is not a character exported by this editor"), true);
+        };
+        {
+            let mut s = st.borrow_mut();
+            let title = trf("Import {} into slot {}", &[&name, &(k + 1)]);
+            stage(ui, &mut s, k, false, slot_edit(Conf::Confirmed, title, vec![Target::Slot(k)]), |sv| {
+                let _ = slots::import(sv, k, &f);
+            });
+        }
+        return refresh(ui, &st.borrow());
+    }
+    let x = match Mhxx::from_bytes(f) {
+        Ok(x) => x,
+        Err(_) => return toast(ui, tr("Not imported: the file is neither a character exported by this editor nor an MHXX save"), true),
+    };
+    let used: Vec<usize> = (0..3).filter(|&j| x.slot_used(j)).collect();
+    match used[..] {
+        [] => toast(ui, tr("Not imported: that MHXX save holds no character"), true),
+        [j] => {
+            import_mhxx(ui, &mut st.borrow_mut(), &x, j, k);
+            refresh(ui, &st.borrow());
+        }
+        _ => ask_mhxx(ui, MhxxPick { file: x, path: p, export: None, into: k }),
     }
 }
 
@@ -253,14 +267,18 @@ fn export_mhxx(ui: &AppWindow, s: &State, mut pick: MhxxPick, k: usize, j: usize
     let sv = s.save();
     let name = character::get(sv, sv.base(k)).name;
     pick.file.put_character(j, slots::get(sv, k));
-    let dir = pick.path.parent().map(Path::to_path_buf).unwrap_or_default();
-    let Some(p) = rfd::FileDialog::new().set_title(tr("Save the MHXX save")).set_directory(dir).set_file_name("system").save_file() else { return };
+    let dir = pick.path.parent().map(Path::to_path_buf);
     let back = match pick.file.kind() {
         mhxx::Kind::Ds => tr("Restore it on the 3DS with JKSM or Checkpoint"),
         mhxx::Kind::Switch => tr("Restore it on the Switch with JKSV or Checkpoint"),
     };
-    match std::fs::write(&p, pick.file.bytes()) {
-        Ok(()) => toast_full(ui, trf("Exported {} to slot {} of the MHXX save", &[&name, &(j + 1)]), back, "", ToastAct::None, false),
-        Err(e) => toast(ui, trf("Could not write {}: {}", &[&p.display(), &e]), true),
-    }
+    let w = ui.as_weak();
+    let kind = (tr("MHXX save (system)"), &["*"][..]);
+    crate::platform::save_file(tr("Save the MHXX save"), kind, "system", dir.as_deref(), pick.file.bytes().to_vec(), move |r| {
+        let Some(ui) = w.upgrade() else { return };
+        match r {
+            Ok(()) => toast_full(&ui, trf("Exported {} to slot {} of the MHXX save", &[&name, &(j + 1)]), back, "", ToastAct::None, false),
+            Err(e) => toast(&ui, e, true),
+        }
+    });
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- the launcher icon's background: the notebook's parchment -->
+    <color name="ic_background">#F3EAD7</color>
+    <!-- the window before Slint's first frame: Material's surface -->
+    <color name="window">#F9F9FF</color>
+</resources>

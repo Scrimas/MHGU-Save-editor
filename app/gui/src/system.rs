@@ -1,4 +1,6 @@
 //! Platform bits: finding saves, the running-emulator check, snapshot folder.
+// the desktop's save detection, mouse buttons and keys: not all of it runs on Android
+#![cfg_attr(target_os = "android", allow(dead_code))]
 
 use crate::i18n::tr;
 use mhgu_save::save::FILE_SIZE;
@@ -363,9 +365,11 @@ fn read_info(p: &std::path::Path) -> Option<SaveInfo> {
 }
 
 pub fn open_url(url: &str) {
+    #[cfg(target_os = "android")]
+    crate::android::open_url(url);
     #[cfg(windows)]
     let _ = std::process::Command::new("explorer").arg(url).spawn();
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "android")))]
     let _ = std::process::Command::new("xdg-open").arg(url).spawn();
 }
 

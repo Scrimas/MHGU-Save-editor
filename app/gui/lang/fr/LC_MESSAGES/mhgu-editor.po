@@ -12,57 +12,60 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "{}: {} to {}. Opens the field."
 msgstr "{} : de {} à {}. Ouvre le champ."
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "{}. Opens the field."
 msgstr "{}. Ouvre le champ."
 
-#: app/gui/ui/app.slint app/gui/ui/common.slint app/gui/ui/pages/overview.slint
+#: app/gui/ui/app.slint app/gui/ui/common.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
 msgid "Undo"
 msgstr "Annuler"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint app/gui/ui/common.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/mobile/sheets.slint
 msgid "and {} more"
 msgstr "et {} de plus"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Review"
 msgstr "Révision"
 
 #: app/gui/ui/app.slint app/gui/ui/common.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/mobile/widgets.slint
 msgid "Close"
 msgstr "Fermer"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one."
 msgstr "Aucune modification en attente. Chaque modification apparaît ici avec la valeur qu'elle remplace, et vous pouvez annuler chacune d'elles."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Derived: worked out from the game's code, not yet checked in game. Untagged changes are confirmed in game."
 msgstr "Déduit : établi d'après le code du jeu, pas encore vérifié en jeu. Les modifications sans étiquette sont confirmées en jeu."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Undo all"
 msgstr "Tout annuler"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Write…"
 msgstr "Écrire…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "What changes"
 msgstr "Ce qui change"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Back to Review"
 msgstr "Retour à la révision"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Before writing"
 msgstr "Avant d'écrire"
 
@@ -84,7 +87,7 @@ msgstr "Fermez-le d'abord : il écrase la sauvegarde en quittant."
 msgid "Check again"
 msgstr "Vérifier à nouveau"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Take a snapshot first (recommended)"
 msgstr "Prendre d'abord un instantané (recommandé)"
 
@@ -93,46 +96,47 @@ msgid "You can restore it any time from Snapshots in the sidebar."
 msgstr "Vous pouvez le restaurer à tout moment depuis Instantanés dans la barre latérale."
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "{n} change is Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on."
 msgid_plural "{n} changes are Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on."
 msgstr[0] "{n} modification est Déduite : établie d'après le code du jeu, pas encore vérifiée en jeu. Gardez l'instantané activé."
 msgstr[1] "{n} modifications sont Déduites : établies d'après le code du jeu, pas encore vérifiées en jeu. Gardez l'instantané activé."
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "{n} change is Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back."
 msgid_plural "{n} changes are Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back."
 msgstr[0] "{n} modification est Déduite : établie d'après le code du jeu, pas encore vérifiée en jeu. Un instantané permet de revenir en arrière."
 msgstr[1] "{n} modifications sont Déduites : établies d'après le code du jeu, pas encore vérifiées en jeu. Un instantané permet de revenir en arrière."
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
+#: app/gui/ui/mobile/write.slint
 msgid "{n} value the game cannot produce is written as it is."
 msgid_plural "{n} values the game cannot produce are written as they are."
 msgstr[0] "{n} valeur que le jeu ne peut pas produire est écrite telle quelle."
 msgstr[1] "{n} valeurs que le jeu ne peut pas produire sont écrites telles quelles."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Files"
 msgstr "Fichiers"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "The data goes into the save file."
 msgstr "Les données sont écrites dans le fichier de sauvegarde."
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "The same data goes into all {n} save file."
 msgid_plural "The same data goes into all {n} save files."
 msgstr[0] "Les mêmes données sont écrites dans {n} fichier de sauvegarde."
 msgstr[1] "Les mêmes données sont écrites dans les {n} fichiers de sauvegarde."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Hide paths"
 msgstr "Masquer les chemins"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Show paths"
 msgstr "Afficher les chemins"
 
@@ -141,28 +145,30 @@ msgid "The emulator keeps two copies of the save, each with a backup; every one 
 msgstr "L'émulateur garde deux copies de la sauvegarde, chacune avec une copie de secours ; toutes reçoivent les mêmes octets et gardent leur propre en-tête."
 
 #: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
-#: app/gui/ui/fill.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/overview.slint
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/equipment.slint
 #: app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "Annuler"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Snapshot and write"
 msgstr "Instantané et écriture"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Write without snapshot"
 msgstr "Écrire sans instantané"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "Snapshots"
 msgstr "Instantanés"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "A copy of the whole save folder, taken before each write and before each restore."
 msgstr "Une copie de tout le dossier de sauvegarde, prise avant chaque écriture et avant chaque restauration."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "No snapshots of this save yet. Write takes one first unless you untick it."
 msgstr "Aucun instantané de cette sauvegarde pour l'instant. Écrire en prend un d'abord, sauf si vous décochez l'option."
 
@@ -171,6 +177,7 @@ msgid "Compare"
 msgstr "Comparer"
 
 #: app/gui/src/views/file.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "Restore…"
 msgstr "Restaurer…"
 
@@ -179,15 +186,15 @@ msgid "Open folder"
 msgstr "Ouvrir le dossier"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Restore the save from {}?"
 msgstr "Restaurer la sauvegarde ({}) ?"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."
 msgstr "Chaque fichier de sauvegarde revient à cette copie. Un instantané de la sauvegarde actuelle est pris d'abord : vous pourrez annuler depuis Instantanés."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Your staged change is dropped."
 msgid_plural "Your {n} staged changes are dropped."
 msgstr[0] "Votre modification en attente est abandonnée."
@@ -198,7 +205,7 @@ msgstr[1] "Vos {n} modifications en attente sont abandonnées."
 msgid "{} is running. Close it first: it overwrites the save when it exits."
 msgstr "{} est lancé. Fermez-le d'abord : il écrase la sauvegarde en quittant."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Restore"
 msgstr "Restaurer"
 
@@ -368,7 +375,7 @@ msgstr "Page de la version ↗"
 msgid "Appearance"
 msgstr "Apparence"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Saves"
 msgstr "Sauvegardes"
 
@@ -388,27 +395,29 @@ msgstr "Mises à jour et versions"
 msgid "Advanced"
 msgstr "Avancé"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/mobile/sheets.slint
 msgid "Settings"
 msgstr "Paramètres"
 
 #: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Language"
 msgstr "Langue"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Theme"
 msgstr "Thème"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "System"
 msgstr "Système"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Light"
 msgstr "Clair"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Dark"
 msgstr "Sombre"
 
@@ -448,7 +457,8 @@ msgstr "Ouvrir sur"
 msgid "The page shown when a save opens"
 msgstr "La page affichée à l'ouverture d'une sauvegarde"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/overview.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/overview.slint
 msgid "Overview"
 msgstr "Aperçu"
 
@@ -468,7 +478,7 @@ msgstr "Changements de page, cartes qui glissent à leur nouvelle place, glissem
 msgid "Open the last save on start"
 msgstr "Ouvrir la dernière sauvegarde au démarrage"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/open.slint
 msgid "Recent saves"
 msgstr "Sauvegardes récentes"
 
@@ -659,63 +669,69 @@ msgid "Release notes"
 msgstr "Notes de version"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
 msgid "MHGU Save Editor — {}"
 msgstr "MHGU Save Editor — {}"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint app/gui/ui/mobile/nav.slint
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/mobile/sheets.slint
 msgid "MHGU Save Editor"
 msgstr "MHGU Save Editor"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/character.slint
 msgid "Character"
 msgstr "Personnage"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/items.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
 msgid "Items"
 msgstr "Objets"
 
 #: app/gui/src/targets.rs app/gui/src/views/sets_ui.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Equipment"
 msgstr "Équipement"
 
 #: app/gui/src/targets.rs app/gui/src/views/palicoes.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/palicoes.slint
 msgid "Palicoes"
 msgstr "Palicos"
 
 #: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/quests.slint
 msgid "Quests"
 msgstr "Quêtes"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/requests.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/requests.slint
 msgid "Requests"
 msgstr "Requêtes"
 
 #: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/collections.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/collections.slint
 msgid "Collections"
 msgstr "Collections"
 
 #: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/unlocks.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/unlocks.slint
 msgid "Unlocks"
 msgstr "Déblocages"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Monsters"
 msgstr "Monstres"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/cards.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/cards.slint
 msgid "Guild Cards"
 msgstr "Cartes Guilde"
 
 #: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/options.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/options.slint
 msgid "Options"
 msgstr "Options"
 
@@ -736,7 +752,9 @@ msgstr "Personnages…"
 msgid "Snapshots…"
 msgstr "Instantanés…"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/open.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/mobile/sheets.slint
+#: app/gui/ui/pages/open.slint
 msgid "Open save…"
 msgstr "Ouvrir une sauvegarde…"
 
@@ -744,7 +762,8 @@ msgstr "Ouvrir une sauvegarde…"
 msgid "Settings…"
 msgstr "Paramètres…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "About"
 msgstr "À propos"
 
@@ -894,14 +913,17 @@ msgid "More information"
 msgstr "Plus d'informations"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+#: app/gui/ui/mobile/widgets.slint
 msgid "Confirmed"
 msgstr "Confirmé"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+#: app/gui/ui/mobile/widgets.slint
 msgid "Derived"
 msgstr "Déduit"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+#: app/gui/ui/mobile/widgets.slint
 msgid "Unresolved"
 msgstr "Non résolu"
 
@@ -918,7 +940,8 @@ msgid "Unresolved: what this value means in game is not known yet, so it is show
 msgstr "Non résolu : la signification de cette valeur en jeu n'est pas encore connue, elle est donc affichée mais pas modifiable."
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/common.slint
+#: app/gui/ui/common.slint app/gui/ui/mobile/nav.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "{}, {n} value not written"
 msgid_plural "{}, {n} values not written"
 msgstr[0] "{}, {n} valeur non écrite"
@@ -995,6 +1018,294 @@ msgstr "Quantité"
 msgid "Staged: undo it in Review until you write."
 msgstr "En attente : annulable dans la Révision tant que vous n'avez pas écrit."
 
+#: app/gui/ui/mobile/app.slint app/gui/ui/mobile/sheets.slint
+msgid "More"
+msgstr "Plus"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/app.slint
+msgid "{} · slot {} · HR {}"
+msgstr "{} · emplacement {} · RC {}"
+
+#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
+#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
+#: app/gui/ui/mobile/app.slint
+msgid "Added to Review"
+msgstr "Ajouté à la révision"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Leave without writing?"
+msgstr "Quitter sans écrire ?"
+
+#: app/gui/ui/mobile/app.slint
+msgid "The changes in Review are not in the save yet. Leaving drops them."
+msgstr "Les modifications de la révision ne sont pas encore dans la sauvegarde. Quitter les abandonne."
+
+#: app/gui/ui/mobile/app.slint
+msgid "Leave"
+msgstr "Quitter"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Open another save?"
+msgstr "Ouvrir une autre sauvegarde ?"
+
+#: app/gui/ui/mobile/app.slint
+msgid "The changes in Review are not in the save yet. Opening another save drops them."
+msgstr "Les modifications de la révision ne sont pas encore dans la sauvegarde. Ouvrir une autre sauvegarde les abandonne."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/requests.slint
+msgid "Open"
+msgstr "Ouverte"
+
+#: app/gui/ui/mobile/nav.slint
+msgid "Every page"
+msgstr "Toutes les pages"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/mobile/nav.slint app/gui/ui/mobile/widgets.slint
+msgid "Review, {n} change not written yet"
+msgid_plural "Review, {n} changes not written yet"
+msgstr[0] "Révision, {n} modification pas encore écrite"
+msgstr[1] "Révision, {n} modifications pas encore écrites"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Undo {}"
+msgstr "Annuler {}"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Every page shows the character picked here."
+msgstr "Chaque page affiche le personnage choisi ici."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {}, {}"
+msgstr "Emplacement {}, {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {}, empty"
+msgstr "Emplacement {}, vide"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {} · empty"
+msgstr "Emplacement {} · vide"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {} · HR {} · {}"
+msgstr "Emplacement {} · RC {} · {}"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "A save editor for Monster Hunter Generations Ultimate. Free software under the GNU GPL, version 3 or later."
+msgstr "Un éditeur de sauvegarde pour Monster Hunter Generations Ultimate. Logiciel libre sous licence GNU GPL, version 3 ou ultérieure."
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Material 3 components: Slint's Material library, MIT licence."
+msgstr "Composants Material 3 : la bibliothèque Material de Slint, licence MIT."
+
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/mobile/sheets.slint
+msgid "Export and import"
+msgstr "Exporter et importer"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "In MHGU Recomp: Settings › Android › Export save, into a folder such as Download."
+msgstr "Dans MHGU Recomp : Settings › Android › Export save, vers un dossier comme Download."
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Here: open the system file it made, edit, and Write."
+msgstr "Ici : ouvrez le fichier system qu'il a créé, modifiez-le, puis Écrire."
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "In MHGU Recomp: Import save, and pick the same system and system_backup files."
+msgstr "Dans MHGU Recomp : Import save, puis choisissez les mêmes fichiers system et system_backup."
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Open the system file"
+msgstr "Ouvrir le fichier system"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint
+msgid "Switch character, slot {}, {}"
+msgstr "Changer de personnage, emplacement {}, {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint
+msgid "Switch character, slot {}"
+msgstr "Changer de personnage, emplacement {}"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "More options"
+msgstr "Plus d'options"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "Back"
+msgstr "Retour"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint
+msgid "Review · {}"
+msgstr "Révision · {}"
+
+#: app/gui/ui/mobile/write.slint
+msgid "MHGU Recomp is closed"
+msgstr "MHGU Recomp est fermé"
+
+#: app/gui/ui/mobile/write.slint
+msgid "Use Exit game in its menu first: it overwrites the save when it exits. Android doesn't let the editor check this itself."
+msgstr "Utilisez d'abord Exit game dans son menu : il écrase la sauvegarde en quittant. Android ne permet pas à l'éditeur de le vérifier lui-même."
+
+#: app/gui/ui/mobile/write.slint
+msgid "You can restore it any time from Snapshots in More."
+msgstr "Vous pouvez la restaurer à tout moment depuis Instantanés, dans Plus."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Settings and About"
+msgstr "Paramètres et À propos"
+
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/pages/open.slint
+msgid "Open a save"
+msgstr "Ouvrir une sauvegarde"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Pick the save of Monster Hunter Generations Ultimate. Nothing is written until you press Write."
+msgstr "Choisissez la sauvegarde de Monster Hunter Generations Ultimate. Rien n'est écrit avant d'appuyer sur Écrire."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "MHGU Recomp folder"
+msgstr "Dossier de MHGU Recomp"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Recommended"
+msgstr "Recommandé"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Set the Recomp's Save folder to a shared folder once, then pick that folder here. The editor reads and writes the save in it directly."
+msgstr "Réglez une fois le Save folder du Recomp sur un dossier partagé, puis choisissez ce dossier ici. L'éditeur lit et écrit directement la sauvegarde qui s'y trouve."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Pick the save folder"
+msgstr "Choisir le dossier de sauvegarde"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "How to set it up"
+msgstr "Comment le configurer"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Other ways"
+msgstr "Autres façons"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "In MHGU Recomp, Export save. Here, open that system file and Write. Then Import save in the Recomp."
+msgstr "Dans MHGU Recomp, Export save. Ici, ouvrez ce fichier system et Écrire. Puis Import save dans le Recomp."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Any system file"
+msgstr "N'importe quel fichier system"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "An emulator's save copied out (Eden, Citron, Sudachi…), or a JKSV or Checkpoint backup from a Switch."
+msgstr "La sauvegarde d'un émulateur copiée (Eden, Citron, Sudachi…), ou une copie JKSV ou Checkpoint d'une Switch."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Close the game before writing: it overwrites the save when it exits."
+msgstr "Fermez le jeu avant d'écrire : il écrase la sauvegarde en quittant."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Android keeps each app's folder private, so the save needs a shared folder. You do this once."
+msgstr "Android garde le dossier de chaque appli privé : la sauvegarde doit donc être dans un dossier partagé. Cela se fait une seule fois."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "In MHGU Recomp"
+msgstr "Dans MHGU Recomp"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Settings › Android › Save folder"
+msgstr "Settings › Android › Save folder"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Make a folder in Download, for example MHGU, and pick it. The Recomp then keeps its save there, in save_0."
+msgstr "Créez un dossier dans Download, par exemple MHGU, et choisissez-le. Le Recomp y garde alors sa sauvegarde, dans save_0."
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Here"
+msgstr "Ici"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Pick that folder"
+msgstr "Choisissez ce dossier"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Android's folder picker opens. Go to Download › MHGU, tap Use this folder, then Allow. Download itself can't be picked."
+msgstr "Le sélecteur de dossier d'Android s'ouvre. Allez dans Download › MHGU, touchez Utiliser ce dossier, puis Autoriser. Download lui-même ne peut pas être choisi."
+
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/pages/items.slint
+msgid "Done"
+msgstr "Terminé"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "The save opens"
+msgstr "La sauvegarde s'ouvre"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "The editor reads and writes save_0/system and system_backup directly. Before Write, use Exit game in the Recomp: it overwrites the save when it exits."
+msgstr "L'éditeur lit et écrit directement save_0/system et system_backup. Avant Écrire, utilisez Exit game dans le Recomp : il écrase la sauvegarde en quittant."
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "In Review"
+msgstr "En révision"
+
+#: app/gui/ui/mobile/pages/overview.slint
+msgid "Preview"
+msgstr "Aperçu"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/character.slint
+msgid "Confirmed in game except where marked"
+msgstr "Confirmé en jeu sauf mention contraire"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Quick goals"
+msgstr "Objectifs rapides"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Each goal adds its changes to Review. Nothing is written until you press Write."
+msgstr "Chaque objectif ajoute ses modifications à la Révision. Rien n'est écrit tant que vous n'appuyez pas sur Écrire."
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Every goal is already in this save."
+msgstr "Tous les objectifs sont déjà dans cette sauvegarde."
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Already in your save"
+msgstr "Déjà dans votre sauvegarde"
+
+#: app/gui/ui/mobile/pages/overview.slint
+msgid "Show less"
+msgstr "Afficher moins"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/overview.slint
+msgid "Show all {}"
+msgstr "Tout afficher ({})"
+
+#: app/gui/ui/mobile/pages/placeholder.slint
+msgid "This page is not on phones and tablets yet: the desktop editor has it."
+msgstr "Cette page n'est pas encore sur téléphone et tablette : l'éditeur pour ordinateur l'a."
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Take a snapshot before writing"
+msgstr "Prendre un instantané avant d'écrire"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Write starts with this ticked."
+msgstr "Écrire démarre avec cette case cochée."
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Open the last save at start"
+msgstr "Ouvrir la dernière sauvegarde au démarrage"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/advanced.slint
 msgid "Every byte range of the save, named from the game's own loader · read-only, character {}"
@@ -1061,10 +1372,6 @@ msgstr "Débloquer"
 #: app/gui/ui/pages/sets.slint
 msgid "The game cannot make this: {}."
 msgstr "Le jeu ne peut pas produire ceci : {}."
-
-#: app/gui/ui/pages/character.slint
-msgid "Confirmed in game except where marked"
-msgstr "Confirmé en jeu sauf mention contraire"
 
 #: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
 msgid "Hunter"
@@ -2083,10 +2390,6 @@ msgstr "Position vide"
 msgid "Empty slot"
 msgstr "Emplacement vide"
 
-#: app/gui/ui/pages/items.slint
-msgid "Done"
-msgstr "Terminé"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/monsters.slint
 msgid "Hunted {}"
@@ -2165,10 +2468,6 @@ msgid "No monster matches the search."
 msgstr "Aucun monstre ne correspond à la recherche."
 
 #: app/gui/ui/pages/open.slint
-msgid "Open a save"
-msgstr "Ouvrir une sauvegarde"
-
-#: app/gui/ui/pages/open.slint
 msgid "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit."
 msgstr "Choisissez le fichier system de Monster Hunter Generations Ultimate (Switch). Dans Ryujinx, il se trouve dans bis/user/save/<id>/0/. Fermez l'émulateur avant d'écrire : il écrase la sauvegarde en quittant."
 
@@ -2193,10 +2492,6 @@ msgid "Showing"
 msgstr "Affiché"
 
 #: app/gui/ui/pages/overview.slint
-msgid "In Review"
-msgstr "En révision"
-
-#: app/gui/ui/pages/overview.slint
 msgid "Preview…"
 msgstr "Aperçu…"
 
@@ -2204,22 +2499,6 @@ msgstr "Aperçu…"
 #: app/gui/ui/pages/overview.slint
 msgid "Character {}, {} · confirmed in game except where marked"
 msgstr "Personnage {}, {} · confirmé en jeu sauf mention contraire"
-
-#: app/gui/ui/pages/overview.slint
-msgid "Quick goals"
-msgstr "Objectifs rapides"
-
-#: app/gui/ui/pages/overview.slint
-msgid "Each goal adds its changes to Review. Nothing is written until you press Write."
-msgstr "Chaque objectif ajoute ses modifications à la Révision. Rien n'est écrit tant que vous n'appuyez pas sur Écrire."
-
-#: app/gui/ui/pages/overview.slint
-msgid "Every goal is already in this save."
-msgstr "Tous les objectifs sont déjà dans cette sauvegarde."
-
-#: app/gui/ui/pages/overview.slint
-msgid "Already in your save"
-msgstr "Déjà dans votre sauvegarde"
 
 #: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
 #: app/gui/ui/pages/palicoes.slint
@@ -2410,10 +2689,6 @@ msgstr "Aucune quête ne correspond à la recherche."
 #: app/gui/ui/pages/requests.slint
 msgid "Search requests or villages"
 msgstr "Rechercher des requêtes ou des villages"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Open"
-msgstr "Ouverte"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
 msgid "Reported"
@@ -3529,6 +3804,18 @@ msgstr[1] "{} octets"
 msgid "{} at {}{}. The Save map names every range."
 msgstr "{} à {}{}. La carte de la sauvegarde nomme chaque plage."
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/picker.rs app/gui/src/android/source.rs
+#: app/gui/src/platform.rs app/gui/src/views/file.rs
+msgid "Could not read {}: {}"
+msgstr "Impossible de lire {} : {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/picker.rs app/gui/src/android/source.rs
+#: app/gui/src/platform.rs
+msgid "Could not write {}: {}"
+msgstr "Impossible d'écrire {} : {}"
+
 #: app/gui/src/system.rs
 msgid "The emulator"
 msgstr "L'émulateur"
@@ -4123,6 +4410,34 @@ msgstr "l'emplacement {} du coffre Palico ne contient pas : {}"
 msgid "not a body type of the game"
 msgstr "pas un type de corps du jeu"
 
+#: app/gui/src/android/source.rs
+msgid "No MHGU save in that folder: it has no system file, in it or in save_0 inside it."
+msgstr "Aucune sauvegarde MHGU dans ce dossier : il n'y a pas de fichier system, ni dedans ni dans son save_0."
+
+#: app/gui/src/android/source.rs
+msgid "No file picked"
+msgstr "Aucun fichier choisi"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "{} and its backup"
+msgstr "{} et sa copie de secours"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "The editor can no longer open {}. Pick it again: Android drops the editor's access when the editor is reinstalled or the folder is moved."
+msgstr "L'éditeur ne peut plus ouvrir {}. Choisissez-le à nouveau : Android retire l'accès de l'éditeur quand il est réinstallé ou que le dossier est déplacé."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "{} does not read back as written"
+msgstr "{} ne se relit pas comme écrit"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "Could not read {} back: {}"
+msgstr "Impossible de relire {} : {}"
+
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/advanced.rs
 msgid "… {} more byte"
@@ -4445,23 +4760,8 @@ msgstr "Écrit dans la sauvegarde, la fiche du joueur et la Carte Guilde"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
-msgid "Could not write {}: {}"
-msgstr "Impossible d'écrire {} : {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs app/gui/src/views/file.rs
-msgid "Could not read {}: {}"
-msgstr "Impossible de lire {} : {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
 msgid "slot {}"
 msgstr "emplacement {}"
-
-#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
-#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
-msgid "Added to Review"
-msgstr "Ajouté à la révision"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
@@ -4496,12 +4796,22 @@ msgid "Exported {}"
 msgstr "{} exporté"
 
 #: app/gui/src/views/characters.rs
+msgid "MHXX save (system)"
+msgstr "Sauvegarde MHXX (system)"
+
+#: app/gui/src/views/characters.rs
 msgid "Import character"
 msgstr "Importer un personnage"
 
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
-msgid "MHXX save (system)"
-msgstr "Sauvegarde MHXX (system)"
+msgid "MHXX save to put {} in"
+msgstr "Sauvegarde MHXX où placer {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "Not an MHXX save: {}"
+msgstr "Pas une sauvegarde MHXX : {}"
 
 #: app/gui/src/views/characters.rs
 msgid "Not imported: the file is not a character exported by this editor"
@@ -4522,16 +4832,6 @@ msgstr "Non importé : cette sauvegarde MHXX ne contient aucun personnage"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
-msgid "MHXX save to put {} in"
-msgstr "Sauvegarde MHXX où placer {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
-msgid "Not an MHXX save: {}"
-msgstr "Pas une sauvegarde MHXX : {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
 msgid "Which character of {} goes into slot {}?"
 msgstr "Quel personnage de {} va dans l'emplacement {} ?"
 
@@ -4546,16 +4846,16 @@ msgid "Import {} from MHXX into slot {}"
 msgstr "Importer {} depuis MHXX dans l'emplacement {}"
 
 #: app/gui/src/views/characters.rs
-msgid "Save the MHXX save"
-msgstr "Enregistrer la sauvegarde MHXX"
-
-#: app/gui/src/views/characters.rs
 msgid "Restore it on the 3DS with JKSM or Checkpoint"
 msgstr "Restaurez-la sur la 3DS avec JKSM ou Checkpoint"
 
 #: app/gui/src/views/characters.rs
 msgid "Restore it on the Switch with JKSV or Checkpoint"
 msgstr "Restaurez-la sur la Switch avec JKSV ou Checkpoint"
+
+#: app/gui/src/views/characters.rs
+msgid "Save the MHXX save"
+msgstr "Enregistrer la sauvegarde MHXX"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
@@ -5127,6 +5427,11 @@ msgstr "Chemin copié"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/file.rs
+msgid "Nothing written: could not read {}: {}"
+msgstr "Rien n'a été écrit : impossible de lire {} : {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
 msgid "Snapshot failed, nothing written: {}"
 msgstr "Échec de l'instantané, rien n'a été écrit : {}"
 
@@ -5560,6 +5865,11 @@ msgid_plural "Redid {n} changes"
 msgstr[0] "{n} modification rétablie"
 msgstr[1] "{n} modifications rétablies"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "Could not read the save again: {}"
+msgstr "Impossible de relire la sauvegarde : {}"
+
 #: app/gui/src/views/mod.rs
 msgid "Read the save again"
 msgstr "Relire la sauvegarde"
@@ -5570,11 +5880,6 @@ msgid "{n} staged change kept"
 msgid_plural "{n} staged changes kept"
 msgstr[0] "{n} modification en attente conservée"
 msgstr[1] "{n} modifications en attente conservées"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/mod.rs
-msgid "Could not read the save again: {}"
-msgstr "Impossible de relire la sauvegarde : {}"
 
 #: app/gui/src/views/monsters_page.rs
 msgid "Bird Wyvern"

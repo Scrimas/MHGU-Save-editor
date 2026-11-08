@@ -1,0 +1,282 @@
+// While no save is open: MHGU Recomp's folder (recommended), Export and import, any system
+// file, the saves opened before. And the guide to setting up the Recomp's folder.
+import { M } from "../theme.slint";
+import { TopBar, Btn, Ico, ListItem, Muted, SectionLabel, GroupRow, Press } from "../widgets.slint";
+import { Api, DetectedSave } from "../../common.slint";
+
+// A saved place: a save opened before, opened again from where it was picked.
+component RecentRow inherits GroupRow {
+    in property <DetectedSave> s;
+    pressable: true;
+    height: max(56px, lay.preferred-height);
+    accessible-role: button;
+    accessible-label: root.s.title;
+    accessible-description: root.s.sub;
+    accessible-action-default => { root.clicked(); }
+    lay := HorizontalLayout {
+        padding: 12px;
+        padding-left: 16px;
+        spacing: 16px;
+        VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("../icons/folder.svg"); }
+        }
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: center;
+            Text { text: root.s.title; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+            if root.s.sub != "": Muted { text: root.s.sub; }
+            if root.s.short != "": Text { text: root.s.short; color: M.on-surface-variant; font-size: M.body-small; overflow: elide; }
+        }
+        if root.s.when != "": VerticalLayout {
+            alignment: center;
+            Text { text: root.s.when; color: M.on-surface-variant; font-size: M.label-medium; }
+        }
+    }
+}
+
+export component OpenPage inherits Rectangle {
+    in property <length> top-inset;
+    in property <length> bottom-inset;
+    in property <length> side-inset;
+    // over an open save: a Close button
+    in property <bool> closable;
+    // Android's predictive back while this screen is what Back closes (0 to 1): rounded
+    // corners as it shrinks (app.slint scales it)
+    in property <float> drag;
+    border-radius: 28px * root.drag;
+    clip: root.drag > 0;
+    callback guide();
+    callback export-import();
+    callback menu();
+    callback close();
+    background: M.surface;
+    VerticalLayout {
+        padding-top: root.top-inset;
+        TopBar {
+            title: root.closable ? @tr("Open save…") : @tr("MHGU Save Editor");
+            close: root.closable;
+            back-clicked => { root.close(); }
+            overflow: true;
+            overflow-label: @tr("Settings and About");
+            overflow-clicked => { root.menu(); }
+        }
+        Flickable {
+            content-width: self.width;
+            vertical-stretch: 1;
+            HorizontalLayout {
+                alignment: center;
+                VerticalLayout {
+                    max-width: 640px;
+                    horizontal-stretch: 1;
+                    padding-left: M.gutter + root.side-inset;
+                    padding-right: M.gutter + root.side-inset;
+                    padding-top: 8px;
+                    padding-bottom: root.bottom-inset + 24px;
+                    spacing: 16px;
+                    VerticalLayout {
+                        spacing: 4px;
+                        Text { text: @tr("Open a save"); color: M.on-surface; font-size: M.headline-small; wrap: word-wrap; }
+                        Muted { text: @tr("Pick the save of Monster Hunter Generations Ultimate. Nothing is written until you press Write."); }
+                    }
+                    // MHGU Recomp's folder
+                    Rectangle {
+                        background: M.primary-container;
+                        border-radius: 16px;
+                        VerticalLayout {
+                            padding: 20px;
+                            spacing: 12px;
+                            HorizontalLayout {
+                                spacing: 16px;
+                                Rectangle {
+                                    width: 48px;
+                                    height: 48px;
+                                    border-radius: 24px;
+                                    background: M.primary;
+                                    Ico { source: @image-url("../icons/folder.svg"); tint: M.on-primary; }
+                                }
+                                VerticalLayout {
+                                    alignment: center;
+                                    horizontal-stretch: 1;
+                                    Text { text: @tr("MHGU Recomp folder"); color: M.on-primary-container; font-size: M.title-medium; font-weight: M.medium; wrap: word-wrap; }
+                                    Text { text: @tr("Recommended"); color: M.on-primary-container; font-size: M.label-medium; font-weight: M.medium; }
+                                }
+                            }
+                            Text {
+                                text: @tr("Set the Recomp's Save folder to a shared folder once, then pick that folder here. The editor reads and writes the save in it directly.");
+                                color: M.on-primary-container;
+                                font-size: M.body-medium;
+                                wrap: word-wrap;
+                            }
+                            VerticalLayout {
+                                spacing: 4px;
+                                HorizontalLayout {
+                                    alignment: start;
+                                    Btn { text: @tr("Pick the save folder"); clicked => { Api.open-tree(); } }
+                                }
+                                HorizontalLayout {
+                                    alignment: start;
+                                    Btn { kind: "text"; text: @tr("How to set it up"); fg: M.on-primary-container; clicked => { root.guide(); } }
+                                }
+                            }
+                        }
+                    }
+                    VerticalLayout {
+                        SectionLabel { text: @tr("Other ways"); color: M.on-surface-variant; height: 32px; vertical-alignment: center; }
+                        ListItem {
+                            icon: @image-url("../icons/swap.svg");
+                            title: @tr("Export and import");
+                            text: @tr("In MHGU Recomp, Export save. Here, open that system file and Write. Then Import save in the Recomp.");
+                            divider: true;
+                            clicked => { root.export-import(); }
+                        }
+                        ListItem {
+                            icon: @image-url("../icons/file.svg");
+                            title: @tr("Any system file");
+                            text: @tr("An emulator's save copied out (Eden, Citron, Sudachi…), or a JKSV or Checkpoint backup from a Switch.");
+                            clicked => { Api.open-dialog(); }
+                        }
+                    }
+                    if Api.recent.length > 0: VerticalLayout {
+                        spacing: 2px;
+                        SectionLabel { text: @tr("Recent saves"); color: M.on-surface-variant; height: 32px; vertical-alignment: center; }
+                        for s[i] in Api.recent: RecentRow {
+                            s: s;
+                            first: i == 0;
+                            last: i == Api.recent.length - 1;
+                            clicked => { Api.open-path(self.s.path); }
+                        }
+                    }
+                    if Api.warning != "": Rectangle {
+                        background: M.error-container;
+                        border-radius: 12px;
+                        HorizontalLayout {
+                            padding: 16px;
+                            spacing: 12px;
+                            Ico { source: @image-url("../icons/warning.svg"); tint: M.on-error-container; }
+                            Text { text: Api.warning; color: M.on-error-container; font-size: M.body-medium; wrap: word-wrap; horizontal-stretch: 1; }
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 8px;
+                        padding-top: 8px;
+                        Ico { source: @image-url("../icons/info.svg"); width: 18px; height: 18px; }
+                        Text {
+                            text: @tr("Close the game before writing: it overwrites the save when it exits.");
+                            color: M.on-surface-variant;
+                            font-size: M.body-small;
+                            wrap: word-wrap;
+                            horizontal-stretch: 1;
+                        }
+                    }
+                    HorizontalLayout {
+                        padding-left: 26px;
+                        Text { text: Api.build-info; color: M.outline; font-size: M.label-small; font-weight: M.medium; wrap: word-wrap; horizontal-stretch: 1; }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// One numbered step of the guide.
+component Step inherits Rectangle {
+    in property <int> n;
+    in property <string> where;
+    in property <string> title;
+    in property <string> text;
+    border-width: 1px;
+    border-color: M.outline-variant;
+    border-radius: 12px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding: 16px;
+        padding-top: 14px;
+        spacing: 10px;
+        HorizontalLayout {
+            spacing: 12px;
+            Rectangle {
+                width: 32px;
+                height: 32px;
+                border-radius: 16px;
+                background: M.primary-container;
+                Text { text: root.n; color: M.on-primary-container; font-weight: M.medium; }
+            }
+            VerticalLayout {
+                alignment: center;
+                horizontal-stretch: 1;
+                Text { text: root.where; color: M.on-surface-variant; font-size: M.label-medium; font-weight: M.medium; }
+                Text { text: root.title; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; wrap: word-wrap; }
+            }
+        }
+        Text { text: root.text; color: M.on-surface; font-size: M.body-medium; wrap: word-wrap; }
+        @children
+    }
+}
+
+export component RecompGuide inherits Rectangle {
+    in property <length> top-inset;
+    in property <length> bottom-inset;
+    // Android's predictive back while this screen is what Back closes (0 to 1): rounded
+    // corners as it shrinks (app.slint scales it)
+    in property <float> drag;
+    border-radius: 28px * root.drag;
+    clip: root.drag > 0;
+    in property <length> side-inset;
+    callback back();
+    background: M.surface;
+    VerticalLayout {
+        padding-top: root.top-inset;
+        TopBar { title: @tr("MHGU Recomp folder"); back: true; back-clicked => { root.back(); } }
+        Flickable {
+            content-width: self.width;
+            vertical-stretch: 1;
+            HorizontalLayout {
+                alignment: center;
+                VerticalLayout {
+                    max-width: 640px;
+                    horizontal-stretch: 1;
+                    padding-left: M.gutter + root.side-inset;
+                    padding-right: M.gutter + root.side-inset;
+                    padding-bottom: 16px;
+                    spacing: 12px;
+                    Muted { text: @tr("Android keeps each app's folder private, so the save needs a shared folder. You do this once."); }
+                    Step {
+                        n: 1;
+                        where: @tr("In MHGU Recomp");
+                        title: @tr("Settings › Android › Save folder");
+                        text: @tr("Make a folder in Download, for example MHGU, and pick it. The Recomp then keeps its save there, in save_0.");
+                    }
+                    Step {
+                        n: 2;
+                        where: @tr("Here");
+                        title: @tr("Pick that folder");
+                        text: @tr("Android's folder picker opens. Go to Download › MHGU, tap Use this folder, then Allow. Download itself can't be picked.");
+                    }
+                    Step {
+                        n: 3;
+                        where: @tr("Done");
+                        title: @tr("The save opens");
+                        text: @tr("The editor reads and writes save_0/system and system_backup directly. Before Write, use Exit game in the Recomp: it overwrites the save when it exits.");
+                    }
+                }
+            }
+        }
+        VerticalLayout {
+            padding-left: M.gutter + root.side-inset;
+            padding-right: M.gutter + root.side-inset;
+            padding-top: 12px;
+            padding-bottom: root.bottom-inset + 12px;
+            HorizontalLayout {
+                alignment: center;
+                Btn {
+                    big: true;
+                    max-width: 608px;
+                    horizontal-stretch: 1;
+                    text: @tr("Pick the save folder");
+                    clicked => { Api.open-tree(); }
+                }
+            }
+        }
+    }
+}

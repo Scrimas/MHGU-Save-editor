@@ -70,6 +70,7 @@ pub(super) fn settings_ui(ui: &AppWindow) {
 
 /// For a bug report: what the editor runs on, in English.
 fn system_info(s: &settings::Settings) -> String {
+    #[cfg_attr(not(target_os = "linux"), allow(unused_mut))]
     let mut os = format!("{} {}", std::env::consts::OS, std::env::consts::ARCH);
     #[cfg(target_os = "linux")]
     {
@@ -253,7 +254,10 @@ pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
             system::open_folder(d);
         }
     });
+    // folder pickers: the desktop's Settings (Android keeps snapshots in the app's folder)
+    #[cfg(not(target_os = "android"))]
     let w = ui.as_weak();
+    #[cfg(not(target_os = "android"))]
     api.on_pick_snapshot_dir(move || {
         let Some(ui) = w.upgrade() else { return };
         if let Some(p) = rfd::FileDialog::new().set_title(tr("Snapshot folder")).set_directory(system::snapshot_root()).pick_folder() {
@@ -262,7 +266,9 @@ pub(super) fn wire_settings(ui: &AppWindow, st: &Shared) {
             toast(&ui, tr("New snapshots go to the new folder; earlier ones stay where they are"), false);
         }
     });
+    #[cfg(not(target_os = "android"))]
     let w = ui.as_weak();
+    #[cfg(not(target_os = "android"))]
     api.on_add_save_folder(move || {
         let Some(ui) = w.upgrade() else { return };
         let Some(p) = rfd::FileDialog::new().set_title(tr("Folder with MHGU saves")).pick_folder() else { return };

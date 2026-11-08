@@ -1,0 +1,118 @@
+// Settings as a sheet: theme, language, the snapshot before writing, reopening the save.
+import { M } from "../theme.slint";
+import { CheckRow, GroupRow, Ico, Muted, Press, SectionLabel, Sheet, Tap } from "../widgets.slint";
+import { Api } from "../../common.slint";
+
+// Segmented buttons: one of a few choices.
+component Segmented inherits Rectangle {
+    in property <[string]> options;
+    in property <int> value;
+    callback picked(int);
+    height: 40px;
+    border-radius: 20px;
+    border-width: 1px;
+    border-color: M.outline;
+    accessible-role: tab-list;
+    HorizontalLayout {
+        for o[i] in root.options: Rectangle {
+            horizontal-stretch: 1;
+            background: i == root.value ? M.secondary-container : transparent;
+            border-top-left-radius: i == 0 ? 20px : 0px;
+            border-bottom-left-radius: i == 0 ? 20px : 0px;
+            border-top-right-radius: i == root.options.length - 1 ? 20px : 0px;
+            border-bottom-right-radius: i == root.options.length - 1 ? 20px : 0px;
+            accessible-role: tab;
+            accessible-label: o;
+            accessible-item-selected: i == root.value;
+            accessible-action-default => { root.picked(i); }
+            Press { on: ta.pressed; border-top-left-radius: parent.border-top-left-radius; border-bottom-left-radius: parent.border-bottom-left-radius; border-top-right-radius: parent.border-top-right-radius; border-bottom-right-radius: parent.border-bottom-right-radius; }
+            if i > 0: Rectangle { x: 0; width: 1px; background: M.outline; }
+            HorizontalLayout {
+                alignment: center;
+                spacing: 8px;
+                if i == root.value: VerticalLayout {
+                    alignment: center;
+                    Ico { source: @image-url("../icons/check.svg"); tint: M.on-secondary-container; width: 18px; height: 18px; }
+                }
+                Text { text: o; color: i == root.value ? M.on-secondary-container : M.on-surface; font-size: M.label-large; font-weight: M.medium; vertical-alignment: center; }
+            }
+            ta := Tap { tapped => { root.picked(i); } }
+        }
+    }
+}
+
+export component SettingsSheet inherits Sheet {
+    in property <bool> open;
+    shown: root.open;
+    title: @tr("Settings");
+    content-h: body.preferred-height;
+    property <bool> languages;
+    Flickable {
+        content-width: self.width;
+        body := VerticalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            padding-bottom: 16px;
+            spacing: 8px;
+            HorizontalLayout {
+                padding-left: 8px;
+                SectionLabel { text: @tr("Theme"); }
+            }
+            Segmented {
+                options: [@tr("System"), @tr("Light"), @tr("Dark")];
+                value: Api.settings.theme;
+                picked(i) => { Api.set-setting("theme", i); }
+            }
+            HorizontalLayout {
+                padding-left: 8px;
+                padding-top: 12px;
+                SectionLabel { text: @tr("Language"); }
+            }
+            for l[i] in Api.settings.languages: GroupRow {
+                first: i == 0;
+                last: i == Api.settings.languages.length - 1;
+                pressable: true;
+                height: 48px;
+                background: i == Api.settings.language ? M.secondary-container : M.group;
+                accessible-role: button;
+                accessible-label: l;
+                accessible-item-selected: i == Api.settings.language;
+                accessible-action-default => { Api.set-setting("language", i); }
+                clicked => { Api.set-setting("language", i); }
+                HorizontalLayout {
+                    padding-left: 16px;
+                    padding-right: 16px;
+                    Text { text: l; color: i == Api.settings.language ? M.on-secondary-container : M.on-surface; font-size: M.body-large; vertical-alignment: center; horizontal-stretch: 1; }
+                    if i == Api.settings.language: VerticalLayout {
+                        alignment: center;
+                        Ico { source: @image-url("../icons/check.svg"); tint: M.on-secondary-container; }
+                    }
+                }
+            }
+            HorizontalLayout {
+                padding-left: 8px;
+                padding-top: 12px;
+                SectionLabel { text: @tr("Saves"); }
+            }
+            GroupRow {
+                first: true;
+                height: s1.preferred-height;
+                s1 := CheckRow {
+                    checked: Api.settings.snapshot-first;
+                    title: @tr("Take a snapshot before writing");
+                    text: @tr("Write starts with this ticked.");
+                    toggled(on) => { Api.set-setting("snapshot-first", on ? 1 : 0); }
+                }
+            }
+            GroupRow {
+                last: true;
+                height: s2.preferred-height;
+                s2 := CheckRow {
+                    checked: Api.settings.reopen;
+                    title: @tr("Open the last save at start");
+                    toggled(on) => { Api.set-setting("reopen", on ? 1 : 0); }
+                }
+            }
+        }
+    }
+}

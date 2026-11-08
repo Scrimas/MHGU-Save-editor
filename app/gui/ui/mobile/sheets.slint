@@ -1,0 +1,460 @@
+// Bottom sheets of the shell: Review, the character slot, More, About, Export and import,
+// and the question before leaving with changes not written.
+import { AboutSlint } from "std-widgets.slint";
+import { M } from "theme.slint";
+import { Btn, ConfidenceLabel, Dot, GroupRow, IconBtn, Ico, ListItem, Muted, Press, SectionLabel, Sheet, Tap } from "widgets.slint";
+import { Api, ChangeRow, Confidence, Fmt, SlotInfo } from "../common.slint";
+
+// One Review entry: old → new in game terms, why the game cannot make it, its own Undo.
+component ReviewEntry inherits GroupRow {
+    in property <ChangeRow> c;
+    callback open();
+    pressable: true;
+    clicked => { root.open(); }
+    height: lay.preferred-height;
+    accessible-role: button;
+    accessible-label: root.c.single ? @tr("{}: {} to {}. Opens the field.", root.c.title, root.c.old, root.c.new) : @tr("{}. Opens the field.", root.c.title);
+    accessible-action-default => { root.open(); }
+    lay := HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 4px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        spacing: 12px;
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: center;
+            spacing: 2px;
+            Text { text: root.c.title; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+            if root.c.sub != "": Muted { text: root.c.sub; }
+            if root.c.confidence != Confidence.confirmed: ConfidenceLabel { level: root.c.confidence; }
+            if root.c.single: HorizontalLayout {
+                spacing: 8px;
+                alignment: start;
+                Text { text: root.c.old; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+                Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; }
+                Text { text: root.c.new; color: root.c.warning != "" ? M.error : M.on-surface; font-size: M.body-medium; font-weight: M.medium; wrap: word-wrap; }
+            }
+            for l in root.c.lines: HorizontalLayout {
+                spacing: 8px;
+                padding-top: 4px;
+                Text { text: l.label; color: M.on-surface; font-size: M.body-medium; wrap: word-wrap; horizontal-stretch: 1; }
+                Text { text: l.old; color: M.on-surface-variant; font-size: M.body-medium; }
+                Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; }
+                Text { text: l.new; color: l.warning != "" ? M.error : M.on-surface; font-size: M.body-medium; font-weight: M.medium; }
+            }
+            if root.c.more > 0: Muted { text: @tr("and {} more", Fmt.num(root.c.more)); }
+            if root.c.note != "": Muted { text: root.c.note; }
+            if root.c.warning != "": HorizontalLayout {
+                spacing: 6px;
+                padding-top: 4px;
+                Ico { source: @image-url("icons/warning.svg"); tint: M.error; width: 16px; height: 16px; }
+                Text { text: root.c.warning; color: M.error; font-size: M.body-small; wrap: word-wrap; horizontal-stretch: 1; }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            IconBtn {
+                icon: @image-url("icons/undo.svg");
+                label: @tr("Undo {}", root.c.title);
+                clicked => { Api.undo(root.c.id); }
+            }
+        }
+    }
+}
+
+export component ReviewSheet inherits Sheet {
+    in property <bool> open;
+    callback write();
+    callback goto(string);
+    shown: root.open;
+    title: @tr("Review");
+    subtitle: Api.review-summary;
+    content-h: Api.change-count == 0 ? 160px : root.height;
+    VerticalLayout {
+        if Api.change-count == 0: VerticalLayout {
+            padding: 24px;
+            Muted { text: @tr("Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one."); }
+        }
+        if Api.change-count > 0: Flickable {
+            content-width: self.width;
+            vertical-stretch: 1;
+            VerticalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-bottom: 12px;
+                spacing: 2px;
+                for c[i] in Api.changes: VerticalLayout {
+                    if c.first: HorizontalLayout {
+                        padding-left: 8px;
+                        SectionLabel { text: c.group; height: 40px; vertical-alignment: bottom; }
+                    }
+                    if c.first: Rectangle { height: 8px; }
+                    ReviewEntry {
+                        c: c;
+                        first: c.first;
+                        last: i == Api.changes.length - 1 || Api.changes[i + 1].first;
+                        open => { root.goto(self.c.key); }
+                    }
+                }
+            }
+        }
+        if Api.change-count > 0: Rectangle { height: 1px; background: M.outline-variant; }
+        if Api.change-count > 0: VerticalLayout {
+            padding-left: 24px;
+            padding-right: 24px;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            spacing: 8px;
+            HorizontalLayout {
+                spacing: 10px;
+                VerticalLayout {
+                    padding-top: 4px;
+                    Dot { level: Confidence.derived; }
+                }
+                Text {
+                    text: @tr("Derived: worked out from the game's code, not yet checked in game. Untagged changes are confirmed in game.");
+                    color: M.on-surface-variant;
+                    font-size: M.body-small;
+                    wrap: word-wrap;
+                    horizontal-stretch: 1;
+                }
+            }
+            if Api.warn-count > 0: HorizontalLayout {
+                spacing: 10px;
+                Ico { source: @image-url("icons/warning.svg"); tint: M.error; width: 16px; height: 16px; }
+                Text {
+                    text: @tr("{n} value the game cannot produce is written as it is." | "{n} values the game cannot produce are written as they are." % Api.warn-count) + " " + Api.warn-why;
+                    color: M.on-surface-variant;
+                    font-size: M.body-small;
+                    wrap: word-wrap;
+                    horizontal-stretch: 1;
+                }
+            }
+            HorizontalLayout {
+                spacing: 8px;
+                padding-top: 8px;
+                Btn { kind: "outlined"; text: @tr("Undo all"); clicked => { Api.undo-all(); } }
+                Rectangle { horizontal-stretch: 1; }
+                Btn {
+                    text: @tr("Write…");
+                    icon: @image-url("icons/write.svg");
+                    has-icon: true;
+                    clicked => { root.write(); }
+                }
+            }
+        }
+    }
+}
+
+// The character slot: switch to another, see who is in each.
+export component SlotSheet inherits Sheet {
+    in property <bool> open;
+    shown: root.open;
+    title: @tr("Character");
+    subtitle: @tr("Every page shows the character picked here.");
+    content-h: list.preferred-height;
+    list := VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 16px;
+        spacing: 2px;
+        for s[i] in Api.slots: GroupRow {
+            first: i == 0;
+            last: i == Api.slots.length - 1;
+            pressable: s.used;
+            height: max(64px, row.preferred-height);
+            background: i == Api.slot ? M.secondary-container : M.group;
+            accessible-role: button;
+            accessible-label: s.used ? @tr("Slot {}, {}", i + 1, s.name) : @tr("Slot {}, empty", i + 1);
+            accessible-item-selected: i == Api.slot;
+            accessible-action-default => { self.clicked(); }
+            clicked => {
+                Api.select-slot(i);
+                root.close();
+            }
+            row := HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                spacing: 16px;
+                Rectangle {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 20px;
+                    background: s.used ? M.tertiary-container : M.s-highest;
+                    Text { text: s.used ? s.initial : (i + 1); color: s.used ? M.on-tertiary-container : M.on-surface-variant; font-size: M.title-medium; font-weight: M.medium; }
+                }
+                VerticalLayout {
+                    alignment: center;
+                    horizontal-stretch: 1;
+                    Text { text: s.used ? s.name : @tr("Slot {} · empty", i + 1); color: s.used ? M.on-surface : M.on-surface-variant; font-size: M.body-large; wrap: word-wrap; }
+                    if s.used: Muted { text: @tr("Slot {} · HR {} · {}", i + 1, s.hr, s.playtime); }
+                }
+                if i == Api.slot: VerticalLayout {
+                    alignment: center;
+                    Ico { source: @image-url("icons/check.svg"); tint: M.on-secondary-container; }
+                }
+            }
+        }
+    }
+}
+
+export struct MoreEntry { id: string, label: string, badge: int, icon: image }
+
+// The pages that are not in the navigation bar, then the app's own screens.
+export component MoreSheet inherits Sheet {
+    in property <bool> open;
+    in property <[MoreEntry]> pages;
+    in property <string> current;
+    callback picked(string);
+    shown: root.open;
+    title: @tr("More");
+    close-button: false;
+    content-h: body.preferred-height;
+    property <int> cols: root.width >= 560px ? 4 : 3;
+    body := VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 16px;
+        spacing: 12px;
+        for r in ceil(root.pages.length / root.cols): HorizontalLayout {
+            spacing: 8px;
+            for c in root.cols: Rectangle {
+                horizontal-stretch: 1;
+                property <int> k: r * root.cols + c;
+                height: 88px;
+                if self.k < root.pages.length: cell := Rectangle {
+                    property <MoreEntry> e: root.pages[parent.k];
+                    border-radius: 16px;
+                    background: self.e.id == root.current ? M.secondary-container : M.group;
+                    accessible-role: button;
+                    accessible-label: self.e.badge > 0 ? @tr("{}, {n} value not written" | "{}, {n} values not written" % self.e.badge, self.e.label) : self.e.label;
+                    accessible-action-default => { root.picked(self.e.id); }
+                    Press { on: ta.pressed; border-radius: parent.border-radius; }
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 6px;
+                        padding: 4px;
+                        HorizontalLayout {
+                            alignment: center;
+                            Rectangle {
+                                width: 40px;
+                                height: 32px;
+                                Ico { source: cell.e.icon; tint: M.on-surface-variant; }
+                                if cell.e.badge > 0: Rectangle {
+                                    x: 26px;
+                                    y: 0;
+                                    width: max(16px, bt.preferred-width + 8px);
+                                    height: 16px;
+                                    border-radius: 8px;
+                                    background: M.primary;
+                                    bt := Text { text: Fmt.num(cell.e.badge); color: M.on-primary; font-size: M.label-small; font-weight: M.medium; }
+                                }
+                            }
+                        }
+                        Text { text: cell.e.label; color: M.on-surface; font-size: M.label-medium; font-weight: M.medium; horizontal-alignment: center; wrap: word-wrap; }
+                    }
+                    ta := Tap { tapped => { root.picked(cell.e.id); } }
+                }
+            }
+        }
+        Rectangle { height: 1px; background: M.outline-variant; }
+        VerticalLayout {
+            ListItem { icon: @image-url("icons/snapshot.svg"); title: @tr("Snapshots"); chevron: false; clicked => { root.picked("snapshots"); } }
+            ListItem { icon: @image-url("icons/folder.svg"); title: @tr("Open save…"); chevron: false; clicked => { root.picked("open"); } }
+            ListItem { icon: @image-url("icons/settings.svg"); title: @tr("Settings"); chevron: false; clicked => { root.picked("settings"); } }
+            ListItem { icon: @image-url("icons/about.svg"); title: @tr("About"); chevron: false; clicked => { root.picked("about"); } }
+        }
+    }
+}
+
+// Open screen's overflow: Settings and About.
+export component MenuSheet inherits Sheet {
+    in property <bool> open;
+    callback picked(string);
+    shown: root.open;
+    close-button: false;
+    content-h: body.preferred-height;
+    body := VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 16px;
+        ListItem { icon: @image-url("icons/settings.svg"); title: @tr("Settings"); chevron: false; clicked => { root.picked("settings"); } }
+        ListItem { icon: @image-url("icons/about.svg"); title: @tr("About"); chevron: false; clicked => { root.picked("about"); } }
+    }
+}
+
+export component AboutSheet inherits Sheet {
+    in property <bool> open;
+    shown: root.open;
+    title: @tr("MHGU Save Editor");
+    subtitle: Api.build-info;
+    content-h: body.preferred-height;
+    body := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 12px;
+        Muted { text: @tr("A save editor for Monster Hunter Generations Ultimate. Free software under the GNU GPL, version 3 or later."); }
+        Text { text: "github.com/Scrimas/MHGU-Save-editor"; color: M.primary; font-size: M.body-medium; }
+        Muted { text: @tr("Material 3 components: Slint's Material library, MIT licence."); }
+        Rectangle {
+            height: 160px;
+            AboutSlint { }
+        }
+    }
+}
+
+// How Export and import works, then the file picker.
+export component ExportImportSheet inherits Sheet {
+    in property <bool> open;
+    shown: root.open;
+    title: @tr("Export and import");
+    content-h: body.preferred-height;
+    body := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 12px;
+        for step[i] in [
+            @tr("In MHGU Recomp: Settings › Android › Export save, into a folder such as Download."),
+            @tr("Here: open the system file it made, edit, and Write."),
+            @tr("In MHGU Recomp: Import save, and pick the same system and system_backup files."),
+        ]: HorizontalLayout {
+            spacing: 12px;
+            VerticalLayout {
+                alignment: start;
+                Rectangle {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 14px;
+                    background: M.primary-container;
+                    Text { text: i + 1; color: M.on-primary-container; font-size: M.label-large; font-weight: M.medium; }
+                }
+            }
+            VerticalLayout {
+                horizontal-stretch: 1;
+                padding-top: 4px;
+                Text { text: step; color: M.on-surface; font-size: M.body-medium; wrap: word-wrap; }
+            }
+        }
+        HorizontalLayout {
+            alignment: end;
+            padding-top: 8px;
+            Btn {
+                text: @tr("Open the system file");
+                clicked => {
+                    root.close();
+                    Api.open-dialog();
+                }
+            }
+        }
+    }
+}
+
+// Leaving (Back on the Overview) or opening another save with changes not written.
+export component AskSheet inherits Sheet {
+    in property <bool> open;
+    in property <string> question;
+    in property <string> text;
+    in property <string> yes;
+    callback confirmed();
+    shown: root.open;
+    title: root.question;
+    close-button: false;
+    content-h: body.preferred-height;
+    body := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 16px;
+        Muted { text: root.text; }
+        HorizontalLayout {
+            alignment: end;
+            spacing: 8px;
+            Btn { kind: "text"; text: @tr("Cancel"); clicked => { root.close(); } }
+            Btn { text: root.yes; clicked => { root.confirmed(); } }
+        }
+    }
+}
+
+// Snapshots: every copy taken before a write and before a restore; Restore puts one back.
+export component SnapshotsSheet inherits Sheet {
+    in property <bool> open;
+    shown: root.open;
+    title: Api.restore-ask == "" ? @tr("Snapshots") : @tr("Restore the save from {}?", Api.restore-when);
+    subtitle: Api.restore-ask == "" ? @tr("A copy of the whole save folder, taken before each write and before each restore.") : "";
+    content-h: Api.restore-ask == "" ? (Api.snapshots.length == 0 ? 120px : root.height) : ask.preferred-height;
+    VerticalLayout {
+        if Api.restore-ask == "" && Api.snapshots.length == 0: VerticalLayout {
+            padding: 24px;
+            Muted { text: @tr("No snapshots of this save yet. Write takes one first unless you untick it."); }
+        }
+        if Api.restore-ask == "" && Api.snapshots.length > 0: Flickable {
+            content-width: self.width;
+            VerticalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-bottom: 16px;
+                spacing: 2px;
+                for s[i] in Api.snapshots: GroupRow {
+                    first: i == 0;
+                    last: i == Api.snapshots.length - 1;
+                    height: max(64px, row.preferred-height);
+                    row := HorizontalLayout {
+                        padding-left: 16px;
+                        padding-right: 8px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        spacing: 8px;
+                        VerticalLayout {
+                            alignment: center;
+                            horizontal-stretch: 1;
+                            Text { text: s.when; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+                            Muted { text: s.before; }
+                        }
+                        VerticalLayout {
+                            alignment: center;
+                            Btn {
+                                kind: "text";
+                                text: @tr("Restore…");
+                                clicked => {
+                                    Api.restore-ask = s.dir;
+                                    Api.restore-when = s.when;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        ask := VerticalLayout {
+            visible: Api.restore-ask != "";
+            padding-left: 24px;
+            padding-right: 24px;
+            padding-bottom: 16px;
+            spacing: 12px;
+            Muted { text: @tr("Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."); }
+            if Api.change-count > 0: Text {
+                text: @tr("Your staged change is dropped." | "Your {n} staged changes are dropped." % Api.change-count);
+                color: M.warn;
+                font-size: M.body-small;
+                wrap: word-wrap;
+            }
+            HorizontalLayout {
+                alignment: end;
+                spacing: 8px;
+                Btn { kind: "text"; text: @tr("Cancel"); clicked => { Api.restore-ask = ""; } }
+                Btn {
+                    text: @tr("Restore");
+                    clicked => {
+                        Api.restore(Api.restore-ask);
+                        Api.restore-ask = "";
+                    }
+                }
+            }
+        }
+    }
+}

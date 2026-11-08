@@ -5,23 +5,23 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 
+# The library holds the editor; the desktop binary runs it, and on Android the APK loads it
+# as libmhgu_editor.so (app/packaging/build-apk.sh builds it with --crate-type cdylib).
+[lib]
+name = "mhgu_editor"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mhgu-editor"
+path = "src/main.rs"
+
 [dependencies]
 mhgu-save = { path = "../core" }
 # Pinned: src/scroll.rs and src/focus.rs use i-slint-core's internals, which must match.
-# Slint's defaults without system-tray (unused) and accessibility (opt-in feature below).
-slint = { version = "=1.18.1", default-features = false, features = [
-    "std",
-    "backend-default",
-    "renderer-femtovg",
-    "renderer-software",
-    "compat-1-2",
-    "unstable-winit-030",
-] }
 i-slint-core = "=1.18.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 image = { version = "0.25", default-features = false, features = ["png"] }
-rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "tokio"] }
 sysinfo = { version = "0.37", default-features = false, features = ["system"] }
 dirs = "6"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
@@ -33,11 +33,32 @@ fontique = "=0.11.1"
 # the embedded name tables and .po catalogs are zlib-compressed by build.rs
 miniz_oxide = "0.8"
 
+# Slint's defaults without system-tray (unused) and accessibility (opt-in feature below).
+[target.'cfg(not(target_os = "android"))'.dependencies]
+slint = { version = "=1.18.1", default-features = false, features = [
+    "std",
+    "backend-default",
+    "renderer-femtovg",
+    "renderer-software",
+    "compat-1-2",
+    "unstable-winit-030",
+] }
+rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "tokio"] }
+
+# Android: Slint's android-activity backend (NativeActivity, Skia), and JNI for the Java side
+# of the app (app/packaging/android/java: pickers, the folder's files, colours, installs).
+[target.'cfg(target_os = "android")'.dependencies]
+slint = { version = "=1.18.1", default-features = false, features = ["std", "backend-android-activity-06", "compat-1-2"] }
+jni = "0.22"
+
 [features]
 # Screen-reader support (AccessKit; AT-SPI over D-Bus on Linux). Off to keep the binary
 # small; `cargo build --features accessibility` turns it back on, the .slint files keep
 # their accessible-* properties either way.
 accessibility = ["slint/accessibility"]
+# The phone and tablet interface (ui/mobile) on the desktop, to check it without a phone;
+# Android builds always use it.
+mobile = []
 
 [build-dependencies]
 slint-build = "1.18.1"

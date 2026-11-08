@@ -241,6 +241,7 @@ thread_local! {
 
 /// Before the window exists: the interface size becomes SLINT_SCALE_FACTOR, unless the
 /// environment already sets it.
+#[cfg_attr(target_os = "android", allow(dead_code))]
 pub fn apply_scale() {
     if std::env::var_os("SLINT_SCALE_FACTOR").is_some() {
         return STARTED.set(None);

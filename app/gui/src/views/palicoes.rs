@@ -531,16 +531,21 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
             if st.borrow().doc.is_none() {
                 return;
             }
-            let Some(f) = open_file(&ui, tr("Import Palico"), tr("MHGU Palico"), PALICO_EXT) else { return };
-            let Ok(name) = palico::name_of(&f) else {
-                return toast(&ui, tr("Not imported: the file is not a Palico exported by this editor"), true);
-            };
-            {
-                let mut s = st.borrow_mut();
-                let k = s.slot;
-                add_palico(&ui, &mut s, k, &f, trf("Import {}", &[&name]));
-            }
-            refresh(&ui, &st.borrow());
+            let st = st.clone();
+            open_file(&ui, tr("Import Palico"), tr("MHGU Palico"), PALICO_EXT, move |ui, f| {
+                let Ok(name) = palico::name_of(&f) else {
+                    return toast(ui, tr("Not imported: the file is not a Palico exported by this editor"), true);
+                };
+                if st.borrow().doc.is_none() {
+                    return;
+                }
+                {
+                    let mut s = st.borrow_mut();
+                    let k = s.slot;
+                    add_palico(ui, &mut s, k, &f, trf("Import {}", &[&name]));
+                }
+                refresh(ui, &st.borrow());
+            });
         });
     }
 }

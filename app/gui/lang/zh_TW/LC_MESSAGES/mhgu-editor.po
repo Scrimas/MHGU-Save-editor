@@ -12,57 +12,60 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "{}: {} to {}. Opens the field."
 msgstr "{}：{} 改為 {}。開啟該欄位。"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "{}. Opens the field."
 msgstr "{}。開啟該欄位。"
 
-#: app/gui/ui/app.slint app/gui/ui/common.slint app/gui/ui/pages/overview.slint
+#: app/gui/ui/app.slint app/gui/ui/common.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
 msgid "Undo"
 msgstr "復原"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/app.slint app/gui/ui/common.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/mobile/sheets.slint
 msgid "and {} more"
 msgstr "以及其他 {} 項"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Review"
 msgstr "審閱"
 
 #: app/gui/ui/app.slint app/gui/ui/common.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/mobile/widgets.slint
 msgid "Close"
 msgstr "關閉"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one."
 msgstr "尚無暫存的變更。每項變更都會在此顯示其取代的值，並可逐一復原。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Derived: worked out from the game's code, not yet checked in game. Untagged changes are confirmed in game."
 msgstr "推導：根據遊戲程式碼推算得出，尚未在遊戲中驗證。未標記的變更均已在遊戲中確認。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Undo all"
 msgstr "全部復原"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Write…"
 msgstr "寫入…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "What changes"
 msgstr "變更內容"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Back to Review"
 msgstr "返回審閱"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Before writing"
 msgstr "寫入前"
 
@@ -84,7 +87,7 @@ msgstr "請先將其關閉：它結束時會覆寫存檔。"
 msgid "Check again"
 msgstr "重新檢查"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Take a snapshot first (recommended)"
 msgstr "先建立快照（建議）"
 
@@ -93,42 +96,43 @@ msgid "You can restore it any time from Snapshots in the sidebar."
 msgstr "可隨時透過側邊欄中的「快照」還原。"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "{n} change is Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on."
 msgid_plural "{n} changes are Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on."
 msgstr[0] "{n} 項變更為推導：根據遊戲程式碼推算得出，尚未在遊戲中驗證。請保持快照開啟。"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "{n} change is Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back."
 msgid_plural "{n} changes are Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back."
 msgstr[0] "{n} 項變更為推導：根據遊戲程式碼推算得出，尚未在遊戲中驗證。快照可讓你恢復原狀。"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
+#: app/gui/ui/mobile/write.slint
 msgid "{n} value the game cannot produce is written as it is."
 msgid_plural "{n} values the game cannot produce are written as they are."
 msgstr[0] "{n} 個遊戲無法產生的值將按原樣寫入。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Files"
 msgstr "檔案"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "The data goes into the save file."
 msgstr "資料將寫入該存檔檔案。"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "The same data goes into all {n} save file."
 msgid_plural "The same data goes into all {n} save files."
 msgstr[0] "相同的資料將寫入全部 {n} 個存檔檔案。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Hide paths"
 msgstr "隱藏路徑"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Show paths"
 msgstr "顯示路徑"
 
@@ -137,28 +141,30 @@ msgid "The emulator keeps two copies of the save, each with a backup; every one 
 msgstr "模擬器會保存兩份存檔，各附一份備份；每份都寫入相同的位元組，並保留各自的檔頭。"
 
 #: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
-#: app/gui/ui/fill.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/overview.slint
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/equipment.slint
 #: app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "取消"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Snapshot and write"
 msgstr "建立快照並寫入"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/write.slint
 msgid "Write without snapshot"
 msgstr "不建立快照直接寫入"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "Snapshots"
 msgstr "快照"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "A copy of the whole save folder, taken before each write and before each restore."
 msgstr "整個存檔資料夾的副本，在每次寫入與每次還原前建立。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "No snapshots of this save yet. Write takes one first unless you untick it."
 msgstr "此存檔尚無快照。寫入時會先建立快照，除非取消勾選。"
 
@@ -167,6 +173,7 @@ msgid "Compare"
 msgstr "比較"
 
 #: app/gui/src/views/file.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "Restore…"
 msgstr "還原…"
 
@@ -175,15 +182,15 @@ msgid "Open folder"
 msgstr "開啟資料夾"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Restore the save from {}?"
 msgstr "要從 {} 還原存檔嗎？"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Every save file goes back to that copy. The save as it is now is snapshotted first, so you can undo this from Snapshots."
 msgstr "所有存檔檔案都將還原為該副本。還原前會先為目前的存檔建立快照，因此可透過「快照」復原此操作。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Your staged change is dropped."
 msgid_plural "Your {n} staged changes are dropped."
 msgstr[0] "暫存的 {n} 項變更將被捨棄。"
@@ -193,7 +200,7 @@ msgstr[0] "暫存的 {n} 項變更將被捨棄。"
 msgid "{} is running. Close it first: it overwrites the save when it exits."
 msgstr "{} 正在執行。請先將其關閉：它結束時會覆寫存檔。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Restore"
 msgstr "還原"
 
@@ -363,7 +370,7 @@ msgstr "發行頁面 ↗"
 msgid "Appearance"
 msgstr "外觀"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Saves"
 msgstr "存檔"
 
@@ -383,27 +390,29 @@ msgstr "更新與版本"
 msgid "Advanced"
 msgstr "進階"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/mobile/sheets.slint
 msgid "Settings"
 msgstr "設定"
 
 #: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Language"
 msgstr "語言"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Theme"
 msgstr "主題"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "System"
 msgstr "跟隨系統"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Light"
 msgstr "淺色"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Dark"
 msgstr "深色"
 
@@ -443,7 +452,8 @@ msgstr "開啟於"
 msgid "The page shown when a save opens"
 msgstr "開啟存檔時顯示的頁面"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/overview.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/overview.slint
 msgid "Overview"
 msgstr "總覽"
 
@@ -463,7 +473,7 @@ msgstr "切換頁面、卡片移到新位置、滑動與淡入淡出。"
 msgid "Open the last save on start"
 msgstr "啟動時開啟上次的存檔"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/open.slint
 msgid "Recent saves"
 msgstr "最近的存檔"
 
@@ -653,63 +663,69 @@ msgid "Release notes"
 msgstr "更新說明"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
 msgid "MHGU Save Editor — {}"
 msgstr "MHGU 存檔編輯器 — {}"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint app/gui/ui/mobile/nav.slint
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/mobile/sheets.slint
 msgid "MHGU Save Editor"
 msgstr "MHGU 存檔編輯器"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/character.slint
 msgid "Character"
 msgstr "角色"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/items.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
 msgid "Items"
 msgstr "道具"
 
 #: app/gui/src/targets.rs app/gui/src/views/sets_ui.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Equipment"
 msgstr "裝備"
 
 #: app/gui/src/targets.rs app/gui/src/views/palicoes.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/palicoes.slint
 msgid "Palicoes"
 msgstr "隨從"
 
 #: app/gui/src/targets.rs app/gui/src/views/quests.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/quests.slint
 msgid "Quests"
 msgstr "任務"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/requests.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/requests.slint
 msgid "Requests"
 msgstr "委託"
 
 #: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/collections.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/collections.slint
 msgid "Collections"
 msgstr "收集"
 
 #: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/unlocks.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/unlocks.slint
 msgid "Unlocks"
 msgstr "解鎖"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
 msgid "Monsters"
 msgstr "魔物"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/cards.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/cards.slint
 msgid "Guild Cards"
 msgstr "公會名片"
 
 #: app/gui/src/targets.rs app/gui/src/views/options_ui.rs app/gui/ui/app.slint
-#: app/gui/ui/pages/options.slint
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/options.slint
 msgid "Options"
 msgstr "選項"
 
@@ -730,7 +746,9 @@ msgstr "角色…"
 msgid "Snapshots…"
 msgstr "快照…"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/open.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/mobile/sheets.slint
+#: app/gui/ui/pages/open.slint
 msgid "Open save…"
 msgstr "開啟存檔…"
 
@@ -738,7 +756,8 @@ msgstr "開啟存檔…"
 msgid "Settings…"
 msgstr "設定…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "About"
 msgstr "關於"
 
@@ -885,14 +904,17 @@ msgid "More information"
 msgstr "更多資訊"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+#: app/gui/ui/mobile/widgets.slint
 msgid "Confirmed"
 msgstr "已確認"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+#: app/gui/ui/mobile/widgets.slint
 msgid "Derived"
 msgstr "推導"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
+#: app/gui/ui/mobile/widgets.slint
 msgid "Unresolved"
 msgstr "未確定"
 
@@ -909,7 +931,8 @@ msgid "Unresolved: what this value means in game is not known yet, so it is show
 msgstr "未確定：此值在遊戲中的含義尚不清楚，因此僅顯示，不可編輯。"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/common.slint
+#: app/gui/ui/common.slint app/gui/ui/mobile/nav.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "{}, {n} value not written"
 msgid_plural "{}, {n} values not written"
 msgstr[0] "{}，{n} 個值未寫入"
@@ -984,6 +1007,293 @@ msgstr "數量"
 msgid "Staged: undo it in Review until you write."
 msgstr "已暫存：寫入之前可以在審閱中復原。"
 
+#: app/gui/ui/mobile/app.slint app/gui/ui/mobile/sheets.slint
+msgid "More"
+msgstr "更多"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/app.slint
+msgid "{} · slot {} · HR {}"
+msgstr "{} · 存檔位 {} · HR {}"
+
+#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
+#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
+#: app/gui/ui/mobile/app.slint
+msgid "Added to Review"
+msgstr "已加入審閱"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Leave without writing?"
+msgstr "不寫入就離開嗎？"
+
+#: app/gui/ui/mobile/app.slint
+msgid "The changes in Review are not in the save yet. Leaving drops them."
+msgstr "審閱中的變更尚未寫入存檔。離開會捨棄這些變更。"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Leave"
+msgstr "離開"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Open another save?"
+msgstr "要開啟另一個存檔嗎？"
+
+#: app/gui/ui/mobile/app.slint
+msgid "The changes in Review are not in the save yet. Opening another save drops them."
+msgstr "審閱中的變更尚未寫入存檔。開啟另一個存檔會捨棄這些變更。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/app.slint
+#: app/gui/ui/pages/requests.slint
+msgid "Open"
+msgstr "未報告"
+
+#: app/gui/ui/mobile/nav.slint
+msgid "Every page"
+msgstr "所有頁面"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/mobile/nav.slint app/gui/ui/mobile/widgets.slint
+msgid "Review, {n} change not written yet"
+msgid_plural "Review, {n} changes not written yet"
+msgstr[0] "審閱，{n} 項變更尚未寫入"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Undo {}"
+msgstr "復原 {}"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Every page shows the character picked here."
+msgstr "每個頁面都會顯示在此選擇的角色。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {}, {}"
+msgstr "存檔位 {}，{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {}, empty"
+msgstr "存檔位 {}，空"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {} · empty"
+msgstr "存檔位 {} · 空"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/sheets.slint
+msgid "Slot {} · HR {} · {}"
+msgstr "存檔位 {} · HR {} · {}"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "A save editor for Monster Hunter Generations Ultimate. Free software under the GNU GPL, version 3 or later."
+msgstr "《魔物獵人 XX Nintendo Switch Ver.》（Monster Hunter Generations Ultimate）的存檔編輯器。以 GNU GPL 第 3 版或更新版本授權的自由軟體。"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Material 3 components: Slint's Material library, MIT licence."
+msgstr "Material 3 元件：Slint 的 Material 函式庫，MIT 授權。"
+
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/mobile/sheets.slint
+msgid "Export and import"
+msgstr "匯出與匯入"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "In MHGU Recomp: Settings › Android › Export save, into a folder such as Download."
+msgstr "在 MHGU Recomp 中：Settings › Android › Export save，匯出到 Download 等資料夾。"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Here: open the system file it made, edit, and Write."
+msgstr "在這裡：開啟它產生的 system 檔案，編輯後寫入。"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "In MHGU Recomp: Import save, and pick the same system and system_backup files."
+msgstr "在 MHGU Recomp 中：Import save，並選擇同樣的 system 與 system_backup 檔案。"
+
+#: app/gui/ui/mobile/sheets.slint
+msgid "Open the system file"
+msgstr "開啟 system 檔案"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint
+msgid "Switch character, slot {}, {}"
+msgstr "切換角色，存檔位 {}，{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint
+msgid "Switch character, slot {}"
+msgstr "切換角色，存檔位 {}"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "More options"
+msgstr "更多選項"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "Back"
+msgstr "返回"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint
+msgid "Review · {}"
+msgstr "審閱 · {}"
+
+#: app/gui/ui/mobile/write.slint
+msgid "MHGU Recomp is closed"
+msgstr "MHGU Recomp 已關閉"
+
+#: app/gui/ui/mobile/write.slint
+msgid "Use Exit game in its menu first: it overwrites the save when it exits. Android doesn't let the editor check this itself."
+msgstr "請先使用其選單中的 Exit game：它結束時會覆寫存檔。Android 不讓編輯器自行檢查這一點。"
+
+#: app/gui/ui/mobile/write.slint
+msgid "You can restore it any time from Snapshots in More."
+msgstr "可隨時透過「更多」中的「快照」還原。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Settings and About"
+msgstr "設定與關於"
+
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/pages/open.slint
+msgid "Open a save"
+msgstr "開啟存檔"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Pick the save of Monster Hunter Generations Ultimate. Nothing is written until you press Write."
+msgstr "選擇《魔物獵人 XX Nintendo Switch Ver.》的存檔。按下寫入之前不會寫入任何內容。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "MHGU Recomp folder"
+msgstr "MHGU Recomp 資料夾"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Recommended"
+msgstr "建議"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Set the Recomp's Save folder to a shared folder once, then pick that folder here. The editor reads and writes the save in it directly."
+msgstr "先將 Recomp 的 Save folder 設為一個共用資料夾，再在這裡選擇該資料夾。編輯器會直接讀寫其中的存檔。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Pick the save folder"
+msgstr "選擇存檔資料夾"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "How to set it up"
+msgstr "設定方式"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Other ways"
+msgstr "其他方式"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "In MHGU Recomp, Export save. Here, open that system file and Write. Then Import save in the Recomp."
+msgstr "在 MHGU Recomp 中 Export save。在這裡開啟該 system 檔案並寫入。然後在 Recomp 中 Import save。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Any system file"
+msgstr "任何 system 檔案"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "An emulator's save copied out (Eden, Citron, Sudachi…), or a JKSV or Checkpoint backup from a Switch."
+msgstr "從模擬器複製出的存檔（Eden、Citron、Sudachi…），或 Switch 上以 JKSV 或 Checkpoint 製作的備份。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Close the game before writing: it overwrites the save when it exits."
+msgstr "寫入前請關閉遊戲：遊戲結束時會覆寫存檔。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Android keeps each app's folder private, so the save needs a shared folder. You do this once."
+msgstr "Android 會將每個應用程式的資料夾設為私人，所以存檔需要一個共用資料夾。只需設定一次。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "In MHGU Recomp"
+msgstr "在 MHGU Recomp 中"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Settings › Android › Save folder"
+msgstr "Settings › Android › Save folder"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Make a folder in Download, for example MHGU, and pick it. The Recomp then keeps its save there, in save_0."
+msgstr "在 Download 中建立一個資料夾，例如 MHGU，並選擇它。之後 Recomp 會將存檔放在其中的 save_0。"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Here"
+msgstr "在這裡"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Pick that folder"
+msgstr "選擇該資料夾"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "Android's folder picker opens. Go to Download › MHGU, tap Use this folder, then Allow. Download itself can't be picked."
+msgstr "Android 的資料夾選擇器會開啟。前往 Download › MHGU，輕觸「使用這個資料夾」，再輕觸「允許」。無法直接選擇 Download 本身。"
+
+#: app/gui/ui/mobile/pages/open.slint app/gui/ui/pages/items.slint
+msgid "Done"
+msgstr "完成"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "The save opens"
+msgstr "存檔隨即開啟"
+
+#: app/gui/ui/mobile/pages/open.slint
+msgid "The editor reads and writes save_0/system and system_backup directly. Before Write, use Exit game in the Recomp: it overwrites the save when it exits."
+msgstr "編輯器會直接讀寫 save_0/system 與 system_backup。寫入前，請在 Recomp 中使用 Exit game：它結束時會覆寫存檔。"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "In Review"
+msgstr "已在審閱中"
+
+#: app/gui/ui/mobile/pages/overview.slint
+msgid "Preview"
+msgstr "預覽"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/character.slint
+msgid "Confirmed in game except where marked"
+msgstr "除標記處外均已在遊戲中確認"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Quick goals"
+msgstr "快速目標"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Each goal adds its changes to Review. Nothing is written until you press Write."
+msgstr "每個目標都會把其變更加入審閱。在按下寫入之前不會寫入任何內容。"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Every goal is already in this save."
+msgstr "此存檔已具備所有目標。"
+
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+msgid "Already in your save"
+msgstr "存檔中已具備"
+
+#: app/gui/ui/mobile/pages/overview.slint
+msgid "Show less"
+msgstr "顯示較少"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/overview.slint
+msgid "Show all {}"
+msgstr "顯示全部（{}）"
+
+#: app/gui/ui/mobile/pages/placeholder.slint
+msgid "This page is not on phones and tablets yet: the desktop editor has it."
+msgstr "手機與平板尚未提供此頁面：電腦版編輯器有。"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Take a snapshot before writing"
+msgstr "寫入前先建立快照"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Write starts with this ticked."
+msgstr "寫入時預設勾選此項。"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Open the last save at start"
+msgstr "啟動時開啟上次的存檔"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/advanced.slint
 msgid "Every byte range of the save, named from the game's own loader · read-only, character {}"
@@ -1050,10 +1360,6 @@ msgstr "取消拒收"
 #: app/gui/ui/pages/sets.slint
 msgid "The game cannot make this: {}."
 msgstr "遊戲無法產生此項：{}。"
-
-#: app/gui/ui/pages/character.slint
-msgid "Confirmed in game except where marked"
-msgstr "除標記處外均已在遊戲中確認"
 
 #: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
 msgid "Hunter"
@@ -2069,10 +2375,6 @@ msgstr "空位置"
 msgid "Empty slot"
 msgstr "空格"
 
-#: app/gui/ui/pages/items.slint
-msgid "Done"
-msgstr "完成"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/monsters.slint
 msgid "Hunted {}"
@@ -2151,10 +2453,6 @@ msgid "No monster matches the search."
 msgstr "沒有符合搜尋的魔物。"
 
 #: app/gui/ui/pages/open.slint
-msgid "Open a save"
-msgstr "開啟存檔"
-
-#: app/gui/ui/pages/open.slint
 msgid "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit."
 msgstr "選擇 Monster Hunter Generations Ultimate（Switch）的 system 檔案。在 Ryujinx 中，它位於 bis/user/save/<id>/0/。寫入前請關閉模擬器：模擬器結束時會覆蓋存檔。"
 
@@ -2179,10 +2477,6 @@ msgid "Showing"
 msgstr "顯示"
 
 #: app/gui/ui/pages/overview.slint
-msgid "In Review"
-msgstr "已在審閱中"
-
-#: app/gui/ui/pages/overview.slint
 msgid "Preview…"
 msgstr "預覽…"
 
@@ -2190,22 +2484,6 @@ msgstr "預覽…"
 #: app/gui/ui/pages/overview.slint
 msgid "Character {}, {} · confirmed in game except where marked"
 msgstr "角色{}，{} · 除標註處外皆已在遊戲中確認"
-
-#: app/gui/ui/pages/overview.slint
-msgid "Quick goals"
-msgstr "快速目標"
-
-#: app/gui/ui/pages/overview.slint
-msgid "Each goal adds its changes to Review. Nothing is written until you press Write."
-msgstr "每個目標都會把其變更加入審閱。在按下寫入之前不會寫入任何內容。"
-
-#: app/gui/ui/pages/overview.slint
-msgid "Every goal is already in this save."
-msgstr "此存檔已具備所有目標。"
-
-#: app/gui/ui/pages/overview.slint
-msgid "Already in your save"
-msgstr "存檔中已具備"
 
 #: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
 #: app/gui/ui/pages/palicoes.slint
@@ -2396,10 +2674,6 @@ msgstr "沒有符合搜尋的任務。"
 #: app/gui/ui/pages/requests.slint
 msgid "Search requests or villages"
 msgstr "搜尋委託或村莊"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Open"
-msgstr "未報告"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
 msgid "Reported"
@@ -3489,6 +3763,18 @@ msgstr[0] "{} 位元組"
 msgid "{} at {}{}. The Save map names every range."
 msgstr "{}，位於 {}{}。存檔結構列出了每個範圍。"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/picker.rs app/gui/src/android/source.rs
+#: app/gui/src/platform.rs app/gui/src/views/file.rs
+msgid "Could not read {}: {}"
+msgstr "無法讀取 {}：{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/picker.rs app/gui/src/android/source.rs
+#: app/gui/src/platform.rs
+msgid "Could not write {}: {}"
+msgstr "無法寫入 {}：{}"
+
 #: app/gui/src/system.rs
 msgid "The emulator"
 msgstr "模擬器"
@@ -4081,6 +4367,34 @@ msgstr "隨從裝備箱第 {} 格中沒有{}"
 msgid "not a body type of the game"
 msgstr "不是遊戲中的體型"
 
+#: app/gui/src/android/source.rs
+msgid "No MHGU save in that folder: it has no system file, in it or in save_0 inside it."
+msgstr "該資料夾中沒有 MHGU 存檔：資料夾內及其中的 save_0 都沒有 system 檔案。"
+
+#: app/gui/src/android/source.rs
+msgid "No file picked"
+msgstr "未選擇檔案"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "{} and its backup"
+msgstr "{} 及其備份"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "The editor can no longer open {}. Pick it again: Android drops the editor's access when the editor is reinstalled or the folder is moved."
+msgstr "編輯器已無法開啟 {}。請重新選擇：重新安裝編輯器或移動資料夾後，Android 會收回編輯器的存取權。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "{} does not read back as written"
+msgstr "{} 讀回的內容與寫入的不同"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/android/source.rs
+msgid "Could not read {} back: {}"
+msgstr "無法讀回 {}：{}"
+
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/advanced.rs
 msgid "… {} more byte"
@@ -4400,23 +4714,8 @@ msgstr "寫入存檔、玩家紀錄和公會名片"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
-msgid "Could not write {}: {}"
-msgstr "無法寫入 {}：{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs app/gui/src/views/file.rs
-msgid "Could not read {}: {}"
-msgstr "無法讀取 {}：{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
 msgid "slot {}"
 msgstr "存檔位 {}"
-
-#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
-#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
-msgid "Added to Review"
-msgstr "已加入審閱"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
@@ -4451,12 +4750,22 @@ msgid "Exported {}"
 msgstr "已匯出 {}"
 
 #: app/gui/src/views/characters.rs
+msgid "MHXX save (system)"
+msgstr "MHXX 存檔（system）"
+
+#: app/gui/src/views/characters.rs
 msgid "Import character"
 msgstr "匯入角色"
 
+#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
-msgid "MHXX save (system)"
-msgstr "MHXX 存檔（system）"
+msgid "MHXX save to put {} in"
+msgstr "用於放入 {} 的 MHXX 存檔"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/characters.rs
+msgid "Not an MHXX save: {}"
+msgstr "不是 MHXX 存檔：{}"
 
 #: app/gui/src/views/characters.rs
 msgid "Not imported: the file is not a character exported by this editor"
@@ -4477,16 +4786,6 @@ msgstr "未匯入：該 MHXX 存檔中沒有角色"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
-msgid "MHXX save to put {} in"
-msgstr "用於放入 {} 的 MHXX 存檔"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
-msgid "Not an MHXX save: {}"
-msgstr "不是 MHXX 存檔：{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/characters.rs
 msgid "Which character of {} goes into slot {}?"
 msgstr "將 {} 中的哪個角色放入存檔位 {}？"
 
@@ -4501,16 +4800,16 @@ msgid "Import {} from MHXX into slot {}"
 msgstr "將 {} 從 MHXX 匯入存檔位 {}"
 
 #: app/gui/src/views/characters.rs
-msgid "Save the MHXX save"
-msgstr "儲存 MHXX 存檔"
-
-#: app/gui/src/views/characters.rs
 msgid "Restore it on the 3DS with JKSM or Checkpoint"
 msgstr "請在 3DS 上使用 JKSM 或 Checkpoint 還原"
 
 #: app/gui/src/views/characters.rs
 msgid "Restore it on the Switch with JKSV or Checkpoint"
 msgstr "請在 Switch 上使用 JKSV 或 Checkpoint 還原"
+
+#: app/gui/src/views/characters.rs
+msgid "Save the MHXX save"
+msgstr "儲存 MHXX 存檔"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs
@@ -5073,6 +5372,11 @@ msgstr "路徑已複製"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/file.rs
+msgid "Nothing written: could not read {}: {}"
+msgstr "未寫入任何內容：無法讀取 {}：{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/file.rs
 msgid "Snapshot failed, nothing written: {}"
 msgstr "快照失敗，未寫入任何內容：{}"
 
@@ -5495,6 +5799,11 @@ msgid "Redid {n} change"
 msgid_plural "Redid {n} changes"
 msgstr[0] "已重做 {n} 項變更"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/mod.rs
+msgid "Could not read the save again: {}"
+msgstr "無法重新讀取存檔：{}"
+
 #: app/gui/src/views/mod.rs
 msgid "Read the save again"
 msgstr "重新讀取存檔"
@@ -5504,11 +5813,6 @@ msgstr "重新讀取存檔"
 msgid "{n} staged change kept"
 msgid_plural "{n} staged changes kept"
 msgstr[0] "已保留 {n} 項待寫入的變更"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/mod.rs
-msgid "Could not read the save again: {}"
-msgstr "無法重新讀取存檔：{}"
 
 #: app/gui/src/views/monsters_page.rs
 msgid "Bird Wyvern"

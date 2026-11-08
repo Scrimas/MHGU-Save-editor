@@ -1,0 +1,233 @@
+// Navigation: the bottom bar (compact windows), the rail and the drawer with every page
+// (from 600 dp: tablets, a foldable's inner screen, landscape).
+import { M } from "theme.slint";
+import { Ico, Press, ReviewFab, Tap } from "widgets.slint";
+import { Api, Fmt } from "../common.slint";
+
+export struct Dest { id: string, label: string, icon: image, icon-on: image, badge: int }
+
+// The badge on a destination: the values staged on its page(s).
+component Badge inherits Rectangle {
+    in property <int> count;
+    width: max(16px, t.preferred-width + 8px);
+    height: 16px;
+    border-radius: 8px;
+    background: M.primary;
+    t := Text { text: root.count > 999 ? "999+" : Fmt.num(root.count); color: M.on-primary; font-size: M.label-small; font-weight: M.medium; }
+}
+
+component NavItem inherits Rectangle {
+    in property <Dest> d;
+    in property <bool> on;
+    in property <bool> vertical-label: true;
+    callback clicked();
+    accessible-role: tab;
+    accessible-label: root.d.badge > 0 ? @tr("{}, {n} value not written" | "{}, {n} values not written" % root.d.badge, root.d.label) : root.d.label;
+    accessible-item-selectable: true;
+    accessible-item-selected: root.on;
+    accessible-action-default => { root.clicked(); }
+    VerticalLayout {
+        alignment: center;
+        spacing: 4px;
+        HorizontalLayout {
+            alignment: center;
+            pill := Rectangle {
+                width: 64px;
+                height: 32px;
+                border-radius: 16px;
+                background: root.on ? M.secondary-container : transparent;
+                Press { on: ta.pressed; border-radius: parent.border-radius; }
+                Ico { source: root.on ? root.d.icon-on : root.d.icon; tint: root.on ? M.on-secondary-container : M.on-surface-variant; }
+                if root.d.badge > 0: Badge { x: 36px; y: 0; count: root.d.badge; }
+            }
+        }
+        Text {
+            text: root.d.label;
+            color: root.on ? M.on-surface : M.on-surface-variant;
+            font-size: M.label-medium;
+            font-weight: root.on ? M.bold : M.medium;
+            horizontal-alignment: center;
+            overflow: elide;
+        }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// The navigation bar: five destinations; `current` is the one of the page shown.
+export component NavBar inherits Rectangle {
+    in property <[Dest]> items;
+    in property <int> current;
+    in property <length> bottom-inset;
+    callback picked(int);
+    height: 80px + root.bottom-inset;
+    background: M.s-cont;
+    accessible-role: tab-list;
+    HorizontalLayout {
+        height: 80px;
+        y: 0;
+        for d[i] in root.items: NavItem {
+            horizontal-stretch: 1;
+            d: d;
+            on: i == root.current;
+            clicked => { root.picked(i); }
+        }
+    }
+}
+
+// The navigation rail: the drawer's button, the Review button while changes wait, then
+// the same five destinations.
+export component NavRail inherits Rectangle {
+    in property <[Dest]> items;
+    in property <int> current;
+    in property <length> top-inset;
+    in property <length> left-inset;
+    callback picked(int);
+    callback menu();
+    callback review();
+    width: 80px + root.left-inset;
+    background: M.surface;
+    accessible-role: tab-list;
+    VerticalLayout {
+        x: root.left-inset;
+        width: 80px;
+        padding-top: root.top-inset + 12px;
+        spacing: 12px;
+        alignment: start;
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                width: M.touch;
+                height: M.touch;
+                border-radius: 24px;
+                accessible-role: button;
+                accessible-label: @tr("Every page");
+                accessible-action-default => { root.menu(); }
+                Press { on: mta.pressed; border-radius: parent.border-radius; }
+                Ico { source: @image-url("icons/menu.svg"); tint: M.on-surface-variant; }
+                mta := Tap { tapped => { root.menu(); } }
+            }
+        }
+        // a small Review button: the count under the icon
+        HorizontalLayout {
+            alignment: center;
+            height: 56px;
+            if Api.change-count > 0: Rectangle {
+                width: 56px;
+                height: 56px;
+                border-radius: 16px;
+                background: M.primary-container;
+                drop-shadow-blur: 6px;
+                drop-shadow-offset-y: 2px;
+                drop-shadow-color: M.shadow;
+                accessible-role: button;
+                accessible-label: @tr("Review, {n} change not written yet" | "Review, {n} changes not written yet" % Api.change-count);
+                accessible-action-default => { root.review(); }
+                Press { on: rta.pressed; tint: M.on-primary-container; border-radius: parent.border-radius; }
+                VerticalLayout {
+                    alignment: center;
+                    spacing: 2px;
+                    HorizontalLayout {
+                        alignment: center;
+                        Ico { source: @image-url("icons/review.svg"); tint: M.on-primary-container; }
+                    }
+                    Text { text: Fmt.num(Api.change-count); color: M.on-primary-container; font-size: M.label-medium; font-weight: M.medium; horizontal-alignment: center; }
+                }
+                rta := Tap { tapped => { root.review(); } }
+            }
+        }
+        for d[i] in root.items: NavItem {
+            height: 64px;
+            d: d;
+            on: i == root.current;
+            clicked => { root.picked(i); }
+        }
+    }
+}
+
+// One entry of the drawer.
+component DrawerItem inherits Rectangle {
+    in property <string> label;
+    in property <bool> on;
+    in property <int> badge;
+    callback clicked();
+    height: 56px;
+    border-radius: 28px;
+    background: root.on ? M.secondary-container : transparent;
+    accessible-role: button;
+    accessible-label: root.label;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 24px;
+        spacing: 12px;
+        Text {
+            text: root.label;
+            color: root.on ? M.on-secondary-container : M.on-surface-variant;
+            font-size: M.label-large;
+            font-weight: M.medium;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+        if root.badge > 0: Text { text: Fmt.num(root.badge); color: root.on ? M.on-secondary-container : M.on-surface-variant; font-size: M.label-large; font-weight: M.medium; vertical-alignment: center; }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+export struct DrawerEntry { id: string, label: string, badge: int, gap: bool }
+
+// The modal drawer: every page in the desktop's order, then the app's own screens.
+export component Drawer inherits Rectangle {
+    in property <bool> shown;
+    in property <[DrawerEntry]> entries;
+    in property <string> current;
+    in property <length> top-inset;
+    in property <length> left-inset;
+    // Android's predictive back while the drawer is what Back closes (0 to 1)
+    in property <float> drag;
+    callback picked(string);
+    callback close();
+    property <float> t: root.shown ? 1 : 0;
+    animate t { duration: M.anim; easing: ease-out; }
+    visible: self.t > 0.001;
+    Rectangle {
+        background: #000000.with-alpha(0.32 * root.t * (1 - 0.5 * root.drag));
+        Tap { tapped => { root.close(); } }
+    }
+    panel := Rectangle {
+        width: min(360px, root.width - 56px) + root.left-inset;
+        x: -self.width * (1 - root.t) - 16px * root.drag;
+        transform-scale-x: 1 - 0.1 * root.drag;
+        transform-scale-y: 1 - 0.1 * root.drag;
+        transform-origin: { x: 0, y: self.height / 2 };
+        background: M.s-low;
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+        TouchArea { }
+        Flickable {
+            content-width: self.width;
+            VerticalLayout {
+                padding-top: root.top-inset + 12px;
+                padding-left: root.left-inset + 12px;
+                padding-right: 12px;
+                padding-bottom: 12px;
+                HorizontalLayout {
+                    padding-left: 16px;
+                    Text { text: @tr("MHGU Save Editor"); height: 56px; color: M.on-surface-variant; font-size: M.title-medium; font-weight: M.medium; vertical-alignment: center; }
+                }
+                for e in root.entries: VerticalLayout {
+                    if e.gap: Rectangle {
+                        height: 17px;
+                        Rectangle { x: 16px; width: parent.width - 32px; height: 1px; background: M.outline-variant; }
+                    }
+                    DrawerItem {
+                        label: e.label;
+                        badge: e.badge;
+                        on: e.id == root.current;
+                        clicked => { root.picked(e.id); }
+                    }
+                }
+            }
+        }
+    }
+}

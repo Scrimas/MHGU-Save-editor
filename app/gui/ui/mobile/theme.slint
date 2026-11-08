@@ -1,0 +1,80 @@
+// Phone and tablet tokens: Material 3's colour roles (MaterialPalette: the wallpaper's
+// colours on Android 12 and newer, android/colors.rs; Material's defaults otherwise), the
+// editor's own confidence colours, the M3 type scale and the layout breakpoints.
+import { Palette } from "std-widgets.slint";
+import { MaterialPalette } from "@material";
+import { Confidence } from "../common.slint";
+
+export global M {
+    out property <bool> dark: Palette.color-scheme == ColorScheme.dark;
+    // colour roles
+    out property <color> primary: MaterialPalette.primary;
+    out property <color> on-primary: MaterialPalette.on-primary;
+    out property <color> primary-container: MaterialPalette.primary-container;
+    out property <color> on-primary-container: MaterialPalette.on-primary-container;
+    out property <color> secondary-container: MaterialPalette.secondary-container;
+    out property <color> on-secondary-container: MaterialPalette.on-secondary-container;
+    out property <color> tertiary-container: MaterialPalette.tertiary-container;
+    out property <color> on-tertiary-container: MaterialPalette.on-tertiary-container;
+    out property <color> surface: MaterialPalette.surface;
+    out property <color> s-lowest: MaterialPalette.surface-container-lowest;
+    out property <color> s-low: MaterialPalette.surface-container-low;
+    out property <color> s-cont: MaterialPalette.surface-container;
+    out property <color> s-high: MaterialPalette.surface-container-high;
+    out property <color> s-highest: MaterialPalette.surface-container-highest;
+    out property <color> on-surface: MaterialPalette.on-surface;
+    out property <color> on-surface-variant: MaterialPalette.on-surface-variant;
+    out property <color> outline: MaterialPalette.outline;
+    out property <color> outline-variant: MaterialPalette.outline-variant;
+    out property <color> inverse-surface: MaterialPalette.inverse-surface;
+    out property <color> inverse-on-surface: MaterialPalette.inverse-on-surface;
+    out property <color> inverse-primary: MaterialPalette.inverse-primary;
+    out property <color> error: MaterialPalette.error;
+    out property <color> on-error: MaterialPalette.on-error;
+    out property <color> error-container: MaterialPalette.error-container;
+    out property <color> on-error-container: MaterialPalette.on-error-container;
+    // grouped list rows: white cards on the surface in light, a step up in dark
+    out property <color> group: dark ? s-high : s-lowest;
+    // the editor's confidence colours (Confirmed, Derived), the same in every scheme
+    out property <color> ok: dark ? #7dd98a : #2e7d32;
+    out property <color> warn: dark ? #f2cc4d : #7a5900;
+    out property <color> warn-dot: dark ? #f2cc4d : #c49a00;
+    // game icons sit on the game's own dark tile in both schemes
+    out property <color> tile: #2b2b2b;
+    out property <color> scrim: #00000052;
+    out property <color> handle: on-surface-variant.with-alpha(0.4);
+    // pressed state layer: the content colour at 10 %
+    out property <float> press: 0.10;
+    out property <color> shadow: dark ? #00000080 : #00000033;
+
+    // type scale (M3): size, line height
+    out property <length> display-small: 36px;
+    out property <length> headline-small: 24px;
+    out property <length> title-large: 22px;
+    out property <length> title-medium: 16px;
+    out property <length> body-large: 16px;
+    out property <length> body-medium: 14px;
+    out property <length> label-large: 14px;
+    out property <length> label-medium: 12px;
+    out property <length> body-small: 12px;
+    out property <length> label-small: 11px;
+    out property <int> regular: 400;
+    out property <int> medium: 500;
+    out property <int> bold: 700;
+
+    // layout
+    out property <length> gutter: 16px;
+    out property <length> touch: 48px;
+    out property <duration> anim: 180ms;
+    // window width classes: compact (phone, a fold's cover screen), medium (rail),
+    // expanded (list and detail side by side)
+    out property <length> medium-from: 600px;
+    out property <length> expanded-from: 840px;
+
+    public pure function confidence-color(c: Confidence) -> color {
+        return c == Confidence.confirmed ? M.ok : c == Confidence.derived ? M.warn : M.error;
+    }
+    public pure function confidence-dot(c: Confidence) -> color {
+        return c == Confidence.confirmed ? M.ok : c == Confidence.derived ? M.warn-dot : M.error;
+    }
+}

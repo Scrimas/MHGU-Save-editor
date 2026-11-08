@@ -25,14 +25,23 @@ fn compressed(src: &Path, dest: &Path) -> PathBuf {
 }
 
 fn main() {
-    // Fluent on both platforms: it follows the system light/dark setting. The @tr strings'
-    // translations are bundled from lang/ (tools/i18n.py), without the component name as
-    // context: src/i18n.rs reads the same catalogs.
+    // The @tr strings' translations are bundled from lang/ (tools/i18n.py), without the
+    // component name as context: src/i18n.rs reads the same catalogs.
     let config = slint_build::CompilerConfiguration::new()
-        .with_style("fluent".into())
         .with_bundled_translations("lang")
         .with_default_translation_context(slint_build::DefaultTranslationContext::None);
-    slint_build::compile_with_config("ui/app.slint", config).unwrap();
+    // Phones and tablets (Android, or the desktop with --features mobile): Material 3 from
+    // Slint's Material library (ui/material, imported as "@material"). Both roots export
+    // AppWindow and the same Api global, so the Rust side is the same for both.
+    let mobile = std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("android") || std::env::var_os("CARGO_FEATURE_MOBILE").is_some();
+    if mobile {
+        let material = Path::new(env!("CARGO_MANIFEST_DIR")).join("ui/material/material.slint");
+        let config = config.with_style("material".into()).with_library_paths(std::collections::HashMap::from([("material".to_string(), material)]));
+        slint_build::compile_with_config("ui/mobile/app.slint", config).unwrap();
+    } else {
+        // Fluent on both desktops: it follows the system light/dark setting.
+        slint_build::compile_with_config("ui/app.slint", config.with_style("fluent".into())).unwrap();
+    }
 
     // Embed the generated game assets (app/assets/gen, made by tools/build_assets.py).
     let pack = Path::new(env!("CARGO_MANIFEST_DIR")).join("../assets/gen");

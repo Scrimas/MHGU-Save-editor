@@ -1,0 +1,217 @@
+// Write, full screen (reached from the end of Review): what changes, the game closed, a
+// snapshot first, the files. The one step that changes the files.
+import { M } from "theme.slint";
+import { Btn, CheckRow, ConfidenceLabel, Dot, GroupRow, Ico, Muted, SectionLabel, TopBar } from "widgets.slint";
+import { Api, Confidence, Fmt } from "../common.slint";
+
+export component WriteScreen inherits Rectangle {
+    in property <bool> open;
+    in property <length> top-inset;
+    in property <length> bottom-inset;
+    in property <length> side-inset;
+    // Android's predictive back while this screen is what Back closes (0 to 1): rounded
+    // corners as it shrinks (app.slint scales it)
+    in property <float> drag;
+    border-radius: 28px * root.drag;
+    clip: root.drag > 0;
+    callback close();
+    callback back-to-review();
+    // Android can't see other apps: the game being closed is confirmed here
+    property <bool> closed;
+    property <bool> snapshot: Api.settings.snapshot-first;
+    property <bool> paths;
+    changed open => {
+        if self.open {
+            self.closed = false;
+            self.snapshot = Api.settings.snapshot-first;
+            self.paths = false;
+        }
+    }
+    property <float> t: root.open ? 1 : 0;
+    animate t { duration: M.anim; easing: ease-out; }
+    visible: self.t > 0.001;
+    opacity: self.t;
+    background: M.surface;
+    accessible-role: groupbox;
+    accessible-label: Api.write-title;
+    // nothing under it takes the taps
+    TouchArea { }
+    VerticalLayout {
+        y: 24px * (1 - root.t);
+        padding-top: root.top-inset;
+        TopBar {
+            title: Api.write-title;
+            subtitle: Api.write-sub;
+            close: true;
+            back-clicked => { root.close(); }
+        }
+        Flickable {
+            content-width: self.width;
+            vertical-stretch: 1;
+            HorizontalLayout {
+                alignment: center;
+                VerticalLayout {
+                    max-width: 640px;
+                    horizontal-stretch: 1;
+                    padding-left: M.gutter + root.side-inset;
+                    padding-right: M.gutter + root.side-inset;
+                    padding-bottom: 16px;
+                    spacing: 2px;
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-top: 16px;
+                        padding-bottom: 8px;
+                        SectionLabel { text: @tr("What changes"); }
+                    }
+                    for r[i] in Api.write-rows: GroupRow {
+                        first: i == 0;
+                        last: false;
+                        height: max(48px, row.preferred-height);
+                        row := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 8px;
+                            VerticalLayout {
+                                horizontal-stretch: 1;
+                                alignment: center;
+                                Text { text: r.title; color: M.on-surface; font-size: M.body-medium; wrap: word-wrap; }
+                                if r.warning != "": Text { text: r.warning; color: M.error; font-size: M.body-small; wrap: word-wrap; }
+                            }
+                            if r.confidence != Confidence.confirmed: VerticalLayout {
+                                alignment: center;
+                                ConfidenceLabel { level: r.confidence; }
+                            }
+                            if r.right != "": Text { text: r.right; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                            if r.old != "": Text { text: r.old; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                            if r.old != "": Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                            if r.new != "": Text { text: r.new; color: r.warning != "" ? M.error : M.on-surface; font-size: M.body-medium; font-weight: M.medium; vertical-alignment: center; }
+                        }
+                    }
+                    GroupRow {
+                        first: Api.write-rows.length == 0;
+                        last: true;
+                        height: 48px;
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 4px;
+                            Rectangle { horizontal-stretch: 1; }
+                            VerticalLayout {
+                                alignment: center;
+                                Btn { kind: "text"; text: @tr("Back to Review"); clicked => { root.back-to-review(); } }
+                            }
+                        }
+                    }
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-top: 20px;
+                        padding-bottom: 8px;
+                        SectionLabel { text: @tr("Before writing"); }
+                    }
+                    GroupRow {
+                        first: true;
+                        height: c1.preferred-height;
+                        c1 := CheckRow {
+                            checked <=> root.closed;
+                            title: @tr("MHGU Recomp is closed");
+                            text: @tr("Use Exit game in its menu first: it overwrites the save when it exits. Android doesn't let the editor check this itself.");
+                        }
+                    }
+                    GroupRow {
+                        last: true;
+                        height: c2.preferred-height;
+                        c2 := CheckRow {
+                            checked <=> root.snapshot;
+                            title: @tr("Take a snapshot first (recommended)");
+                            text: @tr("You can restore it any time from Snapshots in More.");
+                        }
+                    }
+                    VerticalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        padding-top: 14px;
+                        spacing: 8px;
+                        if Api.derived-count > 0: HorizontalLayout {
+                            spacing: 12px;
+                            VerticalLayout {
+                                padding-top: 4px;
+                                Dot { level: Confidence.derived; }
+                            }
+                            Text {
+                                text: root.snapshot
+                                    ? @tr("{n} change is Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on." | "{n} changes are Derived: worked out from the game's code, not yet checked in game. Keep the snapshot on." % Api.derived-count)
+                                    : @tr("{n} change is Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back." | "{n} changes are Derived: worked out from the game's code, not yet checked in game. A snapshot lets you go back." % Api.derived-count);
+                                color: M.on-surface-variant;
+                                font-size: M.body-small;
+                                wrap: word-wrap;
+                                horizontal-stretch: 1;
+                            }
+                        }
+                        if Api.warn-count > 0: HorizontalLayout {
+                            spacing: 12px;
+                            Ico { source: @image-url("icons/warning.svg"); tint: M.error; width: 16px; height: 16px; }
+                            Text {
+                                text: @tr("{n} value the game cannot produce is written as it is." | "{n} values the game cannot produce are written as they are." % Api.warn-count) + " " + Api.warn-why;
+                                color: M.on-surface-variant;
+                                font-size: M.body-small;
+                                wrap: word-wrap;
+                                horizontal-stretch: 1;
+                            }
+                        }
+                    }
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-top: 20px;
+                        padding-bottom: 8px;
+                        SectionLabel { text: @tr("Files"); }
+                    }
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        spacing: 8px;
+                        Text {
+                            text: Api.write-targets.length == 1 ? @tr("The data goes into the save file.") : @tr("The same data goes into all {n} save file." | "The same data goes into all {n} save files." % Api.write-targets.length);
+                            color: M.on-surface;
+                            font-size: M.body-medium;
+                            wrap: word-wrap;
+                            horizontal-stretch: 1;
+                            vertical-alignment: center;
+                        }
+                        Btn { kind: "text"; text: root.paths ? @tr("Hide paths") : @tr("Show paths"); clicked => { root.paths = !root.paths; } }
+                    }
+                    if root.paths: VerticalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        spacing: 2px;
+                        if Api.source-label != "": Muted { text: Api.source-label; }
+                        for p in Api.write-targets: Text { text: p; color: M.on-surface-variant; font-size: M.body-small; font-family: "monospace"; wrap: char-wrap; }
+                    }
+                }
+            }
+        }
+        Rectangle { height: 1px; background: M.outline-variant; }
+        VerticalLayout {
+            padding-left: M.gutter + root.side-inset;
+            padding-right: M.gutter + root.side-inset;
+            padding-top: 12px;
+            padding-bottom: root.bottom-inset + 12px;
+            HorizontalLayout {
+                alignment: center;
+                Btn {
+                    big: true;
+                    max-width: 608px;
+                    horizontal-stretch: 1;
+                    enabled: root.closed && !Api.emulator-running;
+                    text: root.snapshot ? @tr("Snapshot and write") : @tr("Write without snapshot");
+                    icon: @image-url("icons/write.svg");
+                    has-icon: true;
+                    clicked => {
+                        if Api.write(root.snapshot) {
+                            root.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -96,6 +96,12 @@ fn toast(ui: &AppWindow, msg: impl Into<SharedString>, error: bool) {
     toast_full(ui, msg, "", "", ToastAct::None, error);
 }
 
+/// A toast with a second line, for code outside the views (android/).
+#[cfg_attr(not(target_os = "android"), allow(dead_code))]
+pub fn say(ui: &AppWindow, msg: &str, sub: &str, error: bool) {
+    toast_full(ui, msg.to_string(), sub, "", ToastAct::None, error);
+}
+
 /// "3 changes", the count of staged edits.
 fn changes(n: usize) -> String {
     trn("{n} change", "{n} changes", n as i64, &[])
@@ -277,14 +283,25 @@ pub fn refresh(ui: &AppWindow, st: &State) {
     let slots: Vec<SlotInfo> = (0..3)
         .map(|k| {
             let c = character::get(s, s.base(k));
-            SlotInfo { slot: k as i32, used: s.slot_used(k), name: c.name.into(), hr: c.hr as i32, playtime: fmt::playtime(c.playtime).into() }
+            SlotInfo {
+                slot: k as i32,
+                used: s.slot_used(k),
+                initial: c.name.chars().next().map(|x| x.to_uppercase().collect::<String>()).unwrap_or_default().into(),
+                name: c.name.into(),
+                hr: c.hr as i32,
+                playtime: fmt::playtime(c.playtime).into(),
+            }
         })
         .collect();
     api.set_other_characters(model(slots.iter().filter(|x| x.used && x.slot as usize != st.slot).cloned().collect()));
     api.set_slots(model(slots));
     review(ui, st);
     // paths elided in the middle, so the part that differs stays visible (02.4)
+    #[cfg(not(target_os = "android"))]
     api.set_write_targets(strings(doc.loc.copies.iter().map(|p| fmt::elide_path(&p.display().to_string(), 64))));
+    // Android: the picked files, not the app's copy of them
+    #[cfg(target_os = "android")]
+    api.set_write_targets(strings(crate::android::source::targets()));
     let warn: Vec<String> = doc.copies.iter().filter(|(_, c)| *c != store::CopyState::Same).map(|(p, c)| format!("{}: {:?}", p.display(), c)).collect();
     api.set_warning(if warn.is_empty() {
         "".into()
@@ -758,6 +775,10 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                 }
                 ToastAct::Update => ui.global::<Api>().set_update_open(true),
                 ToastAct::Reload => {
+                    #[cfg(target_os = "android")]
+                    if let Err(e) = crate::android::source::pull_again() {
+                        return toast(&ui, trf("Could not read the save again: {}", &[&e]), true);
+                    }
                     let r = st.borrow_mut().reload_keep();
                     refresh(&ui, &st.borrow());
                     match r {

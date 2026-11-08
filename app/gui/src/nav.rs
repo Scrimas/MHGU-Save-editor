@@ -4,6 +4,8 @@
 //! The history follows Api.page and the page's tab whoever sets them (sidebar, TabBar,
 //! Review, Overview cards), through `shown`, which the window calls on every page switch
 //! and a TabBar on every tab switch (Api.tab-shown).
+// the desktop's save detection, mouse buttons and keys: not all of it runs on Android
+#![cfg_attr(target_os = "android", allow(dead_code))]
 
 use crate::targets::PAGES;
 use crate::{Api, AppWindow, Tabs};

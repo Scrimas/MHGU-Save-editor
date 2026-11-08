@@ -42,15 +42,12 @@ fn save_csv(ui: &AppWindow, title: &str, name: &str, text: &str, said: String) {
     save_file(ui, title, (tr("CSV file"), "csv"), name, text.as_bytes(), (said, ""));
 }
 
-fn open_csv(ui: &AppWindow, title: &str) -> Option<String> {
-    let b = open_file(ui, title, tr("CSV file"), "csv")?;
-    match String::from_utf8(b) {
-        Ok(t) => Some(t.trim_start_matches('\u{feff}').to_string()),
-        Err(_) => {
-            toast(ui, tr("Not imported: the file is not UTF-8 text"), true);
-            None
-        }
-    }
+/// Ask for a CSV file and hand its text to `done`.
+fn open_csv(ui: &AppWindow, title: &str, done: impl FnOnce(&AppWindow, String) + 'static) {
+    open_file(ui, title, tr("CSV file"), "csv", move |ui, b| match String::from_utf8(b) {
+        Ok(t) => done(ui, t.trim_start_matches('\u{feff}').to_string()),
+        Err(_) => toast(ui, tr("Not imported: the file is not UTF-8 text"), true),
+    });
 }
 
 /// Stage `f` as one edit over many values of the character shown; lists the targets of
@@ -122,21 +119,26 @@ pub(super) fn wire_transfer(ui: &AppWindow, st: &Shared) {
             if st.borrow().doc.is_none() {
                 return;
             }
-            let Some(text) = open_csv(&ui, tr("Import the item box")) else { return };
-            let (n, en) = (assets::names(), assets::english());
-            let lookup = |name: &str| find(&n.items, &en.items, name).and_then(|i| u16::try_from(i).ok()).filter(|&i| i != 0);
-            let v = match transfer::read_items(&text, items::BOX_N, lookup) {
-                Ok(v) => v,
-                Err(e) => return toast_full(&ui, tr("Item box not imported"), &problem(&e), "", ToastAct::None, true),
-            };
-            {
-                let mut s = st.borrow_mut();
-                let all = (0..items::BOX_N).map(|i| Target::Item(Store::Box, i)).collect();
-                stage_many(&ui, &mut s, tr("Import the item box").into(), tr("Item box"), Conf::Confirmed, all, |sv, base| {
-                    items::set_all(sv, base, Store::Box, &v)
-                });
-            }
-            refresh(&ui, &st.borrow());
+            let st = st.clone();
+            open_csv(&ui, tr("Import the item box"), move |ui, text| {
+                if st.borrow().doc.is_none() {
+                    return;
+                }
+                let (n, en) = (assets::names(), assets::english());
+                let lookup = |name: &str| find(&n.items, &en.items, name).and_then(|i| u16::try_from(i).ok()).filter(|&i| i != 0);
+                let v = match transfer::read_items(&text, items::BOX_N, lookup) {
+                    Ok(v) => v,
+                    Err(e) => return toast_full(ui, tr("Item box not imported"), &problem(&e), "", ToastAct::None, true),
+                };
+                {
+                    let mut s = st.borrow_mut();
+                    let all = (0..items::BOX_N).map(|i| Target::Item(Store::Box, i)).collect();
+                    stage_many(ui, &mut s, tr("Import the item box").into(), tr("Item box"), Conf::Confirmed, all, |sv, base| {
+                        items::set_all(sv, base, Store::Box, &v)
+                    });
+                }
+                refresh(ui, &st.borrow());
+            });
         });
     }
     {
@@ -164,31 +166,36 @@ pub(super) fn wire_transfer(ui: &AppWindow, st: &Shared) {
                 return;
             }
             let owner = owner_of(&ui);
-            let Some(text) = open_csv(&ui, tr("Import the equipment box")) else { return };
-            let v = match transfer::read_equipment(&text, owner.len()) {
-                Ok(v) => v,
-                Err(e) => return toast_full(&ui, tr("Equipment box not imported"), &problem(&e), "", ToastAct::None, true),
-            };
-            let kept = {
-                let mut s = st.borrow_mut();
-                let (sv, base) = (s.save(), s.base());
-                // what the worn gear and the sets point at stays where it is
-                let used = transfer::referenced(sv, base, owner);
-                let kept = used.iter().filter(|&&i| v[i] != equipment::get(sv, base, owner, i)).count();
-                let all = (0..owner.len()).map(|i| Target::Equip(owner, i)).collect();
-                let title = if owner == Owner::Hunter { tr("Import the equipment box") } else { tr("Import the Palico equipment box") };
-                stage_many(&ui, &mut s, title.into(), tr("Equipment box"), Conf::Confirmed, all, |sv, base| {
-                    for (i, e) in v.iter().enumerate().filter(|(i, _)| !used.contains(i)) {
-                        equipment::set(sv, base, owner, i, e);
-                    }
-                });
-                kept
-            };
-            refresh(&ui, &st.borrow());
-            if kept > 0 {
-                let sub = trn("{n} entry kept as it was: worn or in a set", "{n} entries kept as they were: worn or in a set", kept as i64, &[]);
-                toast_full(&ui, tr("Added to Review"), &sub, "", ToastAct::None, false);
-            }
+            let st = st.clone();
+            open_csv(&ui, tr("Import the equipment box"), move |ui, text| {
+                if st.borrow().doc.is_none() {
+                    return;
+                }
+                let v = match transfer::read_equipment(&text, owner.len()) {
+                    Ok(v) => v,
+                    Err(e) => return toast_full(ui, tr("Equipment box not imported"), &problem(&e), "", ToastAct::None, true),
+                };
+                let kept = {
+                    let mut s = st.borrow_mut();
+                    let (sv, base) = (s.save(), s.base());
+                    // what the worn gear and the sets point at stays where it is
+                    let used = transfer::referenced(sv, base, owner);
+                    let kept = used.iter().filter(|&&i| v[i] != equipment::get(sv, base, owner, i)).count();
+                    let all = (0..owner.len()).map(|i| Target::Equip(owner, i)).collect();
+                    let title = if owner == Owner::Hunter { tr("Import the equipment box") } else { tr("Import the Palico equipment box") };
+                    stage_many(ui, &mut s, title.into(), tr("Equipment box"), Conf::Confirmed, all, |sv, base| {
+                        for (i, e) in v.iter().enumerate().filter(|(i, _)| !used.contains(i)) {
+                            equipment::set(sv, base, owner, i, e);
+                        }
+                    });
+                    kept
+                };
+                refresh(ui, &st.borrow());
+                if kept > 0 {
+                    let sub = trn("{n} entry kept as it was: worn or in a set", "{n} entries kept as they were: worn or in a set", kept as i64, &[]);
+                    toast_full(ui, tr("Added to Review"), &sub, "", ToastAct::None, false);
+                }
+            });
         });
     }
     {

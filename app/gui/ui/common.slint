@@ -3,7 +3,8 @@ import { Palette, Button, LineEdit, ListView } from "std-widgets.slint";
 
 export enum Confidence { confirmed, derived, unresolved }
 
-export struct SlotInfo { slot: int, used: bool, name: string, hr: int, playtime: string }
+// initial: the name's first letter (the phone's slot avatar)
+export struct SlotInfo { slot: int, used: bool, name: string, hr: int, playtime: string, initial: string }
 
 // One value of a change, in game terms: "Wycademy points  9,793,209 → 9,999,999".
 // warning: why the game cannot produce the new value ("" when it can)
@@ -377,6 +378,17 @@ export global Api {
     callback toast-act();
     callback open-dialog();
     callback open-path(string);
+    // Android: pick a folder holding the save (MHGU Recomp's save folder); the folder or
+    // files the open save came from, as the system's picker names them ("" on the desktop)
+    callback open-tree();
+    in property <string> source-label;
+    // Android's predictive back (android/back.rs): the gesture under way, how far (0 to 1),
+    // from the right edge; and whether Back has something to do in the app (a sheet, a page,
+    // changes to ask about): when it does not, Android plays its own back-to-home animation
+    in property <bool> back-active;
+    in property <float> back-progress;
+    in property <bool> back-from-right;
+    callback back-enabled(bool);
     // a drag from another app onto the window: whether it carries a file, and its drop (nav.rs)
     pure callback drag-has-file(data-transfer) -> bool;
     // a Picker's search: the positions of the choices that hold the text (all when empty)

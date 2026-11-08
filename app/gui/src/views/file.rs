@@ -15,7 +15,7 @@ fn emulator_blocks(ui: &AppWindow) -> bool {
 }
 
 /// A save on the Open screen: its characters (R12).
-pub(super) fn save_row(p: &Path) -> DetectedSave {
+pub fn save_row(p: &Path) -> DetectedSave {
     let info = system::save_info(p);
     let (title, sub) = match &info {
         Some(i) if !i.names.is_empty() => {
@@ -44,11 +44,17 @@ pub(super) fn save_row(p: &Path) -> DetectedSave {
 /// The Open screen's lists: recent saves still on disk, then the saves found on this
 /// computer that are not among them.
 pub fn detected(ui: &AppWindow) {
-    let recent: Vec<PathBuf> = settings::get().recent.into_iter().filter(|p| p.is_file()).collect();
-    let found: Vec<PathBuf> = system::detect_saves().into_iter().filter(|p| !recent.contains(p)).collect();
-    let api = ui.global::<Api>();
-    api.set_recent(model(recent.iter().map(|p| save_row(p)).collect()));
-    api.set_detected(model(found.iter().map(|p| save_row(p)).collect()));
+    // Android: the folders and files picked before (android/source.rs)
+    #[cfg(target_os = "android")]
+    crate::android::source::show_recent(ui);
+    #[cfg(not(target_os = "android"))]
+    {
+        let recent: Vec<PathBuf> = settings::get().recent.into_iter().filter(|p| p.is_file()).collect();
+        let found: Vec<PathBuf> = system::detect_saves().into_iter().filter(|p| !recent.contains(p)).collect();
+        let api = ui.global::<Api>();
+        api.set_recent(model(recent.iter().map(|p| save_row(p)).collect()));
+        api.set_detected(model(found.iter().map(|p| save_row(p)).collect()));
+    }
 }
 
 /// Snapshot folder of the open save.
@@ -65,7 +71,7 @@ pub fn open(ui: &AppWindow, st: &Shared, p: &Path) {
     open_now(ui, st, p);
 }
 
-pub(super) fn open_now(ui: &AppWindow, st: &Shared, p: &Path) {
+pub fn open_now(ui: &AppWindow, st: &Shared, p: &Path) {
     let r = st.borrow_mut().open(p);
     match r {
         Ok(()) => {
@@ -198,6 +204,8 @@ fn compare(ui: &AppWindow, st: &State, dir: &str, other: i32) {
 
 pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
+    // Android: the system's picker (android/source.rs sets these two)
+    #[cfg(not(target_os = "android"))]
     {
         let w = ui.as_weak();
         let st = st.clone();
@@ -262,6 +270,19 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
             changed_on_disk(&ui, &p);
             return false;
         }
+        // Android: the same for the picked files the copy goes back into
+        #[cfg(target_os = "android")]
+        match crate::android::source::check() {
+            crate::android::source::Check::Same => {}
+            crate::android::source::Check::Changed(name) => {
+                changed_on_disk(&ui, Path::new(&name));
+                return false;
+            }
+            crate::android::source::Check::Unreadable(name, e) => {
+                toast(&ui, trf("Nothing written: could not read {}: {}", &[&name, &e]), true);
+                return false;
+            }
+        }
         let mut kept = None;
         if snapshot {
             let now = chrono::Local::now();
@@ -277,7 +298,11 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
                 }
             }
         }
-        match store::write_all(&mut doc.save, &mut doc.loc) {
+        let written = store::write_all(&mut doc.save, &mut doc.loc);
+        // Android: the copy just written goes back into the picked files
+        #[cfg(target_os = "android")]
+        let written = written.and_then(|w| crate::android::source::push().map(|_| w).map_err(|e| mhgu_save::Error::Io(std::io::Error::other(e))));
+        match written {
             Ok(_) => {
                 s.written();
                 if let Some((p, ..)) = &kept {
@@ -364,7 +389,10 @@ pub(super) fn wire_file(ui: &AppWindow, st: &Shared) {
             }
             Err(e) => return toast(&ui, trf("Snapshot failed, nothing restored: {}", &[&e]), true),
         };
-        match store::restore(&loc, &dir) {
+        let restored = store::restore(&loc, &dir);
+        #[cfg(target_os = "android")]
+        let restored = restored.and_then(|r| crate::android::source::push().map(|_| r).map_err(|e| mhgu_save::Error::Io(std::io::Error::other(e))));
+        match restored {
             Ok(_) => {
                 // after the restore: the snapshot it came from may be among the oldest
                 system::prune_snapshots(kept.parent().unwrap(), &kept);

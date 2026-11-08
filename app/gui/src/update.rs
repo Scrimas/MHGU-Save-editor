@@ -356,6 +356,7 @@ fn swap(old: &Path, part: &Path, new: &Path) -> Result<Option<PathBuf>, String> 
 }
 
 /// On start: delete the .exe an update left aside.
+#[cfg_attr(target_os = "android", allow(dead_code))]
 pub fn cleanup() {
     if let Some(p) = crate::settings::get().update_leftover
         && (std::fs::remove_file(&p).is_ok() || !p.exists())

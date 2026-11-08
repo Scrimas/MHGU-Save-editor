@@ -1,0 +1,235 @@
+// Home: Hunter Rank and Zenny, the progress rows (each opens its page), the quick goals.
+import { M } from "../theme.slint";
+import { Btn, Chip, ConfidenceLabel, Dot, Ico, Muted, ProgressRow, Sheet, Tap } from "../widgets.slint";
+import { Api, Confidence, Goal, Fmt } from "../../common.slint";
+
+component GoalCard inherits Rectangle {
+    in property <Goal> goal;
+    callback preview();
+    border-width: 1px;
+    border-color: M.outline-variant;
+    border-radius: 12px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding: 16px;
+        spacing: 8px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text { text: root.goal.title; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; wrap: word-wrap; horizontal-stretch: 1; }
+            if root.goal.state == 1: Chip { text: @tr("In Review"); selected: true; }
+            if root.goal.state != 1 && root.goal.confidence != Confidence.confirmed: VerticalLayout {
+                padding-top: 4px;
+                ConfidenceLabel { level: root.goal.confidence; }
+            }
+        }
+        Muted { text: root.goal.detail; }
+        if root.goal.state == 0: HorizontalLayout {
+            spacing: 8px;
+            padding-top: 4px;
+            Text {
+                text: root.goal.count;
+                color: M.on-surface-variant;
+                font-size: M.label-medium;
+                font-weight: M.medium;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+                wrap: word-wrap;
+            }
+            Btn { kind: "tonal"; text: @tr("Preview"); clicked => { root.preview(); } }
+        }
+        if root.goal.state == 1: HorizontalLayout {
+            alignment: end;
+            Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo(root.goal.op); } }
+        }
+    }
+}
+
+export component OverviewPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    callback open-page(string, int);
+    callback preview(string);
+    // every goal already met, not only the first three
+    property <bool> all-done;
+    // goal cards side by side on wide windows
+    property <int> cols: root.width >= 1100px ? 3 : root.width >= 640px ? 2 : 1;
+    Flickable {
+        content-width: self.width;
+        HorizontalLayout {
+            alignment: center;
+            VerticalLayout {
+                max-width: 1200px;
+                horizontal-stretch: 1;
+                padding-left: M.gutter + root.side-inset;
+                padding-right: M.gutter + root.side-inset;
+                padding-top: 4px;
+                padding-bottom: root.bottom-pad;
+                spacing: 12px;
+                HorizontalLayout {
+                    spacing: 8px;
+                    VerticalLayout {
+                        alignment: center;
+                        Dot { level: Confidence.confirmed; }
+                    }
+                    Text { text: @tr("Confirmed in game except where marked"); color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; horizontal-stretch: 1; }
+                }
+                // values, not progress (Hunter Rank, Zenny: the last two, views/overview.rs):
+                // the tinted card, side by side; each opens the Character page
+                if Api.stats.length >= 2: Rectangle {
+                    background: M.primary-container;
+                    border-radius: 16px;
+                    height: hero.preferred-height;
+                    hero := HorizontalLayout {
+                        padding-left: 20px;
+                        padding-right: 20px;
+                        padding-top: 16px;
+                        padding-bottom: 16px;
+                        spacing: 12px;
+                        for k in 2: cell := Rectangle {
+                            horizontal-stretch: 1;
+                            height: v.preferred-height;
+                            property <int> i: Api.stats.length - 2 + k;
+                            accessible-role: button;
+                            accessible-label: Api.stats[self.i].title + ": " + Api.stats[self.i].value;
+                            accessible-action-default => { root.open-page(Api.stats[self.i].page, Api.stats[self.i].tab); }
+                            v := VerticalLayout {
+                                Text { text: Api.stats[cell.i].title; color: M.on-primary-container; font-size: M.label-medium; font-weight: M.medium; wrap: word-wrap; }
+                                Text { text: Api.stats[cell.i].value; color: M.on-primary-container; font-size: 32px; overflow: elide; }
+                                Text { text: Api.stats[cell.i].sub; color: M.on-primary-container; font-size: M.body-small; wrap: word-wrap; }
+                            }
+                            Tap { tapped => { root.open-page(Api.stats[cell.i].page, Api.stats[cell.i].tab); } }
+                        }
+                    }
+                }
+                // progress: rows with bars, each opens its page
+                Rectangle {
+                    background: M.s-high;
+                    border-radius: 16px;
+                    height: rows.preferred-height;
+                    rows := VerticalLayout {
+                        padding-left: 16px;
+                        padding-right: 16px;
+                        padding-top: 6px;
+                        padding-bottom: 10px;
+                        // every stat but the values (the last two, in the card above); no
+                        // spacing, so their empty rows take no room
+                        for s[i] in Api.stats: ProgressRow {
+                            shown: i < Api.stats.length - 2;
+                            title: s.title;
+                            value: s.value;
+                            progress: s.progress;
+                            done: s.done;
+                            clicked => { root.open-page(s.page, s.tab); }
+                        }
+                    }
+                }
+                VerticalLayout {
+                    padding-top: 4px;
+                    Text { text: @tr("Quick goals"); color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; }
+                    Muted { text: @tr("Each goal adds its changes to Review. Nothing is written until you press Write."); }
+                }
+                if Api.goals.length == 0: Muted { text: @tr("Every goal is already in this save."); }
+                for r in ceil(Api.goals.length / root.cols): HorizontalLayout {
+                    spacing: 12px;
+                    // the row's last cards stay as empty room, so the columns line up
+                    for c in root.cols: GoalCard {
+                        property <int> k: r * root.cols + c;
+                        horizontal-stretch: 1;
+                        visible: self.k < Api.goals.length;
+                        goal: Api.goals[self.k];
+                        preview => { root.preview(self.goal.id); }
+                    }
+                }
+                // the goals the save already meets: one card of short rows, the first three
+                // until Show all (a wrapping FlexboxLayout reports one row's height, so the page
+                // could not scroll to its end)
+                if Api.goals-done.length > 0: VerticalLayout {
+                    spacing: 8px;
+                    padding-top: 4px;
+                    Text { text: @tr("Already in your save"); color: M.on-surface-variant; font-size: M.label-large; font-weight: M.medium; }
+                    Rectangle {
+                        background: M.s-high;
+                        border-radius: 16px;
+                        height: done.preferred-height;
+                        done := VerticalLayout {
+                            padding-left: 16px;
+                            padding-right: 8px;
+                            padding-top: 6px;
+                            padding-bottom: 6px;
+                            for g[i] in Api.goals-done: HorizontalLayout {
+                                visible: root.all-done || i < 3;
+                                height: self.visible ? max(36px, t.preferred-height + 12px) : 0px;
+                                spacing: 10px;
+                                VerticalLayout {
+                                    alignment: center;
+                                    Ico { source: @image-url("../icons/check.svg"); tint: M.ok; width: 18px; height: 18px; }
+                                }
+                                t := Text { text: g.title; color: M.on-surface; font-size: M.body-medium; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+                            }
+                            if Api.goals-done.length > 3: HorizontalLayout {
+                                alignment: start;
+                                Btn {
+                                    kind: "text";
+                                    text: root.all-done ? @tr("Show less") : @tr("Show all {}", Api.goals-done.length);
+                                    clicked => { root.all-done = !root.all-done; }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// A goal's preview: before → after for each value, then Add to Review.
+export component GoalSheet inherits Sheet {
+    in property <bool> open;
+    shown: root.open;
+    title: Api.preview.title;
+    subtitle: Api.preview.summary;
+    content-h: body.preferred-height;
+    body := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 12px;
+        if Api.preview.confidence != Confidence.confirmed: ConfidenceLabel { level: Api.preview.confidence; }
+        if !Api.preview.empty: Rectangle {
+            background: M.group;
+            border-radius: 16px;
+            height: min(lines.preferred-height, 320px);
+            Flickable {
+                content-width: self.width;
+                lines := VerticalLayout {
+                    padding-left: 16px;
+                    padding-right: 16px;
+                    padding-top: 4px;
+                    padding-bottom: 4px;
+                    for l[i] in Api.preview.lines: HorizontalLayout {
+                        spacing: 8px;
+                        min-height: 40px;
+                        Text { text: l.label; color: M.on-surface; font-size: M.body-medium; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+                        Text { text: l.old; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                        Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                        Text { text: l.new; color: M.on-surface; font-size: M.body-medium; font-weight: M.medium; vertical-alignment: center; }
+                    }
+                    if Api.preview.more > 0: Text { text: @tr("and {} more", Fmt.num(Api.preview.more)); color: M.on-surface-variant; font-size: M.body-small; height: 32px; vertical-alignment: center; }
+                }
+            }
+        }
+        if Api.preview.note != "": Muted { text: Api.preview.note; }
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: end;
+            Btn { kind: "text"; text: Api.preview.empty ? @tr("Close") : @tr("Cancel"); clicked => { root.close(); } }
+            if !Api.preview.empty: Btn {
+                text: Api.preview.action;
+                clicked => {
+                    Api.apply-preview(Api.preview.id);
+                    root.close();
+                }
+            }
+        }
+    }
+}

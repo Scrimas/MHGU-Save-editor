@@ -1,0 +1,601 @@
+// Phone and tablet building blocks in Material 3, drawn with plain Slint elements so they
+// can slide, follow the Back key and keep the design's exact sizes: buttons, the top app
+// bar with the character slot, the Review button, the snackbar, bottom sheets, list rows.
+import { M } from "theme.slint";
+import { Api, Fmt, Confidence, Win } from "../common.slint";
+
+// A touch area for taps. A back swipe starts at the screen's left or right edge, and when
+// Android takes it over, Slint turns the cancelled touch into a release, which a plain
+// TouchArea reads as a tap on whatever was under the finger (the scrim, a row). A press
+// that started in those edge zones is not a tap.
+export component Tap inherits TouchArea {
+    callback tapped();
+    property <length> at: self.absolute-position.x + self.pressed-x;
+    clicked => {
+        if Win.width <= 0 || (self.at > 20px && self.at < Win.width - 20px) {
+            root.tapped();
+        }
+    }
+}
+
+// A 24 dp icon in a colour.
+export component Ico inherits Image {
+    in property <color> tint: M.on-surface-variant;
+    width: 24px;
+    height: 24px;
+    colorize: root.tint;
+    image-fit: contain;
+    accessible-role: none;
+}
+
+// The pressed state layer: the content colour at 10 % over the touched part.
+export component Press inherits Rectangle {
+    in property <bool> on;
+    in property <color> tint: M.on-surface;
+    background: root.on ? root.tint.with-alpha(M.press) : transparent;
+    // set here so Slint keeps the rounded rectangle: radii set only where it is used were
+    // dropped (a square pressed state)
+    border-radius: 0px;
+}
+
+// A 48 dp round icon button.
+export component IconBtn inherits Rectangle {
+    in property <image> icon;
+    in property <color> tint: M.on-surface-variant;
+    in property <string> label;
+    in property <bool> enabled: true;
+    callback clicked();
+    width: M.touch;
+    height: M.touch;
+    border-radius: self.height / 2;
+    accessible-role: button;
+    accessible-label: root.label;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.clicked(); } }
+    Press { on: ta.pressed; tint: root.tint; border-radius: parent.border-radius; }
+    Ico { source: root.icon; tint: root.enabled ? root.tint : M.on-surface.with-alpha(0.38); }
+    ta := Tap {
+        enabled: root.enabled;
+        tapped => { root.clicked(); }
+    }
+}
+
+// Common buttons: "filled", "tonal", "outlined", "text"; `big` is the 56 dp full-width call
+// to action at the bottom of a screen. `fg` overrides the text colour of a text button.
+export component Btn inherits Rectangle {
+    in property <string> text;
+    in property <image> icon;
+    in property <bool> has-icon;
+    in property <string> kind: "filled";
+    in property <bool> enabled: true;
+    in property <bool> big;
+    in property <color> fg: !root.enabled ? M.on-surface.with-alpha(0.38)
+        : root.kind == "filled" ? M.on-primary
+        : root.kind == "tonal" ? M.on-secondary-container : M.primary;
+    callback clicked();
+    height: root.big ? 56px : 40px;
+    min-width: lay.min-width;
+    preferred-width: lay.preferred-width;
+    border-radius: self.height / 2;
+    background: !root.enabled ? (root.kind == "filled" || root.kind == "tonal" ? M.on-surface.with-alpha(0.12) : transparent)
+        : root.kind == "filled" ? M.primary
+        : root.kind == "tonal" ? M.secondary-container : transparent;
+    border-width: root.kind == "outlined" ? 1px : 0px;
+    border-color: root.enabled ? M.outline : M.on-surface.with-alpha(0.12);
+    accessible-role: button;
+    accessible-label: root.text;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.clicked(); } }
+    Press { on: ta.pressed; tint: root.fg; border-radius: parent.border-radius; }
+    lay := HorizontalLayout {
+        padding-left: root.kind == "text" ? 12px : root.has-icon ? 16px : 24px;
+        padding-right: root.kind == "text" ? 12px : 24px;
+        spacing: 8px;
+        alignment: center;
+        if root.has-icon: VerticalLayout {
+            alignment: center;
+            Ico { source: root.icon; tint: root.fg; width: 18px; height: 18px; }
+        }
+        Text {
+            text: root.text;
+            color: root.fg;
+            font-size: root.big ? M.title-medium : M.label-large;
+            font-weight: M.medium;
+            vertical-alignment: center;
+            horizontal-alignment: center;
+        }
+    }
+    ta := Tap {
+        enabled: root.enabled;
+        tapped => { root.clicked(); }
+    }
+}
+
+// The confidence dot (Confirmed, Derived, cannot be made in game).
+export component Dot inherits Rectangle {
+    in property <Confidence> level;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: M.confidence-dot(root.level);
+}
+
+// "● Derived": the dot and its word, for entries that are not Confirmed in game.
+export component ConfidenceLabel inherits HorizontalLayout {
+    in property <Confidence> level;
+    spacing: 6px;
+    alignment: start;
+    VerticalLayout {
+        alignment: center;
+        Dot { level: root.level; }
+    }
+    Text {
+        text: root.level == Confidence.confirmed ? @tr("Confirmed") : root.level == Confidence.derived ? @tr("Derived") : @tr("Unresolved");
+        color: M.confidence-color(root.level);
+        font-size: M.label-medium;
+        font-weight: M.medium;
+        vertical-alignment: center;
+    }
+}
+
+// The character slot at the right of every top app bar: the name's first letter, the slot
+// number on it. Tapping it opens the slot sheet.
+export component SlotAvatar inherits Rectangle {
+    callback clicked();
+    width: M.touch;
+    height: M.touch;
+    border-radius: self.height / 2;
+    property <bool> used: Api.slots.length > Api.slot && Api.slots[Api.slot].used;
+    accessible-role: button;
+    accessible-label: root.used ? @tr("Switch character, slot {}, {}", Api.slot + 1, Api.slots[Api.slot].name) : @tr("Switch character, slot {}", Api.slot + 1);
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    Rectangle {
+        width: 34px;
+        height: 34px;
+        border-radius: 17px;
+        background: M.tertiary-container;
+        if root.used: Text {
+            text: Api.slots[Api.slot].initial;
+            color: M.on-tertiary-container;
+            font-size: 15px;
+            font-weight: M.medium;
+        }
+        if !root.used: Ico { source: @image-url("icons/person.svg"); tint: M.on-tertiary-container; width: 20px; height: 20px; }
+        Rectangle {
+            x: parent.width - 13px;
+            y: parent.height - 13px;
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            background: M.primary;
+            border-width: 2px;
+            border-color: M.surface;
+            Text { text: Api.slot + 1; color: M.on-primary; font-size: 10px; font-weight: M.medium; }
+        }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// The top app bar: a title and a line under it; a leading Back (or Close) button, the
+// slot avatar and an overflow button at the right when asked for.
+export component TopBar inherits Rectangle {
+    in property <string> title;
+    in property <string> subtitle;
+    in property <bool> back;
+    in property <bool> close;
+    in property <bool> avatar;
+    in property <bool> overflow;
+    in property <string> overflow-label: @tr("More options");
+    callback back-clicked();
+    callback avatar-clicked();
+    callback overflow-clicked();
+    height: 64px;
+    HorizontalLayout {
+        padding-left: root.back || root.close ? 4px : M.gutter;
+        padding-right: 4px;
+        spacing: 4px;
+        if root.back || root.close: VerticalLayout {
+            alignment: center;
+            IconBtn {
+                icon: root.close ? @image-url("icons/close.svg") : @image-url("icons/back.svg");
+                tint: M.on-surface;
+                label: root.close ? @tr("Close") : @tr("Back");
+                clicked => { root.back-clicked(); }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: root.title; font-size: M.title-large; color: M.on-surface; overflow: elide; }
+            if root.subtitle != "": Text { text: root.subtitle; font-size: M.body-medium; color: M.on-surface-variant; overflow: elide; }
+        }
+        if root.overflow: VerticalLayout {
+            alignment: center;
+            IconBtn { icon: @image-url("icons/more-vert.svg"); label: root.overflow-label; clicked => { root.overflow-clicked(); } }
+        }
+        if root.avatar: VerticalLayout {
+            alignment: center;
+            SlotAvatar { clicked => { root.avatar-clicked(); } }
+        }
+    }
+}
+
+// The Review button, floating above the navigation bar while changes wait: "Review · 7".
+export component ReviewFab inherits Rectangle {
+    in property <int> count;
+    callback clicked();
+    height: 56px;
+    width: lay.preferred-width;
+    border-radius: 16px;
+    background: M.primary-container;
+    drop-shadow-blur: 6px;
+    drop-shadow-offset-y: 2px;
+    drop-shadow-color: M.shadow;
+    accessible-role: button;
+    accessible-label: @tr("Review, {n} change not written yet" | "Review, {n} changes not written yet" % root.count);
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; tint: M.on-primary-container; border-radius: parent.border-radius; }
+    lay := HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 20px;
+        spacing: 12px;
+        VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("icons/review.svg"); tint: M.on-primary-container; }
+        }
+        Text {
+            text: @tr("Review · {}", Fmt.num(root.count));
+            color: M.on-primary-container;
+            font-size: M.label-large;
+            font-weight: M.medium;
+            vertical-alignment: center;
+        }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// The snackbar: a line (and a second one), an action, on the inverse surface.
+export component Snack inherits Rectangle {
+    in property <string> text;
+    in property <string> sub;
+    in property <string> action;
+    in property <bool> error;
+    callback act();
+    height: max(48px, lay.preferred-height);
+    border-radius: 4px;
+    background: M.inverse-surface;
+    drop-shadow-blur: 6px;
+    drop-shadow-offset-y: 2px;
+    drop-shadow-color: M.shadow;
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.text;
+    lay := HorizontalLayout {
+        padding-left: 16px;
+        padding-right: root.action != "" ? 8px : 16px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        spacing: 8px;
+        if root.error: VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("icons/warning.svg"); tint: M.inverse-primary; width: 20px; height: 20px; }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            spacing: 2px;
+            Text { text: root.text; color: M.inverse-on-surface; font-size: M.body-medium; wrap: word-wrap; }
+            if root.sub != "": Text { text: root.sub; color: M.inverse-on-surface.with-alpha(0.8); font-size: M.body-small; wrap: word-wrap; }
+        }
+        if root.action != "": VerticalLayout {
+            alignment: center;
+            Btn { kind: "text"; text: root.action; fg: M.inverse-primary; clicked => { root.act(); } }
+        }
+    }
+}
+
+// A bottom sheet: the scrim, then a panel sliding up from the bottom edge with its drag
+// handle, a title and a Close button; the content goes below. Back closes it (app.slint).
+export component Sheet inherits Rectangle {
+    in property <bool> shown;
+    in property <string> title;
+    in property <string> subtitle;
+    in property <bool> close-button: true;
+    // the panel's height: its content's, at most `max-h`
+    in property <length> content-h: 200px;
+    in property <length> max-h: root.height - 48px;
+    in property <length> bottom-inset;
+    in property <length> side-inset;
+    in property <length> max-w: 640px;
+    // Android's predictive back while this sheet is what Back closes (0 to 1): it shrinks
+    // toward the bottom edge and lets the page show through
+    in property <float> drag;
+    callback close();
+    property <float> t: root.shown ? 1 : 0;
+    animate t { duration: M.anim; easing: ease-out; }
+    visible: self.t > 0.001;
+    Rectangle {
+        background: #000000.with-alpha(0.32 * root.t * (1 - 0.5 * root.drag));
+        Tap { tapped => { root.close(); } }
+    }
+    panel := Rectangle {
+        property <length> h: min(root.max-h, head.preferred-height + root.content-h + root.bottom-inset);
+        width: min(root.width - 2 * root.side-inset, root.max-w);
+        height: self.h;
+        x: (root.width - self.width) / 2;
+        y: root.height - self.h * root.t + 16px * root.drag;
+        transform-scale-x: 1 - 0.1 * root.drag;
+        transform-scale-y: 1 - 0.1 * root.drag;
+        transform-origin: { x: self.width / 2, y: self.height };
+        background: M.s-low;
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+        accessible-role: groupbox;
+        accessible-label: root.title;
+        // swallows taps that miss the content, so they do not reach the scrim
+        TouchArea { }
+        VerticalLayout {
+            head := VerticalLayout {
+                padding-left: 24px;
+                padding-right: 8px;
+                padding-bottom: 8px;
+                HorizontalLayout {
+                    alignment: center;
+                    padding-top: 16px;
+                    padding-bottom: 8px;
+                    Rectangle { width: 32px; height: 4px; border-radius: 2px; background: M.handle; }
+                }
+                if root.title != "": HorizontalLayout {
+                    spacing: 8px;
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        alignment: center;
+                        padding-top: 4px;
+                        Text { text: root.title; font-size: M.title-large; color: M.on-surface; wrap: word-wrap; }
+                        if root.subtitle != "": Text { text: root.subtitle; font-size: M.body-medium; color: M.on-surface-variant; wrap: word-wrap; }
+                    }
+                    if root.close-button: VerticalLayout {
+                        alignment: start;
+                        IconBtn { icon: @image-url("icons/close.svg"); label: @tr("Close"); clicked => { root.close(); } }
+                    }
+                }
+            }
+            Rectangle {
+                vertical-stretch: 1;
+                @children
+            }
+            Rectangle { height: root.bottom-inset; }
+        }
+    }
+}
+
+// A heading over a group of rows, in the primary colour.
+export component SectionLabel inherits Text {
+    color: M.primary;
+    font-size: M.label-large;
+    font-weight: M.medium;
+    wrap: word-wrap;
+}
+
+// Small grey text.
+export component Muted inherits Text {
+    color: M.on-surface-variant;
+    font-size: M.body-medium;
+    wrap: word-wrap;
+}
+
+// A row of a grouped list: rounded corners only at the group's ends (`first`, `last`).
+export component GroupRow inherits Rectangle {
+    in property <bool> first;
+    in property <bool> last;
+    in property <bool> pressable;
+    callback clicked();
+    background: M.group;
+    border-top-left-radius: root.first ? 16px : 4px;
+    border-top-right-radius: root.first ? 16px : 4px;
+    border-bottom-left-radius: root.last ? 16px : 4px;
+    border-bottom-right-radius: root.last ? 16px : 4px;
+    Press {
+        on: ta.pressed;
+        border-top-left-radius: parent.border-top-left-radius;
+        border-top-right-radius: parent.border-top-right-radius;
+        border-bottom-left-radius: parent.border-bottom-left-radius;
+        border-bottom-right-radius: parent.border-bottom-right-radius;
+    }
+    ta := Tap {
+        enabled: root.pressable;
+        tapped => { root.clicked(); }
+    }
+    @children
+}
+
+// A list item: a round icon, a title and its supporting text, a chevron when it opens
+// something.
+export component ListItem inherits Rectangle {
+    in property <image> icon;
+    in property <bool> has-icon: true;
+    in property <string> title;
+    in property <string> text;
+    in property <bool> chevron: true;
+    in property <bool> divider;
+    callback clicked();
+    height: max(56px, lay.preferred-height);
+    accessible-role: button;
+    accessible-label: root.title;
+    accessible-description: root.text;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: 12px; }
+    lay := HorizontalLayout {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        padding-right: 8px;
+        spacing: 16px;
+        if root.has-icon: VerticalLayout {
+            alignment: start;
+            Rectangle {
+                width: 40px;
+                height: 40px;
+                border-radius: 20px;
+                background: M.secondary-container;
+                Ico { source: root.icon; tint: M.on-secondary-container; width: 22px; height: 22px; }
+            }
+        }
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: center;
+            Text { text: root.title; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+            if root.text != "": Muted { text: root.text; }
+        }
+        if root.chevron: VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("icons/chevron-right.svg"); }
+        }
+    }
+    if root.divider: Rectangle {
+        x: 56px;
+        y: parent.height - 1px;
+        width: parent.width - 56px;
+        height: 1px;
+        background: M.outline-variant;
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// A check box with its label and supporting text, as one 48 dp touch target.
+export component CheckRow inherits Rectangle {
+    in-out property <bool> checked;
+    in property <string> title;
+    in property <string> text;
+    in property <bool> enabled: true;
+    callback toggled(bool);
+    height: max(56px, lay.preferred-height);
+    accessible-role: checkbox;
+    accessible-checkable: true;
+    accessible-checked: root.checked;
+    accessible-label: root.title;
+    accessible-description: root.text;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.checked = !root.checked; root.toggled(root.checked); } }
+    lay := HorizontalLayout {
+        padding-top: 4px;
+        padding-bottom: 4px;
+        padding-right: 16px;
+        padding-left: 4px;
+        spacing: 4px;
+        VerticalLayout {
+            alignment: center;
+            Rectangle {
+                width: M.touch;
+                height: M.touch;
+                Rectangle {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 2px;
+                    background: root.checked ? (root.enabled ? M.primary : M.on-surface.with-alpha(0.38)) : transparent;
+                    border-width: root.checked ? 0px : 2px;
+                    border-color: root.enabled ? M.on-surface-variant : M.on-surface.with-alpha(0.38);
+                    if root.checked: Ico { source: @image-url("icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
+                }
+            }
+        }
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: center;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            Text { text: root.title; color: root.enabled ? M.on-surface : M.on-surface.with-alpha(0.38); font-size: M.body-large; wrap: word-wrap; }
+            if root.text != "": Muted { text: root.text; }
+        }
+    }
+    Tap {
+        enabled: root.enabled;
+        tapped => {
+            root.checked = !root.checked;
+            root.toggled(root.checked);
+        }
+    }
+}
+
+// A progress row: title and value, a 4 dp bar with M3's gap and end stop.
+export component ProgressRow inherits Rectangle {
+    in property <string> title;
+    in property <string> value;
+    in property <float> progress;
+    in property <bool> done;
+    // false: no room taken (rows of a list that are not progress)
+    in property <bool> shown: true;
+    callback clicked();
+    height: root.shown ? lay.preferred-height : 0px;
+    visible: root.shown;
+    accessible-role: button;
+    accessible-label: root.title + ": " + root.value;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: 8px; }
+    lay := VerticalLayout {
+        padding-top: 8px;
+        padding-bottom: 6px;
+        spacing: 6px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text { text: root.title; color: M.on-surface; font-size: M.body-medium; horizontal-stretch: 1; wrap: word-wrap; }
+            Text { text: root.value; color: M.on-surface; font-size: M.body-medium; font-weight: M.medium; }
+        }
+        Rectangle {
+            height: 4px;
+            property <float> p: root.done ? 1 : max(0, min(1, root.progress));
+            Rectangle {
+                x: 0;
+                width: root.done ? parent.width : max(0px, (parent.width - 4px) * parent.p - 4px);
+                height: 4px;
+                border-radius: 2px;
+                background: M.primary;
+            }
+            if !root.done: Rectangle {
+                x: max(0px, (parent.width - 4px) * parent.p);
+                width: parent.width - self.x;
+                height: 4px;
+                border-radius: 2px;
+                background: M.secondary-container;
+                Rectangle { x: parent.width - 4px; width: 4px; height: 4px; border-radius: 2px; background: M.primary; }
+            }
+        }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// A chip that shows a state ("In Review") or acts ("Missing only").
+export component Chip inherits Rectangle {
+    in property <string> text;
+    in property <bool> selected;
+    in property <bool> check-icon: root.selected;
+    callback clicked();
+    height: 32px;
+    width: lay.preferred-width;
+    border-radius: 8px;
+    background: root.selected ? M.secondary-container : transparent;
+    border-width: root.selected ? 0px : 1px;
+    border-color: M.outline-variant;
+    accessible-role: button;
+    accessible-label: root.text;
+    accessible-checkable: true;
+    accessible-checked: root.selected;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    lay := HorizontalLayout {
+        padding-left: root.check-icon ? 8px : 16px;
+        padding-right: 16px;
+        spacing: 8px;
+        if root.check-icon: VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("icons/check.svg"); tint: M.on-secondary-container; width: 18px; height: 18px; }
+        }
+        Text {
+            text: root.text;
+            color: root.selected ? M.on-secondary-container : M.on-surface-variant;
+            font-size: M.label-large;
+            font-weight: M.medium;
+            vertical-alignment: center;
+        }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}

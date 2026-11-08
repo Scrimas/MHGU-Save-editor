@@ -7,7 +7,7 @@ GNU gettext (msginit, msgmerge, msgfmt).
                       print how much of each catalog is translated
 
 Strings come from:
-  app/gui/ui/**.slint   @tr("text"), @tr("one" | "many" % n)
+  app/gui/ui/**.slint   @tr("text"), @tr("one" | "many" % n) (not ui/material, Slint's library)
   app/gui/src/**.rs     tr("text"), trf("text", ...), trn("one", "many", n, ...)
   app/core/src/*.rs     the string literals of an array whose line above says "i18n:"
                         (the GUI shows them through tr())
@@ -66,6 +66,10 @@ def extract():
         e.append(loc)
     gui = os.path.join(ROOT, 'app', 'gui')
     for p in files(os.path.join(gui, 'ui'), '.slint'):
+        # Slint's Material library (the phone UI's widgets): its date and time pickers are
+        # not used, and it brings its own words
+        if os.sep + 'material' + os.sep in p:
+            continue
         t = open(p, encoding='utf-8').read()
         for m in re.finditer(r'@tr\(\s*' + STR + r'(\s*=>\s*' + STR + r')?(\s*\|\s*' + STR + r')?', t):
             if m.group(2):

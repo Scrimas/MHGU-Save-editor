@@ -15,6 +15,8 @@
 //!
 //! Uses Slint's internal item tree: keep slint and i-slint-core on the same pinned
 //! version (Cargo.toml).
+// the desktop's save detection, mouse buttons and keys: not all of it runs on Android
+#![cfg_attr(target_os = "android", allow(dead_code))]
 
 use crate::{Api, AppWindow};
 use i_slint_core::accessibility::AccessibleStringProperty;
