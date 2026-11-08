@@ -137,7 +137,8 @@ msgid "The emulator keeps two copies of the save, each with a backup; every one 
 msgstr "模擬器會保存兩份存檔，各附一份備份；每份都寫入相同的位元組，並保留各自的檔頭。"
 
 #: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/fill.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "取消"
 
@@ -476,7 +477,7 @@ msgid "{n} save listed on the Open page"
 msgid_plural "{n} saves listed on the Open page"
 msgstr[0] "開啟頁面中列出了 {n} 個存檔"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/app.slint app/gui/ui/fill.slint app/gui/ui/pages/quests.slint
 msgid "Clear"
 msgstr "清除"
 
@@ -951,6 +952,38 @@ msgstr "技術細節"
 msgid "More…"
 msgstr "更多…"
 
+#: app/gui/ui/fill.slint
+msgid "in the box"
+msgstr "已在道具箱"
+
+#: app/gui/ui/fill.slint
+msgid "Fill the item box"
+msgstr "填滿道具箱"
+
+#: app/gui/ui/fill.slint
+msgid "Expanded view"
+msgstr "展開檢視"
+
+#: app/gui/ui/fill.slint
+msgid "Compact view"
+msgstr "精簡檢視"
+
+#: app/gui/ui/fill.slint
+msgid "Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out."
+msgstr "將選擇的道具放入空格，每種一組：整個分類或單一道具。道具箱中已有的道具會略過。"
+
+#: app/gui/ui/fill.slint
+msgid "Tick a whole category, or open it to pick single items."
+msgstr "勾選整個分類，或展開後選擇單一道具。"
+
+#: app/gui/ui/fill.slint app/gui/ui/pages/items.slint
+msgid "Count"
+msgstr "數量"
+
+#: app/gui/ui/fill.slint
+msgid "Staged: undo it in Review until you write."
+msgstr "已暫存：寫入之前可以在審閱中復原。"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/advanced.slint
 msgid "Every byte range of the save, named from the game's own loader · read-only, character {}"
@@ -1228,11 +1261,13 @@ msgstr "遊戲會將初階與 G 級點數相加，總和上限為 20,000。"
 msgid "Village"
 msgstr "村莊"
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "Low rank"
 msgstr "初階"
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "G rank"
 msgstr "G級"
 
@@ -1603,8 +1638,8 @@ msgstr "護石"
 msgid "No talisman rolls it."
 msgstr "沒有護石會出現此技能。"
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
 msgid "Decorations"
 msgstr "裝飾品"
 
@@ -1943,6 +1978,10 @@ msgid "Max counts…"
 msgstr "數量最大化…"
 
 #: app/gui/ui/pages/items.slint
+msgid "Fill box…"
+msgstr "填滿道具箱…"
+
+#: app/gui/ui/pages/items.slint
 msgid "Empty box…"
 msgstr "清空道具箱…"
 
@@ -1950,8 +1989,8 @@ msgstr "清空道具箱…"
 msgid "Empty pouch…"
 msgstr "清空道具包包…"
 
-#: app/gui/src/goals.rs app/gui/src/views/transfer_ui.rs
-#: app/gui/ui/pages/items.slint
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
+#: app/gui/src/views/transfer_ui.rs app/gui/ui/pages/items.slint
 msgid "Item box"
 msgstr "道具箱"
 
@@ -2006,10 +2045,6 @@ msgstr "道具箱第{}格"
 #: app/gui/src/targets.rs app/gui/ui/pages/items.slint
 msgid "Pouch slot {}"
 msgstr "道具包包第{}格"
-
-#: app/gui/ui/pages/items.slint
-msgid "Count"
-msgstr "數量"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/items.slint
@@ -2965,7 +3000,7 @@ msgid "Every item obtained"
 msgstr "獲得全部道具"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/src/goals.rs app/gui/src/targets.rs
+#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/src/views/fill_ui.rs
 msgid "{} item"
 msgid_plural "{} items"
 msgstr[0] "{}個道具"
@@ -4716,11 +4751,11 @@ msgid "none in the box"
 msgstr "道具箱中沒有"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "{} in the box"
 msgstr "道具箱中有 {}"
 
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "High rank"
 msgstr "進階"
 
@@ -4843,7 +4878,7 @@ msgstr "沒有任務會給予迷你皇冠尺寸。"
 msgid "Tail"
 msgstr "尾巴"
 
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "Other"
 msgstr "其他"
 
@@ -5114,6 +5149,261 @@ msgstr "還原前的存檔已保存為快照"
 #: app/gui/src/views/file.rs
 msgid "Restore failed: {}"
 msgstr "還原失敗：{}"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Monster materials"
+msgstr "魔物素材"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Gathered"
+msgstr "採集品"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hunting supplies"
+msgstr "狩獵道具"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Village ★1–6, Hub ★1–3"
+msgstr "村莊 ★1–6、集會所 ★1–3"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Village ★7–10, Hub ★4–7"
+msgstr "村莊 ★7–10、集會所 ★4–7"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hub G★1–4"
+msgstr "集會所 G★1–4"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hyper materials"
+msgstr "獰猛化素材"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "From Hyper monsters"
+msgstr "來自獰猛化個體"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Deviant materials"
+msgstr "別名魔物素材"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "From the 18 Deviants"
+msgstr "來自18種別名魔物"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Ore and crystals"
+msgstr "礦石與結晶"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Mining points"
+msgstr "採掘點"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bones"
+msgstr "骨頭"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bone piles"
+msgstr "骨堆"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Plants, mushrooms and berries"
+msgstr "植物、蘑菇與果實"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Gathering points"
+msgstr "採集點"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bugs"
+msgstr "蟲"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bug nets"
+msgstr "捕蟲網"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fish and bait"
+msgstr "魚與釣餌"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fishing spots"
+msgstr "釣魚點"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Healing and buffs"
+msgstr "回復與強化"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Potions, drinks, pills, oils"
+msgstr "藥、飲料、藥丸、油"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bombs, traps and tools"
+msgstr "炸彈、陷阱與工具"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bombs, traps, whetstones, pickaxes, nets"
+msgstr "炸彈、陷阱、砥石、十字鎬、捕蟲網"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Meat and food"
+msgstr "肉與食物"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Steaks and baited meats"
+msgstr "烤肉與陷阱肉"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Ammo"
+msgstr "彈藥"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bowgun shots"
+msgstr "弩槍子彈"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Coatings"
+msgstr "瓶"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bow coatings"
+msgstr "弓用瓶"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Kinsect extracts"
+msgstr "獵蟲萃取液"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Jellies and ambrosias"
+msgstr "果凍與甘露"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "1-slot decorations"
+msgstr "1格裝飾品"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take one decoration slot"
+msgstr "佔用1個裝飾品欄位"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "2-slot decorations"
+msgstr "2格裝飾品"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take two decoration slots"
+msgstr "佔用2個裝飾品欄位"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "3-slot decorations"
+msgstr "3格裝飾品"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take three decoration slots"
+msgstr "佔用3個裝飾品欄位"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Palico scraps"
+msgstr "隨從餘料"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "For the Palico Smithy"
+msgstr "用於隨從工房"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Tickets and vouchers"
+msgstr "券與兌換券"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Quest, event and collaboration tickets"
+msgstr "任務、活動與合作券"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Coins, spheres and books"
+msgstr "硬幣、鎧玉與書"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Armor spheres, coins, Books of Combos"
+msgstr "鎧玉、硬幣、調合書"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Everything else"
+msgstr "其他全部"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fragments, garbage and one-offs"
+msgstr "碎片、垃圾與零星道具"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "✓ all in the box"
+msgstr "✓ 全部已在道具箱"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/fill_ui.rs
+msgid "+{} slot"
+msgid_plural "+{} slots"
+msgstr[0] "+{} 格"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} of {} picked"
+msgstr "已選 {}／{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "needs {}, {} left"
+msgstr "需要 {}，剩餘 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "needs {}, box full"
+msgstr "需要 {}，道具箱已滿"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} to add"
+msgstr "可加入 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} already in the box"
+msgstr "道具箱中已有 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} used"
+msgstr "已用 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} picked"
+msgstr "已選 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} stay free"
+msgstr "剩餘空格 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "of {} slots"
+msgstr "共 {} 格"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fill"
+msgstr "填入"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/fill_ui.rs
+msgid "Fill {} slot ×{}"
+msgid_plural "Fill {} slots ×{}"
+msgstr[0] "填入 {} 格 ×{}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/fill_ui.rs
+msgid "Item box: {} item added ×{}"
+msgid_plural "Item box: {} items added ×{}"
+msgstr[0] "道具箱：加入 {} 種道具 ×{}"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs

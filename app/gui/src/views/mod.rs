@@ -11,9 +11,9 @@ use crate::targets::{self, Mon, PAGES, Target};
 use crate::update::{self, VERSION};
 use crate::{
     Api, AppWindow, AppearanceInfo, ArenaRow, ArtRow, ArtsInfo, CardInfo, ChangeLine, ChangeRow, CharacterInfo, CheckRow, ColourRow, Confidence, DecoRow,
-    DetectedSave, DeviantRow, EquipDetail, EquipRow, FieldRow, Goal, ItemSlot, LookRow, MonsterRow, PalicoDetail, PalicoEntry, PalicoRow, PickItem, PigmentRow,
-    Preview, PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo, ValueLine, VersionRow,
-    WeaponUseRow, WriteRow,
+    DetectedSave, DeviantRow, EquipDetail, EquipRow, FieldRow, FillCat, FillItem, FillTab, Goal, ItemSlot, LookRow, MonsterRow, PalicoDetail, PalicoEntry,
+    PalicoRow, PickItem, PigmentRow, Preview, PreviewLine, QuestRow, RequestRow, SetDetail, SetPiece, SettingsInfo, SlotInfo, SnapRow, StatCard, UpdateInfo,
+    ValueLine, VersionRow, WeaponUseRow, WriteRow,
 };
 use crate::{Shared, keep, model, strings};
 use mhgu_save::data::tables;
@@ -189,6 +189,13 @@ struct View {
     goal_plans: Option<((u64, usize), Vec<GoalView>)>,
     /// the MHXX save the Characters dialog asks about
     mhxx: Option<MhxxPick>,
+    /// Fill box dialog: tab shown, category whose items show (expanded), categories
+    /// opened (compact), items picked, count of each new stack (0: 99)
+    fill_tab: usize,
+    fill_cat: String,
+    fill_open: std::collections::HashSet<String>,
+    fill_picks: std::collections::HashSet<u16>,
+    fill_count: u8,
 }
 
 /// What the Overview shows of a goal's plan.
@@ -644,6 +651,7 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_overview(ui, st);
     wire_character(ui, st);
     wire_items(ui, st);
+    wire_fill(ui, st);
     wire_equipment(ui, st);
     wire_sets(ui, st);
     wire_palicoes(ui, st);
@@ -819,6 +827,7 @@ mod collections;
 mod database;
 mod equipment_page;
 mod file;
+mod fill_ui;
 mod items_page;
 mod monsters_page;
 mod names;
@@ -840,7 +849,7 @@ pub use self::palicoes::{look_label, request_field_name, request_value_name, rol
 pub use self::sets_ui::{arts_value, box_piece_value, palico_piece_label, pigment_value, set_piece_label};
 pub use self::unlocks_ui::{housekeeper_name, maps_conf, pet_costume_name, start_place_name, unlock_map_name, unlock_rows};
 use self::{
-    advanced::*, cards_ui::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, items_page::*, monsters_page::*, names::*,
-    options_ui::*, overview::*, palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, transfer_ui::*, unlocks_ui::*,
+    advanced::*, cards_ui::*, character_page::*, characters::*, collections::*, database::*, equipment_page::*, fill_ui::*, items_page::*, monsters_page::*,
+    names::*, options_ui::*, overview::*, palicoes::*, quests::*, requests::*, sets_ui::*, settings_ui::*, transfer_ui::*, unlocks_ui::*,
 };
 pub use self::{file::*, update_ui::*};

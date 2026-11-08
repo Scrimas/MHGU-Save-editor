@@ -55,7 +55,7 @@ fn open_csv(ui: &AppWindow, title: &str) -> Option<String> {
 
 /// Stage `f` as one edit over many values of the character shown; lists the targets of
 /// `all` whose value changed.
-fn stage_many(ui: &AppWindow, s: &mut State, title: String, detail: &str, conf: Conf, all: Vec<Target>, f: impl FnOnce(&mut Save, usize)) {
+pub(super) fn stage_many(ui: &AppWindow, s: &mut State, title: String, detail: &str, conf: Conf, all: Vec<Target>, f: impl FnOnce(&mut Save, usize)) {
     let e = Edit { key: String::new(), title: title.clone(), detail: detail.into(), note: String::new(), conf, targets: vec![] };
     if refused(ui, e.conf) {
         return;

@@ -172,6 +172,7 @@ fn main() -> Result<(), slint::PlatformError> {
 ///   moofah-gifts:<v>  deviant:<d>:<permits|points|waiting|levels>:<v>
 ///   remove-card:<slot>  option:<id>:<v>  chat-show:<g>  phrase:<auto|phrase>:<i>:<text>
 ///   goto:<key>  undo-all  review  write  dowrite  toastact  snapshots  quit  popup:<name>
+///   fill:<expanded|compact>:<tab>
 ///   theme:light|dark  update (asks GitHub, as Settings' Check now)
 ///   section:<n> (the Settings section shown, with popup:settings)  install:<n> (with
 ///   section:5, the install dialog for version n of the list once GitHub listed it)
@@ -281,6 +282,12 @@ fn steps(ui: &AppWindow, page: &str, list: &str) {
             (_, &["goto", ..]) => api.invoke_goto(parts[1..].join(":").into()),
             (_, &["undo-all"]) => api.invoke_undo_all(),
             (_, &["review"]) => api.set_review_open(true),
+            // the Fill box dialog in its expanded or compact view, on a tab
+            (_, &["fill", view, tab]) => {
+                api.invoke_fill_show();
+                api.invoke_fill_set_compact(view == "compact");
+                api.invoke_fill_select_tab(num(tab).max(0));
+            }
             (_, &["write"]) => {
                 api.invoke_check_emulator();
                 api.set_write_open(true);
@@ -816,6 +823,133 @@ mod tests {
         api.set_loaded(true);
         api.set_slots(model(vec![SlotInfo { used: true, ..Default::default() }; 3]));
         sidebar_keys(&ui);
+    }
+
+    /// The Items page's More… menu (issue #5): a click on each entry reaches its action.
+    #[test]
+    fn items_more_menu_clicks() {
+        use i_slint_core::window::WindowInner;
+        use slint::platform::{PointerEventButton, WindowEvent};
+        i_slint_backend_testing::init_no_event_loop();
+        let ui = AppWindow::new().unwrap();
+        nav::install(&ui);
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let api = ui.global::<Api>();
+        let hits = Rc::new(RefCell::new(Vec::<String>::new()));
+        let h = hits.clone();
+        api.on_item_export(move || h.borrow_mut().push("export".into()));
+        let h = hits.clone();
+        api.on_item_import(move || h.borrow_mut().push("import".into()));
+        let h = hits.clone();
+        api.on_open_preview(move |id| {
+            h.borrow_mut().push(id.to_string());
+            false
+        });
+        api.set_loaded(true);
+        api.set_slots(model(vec![SlotInfo { used: true, ..Default::default() }; 3]));
+        api.set_page("items".into());
+        let tick = || slint::platform::update_timers_and_animations();
+        let click = |x: f32, y: f32| {
+            let position = slint::LogicalPosition::new(x, y);
+            ui.window().dispatch_event(WindowEvent::PointerMoved { position });
+            focus::press(ui.window(), i_slint_core::lengths::LogicalPoint::new(x, y));
+            ui.window().dispatch_event(WindowEvent::PointerPressed { position, button: PointerEventButton::Left });
+            ui.window().dispatch_event(WindowEvent::PointerReleased { position, button: PointerEventButton::Left });
+            tick();
+        };
+        click(5.0, 5.0);
+        for _ in 0..30 {
+            i_slint_backend_testing::testing_backend::mock_elapsed_time(20);
+        }
+        let r = arrows::rect_of(&ui, "More…").expect("a More… button on the Items page");
+        for i in 0..3 {
+            click(r.center().x, r.center().y);
+            // the menu: 220 px wide, right-aligned, 4 px below, 4 px padding, 34 px rows
+            click(r.max_x() - 110.0, r.min_y() + 32.0 + 8.0 + 34.0 * i as f32 + 17.0);
+            // closed first, the action on the next turn of the event loop
+            assert!(WindowInner::from_pub(ui.window()).active_popups().is_empty(), "entry {i} closes the menu");
+            i_slint_backend_testing::testing_backend::mock_elapsed_time(5);
+            assert_eq!(hits.borrow().len(), i + 1, "entry {i} acts");
+        }
+        assert_eq!(*hits.borrow(), ["export", "import", "items:empty"]);
+    }
+
+    /// The Fill box dialog (issue #5): a category picked whole, less one item, fills that
+    /// many empty slots as one Derived edit; the items are then in the box and obtained.
+    /// The compact view opens the category shown.
+    #[test]
+    #[ignore = "needs MHGU_TEST_SAVE"]
+    fn fill_box_dialog() {
+        use mhgu_save::items::{self, Store};
+        let (ui, st, dir) = opened("fill");
+        let api = ui.global::<Api>();
+        api.set_page("items".into());
+        api.invoke_fill_show();
+        assert!(api.get_fill_open());
+        let used = api.get_fill_used();
+        let free = items::BOX_N as i32 - used;
+        let c = api.get_fill_cats().iter().find(|c| c.enabled && !c.done).expect("a category that fits");
+        api.invoke_fill_select_cat(c.key.clone());
+        api.invoke_fill_toggle_cat(c.key.clone());
+        let n = api.get_fill_picked();
+        assert!(n > 0 && n <= free, "{n} picked, {free} free");
+        let shown = api.get_fill_cats().iter().find(|x| x.key == c.key).unwrap();
+        assert!(shown.checked && !shown.partial);
+        // one item left out: the category is partly picked
+        let one = api.get_fill_items().iter().find(|i| i.on).expect("a picked item");
+        api.invoke_fill_toggle_item(one.id);
+        assert_eq!(api.get_fill_picked(), n - 1);
+        assert!(api.get_fill_cats().iter().find(|x| x.key == c.key).unwrap().partial);
+        // compact: the category shown opens with its items
+        api.invoke_fill_set_compact(true);
+        assert!(api.get_fill_cats().iter().any(|x| x.open && x.items.row_count() > 0));
+        api.invoke_fill_set_compact(false);
+        api.invoke_fill_set_count(10);
+        api.invoke_fill_apply();
+        assert!(!api.get_fill_open());
+        let s = st.borrow();
+        let v = items::all(s.save(), s.base(), Store::Box);
+        assert_eq!(v.iter().filter(|x| !x.is_empty()).count() as i32, used + n - 1);
+        assert!(!v.iter().any(|x| x.id == one.id as u16), "the item left out stays out");
+        let added: Vec<_> = v.iter().filter(|x| x.count == 10).map(|x| x.id).collect();
+        assert!(added.iter().all(|&id| items::obtained(s.save(), s.base(), id)));
+        assert_eq!(api.get_change_count(), 1);
+        drop(s);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// The Fill box dialog's size button switches the view on the first click, focused or
+    /// not (its focus catcher sat above the click area and took the first click).
+    #[test]
+    fn fill_view_button_one_click() {
+        use slint::platform::{PointerEventButton, WindowEvent};
+        i_slint_backend_testing::init_no_event_loop();
+        let ui = AppWindow::new().unwrap();
+        let st: Shared = Rc::new(RefCell::new(State::default()));
+        views::wire(&ui, &st);
+        ui.window().set_size(slint::LogicalSize::new(1400.0, 900.0));
+        ui.show().unwrap();
+        let api = ui.global::<Api>();
+        api.set_animate(false);
+        api.set_fill_compact(false);
+        api.set_fill_open(true);
+        let click = |label: &str| {
+            // an event builds what changed (the dialog, the other view)
+            ui.window().dispatch_event(WindowEvent::PointerMoved { position: slint::LogicalPosition::new(1.0, 1.0) });
+            slint::platform::update_timers_and_animations();
+            let r = arrows::rect_of(&ui, label).unwrap_or_else(|| panic!("{label} button"));
+            let position = slint::LogicalPosition::new(r.center().x, r.center().y);
+            ui.window().dispatch_event(WindowEvent::PointerMoved { position });
+            focus::press(ui.window(), i_slint_core::lengths::LogicalPoint::new(r.center().x, r.center().y));
+            ui.window().dispatch_event(WindowEvent::PointerPressed { position, button: PointerEventButton::Left });
+            ui.window().dispatch_event(WindowEvent::PointerReleased { position, button: PointerEventButton::Left });
+            slint::platform::update_timers_and_animations();
+        };
+        click("Compact view");
+        assert!(api.get_fill_compact(), "one click to the compact view");
+        click("Expanded view");
+        assert!(!api.get_fill_compact(), "one click back");
     }
 
     /// A file dragged from another app, as a backend delivers it to the DropArea: taken as

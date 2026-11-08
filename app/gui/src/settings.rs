@@ -72,6 +72,8 @@ pub struct Settings {
     pub last_version: String,
     /// One of RENDERERS, read on start.
     pub renderer: String,
+    /// The Items page's Fill box dialog opens in its compact view.
+    pub fill_compact: bool,
 }
 
 impl Default for Settings {
@@ -99,6 +101,7 @@ impl Default for Settings {
             show_changes: true,
             last_version: String::new(),
             renderer: String::new(),
+            fill_compact: false,
         }
     }
 }

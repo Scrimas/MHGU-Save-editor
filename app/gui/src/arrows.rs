@@ -349,6 +349,13 @@ pub fn probe(ui: &AppWindow) -> Option<(f32, LogicalRect, LogicalRect)> {
     Some((-fl.as_pin_ref().content_y().get(), window_rect(&row), window_rect(&f)))
 }
 
+/// For tests: where the first item with accessible label `label` sits in the window.
+#[cfg(test)]
+pub fn rect_of(ui: &AppWindow, label: &str) -> Option<LogicalRect> {
+    let hit = find(&tree_root(ui)?, &|i| i.accessible_string_property(AccessibleStringProperty::Label).as_deref() == Some(label))?;
+    Some(window_rect(&hit))
+}
+
 fn window_rect(item: &ItemRc) -> LogicalRect {
     let g = item.geometry();
     LogicalRect::new(item.map_to_window(g.origin), g.size)

@@ -131,6 +131,11 @@ export component ItemsPage inherits Rectangle {
                 text: @tr("Max counts…");
                 clicked => { root.bulk("items:max", self.absolute-position.y - root.absolute-position.y + self.height, self.absolute-position.x - root.absolute-position.x + self.width); }
             }
+            // every item of the categories picked, in the box's empty slots (fill.slint)
+            if Api.item-store == 0: Button {
+                text: @tr("Fill box…");
+                clicked => { Api.fill-show(); }
+            }
             // the most destructive action of the app sits behind More… (04), with the box's
             // file export and import
             if Api.item-store < 2: MoreButton {

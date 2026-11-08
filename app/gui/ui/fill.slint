@@ -1,0 +1,476 @@
+// Fill box dialog (Items page, issue #5): the items the box can hold, by tab and
+// category, picked whole or one by one, put into the box's empty slots. Two views: the
+// expanded one (tabs on top, categories beside the items of the one shown) and the
+// compact one (the Settings layout); the size button switches them, the content fading
+// out while the card resizes. Models and rules: views/fill_ui.rs.
+
+import { Button, ListView, Palette } from "std-widgets.slint";
+import { Api, Tok, Win, Modal, Muted, SectionTitle, Hairline, KeyActivate, FocusRing, ConfidenceTag, Confidence, FillTab, FillCat, FillItem } from "common.slint";
+
+// A checkbox with a third state: some of a category's items picked.
+component TriBox inherits Rectangle {
+    in property <bool> checked;
+    in property <bool> partial;
+    in property <bool> enabled: true;
+    property <bool> filled: root.checked || root.partial;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: root.filled ? (root.enabled ? Tok.accent : Tok.faint) : Tok.input;
+    border-width: root.filled ? 0px : 1px;
+    border-color: root.enabled ? Tok.input-edge : Tok.faint;
+    if root.checked: Path {
+        width: 12px;
+        height: 12px;
+        viewbox-width: 12;
+        viewbox-height: 12;
+        stroke: Palette.accent-foreground;
+        stroke-width: 1.8px;
+        commands: "M 2.5 6.2 L 5 8.7 L 9.8 3.5";
+    }
+    if root.partial && !root.checked: Rectangle {
+        width: 8px;
+        height: 2px;
+        border-radius: 1px;
+        background: Palette.accent-foreground;
+    }
+}
+
+// "+12" once some are picked, else how many the tab can add.
+component Badge inherits Rectangle {
+    in property <string> text;
+    in property <bool> on;
+    height: 20px;
+    width: t.preferred-width + 14px;
+    border-radius: 10px;
+    background: root.on ? Tok.accent-soft : transparent;
+    t := Text { text: root.text; font-size: Tok.small; color: root.on ? Tok.accent-text : Tok.faint; font-weight: root.on ? 600 : 400; }
+}
+
+// A tab of the compact view's rail, like Settings' sections.
+component RailTab inherits Rectangle {
+    in property <FillTab> info;
+    in property <bool> active;
+    callback clicked();
+    height: 34px;
+    border-radius: 5px;
+    background: root.active ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+    accessible-role: tab;
+    accessible-label: root.info.name;
+    accessible-item-selected: root.active;
+    accessible-action-default => { root.clicked(); }
+    fk := KeyActivate { activated => { root.clicked(); } }
+    ta := TouchArea { clicked => { root.clicked(); } }
+    Rectangle {
+        x: 0;
+        width: 3px;
+        height: root.active ? 16px : 0px;
+        border-radius: 2px;
+        background: Tok.accent;
+        animate height { duration: Api.animate ? 120ms : 0ms; }
+    }
+    HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 8px;
+        spacing: 6px;
+        Text { text: root.info.name; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; font-weight: root.active ? 600 : 400; }
+        Badge { y: (parent.height - self.height) / 2; text: root.info.badge; on: root.info.picked; }
+    }
+    FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 5px; }
+}
+
+// The expanded view's tabs. Not the pages' TabBar: that one drives Ctrl+arrows and
+// Back/Forward between the page's own tabs.
+component TabStrip inherits Rectangle {
+    in property <[FillTab]> tabs;
+    in property <int> current;
+    callback select(int);
+    height: 40px;
+    HorizontalLayout {
+        alignment: start;
+        spacing: 4px;
+        for t[i] in root.tabs: Rectangle {
+            width: row.preferred-width;
+            accessible-role: tab;
+            accessible-label: t.name;
+            accessible-item-selected: i == root.current;
+            accessible-action-default => { root.select(i); }
+            background: ta.has-hover && i != root.current ? Tok.hover : transparent;
+            border-radius: 4px;
+            fk := KeyActivate { activated => { root.select(i); } }
+            ta := TouchArea { clicked => { root.select(i); } }
+            row := HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 12px;
+                spacing: 6px;
+                Text {
+                    text: t.name;
+                    vertical-alignment: center;
+                    font-weight: i == root.current ? 600 : 400;
+                    color: i == root.current ? Palette.foreground : Tok.muted;
+                }
+                Badge { y: (parent.height - self.height) / 2; text: t.badge; on: t.picked; }
+            }
+            Rectangle {
+                y: parent.height - 3px;
+                x: 12px;
+                width: parent.width - 24px;
+                height: 3px;
+                border-radius: 1.5px;
+                background: i == root.current ? Tok.accent : transparent;
+            }
+            FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+        }
+    }
+    Hairline { y: parent.height - 1px; width: parent.width; }
+}
+
+// A category: its box picks the whole category, the row shows its items (expanded) or
+// opens them below (compact).
+component CatRow inherits Rectangle {
+    in property <FillCat> cat;
+    in property <bool> chevron;
+    callback toggle();
+    callback pick();
+    height: max(52px, lay.preferred-height);
+    border-radius: 4px;
+    background: root.cat.selected && !root.chevron ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+    accessible-role: button;
+    accessible-label: root.cat.name + ", " + root.cat.status;
+    accessible-action-default => { root.pick(); }
+    fk := KeyActivate { activated => { root.pick(); } }
+    ta := TouchArea { clicked => { root.pick(); } }
+    lay := HorizontalLayout {
+        padding: 8px;
+        spacing: 10px;
+        Rectangle {
+            width: 24px;
+            accessible-role: checkbox;
+            accessible-label: root.cat.name;
+            accessible-checked: root.cat.checked;
+            accessible-enabled: root.cat.enabled;
+            accessible-action-default => { if root.cat.enabled { root.toggle(); } }
+            box := TriBox { checked: root.cat.checked; partial: root.cat.partial; enabled: root.cat.enabled; }
+            TouchArea {
+                enabled: root.cat.enabled;
+                clicked => { root.toggle(); }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            spacing: 2px;
+            Text { text: root.cat.name; font-weight: 600; overflow: elide; opacity: root.cat.done ? 0.6 : 1; }
+            Muted { text: root.cat.sub; font-size: Tok.small; wrap: word-wrap; }
+        }
+        Text {
+            text: root.cat.status;
+            font-size: Tok.small;
+            vertical-alignment: center;
+            color: root.cat.tone == 1 ? Tok.ok : root.cat.tone == 2 ? Tok.bad : Palette.foreground;
+        }
+        if root.chevron: Rectangle {
+            width: 16px;
+            Path {
+                width: 10px;
+                height: 6px;
+                stroke: Tok.muted;
+                stroke-width: 1.4px;
+                viewbox-width: 10;
+                viewbox-height: 6;
+                commands: root.cat.open ? "M 1 5.5 L 5 1.5 L 9 5.5" : "M 1 0.5 L 5 4.5 L 9 0.5";
+            }
+        }
+    }
+    FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+}
+
+// One item: its box, its name; "in the box" for those the box holds already.
+component ItemCell inherits Rectangle {
+    in property <FillItem> it;
+    in property <int> count;
+    height: 34px;
+    border-radius: 4px;
+    background: root.it.on ? Tok.accent-soft : ta.has-hover && root.it.enabled ? Tok.hover : transparent;
+    accessible-role: checkbox;
+    accessible-label: root.it.name;
+    accessible-checked: root.it.on || root.it.have;
+    accessible-enabled: root.it.enabled;
+    accessible-action-default => { if root.it.enabled { Api.fill-toggle-item(root.it.id); } }
+    fk := KeyActivate { enabled: root.it.enabled; activated => { Api.fill-toggle-item(root.it.id); } }
+    ta := TouchArea {
+        enabled: root.it.enabled;
+        clicked => { Api.fill-toggle-item(root.it.id); }
+    }
+    HorizontalLayout {
+        padding-left: 8px;
+        padding-right: 8px;
+        spacing: 8px;
+        TriBox { y: (parent.height - self.height) / 2; checked: root.it.on || root.it.have; enabled: root.it.enabled; }
+        Text {
+            text: root.it.name;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+            color: root.it.have || !root.it.enabled ? Tok.faint : Palette.foreground;
+        }
+        Text {
+            text: root.it.have ? @tr("in the box") : root.it.on ? "×" + root.count : "";
+            font-size: Tok.small;
+            vertical-alignment: center;
+            color: root.it.have ? Tok.faint : Tok.muted;
+        }
+    }
+    FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+}
+
+// ×1, ×10, ×99
+component CountPicker inherits HorizontalLayout {
+    spacing: 0px;
+    for v[i] in [1, 10, 99]: Rectangle {
+        width: t.preferred-width + 20px;
+        height: 28px;
+        border-radius: 4px;
+        border-width: 1px;
+        border-color: Tok.line;
+        background: Api.fill-count == v ? Tok.accent-soft : ta.has-hover ? Tok.hover : transparent;
+        accessible-role: button;
+        accessible-label: "×" + v;
+        accessible-checked: Api.fill-count == v;
+        accessible-action-default => { Api.fill-set-count(v); }
+        t := Text {
+            text: "×" + v;
+            color: Api.fill-count == v ? Tok.accent-text : Palette.foreground;
+            font-weight: Api.fill-count == v ? 600 : 400;
+        }
+        fk := KeyActivate { activated => { Api.fill-set-count(v); } }
+        ta := TouchArea { clicked => { Api.fill-set-count(v); } }
+        FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+    }
+}
+
+export component FillDialog inherits Modal {
+    // the view laid out: follows Api.fill-compact once the content has faded out
+    property <bool> compact;
+    property <bool> fading;
+    property <float> o: root.fading ? 0 : 1;
+    animate o { duration: Tok.anim / 2; }
+    card-width: root.compact ? 880px : min(1280px, Win.width * 0.94);
+    card-height: root.compact ? 680px : Win.height * 0.88;
+    animate-size: true;
+    property <length> card-w: min(root.card-width, Win.width - 32px);
+    // compact: the rail; expanded: the categories' column and the items' columns
+    property <length> rail-w: Win.width < 1000px ? 170px : 210px;
+    property <length> list-w: min(380px, root.card-w * 0.4);
+    property <length> items-w: root.card-w - 40px - root.list-w - 1px - Tok.pad;
+    property <int> cols: max(1, floor(root.items-w / 230px));
+    property <length> pane-w: root.card-w - 40px - root.rail-w - 1px - 2 * Tok.pad;
+    property <int> chip-cols: max(1, floor((root.pane-w - 50px) / 200px));
+    dismiss => { Api.fill-open = false; }
+    init => { root.compact = Api.fill-compact; }
+    function flip() {
+        if Tok.anim == 0ms {
+            Api.fill-set-compact(!root.compact);
+            root.compact = !root.compact;
+        } else {
+            root.fading = true;
+            swap.running = true;
+        }
+    }
+    swap := Timer {
+        interval: Tok.anim / 2;
+        running: false;
+        triggered => {
+            self.running = false;
+            Api.fill-set-compact(!root.compact);
+            root.compact = !root.compact;
+            root.fading = false;
+        }
+    }
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Text { text: @tr("Fill the item box"); font-size: 20px; font-weight: 600; vertical-alignment: center; horizontal-stretch: 1; }
+        Rectangle {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: sa.has-hover ? Tok.hover : transparent;
+            accessible-role: button;
+            accessible-label: root.compact ? @tr("Expanded view") : @tr("Compact view");
+            accessible-action-default => { root.flip(); }
+            fk := KeyActivate { activated => { root.flip(); } }
+            sa := TouchArea { clicked => { root.flip(); } }
+            Path {
+                width: 16px;
+                height: 16px;
+                viewbox-width: 16;
+                viewbox-height: 16;
+                stroke: sa.has-hover ? Palette.foreground : Tok.muted;
+                stroke-width: 1.5px;
+                commands: root.compact
+                    ? "M 9.5 2.5 L 13.5 2.5 L 13.5 6.5 M 6.5 13.5 L 2.5 13.5 L 2.5 9.5 M 13.5 2.5 L 9 7 M 2.5 13.5 L 7 9"
+                    : "M 13.5 6.5 L 9.5 6.5 L 9.5 2.5 M 2.5 9.5 L 6.5 9.5 L 6.5 13.5 M 9.5 6.5 L 14 2 M 6.5 9.5 L 2 14";
+            }
+            FocusRing { shown: fk.has-focus && !fk.by-mouse; border-radius: 4px; }
+        }
+    }
+    // wrapped text stretches in a layout: none of the spare height goes here
+    Muted {
+        text: @tr("Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out.");
+        wrap: word-wrap;
+        vertical-stretch: 0;
+        opacity: root.o;
+    }
+    // compact: the Settings layout, a category's items opening below it
+    if root.compact: Rectangle {
+      vertical-stretch: 1;
+      opacity: root.o;
+      HorizontalLayout {
+        spacing: Tok.pad;
+        VerticalLayout {
+            width: root.rail-w;
+            spacing: 2px;
+            alignment: start;
+            for t[i] in Api.fill-tabs: RailTab {
+                info: t;
+                active: i == Api.fill-tab;
+                clicked => { Api.fill-select-tab(i); }
+            }
+        }
+        Rectangle { width: 1px; background: Tok.line; }
+        Flickable {
+            max-height: 100000px;
+            content-height: body.preferred-height;
+            body := VerticalLayout {
+                padding-right: 12px;
+                spacing: 2px;
+                SectionTitle { text: Api.fill-tabs.length > Api.fill-tab ? Api.fill-tabs[Api.fill-tab].name : ""; }
+                Muted {
+                    text: @tr("Tick a whole category, or open it to pick single items.");
+                    font-size: Tok.small;
+                    wrap: word-wrap;
+                }
+                Rectangle { height: 6px; }
+                for c in Api.fill-cats: VerticalLayout {
+                    CatRow {
+                        cat: c;
+                        chevron: true;
+                        toggle => { Api.fill-toggle-cat(c.key); }
+                        pick => { Api.fill-open-cat(c.key); }
+                    }
+                    if c.open: VerticalLayout {
+                        padding-left: 42px;
+                        padding-bottom: 8px;
+                        for r in (c.items.length + root.chip-cols - 1) / root.chip-cols: HorizontalLayout {
+                            spacing: 4px;
+                            for k in root.chip-cols: Rectangle {
+                                height: 34px;
+                                if r * root.chip-cols + k < c.items.length: ItemCell {
+                                    width: parent.width;
+                                    it: c.items[r * root.chip-cols + k];
+                                    count: Api.fill-count;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      }
+    }
+    // expanded: tabs on top, the categories beside the items of the one shown
+    if !root.compact: Rectangle {
+      vertical-stretch: 1;
+      opacity: root.o;
+      VerticalLayout {
+        spacing: Tok.tight;
+        TabStrip {
+            tabs: Api.fill-tabs;
+            current: Api.fill-tab;
+            select(i) => { Api.fill-select-tab(i); }
+        }
+        HorizontalLayout {
+            vertical-stretch: 1;
+            spacing: Tok.pad;
+            // a Flickable is no taller than its content unless told: the column fills the height
+            Flickable {
+                width: root.list-w;
+                max-height: 100000px;
+                content-height: cats.preferred-height;
+                cats := VerticalLayout {
+                    spacing: 2px;
+                    padding-right: 8px;
+                    for c in Api.fill-cats: CatRow {
+                        cat: c;
+                        toggle => { Api.fill-toggle-cat(c.key); }
+                        pick => { Api.fill-select-cat(c.key); }
+                    }
+                }
+            }
+            Rectangle { width: 1px; background: Tok.line; }
+            VerticalLayout {
+                spacing: 2px;
+                SectionTitle { vertical-stretch: 0; text: Api.fill-cat-name; }
+                Muted { text: Api.fill-cat-sub; font-size: Tok.small; wrap: word-wrap; vertical-stretch: 0; }
+                Rectangle { height: 6px; }
+                list := ListView {
+                    vertical-stretch: 1;
+                    for r in (Api.fill-items.length + root.cols - 1) / root.cols: HorizontalLayout {
+                        spacing: 4px;
+                        padding-right: 12px;
+                        height: 36px;
+                        for k in root.cols: Rectangle {
+                            if r * root.cols + k < Api.fill-items.length: ItemCell {
+                                width: parent.width;
+                                it: Api.fill-items[r * root.cols + k];
+                                count: Api.fill-count;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      }
+    }
+    Hairline { }
+    // the box: slots used, picked, staying free
+    Rectangle {
+        height: 8px;
+        border-radius: 4px;
+        background: Tok.track;
+        clip: true;
+        Rectangle { x: 0; width: parent.width * Api.fill-used / 2300; background: Tok.faint; }
+        Rectangle {
+            x: parent.width * Api.fill-used / 2300;
+            width: parent.width * Api.fill-picked / 2300;
+            background: Tok.accent;
+            animate width { duration: Tok.anim; }
+        }
+    }
+    HorizontalLayout {
+        spacing: 14px;
+        alignment: start;
+        for l[i] in Api.fill-legend: HorizontalLayout {
+            spacing: 5px;
+            if i < 3: Rectangle {
+                y: (parent.height - self.height) / 2;
+                width: 10px;
+                height: 10px;
+                border-radius: 2px;
+                background: i == 0 ? Tok.faint : i == 1 ? Tok.accent : Tok.track;
+            }
+            Muted { text: l; font-size: Tok.small; }
+        }
+    }
+    HorizontalLayout {
+        spacing: Tok.tight;
+        Muted { text: @tr("Count"); vertical-alignment: center; }
+        CountPicker { }
+        Rectangle { width: 4px; }
+        ConfidenceTag { level: Confidence.derived; }
+        Muted { text: @tr("Staged: undo it in Review until you write."); font-size: Tok.small; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+        Button { text: @tr("Clear"); enabled: Api.fill-picked > 0; clicked => { Api.fill-clear(); } }
+        Button { text: @tr("Cancel"); clicked => { Api.fill-open = false; } }
+        Button { text: Api.fill-action; primary: true; enabled: Api.fill-picked > 0; clicked => { Api.fill-apply(); } }
+    }
+}

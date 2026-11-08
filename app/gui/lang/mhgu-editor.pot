@@ -135,7 +135,7 @@ msgstr ""
 msgid "The emulator keeps two copies of the save, each with a backup; every one gets the same bytes and keeps its own header."
 msgstr ""
 
-#: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint app/gui/ui/fill.slint app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr ""
 
@@ -474,7 +474,7 @@ msgid_plural "{n} saves listed on the Open page"
 msgstr[0] ""
 msgstr[1] ""
 
-#: app/gui/ui/app.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/app.slint app/gui/ui/fill.slint app/gui/ui/pages/quests.slint
 msgid "Clear"
 msgstr ""
 
@@ -941,6 +941,38 @@ msgstr ""
 msgid "More…"
 msgstr ""
 
+#: app/gui/ui/fill.slint
+msgid "in the box"
+msgstr ""
+
+#: app/gui/ui/fill.slint
+msgid "Fill the item box"
+msgstr ""
+
+#: app/gui/ui/fill.slint
+msgid "Expanded view"
+msgstr ""
+
+#: app/gui/ui/fill.slint
+msgid "Compact view"
+msgstr ""
+
+#: app/gui/ui/fill.slint
+msgid "Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out."
+msgstr ""
+
+#: app/gui/ui/fill.slint
+msgid "Tick a whole category, or open it to pick single items."
+msgstr ""
+
+#: app/gui/ui/fill.slint app/gui/ui/pages/items.slint
+msgid "Count"
+msgstr ""
+
+#: app/gui/ui/fill.slint
+msgid "Staged: undo it in Review until you write."
+msgstr ""
+
 #: app/gui/ui/pages/advanced.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Every byte range of the save, named from the game's own loader · read-only, character {}"
@@ -1207,11 +1239,11 @@ msgstr ""
 msgid "Village"
 msgstr ""
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs app/gui/ui/pages/character.slint
 msgid "Low rank"
 msgstr ""
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs app/gui/ui/pages/character.slint
 msgid "G rank"
 msgstr ""
 
@@ -1565,7 +1597,7 @@ msgstr ""
 msgid "No talisman rolls it."
 msgstr ""
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
 msgid "Decorations"
 msgstr ""
 
@@ -1900,6 +1932,10 @@ msgid "Max counts…"
 msgstr ""
 
 #: app/gui/ui/pages/items.slint
+msgid "Fill box…"
+msgstr ""
+
+#: app/gui/ui/pages/items.slint
 msgid "Empty box…"
 msgstr ""
 
@@ -1907,7 +1943,7 @@ msgstr ""
 msgid "Empty pouch…"
 msgstr ""
 
-#: app/gui/src/goals.rs app/gui/src/views/transfer_ui.rs app/gui/ui/pages/items.slint
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs app/gui/src/views/transfer_ui.rs app/gui/ui/pages/items.slint
 msgid "Item box"
 msgstr ""
 
@@ -1961,10 +1997,6 @@ msgstr ""
 #: app/gui/src/targets.rs app/gui/ui/pages/items.slint
 #. placeholders: {} in order, {0} {1} by position
 msgid "Pouch slot {}"
-msgstr ""
-
-#: app/gui/ui/pages/items.slint
-msgid "Count"
 msgstr ""
 
 #: app/gui/ui/pages/items.slint
@@ -2930,7 +2962,7 @@ msgstr ""
 msgid "Every item obtained"
 msgstr ""
 
-#: app/gui/src/goals.rs app/gui/src/targets.rs
+#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/src/views/fill_ui.rs
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 msgid "{} item"
 msgid_plural "{} items"
@@ -4698,12 +4730,12 @@ msgstr[1] ""
 msgid "none in the box"
 msgstr ""
 
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} in the box"
 msgstr ""
 
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "High rank"
 msgstr ""
 
@@ -4827,7 +4859,7 @@ msgstr ""
 msgid "Tail"
 msgstr ""
 
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "Other"
 msgstr ""
 
@@ -5104,6 +5136,264 @@ msgstr ""
 #. placeholders: {} in order, {0} {1} by position
 msgid "Restore failed: {}"
 msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Monster materials"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Gathered"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hunting supplies"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Village ★1–6, Hub ★1–3"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Village ★7–10, Hub ★4–7"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hub G★1–4"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hyper materials"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "From Hyper monsters"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Deviant materials"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "From the 18 Deviants"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Ore and crystals"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Mining points"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bones"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bone piles"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Plants, mushrooms and berries"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Gathering points"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bugs"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bug nets"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fish and bait"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fishing spots"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Healing and buffs"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Potions, drinks, pills, oils"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bombs, traps and tools"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bombs, traps, whetstones, pickaxes, nets"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Meat and food"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Steaks and baited meats"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Ammo"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bowgun shots"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Coatings"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bow coatings"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Kinsect extracts"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Jellies and ambrosias"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "1-slot decorations"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take one decoration slot"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "2-slot decorations"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take two decoration slots"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "3-slot decorations"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take three decoration slots"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Palico scraps"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "For the Palico Smithy"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Tickets and vouchers"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Quest, event and collaboration tickets"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Coins, spheres and books"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Armor spheres, coins, Books of Combos"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Everything else"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fragments, garbage and one-offs"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "✓ all in the box"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "+{} slot"
+msgid_plural "+{} slots"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} of {} picked"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "needs {}, {} left"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "needs {}, box full"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} to add"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} already in the box"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} used"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} picked"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} stay free"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "of {} slots"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fill"
+msgstr ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "Fill {} slot ×{}"
+msgid_plural "Fill {} slots ×{}"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/fill_ui.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "Item box: {} item added ×{}"
+msgid_plural "Item box: {} items added ×{}"
+msgstr[0] ""
+msgstr[1] ""
 
 #: app/gui/src/views/mod.rs
 #. placeholders: {} in order, {0} {1} by position, {n} the count

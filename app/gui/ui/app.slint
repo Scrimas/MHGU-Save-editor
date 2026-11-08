@@ -3,6 +3,7 @@ import {
     Api, Tabs, Win, Tok, Fmt, Card, Muted, NavButton, Dot, SlotInfo, Confidence, ConfidenceTag, Hairline, TextLink,
     Modal, EmptyState, ChangeRow, Chevron, SectionTitle, Reveal, SettingsInfo, KeyActivate, FocusRing, Picker, ListRow, VersionRow, ChangeLine,
 } from "common.slint";
+import { FillDialog } from "fill.slint";
 import { OpenPage } from "pages/open.slint";
 import { OverviewPage } from "pages/overview.slint";
 import { CharacterPage } from "pages/character.slint";
@@ -1204,7 +1205,7 @@ export component AppWindow inherits Window {
     forward-focus: keys;
     property <string> page-now: Api.page;
     changed page-now => { Api.page-shown(); }
-    out property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.mhxx-title != "" || Api.diff-title != "" || Api.talisman-text-open || Api.settings-open || Api.news-title != "" || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
+    out property <bool> any-modal: Api.write-open || Api.snapshots-open || Api.characters-open || Api.mhxx-title != "" || Api.diff-title != "" || Api.talisman-text-open || Api.settings-open || Api.fill-open || Api.news-title != "" || Api.update-open || Api.quit-open || Api.open-ask != "" || root.about-open;
     changed any-modal => {
         if !any-modal {
             keys.focus();
@@ -1475,6 +1476,7 @@ export component AppWindow inherits Window {
     if Api.diff-title != "": DiffDialog { }
     if Api.talisman-text-open: TalismanTextDialog { }
     if Api.settings-open: SettingsDialog { }
+    if Api.fill-open: FillDialog { }
     if Api.news-title != "": NewsDialog { }
     if Api.update-open: Modal {
         property <string> state: Api.update.state;

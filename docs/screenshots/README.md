@@ -23,6 +23,11 @@ image itself. Back to the [main page](../../README.md).
 ![Items: the item box with game icons](1x/02-items-dark.png#gh-dark-mode-only)
 ![Items: the item box with game icons](1x/02-items-light.png#gh-light-mode-only)
 
+## Items: Fill box
+
+![Fill box: the item box filled with every item of the categories picked, whole or one by one](1x/16-fill-dark.png#gh-dark-mode-only)
+![Fill box: the item box filled with every item of the categories picked, whole or one by one](1x/16-fill-light.png#gh-light-mode-only)
+
 ## Equipment
 
 ![Equipment: the hunter box and a talisman with its skills, slots and decorations](1x/03-equipment-dark.png#gh-dark-mode-only)

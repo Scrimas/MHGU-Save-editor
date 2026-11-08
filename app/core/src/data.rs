@@ -303,6 +303,9 @@ pub struct Tables {
     pub palico_fortes: LazyLock<Vec<PalicoForte>>,
     pub palico_looks: LazyLock<Vec<PalicoLook>>,
     pub unlock_lists: LazyLock<Vec<UnlockEntry>>,
+    /// data/item-fill.csv: (item, category) of every item the box can hold, by item ID;
+    /// categories in items::FILL.
+    pub item_fill: LazyLock<Vec<(u16, String)>>,
 }
 
 impl Tables {
@@ -535,6 +538,9 @@ pub fn tables() -> &'static Tables {
                 .map(|r| (num(&r["item1"]) as u16, num(&r["item2"]) as u16, num(&r["result"]) as u16, num(&r["chance"]) as u8))
                 .collect()
         }),
+        item_fill: LazyLock::new(|| {
+            rows(include_str!("../../../data/item-fill.csv")).iter().map(|r| (num(&r["item"]) as u16, r["category"].clone())).collect()
+        }),
         carves: LazyLock::new(|| {
             rows(include_str!("../../../data/monster-carves.csv"))
                 .iter()
@@ -634,6 +640,10 @@ mod tests {
         }
         assert!(sums.iter().all(|(k, &v)| v == 100 || k.2 == "other"), "carve tables");
         assert_eq!(t.skill_trees.len(), 206);
+        // every item the Fill box dialog offers has one of its categories, each category items
+        assert_eq!(t.item_fill.len(), 2693);
+        assert!(t.item_fill.iter().all(|(i, c)| *i > 0 && crate::items::FILL.contains(&c.as_str())));
+        assert!(crate::items::FILL.iter().all(|c| t.item_fill.iter().any(|x| x.1 == *c)));
         assert!(t.armor_skills.iter().chain(t.decorations.iter()).all(|r| (r.2 as usize) < 206));
         // every upgraded weapon has its upgrade, every provision group has materials
         assert!(

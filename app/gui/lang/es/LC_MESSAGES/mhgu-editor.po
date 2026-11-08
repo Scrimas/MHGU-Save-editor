@@ -141,7 +141,8 @@ msgid "The emulator keeps two copies of the save, each with a backup; every one 
 msgstr "El emulador guarda dos copias de la partida, cada una con su copia de seguridad; todas reciben los mismos bytes y conservan su propia cabecera."
 
 #: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/fill.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -482,7 +483,7 @@ msgid_plural "{n} saves listed on the Open page"
 msgstr[0] "{n} partida listada en la página Abrir"
 msgstr[1] "{n} partidas listadas en la página Abrir"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/app.slint app/gui/ui/fill.slint app/gui/ui/pages/quests.slint
 msgid "Clear"
 msgstr "Borrar"
 
@@ -962,6 +963,38 @@ msgstr "Detalles técnicos"
 msgid "More…"
 msgstr "Más…"
 
+#: app/gui/ui/fill.slint
+msgid "in the box"
+msgstr "en la caja"
+
+#: app/gui/ui/fill.slint
+msgid "Fill the item box"
+msgstr "Llenar la caja de objetos"
+
+#: app/gui/ui/fill.slint
+msgid "Expanded view"
+msgstr "Vista ampliada"
+
+#: app/gui/ui/fill.slint
+msgid "Compact view"
+msgstr "Vista compacta"
+
+#: app/gui/ui/fill.slint
+msgid "Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out."
+msgstr "Coloca los objetos elegidos en las ranuras vacías, una pila de cada uno: categorías enteras u objetos sueltos. Los que ya están en la caja se omiten."
+
+#: app/gui/ui/fill.slint
+msgid "Tick a whole category, or open it to pick single items."
+msgstr "Marca una categoría entera o ábrela para elegir objetos sueltos."
+
+#: app/gui/ui/fill.slint app/gui/ui/pages/items.slint
+msgid "Count"
+msgstr "Cantidad"
+
+#: app/gui/ui/fill.slint
+msgid "Staged: undo it in Review until you write."
+msgstr "Pendiente: puedes deshacerlo en Revisión hasta que escribas."
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/advanced.slint
 msgid "Every byte range of the save, named from the game's own loader · read-only, character {}"
@@ -1239,11 +1272,13 @@ msgstr "El juego suma rango bajo y rango G y limita el total a 20.000."
 msgid "Village"
 msgstr "Aldea"
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "Low rank"
 msgstr "Rango bajo"
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/character.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/pages/character.slint
 msgid "G rank"
 msgstr "Rango G"
 
@@ -1614,8 +1649,8 @@ msgstr "Talismanes"
 msgid "No talisman rolls it."
 msgstr "Ningún talismán la da."
 
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/equipment.slint
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
 msgid "Decorations"
 msgstr "Adornos"
 
@@ -1957,6 +1992,10 @@ msgid "Max counts…"
 msgstr "Cantidades al máximo…"
 
 #: app/gui/ui/pages/items.slint
+msgid "Fill box…"
+msgstr "Llenar caja…"
+
+#: app/gui/ui/pages/items.slint
 msgid "Empty box…"
 msgstr "Vaciar caja…"
 
@@ -1964,8 +2003,8 @@ msgstr "Vaciar caja…"
 msgid "Empty pouch…"
 msgstr "Vaciar bolsa…"
 
-#: app/gui/src/goals.rs app/gui/src/views/transfer_ui.rs
-#: app/gui/ui/pages/items.slint
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
+#: app/gui/src/views/transfer_ui.rs app/gui/ui/pages/items.slint
 msgid "Item box"
 msgstr "Caja de objetos"
 
@@ -2020,10 +2059,6 @@ msgstr "Espacio {} de la caja de objetos"
 #: app/gui/src/targets.rs app/gui/ui/pages/items.slint
 msgid "Pouch slot {}"
 msgstr "Espacio {} de la bolsa"
-
-#: app/gui/ui/pages/items.slint
-msgid "Count"
-msgstr "Cantidad"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/items.slint
@@ -2993,7 +3028,7 @@ msgid "Every item obtained"
 msgstr "Todos los objetos obtenidos"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/src/goals.rs app/gui/src/targets.rs
+#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/src/views/fill_ui.rs
 msgid "{} item"
 msgid_plural "{} items"
 msgstr[0] "{} objeto"
@@ -4765,11 +4800,11 @@ msgid "none in the box"
 msgstr "ninguno en la caja"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "{} in the box"
 msgstr "{} en la caja"
 
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "High rank"
 msgstr "Rango alto"
 
@@ -4893,7 +4928,7 @@ msgstr "Ninguna misión le da tamaño mini."
 msgid "Tail"
 msgstr "Cola"
 
-#: app/gui/src/views/database.rs
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
 msgid "Other"
 msgstr "Otros"
 
@@ -5170,6 +5205,264 @@ msgstr "La partida previa a la restauración se conserva como instantánea"
 #: app/gui/src/views/file.rs
 msgid "Restore failed: {}"
 msgstr "Error al restaurar: {}"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Monster materials"
+msgstr "Materiales de monstruos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Gathered"
+msgstr "Recolectados"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hunting supplies"
+msgstr "Suministros de caza"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Village ★1–6, Hub ★1–3"
+msgstr "Aldea ★1–6, Campamento ★1–3"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Village ★7–10, Hub ★4–7"
+msgstr "Aldea ★7–10, Campamento ★4–7"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hub G★1–4"
+msgstr "Campamento G★1–4"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Hyper materials"
+msgstr "Materiales híper"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "From Hyper monsters"
+msgstr "De monstruos híper"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Deviant materials"
+msgstr "Materiales de mutados"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "From the 18 Deviants"
+msgstr "De los 18 mutados"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Ore and crystals"
+msgstr "Minerales y cristales"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Mining points"
+msgstr "Puntos de minería"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bones"
+msgstr "Huesos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bone piles"
+msgstr "Montones de huesos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Plants, mushrooms and berries"
+msgstr "Plantas, setas y bayas"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Gathering points"
+msgstr "Puntos de recolección"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bugs"
+msgstr "Insectos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bug nets"
+msgstr "Cazamariposas"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fish and bait"
+msgstr "Peces y cebos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fishing spots"
+msgstr "Zonas de pesca"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Healing and buffs"
+msgstr "Curación y mejoras"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Potions, drinks, pills, oils"
+msgstr "Pociones, bebidas, píldoras, aceites"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bombs, traps and tools"
+msgstr "Bombas, trampas y herramientas"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bombs, traps, whetstones, pickaxes, nets"
+msgstr "Bombas, trampas, piedras de afilar, picos, redes"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Meat and food"
+msgstr "Carne y comida"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Steaks and baited meats"
+msgstr "Filetes y carnes con cebo"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Ammo"
+msgstr "Munición"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bowgun shots"
+msgstr "Disparos de ballesta"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Coatings"
+msgstr "Revestimientos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Bow coatings"
+msgstr "Revestimientos de arco"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Kinsect extracts"
+msgstr "Extractos de kinsecto"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Jellies and ambrosias"
+msgstr "Jaleas y ambrosías"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "1-slot decorations"
+msgstr "Adornos de 1 ranura"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take one decoration slot"
+msgstr "Ocupan una ranura"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "2-slot decorations"
+msgstr "Adornos de 2 ranuras"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take two decoration slots"
+msgstr "Ocupan dos ranuras"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "3-slot decorations"
+msgstr "Adornos de 3 ranuras"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Take three decoration slots"
+msgstr "Ocupan tres ranuras"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Palico scraps"
+msgstr "Restos para Camaradas"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "For the Palico Smithy"
+msgstr "Para la herrería de Camaradas"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Tickets and vouchers"
+msgstr "Tickets y vales"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Quest, event and collaboration tickets"
+msgstr "Tickets de misiones, eventos y colaboraciones"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Coins, spheres and books"
+msgstr "Monedas, esferas y libros"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Armor spheres, coins, Books of Combos"
+msgstr "Esferas armadura, monedas, libros combos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Everything else"
+msgstr "Todo lo demás"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fragments, garbage and one-offs"
+msgstr "Fragmentos, basura y objetos sueltos"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "✓ all in the box"
+msgstr "✓ todo en la caja"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/fill_ui.rs
+msgid "+{} slot"
+msgid_plural "+{} slots"
+msgstr[0] "+{} ranura"
+msgstr[1] "+{} ranuras"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} of {} picked"
+msgstr "{} de {} elegidos"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "needs {}, {} left"
+msgstr "necesita {}, quedan {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "needs {}, box full"
+msgstr "necesita {}, caja llena"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} to add"
+msgstr "{} por añadir"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} already in the box"
+msgstr "{} ya en la caja"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} used"
+msgstr "{} usadas"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} picked"
+msgstr "{} elegidos"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "{} stay free"
+msgstr "{} quedan libres"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/fill_ui.rs
+msgid "of {} slots"
+msgstr "de {} ranuras"
+
+#: app/gui/src/views/fill_ui.rs
+msgid "Fill"
+msgstr "Llenar"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/fill_ui.rs
+msgid "Fill {} slot ×{}"
+msgid_plural "Fill {} slots ×{}"
+msgstr[0] "Llenar {} ranura ×{}"
+msgstr[1] "Llenar {} ranuras ×{}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/fill_ui.rs
+msgid "Item box: {} item added ×{}"
+msgid_plural "Item box: {} items added ×{}"
+msgstr[0] "Caja de objetos: {} objeto añadido ×{}"
+msgstr[1] "Caja de objetos: {} objetos añadidos ×{}"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs

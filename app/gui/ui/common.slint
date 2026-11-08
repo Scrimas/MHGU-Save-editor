@@ -22,6 +22,14 @@ export struct ChangeRow {
 
 export struct WriteRow { title: string, right: string, confidence: Confidence, old: string, new: string, warning: string }
 
+// Fill box dialog (fill.slint): a tab ("+N" picked, else N to add), an item, a category
+// (tone: 0 plain, 1 all in the box, 2 does not fit)
+export struct FillTab { name: string, badge: string, picked: bool }
+export struct FillItem { id: int, name: string, have: bool, on: bool, enabled: bool }
+export struct FillCat {
+    key: string, name: string, sub: string, status: string, tone: int,
+    done: bool, checked: bool, partial: bool, enabled: bool, selected: bool, open: bool, items: [FillItem],
+}
 export struct SnapRow { dir: string, when: string, before: string }
 export struct MhxxRow { name: string, sub: string, used: bool }
 // a record of the Guild Card's history log; `bad` for a failed or abandoned quest
@@ -452,6 +460,32 @@ export global Api {
     // the item box and the equipment box shown, to and from CSV files
     callback item-export();
     callback item-import();
+    // Fill box dialog (fill.slint): its view (saved in Settings), tabs, the tab's categories,
+    // the items of the category shown (expanded), the box's slots used, items picked,
+    // the count of each new stack; the footer's legend and Fill button text
+    in-out property <bool> fill-open;
+    in property <bool> fill-compact;
+    in property <[FillTab]> fill-tabs;
+    in property <int> fill-tab;
+    in property <[FillCat]> fill-cats;
+    in property <string> fill-cat-name;
+    in property <string> fill-cat-sub;
+    in property <[FillItem]> fill-items;
+    in property <int> fill-used;
+    in property <int> fill-picked;
+    in property <int> fill-count: 99;
+    in property <[string]> fill-legend;
+    in property <string> fill-action;
+    callback fill-show();
+    callback fill-set-compact(bool);
+    callback fill-select-tab(int);
+    callback fill-select-cat(string);
+    callback fill-open-cat(string);
+    callback fill-toggle-cat(string);
+    callback fill-toggle-item(int /* item ID */);
+    callback fill-set-count(int);
+    callback fill-clear();
+    callback fill-apply();
     callback equip-export();
     callback equip-import();
     // talismans as text (Athena's charm list): every one or the one selected; text pasted
@@ -1905,6 +1939,10 @@ export component SearchField inherits LineEdit {
 
 export component Modal inherits Rectangle {
     in property <length> card-width: 520px;
+    // 0: the content's height
+    in property <length> card-height: 0px;
+    // the card's size animates (a dialog with two sizes)
+    in property <bool> animate-size;
     callback dismiss();  // click on the scrim, or Escape
     background: #00000080;
     // takes the keyboard while open: Escape closes it, keys of its fields bubble here
@@ -1919,9 +1957,10 @@ export component Modal inherits Rectangle {
         TouchArea { clicked => { root.dismiss(); } }
         Rectangle {
             width: min(root.card-width, root.width - 32px);
-            height: min(lay.preferred-height, root.height - 48px);
+            height: root.card-height > 0 ? min(root.card-height, root.height - 48px) : min(lay.preferred-height, root.height - 48px);
             x: (root.width - self.width) / 2;
             y: max(24px, (root.height - self.height) / 3);
+            animate width, height { duration: root.animate-size ? Tok.anim : 0ms; easing: ease-out; }
             background: Tok.raised;
             border-radius: 8px;
             border-width: 1px;
@@ -2083,12 +2122,25 @@ export component PreviewPopup inherits Rectangle {
     }
 }
 
-// "More…" button with a menu of less common or destructive page actions (04.4).
+// "More…" button with a menu of less common or destructive page actions (04.4). An entry
+// notes its index and closes the menu; the action runs on the next turn of the event loop.
+// Closing the popup ends the row that holds `i`, so nothing after the close ran (issue #5),
+// and acting first would leave the menu drawn behind a file dialog.
 export component MoreButton inherits Rectangle {
     in property <[string]> items;
     callback activated(int);
     width: b.preferred-width;
     height: 32px;
+    property <int> pending: -1;
+    Timer {
+        interval: 1ms;
+        running: root.pending >= 0;
+        triggered => {
+            let k = root.pending;
+            root.pending = -1;
+            root.activated(k);
+        }
+    }
     b := Button { text: @tr("More…"); height: 32px; clicked => { menu.show(); } }
     menu := PopupWindow {
         x: root.width - 220px;
@@ -2111,21 +2163,21 @@ export component MoreButton inherits Rectangle {
                     accessible-role: button;
                     accessible-label: it;
                     accessible-action-default => {
+                        root.pending = i;
                         menu.close();
-                        root.activated(i);
                     }
                     Text { text: it; x: 12px; vertical-alignment: center; }
                     fk := KeyActivate {
                         activated => {
+                            root.pending = i;
                             menu.close();
-                            root.activated(i);
                         }
                     }
                     FocusRing { shown: fk.has-focus; border-radius: 4px; }
                     ta := TouchArea {
                         clicked => {
+                            root.pending = i;
                             menu.close();
-                            root.activated(i);
                         }
                     }
                 }

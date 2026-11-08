@@ -121,6 +121,36 @@ pub fn compact(v: &[Stack], sort: bool, store: Store, max: impl Fn(u16) -> u8) -
     out
 }
 
+/// The Fill box dialog's categories (data/item-fill.csv, tools/item_fill.py), in the
+/// order its tabs list them. DERIVED: an editor grouping; the items the game never keeps
+/// in the box (supply, quest, appraised and carried items) are in none.
+pub const FILL: [&str; 23] = [
+    "low", "high", "g", "hyper", "deviant", "ore", "bone", "plant", "bug", "fish", "heal", "tool", "food", "ammo", "coating", "extract", "deco1", "deco2",
+    "deco3", "scrap", "ticket", "trade", "other",
+];
+
+/// Put one stack of `count` of each item of `ids` that the box does not hold yet into its
+/// empty slots, from the first, in the order given; marks each one obtained, as the game
+/// does when an item first enters the box. Stops when the box is full. Returns how many
+/// were put in. DERIVED.
+pub fn fill(s: &mut Save, base: usize, ids: &[u16], count: u8) -> usize {
+    let v = all(s, base, Store::Box);
+    let held: std::collections::HashSet<u16> = v.iter().map(|x| x.id).collect();
+    let mut empty = v.iter().enumerate().filter(|(_, x)| x.is_empty()).map(|(i, _)| i);
+    let mut seen = std::collections::HashSet::new();
+    let mut n = 0;
+    for &id in ids.iter().filter(|&&id| id != 0 && !held.contains(&id)) {
+        if !seen.insert(id) {
+            continue;
+        }
+        let Some(i) = empty.next() else { break };
+        set(s, base, Store::Box, i, Stack { id, count: count.clamp(1, MAX_COUNT) });
+        set_obtained(s, base, id, true);
+        n += 1;
+    }
+    n
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Loadout {
     pub name: String,
@@ -197,6 +227,21 @@ mod tests {
         assert_eq!(&r.items[..3], &[(1, 5), (0, 0), (2, 99)]);
         assert_eq!(get(&s, SLOT1_BASE, Store::Pouch, 0), Stack::default(), "the last loadout ends before the pouch");
         assert!(std::panic::catch_unwind(|| loadout(&blank(), SLOT1_BASE, LOADOUT_N)).is_err());
+    }
+
+    #[test]
+    fn fill_takes_empty_slots_and_skips_held_items() {
+        let mut s = blank();
+        set(&mut s, SLOT1_BASE, Store::Box, 0, Stack { id: 7, count: 1 });
+        set(&mut s, SLOT1_BASE, Store::Box, 2, Stack { id: 9, count: 3 });
+        assert_eq!(fill(&mut s, SLOT1_BASE, &[7, 12, 12, 0, 30], 99), 2);
+        let v = all(&s, SLOT1_BASE, Store::Box);
+        assert_eq!(&v[..4], &[Stack { id: 7, count: 1 }, Stack { id: 12, count: 99 }, Stack { id: 9, count: 3 }, Stack { id: 30, count: 99 }]);
+        assert!(obtained(&s, SLOT1_BASE, 12) && obtained(&s, SLOT1_BASE, 30) && !obtained(&s, SLOT1_BASE, 7));
+        // a full box takes nothing more
+        let ids: Vec<u16> = (100..100 + BOX_N as u16).collect();
+        assert_eq!(fill(&mut s, SLOT1_BASE, &ids, 1), BOX_N - 4);
+        assert_eq!(fill(&mut s, SLOT1_BASE, &[5], 1), 0);
     }
 
     #[test]
