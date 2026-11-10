@@ -51,6 +51,8 @@ export component WriteScreen inherits Rectangle {
             HorizontalLayout {
                 alignment: center;
                 VerticalLayout {
+                    // shorter than the view: the spare room stays below the content
+                    alignment: start;
                     max-width: 640px;
                     horizontal-stretch: 1;
                     padding-left: M.gutter + root.side-inset;

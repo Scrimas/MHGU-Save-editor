@@ -1,0 +1,858 @@
+// Equipment on phones and tablets: the hunter and Palico boxes as lists with their filters,
+// a piece's detail (level, decorations, transmog, a talisman's skills and slots), and the
+// My Sets and Palico sets. On a phone the detail takes the list's place, with Back; from
+// 840 dp they sit side by side (the design's tablet layout).
+import { ListView } from "std-widgets.slint";
+import { M } from "../theme.slint";
+import { Btn, CheckRow, Chip, CountField, Dot, GroupRow, Ico, IconBtn, Muted, Press, SearchBar, Segmented, Sheet, TabRow, Tap, TextField } from "../widgets.slint";
+import { Choice } from "../pick.slint";
+import { ColourEdit } from "../colour.slint";
+import { ColourRow } from "../form.slint";
+import { Api, Confidence, EquipRow, Fmt, Tabs } from "../../common.slint";
+
+// What the page shows on a phone (Back closes the detail first, app.slint) and the icon of
+// the piece picked (the detail has none of its own).
+export global EquipView {
+    in-out property <bool> detail;
+    in-out property <bool> set-detail;
+    in-out property <image> icon;
+    in-out property <bool> has-icon;
+}
+
+// The piece picker: what goes into a box slot (-1 the first free one), or a look
+// (Api.pick-mode "transmog").
+export global EquipPick {
+    in-out property <bool> open;
+    in-out property <int> slot: -1;
+    in-out property <int> id;
+    in-out property <string> search;
+    public function add(slot: int, id: int, category: int) {
+        EquipPick.slot = slot;
+        EquipPick.id = id;
+        if category >= 0 {
+            Api.equip-category = category;
+        }
+        Api.pick-mode = "";
+        EquipPick.search = "";
+        Api.search-equip("");
+        EquipPick.open = true;
+    }
+    public function transmog() {
+        EquipPick.slot = Api.equip-detail.slot;
+        EquipPick.id = Api.equip-detail.transmog-id;
+        Api.pick-mode = "transmog";
+        EquipPick.search = "";
+        Api.search-equip("");
+        EquipPick.open = true;
+    }
+}
+
+export global DecoPick {
+    in-out property <bool> open;
+    in-out property <string> search;
+    public function show() {
+        DecoPick.search = "";
+        Api.search-decos("");
+        DecoPick.open = true;
+    }
+}
+
+// A game icon on its dark tile.
+component Tile inherits Rectangle {
+    in property <image> icon;
+    in property <bool> has-icon;
+    in property <length> size: 40px;
+    in property <bool> empty;
+    width: root.size;
+    height: root.size;
+    border-radius: root.size / 5;
+    background: root.empty ? transparent : M.tile;
+    border-width: root.empty ? 1px : 0px;
+    border-color: M.outline-variant;
+    clip: true;
+    if root.has-icon && !root.empty: Image { source: root.icon; width: root.size * 0.8; height: root.size * 0.8; image-rendering: smooth; }
+}
+
+// A box entry: its icon, name and what it is, the slot number at the right.
+component EquipItem inherits Rectangle {
+    in property <EquipRow> e;
+    in property <bool> selected;
+    in property <bool> flash;
+    callback clicked();
+    height: max(64px, lay.preferred-height);
+    border-radius: 12px;
+    background: root.selected || root.flash ? M.secondary-container : transparent;
+    accessible-role: list-item;
+    accessible-label: @tr("Box slot {}: {}", root.e.slot + 1, root.e.title);
+    accessible-description: root.e.warning != "" ? root.e.sub + " · " + root.e.warning : root.e.sub;
+    accessible-item-selected: root.selected;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    lay := HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        spacing: 16px;
+        VerticalLayout {
+            alignment: center;
+            Tile { icon: root.e.icon; has-icon: root.e.has-icon; empty: root.e.kind-code == 0; }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            HorizontalLayout {
+                spacing: 8px;
+                Text {
+                    text: root.e.title;
+                    color: root.e.kind-code == 0 ? M.on-surface-variant : root.selected ? M.on-secondary-container : M.on-surface;
+                    font-size: M.body-large;
+                    overflow: elide;
+                    horizontal-stretch: 1;
+                }
+                if root.e.changed: VerticalLayout {
+                    alignment: center;
+                    Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+                }
+            }
+            if root.e.sub != "": Text { text: root.e.sub; color: M.on-surface-variant; font-size: M.body-medium; overflow: elide; }
+            if root.e.warning != "": Text { text: root.e.warning; color: M.error; font-size: M.body-small; overflow: elide; }
+        }
+        if root.e.status != "": VerticalLayout {
+            alignment: center;
+            Rectangle {
+                height: 24px;
+                width: st.preferred-width + 16px;
+                border-radius: 8px;
+                background: M.tertiary-container;
+                st := Text { text: root.e.status; color: M.on-tertiary-container; font-size: M.label-small; font-weight: M.medium; }
+            }
+        }
+        Text { text: root.e.slot + 1; color: M.on-surface-variant; font-size: M.label-medium; vertical-alignment: center; }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// A rounded card of the detail, with its heading and a dot while its change waits.
+component Card inherits Rectangle {
+    in property <string> title;
+    in property <bool> staged;
+    in property <string> note;
+    in property <bool> note-bad;
+    background: M.s-low;
+    border-radius: 16px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding-left: 16px;
+        padding-right: 12px;
+        padding-top: 12px;
+        padding-bottom: 14px;
+        spacing: 4px;
+        if root.title != "": HorizontalLayout {
+            spacing: 8px;
+            Text { text: root.title; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; vertical-alignment: center; }
+            if root.staged: VerticalLayout {
+                alignment: center;
+                Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+            }
+            Rectangle { horizontal-stretch: 1; }
+            if root.note != "": Text { text: root.note; color: root.note-bad ? M.error : M.on-surface-variant; font-size: M.label-medium; font-weight: M.medium; vertical-alignment: center; }
+        }
+        @children
+    }
+}
+
+// "was 5 · Undo" under a staged value.
+component WasRow inherits HorizontalLayout {
+    in property <string> was;
+    in property <string> key;
+    spacing: 4px;
+    alignment: start;
+    Text { text: @tr("was {}", root.was); color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+    Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo-value(root.key); } }
+}
+
+// A setting that opens a list: its label, the value, a chevron.
+component ChoiceRow inherits Rectangle {
+    in property <string> label;
+    in property <string> value;
+    callback clicked();
+    height: max(56px, lay.preferred-height);
+    border-radius: 12px;
+    accessible-role: button;
+    accessible-label: root.label;
+    accessible-value: root.value;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    lay := HorizontalLayout {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        padding-right: 4px;
+        spacing: 12px;
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: root.label; color: M.on-surface-variant; font-size: M.body-small; }
+            Text { text: root.value; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+        }
+        VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("../icons/chevron-down.svg"); }
+        }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// The piece picked: what it is, then what can change on it.
+component PieceDetail inherits Flickable {
+    // the width it gets (the page's, less the list's beside it): read from the page, so
+    // it does not depend on the detail's own content
+    in property <length> avail;
+    in property <length> side;
+    in property <length> bottom-pad;
+    in property <bool> back;
+    property <bool> hunter: Api.equip-owner == 0;
+    property <string> key: (root.hunter ? "equip:hunter:" : "equip:palico:") + Api.equip-detail.slot;
+    property <int> free: Api.equip-detail.deco-slots - Api.equip-detail.deco-used;
+    content-width: self.width;
+    VerticalLayout {
+        padding-left: root.side;
+        padding-right: root.side;
+        padding-top: 4px;
+        padding-bottom: root.bottom-pad;
+        spacing: 12px;
+        alignment: start;
+        if root.back: HorizontalLayout {
+            padding-left: -12px;
+            spacing: 4px;
+            IconBtn {
+                icon: @image-url("../icons/back.svg");
+                tint: M.on-surface;
+                label: @tr("Back to the box");
+                clicked => { EquipView.detail = false; }
+            }
+            Text { text: root.hunter ? @tr("Hunter box") : @tr("Palico box"); color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; vertical-alignment: center; }
+        }
+        HorizontalLayout {
+            spacing: 16px;
+            VerticalLayout {
+                alignment: start;
+                Tile { size: 64px; icon: EquipView.icon; has-icon: EquipView.has-icon; empty: Api.equip-detail.kind-code == 0; }
+            }
+            VerticalLayout {
+                alignment: center;
+                spacing: 2px;
+                // (a set width: wrapped text in a row is otherwise measured as one line)
+                width: root.avail - 2 * root.side - 80px;
+                Text { text: Api.equip-detail.name; color: M.on-surface; font-size: M.headline-small; wrap: word-wrap; }
+                Text {
+                    text: Api.equip-detail.id > 0 ? @tr("{} · box slot {} · ID {}", Api.equip-detail.kind, Api.equip-detail.slot + 1, Api.equip-detail.id) : @tr("{} · box slot {}", Api.equip-detail.kind, Api.equip-detail.slot + 1);
+                    color: M.on-surface-variant;
+                    font-size: M.body-medium;
+                    wrap: word-wrap;
+                }
+                HorizontalLayout {
+                    spacing: 6px;
+                    VerticalLayout {
+                        alignment: center;
+                        Dot { level: Confidence.confirmed; }
+                    }
+                    Text { text: @tr("Confirmed in game except where marked"); color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; horizontal-stretch: 1; }
+                }
+            }
+        }
+        if Api.equip-detail.was != "": WasRow { was: Api.equip-detail.was; key: root.key; }
+        if Api.equip-detail.warning != "": Text {
+            text: @tr("The game cannot make this: {}.", Api.equip-detail.warning);
+            color: M.error;
+            font-size: M.body-small;
+            wrap: word-wrap;
+        }
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: start;
+            if Api.equip-detail.kind-code == 0: Btn {
+                text: @tr("Add equipment here");
+                enabled: Api.equip-detail.uses == "";
+                clicked => { EquipPick.add(Api.equip-detail.slot, 0, -1); }
+            }
+            if Api.equip-detail.kind-code != 0: Btn {
+                kind: "outlined";
+                text: @tr("Replace…");
+                enabled: Api.equip-detail.uses == "";
+                clicked => { EquipPick.add(Api.equip-detail.slot, Api.equip-detail.id, Api.equip-detail.category); }
+            }
+            if Api.equip-detail.kind-code != 0: Btn {
+                kind: "outlined";
+                text: @tr("Remove");
+                enabled: Api.equip-detail.uses == "";
+                clicked => { Api.put-equip(Api.equip-detail.slot, 0); }
+            }
+        }
+        // why the buttons are off, next to them
+        if root.hunter && Api.equip-detail.uses != "": Text {
+            text: @tr("Used by {}. Change that in game before replacing or removing this piece.", Api.equip-detail.uses);
+            color: M.warn;
+            font-size: M.body-small;
+            wrap: word-wrap;
+        }
+        // Palico gear has neither levels nor decoration slots
+        if root.hunter && Api.equip-detail.kind-code != 0 && !Api.equip-detail.is-talisman: Card {
+            title: @tr("Level");
+            staged: Api.equip-detail.was-level != "";
+            CountField {
+                value: Api.equip-detail.level;
+                minimum: 1;
+                maximum: 32;
+                show-limit: false;
+                show-label: false;
+                label: @tr("Level");
+                edited(v) => { Api.set-equip("level", v); }
+            }
+            if Api.equip-detail.was-level != "": WasRow { was: Api.equip-detail.was-level; key: root.key; }
+        }
+        if root.hunter && Api.equip-detail.kind-code != 0 && (Api.equip-detail.decos.length > 0 || Api.equip-detail.deco-slots != 0): Card {
+            title: @tr("Decorations");
+            note: Api.equip-detail.deco-slots >= 0 ? @tr("{} of {n} slot used" | "{} of {n} slots used" % Api.equip-detail.deco-slots, Api.equip-detail.deco-used) : "";
+            note-bad: Api.equip-detail.deco-slots >= 0 && Api.equip-detail.deco-used > Api.equip-detail.deco-slots;
+            if Api.equip-detail.decos.length == 0: Muted { text: @tr("None"); }
+            for d in Api.equip-detail.decos: HorizontalLayout {
+                spacing: 12px;
+                min-height: 56px;
+                VerticalLayout {
+                    alignment: center;
+                    horizontal-stretch: 1;
+                    Text { text: d.name; color: M.on-surface; font-size: M.body-large; overflow: elide; }
+                    Text { text: @tr("{n} slot" | "{n} slots" % d.size); color: M.on-surface-variant; font-size: M.body-medium; }
+                }
+                VerticalLayout {
+                    alignment: center;
+                    IconBtn {
+                        icon: @image-url("../icons/close.svg");
+                        label: @tr("Remove {}", d.name);
+                        clicked => { Api.set-equip("deco-remove", d.index); }
+                    }
+                }
+            }
+            if Api.equip-detail.deco-slots >= 0 && root.free < 0: Text {
+                text: @tr("Decorations that do not fit come after: the game never allows them.");
+                color: M.error;
+                font-size: M.body-small;
+                wrap: word-wrap;
+            }
+            // past the free slots too, with a warning; three fields at most
+            if Api.equip-detail.deco-slots >= 0 && Api.equip-detail.decos.length < 3: HorizontalLayout {
+                alignment: start;
+                padding-top: 4px;
+                Btn {
+                    kind: "tonal";
+                    has-icon: true;
+                    icon: @image-url("../icons/add.svg");
+                    text: @tr("Add decoration");
+                    clicked => { DecoPick.show(); }
+                }
+            }
+            if Api.equip-detail.deco-slots < 0: Muted { text: @tr("This build's game data has no slot counts: decorations can only be removed."); }
+        }
+        if Api.equip-detail.kind-code >= 1 && Api.equip-detail.kind-code <= 5: Card {
+            title: @tr("Transmog");
+            note: Api.equip-detail.transmog == "" ? @tr("Own look") : Api.equip-detail.transmog;
+            if Api.equip-detail.can-transmog: Muted { text: @tr("The piece keeps its skills, slots and defense; only its look changes."); }
+            HorizontalLayout {
+                spacing: 8px;
+                alignment: start;
+                padding-top: 6px;
+                if Api.equip-detail.can-transmog: Btn { kind: "outlined"; text: @tr("Change look…"); clicked => { EquipPick.transmog(); } }
+                if Api.equip-detail.transmog-id != 0: Btn { kind: "text"; text: @tr("Restore own look"); clicked => { Api.set-equip("transmog", 0); } }
+            }
+        }
+        if Api.equip-detail.is-talisman: Card {
+            title: @tr("Skills");
+            if Api.equip-detail.tier != "": Muted { text: Api.equip-detail.tier; }
+            for k in 2: VerticalLayout {
+                spacing: 8px;
+                padding-top: 4px;
+                ChoiceRow {
+                    label: @tr("Skill {}", k + 1);
+                    value: Api.skill-names[k == 0 ? Api.equip-detail.skill1 : Api.equip-detail.skill2];
+                    clicked => { Choice.show("skill", k, @tr("Skill {}", k + 1), Api.skill-names, k == 0 ? Api.equip-detail.skill1 : Api.equip-detail.skill2); }
+                }
+                CountField {
+                    value: k == 0 ? Api.equip-detail.points1 : Api.equip-detail.points2;
+                    minimum: -10;
+                    maximum: 20;
+                    show-limit: false;
+                    signed: true;
+                    label: @tr("Points of skill {}", k + 1);
+                    edited(v) => { Api.set-equip("points" + k, v); }
+                }
+            }
+        }
+        if Api.equip-detail.is-talisman: Card {
+            title: @tr("Decoration slots");
+            Segmented {
+                options: ["0", "1", "2", "3"];
+                value: Api.equip-detail.slots;
+                picked(i) => { Api.set-equip("slots", i); }
+            }
+        }
+    }
+}
+
+// My Sets and Palico sets: the set picked.
+component SetDetailView inherits Flickable {
+    in property <length> side;
+    in property <length> bottom-pad;
+    in property <bool> back;
+    property <bool> palico: Api.set-detail.palico;
+    property <int> k: Api.set-detail.index;
+    property <string> set-key: root.palico ? "palset:" + root.k : "myset:" + root.k;
+    property <[string]> styles: [@tr("Guild Style"), @tr("Striker Style"), @tr("Aerial Style"), @tr("Adept Style"), @tr("Alchemy Style"), @tr("Valor Style")];
+    content-width: self.width;
+    VerticalLayout {
+        padding-left: root.side;
+        padding-right: root.side;
+        padding-top: 4px;
+        padding-bottom: root.bottom-pad;
+        spacing: 12px;
+        alignment: start;
+        HorizontalLayout {
+            padding-left: root.back ? -12px : 0px;
+            spacing: 4px;
+            if root.back: IconBtn {
+                icon: @image-url("../icons/back.svg");
+                tint: M.on-surface;
+                label: @tr("Back");
+                clicked => { EquipView.set-detail = false; }
+            }
+            Text {
+                text: root.palico ? @tr("Palico set {}", root.k + 1) : @tr("My Set {}", root.k + 1);
+                color: M.on-surface;
+                font-size: M.title-large;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+            }
+            // the set to the slot before or after (the ones between shift), as the desktop's
+            // drag and Alt+Up/Down do
+            IconBtn {
+                icon: @image-url("../icons/arrow-up.svg");
+                label: @tr("Move up");
+                enabled: root.k > 0;
+                clicked => { Api.reorder-key(root.palico ? "palset" : "myset", root.k, -1); }
+            }
+            IconBtn {
+                icon: @image-url("../icons/arrow-down.svg");
+                label: @tr("Move down");
+                enabled: root.k < (root.palico ? 23 : 39);
+                clicked => { Api.reorder-key(root.palico ? "palset" : "myset", root.k, 1); }
+            }
+            if root.palico || Api.set-detail.used: VerticalLayout {
+                alignment: center;
+                Btn { kind: "text"; text: @tr("Clear set"); clicked => { Api.clear-set(); } }
+            }
+        }
+        if root.palico || Api.set-detail.used: TextField {
+            label: @tr("Set name");
+            value: Api.set-detail.name;
+            label-bg: M.surface;
+            committed(t) => { Api.set-set-name(t); }
+        }
+        if Api.set-detail.was-name != "": WasRow { was: Api.set-detail.was-name; key: root.palico ? root.set-key : root.set-key + ":name"; }
+        if !root.palico && !Api.set-detail.used: VerticalLayout {
+            spacing: 12px;
+            Muted { text: @tr("An unused set. Save what you have on into it, as the game's Register does, then change it here."); }
+            HorizontalLayout {
+                alignment: start;
+                Btn { text: @tr("Save what you have on"); clicked => { Api.set-from-current(); } }
+            }
+        }
+        if root.palico || Api.set-detail.used: Card {
+            title: @tr("Gear");
+            Muted { text: root.palico ? @tr("Pieces of the Palico box.") : @tr("Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box."); }
+            for p[j] in Api.set-detail.pieces: ChoiceRow {
+                label: p.part;
+                value: p.choices[p.pick];
+                clicked => { Choice.show("set-piece", j, p.part, p.choices, p.pick); }
+            }
+            if Api.set-detail.was-gear != "": WasRow { was: Api.set-detail.was-gear; key: root.set-key + ":gear"; }
+            if Api.set-detail.warn-gear != "": Text { text: @tr("The game cannot make this: {}.", Api.set-detail.warn-gear); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+        }
+        if !root.palico && Api.set-detail.used: Card {
+            title: @tr("Style and Hunter Arts");
+            ChoiceRow {
+                label: @tr("Style");
+                value: root.styles[Api.set-detail.arts.style];
+                clicked => { Choice.show("arts-style", 0, @tr("Style"), root.styles, Api.set-detail.arts.style); }
+            }
+            if Api.set-detail.arts.weapon != "": Muted { text: @tr("Arts for the {}", Api.set-detail.arts.weapon); }
+            for a in Api.set-detail.arts.slots: VerticalLayout {
+                ChoiceRow {
+                    label: @tr("Art {}", a + 1);
+                    value: Api.set-detail.arts.choices[Api.set-detail.arts.picks[a]];
+                    clicked => { Choice.show("arts-art", a, @tr("Art {}", a + 1), Api.set-detail.arts.choices, Api.set-detail.arts.picks[a]); }
+                }
+                CheckRow {
+                    title: @tr("SP Art");
+                    checked: Api.set-detail.arts.sp[a];
+                    enabled: Api.set-detail.arts.picks[a] != 0;
+                    toggled(on) => { Api.set-arts(0, "sp", a, on ? 1 : 0); }
+                }
+            }
+            if Api.set-detail.arts.was != "": WasRow { was: Api.set-detail.arts.was; key: root.set-key + ":arts"; }
+            if Api.set-detail.arts.warning != "": Text { text: @tr("The game cannot make this: {}.", Api.set-detail.arts.warning); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+        }
+        if !root.palico && Api.set-detail.used: Card {
+            title: @tr("Pigment");
+            Muted { text: @tr("The colours the hunter wears with this set, applied when it is loaded."); }
+            for r[j] in Api.set-detail.pigment: ColourRow {
+                label: r.part;
+                colour: r.colour;
+                hex: r.own ? @tr("the armor's own colour") : r.hex;
+                dim: r.own;
+                clicked => { ColourEdit.show("pigment", "", 0, j, r.part, r.colour); }
+                if !r.own: VerticalLayout {
+                    alignment: center;
+                    Btn { kind: "text"; text: @tr("Armor's own colour"); clicked => { Api.own-pigment(0, j); } }
+                }
+            }
+            if Api.set-detail.was-pigment != "": WasRow { was: Api.set-detail.was-pigment; key: root.set-key + ":pigment"; }
+        }
+        if !root.palico && Api.set-detail.used: HorizontalLayout {
+            alignment: start;
+            Btn { kind: "outlined"; text: @tr("Replace with what you have on"); clicked => { Api.set-from-current(); } }
+        }
+    }
+}
+
+export component EquipmentPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    property <bool> hunter: Api.equip-owner == 0;
+    // list and detail side by side (the design's tablet layout)
+    property <bool> wide: root.width >= M.expanded-from;
+    property <length> list-w: root.wide ? min(440px, root.width * 0.45) : root.width;
+    changed wide => {
+        EquipView.detail = false;
+        EquipView.set-detail = false;
+    }
+    property <string> flash-key: root.hunter ? "equip:hunter:" : "equip:palico:";
+    VerticalLayout {
+        TabRow {
+            tabs: [@tr("Hunter"), @tr("Palico"), @tr("My Sets"), @tr("Palico sets")];
+            current: Api.equip-owner;
+            select(i) => {
+                EquipView.detail = false;
+                EquipView.set-detail = false;
+                Tabs.select("equipment", i);
+            }
+        }
+        if Api.equip-owner < 2: HorizontalLayout {
+            vertical-stretch: 1;
+            if root.wide || !EquipView.detail: VerticalLayout {
+                width: root.list-w;
+                padding-top: 12px;
+                spacing: 12px;
+                HorizontalLayout {
+                    padding-left: root.side;
+                    padding-right: root.wide ? 8px : root.side;
+                    SearchBar {
+                        placeholder: root.hunter ? @tr("Search name, weapon type or skill") : @tr("Search name or type");
+                        text <=> Api.equip-search;
+                        edited(t) => { Api.search-equip-list(t); }
+                    }
+                }
+                Flickable {
+                    height: 32px;
+                    content-width: chips.preferred-width;
+                    chips := HorizontalLayout {
+                        padding-left: root.side;
+                        padding-right: root.side;
+                        spacing: 8px;
+                        Chip {
+                            text: @tr("Add equipment");
+                            has-icon: true;
+                            icon: @image-url("../icons/add.svg");
+                            enabled: Api.equip-free >= 0;
+                            clicked => { EquipPick.add(-1, 0, -1); }
+                        }
+                        // no Talismans filter on the Palico box
+                        for f in root.hunter
+                            ? [{k: "all", t: @tr("All")}, {k: "weapon", t: @tr("Weapons")}, {k: "armor", t: @tr("Armor")}, {k: "talisman", t: @tr("Talismans")}, {k: "empty", t: @tr("Empty")}]
+                            : [{k: "all", t: @tr("All")}, {k: "weapon", t: @tr("Weapons")}, {k: "armor", t: @tr("Armor")}, {k: "empty", t: @tr("Empty")}]: Chip {
+                            text: f.t;
+                            selected: Api.equip-filter == f.k;
+                            clicked => {
+                                Api.equip-filter = f.k;
+                                Api.filter-equip(f.k);
+                            }
+                        }
+                    }
+                }
+                if Api.equip-rows.length == 0: HorizontalLayout {
+                    padding: root.side;
+                    Muted { text: @tr("Nothing in the box matches."); horizontal-alignment: center; }
+                }
+                ListView {
+                    vertical-stretch: 1;
+                    property <int> seq: Api.jump-seq;
+                    // keep the row Review jumped to in view
+                    function go() {
+                        if Api.page == "equipment" && Api.jump-row >= 0 {
+                            self.content-y = -max(0px, Api.jump-row * 64px - self.visible-height / 3);
+                        }
+                    }
+                    init => { self.go(); }
+                    changed seq => { self.go(); }
+                    for e[i] in Api.equip-rows: HorizontalLayout {
+                        padding-left: root.side - 8px;
+                        padding-right: root.wide ? 0px : root.side - 8px;
+                        padding-bottom: i == Api.equip-rows.length - 1 ? root.bottom-pad : 0px;
+                        EquipItem {
+                            e: e;
+                            selected: root.wide && e.slot == Api.equip-detail.slot;
+                            flash: Api.highlight != "" && Api.highlight == root.flash-key + e.slot;
+                            clicked => {
+                                Api.select-equip(e.slot);
+                                EquipView.icon = e.icon;
+                                EquipView.has-icon = e.has-icon;
+                                // an empty slot opens the picker, like the item box; a piece
+                                // shows its detail
+                                if e.kind-code == 0 {
+                                    EquipPick.add(e.slot, 0, -1);
+                                } else {
+                                    EquipView.detail = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if root.wide: Rectangle { width: 1px; background: M.outline-variant; }
+            if (root.wide || EquipView.detail) && Api.equip-detail.slot >= 0: PieceDetail {
+                horizontal-stretch: 1;
+                avail: root.wide ? root.width - root.list-w - 1px : root.width;
+                side: root.wide ? 24px : root.side;
+                bottom-pad: root.bottom-pad;
+                back: !root.wide;
+            }
+            if root.wide && Api.equip-detail.slot < 0: VerticalLayout {
+                horizontal-stretch: 1;
+                alignment: center;
+                padding: 24px;
+                Muted { text: @tr("Pick a piece, or add one to the first free slot."); horizontal-alignment: center; }
+            }
+        }
+        // My Sets and Palico sets: the list (runs of unused sets folded), then the set picked
+        if Api.equip-owner >= 2: HorizontalLayout {
+            vertical-stretch: 1;
+            if root.wide || !EquipView.set-detail: Flickable {
+                width: root.list-w;
+                content-width: self.width;
+                VerticalLayout {
+                    padding-left: root.side;
+                    padding-right: root.wide ? 8px : root.side;
+                    padding-top: 12px;
+                    padding-bottom: root.bottom-pad;
+                    alignment: start;
+                    // (a run of unused sets is one row: its other entries have no height)
+                    for r[i] in Api.set-rows: Rectangle {
+                        height: r.h > 0 ? g.height + 2px : 0px;
+                        visible: r.h > 0;
+                        g := GroupRow {
+                            y: 0;
+                            first: r.first == 0;
+                            last: r.last == Api.set-rows.length - 1;
+                            pressable: true;
+                            height: max(64px, row.preferred-height);
+                            background: root.wide && r.first <= Api.set-detail.index && Api.set-detail.index <= r.last ? M.secondary-container : M.group;
+                            accessible-role: button;
+                            accessible-label: r.num + " " + r.name;
+                            accessible-description: r.sub;
+                            accessible-action-default => {
+                                Api.select-set(r.first);
+                                EquipView.set-detail = true;
+                            }
+                            clicked => {
+                                Api.select-set(r.first);
+                                EquipView.set-detail = true;
+                            }
+                            row := HorizontalLayout {
+                                padding-left: 16px;
+                                padding-right: 12px;
+                                padding-top: 8px;
+                                padding-bottom: 8px;
+                                spacing: 12px;
+                                Text { text: r.num; width: 32px; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                                VerticalLayout {
+                                    alignment: center;
+                                    horizontal-stretch: 1;
+                                    Text { text: r.name; color: r.used ? M.on-surface : M.on-surface-variant; font-size: M.body-large; overflow: elide; }
+                                    if r.sub != "": Text { text: r.sub; color: M.on-surface-variant; font-size: M.body-small; overflow: elide; }
+                                }
+                                if r.changed: VerticalLayout {
+                                    alignment: center;
+                                    Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+                                }
+                                VerticalLayout {
+                                    alignment: center;
+                                    Ico { source: @image-url("../icons/chevron-right.svg"); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if root.wide: Rectangle { width: 1px; background: M.outline-variant; }
+            if root.wide || EquipView.set-detail: SetDetailView {
+                horizontal-stretch: 1;
+                side: root.wide ? 24px : root.side;
+                bottom-pad: root.bottom-pad;
+                back: !root.wide;
+            }
+        }
+    }
+}
+
+// The piece (or look) picker: categories as chips, a search, the list.
+export component EquipPickSheet inherits Sheet {
+    property <bool> look: Api.pick-mode == "transmog";
+    shown: EquipPick.open;
+    title: root.look ? @tr("Look for {}", Api.equip-detail.name)
+        : EquipPick.id != 0 ? @tr("Replace box slot {}", (EquipPick.slot >= 0 ? EquipPick.slot : Api.equip-free) + 1)
+        : @tr("Add to box slot {}", (EquipPick.slot >= 0 ? EquipPick.slot : Api.equip-free) + 1);
+    subtitle: root.look ? @tr("The piece keeps its skills, slots and defense; only its look changes.") : @tr("New pieces start at level 1 with no decorations; edit them afterwards.");
+    content-h: 2000px;
+    close => { EquipPick.open = false; }
+    function pick(id: int) {
+        if root.look {
+            Api.set-equip("transmog", id);
+        } else {
+            Api.put-equip(EquipPick.slot, id);
+        }
+        EquipPick.open = false;
+    }
+    VerticalLayout {
+        spacing: 8px;
+        padding-bottom: 8px;
+        if !root.look: Flickable {
+            height: 32px;
+            content-width: cats.preferred-width;
+            cats := HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                spacing: 8px;
+                for c[i] in Api.equip-categories: Chip {
+                    text: c;
+                    selected: i == Api.equip-category;
+                    check-icon: false;
+                    clicked => {
+                        Api.equip-category = i;
+                        Api.search-equip(EquipPick.search);
+                    }
+                }
+            }
+        }
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            SearchBar {
+                placeholder: @tr("Search");
+                text <=> EquipPick.search;
+                edited(t) => { Api.search-equip(t); }
+            }
+        }
+        ListView {
+            vertical-stretch: 1;
+            for p in Api.pick-equip: HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                Rectangle {
+                    height: 56px;
+                    border-radius: 12px;
+                    background: p.id == EquipPick.id ? M.secondary-container : transparent;
+                    accessible-role: list-item;
+                    accessible-label: p.name;
+                    accessible-description: p.sub;
+                    accessible-item-selected: p.id == EquipPick.id;
+                    accessible-action-default => { root.pick(p.id); }
+                    Press { on: pa.pressed; border-radius: parent.border-radius; }
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        spacing: 16px;
+                        VerticalLayout {
+                            alignment: center;
+                            Tile { icon: p.icon; has-icon: p.has-icon; }
+                        }
+                        VerticalLayout {
+                            alignment: center;
+                            horizontal-stretch: 1;
+                            Text { text: p.name; color: M.on-surface; font-size: M.body-large; overflow: elide; }
+                            if p.sub != "": Text { text: p.sub; color: M.on-surface-variant; font-size: M.body-small; overflow: elide; }
+                        }
+                    }
+                    pa := Tap { tapped => { root.pick(p.id); } }
+                }
+            }
+        }
+    }
+}
+
+// Decorations for the piece picked: those that fit its free slots first.
+export component DecoSheet inherits Sheet {
+    property <int> free: Api.equip-detail.deco-slots - Api.equip-detail.deco-used;
+    shown: DecoPick.open;
+    title: @tr("Decoration for {}", Api.equip-detail.name);
+    subtitle: @tr("{n} slot free. Decorations that do not fit come after: the game never allows them." | "{n} slots free. Decorations that do not fit come after: the game never allows them." % max(root.free, 0));
+    content-h: 2000px;
+    close => { DecoPick.open = false; }
+    VerticalLayout {
+        spacing: 8px;
+        padding-bottom: 8px;
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            SearchBar {
+                placeholder: @tr("Search decorations");
+                text <=> DecoPick.search;
+                edited(t) => { Api.search-decos(t); }
+            }
+        }
+        ListView {
+            vertical-stretch: 1;
+            for p in Api.pick-decos: HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                Rectangle {
+                    height: 56px;
+                    border-radius: 12px;
+                    accessible-role: list-item;
+                    accessible-label: p.name + ", " + p.sub;
+                    accessible-action-default => {
+                        Api.set-equip("deco-add", p.id);
+                        DecoPick.open = false;
+                    }
+                    Press { on: da.pressed; border-radius: parent.border-radius; }
+                    HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 8px;
+                        spacing: 16px;
+                        VerticalLayout {
+                            alignment: center;
+                            Tile { icon: p.icon; has-icon: p.has-icon; }
+                        }
+                        Text { text: p.name; color: M.on-surface; font-size: M.body-large; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        Text { text: p.sub; color: p.max > root.free ? M.error : M.on-surface-variant; font-size: M.body-small; vertical-alignment: center; }
+                    }
+                    da := Tap {
+                        tapped => {
+                            Api.set-equip("deco-add", p.id);
+                            DecoPick.open = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

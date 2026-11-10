@@ -98,7 +98,8 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
         api.set_quests(model(vec![]));
         return;
     }
-    let (search, missing) = view(|v| (v.quest_search.to_lowercase(), v.quest_missing));
+    let (search, missing, sel) = view(|v| (v.quest_search.to_lowercase(), v.quest_missing, v.quest_sel.clone()));
+    api.set_quest_selected(sel.len() as i32);
     let cat = tabs.get(tab).cloned().unwrap_or_default();
     let mut qs: Vec<_> = Char::real_quests(true).into_iter().filter(|q| q.category == cat).collect();
     qs.sort_by_key(|q| (deviant_of(q.index).unwrap_or(0), q.rank.parse::<u32>().unwrap_or(99), q.id));
@@ -132,8 +133,10 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
             });
         }
         let (lock, locked) = if cl { (String::new(), false) } else { lock_text(&c.lock(q.id)) };
-        let byte = |o: usize| base + o + q.index / 8;
-        let changed = [mhgu_save::progress::CLEARED, mhgu_save::progress::SEEN, mhgu_save::progress::FAILED].iter().any(|&o| st.changed(byte(o), 1));
+        // its own bits: a byte holds eight quests' flags
+        let changed = [mhgu_save::progress::CLEARED, mhgu_save::progress::SEEN, mhgu_save::progress::FAILED]
+            .iter()
+            .any(|&o| st.save().bit(base + o, q.index) != st.orig().bit(base + o, q.index));
         rows.push(QuestRow {
             index: q.index as i32,
             id: q.id as i32,
@@ -149,6 +152,7 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
             header: false,
             group: SharedString::default(),
             action: SharedString::default(),
+            selected: sel.contains(&q.index),
         });
     }
     // the Guild Card's counts for this category, kept in step with the cleared quests
@@ -169,8 +173,68 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
 pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {
     // quests
     on!(ui, st, on_select_quest_tab, |ui, s, i: i32| {
-        view(|v| v.quest_tab = i as usize);
+        view(|v| {
+            v.quest_tab = i as usize;
+            v.quest_sel.clear();
+        });
+        ui.global::<Api>().set_quest_selecting(false);
+        let _ = &s;
+    });
+    // the phone's selection mode
+    on!(ui, st, on_quest_select, |ui, s, index: i32, on: bool| {
+        view(|v| {
+            if on {
+                v.quest_sel.insert(index as usize);
+            } else {
+                v.quest_sel.remove(&(index as usize));
+            }
+        });
         let _ = (&ui, &s);
+    });
+    on!(ui, st, on_quest_select_group, |ui, s, group: SharedString| {
+        let cat = quest_tabs().get(view(|v| v.quest_tab)).cloned().unwrap_or_default();
+        let members: Vec<usize> =
+            Char::real_quests(true).into_iter().filter(|q| q.category == cat && quest_group(q) == group.as_str()).map(|q| q.index).collect();
+        view(|v| v.quest_sel.extend(members));
+        let _ = (&ui, &s);
+    });
+    on!(ui, st, on_quest_select_none, |ui, s| {
+        view(|v| v.quest_sel.clear());
+        ui.global::<Api>().set_quest_selecting(false);
+        let _ = &s;
+    });
+    on!(ui, st, on_quest_mark_selected, |ui, s, cleared: bool| {
+        let picked: Vec<usize> = view(|v| std::mem::take(&mut v.quest_sel)).into_iter().collect();
+        ui.global::<Api>().set_quest_selecting(false);
+        if picked.is_empty() {
+            return;
+        }
+        let slot = s.slot;
+        let n = picked.len() as i64;
+        let e = Edit {
+            key: String::new(),
+            title: if cleared {
+                trn("{} quest marked cleared", "{} quests marked cleared", n, &[&num(n)])
+            } else {
+                trn("{} quest marked not cleared", "{} quests marked not cleared", n, &[&num(n)])
+            },
+            detail: tr("Quests").into(),
+            note: if cleared { tr("Completed quest sets are recorded too, as the game does").into() } else { String::new() },
+            conf: Conf::Confirmed,
+            targets: vec![],
+        };
+        s.edit(e, |sv, _| {
+            let mut c = Char::new(sv, slot);
+            let todo: Vec<usize> = picked.iter().copied().filter(|&i| c.quest(QuestBit::Cleared, i) != cleared).collect();
+            if cleared {
+                c.clear_quests(&todo);
+            } else {
+                for &i in &todo {
+                    c.set_quest(QuestBit::Cleared, i, false);
+                }
+            }
+            todo.into_iter().map(Target::Quest).collect()
+        });
     });
     on!(ui, st, on_filter_quests, |ui, s| {
         let api = ui.global::<Api>();

@@ -1,0 +1,918 @@
+// Requests, Collections, Unlocks and Monsters on phones and tablets: a search, filters and
+// the page's bulk actions as chips, then the list. What a row holds beyond its check box
+// opens in a sheet (a request's marks, a deviant's permits, a monster's records).
+import { ListView } from "std-widgets.slint";
+import { M } from "../theme.slint";
+import { Btn, CheckRow, Chip, CountField, GroupRow, Ico, IconBtn, Muted, Press, ScrollTabRow, SearchBar, SectionLabel, Sheet, Tap, TextField } from "../widgets.slint";
+import { Choice } from "../pick.slint";
+import { Api, ArtRow, CheckRow as CheckItem, DeviantRow, MonsterRow, RequestRow, Tabs, UnlockCell } from "../../common.slint";
+
+// The entry a sheet edits: its place in its list, read live so the sheet follows changes;
+// whether the Unlocks page shows a list's entries (phones: instead of the lists).
+export global ListEdit {
+    in-out property <int> request: -1;
+    in-out property <int> deviant: -1;
+    in-out property <int> monster: -1;
+    in-out property <bool> unlock-detail;
+}
+
+// A game icon on its dark tile.
+component Tile inherits Rectangle {
+    in property <image> icon;
+    in property <bool> has-icon;
+    in property <length> size: 40px;
+    in property <bool> dim;
+    width: root.size;
+    height: root.size;
+    border-radius: root.size / 5;
+    background: M.tile;
+    clip: true;
+    opacity: root.dim ? 0.45 : 1;
+    if root.has-icon: Image { source: root.icon; width: root.size * 0.8; height: root.size * 0.8; image-rendering: smooth; }
+}
+
+// An 18 dp check box in a 48 dp target.
+component Check inherits Rectangle {
+    in property <bool> on;
+    in property <bool> enabled: true;
+    in property <string> label;
+    callback toggled();
+    width: M.touch;
+    height: M.touch;
+    accessible-role: checkbox;
+    accessible-label: root.label;
+    accessible-checked: root.on;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.toggled(); } }
+    Rectangle {
+        width: 18px;
+        height: 18px;
+        border-radius: 2px;
+        background: root.on ? (root.enabled ? M.primary : M.on-surface.with-alpha(0.38)) : transparent;
+        border-width: root.on ? 0px : 2px;
+        border-color: root.enabled ? M.on-surface-variant : M.on-surface.with-alpha(0.38);
+        if root.on: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
+    }
+    Tap {
+        enabled: root.enabled;
+        tapped => { root.toggled(); }
+    }
+}
+
+// The dot of a change waiting in Review.
+component Staged inherits VerticalLayout {
+    alignment: center;
+    Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+}
+
+// "was 5 · Undo" under a staged value.
+component WasRow inherits HorizontalLayout {
+    in property <string> was;
+    in property <string> key;
+    spacing: 4px;
+    alignment: start;
+    Text { text: @tr("was {}", root.was); color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+    Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo-value(root.key); } }
+}
+
+// A row that opens a sheet: its two lines of text (they wrap) and a dot while staged.
+component OpenRow inherits Rectangle {
+    in property <string> title;
+    in property <string> sub;
+    in property <color> sub-color: M.on-surface-variant;
+    in property <string> note;
+    in property <color> note-color: M.warn;
+    in property <bool> staged;
+    in property <bool> flash;
+    in property <image> icon;
+    in property <bool> has-icon;
+    in property <bool> tile;
+    // the text column's width (wrapped text in a row is otherwise measured as one line)
+    in property <length> text-w;
+    callback clicked();
+    height: max(64px, lay.preferred-height);
+    border-radius: 12px;
+    background: root.flash ? M.secondary-container : transparent;
+    accessible-role: button;
+    accessible-label: root.title;
+    accessible-description: root.sub;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    ta := Tap { tapped => { root.clicked(); } }
+    lay := HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        spacing: 16px;
+        if root.tile: VerticalLayout {
+            alignment: center;
+            Tile { icon: root.icon; has-icon: root.has-icon; }
+        }
+        VerticalLayout {
+            alignment: center;
+            width: root.text-w - (root.tile ? 56px : 0px);
+            Text { text: root.title; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+            if root.sub != "": Text { text: root.sub; color: root.sub-color; font-size: M.body-medium; wrap: word-wrap; }
+            if root.note != "": Text { text: root.note; color: root.note-color; font-size: M.body-small; wrap: word-wrap; }
+        }
+        Rectangle { horizontal-stretch: 1; }
+        if root.staged: Staged { }
+    }
+}
+
+// A numbered field with its label above it (labels too long to float on the field).
+component LabelledCount inherits VerticalLayout {
+    in property <string> label;
+    in property <int> value;
+    in property <int> minimum: 0;
+    in property <int> maximum: 9999;
+    in property <int> limit: root.maximum;
+    in property <bool> show-limit;
+    in property <string> was;
+    in property <string> key;
+    callback edited(int);
+    spacing: 6px;
+    Text { text: root.label; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+    CountField {
+        value: root.value;
+        minimum: root.minimum;
+        maximum: root.maximum;
+        limit: root.limit;
+        show-limit: root.show-limit;
+        show-label: false;
+        label: root.label;
+        edited(v) => { root.edited(v); }
+    }
+    if root.was != "": WasRow { was: root.was; key: root.key; }
+}
+
+// Chips that scroll sideways: filters and the page's actions.
+component ChipRow inherits Flickable {
+    in property <length> side;
+    height: 32px;
+    content-width: row.preferred-width;
+    row := HorizontalLayout {
+        padding-left: root.side;
+        padding-right: root.side;
+        spacing: 8px;
+        @children
+    }
+}
+
+// ---------------------------------------------------------------- Requests
+
+export component RequestsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        padding-top: 12px;
+        spacing: 10px;
+        HorizontalLayout {
+            padding-left: root.side;
+            padding-right: root.side;
+            SearchBar {
+                placeholder: @tr("Search requests or villages");
+                text <=> Api.request-search;
+                edited => { Api.filter-requests(); }
+            }
+        }
+        ChipRow {
+            side: root.side;
+            for f in [{k: "open", t: @tr("Open")}, {k: "done", t: @tr("Reported")}, {k: "all", t: @tr("All")}]: Chip {
+                text: f.t;
+                selected: Api.request-filter == f.k;
+                clicked => {
+                    Api.request-filter = f.k;
+                    Api.filter-requests();
+                }
+            }
+        }
+        // what Reported costs, said before anything is ticked
+        HorizontalLayout {
+            padding-left: root.side;
+            padding-right: root.side;
+            Rectangle {
+                height: banner.preferred-height;
+                border-radius: 12px;
+                background: M.warn.with-alpha(0.12);
+                banner := VerticalLayout {
+                    padding: 12px;
+                    padding-left: 16px;
+                    padding-right: 16px;
+                    Text {
+                        text: @tr("Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward.");
+                        color: M.warn;
+                        font-size: M.body-small;
+                        wrap: word-wrap;
+                    }
+                }
+            }
+        }
+        if Api.requests.length == 0: HorizontalLayout {
+            padding: root.side;
+            Muted {
+                text: Api.request-search != "" ? @tr("No request matches the search.") : Api.request-filter == "open" ? @tr("Every request is reported.") : Api.request-filter == "done" ? @tr("No request is reported yet.") : @tr("No requests.");
+                horizontal-alignment: center;
+            }
+        }
+        ListView {
+            vertical-stretch: 1;
+            for r[i] in Api.requests: HorizontalLayout {
+                padding-left: root.side - 8px;
+                padding-right: root.side - 8px;
+                padding-bottom: i == Api.requests.length - 1 ? root.bottom-pad : 0px;
+                OpenRow {
+                    title: r.name;
+                    sub: r.sub;
+                    note: !r.has-flags ? "" : (r.accepted ? @tr("Accepted") : "") + (r.accepted && r.completed ? " · " : "") + (r.completed ? @tr("Reported") : "");
+                    note-color: M.on-surface-variant;
+                    staged: r.changed;
+                    flash: Api.highlight != "" && Api.highlight == "request:" + r.index;
+                    text-w: root.width - 2 * root.side - 24px - 24px;
+                    clicked => { ListEdit.request = i; }
+                }
+            }
+        }
+    }
+}
+
+export component RequestSheet inherits Sheet {
+    property <RequestRow> r: Api.requests[ListEdit.request];
+    shown: ListEdit.request >= 0 && ListEdit.request < Api.requests.length;
+    title: root.r.name;
+    subtitle: root.r.sub;
+    content-h: lay.preferred-height;
+    close => { ListEdit.request = -1; }
+    lay := VerticalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 16px;
+        spacing: 4px;
+        if !root.r.has-flags: HorizontalLayout {
+            padding: 12px;
+            Muted { text: @tr("No requests."); }
+        }
+        if root.r.has-flags: CheckRow {
+            title: @tr("Accepted");
+            text: @tr("Accepted posts the request's quest on the board, as talking to the villager does.");
+            checked: root.r.accepted;
+            toggled(on) => { Api.set-request(root.r.index, "accepted", on); }
+        }
+        if root.r.has-flags: CheckRow {
+            title: @tr("Reported");
+            text: @tr("Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward.");
+            checked: root.r.completed;
+            toggled(on) => { Api.set-request(root.r.index, "completed", on); }
+        }
+        if root.r.was != "": HorizontalLayout {
+            padding-left: 16px;
+            WasRow { was: root.r.was; key: "request:" + root.r.index; }
+        }
+    }
+}
+
+// ---------------------------------------------------------------- Collections
+
+// A Hunter Art: its name, its levels I, II and III as check boxes.
+component ArtItem inherits Rectangle {
+    in property <ArtRow> a;
+    in property <length> text-w;
+    height: max(56px, lay.preferred-height);
+    lay := HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 4px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        spacing: 4px;
+        Text { text: root.a.name; color: M.on-surface; font-size: M.body-large; vertical-alignment: center; wrap: word-wrap; width: root.text-w; }
+        Rectangle { horizontal-stretch: 1; }
+        if root.a.changed: Staged { }
+        // a level: its box, I / II / III under it, one 44 x 56 dp target
+        for k in root.a.ids.length: Rectangle {
+            width: 44px;
+            height: 56px;
+            accessible-role: checkbox;
+            accessible-label: root.a.name + (root.a.ids.length == 1 ? "" : k == 0 ? " I" : k == 1 ? " II" : " III");
+            accessible-checked: root.a.on[k];
+            accessible-action-default => { Api.set-check(root.a.ids[k], !root.a.on[k]); }
+            Rectangle {
+                y: root.a.ids.length > 1 ? 10px : 19px;
+                width: 18px;
+                height: 18px;
+                border-radius: 2px;
+                background: root.a.on[k] ? M.primary : transparent;
+                border-width: root.a.on[k] ? 0px : 2px;
+                border-color: M.on-surface-variant;
+                if root.a.on[k]: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
+            }
+            if root.a.ids.length > 1: Text {
+                y: 34px;
+                text: k == 0 ? "I" : k == 1 ? "II" : "III";
+                color: M.on-surface-variant;
+                font-size: M.label-small;
+            }
+            Tap { tapped => { Api.set-check(root.a.ids[k], !root.a.on[k]); } }
+        }
+    }
+}
+
+// An entry of a checklist: its box, the game's icon, its name.
+component CheckItemRow inherits Rectangle {
+    in property <CheckItem> c;
+    in property <bool> flash;
+    height: max(56px, lay.preferred-height);
+    border-radius: 12px;
+    background: root.flash ? M.secondary-container : transparent;
+    accessible-role: checkbox;
+    accessible-label: root.c.name;
+    accessible-checked: root.c.on;
+    accessible-action-default => { Api.set-check(root.c.key, !root.c.on); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    ta := Tap { tapped => { Api.set-check(root.c.key, !root.c.on); } }
+    lay := HorizontalLayout {
+        padding-left: 4px;
+        padding-right: 12px;
+        spacing: 8px;
+        VerticalLayout {
+            alignment: center;
+            Check { on: root.c.on; label: root.c.name; toggled => { Api.set-check(root.c.key, !root.c.on); } }
+        }
+        if root.c.has-icon: VerticalLayout {
+            alignment: center;
+            Tile { icon: root.c.icon; has-icon: true; size: 32px; dim: !root.c.on; }
+        }
+        Text {
+            text: root.c.name;
+            color: root.c.on ? M.on-surface : M.on-surface-variant;
+            font-size: M.body-large;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+        }
+        if root.c.changed: Staged { }
+    }
+}
+
+export component CollectionsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    callback preview(string);
+    property <length> side: M.gutter + root.side-inset;
+    property <bool> checks: Api.collection-tab < 4;
+    // checklists in columns of at least 320 dp
+    property <int> cols: max(1, floor((root.width - 2 * root.side + 8px) / 328px));
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.collection-tabs;
+            current: Api.collection-tab;
+            select(i) => { Tabs.select("collections", i); }
+        }
+        VerticalLayout {
+            vertical-stretch: 1;
+            padding-top: 12px;
+            spacing: 10px;
+            HorizontalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                SearchBar {
+                    placeholder: @tr("Search");
+                    text <=> Api.check-search;
+                    edited => { Api.filter-checks(); }
+                }
+            }
+            ChipRow {
+                side: root.side;
+                Chip {
+                    text: @tr("Missing only");
+                    selected: Api.check-missing;
+                    clicked => {
+                        Api.check-missing = !Api.check-missing;
+                        Api.filter-checks();
+                    }
+                }
+                if root.checks: Chip { text: @tr("Check all…"); has-icon: true; icon: @image-url("../icons/check.svg"); clicked => { root.preview("checks:all"); } }
+                if root.checks: Chip { text: @tr("Uncheck all…"); has-icon: true; icon: @image-url("../icons/close.svg"); clicked => { root.preview("checks:none"); } }
+                if !root.checks: Chip { text: @tr("All levels…"); has-icon: true; icon: @image-url("../icons/max.svg"); clicked => { root.preview("deviants:levels"); } }
+                if !root.checks: Chip { text: @tr("Max permits…"); has-icon: true; icon: @image-url("../icons/max.svg"); clicked => { root.preview("deviants:permits"); } }
+            }
+            if Api.collection-tab == 0 && Api.arts.length == 0: HorizontalLayout {
+                padding: root.side;
+                Muted { text: Api.check-missing ? @tr("Every Hunter Art is unlocked.") : @tr("No art matches the search."); horizontal-alignment: center; }
+            }
+            if Api.collection-tab == 0: ListView {
+                vertical-stretch: 1;
+                for a[i] in Api.arts: HorizontalLayout {
+                    padding-left: root.side - 16px;
+                    padding-right: root.side - 4px;
+                    padding-bottom: i == Api.arts.length - 1 ? root.bottom-pad : 0px;
+                    ArtItem { a: a; text-w: root.width - 2 * root.side - 3 * M.touch - 24px; }
+                }
+            }
+            if Api.collection-tab >= 1 && Api.collection-tab <= 3 && Api.checks.length == 0: HorizontalLayout {
+                padding: root.side;
+                Muted { text: Api.check-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); horizontal-alignment: center; }
+            }
+            if Api.collection-tab >= 1 && Api.collection-tab <= 3: ListView {
+                vertical-stretch: 1;
+                property <int> seq: Api.jump-seq;
+                function go() {
+                    if Api.page == "collections" && Api.jump-row >= 0 {
+                        self.content-y = -max(0, floor(Api.jump-row / root.cols) - 2) * 56px;
+                    }
+                }
+                init => { self.go(); }
+                changed seq => { self.go(); }
+                for r in (Api.checks.length + root.cols - 1) / root.cols: HorizontalLayout {
+                    padding-left: root.side - 8px;
+                    padding-right: root.side - 8px;
+                    padding-bottom: r == (Api.checks.length + root.cols - 1) / root.cols - 1 ? root.bottom-pad : 0px;
+                    spacing: 8px;
+                    for c in root.cols: Rectangle {
+                        width: (root.width - 2 * root.side + 16px - (root.cols - 1) * 8px) / root.cols;
+                        height: 56px;
+                        if r * root.cols + c < Api.checks.length: CheckItemRow {
+                            c: Api.checks[r * root.cols + c];
+                            flash: Api.highlight != "" && Api.highlight == "check:" + Api.collection-tab + ":" + self.c.key;
+                        }
+                    }
+                }
+            }
+            if Api.collection-tab == 4 && Api.deviants.length == 0: HorizontalLayout {
+                padding: root.side;
+                Muted { text: Api.check-missing ? @tr("Every deviant has every level cleared.") : @tr("No deviant matches the search."); horizontal-alignment: center; }
+            }
+            if Api.collection-tab == 4: ListView {
+                vertical-stretch: 1;
+                for d[i] in Api.deviants: HorizontalLayout {
+                    padding-left: root.side - 8px;
+                    padding-right: root.side - 8px;
+                    padding-bottom: i == Api.deviants.length - 1 ? root.bottom-pad : 0px;
+                    OpenRow {
+                        tile: true;
+                        icon: d.icon;
+                        has-icon: d.has-icon;
+                        title: d.name;
+                        sub: @tr("Special Permits") + " " + d.permits + " · " + @tr("Levels cleared") + " " + d.levels + " / " + d.total;
+                        note: d.gate;
+                        staged: d.was-permits != "" || d.was-levels != "" || d.was-points != "" || d.was-waiting != "";
+                        text-w: root.width - 2 * root.side - 24px - 24px;
+                        clicked => { ListEdit.deviant = i; }
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component DeviantSheet inherits Sheet {
+    property <DeviantRow> d: Api.deviants[ListEdit.deviant];
+    shown: ListEdit.deviant >= 0 && ListEdit.deviant < Api.deviants.length;
+    title: root.d.name;
+    subtitle: root.d.gate;
+    content-h: lay.preferred-height;
+    close => { ListEdit.deviant = -1; }
+    lay := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 14px;
+        LabelledCount {
+            label: @tr("Special Permits");
+            value: root.d.permits;
+            maximum: 99;
+            was: root.d.was-permits;
+            key: "permits:" + root.d.index;
+            edited(v) => { Api.set-deviant(root.d.index, "permits", v); }
+        }
+        LabelledCount {
+            label: @tr("Special Permit points of {}", root.d.name);
+            value: root.d.points;
+            was: root.d.was-points;
+            key: "permit-points:" + root.d.index;
+            edited(v) => { Api.set-deviant(root.d.index, "points", v); }
+        }
+        LabelledCount {
+            label: @tr("Points of {} waiting at the Courier", root.d.name);
+            value: root.d.waiting;
+            was: root.d.was-waiting;
+            key: "permit-wait:" + root.d.index;
+            edited(v) => { Api.set-deviant(root.d.index, "waiting", v); }
+        }
+        LabelledCount {
+            label: @tr("Levels cleared");
+            value: root.d.levels;
+            maximum: root.d.total;
+            show-limit: true;
+            was: root.d.was-levels;
+            key: "levels:" + root.d.index;
+            edited(v) => { Api.set-deviant(root.d.index, "levels", v); }
+        }
+    }
+}
+
+// ---------------------------------------------------------------- Unlocks
+
+// An entry of an unlock list: its box (none for the shops' read-only lists), its name,
+// what unlocks it, the game's NEW mark.
+component UnlockItem inherits Rectangle {
+    in property <UnlockCell> c;
+    in property <bool> flash;
+    in property <length> text-w;
+    height: max(56px, lay.preferred-height);
+    border-radius: 12px;
+    background: root.flash ? M.secondary-container : transparent;
+    accessible-role: checkbox;
+    accessible-label: root.c.name;
+    accessible-description: root.c.sub;
+    accessible-checked: root.c.on;
+    accessible-enabled: root.c.enabled;
+    accessible-action-default => { if root.c.check && root.c.enabled { Api.set-unlock(root.c.key, !root.c.on); } }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    ta := Tap {
+        enabled: root.c.check && root.c.enabled;
+        tapped => { Api.set-unlock(root.c.key, !root.c.on); }
+    }
+    lay := HorizontalLayout {
+        padding-left: root.c.check ? 4px : 16px;
+        padding-right: 12px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        spacing: 8px;
+        if root.c.check: VerticalLayout {
+            alignment: center;
+            Check { on: root.c.on; enabled: root.c.enabled; label: root.c.name; toggled => { Api.set-unlock(root.c.key, !root.c.on); } }
+        }
+        VerticalLayout {
+            alignment: center;
+            width: root.text-w;
+            HorizontalLayout {
+                spacing: 8px;
+                Text { text: root.c.name; color: root.c.on ? M.on-surface : M.on-surface-variant; font-size: M.body-large; wrap: word-wrap; horizontal-stretch: 1; }
+                if root.c.new: Text { text: @tr("NEW"); color: M.primary; font-size: M.label-small; font-weight: M.bold; vertical-alignment: center; }
+            }
+            if root.c.sub != "": Text { text: root.c.sub; color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+        }
+        Rectangle { horizontal-stretch: 1; }
+        if root.c.changed: Staged { }
+    }
+}
+
+// The village pets and the Moofahs.
+component Pets inherits VerticalLayout {
+    in property <length> side;
+    spacing: 12px;
+    alignment: start;
+    Muted { text: @tr("A pet is adopted from its village's pet menu the first time it is used; that gives its first costume. A pet wears costumes of its own kind: Moofy's or the Poogies'."); }
+    for p in Api.pets: Rectangle {
+        background: M.s-low;
+        border-radius: 16px;
+        height: pet.preferred-height;
+        pet := VerticalLayout {
+            padding: 16px;
+            padding-bottom: 8px;
+            spacing: 10px;
+            Text { text: p.place; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; }
+            TextField {
+                label: @tr("Name of the pet of {}", p.place);
+                value: p.name;
+                committed(t) => { Api.set-pet(p.index, "name", t); }
+            }
+            Rectangle {
+                height: cost.preferred-height;
+                border-radius: 12px;
+                cost := HorizontalLayout {
+                    padding-top: 8px;
+                    padding-bottom: 8px;
+                    VerticalLayout {
+                        alignment: center;
+                        horizontal-stretch: 1;
+                        Text { text: @tr("Costume"); color: M.on-surface-variant; font-size: M.body-small; }
+                        Text { text: p.costumes[p.costume]; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+                    }
+                    VerticalLayout {
+                        alignment: center;
+                        Ico { source: @image-url("../icons/chevron-down.svg"); }
+                    }
+                }
+                Press { on: ct.pressed; border-radius: parent.border-radius; }
+                ct := Tap { tapped => { Choice.show("pet-costume", p.index, @tr("Costume"), p.costumes, p.costume); } }
+            }
+            CheckRow {
+                title: @tr("Adopted");
+                checked: p.adopted;
+                toggled(on) => { Api.set-pet(p.index, "adopted", on ? "1" : "0"); }
+            }
+            if p.was != "": WasRow { was: p.was; key: "pet:" + p.index; }
+        }
+    }
+    SectionLabel { text: @tr("Moofah affection"); }
+    Muted { text: @tr("Petting a Moofah raises it by one, up to 10, and each quest lowers it by 2. At 6 the game unlocks the title word Moofah, which an edit to 6 or more also does."); }
+    for v[k] in Api.moofahs: LabelledCount {
+        label: k == 0 ? @tr("Bherna Moofah 1") : k == 1 ? @tr("Bherna Moofah 2") : k == 2 ? @tr("Palico Ranch Moofah 1") : @tr("Palico Ranch Moofah 2");
+        value: v;
+        maximum: 10;
+        show-limit: true;
+        edited(x) => { Api.set-moofah(k, x); }
+    }
+    if Api.was-moofahs != "": WasRow { was: Api.was-moofahs; key: "moofahs"; }
+    SectionLabel { text: @tr("Moofah gifts"); }
+    Muted { text: @tr("A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."); }
+    LabelledCount {
+        label: @tr("Fleeceballs received");
+        value: Api.moofah-gifts;
+        maximum: 10;
+        show-limit: true;
+        was: Api.was-moofah-gifts;
+        key: "moofah-gifts";
+        edited(x) => { Api.set-moofah-gifts(x); }
+    }
+}
+
+export component UnlocksPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    callback preview(string);
+    property <length> side: M.gutter + root.side-inset;
+    property <bool> wide: root.width >= M.expanded-from;
+    property <length> list-w: root.wide ? min(360px, root.width * 0.38) : root.width;
+    property <length> detail-w: root.wide ? root.width - root.list-w - 1px : root.width;
+    changed wide => { ListEdit.unlock-detail = false; }
+    HorizontalLayout {
+        // the lists, by group
+        if root.wide || !ListEdit.unlock-detail: Flickable {
+            width: root.list-w;
+            content-width: self.width;
+            VerticalLayout {
+                padding-left: root.side;
+                padding-right: root.wide ? 8px : root.side;
+                padding-top: 4px;
+                padding-bottom: root.bottom-pad;
+                alignment: start;
+                for r[i] in Api.unlock-rows: VerticalLayout {
+                    if r.group != "": HorizontalLayout {
+                        padding-left: 8px;
+                        padding-top: 16px;
+                        padding-bottom: 8px;
+                        SectionLabel { text: r.group; }
+                    }
+                    GroupRow {
+                        first: r.group != "" || i == 0;
+                        last: i == Api.unlock-rows.length - 1 || Api.unlock-rows[i + 1].group != "";
+                        pressable: true;
+                        height: max(56px, ur.preferred-height);
+                        background: root.wide && r.index == Api.unlock-sel ? M.secondary-container : M.group;
+                        accessible-role: button;
+                        accessible-label: r.name;
+                        accessible-description: r.count;
+                        accessible-action-default => {
+                            Api.select-unlock(r.index);
+                            ListEdit.unlock-detail = true;
+                        }
+                        clicked => {
+                            Api.select-unlock(r.index);
+                            ListEdit.unlock-detail = true;
+                        }
+                        ur := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 12px;
+                            padding-top: 8px;
+                            padding-bottom: 8px;
+                            spacing: 12px;
+                            Text { text: r.name; color: M.on-surface; font-size: M.body-large; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                            Text { text: r.count; color: M.on-surface-variant; font-size: M.body-small; vertical-alignment: center; }
+                            if r.changed: Staged { }
+                            if !root.wide: VerticalLayout {
+                                alignment: center;
+                                Ico { source: @image-url("../icons/chevron-right.svg"); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if root.wide: Rectangle { width: 1px; background: M.outline-variant; }
+        // the list picked
+        if root.wide || ListEdit.unlock-detail: det := VerticalLayout {
+            width: root.detail-w;
+            property <length> dside: root.wide ? 24px : root.side;
+            HorizontalLayout {
+                padding-left: root.wide ? 24px : 4px + root.side-inset;
+                padding-right: det.dside;
+                padding-top: 4px;
+                spacing: 4px;
+                if !root.wide: IconBtn {
+                    icon: @image-url("../icons/back.svg");
+                    tint: M.on-surface;
+                    label: @tr("Back");
+                    clicked => { ListEdit.unlock-detail = false; }
+                }
+                VerticalLayout {
+                    alignment: center;
+                    width: root.detail-w - det.dside - (root.wide ? 24px : 56px + root.side-inset);
+                    Text { text: Api.unlock-title; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; wrap: word-wrap; }
+                    if Api.unlock-derived: Text { text: @tr("Derived"); color: M.warn; font-size: M.body-small; }
+                }
+            }
+            if Api.unlock-note != "": HorizontalLayout {
+                padding-left: det.dside;
+                padding-right: det.dside;
+                padding-top: 4px;
+                Muted { text: Api.unlock-note; }
+            }
+            if !Api.unlock-pets: VerticalLayout {
+                vertical-stretch: 1;
+                padding-top: 12px;
+                spacing: 10px;
+                HorizontalLayout {
+                    padding-left: det.dside;
+                    padding-right: det.dside;
+                    SearchBar {
+                        placeholder: @tr("Search");
+                        text <=> Api.unlock-search;
+                        edited => { Api.filter-unlocks(); }
+                    }
+                }
+                ChipRow {
+                    side: det.dside;
+                    Chip {
+                        text: @tr("Missing only");
+                        selected: Api.unlock-missing;
+                        clicked => {
+                            Api.unlock-missing = !Api.unlock-missing;
+                            Api.filter-unlocks();
+                        }
+                    }
+                    if Api.unlock-editable: Chip { text: @tr("Unlock all…"); has-icon: true; icon: @image-url("../icons/unlock.svg"); clicked => { root.preview("unlocks:all"); } }
+                    if Api.unlock-editable: Chip { text: @tr("Lock all…"); has-icon: true; icon: @image-url("../icons/close.svg"); clicked => { root.preview("unlocks:none"); } }
+                }
+                if Api.unlock-cells.length == 0: HorizontalLayout {
+                    padding: det.dside;
+                    Muted { text: Api.unlock-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); horizontal-alignment: center; }
+                }
+                ListView {
+                    vertical-stretch: 1;
+                    for c[i] in Api.unlock-cells: HorizontalLayout {
+                        padding-left: det.dside - 8px;
+                        padding-right: det.dside - 8px;
+                        padding-bottom: i == Api.unlock-cells.length - 1 ? root.bottom-pad : 0px;
+                        UnlockItem {
+                            c: c;
+                            text-w: root.detail-w - 2 * det.dside - M.touch - 40px;
+                            flash: Api.highlight != "" && Api.highlight == "unlock-cell:" + c.key;
+                        }
+                    }
+                }
+            }
+            if Api.unlock-pets: Flickable {
+                vertical-stretch: 1;
+                content-width: self.width;
+                HorizontalLayout {
+                    padding-left: det.dside;
+                    padding-right: det.dside;
+                    padding-top: 12px;
+                    padding-bottom: root.bottom-pad;
+                    Pets { side: det.dside; }
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------- Monsters
+
+export component MonstersPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    callback preview(string);
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        padding-top: 12px;
+        spacing: 10px;
+        HorizontalLayout {
+            padding-left: root.side;
+            padding-right: root.side;
+            SearchBar {
+                placeholder: @tr("Search monsters");
+                text <=> Api.monster-filter;
+                edited => { Api.filter-monsters(); }
+            }
+        }
+        ChipRow {
+            side: root.side;
+            Chip {
+                text: @tr("Large only");
+                selected: Api.monster-large-only;
+                clicked => {
+                    Api.monster-large-only = !Api.monster-large-only;
+                    Api.filter-monsters();
+                }
+            }
+            Chip {
+                text: @tr("Missing a crown");
+                selected: Api.monster-missing;
+                clicked => {
+                    Api.monster-missing = !Api.monster-missing;
+                    Api.filter-monsters();
+                }
+            }
+            Chip { text: @tr("Max hunts…"); has-icon: true; icon: @image-url("../icons/max.svg"); clicked => { root.preview("monsters:hunts"); } }
+            Chip { text: @tr("Every crown…"); has-icon: true; icon: @image-url("../icons/star.svg"); clicked => { root.preview("crowns"); } }
+        }
+        if Api.monsters.length == 0: HorizontalLayout {
+            padding: root.side;
+            Muted { text: Api.monster-missing ? @tr("Every monster shown has its crowns.") : @tr("No monster matches the search."); horizontal-alignment: center; }
+        }
+        ListView {
+            vertical-stretch: 1;
+            property <int> seq: Api.jump-seq;
+            function go() {
+                if Api.page == "monsters" && Api.jump-row >= 0 {
+                    self.content-y = -max(0px, Api.jump-row * 72px - self.visible-height / 3);
+                }
+            }
+            init => { self.go(); }
+            changed seq => { self.go(); }
+            for m[i] in Api.monsters: HorizontalLayout {
+                padding-left: root.side - 8px;
+                padding-right: root.side - 8px;
+                padding-bottom: i == Api.monsters.length - 1 ? root.bottom-pad : 0px;
+                OpenRow {
+                    tile: true;
+                    icon: m.icon;
+                    has-icon: m.has-icon;
+                    title: m.name;
+                    sub: @tr("Hunted") + " " + m.hunts + " · " + @tr("Captured") + " " + m.captures
+                        + (m.has-size ? " · " + m.min + "–" + m.max + " %" : "")
+                        + (m.mini ? " · " + @tr("Mini") : "") + (m.crown == 2 ? " · " + @tr("Gold") : m.crown == 1 ? " · " + @tr("Silver") : "");
+                    note: m.warning;
+                    note-color: M.error;
+                    staged: m.changed;
+                    flash: Api.highlight != "" && Api.highlight == "mon:" + m.index;
+                    text-w: root.width - 2 * root.side - 24px - 24px;
+                    clicked => { ListEdit.monster = i; }
+                }
+            }
+        }
+    }
+}
+
+export component MonsterSheet inherits Sheet {
+    property <MonsterRow> m: Api.monsters[ListEdit.monster];
+    property <string> k: "mon:" + root.m.index + ":";
+    shown: ListEdit.monster >= 0 && ListEdit.monster < Api.monsters.length;
+    title: root.m.name;
+    subtitle: root.m.sub;
+    content-h: lay.preferred-height;
+    close => { ListEdit.monster = -1; }
+    lay := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 14px;
+        HorizontalLayout {
+            spacing: 16px;
+            LabelledCount {
+                horizontal-stretch: 1;
+                label: @tr("Hunted");
+                value: root.m.hunts;
+                was: root.m.was-hunts;
+                key: root.k + "hunts";
+                edited(v) => { Api.set-monster(root.m.index, "hunts", v); }
+            }
+        }
+        LabelledCount {
+            label: @tr("Captured");
+            value: root.m.captures;
+            was: root.m.was-captures;
+            key: root.k + "captures";
+            edited(v) => { Api.set-monster(root.m.index, "captures", v); }
+        }
+        Muted { text: @tr("Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."); font-size: M.body-small; }
+        if root.m.has-size: LabelledCount {
+            label: @tr("Smallest") + (root.m.mini ? " · " + @tr("Mini") : "") + " (%)";
+            value: root.m.min;
+            maximum: 200;
+            was: root.m.was-min;
+            key: root.k + "min";
+            edited(v) => { Api.set-monster(root.m.index, "min", v); }
+        }
+        if root.m.has-size: LabelledCount {
+            label: @tr("Largest") + (root.m.crown == 2 ? " · " + @tr("Gold") : root.m.crown == 1 ? " · " + @tr("Silver") : "") + " (%)";
+            value: root.m.max;
+            maximum: 200;
+            was: root.m.was-max;
+            key: root.k + "max";
+            edited(v) => { Api.set-monster(root.m.index, "max", v); }
+        }
+        if root.m.has-size && root.m.thresholds != "": Muted { text: root.m.thresholds; font-size: M.body-small; }
+        if !root.m.has-size: Muted { text: @tr("No size record"); }
+        if root.m.has-notes: CheckRow {
+            title: @tr("Hunter's Notes page of {}", root.m.name);
+            checked: root.m.notes;
+            toggled(on) => { Api.set-monster(root.m.index, "notes", on ? 1 : 0); }
+        }
+        if root.m.was-notes != "": WasRow { was: root.m.was-notes; key: root.k + "notes"; }
+    }
+}

@@ -4,6 +4,8 @@ name: Release builds
 # script in an Arch Linux container (the toolchain it was written for):
 #   MHGU-Save-Editor-<version>-x86_64.exe        mingw-w64 (UCRT) cross build
 #   MHGU-Save-Editor-<version>-x86_64.AppImage   zig, glibc 2.28, type 2 runtime
+#   MHGU-Save-Editor-<version>-arm64.apk         app/packaging/build-apk.sh --release, signed
+#                                                with the release key (secrets below)
 # The .exe is then started on Windows with the sealed test save (it must open the save and
 # draw its window). A v* tag drafts a GitHub Release with them once that passes; a manual
 # run keeps them as workflow artifacts.
@@ -124,8 +126,61 @@ jobs:
           if-no-files-found: ignore
           retention-days: 1
 
+  # The Android APK, signed with the release key: MHGU_APK_KEYSTORE_B64 (the PKCS12
+  # keystore, base64) and MHGU_APK_KEYSTORE_PASS. Never change the key once an APK is out:
+  # Android refuses an update signed with another one.
+  android:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      VER: ${{ needs.build.outputs.ver }}
+    steps:
+      - name: Toolchain
+        run: |
+          rustup update stable --no-self-update && rustup default stable
+          rustup target add aarch64-linux-android
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v7
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app
+          key: android-release
+
+      - name: Asset pack
+        env:
+          ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
+        run: |
+          printf '%s' "$ASSETS_PASSPHRASE" |
+            gpg --batch --pinentry-mode loopback --passphrase-fd 0 --decrypt app/assets/gen.tar.gz.gpg |
+            tar -xz -C app/assets
+          test -f app/assets/gen/names.json
+
+      - name: Build
+        env:
+          KEYSTORE_B64: ${{ secrets.MHGU_APK_KEYSTORE_B64 }}
+          MHGU_APK_KEYSTORE_PASS: ${{ secrets.MHGU_APK_KEYSTORE_PASS }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$MHGU_APK_KEYSTORE_PASS" ]; then
+            echo "::error::the APK release key is not set (secrets MHGU_APK_KEYSTORE_B64, MHGU_APK_KEYSTORE_PASS)"
+            exit 1
+          fi
+          export MHGU_APK_KEYSTORE="$RUNNER_TEMP/release.p12"
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$MHGU_APK_KEYSTORE"
+          bash app/packaging/build-apk.sh --release
+          rm -f "$MHGU_APK_KEYSTORE"
+          cd app/dist && sha256sum "MHGU-Save-Editor-$VER-arm64.apk" > "SHA256SUMS-android-$VER"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MHGU-Save-Editor-android-${{ needs.build.outputs.ver }}
+          path: app/dist/*${{ needs.build.outputs.ver }}*
+          if-no-files-found: error
+          retention-days: 1
+
   release:
-    needs: [build, windows]
+    needs: [build, windows, android]
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     env:
@@ -136,11 +191,19 @@ jobs:
           name: MHGU-Save-Editor-${{ needs.build.outputs.ver }}
           path: dist
 
+      - uses: actions/download-artifact@v7
+        with:
+          name: MHGU-Save-Editor-android-${{ needs.build.outputs.ver }}
+          path: android
+
       - name: Draft release
         env:
           GH_TOKEN: ${{ github.token }}
-        # the checksums also as plain SHA256SUMS: the 0.8.0 updater looks for that name only
+        # one checksum list for every file; also as plain SHA256SUMS: the 0.8.0 updater
+        # looks for that name only
         run: |
+          mv "android/MHGU-Save-Editor-$VER-arm64.apk" dist/
+          cat "android/SHA256SUMS-android-$VER" >> "dist/SHA256SUMS-$VER"
           cp "dist/SHA256SUMS-$VER" "$RUNNER_TEMP/SHA256SUMS"
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
             --title "MHGU Save Editor $VER" --generate-notes dist/*"$VER"* "$RUNNER_TEMP/SHA256SUMS"

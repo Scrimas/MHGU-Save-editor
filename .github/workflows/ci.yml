@@ -1,7 +1,8 @@
 name: CI
 
 # Tests, clippy and formatting on every push and pull request, in the Arch Linux container the release
-# builds use, and the tests again on Windows (the .exe's file and update handling). The
+# builds use, the tests again on Windows (the .exe's file and update handling), and the
+# Android app's clippy and debug APK. The
 # tests that need a real save get the sealed copy app/assets/test-save.tar.xz.gpg and the
 # game-asset pack (the UI test picks equipment by name); see app/assets/README.md. Without
 # the secret (a fork's pull request) the editor builds with placeholders and those tests
@@ -103,6 +104,45 @@ jobs:
         with:
           manifest-path: app/Cargo.toml
           command: check ${{ matrix.checks }}
+
+  # the Android app: clippy for the Android target (src/android builds only there) and the
+  # debug APK, kept a few days for a phone test. The runner image brings the Android SDK,
+  # the NDK and a JDK; build-apk.sh takes the newest of each.
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Toolchain
+        run: |
+          rustup update stable --no-self-update && rustup default stable
+          rustup target add aarch64-linux-android
+          rustup component add clippy
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v7
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app
+          key: android
+          cache-on-failure: true
+
+      - name: Asset pack and test save
+        env:
+          ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
+        run: *unseal
+
+      - name: Clippy (Android)
+        run: bash app/packaging/build-apk.sh --check
+
+      - name: Debug APK
+        run: bash app/packaging/build-apk.sh
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: mhgu-editor-debug-apk
+          path: app/target/apk/mhgu-editor-debug.apk
+          if-no-files-found: error
+          retention-days: 7
 
   windows:
     runs-on: windows-latest

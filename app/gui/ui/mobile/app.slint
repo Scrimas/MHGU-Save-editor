@@ -8,14 +8,24 @@ import { Palette } from "std-widgets.slint";
 import { M } from "theme.slint";
 import { Api, Fmt, Tabs, Win } from "../common.slint";
 import { MaterialPalette } from "@material";
-import { TopBar, ReviewFab, Snack } from "widgets.slint";
+import { Btn, TopBar, ReviewFab, Snack } from "widgets.slint";
 import { NavBar, NavRail, Drawer, Dest, DrawerEntry } from "nav.slint";
-import { ReviewSheet, SlotSheet, MoreSheet, MoreEntry, MenuSheet, AboutSheet, ExportImportSheet, AskSheet, SnapshotsSheet } from "sheets.slint";
+import { ReviewSheet, SlotSheet, MoreSheet, MoreEntry, MenuSheet, AboutSheet, ExportImportSheet, AskSheet, SnapshotsSheet, ChoiceSheet, CharactersSheet, MhxxSheet } from "sheets.slint";
 import { WriteScreen } from "write.slint";
 import { OpenPage, RecompGuide } from "pages/open.slint";
 import { OverviewPage, GoalSheet } from "pages/overview.slint";
 import { PlaceholderPage } from "pages/placeholder.slint";
-import { SettingsSheet } from "pages/settings.slint";
+import { ItemsPage, ItemSheet, ItemEdit } from "pages/items.slint";
+import { FillSheet } from "pages/fill.slint";
+import { EquipmentPage, EquipPickSheet, DecoSheet, EquipView, EquipPick, DecoPick } from "pages/equipment.slint";
+import { ChoiceList, Choice } from "pick.slint";
+import { QuestsPage, QuestSheet, ArenaSheet, QuestEdit } from "pages/quests.slint";
+import { RequestsPage, RequestSheet, CollectionsPage, DeviantSheet, UnlocksPage, MonstersPage, MonsterSheet, ListEdit } from "pages/lists.slint";
+import { OptionsPage, CardsPage } from "pages/misc.slint";
+import { CharacterPage } from "pages/character.slint";
+import { PalicoesPage, PalicoView } from "pages/palicoes.slint";
+import { ColourSheet, ColourEdit } from "colour.slint";
+import { NewsSheet, SettingsScreen, SettingsView, UpdateSheet, VersionSheet } from "pages/settings.slint";
 
 export { Api, Fmt, Tabs, MaterialPalette }
 
@@ -28,9 +38,15 @@ component PageLayer inherits Rectangle {
     in property <length> top-inset;
     in property <length> pad;
     in property <length> side-inset;
+    // the page's own actions, behind ⋮ in its top app bar
+    in property <bool> actions;
+    // quests picked one by one: the bar says how many, with Close
+    in property <bool> selecting;
+    callback leave-selection();
     callback avatar();
     callback open-page(string, int);
     callback preview(string);
+    callback show-actions();
     background: M.surface;
     // set here so the radius and clip set where it is used apply (see Press)
     border-radius: 0px;
@@ -38,10 +54,14 @@ component PageLayer inherits Rectangle {
     VerticalLayout {
         padding-top: root.top-inset;
         TopBar {
-            title: root.title;
-            subtitle: root.subtitle;
-            avatar: true;
+            title: root.selecting ? @tr("{} selected", Api.quest-selected) : root.title;
+            subtitle: root.selecting ? "" : root.subtitle;
+            close: root.selecting;
+            back-clicked => { root.leave-selection(); }
+            avatar: !root.selecting;
             avatar-clicked => { root.avatar(); }
+            overflow: root.actions && !root.selecting;
+            overflow-clicked => { root.show-actions(); }
         }
         Rectangle {
             vertical-stretch: 1;
@@ -51,7 +71,57 @@ component PageLayer inherits Rectangle {
                 open-page(page, tab) => { root.open-page(page, tab); }
                 preview(id) => { root.preview(id); }
             }
-            if root.page != "overview": PlaceholderPage { name: root.title; }
+            if root.page == "items": ItemsPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+                preview(id) => { root.preview(id); }
+            }
+            if root.page == "equipment": EquipmentPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+            }
+            if root.page == "quests": QuestsPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+            }
+            if root.page == "requests": RequestsPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+            }
+            if root.page == "collections": CollectionsPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+                preview(id) => { root.preview(id); }
+            }
+            if root.page == "unlocks": UnlocksPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+                preview(id) => { root.preview(id); }
+            }
+            if root.page == "monsters": MonstersPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+                preview(id) => { root.preview(id); }
+            }
+            if root.page == "character": CharacterPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+            }
+            if root.page == "palicoes": PalicoesPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+            }
+            if root.page == "options": OptionsPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+            }
+            if root.page == "cards": CardsPage {
+                bottom-pad: root.pad;
+                side-inset: root.side-inset;
+            }
+            if root.page != "overview" && root.page != "items" && root.page != "equipment" && root.page != "quests"
+                && root.page != "requests" && root.page != "collections" && root.page != "unlocks" && root.page != "monsters"
+                && root.page != "options" && root.page != "cards" && root.page != "character" && root.page != "palicoes": PlaceholderPage { name: root.title; }
         }
     }
 }
@@ -98,11 +168,13 @@ export component AppWindow inherits Window {
     property <bool> guide-open;
     property <bool> export-open;
     property <bool> goal-open;
+    // the page's ⋮ actions
+    property <bool> actions-open;
     // the Open screen over an open save (More, Open save…); it closes once another opens
     property <bool> open-screen;
     property <string> opened: Api.file-path;
     changed opened => { root.open-screen = false; }
-    out property <bool> any-modal: Api.snapshots-open || root.open-screen || Api.write-open || Api.review-open || root.slot-open || root.more-open || root.menu-open || root.about-open || root.settings-open || root.drawer-open || root.export-open || root.goal-open || Api.quit-open || Api.open-ask != "";
+    out property <bool> any-modal: Api.snapshots-open || root.open-screen || Api.write-open || Api.review-open || root.slot-open || root.more-open || root.menu-open || root.about-open || root.settings-open || root.drawer-open || root.export-open || root.goal-open || root.actions-open || ItemEdit.open || Api.fill-open || Choice.open || EquipPick.open || DecoPick.open || QuestEdit.open || QuestEdit.arena-open || ListEdit.request >= 0 || ListEdit.deviant >= 0 || ListEdit.monster >= 0 || ColourEdit.open || Api.characters-open || Api.mhxx-title != "" || Api.quit-open || Api.open-ask != "" || Api.update-open || Api.news-title != "";
 
     // the five destinations of the bar and the rail; More holds the other pages. Api.page-counts
     // follows the desktop sidebar: overview character items equipment palicoes quests requests
@@ -144,6 +216,89 @@ export component AppWindow inherits Window {
         { id: "settings", label: @tr("Settings") },
         { id: "about", label: @tr("About") },
     ];
+
+    // the page's subtitle under its title
+    pure function page-sub(id: string) -> string {
+        return id == "items" && Api.item-store < 2 ? @tr("{} / {} slots used", Fmt.num(Api.item-used), Fmt.num(Api.item-total))
+            : id == "equipment" ? Api.equip-summary
+            : id == "quests" ? Api.quest-summary
+            : id == "requests" ? Api.request-summary
+            : id == "collections" ? Api.checks-summary
+            : id == "unlocks" ? Api.unlock-summary
+            : id == "monsters" ? Api.monster-summary
+            : id == "palicoes" ? Api.palico-summary
+            : id == "options" ? Api.options-summary
+            : id == "cards" ? Api.cards-summary
+            : "";
+    }
+    // the actions behind the page's ⋮ (page-action runs them)
+    property <[string]> page-actions: Api.page == "items" && Api.item-store == 0 ? [@tr("Export box to CSV…"), @tr("Import box from CSV…"), @tr("Empty box…")]
+        : Api.page == "items" && Api.item-store == 1 ? [@tr("Empty pouch…")]
+        : Api.page == "equipment" && Api.equip-owner < 2 ? [@tr("Export box to CSV…"), @tr("Import box from CSV…")]
+        : [];
+    function page-action(i: int) {
+        root.actions-open = false;
+        if Api.page == "items" && Api.item-store == 0 && i == 0 {
+            Api.item-export();
+        } else if Api.page == "items" && Api.item-store == 0 && i == 1 {
+            Api.item-import();
+        } else if Api.page == "items" {
+            root.preview("items:empty");
+        } else if Api.page == "equipment" && i == 0 {
+            Api.equip-export();
+        } else if Api.page == "equipment" {
+            Api.equip-import();
+        }
+    }
+    // a pick of the option sheet (pick.slint), by what it was opened for
+    function choose(key: string, n: int, i: int) {
+        if key == "skill" {
+            Api.set-equip(n == 0 ? "skill0" : "skill1", i);
+        } else if key == "set-piece" {
+            Api.set-set-piece(n, i);
+        } else if key == "arts-style" {
+            Api.set-arts(0, "style", 0, i);
+        } else if key == "arts-art" {
+            Api.set-arts(0, "art", n, i);
+        } else if key == "char" {
+            Api.set-character(Choice.s, i);
+        } else if key == "look" {
+            Api.set-look(Choice.s, Choice.s == "voice" ? i + 1 : i);
+        } else if key == "card" {
+            Api.set-card(Choice.s, i);
+        } else if key == "char-arts-style" {
+            Api.set-arts(-1, "style", 0, i);
+        } else if key == "char-arts-art" {
+            Api.set-arts(-1, "art", n, i);
+        } else if key == "palico-field" {
+            Api.set-palico-field(Choice.s, i);
+        } else if key == "palico-bias" {
+            Api.set-palico("bias", i);
+        } else if key == "palico-target" {
+            Api.set-palico("target", i + 1);
+        } else if key == "palico-look" {
+            Api.set-palico-look(Choice.s, i);
+        } else if key == "palico-move" {
+            Api.set-palico-entry("moves", Api.palico.move-rows[n].slot, i, Api.palico.move-rows[n].on);
+        } else if key == "palico-skill" {
+            Api.set-palico-entry("skills", Api.palico.skill-rows[n].slot, i, Api.palico.skill-rows[n].on);
+        } else if key == "setting" {
+            Api.set-setting(Choice.s, i);
+        } else if key == "option" {
+            Api.set-option(Choice.s, i);
+        } else if key == "chat-group" {
+            Api.set-chat-group(i);
+        } else if key == "pet-costume" {
+            Api.set-pet(n, "costume", i);
+        } else if key == "arena-set" {
+            Api.set-arena(Api.arena[n].index, i, max(1, Api.arena[n].minutes * 6000 + Api.arena[n].seconds * 100 + Api.arena[n].hundredths));
+        }
+    }
+    function preview(id: string) {
+        if Api.open-preview(id) {
+            root.goal-open = true;
+        }
+    }
 
     pure function page-title(id: string) -> string {
         return id == "overview" ? @tr("Overview")
@@ -189,7 +344,7 @@ export component AppWindow inherits Window {
 
     // Android's Back: the open sheet or screen first, then the page, then leave (asking first
     // when changes are not written). false lets the app close.
-    function back() -> bool {
+    public function back() -> bool {
         if Api.quit-open {
             Api.quit-open = false;
             return true;
@@ -198,8 +353,65 @@ export component AppWindow inherits Window {
             Api.open-ask = "";
             return true;
         }
+        if Api.update-open {
+            if Api.update.state == "downloading" {
+                Api.cancel-update();
+            } else {
+                Api.update-open = false;
+                Api.update-closed();
+            }
+            return true;
+        }
+        if Api.news-title != "" {
+            Api.news-title = "";
+            return true;
+        }
         if root.goal-open {
             root.goal-open = false;
+            return true;
+        }
+        if Api.mhxx-title != "" {
+            Api.mhxx-title = "";
+            return true;
+        }
+        if Choice.open {
+            Choice.open = false;
+            return true;
+        }
+        if ColourEdit.open {
+            ColourEdit.open = false;
+            return true;
+        }
+        if Api.characters-open {
+            Api.characters-open = false;
+            return true;
+        }
+        if ListEdit.request >= 0 || ListEdit.deviant >= 0 || ListEdit.monster >= 0 {
+            ListEdit.request = -1;
+            ListEdit.deviant = -1;
+            ListEdit.monster = -1;
+            return true;
+        }
+        if QuestEdit.open || QuestEdit.arena-open {
+            QuestEdit.open = false;
+            QuestEdit.arena-open = false;
+            return true;
+        }
+        if EquipPick.open || DecoPick.open {
+            EquipPick.open = false;
+            DecoPick.open = false;
+            return true;
+        }
+        if ItemEdit.open {
+            ItemEdit.back();
+            return true;
+        }
+        if Api.fill-open {
+            Api.fill-open = false;
+            return true;
+        }
+        if root.actions-open {
+            root.actions-open = false;
             return true;
         }
         if Api.restore-ask != "" {
@@ -212,6 +424,14 @@ export component AppWindow inherits Window {
         }
         if Api.write-open {
             Api.write-open = false;
+            return true;
+        }
+        if root.settings-open && SettingsView.versions && SettingsView.version-open {
+            SettingsView.version-open = false;
+            return true;
+        }
+        if root.settings-open && SettingsView.versions {
+            SettingsView.versions = false;
             return true;
         }
         if root.export-open || root.about-open || root.settings-open || root.menu-open || root.slot-open || root.more-open || root.drawer-open {
@@ -239,6 +459,27 @@ export component AppWindow inherits Window {
         if !Api.loaded {
             return false;
         }
+        if Api.page == "quests" && Api.quest-selecting {
+            Api.quest-select-none();
+            return true;
+        }
+        if Api.page == "items" && Api.item-store == 2 && Api.loadout-sel >= 0 {
+            Api.select-loadout(-1);
+            return true;
+        }
+        if Api.page == "palicoes" && PalicoView.detail && Api.palico-tab <= 1 && root.width - (root.compact ? 0px : 80px) < M.expanded-from {
+            PalicoView.detail = false;
+            return true;
+        }
+        if Api.page == "unlocks" && ListEdit.unlock-detail && root.width - (root.compact ? 0px : 80px) < M.expanded-from {
+            ListEdit.unlock-detail = false;
+            return true;
+        }
+        if Api.page == "equipment" && (EquipView.detail || EquipView.set-detail) && root.width - (root.compact ? 0px : 80px) < M.expanded-from {
+            EquipView.detail = false;
+            EquipView.set-detail = false;
+            return true;
+        }
         if Api.page != "overview" {
             Api.page = "overview";
             return true;
@@ -253,11 +494,22 @@ export component AppWindow inherits Window {
     // Predictive back (Android 14): what Back would close, in back()'s order; the gesture's
     // progress (it springs back when cancelled); and whether Back has anything to do in the
     // app at all; when it does not, Android plays its back-to-home animation (MainActivity).
-    out property <string> back-target: Api.quit-open ? "quit" : Api.open-ask != "" ? "ask" : root.goal-open ? "goal"
+    out property <string> back-target: Api.quit-open ? "quit" : Api.open-ask != "" ? "ask"
+        : Api.update-open ? "update" : Api.news-title != "" ? "news" : root.goal-open ? "goal"
+        : Api.mhxx-title != "" ? "mhxx" : Choice.open ? "choice" : ColourEdit.open ? "colour" : Api.characters-open ? "characters" : EquipPick.open ? "equip-pick" : DecoPick.open ? "deco-pick"
+        : QuestEdit.open ? "quest" : QuestEdit.arena-open ? "arena"
+        : ListEdit.request >= 0 ? "request" : ListEdit.deviant >= 0 ? "deviant" : ListEdit.monster >= 0 ? "monster"
+        : ItemEdit.open ? (ItemEdit.picking && ItemEdit.id != 0 ? "item-pick" : "item") : Api.fill-open ? "fill" : root.actions-open ? "actions"
         : Api.snapshots-open ? "snapshots" : Api.write-open ? "write"
-        : root.export-open ? "export" : root.about-open ? "about" : root.settings-open ? "settings" : root.menu-open ? "menu"
+        : root.export-open ? "export" : root.about-open ? "about"
+        : root.settings-open && SettingsView.versions && SettingsView.version-open ? "version" : root.settings-open ? "settings" : root.menu-open ? "menu"
         : root.slot-open ? "slot" : root.more-open ? "more" : root.drawer-open ? "drawer"
         : Api.review-open ? "review" : root.guide-open ? "guide" : root.open-screen ? "open"
+        : Api.loaded && Api.page == "quests" && Api.quest-selecting ? "selection"
+        : Api.loaded && Api.page == "items" && Api.item-store == 2 && Api.loadout-sel >= 0 ? "loadout"
+        : Api.loaded && Api.page == "equipment" && (EquipView.detail || EquipView.set-detail) && root.width - (root.compact ? 0px : 80px) < M.expanded-from ? "piece"
+        : Api.loaded && Api.page == "unlocks" && ListEdit.unlock-detail && root.width - (root.compact ? 0px : 80px) < M.expanded-from ? "unlock"
+        : Api.loaded && Api.page == "palicoes" && PalicoView.detail && Api.palico-tab <= 1 && root.width - (root.compact ? 0px : 80px) < M.expanded-from ? "palico"
         : Api.loaded && Api.page != "overview" ? "page" : Api.loaded && Api.change-count > 0 ? "leave" : "";
     out property <bool> can-back: root.back-target != "";
     changed can-back => { Api.back-enabled(self.can-back); }
@@ -268,7 +520,12 @@ export component AppWindow inherits Window {
     }
     changed width => { Win.width = self.width; }
     changed height => { Win.height = self.height; }
-    property <float> bp: Api.back-active ? Api.back-progress : 0;
+    // the finger's progress, from the window's own touches: since Android 15 the back
+    // callback's progress comes from the touches the window hands Android's back
+    // dispatcher, and NativeActivity sends them all to Slint instead (one progress event,
+    // 0, per gesture), so the edge strips below measure it
+    property <float> touch-p;
+    property <float> bp: Api.back-active ? max(Api.back-progress, root.touch-p) : 0;
     animate bp { duration: Api.back-active ? 0ms : M.anim; easing: ease-out; }
     // Android's progress follows the finger across the whole screen width, so a usual swipe
     // stays small: the whole effect is reached a third of the way, eased out
@@ -299,6 +556,9 @@ export component AppWindow inherits Window {
     forward-focus: keys;
     keys := FocusScope {
         key-pressed(e) => {
+            if e.text == Key.Back && Api.back-by-callback {
+                return accept;
+            }
             if e.text == Key.Back || e.text == Key.Escape {
                 return root.back() ? accept : reject;
             }
@@ -384,10 +644,14 @@ export component AppWindow inherits Window {
                     clip: content.p > 0;
                     page: Api.page;
                     title: root.page-title(Api.page);
-                    subtitle: Api.page == "overview" ? content.overview-sub : "";
+                    subtitle: Api.page == "overview" ? content.overview-sub : root.page-sub(Api.page);
                     top-inset: root.inset-top;
                     pad: content.pad;
                     side-inset: content.side;
+                    actions: root.page-actions.length > 0;
+                    show-actions => { root.actions-open = true; }
+                    selecting: Api.page == "quests" && Api.quest-selecting;
+                    leave-selection => { Api.quest-select-none(); }
                     avatar => { root.slot-open = true; }
                     open-page(page, tab) => {
                         if page == "collections" {
@@ -395,14 +659,39 @@ export component AppWindow inherits Window {
                         }
                         Api.page = page;
                     }
-                    preview(id) => {
-                        if Api.open-preview(id) {
-                            root.goal-open = true;
-                        }
+                    preview(id) => { root.preview(id); }
+                }
+            }
+            // selecting quests: the two marks in place of the navigation bar
+            if Api.page == "quests" && Api.quest-selecting: Rectangle {
+                x: parent.rail-w;
+                y: parent.height - self.height;
+                width: parent.width - parent.rail-w;
+                height: sel.preferred-height;
+                background: M.s-cont;
+                TouchArea { }
+                sel := HorizontalLayout {
+                    padding-left: 16px + root.inset-left;
+                    padding-right: 16px + root.inset-right;
+                    padding-top: 16px;
+                    padding-bottom: 16px + root.inset-bottom;
+                    spacing: 8px;
+                    Btn {
+                        horizontal-stretch: 1;
+                        kind: "tonal";
+                        text: @tr("Mark not cleared");
+                        enabled: Api.quest-selected > 0;
+                        clicked => { Api.quest-mark-selected(false); }
+                    }
+                    Btn {
+                        horizontal-stretch: 1;
+                        text: @tr("Mark cleared");
+                        enabled: Api.quest-selected > 0;
+                        clicked => { Api.quest-mark-selected(true); }
                     }
                 }
             }
-            if root.compact: NavBar {
+            if root.compact && !(Api.page == "quests" && Api.quest-selecting): NavBar {
                 y: parent.height - self.height;
                 items: root.dests;
                 current: root.dest;
@@ -410,7 +699,8 @@ export component AppWindow inherits Window {
                 picked(i) => { root.pick-dest(i); }
             }
             // the Review button, above the bar (and above a snackbar)
-            if root.compact && Api.change-count > 0: ReviewFab {
+            // (not while quests are selected: the bar under the list holds the actions then)
+            if root.compact && Api.change-count > 0 && !(Api.page == "quests" && Api.quest-selecting): ReviewFab {
                 property <length> lift: root.snack-shown ? snack.height + 8px : 0px;
                 animate lift { duration: M.anim; easing: ease-out; }
                 x: parent.width - self.width - 16px - root.inset-right;
@@ -481,12 +771,7 @@ export component AppWindow inherits Window {
                 root.go(id);
             }
         }
-        SettingsSheet {
-            drag: root.drag("settings");
-            open: root.settings-open;
-            bottom-inset: root.inset-bottom;
-            close => { root.settings-open = false; }
-        }
+
         AboutSheet {
             drag: root.drag("about");
             open: root.about-open;
@@ -507,6 +792,74 @@ export component AppWindow inherits Window {
                 Api.snapshots-open = false;
                 Api.restore-ask = "";
             }
+        }
+        ItemSheet {
+            drag: root.drag("item");
+            bottom-inset: root.inset-bottom;
+        }
+        FillSheet {
+            drag: root.drag("fill");
+            bottom-inset: root.inset-bottom;
+        }
+        EquipPickSheet {
+            drag: root.drag("equip-pick");
+            bottom-inset: root.inset-bottom;
+        }
+        DecoSheet {
+            drag: root.drag("deco-pick");
+            bottom-inset: root.inset-bottom;
+        }
+        RequestSheet {
+            drag: root.drag("request");
+            bottom-inset: root.inset-bottom;
+        }
+        DeviantSheet {
+            drag: root.drag("deviant");
+            bottom-inset: root.inset-bottom;
+        }
+        MonsterSheet {
+            drag: root.drag("monster");
+            bottom-inset: root.inset-bottom;
+        }
+        QuestSheet {
+            drag: root.drag("quest");
+            bottom-inset: root.inset-bottom;
+        }
+        ArenaSheet {
+            drag: root.drag("arena");
+            bottom-inset: root.inset-bottom;
+        }
+        CharactersSheet {
+            drag: root.drag("characters");
+            bottom-inset: root.inset-bottom;
+        }
+        MhxxSheet {
+            drag: root.drag("mhxx");
+            bottom-inset: root.inset-bottom;
+        }
+        ColourSheet {
+            drag: root.drag("colour");
+            bottom-inset: root.inset-bottom;
+            apply(hex) => {
+                if ColourEdit.kind == "look" {
+                    Api.set-look-colour(ColourEdit.key, hex);
+                } else {
+                    Api.set-pigment(ColourEdit.where, ColourEdit.part, hex);
+                }
+            }
+        }
+        ChoiceList {
+            drag: root.drag("choice");
+            bottom-inset: root.inset-bottom;
+            picked(key, n, i) => { root.choose(key, n, i); }
+        }
+        ChoiceSheet {
+            drag: root.drag("actions");
+            open: root.actions-open;
+            bottom-inset: root.inset-bottom;
+            entries: root.page-actions;
+            close => { root.actions-open = false; }
+            picked(i) => { root.page-action(i); }
         }
         GoalSheet {
             drag: root.drag("goal");
@@ -544,6 +897,23 @@ export component AppWindow inherits Window {
             close => { root.drawer-open = false; }
             picked(id) => { root.go(id); }
         }
+        SettingsScreen {
+            open: root.settings-open;
+            drag: root.drag("settings");
+            x: root.shift("settings");
+            transform-scale-x: 1 - 0.1 * self.drag;
+            transform-scale-y: 1 - 0.1 * self.drag;
+            top-inset: root.inset-top;
+            bottom-inset: root.inset-bottom;
+            side-inset: max(root.inset-left, root.inset-right);
+            close => { root.settings-open = false; }
+        }
+        VersionSheet {
+            open: root.settings-open;
+            drag: root.drag("version");
+            bottom-inset: root.inset-bottom;
+            side-inset: max(root.inset-left, root.inset-right);
+        }
         WriteScreen {
             open: Api.write-open;
             drag: root.drag("write");
@@ -557,6 +927,33 @@ export component AppWindow inherits Window {
             back-to-review => {
                 Api.write-open = false;
                 Api.review-open = true;
+            }
+        }
+        // over everything (Check now opens it from Settings)
+        UpdateSheet {
+            drag: root.drag("update");
+            bottom-inset: root.inset-bottom;
+            side-inset: max(root.inset-left, root.inset-right);
+        }
+        NewsSheet {
+            drag: root.drag("news");
+            bottom-inset: root.inset-bottom;
+            side-inset: max(root.inset-left, root.inset-right);
+        }
+        // Android's back gesture starts at the left or right edge: a press there follows
+        // the finger for the gesture's progress (and is never a tap, see Tap)
+        for side in [0, 1]: TouchArea {
+            x: side == 0 ? 0 : root.width - self.width;
+            width: 20px;
+            height: root.height;
+            enabled: Api.back-by-callback;
+            moved => {
+                root.touch-p = max(0, min(1, (side == 0 ? 1 : -1) * (self.mouse-x - self.pressed-x) / root.width));
+            }
+            changed pressed => {
+                if !self.pressed {
+                    root.touch-p = 0;
+                }
             }
         }
     }

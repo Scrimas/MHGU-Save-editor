@@ -22,7 +22,10 @@ msgid "{}. Opens the field."
 msgstr "{}. Ouvre le champ."
 
 #: app/gui/ui/app.slint app/gui/ui/common.slint app/gui/ui/mobile/app.slint
-#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+#: app/gui/ui/mobile/form.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/mobile/pages/overview.slint
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/overview.slint
 msgid "Undo"
 msgstr "Annuler"
 
@@ -145,9 +148,11 @@ msgid "The emulator keeps two copies of the save, each with a backup; every one 
 msgstr "L'émulateur garde deux copies de la sauvegarde, chacune avec une copie de secours ; toutes reçoivent les mêmes octets et gardent leur propre en-tête."
 
 #: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
-#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/overview.slint
-#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/items.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/colour.slint
+#: app/gui/ui/mobile/pages/fill.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/overview.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/mobile/sheets.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -217,7 +222,7 @@ msgstr "Talismans en texte"
 msgid "One talisman a line: slots, skill, points, second skill, points, with the game's English skill names. The charm list of Athena's Armor Set Search reads it as it is. Paste talismans here to add them to the box."
 msgstr "Un talisman par ligne : emplacements, talent, points, second talent, points, avec les noms de talents anglais du jeu. La liste de charmes d'Athena's Armor Set Search la lit telle quelle. Collez ici des talismans pour les ajouter au coffre."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Copy"
 msgstr "Copier"
 
@@ -233,7 +238,8 @@ msgstr "Comparé à"
 msgid "Nothing differs."
 msgstr "Aucune différence."
 
-#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Replace…"
 msgstr "Remplacer…"
 
@@ -255,70 +261,76 @@ msgstr "Le personnage est mis en attente comme toute importation : il apparaît 
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "{} · empty"
 msgstr "{} · vide"
 
 #: app/gui/src/views/characters.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "Characters"
 msgstr "Personnages"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Copy, swap, delete, export or import whole characters. Each change is staged: it shows in Review and goes into the save with Write."
 msgstr "Copiez, échangez, supprimez, exportez ou importez des personnages entiers. Chaque changement est en attente : il apparaît dans la révision et va dans la sauvegarde avec Écrire."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs app/gui/src/views/file.rs
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "HR {} · {}"
 msgstr "RC {} · {}"
 
 #: app/gui/src/views/characters.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "No character in this slot"
 msgstr "Aucun personnage dans cet emplacement"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Import…"
 msgstr "Importer…"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/palicoes.slint
 msgid "Export…"
 msgstr "Exporter…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Delete"
 msgstr "Supprimer"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "to"
 msgstr "vers"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Swap"
 msgstr "Échanger"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Copy replaces {} in slot {}."
 msgstr "La copie remplace {} dans l'emplacement {}."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "MHXX"
 msgstr "MHXX"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Export to an MHXX save…"
 msgstr "Exporter vers une sauvegarde MHXX…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Import… also takes a character from an MHXX save: the system file of a JKSM or Checkpoint backup (3DS), or of JKSV or Checkpoint (Switch). Unequip gear the other game lacks before moving a character."
 msgstr "Importer… accepte aussi un personnage d'une sauvegarde MHXX : le fichier system d'une sauvegarde JKSM ou Checkpoint (3DS), ou JKSV ou Checkpoint (Switch). Déséquipez l'équipement que l'autre jeu n'a pas avant de déplacer un personnage."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "An MHXX character is Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
 msgstr "Un personnage MHXX est déduit : pas encore vérifié en jeu. Supprimer laisse l'emplacement comme jamais utilisé ; un nouveau personnage s'y crée en jeu."
 
-#: app/gui/ui/app.slint app/gui/ui/pages/cards.slint
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/cards.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint
 msgid "Remove"
 msgstr "Retirer"
 
@@ -371,7 +383,9 @@ msgstr "Passer à la {} ajoute :"
 msgid "Release page ↗"
 msgstr "Page de la version ↗"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/character.slint
 msgid "Appearance"
 msgstr "Apparence"
 
@@ -383,11 +397,11 @@ msgstr "Sauvegardes"
 msgid "Emulator check"
 msgstr "Détection de l'émulateur"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Safety"
 msgstr "Sécurité"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Updates and versions"
 msgstr "Mises à jour et versions"
 
@@ -449,51 +463,54 @@ msgstr "Enregistrer le modèle"
 msgid "Interface size"
 msgstr "Taille de l'interface"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Start on"
 msgstr "Ouvrir sur"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "The page shown when a save opens"
 msgstr "La page affichée à l'ouverture d'une sauvegarde"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
-#: app/gui/ui/pages/overview.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/overview.slint
 msgid "Overview"
 msgstr "Aperçu"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "The last page used"
 msgstr "La dernière page utilisée"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Animations"
 msgstr "Animations"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Page switches, cards moving to their new place, slides and fades."
 msgstr "Changements de page, cartes qui glissent à leur nouvelle place, glissements et fondus."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Open the last save on start"
 msgstr "Ouvrir la dernière sauvegarde au démarrage"
 
 #: app/gui/ui/app.slint app/gui/ui/mobile/pages/open.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Recent saves"
 msgstr "Sauvegardes récentes"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "None yet"
 msgstr "Aucune pour l'instant"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "{n} save listed on the Open page"
 msgid_plural "{n} saves listed on the Open page"
 msgstr[0] "{n} sauvegarde listée sur la page Ouvrir"
 msgstr[1] "{n} sauvegardes listées sur la page Ouvrir"
 
-#: app/gui/ui/app.slint app/gui/ui/fill.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/app.slint app/gui/ui/fill.slint
+#: app/gui/ui/mobile/pages/fill.slint app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/quests.slint
 msgid "Clear"
 msgstr "Effacer"
 
@@ -521,21 +538,23 @@ msgstr "Changer…"
 msgid "Default"
 msgstr "Par défaut"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Keep per save"
 msgstr "À garder par sauvegarde"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "After each new snapshot, the oldest beyond this number are deleted."
 msgstr "Après chaque nouvel instantané, les plus anciens au-delà de ce nombre sont supprimés."
 
-#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/character.slint
 #: app/gui/ui/pages/equipment.slint app/gui/ui/pages/requests.slint
 msgid "All"
 msgstr "Tous"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Last {}"
 msgstr "{} derniers"
 
@@ -543,11 +562,11 @@ msgstr "{} derniers"
 msgid "Tick \"Take a snapshot first\" in the Write dialog"
 msgstr "Cochez \"Prendre d'abord un instantané\" dans la fenêtre Écrire"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Take a snapshot when a save opens"
 msgstr "Prendre un instantané à l'ouverture d'une sauvegarde"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Once per save and day: the save as it was before the day's changes is always kept."
 msgstr "Une fois par sauvegarde et par jour : la sauvegarde telle qu'elle était avant les changements du jour est toujours gardée."
 
@@ -564,19 +583,19 @@ msgstr "Autre nom de processus"
 msgid "Add"
 msgstr "Ajouter"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Confirmed changes only"
 msgstr "Modifications confirmées uniquement"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."
 msgstr "Les modifications marquées Déduit (établies d'après le code du jeu, pas encore vérifiées en jeu) sont refusées. Celles déjà en Révision restent."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Version"
 msgstr "Version"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Check now"
 msgstr "Vérifier"
 
@@ -585,26 +604,27 @@ msgid "Restart…"
 msgstr "Redémarrer…"
 
 #: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Update…"
 msgstr "Mettre à jour…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Check for a new version on start"
 msgstr "Chercher une nouvelle version au démarrage"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Asks GitHub for the latest release. Nothing is downloaded until you choose to update."
 msgstr "Interroge GitHub sur la dernière version. Rien n'est téléchargé tant que vous ne choisissez pas de mettre à jour."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Show what changed after an update"
 msgstr "Montrer les nouveautés après une mise à jour"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Once, on the first start of a new version: the changes since the version before, from GitHub."
 msgstr "Une fois, au premier démarrage d'une nouvelle version : les changements depuis la version précédente, depuis GitHub."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Other versions"
 msgstr "Autres versions"
 
@@ -612,7 +632,7 @@ msgstr "Autres versions"
 msgid "Go back to an older release, or forward again. Downloaded from GitHub and checked like an update."
 msgstr "Revenir à une version plus ancienne, ou de nouveau en avant. Téléchargée depuis GitHub et vérifiée comme une mise à jour."
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Try again"
 msgstr "Réessayer"
 
@@ -664,7 +684,7 @@ msgstr "Réinitialiser…"
 msgid "Reset"
 msgstr "Réinitialiser"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Release notes"
 msgstr "Notes de version"
 
@@ -744,7 +764,7 @@ msgstr "Base de données"
 msgid "Save map"
 msgstr "Carte de la sauvegarde"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Characters…"
 msgstr "Personnages…"
 
@@ -794,12 +814,13 @@ msgid "Version {} is installed"
 msgstr "La version {} est installée"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Go back to {}?"
 msgstr "Revenir à la {} ?"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Version {} is available"
 msgstr "La version {} est disponible"
 
@@ -829,7 +850,7 @@ msgstr "Pas maintenant"
 msgid "Install {}"
 msgstr "Installer la {}"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Download and install"
 msgstr "Télécharger et installer"
 
@@ -904,7 +925,7 @@ msgstr "Récentes"
 msgid "Presets"
 msgstr "Préréglages"
 
-#: app/gui/ui/colour.slint
+#: app/gui/ui/colour.slint app/gui/ui/mobile/colour.slint
 msgid "Apply"
 msgstr "Appliquer"
 
@@ -918,7 +939,7 @@ msgid "Confirmed"
 msgstr "Confirmé"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
-#: app/gui/ui/mobile/widgets.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/widgets.slint
 msgid "Derived"
 msgstr "Déduit"
 
@@ -955,8 +976,12 @@ msgstr[0] "{n} valeur modifiée sur cette page"
 msgstr[1] "{n} valeurs modifiées sur cette page"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/common.slint app/gui/ui/pages/items.slint
-#: app/gui/ui/pages/quests.slint app/gui/ui/pages/requests.slint
+#: app/gui/ui/common.slint app/gui/ui/mobile/form.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pages/misc.slint
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/mobile/widgets.slint
+#: app/gui/ui/pages/items.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/requests.slint
 msgid "was {}"
 msgstr "avant : {}"
 
@@ -964,8 +989,10 @@ msgstr "avant : {}"
 msgid "No match"
 msgstr "Aucun résultat"
 
-#: app/gui/ui/common.slint app/gui/ui/pages/collections.slint
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/unlocks.slint
+#: app/gui/ui/common.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pick.slint
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/unlocks.slint
 msgid "Search"
 msgstr "Rechercher"
 
@@ -986,11 +1013,11 @@ msgstr "Détails techniques"
 msgid "More…"
 msgstr "Plus…"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "in the box"
 msgstr "dans le coffre"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Fill the item box"
 msgstr "Remplir le coffre"
 
@@ -1002,21 +1029,27 @@ msgstr "Vue étendue"
 msgid "Compact view"
 msgstr "Vue compacte"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out."
 msgstr "Place les objets choisis dans les emplacements vides, une pile chacun : des catégories entières ou des objets seuls. Les objets déjà dans le coffre sont ignorés."
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Tick a whole category, or open it to pick single items."
 msgstr "Cochez une catégorie entière, ou ouvrez-la pour choisir des objets seuls."
 
-#: app/gui/ui/fill.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/items.slint
 msgid "Count"
 msgstr "Quantité"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Staged: undo it in Review until you write."
 msgstr "En attente : annulable dans la Révision tant que vous n'avez pas écrit."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/app.slint
+msgid "{} selected"
+msgstr "{} sélectionnées"
 
 #: app/gui/ui/mobile/app.slint app/gui/ui/mobile/sheets.slint
 msgid "More"
@@ -1024,8 +1057,39 @@ msgstr "Plus"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/mobile/app.slint
+msgid "{} / {} slots used"
+msgstr "{} / {} emplacements utilisés"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
+msgid "Export box to CSV…"
+msgstr "Exporter le coffre en CSV…"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
+msgid "Import box from CSV…"
+msgstr "Importer le coffre depuis un CSV…"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/items.slint
+msgid "Empty box…"
+msgstr "Vider le coffre…"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/items.slint
+msgid "Empty pouch…"
+msgstr "Vider l'inventaire…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/app.slint
 msgid "{} · slot {} · HR {}"
 msgstr "{} · emplacement {} · RC {}"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Mark not cleared"
+msgstr "Marquer non terminées"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Mark cleared"
+msgstr "Marquer complétées"
 
 #: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
 #: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
@@ -1054,9 +1118,21 @@ msgid "The changes in Review are not in the save yet. Opening another save drops
 msgstr "Les modifications de la révision ne sont pas encore dans la sauvegarde. Ouvrir une autre sauvegarde les abandonne."
 
 #: app/gui/src/targets.rs app/gui/ui/mobile/app.slint
-#: app/gui/ui/pages/requests.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
 msgid "Open"
 msgstr "Ouverte"
+
+#: app/gui/ui/mobile/colour.slint
+msgid "Hue"
+msgstr "Teinte"
+
+#: app/gui/ui/mobile/colour.slint
+msgid "Saturation"
+msgstr "Saturation"
+
+#: app/gui/ui/mobile/colour.slint
+msgid "Brightness"
+msgstr "Luminosité"
 
 #: app/gui/ui/mobile/nav.slint
 msgid "Every page"
@@ -1126,6 +1202,10 @@ msgstr "Dans MHGU Recomp : Import save, puis choisissez les mêmes fichiers syst
 msgid "Open the system file"
 msgstr "Ouvrir le fichier system"
 
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/database.slint
+msgid "From"
+msgstr "Source"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/mobile/widgets.slint
 msgid "Switch character, slot {}, {}"
@@ -1140,6 +1220,8 @@ msgstr "Changer de personnage, emplacement {}"
 msgid "More options"
 msgstr "Plus d'options"
 
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pages/palicoes.slint
 #: app/gui/ui/mobile/widgets.slint
 msgid "Back"
 msgstr "Retour"
@@ -1148,6 +1230,37 @@ msgstr "Retour"
 #: app/gui/ui/mobile/widgets.slint
 msgid "Review · {}"
 msgstr "Révision · {}"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "Clear the search"
+msgstr "Effacer la recherche"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/items.slint
+msgid "Slot {}: empty"
+msgstr "Emplacement {} : vide"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/items.slint
+msgid "Slot {}: {} ×{}"
+msgstr "Emplacement {} : {} ×{}"
+
+#: app/gui/src/diff.rs app/gui/src/targets.rs
+#: app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs
+#: app/gui/src/views/names.rs app/gui/src/views/reorder.rs
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
+msgid "Empty"
+msgstr "Vide"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "One less"
+msgstr "Un de moins"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "One more"
+msgstr "Un de plus"
 
 #: app/gui/ui/mobile/write.slint
 msgid "MHGU Recomp is closed"
@@ -1160,6 +1273,1012 @@ msgstr "Utilisez d'abord Exit game dans son menu : il écrase la sauvegarde en q
 #: app/gui/ui/mobile/write.slint
 msgid "You can restore it any time from Snapshots in More."
 msgstr "Vous pouvez la restaurer à tout moment depuis Instantanés, dans Plus."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Type 1 (male)"
+msgstr "Type 1 (masculin)"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Type 2 (female)"
+msgstr "Type 2 (féminin)"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Guild Style"
+msgstr "Style Guilde"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Striker Style"
+msgstr "Style Guerrier"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Aerial Style"
+msgstr "Style Voltigeur"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Adept Style"
+msgstr "Style Bushido"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Alchemy Style"
+msgstr "Style Alchimiste"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Valor Style"
+msgstr "Style Vaillant"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Bherna"
+msgstr "Bherna"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Kokoto"
+msgstr "Kokoto"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Pokke"
+msgstr "Pokke"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Yukumo"
+msgstr "Yukumo"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Village"
+msgstr "Village"
+
+#: app/core/src/character.rs app/gui/src/views/requests.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hub"
+msgstr "Grand-Camp"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Arena"
+msgstr "Arène"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/character.slint
+msgid "Confirmed in game except where marked"
+msgstr "Confirmé en jeu sauf mention contraire"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Hunter"
+msgstr "Chasseur"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/advanced.slint
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/pages/palicoes.slint app/gui/ui/pages/sets.slint
+msgid "Name"
+msgstr "Nom"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Written to the save, the player record and the Guild Card."
+msgstr "Écrit dans la sauvegarde, la fiche du joueur et la Carte Guilde."
+
+#: app/gui/src/targets.rs app/gui/src/views/overview.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hunter Rank"
+msgstr "Rang de chasseur"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Follows HR points"
+msgstr "Suit les points RC"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "HR points"
+msgstr "Points RC"
+
+#: app/gui/src/targets.rs app/gui/src/views/overview.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Zenny"
+msgstr "Zenny"
+
+#: app/gui/src/goals.rs app/gui/src/targets.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Wycademy points"
+msgstr "Points Wycadémie"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hours played"
+msgstr "Heures jouées"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Minutes played"
+msgstr "Minutes jouées"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Progress"
+msgstr "Progression"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Village star level"
+msgstr "Niveau d'étoiles du Village"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hub star level"
+msgstr "Niveau d'étoiles du Grand-Camp"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "The game raises star levels when every urgent quest of a level is cleared."
+msgstr "Le jeu augmente le niveau d'étoiles quand toutes les quêtes urgentes d'un niveau sont complétées."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Quest counter"
+msgstr "Compteur de quêtes"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Courier points"
+msgstr "Points du Messager"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Start in"
+msgstr "Départ à"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Housekeeper"
+msgstr "Room service"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "As character creation sets it, numbered as the game shows it."
+msgstr "Comme à la création du personnage, numéroté comme dans le jeu."
+
+#: app/gui/src/targets.rs app/gui/src/views/database.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Body"
+msgstr "Corps"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Some armour is made for one body type only: check what you wear after changing it."
+msgstr "Certaines armures ne sont faites que pour un type de corps : vérifiez ce que vous portez après l'avoir changé."
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Face"
+msgstr "Visage"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hairstyle"
+msgstr "Coiffure"
+
+#: app/gui/src/views/palicoes.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Voice"
+msgstr "Voix"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Eye colour"
+msgstr "Yeux"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Features"
+msgstr "Cosmétique"
+
+#: app/gui/src/views/palicoes.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Clothing"
+msgstr "Vêtements"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Guild Card"
+msgstr "Carte Guilde"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
+msgstr "Comme les règle l'éditeur de carte du jeu. Les entrées verrouillées peuvent aussi être choisies : la carte l'indique alors."
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Title"
+msgstr "Titre"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "Message"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Scene"
+msgstr "Décor"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Pose"
+msgstr "Pose"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Style and Hunter Arts"
+msgstr "Style et Arts de chasse"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "What you have on now. Loading a My Set in game replaces them with the set's."
+msgstr "Ce que vous portez maintenant. Charger un set perso en jeu les remplace par ceux du set."
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Style"
+msgstr "Style"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Arts for the {}"
+msgstr "Arts de l'arme : {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Art {}"
+msgstr "Art {}"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "SP Art"
+msgstr "Art SP"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/sets.slint
+msgid "The game cannot make this: {}."
+msgstr "Le jeu ne peut pas produire ceci : {}."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Armor pigment"
+msgstr "Teinture de l'armure"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets)."
+msgstr "Les couleurs de l'armure que vous portez maintenant. Chaque set perso garde les siennes (Équipement, Sets perso)."
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "the armor's own colour"
+msgstr "la couleur d'origine de l'armure"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Armor's own colour"
+msgstr "Couleur d'origine"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Village points"
+msgstr "Points de village"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "The game adds Low rank and G rank and caps the sum at 20,000."
+msgstr "Le jeu additionne rang inférieur et rang G et plafonne la somme à 20 000."
+
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Low rank"
+msgstr "Rang inférieur"
+
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "G rank"
+msgstr "Rang G"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hunting styles"
+msgstr "Styles de chasse"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Quests done with each style. Your Palico's lines name the most and least used."
+msgstr "Quêtes faites avec chaque style. Les répliques de votre Palico citent le plus et le moins utilisé."
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Weapon usage"
+msgstr "Utilisation des armes"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
+msgstr "Quêtes complétées avec chaque arme, comptées comme sur la Carte Guilde. Le plus grand total désigne l'arme principale."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Box slot {}: {}"
+msgstr "Emplacement {} du coffre : {}"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Back to the box"
+msgstr "Retour au coffre"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Hunter box"
+msgstr "Coffre du chasseur"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Palico box"
+msgstr "Coffre Palico"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "{} · box slot {} · ID {}"
+msgstr "{} · emplacement {} du coffre · ID {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "{} · box slot {}"
+msgstr "{} · emplacement {} du coffre"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Add equipment here"
+msgstr "Ajouter un équipement ici"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Used by {}. Change that in game before replacing or removing this piece."
+msgstr "Utilisée par {}. Changez cela en jeu avant de remplacer ou de retirer cette pièce."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Level"
+msgstr "Niveau"
+
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Decorations"
+msgstr "Décorations"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "{} of {n} slot used"
+msgid_plural "{} of {n} slots used"
+msgstr[0] "{} emplacement utilisé sur {n}"
+msgstr[1] "{} emplacements utilisés sur {n}"
+
+#: app/core/src/palico.rs app/gui/src/targets.rs
+#: app/gui/src/views/character_page.rs app/gui/src/views/palicoes.rs
+#: app/gui/src/views/sets_ui.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "None"
+msgstr "Aucun"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/names.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "{n} slot"
+msgid_plural "{n} slots"
+msgstr[0] "{n} emplacement"
+msgstr[1] "{n} emplacements"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Remove {}"
+msgstr "Retirer {}"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Decorations that do not fit come after: the game never allows them."
+msgstr "Les décorations qui ne rentrent pas viennent ensuite : le jeu ne les permet jamais."
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Add decoration"
+msgstr "Ajouter une décoration"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "This build's game data has no slot counts: decorations can only be removed."
+msgstr "Les données de jeu de cette version n'ont pas le nombre d'emplacements : les décorations peuvent seulement être retirées."
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Transmog"
+msgstr "Transmogrification"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Own look"
+msgstr "Apparence d'origine"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "The piece keeps its skills, slots and defense; only its look changes."
+msgstr "La pièce garde ses talents, emplacements et défense ; seule son apparence change."
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Change look…"
+msgstr "Changer l'apparence…"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Restore own look"
+msgstr "Rétablir l'apparence d'origine"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Skills"
+msgstr "Talents"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Skill {}"
+msgstr "Talent {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Points of skill {}"
+msgstr "Points du talent {}"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Decoration slots"
+msgstr "Emplacements de décoration"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Palico set {}"
+msgstr "Set de Palico {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "My Set {}"
+msgstr "Set perso {}"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+msgid "Move up"
+msgstr "Monter"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+msgid "Move down"
+msgstr "Descendre"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Clear set"
+msgstr "Vider le set"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Set name"
+msgstr "Nom du set"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "An unused set. Save what you have on into it, as the game's Register does, then change it here."
+msgstr "Set inutilisé. Enregistrez-y ce que vous portez, comme le fait l'enregistrement en jeu, puis modifiez-le ici."
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Save what you have on"
+msgstr "Enregistrer ce que vous portez"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Gear"
+msgstr "Équipement"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Pieces of the Palico box."
+msgstr "Pièces du coffre Palico."
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box."
+msgstr "Pièces du coffre du chasseur, avec leurs décorations. Une pièce utilisée par un set ne peut être ni remplacée ni retirée du coffre."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Pigment"
+msgstr "Teinture"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "The colours the hunter wears with this set, applied when it is loaded."
+msgstr "Les couleurs portées avec ce set, appliquées quand il est chargé."
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Replace with what you have on"
+msgstr "Remplacer par ce que vous portez"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
+msgid "Palico"
+msgstr "Palico"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "My Sets"
+msgstr "Sets perso"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Palico sets"
+msgstr "Sets de Palico"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Search name, weapon type or skill"
+msgstr "Rechercher nom, type d'arme ou talent"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Search name or type"
+msgstr "Rechercher nom ou type"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Add equipment"
+msgstr "Ajouter un équipement"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Weapons"
+msgstr "Armes"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Armor"
+msgstr "Armure"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Talismans"
+msgstr "Talismans"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Nothing in the box matches."
+msgstr "Rien dans le coffre ne correspond."
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Pick a piece, or add one to the first free slot."
+msgstr "Choisissez une pièce, ou ajoutez-en une au premier emplacement libre."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Look for {}"
+msgstr "Apparence pour {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Replace box slot {}"
+msgstr "Remplacer l'emplacement {} du coffre"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Add to box slot {}"
+msgstr "Ajouter à l'emplacement {} du coffre"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "New pieces start at level 1 with no decorations; edit them afterwards."
+msgstr "Les nouvelles pièces commencent au niveau 1 sans décorations ; modifiez-les ensuite."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Decoration for {}"
+msgstr "Décoration pour {}"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "{n} slot free. Decorations that do not fit come after: the game never allows them."
+msgid_plural "{n} slots free. Decorations that do not fit come after: the game never allows them."
+msgstr[0] "{n} emplacement libre. Les décorations qui ne rentrent pas viennent ensuite : le jeu ne les permet jamais."
+msgstr[1] "{n} emplacements libres. Les décorations qui ne rentrent pas viennent ensuite : le jeu ne les permet jamais."
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Search decorations"
+msgstr "Rechercher des décorations"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadout {} · position {}"
+msgstr "Kit {} · position {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Item box slot {}"
+msgstr "Emplacement {} du coffre"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Pouch slot {}"
+msgstr "Emplacement {} de l'inventaire"
+
+#: app/gui/ui/mobile/pages/items.slint
+msgid "Change item"
+msgstr "Changer d'objet"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "over the carry limit of {}: the game never makes this stack"
+msgstr "au-delà de la limite de transport de {} : le jeu ne fait jamais une telle pile"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "of {} (carry limit)"
+msgstr "sur {} (limite de transport)"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Empty position"
+msgstr "Position vide"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Empty slot"
+msgstr "Emplacement vide"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/mobile/pages/open.slint
+#: app/gui/ui/pages/items.slint
+msgid "Done"
+msgstr "Terminé"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/items.slint
+msgid "Search items"
+msgstr "Rechercher des objets"
+
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
+#: app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Item box"
+msgstr "Coffre"
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Pouch"
+msgstr "Inventaire"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadouts"
+msgstr "Kits"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Search the item box"
+msgstr "Rechercher dans le coffre"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Search the pouch"
+msgstr "Rechercher dans l'inventaire"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Add item"
+msgstr "Ajouter un objet"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Sort & merge…"
+msgstr "Trier et fusionner…"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Max counts…"
+msgstr "Quantités max…"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Fill box…"
+msgstr "Remplir le coffre…"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "No slot matches the search."
+msgstr "Aucun emplacement ne correspond à la recherche."
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Pick a loadout to edit its name and items."
+msgstr "Choisissez un kit pour modifier son nom et ses objets."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadout {}"
+msgstr "Kit {}"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadout name"
+msgstr "Nom du kit"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
+msgstr "Les 32 positions de l'inventaire que le kit remplit, avec les quantités qu'il prend dans le coffre."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Search requests or villages"
+msgstr "Rechercher des requêtes ou des villages"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/requests.slint
+msgid "Reported"
+msgstr "Rapportée"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward."
+msgstr "Rapportée saute la discussion avec le villageois : le jeu ne remet alors jamais cette récompense. Laissez décoché et faites le rapport en jeu pour obtenir la récompense."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "No request matches the search."
+msgstr "Aucune requête ne correspond à la recherche."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Every request is reported."
+msgstr "Toutes les requêtes sont rapportées."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "No request is reported yet."
+msgstr "Aucune requête n'est encore rapportée."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "No requests."
+msgstr "Aucune requête."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/requests.slint
+msgid "Accepted"
+msgstr "Acceptée"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Accepted posts the request's quest on the board, as talking to the villager does."
+msgstr "Acceptée affiche la quête de la requête au tableau, comme le fait une discussion avec le villageois."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward."
+msgstr "Rapportée : la quête accomplie a été rapportée au villageois. Décoché, le jeu vous demande d'aller faire le rapport. Le jeu ne remet la récompense que si vous allez vous-même voir le villageois : cocher ici fait donc perdre cette récompense."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Missing only"
+msgstr "Manquants seulement"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Check all…"
+msgstr "Tout cocher…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Uncheck all…"
+msgstr "Tout décocher…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "All levels…"
+msgstr "Tous les niveaux…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Max permits…"
+msgstr "Licences au max…"
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/collections.slint
+msgid "Every Hunter Art is unlocked."
+msgstr "Tous les Arts de chasse sont débloqués."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "No art matches the search."
+msgstr "Aucun art ne correspond à la recherche."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Nothing is missing here."
+msgstr "Rien ne manque ici."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Nothing matches the search."
+msgstr "Rien ne correspond à la recherche."
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/collections.slint
+msgid "Every deviant has every level cleared."
+msgstr "Chaque exotique a tous ses niveaux terminés."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "No deviant matches the search."
+msgstr "Aucun exotique ne correspond à la recherche."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Special Permits"
+msgstr "Licences spéciales"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Levels cleared"
+msgstr "Niveaux terminés"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Special Permit points of {}"
+msgstr "Points de Licence spéciale de {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Points of {} waiting at the Courier"
+msgstr "Points de {} en attente chez le Messager"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "NEW"
+msgstr "NEW"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "A pet is adopted from its village's pet menu the first time it is used; that gives its first costume. A pet wears costumes of its own kind: Moofy's or the Poogies'."
+msgstr "Un animal est adopté au premier usage du menu des animaux de son village, qui lui donne son premier costume. Un animal porte les costumes de son espèce : ceux de Moofy ou ceux des Poogies."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Name of the pet of {}"
+msgstr "Nom de l'animal de {}"
+
+#: app/gui/ui/mobile/pages/lists.slint
+msgid "Costume"
+msgstr "Costume"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Adopted"
+msgstr "Adopté"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Moofah affection"
+msgstr "Affection des Moofahs"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Petting a Moofah raises it by one, up to 10, and each quest lowers it by 2. At 6 the game unlocks the title word Moofah, which an edit to 6 or more also does."
+msgstr "Câliner un Moofah l'augmente de 1, jusqu'à 10, et chaque quête la réduit de 2. À 6, le jeu débloque le mot de titre Moofah ; une modification à 6 ou plus le fait aussi."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Bherna Moofah 1"
+msgstr "Moofah de Bherna 1"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Bherna Moofah 2"
+msgstr "Moofah de Bherna 2"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Palico Ranch Moofah 1"
+msgstr "Moofah du Ranch Palico 1"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Palico Ranch Moofah 2"
+msgstr "Moofah du Ranch Palico 2"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Moofah gifts"
+msgstr "Cadeaux des Moofahs"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."
+msgstr "Un Moofah de Bherna donne une Boule peluche Moofah la première fois qu'il est caressé après une quête, compté jusqu'à 10. À 10 le jeu accorde la distinction Balle en laine de Moofah après la caresse suivante ; une modification à 10 l'accorde tout de suite."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Fleeceballs received"
+msgstr "Boules peluche reçues"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Unlock all…"
+msgstr "Tout débloquer…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Lock all…"
+msgstr "Tout verrouiller…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Search monsters"
+msgstr "Rechercher des monstres"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Large only"
+msgstr "Grands seulement"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Missing a crown"
+msgstr "Couronne manquante"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Max hunts…"
+msgstr "Chasses au max…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Every crown…"
+msgstr "Toutes les couronnes…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Every monster shown has its crowns."
+msgstr "Chaque monstre affiché a ses couronnes."
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "No monster matches the search."
+msgstr "Aucun monstre ne correspond à la recherche."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Hunted"
+msgstr "Chassés"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Captured"
+msgstr "Capturés"
+
+#: app/gui/src/views/database.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Mini"
+msgstr "Mini"
+
+#: app/gui/src/views/database.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Gold"
+msgstr "Or"
+
+#: app/gui/src/views/database.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Silver"
+msgstr "Argent"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."
+msgstr "Chassés ne compte que les monstres tués ; le bestiaire du jeu affiche chassés plus capturés. Chaque modification reconstruit aussi le journal des monstres de la Carte Guilde."
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Smallest"
+msgstr "Plus petit"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Largest"
+msgstr "Plus grand"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "No size record"
+msgstr "Aucun record de taille"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Hunter's Notes page of {}"
+msgstr "Page du Compendium de {}"
+
+#: app/gui/src/views/options_ui.rs app/gui/ui/mobile/pages/misc.slint
+#: app/gui/ui/pages/options.slint
+msgid "On"
+msgstr "Oui"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/options.slint
+msgid "Group in use"
+msgstr "Groupe utilisé"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/options.slint
+msgid "Showing"
+msgstr "Affiché"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "No Guild Cards stored."
+msgstr "Aucune Carte Guilde enregistrée."
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "The inbox is empty."
+msgstr "La boîte de réception est vide."
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "No hunters for hire."
+msgstr "Aucun chasseur à louer."
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "No one is blocked."
+msgstr "Personne n'est bloqué."
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "Move to Card List"
+msgstr "Déplacer vers la Liste de cartes"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "Unblock"
+msgstr "Débloquer"
 
 #: app/gui/ui/mobile/pages/open.slint
 msgid "Settings and About"
@@ -1241,10 +2360,6 @@ msgstr "Choisissez ce dossier"
 msgid "Android's folder picker opens. Go to Download › MHGU, tap Use this folder, then Allow. Download itself can't be picked."
 msgstr "Le sélecteur de dossier d'Android s'ouvre. Allez dans Download › MHGU, touchez Utiliser ce dossier, puis Autoriser. Download lui-même ne peut pas être choisi."
 
-#: app/gui/ui/mobile/pages/open.slint app/gui/ui/pages/items.slint
-msgid "Done"
-msgstr "Terminé"
-
 #: app/gui/ui/mobile/pages/open.slint
 msgid "The save opens"
 msgstr "La sauvegarde s'ouvre"
@@ -1260,10 +2375,6 @@ msgstr "En révision"
 #: app/gui/ui/mobile/pages/overview.slint
 msgid "Preview"
 msgstr "Aperçu"
-
-#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/character.slint
-msgid "Confirmed in game except where marked"
-msgstr "Confirmé en jeu sauf mention contraire"
 
 #: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
 msgid "Quick goals"
@@ -1290,9 +2401,191 @@ msgstr "Afficher moins"
 msgid "Show all {}"
 msgstr "Tout afficher ({})"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "{}, colour {}"
+msgstr "{}, couleur {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Equip {}"
+msgstr "Équiper {}"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Innate"
+msgstr "Inné"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Taught slot"
+msgstr "Emplacement d'enseignement"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Support moves"
+msgstr "Habiletés"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Copy to {}"
+msgstr "Copier vers {}"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Experience"
+msgstr "Expérience"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Separate from the level: the game does not recompute one from the other."
+msgstr "Indépendante du niveau : le jeu ne recalcule pas l'un à partir de l'autre."
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Forte"
+msgstr "Spécialité"
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Target"
+msgstr "Cible"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Original owner"
+msgstr "Premier maître"
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Looks"
+msgstr "Apparence"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
+msgstr "Les entrées innées viennent de la spécialité ; les emplacements d'enseignement sont ceux que remplit le dojo des Palicos. Le jeu tire les autres à la naissance du Palico."
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "No StreetPass Palicoes."
+msgstr "Aucun Palico StreetPass."
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Search Palicoes"
+msgstr "Rechercher des Palicos"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Import Palico…"
+msgstr "Importer un Palico…"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "No Palicoes in this save."
+msgstr "Aucun Palico dans cette sauvegarde."
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "No Palico matches the search."
+msgstr "Aucun Palico ne correspond à la recherche."
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Pick a Palico to edit it."
+msgstr "Choisissez un Palico pour le modifier."
+
 #: app/gui/ui/mobile/pages/placeholder.slint
 msgid "This page is not on phones and tablets yet: the desktop editor has it."
 msgstr "Cette page n'est pas encore sur téléphone et tablette : l'éditeur pour ordinateur l'a."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Cleared: {}"
+msgstr "Complétée : {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "{}  (Prowler)"
+msgstr "{}  (Miaroudeur)"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/quests.slint
+msgid "Seen"
+msgstr "Vue"
+
+#: app/gui/src/targets.rs app/gui/src/views/quests.rs
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Failed"
+msgstr "Échouée"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/quests.slint
+msgid "Cleared"
+msgstr "Complétée"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/database.slint
+msgid "Not cleared"
+msgstr "Non terminées"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Search quests by name or number"
+msgstr "Rechercher des quêtes par nom ou numéro"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Select"
+msgstr "Sélectionner"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Every quest here is cleared."
+msgstr "Toutes les quêtes ici sont complétées."
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "No quest matches the search."
+msgstr "Aucune quête ne correspond à la recherche."
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Select all"
+msgstr "Tout sélectionner"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgstr "Votre meilleur temps par quête d'arène, en solo avec l'équipement choisi. Le rang suit le temps ; le meilleur temps du comptoir de l'arène suit le vôtre."
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "The last ten records of your Guild Card, newest first, as the game wrote them. Read only."
+msgstr "Les dix derniers enregistrements de votre Carte Guilde, du plus récent au plus ancien, tels que le jeu les a écrits. Lecture seule."
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "No record yet."
+msgstr "Aucun enregistrement pour l'instant."
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."
+msgstr "Une ligne rouge signifie que la quête n'est pas encore au tableau et indique ce qui la débloque. Compléter une quête la marque aussi comme vue et termine ses séries de quêtes, comme le fait le jeu."
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Minutes"
+msgstr "Minutes"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Seconds"
+msgstr "Secondes"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Hundredths"
+msgstr "Centièmes"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Set"
+msgstr "Équipement"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Rank"
+msgstr "Rang"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Every published release, with what changed. Android installs only newer versions over the app."
+msgstr "Toutes les versions publiées, avec ce qui a changé. Android n'installe que des versions plus récentes par-dessus l'application."
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Installed"
+msgstr "Installée"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Latest"
+msgstr "Dernière"
 
 #: app/gui/ui/mobile/pages/settings.slint
 msgid "Take a snapshot before writing"
@@ -1303,8 +2596,20 @@ msgid "Write starts with this ticked."
 msgstr "Écrire démarre avec cette case cochée."
 
 #: app/gui/ui/mobile/pages/settings.slint
-msgid "Open the last save at start"
-msgstr "Ouvrir la dernière sauvegarde au démarrage"
+msgid "Updates"
+msgstr "Mises à jour"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "This is the version installed."
+msgstr "C'est la version installée."
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Release page"
+msgstr "Page de la version"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Write or undo the staged changes first: installing closes the editor."
+msgstr "Écrivez ou annulez d'abord les modifications en attente : l'installation ferme l'éditeur."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/advanced.slint
@@ -1327,13 +2632,6 @@ msgstr "Taille"
 msgid "Manager"
 msgstr "Gestionnaire"
 
-#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
-#: app/gui/ui/pages/advanced.slint app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/items.slint app/gui/ui/pages/palicoes.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Name"
-msgstr "Nom"
-
 #: app/gui/ui/pages/advanced.slint
 msgid "Confidence"
 msgstr "Certitude"
@@ -1342,272 +2640,42 @@ msgstr "Certitude"
 msgid "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."
 msgstr "Choisissez une ligne pour voir ses octets. Un * marque les octets modifiés par des changements pas encore écrits."
 
-#: app/gui/ui/pages/cards.slint
-msgid "Move to Card List"
-msgstr "Déplacer vers la Liste de cartes"
-
-#: app/gui/ui/pages/cards.slint
-msgid "No Guild Cards stored."
-msgstr "Aucune Carte Guilde enregistrée."
-
-#: app/gui/ui/pages/cards.slint
-msgid "The inbox is empty."
-msgstr "La boîte de réception est vide."
-
-#: app/gui/ui/pages/cards.slint
-msgid "No hunters for hire."
-msgstr "Aucun chasseur à louer."
-
-#: app/gui/ui/pages/cards.slint
-msgid "No one is blocked."
-msgstr "Personne n'est bloqué."
-
-#: app/gui/ui/pages/cards.slint
-msgid "Unblock"
-msgstr "Débloquer"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/palicoes.slint app/gui/ui/pages/quests.slint
-#: app/gui/ui/pages/sets.slint
-msgid "The game cannot make this: {}."
-msgstr "Le jeu ne peut pas produire ceci : {}."
-
-#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
-msgid "Hunter"
-msgstr "Chasseur"
-
-#: app/gui/ui/pages/character.slint
-msgid "Written to the save, the player record and the Guild Card."
-msgstr "Écrit dans la sauvegarde, la fiche du joueur et la Carte Guilde."
-
 #: app/gui/ui/pages/character.slint
 msgid "Hunter name"
 msgstr "Nom du chasseur"
-
-#: app/gui/src/targets.rs app/gui/src/views/overview.rs
-#: app/gui/ui/pages/character.slint
-msgid "Hunter Rank"
-msgstr "Rang de chasseur"
-
-#: app/gui/ui/pages/character.slint
-msgid "Follows HR points"
-msgstr "Suit les points RC"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "HR points"
-msgstr "Points RC"
-
-#: app/gui/src/targets.rs app/gui/src/views/overview.rs
-#: app/gui/ui/pages/character.slint
-msgid "Zenny"
-msgstr "Zenny"
-
-#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Wycademy points"
-msgstr "Points Wycadémie"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/character.slint
 msgid "Play time"
 msgstr "Temps de jeu"
 
-#: app/gui/ui/pages/character.slint
-msgid "Hours played"
-msgstr "Heures jouées"
-
-#: app/gui/ui/pages/character.slint
-msgid "Minutes played"
-msgstr "Minutes jouées"
-
-#: app/gui/ui/pages/character.slint
-msgid "Progress"
-msgstr "Progression"
-
 #: app/gui/src/targets.rs app/gui/ui/pages/character.slint
 msgid "Village ★"
 msgstr "Village ★"
-
-#: app/gui/ui/pages/character.slint
-msgid "Village star level"
-msgstr "Niveau d'étoiles du Village"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/character.slint
 msgid "Hub ★"
 msgstr "Grand-Camp ★"
 
 #: app/gui/ui/pages/character.slint
-msgid "Hub star level"
-msgstr "Niveau d'étoiles du Grand-Camp"
-
-#: app/gui/ui/pages/character.slint
-msgid "The game raises star levels when every urgent quest of a level is cleared."
-msgstr "Le jeu augmente le niveau d'étoiles quand toutes les quêtes urgentes d'un niveau sont complétées."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Quest counter"
-msgstr "Compteur de quêtes"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Courier points"
-msgstr "Points du Messager"
-
-#: app/gui/ui/pages/character.slint
 msgid "Quests completed as the Courier counts them, not shown in game; past 210 the count stays between 210 and 419. Each 1,000 Courier points become 10 Special Permits for a deviant, up to 10,000 points."
 msgstr "Quêtes terminées telles que le Messager les compte, non affiché en jeu ; au-delà de 210 le compte reste entre 210 et 419. Chaque tranche de 1 000 points du Messager devient 10 Licences spéciales pour un exotique, jusqu'à 10 000 points."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Start in"
-msgstr "Départ à"
 
 #: app/gui/ui/pages/character.slint
 msgid "Where the next load starts"
 msgstr "Lieu de départ au prochain chargement"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Housekeeper"
-msgstr "Room service"
 
 #: app/gui/ui/pages/character.slint
 msgid "Room Service, Change Housekeeper"
 msgstr "Room service, Valet de chambre"
 
 #: app/gui/ui/pages/character.slint
-msgid "As character creation sets it, numbered as the game shows it."
-msgstr "Comme à la création du personnage, numéroté comme dans le jeu."
-
-#: app/gui/src/targets.rs app/gui/src/views/database.rs
-#: app/gui/ui/pages/character.slint
-msgid "Body"
-msgstr "Corps"
-
-#: app/gui/ui/pages/character.slint
-msgid "Some armour is made for one body type only: check what you wear after changing it."
-msgstr "Certaines armures ne sont faites que pour un type de corps : vérifiez ce que vous portez après l'avoir changé."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Type 1 (male)"
-msgstr "Type 1 (masculin)"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Type 2 (female)"
-msgstr "Type 2 (féminin)"
-
-#: app/gui/ui/pages/character.slint
 msgid "Face, hairstyle, voice"
 msgstr "Visage, coiffure, voix"
-
-#: app/gui/ui/pages/character.slint
-msgid "Face"
-msgstr "Visage"
-
-#: app/gui/ui/pages/character.slint
-msgid "Hairstyle"
-msgstr "Coiffure"
-
-#: app/gui/src/views/palicoes.rs app/gui/ui/pages/character.slint
-msgid "Voice"
-msgstr "Voix"
-
-#: app/gui/ui/pages/character.slint
-msgid "Eye colour"
-msgstr "Yeux"
-
-#: app/gui/ui/pages/character.slint
-msgid "Features"
-msgstr "Cosmétique"
-
-#: app/gui/src/views/palicoes.rs app/gui/ui/pages/character.slint
-msgid "Clothing"
-msgstr "Vêtements"
-
-#: app/gui/ui/pages/character.slint
-msgid "Guild Card"
-msgstr "Carte Guilde"
-
-#: app/gui/ui/pages/character.slint
-msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
-msgstr "Comme les règle l'éditeur de carte du jeu. Les entrées verrouillées peuvent aussi être choisies : la carte l'indique alors."
-
-#: app/gui/ui/pages/character.slint
-msgid "Title"
-msgstr "Titre"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr "Message"
 
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
 #: app/gui/ui/pages/character.slint
 msgid "Guild Card greeting"
 msgstr "Message de la carte de guilde"
-
-#: app/gui/ui/pages/character.slint
-msgid "Scene"
-msgstr "Décor"
-
-#: app/gui/ui/pages/character.slint
-msgid "Pose"
-msgstr "Pose"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Style and Hunter Arts"
-msgstr "Style et Arts de chasse"
-
-#: app/gui/ui/pages/character.slint
-msgid "What you have on now. Loading a My Set in game replaces them with the set's."
-msgstr "Ce que vous portez maintenant. Charger un set perso en jeu les remplace par ceux du set."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Armor pigment"
-msgstr "Teinture de l'armure"
-
-#: app/gui/ui/pages/character.slint
-msgid "The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets)."
-msgstr "Les couleurs de l'armure que vous portez maintenant. Chaque set perso garde les siennes (Équipement, Sets perso)."
-
-#: app/gui/ui/pages/character.slint
-msgid "Village points"
-msgstr "Points de village"
-
-#: app/gui/ui/pages/character.slint
-msgid "The game adds Low rank and G rank and caps the sum at 20,000."
-msgstr "Le jeu additionne rang inférieur et rang G et plafonne la somme à 20 000."
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Village"
-msgstr "Village"
-
-#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Low rank"
-msgstr "Rang inférieur"
-
-#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "G rank"
-msgstr "Rang G"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Bherna"
-msgstr "Bherna"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Kokoto"
-msgstr "Kokoto"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Pokke"
-msgstr "Pokke"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Yukumo"
-msgstr "Yukumo"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/character.slint
@@ -1619,65 +2687,10 @@ msgstr "Points rang inférieur à {}"
 msgid "{} G rank points"
 msgstr "Points rang G à {}"
 
-#: app/gui/ui/pages/character.slint
-msgid "Hunting styles"
-msgstr "Styles de chasse"
-
-#: app/gui/ui/pages/character.slint
-msgid "Quests done with each style. Your Palico's lines name the most and least used."
-msgstr "Quêtes faites avec chaque style. Les répliques de votre Palico citent le plus et le moins utilisé."
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Guild Style"
-msgstr "Style Guilde"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Striker Style"
-msgstr "Style Guerrier"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Aerial Style"
-msgstr "Style Voltigeur"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Adept Style"
-msgstr "Style Bushido"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Alchemy Style"
-msgstr "Style Alchimiste"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Valor Style"
-msgstr "Style Vaillant"
-
-#: app/gui/ui/pages/character.slint
-msgid "Weapon usage"
-msgstr "Utilisation des armes"
-
-#: app/gui/ui/pages/character.slint
-msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
-msgstr "Quêtes complétées avec chaque arme, comptées comme sur la Carte Guilde. Le plus grand total désigne l'arme principale."
-
 #: app/gui/src/views/names.rs app/gui/src/views/sets_ui.rs
 #: app/gui/ui/pages/character.slint
 msgid "Weapon"
 msgstr "Arme"
-
-#: app/core/src/character.rs app/gui/src/views/requests.rs
-#: app/gui/ui/pages/character.slint
-msgid "Hub"
-msgstr "Grand-Camp"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Arena"
-msgstr "Arène"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/character.slint
@@ -1685,84 +2698,21 @@ msgid "{} quests, {}"
 msgstr "Quêtes {}, {}"
 
 #: app/gui/ui/pages/collections.slint
-msgid "Check all…"
-msgstr "Tout cocher…"
-
-#: app/gui/ui/pages/collections.slint
-msgid "Uncheck all…"
-msgstr "Tout décocher…"
-
-#: app/gui/ui/pages/collections.slint
-msgid "All levels…"
-msgstr "Tous les niveaux…"
-
-#: app/gui/ui/pages/collections.slint
-msgid "Max permits…"
-msgstr "Licences au max…"
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
-#: app/gui/ui/pages/unlocks.slint
-msgid "Missing only"
-msgstr "Manquants seulement"
-
-#: app/gui/ui/pages/collections.slint
 msgid "Hunter Art"
 msgstr "Art de chasse"
-
-#: app/gui/src/goals.rs app/gui/ui/pages/collections.slint
-msgid "Every Hunter Art is unlocked."
-msgstr "Tous les Arts de chasse sont débloqués."
-
-#: app/gui/ui/pages/collections.slint
-msgid "No art matches the search."
-msgstr "Aucun art ne correspond à la recherche."
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/unlocks.slint
-msgid "Nothing is missing here."
-msgstr "Rien ne manque ici."
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/unlocks.slint
-msgid "Nothing matches the search."
-msgstr "Rien ne correspond à la recherche."
 
 #: app/gui/src/views/quests.rs app/gui/ui/pages/collections.slint
 msgid "Deviant"
 msgstr "Exotique"
 
 #: app/gui/ui/pages/collections.slint
-msgid "Special Permits"
-msgstr "Licences spéciales"
-
-#: app/gui/ui/pages/collections.slint
 msgid "Permit points · at the Courier"
 msgstr "Points de licence · chez le Messager"
-
-#: app/gui/ui/pages/collections.slint
-msgid "Levels cleared"
-msgstr "Niveaux terminés"
-
-#: app/gui/src/goals.rs app/gui/ui/pages/collections.slint
-msgid "Every deviant has every level cleared."
-msgstr "Chaque exotique a tous ses niveaux terminés."
-
-#: app/gui/ui/pages/collections.slint
-msgid "No deviant matches the search."
-msgstr "Aucun exotique ne correspond à la recherche."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/collections.slint
 msgid "Special Permits of {}"
 msgstr "Licences spéciales de {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/collections.slint
-msgid "Special Permit points of {}"
-msgstr "Points de Licence spéciale de {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/collections.slint
-msgid "Points of {} waiting at the Courier"
-msgstr "Points de {} en attente chez le Messager"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/collections.slint
@@ -1808,21 +2758,6 @@ msgstr "Découpes"
 #: app/gui/ui/pages/database.slint
 msgid "Edit on the Monsters page"
 msgstr "Modifier sur la page Monstres"
-
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
-msgid "Mini"
-msgstr "Mini"
-
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
-msgid "Silver"
-msgstr "Argent"
-
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
-msgid "Gold"
-msgstr "Or"
 
 #: app/gui/ui/pages/database.slint
 msgid "Crown chances"
@@ -1900,10 +2835,6 @@ msgid "No carve, quest reward or combination gives it. It may come from gatherin
 msgstr "Aucune découpe, récompense de quête ou combinaison ne le donne. Il peut venir de la cueillette ou des boutiques, qui ne sont pas encore dans la base de données."
 
 #: app/gui/ui/pages/database.slint
-msgid "From"
-msgstr "Source"
-
-#: app/gui/ui/pages/database.slint
 msgid "Chance"
 msgstr "Chance"
 
@@ -1939,47 +2870,21 @@ msgstr "Arbre d'amélioration"
 msgid "Levels"
 msgstr "Niveaux"
 
-#: app/gui/src/targets.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Skills"
-msgstr "Talents"
-
 #: app/gui/ui/pages/database.slint
 msgid "No skill."
 msgstr "Aucun talent."
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
-msgid "Talismans"
-msgstr "Talismans"
 
 #: app/gui/ui/pages/database.slint
 msgid "No talisman rolls it."
 msgstr "Aucun talisman ne le donne."
 
-#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
-msgid "Decorations"
-msgstr "Décorations"
-
 #: app/gui/ui/pages/database.slint
 msgid "No decoration gives it."
 msgstr "Aucune décoration ne le donne."
 
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
-msgid "Armor"
-msgstr "Armure"
-
 #: app/gui/ui/pages/database.slint
 msgid "No armor piece gives it."
 msgstr "Aucune pièce d'armure ne le donne."
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
-msgid "Search monsters"
-msgstr "Rechercher des monstres"
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
-msgid "Missing a crown"
-msgstr "Couronne manquante"
 
 #: app/gui/ui/pages/database.slint
 msgid "No monster matches."
@@ -1994,20 +2899,12 @@ msgid "Search quests"
 msgstr "Rechercher des quêtes"
 
 #: app/gui/ui/pages/database.slint
-msgid "Not cleared"
-msgstr "Non terminées"
-
-#: app/gui/ui/pages/database.slint
 msgid "No quest matches."
 msgstr "Aucune quête ne correspond."
 
 #: app/gui/ui/pages/database.slint
 msgid "Pick a quest."
 msgstr "Choisissez une quête."
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
-msgid "Search items"
-msgstr "Rechercher des objets"
 
 #: app/gui/ui/pages/database.slint
 msgid "In the box"
@@ -2057,137 +2954,17 @@ msgstr "Choisissez un équipement."
 msgid "The game's own data, next to this save. Nothing on this page is edited."
 msgstr "Les données du jeu, à côté de cette sauvegarde. Rien n'est modifié sur cette page."
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Box slot {}: {}"
-msgstr "Emplacement {} du coffre : {}"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Add equipment"
-msgstr "Ajouter un équipement"
-
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
-msgid "Export box to CSV…"
-msgstr "Exporter le coffre en CSV…"
-
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
-msgid "Import box from CSV…"
-msgstr "Importer le coffre depuis un CSV…"
-
 #: app/gui/ui/pages/equipment.slint
 msgid "Talismans as text…"
 msgstr "Talismans en texte…"
 
 #: app/gui/ui/pages/equipment.slint
-msgid "Palico"
-msgstr "Palico"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "My Sets"
-msgstr "Sets perso"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Palico sets"
-msgstr "Sets de Palico"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Search name, weapon type or skill"
-msgstr "Rechercher nom, type d'arme ou talent"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Search name or type"
-msgstr "Rechercher nom ou type"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Weapons"
-msgstr "Armes"
-
-#: app/gui/src/diff.rs app/gui/src/targets.rs
-#: app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs
-#: app/gui/src/views/names.rs app/gui/src/views/reorder.rs
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
-msgid "Empty"
-msgstr "Vide"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Nothing in the box matches."
-msgstr "Rien dans le coffre ne correspond."
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Pick a piece, or add one to the first free slot."
-msgstr "Choisissez une pièce, ou ajoutez-en une au premier emplacement libre."
-
-#: app/gui/ui/pages/equipment.slint
 msgid "‹ Back to the box"
 msgstr "‹ Retour au coffre"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "{} · box slot {} · ID {}"
-msgstr "{} · emplacement {} du coffre · ID {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
-msgid "{} · box slot {}"
-msgstr "{} · emplacement {} du coffre"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Add equipment here"
-msgstr "Ajouter un équipement ici"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Used by {}. Change that in game before replacing or removing this piece."
-msgstr "Utilisée par {}. Changez cela en jeu avant de remplacer ou de retirer cette pièce."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Level"
-msgstr "Niveau"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/pages/equipment.slint
-msgid "{} of {n} slot used"
-msgid_plural "{} of {n} slots used"
-msgstr[0] "{} emplacement utilisé sur {n}"
-msgstr[1] "{} emplacements utilisés sur {n}"
-
-#: app/core/src/palico.rs app/gui/src/targets.rs
-#: app/gui/src/views/character_page.rs app/gui/src/views/palicoes.rs
-#: app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
-msgid "None"
-msgstr "Aucun"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
-msgid "{n} slot"
-msgid_plural "{n} slots"
-msgstr[0] "{n} emplacement"
-msgstr[1] "{n} emplacements"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Add decoration…"
 msgstr "Ajouter une décoration…"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "This build's game data has no slot counts: decorations can only be removed."
-msgstr "Les données de jeu de cette version n'ont pas le nombre d'emplacements : les décorations peuvent seulement être retirées."
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Transmog"
-msgstr "Transmogrification"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Own look"
-msgstr "Apparence d'origine"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Change look…"
-msgstr "Changer l'apparence…"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Restore own look"
-msgstr "Rétablir l'apparence d'origine"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Looks of the same part that this piece's class and your body type can wear. Skills, slots and defense stay."
@@ -2198,23 +2975,9 @@ msgstr "Apparences de la même partie que la classe de cette pièce et votre typ
 msgid "Talisman"
 msgstr "Talisman"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Skill {}"
-msgstr "Talent {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Points of skill {}"
-msgstr "Points du talent {}"
-
 #: app/gui/ui/pages/equipment.slint
 msgid "Slots"
 msgstr "Emplacements"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Decoration slots"
-msgstr "Emplacements de décoration"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Share as text…"
@@ -2228,55 +2991,6 @@ msgstr "Les 36 octets de cette entrée du coffre. Sélectionnez pour copier."
 msgid "Show in Save map"
 msgstr "Afficher dans la carte de la sauvegarde"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Look for {}"
-msgstr "Apparence pour {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Replace box slot {}"
-msgstr "Remplacer l'emplacement {} du coffre"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Add to box slot {}"
-msgstr "Ajouter à l'emplacement {} du coffre"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "The piece keeps its skills, slots and defense; only its look changes."
-msgstr "La pièce garde ses talents, emplacements et défense ; seule son apparence change."
-
-#: app/gui/ui/pages/equipment.slint
-msgid "New pieces start at level 1 with no decorations; edit them afterwards."
-msgstr "Les nouvelles pièces commencent au niveau 1 sans décorations ; modifiez-les ensuite."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Decoration for {}"
-msgstr "Décoration pour {}"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/pages/equipment.slint
-msgid "{n} slot free. Decorations that do not fit come after: the game never allows them."
-msgid_plural "{n} slots free. Decorations that do not fit come after: the game never allows them."
-msgstr[0] "{n} emplacement libre. Les décorations qui ne rentrent pas viennent ensuite : le jeu ne les permet jamais."
-msgstr[1] "{n} emplacements libres. Les décorations qui ne rentrent pas viennent ensuite : le jeu ne les permet jamais."
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Search decorations"
-msgstr "Rechercher des décorations"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Slot {}: empty"
-msgstr "Emplacement {} : vide"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Slot {}: {} ×{}"
-msgstr "Emplacement {} : {} ×{}"
-
 #: app/gui/ui/pages/items.slint
 msgid "Item loadouts · confirmed in game except where marked"
 msgstr "Kits d'objets · confirmé en jeu sauf mention contraire"
@@ -2286,109 +3000,10 @@ msgstr "Kits d'objets · confirmé en jeu sauf mention contraire"
 msgid "{} / {} slots used · confirmed in game except where marked"
 msgstr "{} / {} emplacements utilisés · confirmé en jeu sauf mention contraire"
 
-#: app/gui/ui/pages/items.slint
-msgid "Add item"
-msgstr "Ajouter un objet"
-
-#: app/gui/ui/pages/items.slint
-msgid "Sort & merge…"
-msgstr "Trier et fusionner…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Max counts…"
-msgstr "Quantités max…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Fill box…"
-msgstr "Remplir le coffre…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty box…"
-msgstr "Vider le coffre…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty pouch…"
-msgstr "Vider l'inventaire…"
-
-#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
-#: app/gui/src/views/transfer_ui.rs app/gui/ui/pages/items.slint
-msgid "Item box"
-msgstr "Coffre"
-
-#: app/gui/src/goals.rs app/gui/ui/pages/items.slint
-msgid "Pouch"
-msgstr "Inventaire"
-
-#: app/gui/ui/pages/items.slint
-msgid "Loadouts"
-msgstr "Kits"
-
-#: app/gui/ui/pages/items.slint
-msgid "Search the item box"
-msgstr "Rechercher dans le coffre"
-
-#: app/gui/ui/pages/items.slint
-msgid "Search the pouch"
-msgstr "Rechercher dans l'inventaire"
-
-#: app/gui/ui/pages/items.slint
-msgid "No slot matches the search."
-msgstr "Aucun emplacement ne correspond à la recherche."
-
-#: app/gui/ui/pages/items.slint
-msgid "Pick a loadout to edit its name and items."
-msgstr "Choisissez un kit pour modifier son nom et ses objets."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Loadout {}"
-msgstr "Kit {}"
-
-#: app/gui/ui/pages/items.slint
-msgid "Loadout name"
-msgstr "Nom du kit"
-
-#: app/gui/ui/pages/items.slint
-msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
-msgstr "Les 32 positions de l'inventaire que le kit remplit, avec les quantités qu'il prend dans le coffre."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Loadout {} · position {}"
-msgstr "Kit {} · position {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/items.slint
-msgid "Item box slot {}"
-msgstr "Emplacement {} du coffre"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/items.slint
-msgid "Pouch slot {}"
-msgstr "Emplacement {} de l'inventaire"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/items.slint
 msgid "of {}"
 msgstr "sur {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "over the carry limit of {}: the game never makes this stack"
-msgstr "au-delà de la limite de transport de {} : le jeu ne fait jamais une telle pile"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "of {} (carry limit)"
-msgstr "sur {} (limite de transport)"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty position"
-msgstr "Position vide"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty slot"
-msgstr "Emplacement vide"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/monsters.slint
@@ -2411,61 +3026,12 @@ msgid "Largest size of {}"
 msgstr "Plus grande taille de {}"
 
 #: app/gui/ui/pages/monsters.slint
-msgid "No size record"
-msgstr "Aucun record de taille"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/monsters.slint
-msgid "Hunter's Notes page of {}"
-msgstr "Page du Compendium de {}"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Max hunts…"
-msgstr "Chasses au max…"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Every crown…"
-msgstr "Toutes les couronnes…"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Large only"
-msgstr "Grands seulement"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Hunted"
-msgstr "Chassés"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."
-msgstr "Chassés ne compte que les monstres tués ; le bestiaire du jeu affiche chassés plus capturés. Chaque modification reconstruit aussi le journal des monstres de la Carte Guilde."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Captured"
-msgstr "Capturés"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Smallest"
-msgstr "Plus petit"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Largest"
-msgstr "Plus grand"
-
-#: app/gui/ui/pages/monsters.slint
 msgid "Sizes are % of the monster's base size. At or below its mini size it has the mini crown; at or above its silver or gold size, that crown. Click a size to see the monster's own sizes. The crown awards read the Guild Card's monster log, which every edit rebuilds."
 msgstr "Les tailles sont en % de la taille de base du monstre. À sa taille mini ou en dessous, il a la couronne miniature ; à sa taille argent ou or ou au-dessus, cette couronne. Cliquez sur une taille pour voir les tailles propres au monstre. Les distinctions de couronnes lisent le journal des monstres de la Carte Guilde, que chaque modification reconstruit."
 
 #: app/gui/ui/pages/monsters.slint
 msgid "Notes"
 msgstr "Compendium"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Every monster shown has its crowns."
-msgstr "Chaque monstre affiché a ses couronnes."
-
-#: app/gui/ui/pages/monsters.slint
-msgid "No monster matches the search."
-msgstr "Aucun monstre ne correspond à la recherche."
 
 #: app/gui/ui/pages/open.slint
 msgid "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit."
@@ -2479,18 +3045,6 @@ msgstr "Aussi sur cet ordinateur"
 msgid "Found on this computer"
 msgstr "Trouvées sur cet ordinateur"
 
-#: app/gui/src/views/options_ui.rs app/gui/ui/pages/options.slint
-msgid "On"
-msgstr "Oui"
-
-#: app/gui/ui/pages/options.slint
-msgid "Group in use"
-msgstr "Groupe utilisé"
-
-#: app/gui/ui/pages/options.slint
-msgid "Showing"
-msgstr "Affiché"
-
 #: app/gui/ui/pages/overview.slint
 msgid "Preview…"
 msgstr "Aperçu…"
@@ -2499,98 +3053,6 @@ msgstr "Aperçu…"
 #: app/gui/ui/pages/overview.slint
 msgid "Character {}, {} · confirmed in game except where marked"
 msgstr "Personnage {}, {} · confirmé en jeu sauf mention contraire"
-
-#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
-#: app/gui/ui/pages/palicoes.slint
-msgid "Looks"
-msgstr "Apparence"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/palicoes.slint
-msgid "{}, colour {}"
-msgstr "{}, couleur {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/palicoes.slint
-msgid "Equip {}"
-msgstr "Équiper {}"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Innate"
-msgstr "Inné"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Taught slot"
-msgstr "Emplacement d'enseignement"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "No StreetPass Palicoes."
-msgstr "Aucun Palico StreetPass."
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Search Palicoes"
-msgstr "Rechercher des Palicos"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "No Palicoes in this save."
-msgstr "Aucun Palico dans cette sauvegarde."
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "No Palico matches the search."
-msgstr "Aucun Palico ne correspond à la recherche."
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Import Palico…"
-msgstr "Importer un Palico…"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Pick a Palico to edit it."
-msgstr "Choisissez un Palico pour le modifier."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/palicoes.slint
-msgid "Copy to {}"
-msgstr "Copier vers {}"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Experience"
-msgstr "Expérience"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Separate from the level: the game does not recompute one from the other."
-msgstr "Indépendante du niveau : le jeu ne recalcule pas l'un à partir de l'autre."
-
-#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
-#: app/gui/ui/pages/palicoes.slint
-msgid "Forte"
-msgstr "Spécialité"
-
-#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
-#: app/gui/ui/pages/palicoes.slint
-msgid "Target"
-msgstr "Cible"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Original owner"
-msgstr "Premier maître"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Support moves"
-msgstr "Habiletés"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
-msgstr "Les entrées innées viennent de la spécialité ; les emplacements d'enseignement sont ceux que remplit le dojo des Palicos. Le jeu tire les autres à la naissance du Palico."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/quests.slint
-msgid "Cleared: {}"
-msgstr "Complétée : {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/quests.slint
-msgid "{}  (Prowler)"
-msgstr "{}  (Miaroudeur)"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/quests.slint
@@ -2601,10 +3063,6 @@ msgstr "Vue : {}"
 #: app/gui/ui/pages/quests.slint
 msgid "Failed: {}"
 msgstr "Échouée : {}"
-
-#: app/gui/ui/pages/quests.slint
-msgid "The last ten records of your Guild Card, newest first, as the game wrote them. Read only."
-msgstr "Les dix derniers enregistrements de votre Carte Guilde, du plus récent au plus ancien, tels que le jeu les a écrits. Lecture seule."
 
 #: app/gui/ui/pages/quests.slint
 msgid "Date"
@@ -2623,24 +3081,8 @@ msgid "Party"
 msgstr "Équipe"
 
 #: app/gui/ui/pages/quests.slint
-msgid "No record yet."
-msgstr "Aucun enregistrement pour l'instant."
-
-#: app/gui/ui/pages/quests.slint
-msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
-msgstr "Votre meilleur temps par quête d'arène, en solo avec l'équipement choisi. Le rang suit le temps ; le meilleur temps du comptoir de l'arène suit le vôtre."
-
-#: app/gui/ui/pages/quests.slint
 msgid "Best time"
 msgstr "Meilleur temps"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Set"
-msgstr "Équipement"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Rank"
-msgstr "Rang"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/quests.slint
@@ -2657,78 +3099,9 @@ msgstr "{}, secondes"
 msgid "{}, hundredths"
 msgstr "{}, centièmes"
 
-#: app/gui/ui/pages/quests.slint
-msgid "Search quests by name or number"
-msgstr "Rechercher des quêtes par nom ou numéro"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
-msgid "Cleared"
-msgstr "Complétée"
-
-#: app/gui/ui/pages/quests.slint
-msgid "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."
-msgstr "Une ligne rouge signifie que la quête n'est pas encore au tableau et indique ce qui la débloque. Compléter une quête la marque aussi comme vue et termine ses séries de quêtes, comme le fait le jeu."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
-msgid "Seen"
-msgstr "Vue"
-
-#: app/gui/src/targets.rs app/gui/src/views/quests.rs
-#: app/gui/ui/pages/quests.slint
-msgid "Failed"
-msgstr "Échouée"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Every quest here is cleared."
-msgstr "Toutes les quêtes ici sont complétées."
-
-#: app/gui/ui/pages/quests.slint
-msgid "No quest matches the search."
-msgstr "Aucune quête ne correspond à la recherche."
-
-#: app/gui/ui/pages/requests.slint
-msgid "Search requests or villages"
-msgstr "Rechercher des requêtes ou des villages"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Reported"
-msgstr "Rapportée"
-
-#: app/gui/ui/pages/requests.slint
-msgid "Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward."
-msgstr "Rapportée saute la discussion avec le villageois : le jeu ne remet alors jamais cette récompense. Laissez décoché et faites le rapport en jeu pour obtenir la récompense."
-
 #: app/gui/ui/pages/requests.slint
 msgid "Request"
 msgstr "Requête"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Accepted"
-msgstr "Acceptée"
-
-#: app/gui/ui/pages/requests.slint
-msgid "Accepted posts the request's quest on the board, as talking to the villager does."
-msgstr "Acceptée affiche la quête de la requête au tableau, comme le fait une discussion avec le villageois."
-
-#: app/gui/ui/pages/requests.slint
-msgid "Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward."
-msgstr "Rapportée : la quête accomplie a été rapportée au villageois. Décoché, le jeu vous demande d'aller faire le rapport. Le jeu ne remet la récompense que si vous allez vous-même voir le villageois : cocher ici fait donc perdre cette récompense."
-
-#: app/gui/ui/pages/requests.slint
-msgid "No request matches the search."
-msgstr "Aucune requête ne correspond à la recherche."
-
-#: app/gui/ui/pages/requests.slint
-msgid "Every request is reported."
-msgstr "Toutes les requêtes sont rapportées."
-
-#: app/gui/ui/pages/requests.slint
-msgid "No request is reported yet."
-msgstr "Aucune requête n'est encore rapportée."
-
-#: app/gui/ui/pages/requests.slint
-msgid "No requests."
-msgstr "Aucune requête."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/requests.slint
@@ -2739,143 +3112,6 @@ msgstr "Acceptée : {}"
 #: app/gui/ui/pages/requests.slint
 msgid "Reported: {}"
 msgstr "Rapportée : {}"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Style"
-msgstr "Style"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/sets.slint
-msgid "Arts for the {}"
-msgstr "Arts de l'arme : {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/sets.slint
-msgid "Art {}"
-msgstr "Art {}"
-
-#: app/gui/ui/pages/sets.slint
-msgid "SP Art"
-msgstr "Art SP"
-
-#: app/gui/ui/pages/sets.slint
-msgid "the armor's own colour"
-msgstr "la couleur d'origine de l'armure"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Armor's own colour"
-msgstr "Couleur d'origine"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "Palico set {}"
-msgstr "Set de Palico {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "My Set {}"
-msgstr "Set perso {}"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Set name"
-msgstr "Nom du set"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Clear set"
-msgstr "Vider le set"
-
-#: app/gui/ui/pages/sets.slint
-msgid "An unused set. Save what you have on into it, as the game's Register does, then change it here."
-msgstr "Set inutilisé. Enregistrez-y ce que vous portez, comme le fait l'enregistrement en jeu, puis modifiez-le ici."
-
-#: app/gui/ui/pages/sets.slint
-msgid "Save what you have on"
-msgstr "Enregistrer ce que vous portez"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "Gear"
-msgstr "Équipement"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Pieces of the Palico box."
-msgstr "Pièces du coffre Palico."
-
-#: app/gui/ui/pages/sets.slint
-msgid "Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box."
-msgstr "Pièces du coffre du chasseur, avec leurs décorations. Une pièce utilisée par un set ne peut être ni remplacée ni retirée du coffre."
-
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "Pigment"
-msgstr "Teinture"
-
-#: app/gui/ui/pages/sets.slint
-msgid "The colours the hunter wears with this set, applied when it is loaded."
-msgstr "Les couleurs portées avec ce set, appliquées quand il est chargé."
-
-#: app/gui/ui/pages/sets.slint
-msgid "Replace with what you have on"
-msgstr "Remplacer par ce que vous portez"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "NEW"
-msgstr "NEW"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "A pet is adopted from its village's pet menu the first time it is used; that gives its first costume. A pet wears costumes of its own kind: Moofy's or the Poogies'."
-msgstr "Un animal est adopté au premier usage du menu des animaux de son village, qui lui donne son premier costume. Un animal porte les costumes de son espèce : ceux de Moofy ou ceux des Poogies."
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/unlocks.slint
-msgid "Name of the pet of {}"
-msgstr "Nom de l'animal de {}"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Adopted"
-msgstr "Adopté"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/unlocks.slint
-msgid "Moofah affection"
-msgstr "Affection des Moofahs"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Petting a Moofah raises it by one, up to 10, and each quest lowers it by 2. At 6 the game unlocks the title word Moofah, which an edit to 6 or more also does."
-msgstr "Câliner un Moofah l'augmente de 1, jusqu'à 10, et chaque quête la réduit de 2. À 6, le jeu débloque le mot de titre Moofah ; une modification à 6 ou plus le fait aussi."
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Bherna Moofah 1"
-msgstr "Moofah de Bherna 1"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Bherna Moofah 2"
-msgstr "Moofah de Bherna 2"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Palico Ranch Moofah 1"
-msgstr "Moofah du Ranch Palico 1"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Palico Ranch Moofah 2"
-msgstr "Moofah du Ranch Palico 2"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/unlocks.slint
-msgid "Moofah gifts"
-msgstr "Cadeaux des Moofahs"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."
-msgstr "Un Moofah de Bherna donne une Boule peluche Moofah la première fois qu'il est caressé après une quête, compté jusqu'à 10. À 10 le jeu accorde la distinction Balle en laine de Moofah après la caresse suivante ; une modification à 10 l'accorde tout de suite."
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Fleeceballs received"
-msgstr "Boules peluche reçues"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Unlock all…"
-msgstr "Tout débloquer…"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Lock all…"
-msgstr "Tout verrouiller…"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/assets.rs
@@ -4142,12 +4378,12 @@ msgid "{} is not in {}"
 msgstr "{} n'est pas dans {}"
 
 #: app/gui/src/update.rs
-msgid "The running file has no usable name"
-msgstr "Le fichier en cours d'exécution n'a pas de nom utilisable"
-
-#: app/gui/src/update.rs
 msgid "The download does not match the release's checksum"
 msgstr "Le téléchargement ne correspond pas à la somme de contrôle de la version"
+
+#: app/gui/src/update.rs
+msgid "The running file has no usable name"
+msgstr "Le fichier en cours d'exécution n'a pas de nom utilisable"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/update.rs
@@ -6717,6 +6953,24 @@ msgstr "{} : {} / {} complétées · confirmé en jeu sauf mention contraire"
 msgid "Guild Card completions: {}"
 msgstr "Quêtes terminées sur la carte de guilde : {}"
 
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/quests.rs
+msgid "{} quest marked cleared"
+msgid_plural "{} quests marked cleared"
+msgstr[0] "{} quête marquée complétée"
+msgstr[1] "{} quêtes marquées complétées"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/quests.rs
+msgid "{} quest marked not cleared"
+msgid_plural "{} quests marked not cleared"
+msgstr[0] "{} quête marquée non terminée"
+msgstr[1] "{} quêtes marquées non terminées"
+
+#: app/gui/src/views/quests.rs
+msgid "Completed quest sets are recorded too, as the game does"
+msgstr "Les séries de quêtes terminées sont aussi enregistrées, comme le fait le jeu"
+
 #: app/gui/src/views/quests.rs
 msgid "Also completes its quest set, as the game does"
 msgstr "Termine aussi sa série de quêtes, comme le fait le jeu"
@@ -6730,10 +6984,6 @@ msgstr "Quêtes {} marquées complétées"
 #: app/gui/src/views/quests.rs
 msgid "{} {}★ quests marked cleared"
 msgstr "Quêtes {} {}★ marquées complétées"
-
-#: app/gui/src/views/quests.rs
-msgid "Completed quest sets are recorded too, as the game does"
-msgstr "Les séries de quêtes terminées sont aussi enregistrées, comme le fait le jeu"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/reorder.rs
@@ -7492,6 +7742,16 @@ msgstr "{} entrées débloquées sur {}"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
+msgid "You have {}. Android installs only newer versions over the app. To go back to {}, uninstall the app (its settings and snapshots go with it, your saves stay), then install that version's APK from its release page."
+msgstr "Vous avez la {}. Android n'installe que des versions plus récentes par-dessus l'application. Pour revenir à la {}, désinstallez l'application (ses paramètres et instantanés partent avec elle, vos sauvegardes restent), puis installez l'APK de cette version depuis sa page."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "You have {}. The new version ({}) is downloaded from GitHub and checked against the release's SHA-256 checksums, then Android asks you to install it. Saves, snapshots and settings are not touched."
+msgstr "Vous avez la {}. La nouvelle version ({}) est téléchargée depuis GitHub et vérifiée avec les sommes de contrôle SHA-256 de la version, puis Android vous demande de l'installer. Sauvegardes, instantanés et paramètres ne sont pas touchés."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
 msgid "You have {}. Version {} ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves and snapshots are not touched."
 msgstr "Vous avez la {}. La version {} ({}) est téléchargée depuis GitHub, vérifiée avec les sommes de contrôle SHA-256 de la version et remplace {}. Sauvegardes et instantanés ne sont pas touchés."
 
@@ -7528,20 +7788,8 @@ msgid "{} is available"
 msgstr "{} est disponible"
 
 #: app/gui/src/views/update_ui.rs
-msgid "checking…"
-msgstr "vérification…"
-
-#: app/gui/src/views/update_ui.rs
-msgid "up to date"
-msgstr "à jour"
-
-#: app/gui/src/views/update_ui.rs
-msgid "Not installed: the settings file could not be copied. The editor you are running is unchanged."
-msgstr "Non installée : le fichier des paramètres n'a pas pu être copié. L'éditeur en cours n'a pas changé."
-
-#: app/gui/src/views/update_ui.rs
-msgid "update failed"
-msgstr "échec de la mise à jour"
+msgid "Android first asks to let this app install apps: allow it on the page that opened, come back, then press Download and install again."
+msgstr "Android demande d'abord d'autoriser cette application à installer des applications : autorisez-la sur la page qui s'est ouverte, revenez, puis appuyez de nouveau sur Télécharger et installer."
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
@@ -7553,6 +7801,53 @@ msgstr "téléchargement de {}…"
 msgid "Downloading… {} of {}"
 msgstr "Téléchargement… {} sur {}"
 
+#: app/gui/src/views/update_ui.rs
+msgid "update failed"
+msgstr "échec de la mise à jour"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "Not updated: {}. The editor you are running is unchanged."
+msgstr "Pas de mise à jour : {}. L'éditeur en cours d'exécution est inchangé."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "installing {}…"
+msgstr "installation de {}…"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Android asks you to confirm the install. The editor then closes: open it again to use the new version."
+msgstr "Android vous demande de confirmer l'installation. L'éditeur se ferme ensuite : rouvrez-le pour utiliser la nouvelle version."
+
+#: app/gui/src/views/update_ui.rs
+msgid "installed"
+msgstr "installée"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Open the editor again to use the new version."
+msgstr "Rouvrez l'éditeur pour utiliser la nouvelle version."
+
+#: app/gui/src/views/update_ui.rs
+msgid "Android refused it: the editor installed is signed with another key (a build of your own?). Uninstall it, then install the APK from the release page. Your saves stay; the settings and snapshots go with the app."
+msgstr "Android l'a refusée : l'éditeur installé est signé avec une autre clé (une version compilée par vous ?). Désinstallez-le, puis installez l'APK depuis la page de la version. Vos sauvegardes restent ; les paramètres et instantanés partent avec l'application."
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "Android's installer answered {}"
+msgstr "l'installateur d'Android a répondu {}"
+
+#: app/gui/src/views/update_ui.rs
+msgid "checking…"
+msgstr "vérification…"
+
+#: app/gui/src/views/update_ui.rs
+msgid "up to date"
+msgstr "à jour"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Not installed: the settings file could not be copied. The editor you are running is unchanged."
+msgstr "Non installée : le fichier des paramètres n'a pas pu être copié. L'éditeur en cours n'a pas changé."
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
 msgid "{} is in place. Restart to use it."
@@ -7562,11 +7857,6 @@ msgstr "{} est en place. Redémarrez pour l'utiliser."
 #: app/gui/src/views/update_ui.rs
 msgid "{} installed, restart to use it"
 msgstr "{} installée, redémarrez pour l'utiliser"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/update_ui.rs
-msgid "Not updated: {}. The editor you are running is unchanged."
-msgstr "Pas de mise à jour : {}. L'éditeur en cours d'exécution est inchangé."
 
 #: app/gui/src/views/update_ui.rs
 msgid "Update cancelled"

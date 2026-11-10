@@ -1,0 +1,352 @@
+// The character on phones and tablets: one scrolling page of cards, in the desktop's
+// order. Hunter, Progress, Appearance, Guild Card, Style and Hunter Arts, Armor pigment,
+// Village points, Hunting styles, Weapon usage. Lists open the option sheet (app.slint
+// acts on the pick by its key); colours open the colour sheet.
+import { M } from "../theme.slint";
+import { Btn, CheckRow, Muted, TextField } from "../widgets.slint";
+import { ChoiceRow, ColourRow, FormCard, LabelledCount, WasRow } from "../form.slint";
+import { Choice } from "../pick.slint";
+import { ColourEdit } from "../colour.slint";
+import { Api } from "../../common.slint";
+
+export component CharacterPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    property <[string]> bodies: [@tr("Type 1 (male)"), @tr("Type 2 (female)")];
+    property <[string]> styles: [@tr("Guild Style"), @tr("Striker Style"), @tr("Aerial Style"), @tr("Adept Style"), @tr("Alchemy Style"), @tr("Valor Style")];
+    property <[string]> villages: [@tr("Bherna"), @tr("Kokoto"), @tr("Pokke"), @tr("Yukumo")];
+    property <[string]> venues: [@tr("Village"), @tr("Hub"), @tr("Arena")];
+    // cards side by side from 840 dp
+    property <int> cols: root.width >= M.expanded-from ? 2 : 1;
+    Flickable {
+        content-width: self.width;
+        VerticalLayout {
+            padding-left: root.side;
+            padding-right: root.side;
+            padding-top: 8px;
+            padding-bottom: root.bottom-pad;
+            spacing: 12px;
+            alignment: start;
+            Muted { text: @tr("Confirmed in game except where marked"); font-size: M.body-small; }
+
+            FormCard {
+                title: @tr("Hunter");
+                staged: Api.character.was-name != "" || Api.character.was-hr != "" || Api.character.was-hr-points != "" || Api.character.was-funds != "" || Api.character.was-wycademy != "" || Api.character.was-playtime != "";
+                VerticalLayout {
+                    spacing: 6px;
+                    padding-top: 6px;
+                    TextField {
+                        label: @tr("Name");
+                        value: Api.character.name;
+                        committed(t) => { Api.set-name(t); }
+                    }
+                    if Api.character.was-name != "": WasRow { was: Api.character.was-name; key: "name"; }
+                    if Api.character.was-name == "": Text { text: @tr("Written to the save, the player record and the Guild Card."); color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+                }
+                LabelledCount {
+                    label: @tr("Hunter Rank");
+                    hint: @tr("Follows HR points");
+                    value: Api.character.hr;
+                    minimum: 1;
+                    maximum: 999;
+                    was: Api.character.was-hr;
+                    key: "hr";
+                    edited(v) => { Api.set-character("hr", v); }
+                }
+                LabelledCount {
+                    label: @tr("HR points");
+                    value: Api.character.hr-points;
+                    maximum: 9999999;
+                    was: Api.character.was-hr-points;
+                    key: "hr-points";
+                    edited(v) => { Api.set-character("hr-points", v); }
+                }
+                LabelledCount {
+                    label: @tr("Zenny");
+                    value: Api.character.funds;
+                    maximum: 9999999;
+                    was: Api.character.was-funds;
+                    key: "funds";
+                    edited(v) => { Api.set-character("funds", v); }
+                }
+                LabelledCount {
+                    label: @tr("Wycademy points");
+                    value: Api.character.wycademy;
+                    maximum: 9999999;
+                    was: Api.character.was-wycademy;
+                    key: "wycademy";
+                    edited(v) => { Api.set-character("wycademy", v); }
+                }
+                LabelledCount {
+                    label: @tr("Hours played");
+                    value: Api.character.playtime-h;
+                    maximum: 9999;
+                    edited(v) => { Api.set-character("play-h", v); }
+                }
+                LabelledCount {
+                    label: @tr("Minutes played");
+                    value: Api.character.playtime-m;
+                    maximum: 59;
+                    was: Api.character.was-playtime;
+                    key: "playtime";
+                    edited(v) => { Api.set-character("play-m", v); }
+                }
+            }
+
+            FormCard {
+                title: @tr("Progress");
+                LabelledCount {
+                    label: @tr("Village star level");
+                    value: Api.character.village-star;
+                    minimum: 1;
+                    maximum: 10;
+                    was: Api.character.was-village-star;
+                    key: "village-star";
+                    edited(v) => { Api.set-character("village-star", v); }
+                }
+                LabelledCount {
+                    label: @tr("Hub star level");
+                    value: Api.character.hub-star;
+                    maximum: 13;
+                    was: Api.character.was-hub-star;
+                    key: "hub-star";
+                    edited(v) => { Api.set-character("hub-star", v); }
+                }
+                Muted { text: @tr("The game raises star levels when every urgent quest of a level is cleared."); font-size: M.body-small; }
+                LabelledCount {
+                    label: @tr("Quest counter");
+                    value: Api.character.quest-counter;
+                    maximum: 9999999;
+                    was: Api.character.was-quest-counter;
+                    key: "quest-counter";
+                    edited(v) => { Api.set-character("quest-counter", v); }
+                }
+                LabelledCount {
+                    label: @tr("Courier points");
+                    value: Api.character.courier-points;
+                    maximum: 10000;
+                    was: Api.character.was-courier-points;
+                    key: "courier-points";
+                    edited(v) => { Api.set-character("courier-points", v); }
+                }
+                ChoiceRow {
+                    label: @tr("Start in");
+                    value: Api.character.start-village >= 0 ? Api.character.start-places[Api.character.start-village] : "—";
+                    clicked => { Choice.show-for("char", "start-village", @tr("Start in"), Api.character.start-places, Api.character.start-village); }
+                }
+                if Api.character.was-start-village != "": WasRow { was: Api.character.was-start-village; key: "start-village"; }
+                ChoiceRow {
+                    label: @tr("Housekeeper");
+                    value: Api.character.housekeeper >= 0 ? Api.character.housekeepers[Api.character.housekeeper] : "—";
+                    clicked => { Choice.show-for("char", "housekeeper", @tr("Housekeeper"), Api.character.housekeepers, Api.character.housekeeper); }
+                }
+                if Api.character.was-housekeeper != "": WasRow { was: Api.character.was-housekeeper; key: "housekeeper"; }
+            }
+
+            FormCard {
+                title: @tr("Appearance");
+                text: @tr("As character creation sets it, numbered as the game shows it.");
+                staged: Api.appearance.was-gender != "" || Api.appearance.was-appearance != "";
+                ChoiceRow {
+                    label: @tr("Body");
+                    value: root.bodies[Api.appearance.gender];
+                    note: Api.appearance.warn-gender;
+                    clicked => { Choice.show-for("look", "gender", @tr("Body"), root.bodies, Api.appearance.gender); }
+                }
+                if Api.appearance.was-gender != "": WasRow { was: Api.appearance.was-gender; key: "gender"; }
+                if Api.appearance.was-gender == "": Text { text: @tr("Some armour is made for one body type only: check what you wear after changing it."); color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+                ChoiceRow {
+                    label: @tr("Face");
+                    value: Api.look-faces[Api.appearance.face];
+                    clicked => { Choice.show-for("look", "face", @tr("Face"), Api.look-faces, Api.appearance.face); }
+                }
+                ChoiceRow {
+                    label: @tr("Hairstyle");
+                    value: Api.look-hairstyles[Api.appearance.hair];
+                    clicked => { Choice.show-for("look", "hair", @tr("Hairstyle"), Api.look-hairstyles, Api.appearance.hair); }
+                }
+                ChoiceRow {
+                    label: @tr("Voice");
+                    value: Api.look-voices[Api.appearance.voice - 1];
+                    clicked => { Choice.show-for("look", "voice", @tr("Voice"), Api.look-voices, Api.appearance.voice - 1); }
+                }
+                ChoiceRow {
+                    label: @tr("Eye colour");
+                    value: Api.look-eye-colours[Api.appearance.eyes];
+                    clicked => { Choice.show-for("look", "eyes", @tr("Eye colour"), Api.look-eye-colours, Api.appearance.eyes); }
+                }
+                ChoiceRow {
+                    label: @tr("Features");
+                    value: Api.look-features[Api.appearance.features];
+                    clicked => { Choice.show-for("look", "features", @tr("Features"), Api.look-features, Api.appearance.features); }
+                }
+                ChoiceRow {
+                    label: @tr("Clothing");
+                    value: Api.look-clothing[Api.appearance.clothing];
+                    clicked => { Choice.show-for("look", "clothing", @tr("Clothing"), Api.look-clothing, Api.appearance.clothing); }
+                }
+                if Api.appearance.warn-appearance != "": Text { text: Api.appearance.warn-appearance; color: M.error; font-size: M.body-small; wrap: word-wrap; }
+                if Api.appearance.was-appearance != "": WasRow { was: Api.appearance.was-appearance; key: "appearance"; }
+                for c in Api.appearance.colours: ColourRow {
+                    label: c.label;
+                    colour: c.colour;
+                    hex: c.hex;
+                    clicked => { ColourEdit.show("look", c.key, 0, 0, c.label, c.colour); }
+                }
+            }
+
+            FormCard {
+                title: @tr("Guild Card");
+                text: @tr("As the card editor in game sets them. Locked entries can be picked too: the card then says so.");
+                staged: Api.card.was-title != "" || Api.card.was-greeting != "" || Api.card.was-scene != "" || Api.card.was-pose != "";
+                Text { text: Api.card.title; color: M.on-surface; font-size: M.title-medium; wrap: word-wrap; }
+                ChoiceRow {
+                    label: @tr("Title");
+                    value: Api.gc-words[Api.card.word1];
+                    clicked => { Choice.show-for("card", "word1", @tr("Title"), Api.gc-words, Api.card.word1); }
+                }
+                ChoiceRow {
+                    label: @tr("Title");
+                    value: Api.gc-links[Api.card.link];
+                    clicked => { Choice.show-for("card", "link", @tr("Title"), Api.gc-links, Api.card.link); }
+                }
+                ChoiceRow {
+                    label: @tr("Title");
+                    value: Api.gc-words[Api.card.word2];
+                    clicked => { Choice.show-for("card", "word2", @tr("Title"), Api.gc-words, Api.card.word2); }
+                }
+                if Api.card.warn-title != "": Text { text: Api.card.warn-title; color: M.error; font-size: M.body-small; wrap: word-wrap; }
+                if Api.card.was-title != "": WasRow { was: Api.card.was-title; key: "card-title"; }
+                VerticalLayout {
+                    padding-top: 8px;
+                    spacing: 6px;
+                    TextField {
+                        label: @tr("Greeting");
+                        value: Api.card.greeting;
+                        committed(t) => { Api.set-greeting(t); }
+                    }
+                    if Api.card.was-greeting != "": WasRow { was: Api.card.was-greeting; key: "card-greeting"; }
+                }
+                ChoiceRow {
+                    label: @tr("Scene");
+                    value: Api.gc-scenes[Api.card.scene];
+                    note: Api.card.warn-scene;
+                    clicked => { Choice.show-for("card", "scene", @tr("Scene"), Api.gc-scenes, Api.card.scene); }
+                }
+                if Api.card.was-scene != "": WasRow { was: Api.card.was-scene; key: "card-scene"; }
+                ChoiceRow {
+                    label: @tr("Pose");
+                    value: Api.gc-poses[Api.card.pose];
+                    note: Api.card.warn-pose;
+                    clicked => { Choice.show-for("card", "pose", @tr("Pose"), Api.gc-poses, Api.card.pose); }
+                }
+                if Api.card.was-pose != "": WasRow { was: Api.card.was-pose; key: "card-pose"; }
+            }
+
+            FormCard {
+                title: @tr("Style and Hunter Arts");
+                text: @tr("What you have on now. Loading a My Set in game replaces them with the set's.");
+                staged: Api.char-arts.was != "";
+                ChoiceRow {
+                    label: @tr("Style");
+                    value: root.styles[Api.char-arts.style];
+                    clicked => { Choice.show("char-arts-style", 0, @tr("Style"), root.styles, Api.char-arts.style); }
+                }
+                if Api.char-arts.weapon != "": Muted { text: @tr("Arts for the {}", Api.char-arts.weapon); font-size: M.body-small; }
+                for a in Api.char-arts.slots: VerticalLayout {
+                    ChoiceRow {
+                        label: @tr("Art {}", a + 1);
+                        value: Api.char-arts.choices[Api.char-arts.picks[a]];
+                        clicked => { Choice.show("char-arts-art", a, @tr("Art {}", a + 1), Api.char-arts.choices, Api.char-arts.picks[a]); }
+                    }
+                    CheckRow {
+                        title: @tr("SP Art");
+                        checked: Api.char-arts.sp[a];
+                        enabled: Api.char-arts.picks[a] != 0;
+                        toggled(on) => { Api.set-arts(-1, "sp", a, on ? 1 : 0); }
+                    }
+                }
+                if Api.char-arts.was != "": WasRow { was: Api.char-arts.was; key: "arts"; }
+                if Api.char-arts.warning != "": Text { text: @tr("The game cannot make this: {}.", Api.char-arts.warning); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+            }
+
+            FormCard {
+                title: @tr("Armor pigment");
+                text: @tr("The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets).");
+                staged: Api.was-pigment != "";
+                for r[j] in Api.char-pigment: ColourRow {
+                    label: r.part;
+                    colour: r.colour;
+                    hex: r.own ? @tr("the armor's own colour") : r.hex;
+                    dim: r.own;
+                    clicked => { ColourEdit.show("pigment", "", -1, j, r.part, r.colour); }
+                    if !r.own: VerticalLayout {
+                        alignment: center;
+                        Btn { kind: "text"; text: @tr("Armor's own colour"); clicked => { Api.own-pigment(-1, j); } }
+                    }
+                }
+                if Api.was-pigment != "": WasRow { was: Api.was-pigment; key: "pigment"; }
+            }
+
+            FormCard {
+                title: @tr("Village points");
+                text: @tr("The game adds Low rank and G rank and caps the sum at 20,000.");
+                for v[i] in root.villages: VerticalLayout {
+                    spacing: 8px;
+                    padding-top: 4px;
+                    Text { text: v; color: M.on-surface; font-size: M.body-large; font-weight: M.medium; }
+                    LabelledCount {
+                        label: @tr("Low rank");
+                        value: Api.character.points-lr[i];
+                        maximum: 20000;
+                        was: Api.character.was-lr[i];
+                        key: "points:lr" + i;
+                        edited(x) => { Api.set-character("lr" + i, x); }
+                    }
+                    LabelledCount {
+                        label: @tr("G rank");
+                        value: Api.character.points-g[i];
+                        maximum: 20000;
+                        was: Api.character.was-g[i];
+                        key: "points:g" + i;
+                        edited(x) => { Api.set-character("g" + i, x); }
+                    }
+                }
+            }
+
+            FormCard {
+                title: @tr("Hunting styles");
+                text: @tr("Quests done with each style. Your Palico's lines name the most and least used.");
+                for name[k] in root.styles: LabelledCount {
+                    label: name;
+                    value: Api.character.style-use[k];
+                    was: Api.character.was-style[k];
+                    key: "style:" + k;
+                    edited(x) => { Api.set-character("style:" + k, x); }
+                }
+            }
+
+            FormCard {
+                title: @tr("Weapon usage");
+                text: @tr("Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon.");
+                for w in Api.character.weapon-use: VerticalLayout {
+                    spacing: 8px;
+                    padding-top: 8px;
+                    HorizontalLayout {
+                        spacing: 8px;
+                        Text { text: w.name + (w.main ? "  ★" : ""); color: M.on-surface; font-size: M.body-large; font-weight: M.medium; horizontal-stretch: 1; }
+                        Text { text: @tr("All") + " " + w.total; color: M.on-surface-variant; font-size: M.body-small; vertical-alignment: center; }
+                    }
+                    for c[v] in w.counts: LabelledCount {
+                        label: root.venues[v];
+                        value: c;
+                        was: w.was[v];
+                        key: "use:" + v + ":" + w.index;
+                        edited(x) => { Api.set-character("use:" + v + ":" + w.index, x); }
+                    }
+                }
+            }
+        }
+    }
+}

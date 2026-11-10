@@ -1,0 +1,247 @@
+// Fill box on phones and tablets (Items page, issue #5): the desktop dialog's compact view
+// as a full-height sheet. The tabs as chips, then the tab's categories; a category's box
+// picks it whole, the row opens its items below. Models and rules: views/fill_ui.rs.
+import { M } from "../theme.slint";
+import { Btn, Chip, ConfidenceLabel, Ico, Muted, Press, Sheet, Tap } from "../widgets.slint";
+import { Api, Confidence, FillCat, FillItem } from "../../common.slint";
+
+// A check box with a third state (some of a category's items picked), 48 dp to touch.
+component TriCheck inherits Rectangle {
+    in property <bool> checked;
+    in property <bool> partial;
+    in property <bool> enabled: true;
+    in property <string> label;
+    callback toggled();
+    width: M.touch;
+    height: M.touch;
+    accessible-role: checkbox;
+    accessible-label: root.label;
+    accessible-checked: root.checked;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.toggled(); } }
+    property <bool> filled: root.checked || root.partial;
+    Rectangle {
+        width: 18px;
+        height: 18px;
+        border-radius: 2px;
+        background: root.filled ? (root.enabled ? M.primary : M.on-surface.with-alpha(0.38)) : transparent;
+        border-width: root.filled ? 0px : 2px;
+        border-color: root.enabled ? M.on-surface-variant : M.on-surface.with-alpha(0.38);
+        if root.checked: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
+        if root.partial && !root.checked: Rectangle { width: 10px; height: 2px; border-radius: 1px; background: M.on-primary; }
+    }
+    Tap {
+        enabled: root.enabled;
+        tapped => { root.toggled(); }
+    }
+}
+
+// A category: its box, its name and what it adds; the row opens its items.
+component CatRow inherits Rectangle {
+    in property <FillCat> cat;
+    height: max(56px, lay.preferred-height);
+    border-radius: 12px;
+    accessible-role: button;
+    accessible-label: root.cat.name + ", " + root.cat.status;
+    accessible-expandable: true;
+    accessible-expanded: root.cat.open;
+    accessible-action-default => { Api.fill-open-cat(root.cat.key); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    ta := Tap { tapped => { Api.fill-open-cat(root.cat.key); } }
+    lay := HorizontalLayout {
+        padding-right: 8px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        spacing: 4px;
+        VerticalLayout {
+            alignment: center;
+            TriCheck {
+                checked: root.cat.checked;
+                partial: root.cat.partial;
+                enabled: root.cat.enabled;
+                label: root.cat.name;
+                toggled => { Api.fill-toggle-cat(root.cat.key); }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            padding-top: 6px;
+            padding-bottom: 6px;
+            horizontal-stretch: 1;
+            Text { text: root.cat.name; color: M.on-surface; font-size: M.body-large; opacity: root.cat.done ? 0.6 : 1; wrap: word-wrap; }
+            if root.cat.sub != "": Text { text: root.cat.sub; color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+        }
+        Text {
+            text: root.cat.status;
+            color: root.cat.tone == 1 ? M.ok : root.cat.tone == 2 ? M.error : M.on-surface;
+            font-size: M.body-small;
+            vertical-alignment: center;
+        }
+        VerticalLayout {
+            alignment: center;
+            Ico { source: root.cat.open ? @image-url("../icons/chevron-down.svg") : @image-url("../icons/chevron-right.svg"); }
+        }
+    }
+}
+
+// One item of an open category: its box, its name; "in the box" for those already there.
+component ItemRow inherits Rectangle {
+    in property <FillItem> it;
+    height: 48px;
+    border-radius: 12px;
+    background: root.it.on ? M.secondary-container : transparent;
+    accessible-role: checkbox;
+    accessible-label: root.it.name;
+    accessible-checked: root.it.on || root.it.have;
+    accessible-enabled: root.it.enabled;
+    accessible-action-default => { if root.it.enabled { Api.fill-toggle-item(root.it.id); } }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    ta := Tap {
+        enabled: root.it.enabled;
+        tapped => { Api.fill-toggle-item(root.it.id); }
+    }
+    HorizontalLayout {
+        padding-left: 48px;
+        padding-right: 16px;
+        spacing: 4px;
+        VerticalLayout {
+            alignment: center;
+            Rectangle {
+                width: 32px;
+                height: 32px;
+                property <bool> filled: root.it.on || root.it.have;
+                Rectangle {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 2px;
+                    background: parent.filled ? (root.it.enabled ? M.primary : M.on-surface.with-alpha(0.38)) : transparent;
+                    border-width: parent.filled ? 0px : 2px;
+                    border-color: root.it.enabled ? M.on-surface-variant : M.on-surface.with-alpha(0.38);
+                    if parent.filled: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
+                }
+            }
+        }
+        Text {
+            text: root.it.name;
+            color: root.it.have || !root.it.enabled ? M.on-surface.with-alpha(0.38) : M.on-surface;
+            font-size: M.body-medium;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+        }
+        Text {
+            text: root.it.have ? @tr("in the box") : root.it.on ? "×" + Api.fill-count : "";
+            color: M.on-surface-variant;
+            font-size: M.body-small;
+            vertical-alignment: center;
+        }
+    }
+}
+
+export component FillSheet inherits Sheet {
+    shown: Api.fill-open;
+    title: @tr("Fill the item box");
+    subtitle: @tr("Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out.");
+    content-h: 2000px;
+    close => { Api.fill-open = false; }
+    // categories open below themselves: the desktop's compact view (views/fill_ui.rs)
+    changed shown => {
+        if self.shown && !Api.fill-compact {
+            Api.fill-set-compact(true);
+        }
+    }
+    VerticalLayout {
+        spacing: 8px;
+        Flickable {
+            height: 32px;
+            content-width: tabs.preferred-width;
+            tabs := HorizontalLayout {
+                padding-left: 24px;
+                padding-right: 24px;
+                spacing: 8px;
+                for t[i] in Api.fill-tabs: Chip {
+                    text: t.badge != "" ? t.name + " · " + t.badge : t.name;
+                    selected: i == Api.fill-tab;
+                    clicked => { Api.fill-select-tab(i); }
+                }
+            }
+        }
+        HorizontalLayout {
+            padding-left: 24px;
+            padding-right: 24px;
+            Muted { text: @tr("Tick a whole category, or open it to pick single items."); font-size: M.body-small; }
+        }
+        Flickable {
+            vertical-stretch: 1;
+            content-width: self.width;
+            VerticalLayout {
+                // shorter than the view: the spare room stays below the content
+                alignment: start;
+                padding-left: 12px;
+                padding-right: 12px;
+                spacing: 2px;
+                for c in Api.fill-cats: VerticalLayout {
+                    CatRow { cat: c; }
+                    if c.open: VerticalLayout {
+                        for it in c.items: ItemRow { it: it; }
+                    }
+                }
+            }
+        }
+        Rectangle { height: 1px; background: M.outline-variant; }
+        VerticalLayout {
+            padding-left: 24px;
+            padding-right: 24px;
+            spacing: 8px;
+            // the box: slots used, picked, staying free
+            Rectangle {
+                height: 8px;
+                border-radius: 4px;
+                background: M.secondary-container;
+                clip: true;
+                Rectangle { x: 0; width: parent.width * Api.fill-used / 2300; background: M.outline; }
+                Rectangle {
+                    x: parent.width * Api.fill-used / 2300;
+                    width: parent.width * Api.fill-picked / 2300;
+                    background: M.primary;
+                    animate width { duration: M.anim; }
+                }
+            }
+            HorizontalLayout {
+                spacing: 12px;
+                alignment: start;
+                for l[i] in Api.fill-legend: HorizontalLayout {
+                    spacing: 6px;
+                    if i < 3: VerticalLayout {
+                        alignment: center;
+                        Rectangle { width: 10px; height: 10px; border-radius: 2px; background: i == 0 ? M.outline : i == 1 ? M.primary : M.secondary-container; }
+                    }
+                    Text { text: l; color: M.on-surface-variant; font-size: M.body-small; }
+                }
+            }
+            HorizontalLayout {
+                spacing: 12px;
+                Text { text: @tr("Count"); color: M.on-surface; font-size: M.body-medium; vertical-alignment: center; }
+                for v[i] in [1, 10, 99]: Chip {
+                    text: "×" + v;
+                    selected: Api.fill-count == v;
+                    check-icon: false;
+                    clicked => { Api.fill-set-count(v); }
+                }
+                Rectangle { horizontal-stretch: 1; }
+                VerticalLayout {
+                    alignment: center;
+                    ConfidenceLabel { level: Confidence.derived; }
+                }
+            }
+            Muted { text: @tr("Staged: undo it in Review until you write."); font-size: M.body-small; }
+            HorizontalLayout {
+                spacing: 8px;
+                Btn { kind: "text"; text: @tr("Clear"); enabled: Api.fill-picked > 0; clicked => { Api.fill-clear(); } }
+                Rectangle { horizontal-stretch: 1; }
+                Btn { kind: "text"; text: @tr("Cancel"); clicked => { Api.fill-open = false; } }
+                Btn { text: Api.fill-action; enabled: Api.fill-picked > 0; clicked => { Api.fill-apply(); } }
+            }
+        }
+    }
+}

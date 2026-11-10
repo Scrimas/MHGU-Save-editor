@@ -22,7 +22,10 @@ msgid "{}. Opens the field."
 msgstr "{}。打开该字段。"
 
 #: app/gui/ui/app.slint app/gui/ui/common.slint app/gui/ui/mobile/app.slint
-#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
+#: app/gui/ui/mobile/form.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/mobile/pages/overview.slint
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/overview.slint
 msgid "Undo"
 msgstr "撤销"
 
@@ -141,9 +144,11 @@ msgid "The emulator keeps two copies of the save, each with a backup; every one 
 msgstr "模拟器会保存两份存档，各带一份备份；每份都写入相同的字节，并保留各自的文件头。"
 
 #: app/gui/ui/app.slint app/gui/ui/colour.slint app/gui/ui/common.slint
-#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/overview.slint
-#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/items.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/colour.slint
+#: app/gui/ui/mobile/pages/fill.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/overview.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/mobile/sheets.slint
+#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
 msgid "Cancel"
 msgstr "取消"
 
@@ -212,7 +217,7 @@ msgstr "护石文本"
 msgid "One talisman a line: slots, skill, points, second skill, points, with the game's English skill names. The charm list of Athena's Armor Set Search reads it as it is. Paste talismans here to add them to the box."
 msgstr "每行一个护石：插槽、技能、点数、第二技能、点数，使用游戏的英文技能名。Athena's Armor Set Search 的护石列表可直接读取。将护石粘贴到此处即可加入装备箱。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Copy"
 msgstr "复制"
 
@@ -228,7 +233,8 @@ msgstr "比较对象"
 msgid "Nothing differs."
 msgstr "没有差异。"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
 msgid "Replace…"
 msgstr "替换…"
 
@@ -250,70 +256,76 @@ msgstr "该角色会像其他导入一样暂存：它会显示在审阅中，并
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "{} · empty"
 msgstr "{} · 空"
 
 #: app/gui/src/views/characters.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "Characters"
 msgstr "角色"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Copy, swap, delete, export or import whole characters. Each change is staged: it shows in Review and goes into the save with Write."
 msgstr "复制、交换、删除、导出或导入整个角色。每项更改都会暂存：显示在审阅中，并通过写入保存到存档。"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/characters.rs app/gui/src/views/file.rs
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "HR {} · {}"
 msgstr "HR {} · {}"
 
 #: app/gui/src/views/characters.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/sheets.slint
 msgid "No character in this slot"
 msgstr "此存档位没有角色"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Import…"
 msgstr "导入…"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/palicoes.slint
 msgid "Export…"
 msgstr "导出…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Delete"
 msgstr "删除"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "to"
 msgstr "到"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Swap"
 msgstr "交换"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Copy replaces {} in slot {}."
 msgstr "复制将替换 {}（存档位 {}）。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "MHXX"
 msgstr "MHXX"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Export to an MHXX save…"
 msgstr "导出到 MHXX 存档…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Import… also takes a character from an MHXX save: the system file of a JKSM or Checkpoint backup (3DS), or of JKSV or Checkpoint (Switch). Unequip gear the other game lacks before moving a character."
 msgstr "导入…也可从 MHXX 存档读取角色：JKSM 或 Checkpoint 备份（3DS）中的 system 文件，或 JKSV、Checkpoint（Switch）中的 system 文件。移动角色前，请先卸下另一款游戏没有的装备。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "An MHXX character is Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."
 msgstr "MHXX 角色为推导：尚未在游戏中确认。删除会将存档位恢复为从未使用的状态；新角色需在游戏中创建。"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/cards.slint
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/palicoes.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/cards.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint
 msgid "Remove"
 msgstr "移除"
 
@@ -366,7 +378,9 @@ msgstr "更新至 {} 会加入："
 msgid "Release page ↗"
 msgstr "发行页面 ↗"
 
-#: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/src/targets.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/character.slint
 msgid "Appearance"
 msgstr "外观"
 
@@ -378,11 +392,11 @@ msgstr "存档"
 msgid "Emulator check"
 msgstr "模拟器检测"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Safety"
 msgstr "安全"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Updates and versions"
 msgstr "更新与版本"
 
@@ -444,50 +458,53 @@ msgstr "保存模板"
 msgid "Interface size"
 msgstr "界面大小"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Start on"
 msgstr "打开于"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "The page shown when a save opens"
 msgstr "打开存档时显示的页面"
 
 #: app/gui/src/targets.rs app/gui/ui/app.slint app/gui/ui/mobile/app.slint
-#: app/gui/ui/pages/overview.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/overview.slint
 msgid "Overview"
 msgstr "概览"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "The last page used"
 msgstr "上次使用的页面"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Animations"
 msgstr "动画"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Page switches, cards moving to their new place, slides and fades."
 msgstr "切换页面、卡片移到新位置、滑动与淡入淡出。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Open the last save on start"
 msgstr "启动时打开上次的存档"
 
 #: app/gui/ui/app.slint app/gui/ui/mobile/pages/open.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Recent saves"
 msgstr "最近的存档"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "None yet"
 msgstr "暂无"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "{n} save listed on the Open page"
 msgid_plural "{n} saves listed on the Open page"
 msgstr[0] "打开页面中列出了 {n} 个存档"
 
-#: app/gui/ui/app.slint app/gui/ui/fill.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/app.slint app/gui/ui/fill.slint
+#: app/gui/ui/mobile/pages/fill.slint app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/quests.slint
 msgid "Clear"
 msgstr "清除"
 
@@ -515,21 +532,23 @@ msgstr "更改…"
 msgid "Default"
 msgstr "默认"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Keep per save"
 msgstr "每个存档保留"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "After each new snapshot, the oldest beyond this number are deleted."
 msgstr "每次创建新快照后，超出此数量的最旧快照将被删除。"
 
-#: app/gui/ui/app.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/mobile/pages/settings.slint app/gui/ui/pages/character.slint
 #: app/gui/ui/pages/equipment.slint app/gui/ui/pages/requests.slint
 msgid "All"
 msgstr "全部"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Last {}"
 msgstr "最近 {} 个"
 
@@ -537,11 +556,11 @@ msgstr "最近 {} 个"
 msgid "Tick \"Take a snapshot first\" in the Write dialog"
 msgstr "在写入对话框中勾选“先创建快照”"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Take a snapshot when a save opens"
 msgstr "打开存档时创建快照"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Once per save and day: the save as it was before the day's changes is always kept."
 msgstr "每个存档每天一次：一定会保留当天修改前的存档。"
 
@@ -558,19 +577,19 @@ msgstr "其他进程名"
 msgid "Add"
 msgstr "添加"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Confirmed changes only"
 msgstr "仅限已确认的更改"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay."
 msgstr "标记为推导（根据游戏代码推算得出，尚未在游戏中验证）的更改将被拒绝。已在审阅中的更改保留不变。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Version"
 msgstr "版本"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Check now"
 msgstr "立即检查"
 
@@ -579,26 +598,27 @@ msgid "Restart…"
 msgstr "重新启动…"
 
 #: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Update…"
 msgstr "更新…"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Check for a new version on start"
 msgstr "启动时检查新版本"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Asks GitHub for the latest release. Nothing is downloaded until you choose to update."
 msgstr "向 GitHub 查询最新版本。在你选择更新之前不会下载任何内容。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Show what changed after an update"
 msgstr "更新后显示变更内容"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Once, on the first start of a new version: the changes since the version before, from GitHub."
 msgstr "新版本第一次启动时显示一次：自上一个版本以来的变更，取自 GitHub。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Other versions"
 msgstr "其他版本"
 
@@ -606,7 +626,7 @@ msgstr "其他版本"
 msgid "Go back to an older release, or forward again. Downloaded from GitHub and checked like an update."
 msgstr "回到较旧的发行版，或再往前更新。从 GitHub 下载，并像更新一样验证。"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Try again"
 msgstr "重试"
 
@@ -658,7 +678,7 @@ msgstr "重置…"
 msgid "Reset"
 msgstr "重置"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Release notes"
 msgstr "更新说明"
 
@@ -738,7 +758,7 @@ msgstr "数据库"
 msgid "Save map"
 msgstr "存档结构"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/sheets.slint
 msgid "Characters…"
 msgstr "角色…"
 
@@ -787,12 +807,13 @@ msgid "Version {} is installed"
 msgstr "已安装版本 {}"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Go back to {}?"
 msgstr "要回到 {} 吗？"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs app/gui/ui/app.slint
+#: app/gui/ui/mobile/pages/settings.slint
 msgid "Version {} is available"
 msgstr "版本 {} 已推出"
 
@@ -822,7 +843,7 @@ msgstr "暂不"
 msgid "Install {}"
 msgstr "安装 {}"
 
-#: app/gui/ui/app.slint
+#: app/gui/ui/app.slint app/gui/ui/mobile/pages/settings.slint
 msgid "Download and install"
 msgstr "下载并安装"
 
@@ -895,7 +916,7 @@ msgstr "最近"
 msgid "Presets"
 msgstr "预设"
 
-#: app/gui/ui/colour.slint
+#: app/gui/ui/colour.slint app/gui/ui/mobile/colour.slint
 msgid "Apply"
 msgstr "应用"
 
@@ -909,7 +930,7 @@ msgid "Confirmed"
 msgstr "已确认"
 
 #: app/gui/src/views/advanced.rs app/gui/ui/common.slint
-#: app/gui/ui/mobile/widgets.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/widgets.slint
 msgid "Derived"
 msgstr "推导"
 
@@ -944,8 +965,12 @@ msgid_plural "{n} values changed on this page"
 msgstr[0] "此页面有 {n} 个值已更改"
 
 #. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/common.slint app/gui/ui/pages/items.slint
-#: app/gui/ui/pages/quests.slint app/gui/ui/pages/requests.slint
+#: app/gui/ui/common.slint app/gui/ui/mobile/form.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pages/misc.slint
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/mobile/widgets.slint
+#: app/gui/ui/pages/items.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/requests.slint
 msgid "was {}"
 msgstr "原为 {}"
 
@@ -953,8 +978,10 @@ msgstr "原为 {}"
 msgid "No match"
 msgstr "没有符合的项目"
 
-#: app/gui/ui/common.slint app/gui/ui/pages/collections.slint
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/unlocks.slint
+#: app/gui/ui/common.slint app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pick.slint
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/unlocks.slint
 msgid "Search"
 msgstr "搜索"
 
@@ -975,11 +1002,11 @@ msgstr "技术细节"
 msgid "More…"
 msgstr "更多…"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "in the box"
 msgstr "已在道具箱"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Fill the item box"
 msgstr "填满道具箱"
 
@@ -991,21 +1018,27 @@ msgstr "展开视图"
 msgid "Compact view"
 msgstr "紧凑视图"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out."
 msgstr "将选择的道具放入空格，每种一组：整个分类或单个道具。道具箱中已有的道具会跳过。"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Tick a whole category, or open it to pick single items."
 msgstr "勾选整个分类，或展开后选择单个道具。"
 
-#: app/gui/ui/fill.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/items.slint
 msgid "Count"
 msgstr "数量"
 
-#: app/gui/ui/fill.slint
+#: app/gui/ui/fill.slint app/gui/ui/mobile/pages/fill.slint
 msgid "Staged: undo it in Review until you write."
 msgstr "已暂存：写入之前可以在审阅中撤销。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/app.slint
+msgid "{} selected"
+msgstr "已选择 {} 个"
 
 #: app/gui/ui/mobile/app.slint app/gui/ui/mobile/sheets.slint
 msgid "More"
@@ -1013,8 +1046,39 @@ msgstr "更多"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/mobile/app.slint
+msgid "{} / {} slots used"
+msgstr "已用 {} / {} 格"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
+msgid "Export box to CSV…"
+msgstr "将箱子导出为 CSV…"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
+msgid "Import box from CSV…"
+msgstr "从 CSV 导入箱子…"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/items.slint
+msgid "Empty box…"
+msgstr "清空道具箱…"
+
+#: app/gui/ui/mobile/app.slint app/gui/ui/pages/items.slint
+msgid "Empty pouch…"
+msgstr "清空道具袋…"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/app.slint
 msgid "{} · slot {} · HR {}"
 msgstr "{} · 存档位 {} · HR {}"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Mark not cleared"
+msgstr "标记为未通关"
+
+#: app/gui/ui/mobile/app.slint
+msgid "Mark cleared"
+msgstr "标记为已通关"
 
 #: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
 #: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
@@ -1043,9 +1107,21 @@ msgid "The changes in Review are not in the save yet. Opening another save drops
 msgstr "审阅中的更改尚未写入存档。打开另一个存档会丢弃这些更改。"
 
 #: app/gui/src/targets.rs app/gui/ui/mobile/app.slint
-#: app/gui/ui/pages/requests.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
 msgid "Open"
 msgstr "未报告"
+
+#: app/gui/ui/mobile/colour.slint
+msgid "Hue"
+msgstr "色相"
+
+#: app/gui/ui/mobile/colour.slint
+msgid "Saturation"
+msgstr "饱和度"
+
+#: app/gui/ui/mobile/colour.slint
+msgid "Brightness"
+msgstr "亮度"
 
 #: app/gui/ui/mobile/nav.slint
 msgid "Every page"
@@ -1114,6 +1190,10 @@ msgstr "在 MHGU Recomp 中：Import save，并选择同样的 system 和 system
 msgid "Open the system file"
 msgstr "打开 system 文件"
 
+#: app/gui/ui/mobile/sheets.slint app/gui/ui/pages/database.slint
+msgid "From"
+msgstr "来源"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/mobile/widgets.slint
 msgid "Switch character, slot {}, {}"
@@ -1128,6 +1208,8 @@ msgstr "切换角色，存档位 {}"
 msgid "More options"
 msgstr "更多选项"
 
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pages/palicoes.slint
 #: app/gui/ui/mobile/widgets.slint
 msgid "Back"
 msgstr "返回"
@@ -1136,6 +1218,37 @@ msgstr "返回"
 #: app/gui/ui/mobile/widgets.slint
 msgid "Review · {}"
 msgstr "审阅 · {}"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "Clear the search"
+msgstr "清除搜索"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/items.slint
+msgid "Slot {}: empty"
+msgstr "第{}格：空"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/items.slint
+msgid "Slot {}: {} ×{}"
+msgstr "第{}格：{} ×{}"
+
+#: app/gui/src/diff.rs app/gui/src/targets.rs
+#: app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs
+#: app/gui/src/views/names.rs app/gui/src/views/reorder.rs
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/widgets.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/items.slint
+msgid "Empty"
+msgstr "空"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "One less"
+msgstr "减一"
+
+#: app/gui/ui/mobile/widgets.slint
+msgid "One more"
+msgstr "加一"
 
 #: app/gui/ui/mobile/write.slint
 msgid "MHGU Recomp is closed"
@@ -1148,6 +1261,1009 @@ msgstr "请先使用其菜单中的 Exit game：它退出时会覆盖存档。An
 #: app/gui/ui/mobile/write.slint
 msgid "You can restore it any time from Snapshots in More."
 msgstr "可随时通过“更多”中的“快照”恢复。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Type 1 (male)"
+msgstr "TYPE 1（男性）"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Type 2 (female)"
+msgstr "TYPE 2（女性）"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Guild Style"
+msgstr "公会风格"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Striker Style"
+msgstr "强袭风格"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Aerial Style"
+msgstr "空战风格"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Adept Style"
+msgstr "武士道风格"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Alchemy Style"
+msgstr "炼金风格"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Valor Style"
+msgstr "英勇风格"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Bherna"
+msgstr "贝鲁纳"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Kokoto"
+msgstr "可可特"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Pokke"
+msgstr "波凯"
+
+#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Yukumo"
+msgstr "结云"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Village"
+msgstr "村庄"
+
+#: app/core/src/character.rs app/gui/src/views/requests.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hub"
+msgstr "集会所"
+
+#: app/core/src/character.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Arena"
+msgstr "斗技大会"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/character.slint
+msgid "Confirmed in game except where marked"
+msgstr "除标记处外均已在游戏中确认"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Hunter"
+msgstr "猎人"
+
+#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/advanced.slint
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/items.slint
+#: app/gui/ui/pages/palicoes.slint app/gui/ui/pages/sets.slint
+msgid "Name"
+msgstr "名称"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Written to the save, the player record and the Guild Card."
+msgstr "写入存档、玩家记录和公会卡片。"
+
+#: app/gui/src/targets.rs app/gui/src/views/overview.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hunter Rank"
+msgstr "猎人等级"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Follows HR points"
+msgstr "跟随 HR 点数"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "HR points"
+msgstr "HR 点数"
+
+#: app/gui/src/targets.rs app/gui/src/views/overview.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Zenny"
+msgstr "金钱"
+
+#: app/gui/src/goals.rs app/gui/src/targets.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Wycademy points"
+msgstr "龙历院点数"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hours played"
+msgstr "游玩小时数"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Minutes played"
+msgstr "游玩分钟数"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Progress"
+msgstr "进度"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Village star level"
+msgstr "村庄星级"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hub star level"
+msgstr "集会所星级"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "The game raises star levels when every urgent quest of a level is cleared."
+msgstr "当某一等级的所有紧急任务完成后，游戏会提升星级。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Quest counter"
+msgstr "任务计数"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Courier points"
+msgstr "邮差点数"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Start in"
+msgstr "起始地点"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Housekeeper"
+msgstr "管家"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "As character creation sets it, numbered as the game shows it."
+msgstr "与创造角色时的设置相同，编号与游戏中显示的一致。"
+
+#: app/gui/src/targets.rs app/gui/src/views/database.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Body"
+msgstr "体型"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Some armour is made for one body type only: check what you wear after changing it."
+msgstr "部分防具仅适用于一种体型：更改后请检查身上的装备。"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Face"
+msgstr "脸"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hairstyle"
+msgstr "发型"
+
+#: app/gui/src/views/palicoes.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Voice"
+msgstr "语音"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Eye colour"
+msgstr "瞳色"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Features"
+msgstr "化妆"
+
+#: app/gui/src/views/palicoes.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Clothing"
+msgstr "内衬"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Guild Card"
+msgstr "公会卡片"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
+msgstr "与游戏中的卡片编辑器设置方式相同。也可以选择未解锁的项目：卡片上会注明。"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Title"
+msgstr "称号"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Greeting"
+msgstr "自我介绍"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Scene"
+msgstr "背景"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Pose"
+msgstr "姿势"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/character.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Style and Hunter Arts"
+msgstr "狩猎风格与狩技"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "What you have on now. Loading a My Set in game replaces them with the set's."
+msgstr "当前装备的内容。在游戏中装备个人组合时，会替换为该组合的内容。"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Style"
+msgstr "风格"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Arts for the {}"
+msgstr "{}的狩技"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Art {}"
+msgstr "狩技{}"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "SP Art"
+msgstr "SP狩技"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/sets.slint
+msgid "The game cannot make this: {}."
+msgstr "游戏无法产生此项：{}。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/pages/character.slint
+msgid "Armor pigment"
+msgstr "防具上色"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets)."
+msgstr "当前所穿防具的颜色。每个装备个人组合各自保存颜色（装备、装备个人组合）。"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "the armor's own colour"
+msgstr "防具原本的颜色"
+
+#: app/gui/ui/mobile/pages/character.slint
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Armor's own colour"
+msgstr "防具原本的颜色"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Village points"
+msgstr "村庄点数"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "The game adds Low rank and G rank and caps the sum at 20,000."
+msgstr "游戏会将下位与 G 级点数相加，总和上限为 20,000。"
+
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Low rank"
+msgstr "下位"
+
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "G rank"
+msgstr "G级"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Hunting styles"
+msgstr "狩猎风格"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Quests done with each style. Your Palico's lines name the most and least used."
+msgstr "使用各风格完成的任务数。随从的台词会提到最常用和最少用的风格。"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Weapon usage"
+msgstr "武器使用次数"
+
+#: app/gui/ui/mobile/pages/character.slint app/gui/ui/pages/character.slint
+msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
+msgstr "使用各武器完成的任务数，按公会卡片的统计方式计算。总数最高者即为主武器。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Box slot {}: {}"
+msgstr "装备箱第 {} 格：{}"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Back to the box"
+msgstr "返回装备箱"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Hunter box"
+msgstr "猎人装备箱"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Palico box"
+msgstr "随从装备箱"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "{} · box slot {} · ID {}"
+msgstr "{} · 装备箱第 {} 格 · ID {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/sets_ui.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "{} · box slot {}"
+msgstr "{} · 装备箱第 {} 格"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Add equipment here"
+msgstr "在此添加装备"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Used by {}. Change that in game before replacing or removing this piece."
+msgstr "被{}使用。替换或移除此装备前，请先在游戏中更改。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Level"
+msgstr "等级"
+
+#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Decorations"
+msgstr "装饰品"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "{} of {n} slot used"
+msgid_plural "{} of {n} slots used"
+msgstr[0] "已使用 {}/{n} 个插槽"
+
+#: app/core/src/palico.rs app/gui/src/targets.rs
+#: app/gui/src/views/character_page.rs app/gui/src/views/palicoes.rs
+#: app/gui/src/views/sets_ui.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "None"
+msgstr "无"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/names.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "{n} slot"
+msgid_plural "{n} slots"
+msgstr[0] "{n} 个插槽"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Remove {}"
+msgstr "移除{}"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Decorations that do not fit come after: the game never allows them."
+msgstr "放不下的装饰品排在后面：游戏永远不允许使用它们。"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+msgid "Add decoration"
+msgstr "添加装饰品"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "This build's game data has no slot counts: decorations can only be removed."
+msgstr "此版本的游戏数据没有插槽数量：只能移除装饰品。"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Transmog"
+msgstr "防具合成"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Own look"
+msgstr "原本外观"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "The piece keeps its skills, slots and defense; only its look changes."
+msgstr "该装备保留其技能、插槽和防御力，仅改变外观。"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Change look…"
+msgstr "更改外观…"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Restore own look"
+msgstr "恢复原本外观"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Skills"
+msgstr "技能"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Skill {}"
+msgstr "技能 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Points of skill {}"
+msgstr "技能 {} 的点数"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Decoration slots"
+msgstr "装饰品插槽"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Palico set {}"
+msgstr "随从个人组合{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "My Set {}"
+msgstr "装备个人组合{}"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+msgid "Move up"
+msgstr "上移"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/items.slint
+msgid "Move down"
+msgstr "下移"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Clear set"
+msgstr "清除组合"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Set name"
+msgstr "组合名称"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "An unused set. Save what you have on into it, as the game's Register does, then change it here."
+msgstr "未使用的组合。像游戏的“登记”那样把当前装备存入此处，然后在这里修改。"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Save what you have on"
+msgstr "存入当前装备"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Gear"
+msgstr "装备"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Pieces of the Palico box."
+msgstr "随从装备箱中的装备。"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box."
+msgstr "猎人装备箱中的装备，以及其中镶嵌的装饰品。组合所用的装备无法替换，也无法从装备箱中移除。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/pages/sets.slint
+msgid "Pigment"
+msgstr "上色"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "The colours the hunter wears with this set, applied when it is loaded."
+msgstr "此组合中猎人所穿防具的颜色，在读取组合时应用。"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/sets.slint
+msgid "Replace with what you have on"
+msgstr "替换为当前装备"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
+msgid "Palico"
+msgstr "随从"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "My Sets"
+msgstr "装备个人组合"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Palico sets"
+msgstr "随从个人组合"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Search name, weapon type or skill"
+msgstr "搜索名称、武器种类或技能"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Search name or type"
+msgstr "搜索名称或种类"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Add equipment"
+msgstr "添加装备"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Weapons"
+msgstr "武器"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Armor"
+msgstr "防具"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/equipment.slint
+msgid "Talismans"
+msgstr "护石"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Nothing in the box matches."
+msgstr "箱中没有符合的项目。"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Pick a piece, or add one to the first free slot."
+msgstr "选择一件装备，或在第一个空格中添加一件。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Look for {}"
+msgstr "{}的外观"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Replace box slot {}"
+msgstr "替换装备箱第 {} 格"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Add to box slot {}"
+msgstr "添加到装备箱第 {} 格"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "New pieces start at level 1 with no decorations; edit them afterwards."
+msgstr "新装备从等级 1 开始，且没有装饰品；之后可再编辑。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Decoration for {}"
+msgstr "用于{}的装饰品"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "{n} slot free. Decorations that do not fit come after: the game never allows them."
+msgid_plural "{n} slots free. Decorations that do not fit come after: the game never allows them."
+msgstr[0] "{n} 个插槽空闲。放不下的装饰品排在后面：游戏永远不允许使用它们。"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Search decorations"
+msgstr "搜索装饰品"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadout {} · position {}"
+msgstr "道具个人组合{} · 位置{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Item box slot {}"
+msgstr "道具箱第{}格"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Pouch slot {}"
+msgstr "道具袋第{}格"
+
+#: app/gui/ui/mobile/pages/items.slint
+msgid "Change item"
+msgstr "更换道具"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "over the carry limit of {}: the game never makes this stack"
+msgstr "超过携带上限 {}：游戏中不会出现这样的堆叠"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "of {} (carry limit)"
+msgstr "/ {}（携带上限）"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Empty position"
+msgstr "空位置"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Empty slot"
+msgstr "空格"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/mobile/pages/open.slint
+#: app/gui/ui/pages/items.slint
+msgid "Done"
+msgstr "完成"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/items.slint
+msgid "Search items"
+msgstr "搜索道具"
+
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
+#: app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Item box"
+msgstr "道具箱"
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Pouch"
+msgstr "道具袋"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadouts"
+msgstr "道具个人组合"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Search the item box"
+msgstr "搜索道具箱"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Search the pouch"
+msgstr "搜索道具袋"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Add item"
+msgstr "添加道具"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Sort & merge…"
+msgstr "整理并合并…"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Max counts…"
+msgstr "数量最大化…"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Fill box…"
+msgstr "填满道具箱…"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "No slot matches the search."
+msgstr "没有符合搜索的格子。"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Pick a loadout to edit its name and items."
+msgstr "选择一个道具个人组合，编辑其名称和道具。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadout {}"
+msgstr "道具个人组合{}"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadout name"
+msgstr "组合名称"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
+msgstr "该个人组合填入的 32 个道具袋位置，以及每格从道具箱取出的数量。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Search requests or villages"
+msgstr "搜索委托或村庄"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/requests.slint
+msgid "Reported"
+msgstr "已报告"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward."
+msgstr "“已报告”会跳过与村民的对话，因此游戏不会发放该报酬。若想获得报酬，请保持不勾选并在游戏中报告。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "No request matches the search."
+msgstr "没有符合搜索的委托。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Every request is reported."
+msgstr "所有委托均已报告。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "No request is reported yet."
+msgstr "尚无已报告的委托。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "No requests."
+msgstr "没有委托。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/requests.slint
+msgid "Accepted"
+msgstr "已接受"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Accepted posts the request's quest on the board, as talking to the villager does."
+msgstr "“已接受”会将该委托的任务发布到任务看板上，与和村民对话的效果相同。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
+msgid "Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward."
+msgstr "已报告：已完成的任务已向村民报告。不勾选时，游戏会要求你去报告。只有亲自报告时游戏才会发放报酬，因此在此勾选会失去该报酬。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Missing only"
+msgstr "仅显示缺少的"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Check all…"
+msgstr "全部勾选…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Uncheck all…"
+msgstr "全部取消勾选…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "All levels…"
+msgstr "全部等级…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Max permits…"
+msgstr "许可券设为上限…"
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/collections.slint
+msgid "Every Hunter Art is unlocked."
+msgstr "所有狩技均已解锁。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "No art matches the search."
+msgstr "没有符合搜索的狩技。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Nothing is missing here."
+msgstr "这里没有缺少的项目。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Nothing matches the search."
+msgstr "没有符合搜索的项目。"
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/collections.slint
+msgid "Every deviant has every level cleared."
+msgstr "所有别名怪物的所有等级均已通关。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "No deviant matches the search."
+msgstr "没有符合搜索的别名怪物。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Special Permits"
+msgstr "特殊许可任务券"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Levels cleared"
+msgstr "已通关等级"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Special Permit points of {}"
+msgstr "{}的特殊许可点数"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/collections.slint
+msgid "Points of {} waiting at the Courier"
+msgstr "{}在邮差处待领取的点数"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "NEW"
+msgstr "NEW"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "A pet is adopted from its village's pet menu the first time it is used; that gives its first costume. A pet wears costumes of its own kind: Moofy's or the Poogies'."
+msgstr "宠物在首次使用其所在村庄的宠物菜单时被收养，并获得第一套服装。宠物只能穿自己种类的服装：菲妮的或噗吱猪的。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Name of the pet of {}"
+msgstr "{}的宠物名字"
+
+#: app/gui/ui/mobile/pages/lists.slint
+msgid "Costume"
+msgstr "服装"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Adopted"
+msgstr "已收养"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Moofah affection"
+msgstr "云羊鹿好感度"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Petting a Moofah raises it by one, up to 10, and each quest lowers it by 2. At 6 the game unlocks the title word Moofah, which an edit to 6 or more also does."
+msgstr "每抚摸一次云羊鹿，好感度加 1，最高 10；每次任务减 2。达到 6 时游戏会解锁称号词“云羊鹿”，将其更改为 6 或以上也会解锁。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Bherna Moofah 1"
+msgstr "贝鲁纳村云羊鹿 1"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Bherna Moofah 2"
+msgstr "贝鲁纳村云羊鹿 2"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Palico Ranch Moofah 1"
+msgstr "随从广场云羊鹿 1"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Palico Ranch Moofah 2"
+msgstr "随从广场云羊鹿 2"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/unlocks.slint
+msgid "Moofah gifts"
+msgstr "云羊鹿的毛球"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."
+msgstr "贝鲁纳村的云羊鹿在每次任务后首次被抚摸时会给一个云羊鹿的毛球，最多计数到 10。达到 10 后，游戏会在下次抚摸后授予勋章“云羊鹿的毛球”；将其更改为 10 会立即授予。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Fleeceballs received"
+msgstr "已获得的毛球"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Unlock all…"
+msgstr "全部解锁…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/unlocks.slint
+msgid "Lock all…"
+msgstr "全部锁定…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Search monsters"
+msgstr "搜索怪物"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Large only"
+msgstr "仅大型"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/database.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Missing a crown"
+msgstr "缺少皇冠"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Max hunts…"
+msgstr "狩猎数最大化…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Every crown…"
+msgstr "全部皇冠…"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Every monster shown has its crowns."
+msgstr "显示的每个怪物都已拥有皇冠。"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "No monster matches the search."
+msgstr "没有符合搜索的怪物。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Hunted"
+msgstr "狩猎数"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Captured"
+msgstr "捕获数"
+
+#: app/gui/src/views/database.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Mini"
+msgstr "小皇冠"
+
+#: app/gui/src/views/database.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Gold"
+msgstr "金皇冠"
+
+#: app/gui/src/views/database.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
+msgid "Silver"
+msgstr "银皇冠"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."
+msgstr "狩猎数只计讨伐；游戏的怪物列表显示的是狩猎数加捕获数。每次更改也会重建公会卡片的怪物狩猎记录。"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Smallest"
+msgstr "最小纪录"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/lists.slint
+#: app/gui/ui/pages/monsters.slint
+msgid "Largest"
+msgstr "最大纪录"
+
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "No size record"
+msgstr "无尺寸纪录"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/monsters.slint
+msgid "Hunter's Notes page of {}"
+msgstr "{}的猎人笔记页"
+
+#: app/gui/src/views/options_ui.rs app/gui/ui/mobile/pages/misc.slint
+#: app/gui/ui/pages/options.slint
+msgid "On"
+msgstr "开"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/options.slint
+msgid "Group in use"
+msgstr "使用中的组"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/options.slint
+msgid "Showing"
+msgstr "显示"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "No Guild Cards stored."
+msgstr "没有保存的公会卡片。"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "The inbox is empty."
+msgstr "收取箱是空的。"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "No hunters for hire."
+msgstr "没有游荡猎人。"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "No one is blocked."
+msgstr "没有拒收任何人。"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "Move to Card List"
+msgstr "移至卡片列表"
+
+#: app/gui/ui/mobile/pages/misc.slint app/gui/ui/pages/cards.slint
+msgid "Unblock"
+msgstr "取消拒收"
 
 #: app/gui/ui/mobile/pages/open.slint
 msgid "Settings and About"
@@ -1229,10 +2345,6 @@ msgstr "选择该文件夹"
 msgid "Android's folder picker opens. Go to Download › MHGU, tap Use this folder, then Allow. Download itself can't be picked."
 msgstr "Android 的文件夹选择器会打开。前往 Download › MHGU，点按“使用此文件夹”，再点按“允许”。无法直接选择 Download 本身。"
 
-#: app/gui/ui/mobile/pages/open.slint app/gui/ui/pages/items.slint
-msgid "Done"
-msgstr "完成"
-
 #: app/gui/ui/mobile/pages/open.slint
 msgid "The save opens"
 msgstr "存档随即打开"
@@ -1248,10 +2360,6 @@ msgstr "已在审阅中"
 #: app/gui/ui/mobile/pages/overview.slint
 msgid "Preview"
 msgstr "预览"
-
-#: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/character.slint
-msgid "Confirmed in game except where marked"
-msgstr "除标记处外均已在游戏中确认"
 
 #: app/gui/ui/mobile/pages/overview.slint app/gui/ui/pages/overview.slint
 msgid "Quick goals"
@@ -1278,9 +2386,191 @@ msgstr "显示较少"
 msgid "Show all {}"
 msgstr "显示全部（{}）"
 
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "{}, colour {}"
+msgstr "{}，颜色{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Equip {}"
+msgstr "装备{}"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Innate"
+msgstr "固有"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Taught slot"
+msgstr "传授栏位"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Support moves"
+msgstr "支援行动"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Copy to {}"
+msgstr "复制到{}"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Experience"
+msgstr "经验值"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Separate from the level: the game does not recompute one from the other."
+msgstr "与等级相互独立：游戏不会根据其中一项重新计算另一项。"
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Forte"
+msgstr "支援倾向"
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Target"
+msgstr "目标"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
+#: app/gui/ui/pages/palicoes.slint
+msgid "Original owner"
+msgstr "原主人"
+
+#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Looks"
+msgstr "外观"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
+msgstr "固有项随支援倾向而定；传授栏位由随从道场填入。其余部分在随从出生时由游戏随机决定。"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "No StreetPass Palicoes."
+msgstr "没有擦肩而来的随从。"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Search Palicoes"
+msgstr "搜索随从"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Import Palico…"
+msgstr "导入随从…"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "No Palicoes in this save."
+msgstr "此存档中没有随从。"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "No Palico matches the search."
+msgstr "没有符合搜索的随从。"
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "Pick a Palico to edit it."
+msgstr "选择一只随从进行编辑。"
+
 #: app/gui/ui/mobile/pages/placeholder.slint
 msgid "This page is not on phones and tablets yet: the desktop editor has it."
 msgstr "手机和平板尚未提供此页面：电脑版编辑器有。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Cleared: {}"
+msgstr "已完成：{}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "{}  (Prowler)"
+msgstr "{}（猎喵）"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/quests.slint
+msgid "Seen"
+msgstr "已见过"
+
+#: app/gui/src/targets.rs app/gui/src/views/quests.rs
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Failed"
+msgstr "已失败"
+
+#: app/gui/src/targets.rs app/gui/ui/mobile/pages/quests.slint
+#: app/gui/ui/pages/quests.slint
+msgid "Cleared"
+msgstr "已完成"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/database.slint
+msgid "Not cleared"
+msgstr "未通关"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Search quests by name or number"
+msgstr "按名称或编号搜索任务"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Select"
+msgstr "选择"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Every quest here is cleared."
+msgstr "此处所有任务均已完成。"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "No quest matches the search."
+msgstr "没有符合搜索的任务。"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Select all"
+msgstr "全选"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
+msgstr "每个斗技大会任务的最快时间，以所选装备单人完成计。评级随时间而定；斗技大会窗口的最快时间也随之更新。"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "The last ten records of your Guild Card, newest first, as the game wrote them. Read only."
+msgstr "公会卡片的最近十条记录，最新的在前，与游戏写入的一致。只读。"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "No record yet."
+msgstr "暂无记录。"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."
+msgstr "红线表示该任务尚未出现在任务看板上，并说明解锁条件。完成任务也会将其标记为已见过，并完成其所属的任务组，与游戏一致。"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Minutes"
+msgstr "分"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Seconds"
+msgstr "秒"
+
+#: app/gui/ui/mobile/pages/quests.slint
+msgid "Hundredths"
+msgstr "百分之一秒"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Set"
+msgstr "装备"
+
+#: app/gui/ui/mobile/pages/quests.slint app/gui/ui/pages/quests.slint
+msgid "Rank"
+msgstr "评级"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Every published release, with what changed. Android installs only newer versions over the app."
+msgstr "所有已发布的版本及其更改。Android 只能用较新的版本覆盖安装此应用。"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Installed"
+msgstr "已安装"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Latest"
+msgstr "最新"
 
 #: app/gui/ui/mobile/pages/settings.slint
 msgid "Take a snapshot before writing"
@@ -1291,8 +2581,20 @@ msgid "Write starts with this ticked."
 msgstr "写入时默认勾选此项。"
 
 #: app/gui/ui/mobile/pages/settings.slint
-msgid "Open the last save at start"
-msgstr "启动时打开上次的存档"
+msgid "Updates"
+msgstr "更新"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "This is the version installed."
+msgstr "这是已安装的版本。"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Release page"
+msgstr "发布页面"
+
+#: app/gui/ui/mobile/pages/settings.slint
+msgid "Write or undo the staged changes first: installing closes the editor."
+msgstr "请先写入或撤销暂存的更改：安装会关闭编辑器。"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/advanced.slint
@@ -1315,13 +2617,6 @@ msgstr "大小"
 msgid "Manager"
 msgstr "管理器"
 
-#: app/gui/src/targets.rs app/gui/src/views/character_page.rs
-#: app/gui/ui/pages/advanced.slint app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/items.slint app/gui/ui/pages/palicoes.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Name"
-msgstr "名称"
-
 #: app/gui/ui/pages/advanced.slint
 msgid "Confidence"
 msgstr "可信度"
@@ -1330,272 +2625,42 @@ msgstr "可信度"
 msgid "Pick a row to see its bytes. A * marks bytes changed by edits that are not written yet."
 msgstr "选择一行以查看其字节。* 表示被尚未写入的更改修改过的字节。"
 
-#: app/gui/ui/pages/cards.slint
-msgid "Move to Card List"
-msgstr "移至卡片列表"
-
-#: app/gui/ui/pages/cards.slint
-msgid "No Guild Cards stored."
-msgstr "没有保存的公会卡片。"
-
-#: app/gui/ui/pages/cards.slint
-msgid "The inbox is empty."
-msgstr "收取箱是空的。"
-
-#: app/gui/ui/pages/cards.slint
-msgid "No hunters for hire."
-msgstr "没有游荡猎人。"
-
-#: app/gui/ui/pages/cards.slint
-msgid "No one is blocked."
-msgstr "没有拒收任何人。"
-
-#: app/gui/ui/pages/cards.slint
-msgid "Unblock"
-msgstr "取消拒收"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/palicoes.slint app/gui/ui/pages/quests.slint
-#: app/gui/ui/pages/sets.slint
-msgid "The game cannot make this: {}."
-msgstr "游戏无法产生此项：{}。"
-
-#: app/gui/ui/pages/character.slint app/gui/ui/pages/equipment.slint
-msgid "Hunter"
-msgstr "猎人"
-
-#: app/gui/ui/pages/character.slint
-msgid "Written to the save, the player record and the Guild Card."
-msgstr "写入存档、玩家记录和公会卡片。"
-
 #: app/gui/ui/pages/character.slint
 msgid "Hunter name"
 msgstr "猎人名"
-
-#: app/gui/src/targets.rs app/gui/src/views/overview.rs
-#: app/gui/ui/pages/character.slint
-msgid "Hunter Rank"
-msgstr "猎人等级"
-
-#: app/gui/ui/pages/character.slint
-msgid "Follows HR points"
-msgstr "跟随 HR 点数"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "HR points"
-msgstr "HR 点数"
-
-#: app/gui/src/targets.rs app/gui/src/views/overview.rs
-#: app/gui/ui/pages/character.slint
-msgid "Zenny"
-msgstr "金钱"
-
-#: app/gui/src/goals.rs app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Wycademy points"
-msgstr "龙历院点数"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/character.slint
 msgid "Play time"
 msgstr "游玩时间"
 
-#: app/gui/ui/pages/character.slint
-msgid "Hours played"
-msgstr "游玩小时数"
-
-#: app/gui/ui/pages/character.slint
-msgid "Minutes played"
-msgstr "游玩分钟数"
-
-#: app/gui/ui/pages/character.slint
-msgid "Progress"
-msgstr "进度"
-
 #: app/gui/src/targets.rs app/gui/ui/pages/character.slint
 msgid "Village ★"
 msgstr "村庄★"
-
-#: app/gui/ui/pages/character.slint
-msgid "Village star level"
-msgstr "村庄星级"
 
 #: app/gui/src/targets.rs app/gui/ui/pages/character.slint
 msgid "Hub ★"
 msgstr "集会所★"
 
 #: app/gui/ui/pages/character.slint
-msgid "Hub star level"
-msgstr "集会所星级"
-
-#: app/gui/ui/pages/character.slint
-msgid "The game raises star levels when every urgent quest of a level is cleared."
-msgstr "当某一等级的所有紧急任务完成后，游戏会提升星级。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Quest counter"
-msgstr "任务计数"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Courier points"
-msgstr "邮差点数"
-
-#: app/gui/ui/pages/character.slint
 msgid "Quests completed as the Courier counts them, not shown in game; past 210 the count stays between 210 and 419. Each 1,000 Courier points become 10 Special Permits for a deviant, up to 10,000 points."
 msgstr "邮差统计的已完成任务数，游戏中不显示；超过 210 后，该数值保持在 210 到 419 之间。每 1,000 邮差点数可换成某一别名怪物的 10 张特殊许可券，最多 10,000 点。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Start in"
-msgstr "起始地点"
 
 #: app/gui/ui/pages/character.slint
 msgid "Where the next load starts"
 msgstr "下次读取时的起始地点"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Housekeeper"
-msgstr "管家"
 
 #: app/gui/ui/pages/character.slint
 msgid "Room Service, Change Housekeeper"
 msgstr "管家、更改管家"
 
 #: app/gui/ui/pages/character.slint
-msgid "As character creation sets it, numbered as the game shows it."
-msgstr "与创造角色时的设置相同，编号与游戏中显示的一致。"
-
-#: app/gui/src/targets.rs app/gui/src/views/database.rs
-#: app/gui/ui/pages/character.slint
-msgid "Body"
-msgstr "体型"
-
-#: app/gui/ui/pages/character.slint
-msgid "Some armour is made for one body type only: check what you wear after changing it."
-msgstr "部分防具仅适用于一种体型：更改后请检查身上的装备。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Type 1 (male)"
-msgstr "TYPE 1（男性）"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Type 2 (female)"
-msgstr "TYPE 2（女性）"
-
-#: app/gui/ui/pages/character.slint
 msgid "Face, hairstyle, voice"
 msgstr "脸、发型、语音"
-
-#: app/gui/ui/pages/character.slint
-msgid "Face"
-msgstr "脸"
-
-#: app/gui/ui/pages/character.slint
-msgid "Hairstyle"
-msgstr "发型"
-
-#: app/gui/src/views/palicoes.rs app/gui/ui/pages/character.slint
-msgid "Voice"
-msgstr "语音"
-
-#: app/gui/ui/pages/character.slint
-msgid "Eye colour"
-msgstr "瞳色"
-
-#: app/gui/ui/pages/character.slint
-msgid "Features"
-msgstr "化妆"
-
-#: app/gui/src/views/palicoes.rs app/gui/ui/pages/character.slint
-msgid "Clothing"
-msgstr "内衬"
-
-#: app/gui/ui/pages/character.slint
-msgid "Guild Card"
-msgstr "公会卡片"
-
-#: app/gui/ui/pages/character.slint
-msgid "As the card editor in game sets them. Locked entries can be picked too: the card then says so."
-msgstr "与游戏中的卡片编辑器设置方式相同。也可以选择未解锁的项目：卡片上会注明。"
-
-#: app/gui/ui/pages/character.slint
-msgid "Title"
-msgstr "称号"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Greeting"
-msgstr "自我介绍"
 
 #: app/gui/src/targets.rs app/gui/src/views/character_page.rs
 #: app/gui/ui/pages/character.slint
 msgid "Guild Card greeting"
 msgstr "公会卡片自我介绍"
-
-#: app/gui/ui/pages/character.slint
-msgid "Scene"
-msgstr "背景"
-
-#: app/gui/ui/pages/character.slint
-msgid "Pose"
-msgstr "姿势"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Style and Hunter Arts"
-msgstr "狩猎风格与狩技"
-
-#: app/gui/ui/pages/character.slint
-msgid "What you have on now. Loading a My Set in game replaces them with the set's."
-msgstr "当前装备的内容。在游戏中装备个人组合时，会替换为该组合的内容。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/character.slint
-msgid "Armor pigment"
-msgstr "防具上色"
-
-#: app/gui/ui/pages/character.slint
-msgid "The colours of the armor you have on now. Each My Set keeps its own (Equipment, My Sets)."
-msgstr "当前所穿防具的颜色。每个装备个人组合各自保存颜色（装备、装备个人组合）。"
-
-#: app/gui/ui/pages/character.slint
-msgid "Village points"
-msgstr "村庄点数"
-
-#: app/gui/ui/pages/character.slint
-msgid "The game adds Low rank and G rank and caps the sum at 20,000."
-msgstr "游戏会将下位与 G 级点数相加，总和上限为 20,000。"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Village"
-msgstr "村庄"
-
-#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Low rank"
-msgstr "下位"
-
-#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "G rank"
-msgstr "G级"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Bherna"
-msgstr "贝鲁纳"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Kokoto"
-msgstr "可可特"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Pokke"
-msgstr "波凯"
-
-#: app/core/src/progress.rs app/gui/src/views/unlocks_ui.rs
-#: app/gui/ui/pages/character.slint
-msgid "Yukumo"
-msgstr "结云"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/character.slint
@@ -1607,65 +2672,10 @@ msgstr "{} 下位点数"
 msgid "{} G rank points"
 msgstr "{} G级点数"
 
-#: app/gui/ui/pages/character.slint
-msgid "Hunting styles"
-msgstr "狩猎风格"
-
-#: app/gui/ui/pages/character.slint
-msgid "Quests done with each style. Your Palico's lines name the most and least used."
-msgstr "使用各风格完成的任务数。随从的台词会提到最常用和最少用的风格。"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Guild Style"
-msgstr "公会风格"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Striker Style"
-msgstr "强袭风格"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Aerial Style"
-msgstr "空战风格"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Adept Style"
-msgstr "武士道风格"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Alchemy Style"
-msgstr "炼金风格"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-#: app/gui/ui/pages/sets.slint
-msgid "Valor Style"
-msgstr "英勇风格"
-
-#: app/gui/ui/pages/character.slint
-msgid "Weapon usage"
-msgstr "武器使用次数"
-
-#: app/gui/ui/pages/character.slint
-msgid "Quests completed with each weapon, as the Guild Card counts them. The largest total is the main weapon."
-msgstr "使用各武器完成的任务数，按公会卡片的统计方式计算。总数最高者即为主武器。"
-
 #: app/gui/src/views/names.rs app/gui/src/views/sets_ui.rs
 #: app/gui/ui/pages/character.slint
 msgid "Weapon"
 msgstr "武器"
-
-#: app/core/src/character.rs app/gui/src/views/requests.rs
-#: app/gui/ui/pages/character.slint
-msgid "Hub"
-msgstr "集会所"
-
-#: app/core/src/character.rs app/gui/ui/pages/character.slint
-msgid "Arena"
-msgstr "斗技大会"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/character.slint
@@ -1673,84 +2683,21 @@ msgid "{} quests, {}"
 msgstr "{} 个任务，{}"
 
 #: app/gui/ui/pages/collections.slint
-msgid "Check all…"
-msgstr "全部勾选…"
-
-#: app/gui/ui/pages/collections.slint
-msgid "Uncheck all…"
-msgstr "全部取消勾选…"
-
-#: app/gui/ui/pages/collections.slint
-msgid "All levels…"
-msgstr "全部等级…"
-
-#: app/gui/ui/pages/collections.slint
-msgid "Max permits…"
-msgstr "许可券设为上限…"
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/quests.slint
-#: app/gui/ui/pages/unlocks.slint
-msgid "Missing only"
-msgstr "仅显示缺少的"
-
-#: app/gui/ui/pages/collections.slint
 msgid "Hunter Art"
 msgstr "狩技"
-
-#: app/gui/src/goals.rs app/gui/ui/pages/collections.slint
-msgid "Every Hunter Art is unlocked."
-msgstr "所有狩技均已解锁。"
-
-#: app/gui/ui/pages/collections.slint
-msgid "No art matches the search."
-msgstr "没有符合搜索的狩技。"
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/unlocks.slint
-msgid "Nothing is missing here."
-msgstr "这里没有缺少的项目。"
-
-#: app/gui/ui/pages/collections.slint app/gui/ui/pages/unlocks.slint
-msgid "Nothing matches the search."
-msgstr "没有符合搜索的项目。"
 
 #: app/gui/src/views/quests.rs app/gui/ui/pages/collections.slint
 msgid "Deviant"
 msgstr "别名怪物"
 
 #: app/gui/ui/pages/collections.slint
-msgid "Special Permits"
-msgstr "特殊许可任务券"
-
-#: app/gui/ui/pages/collections.slint
 msgid "Permit points · at the Courier"
 msgstr "许可点数 · 邮差处"
-
-#: app/gui/ui/pages/collections.slint
-msgid "Levels cleared"
-msgstr "已通关等级"
-
-#: app/gui/src/goals.rs app/gui/ui/pages/collections.slint
-msgid "Every deviant has every level cleared."
-msgstr "所有别名怪物的所有等级均已通关。"
-
-#: app/gui/ui/pages/collections.slint
-msgid "No deviant matches the search."
-msgstr "没有符合搜索的别名怪物。"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/collections.slint
 msgid "Special Permits of {}"
 msgstr "{}的特殊许可任务券"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/collections.slint
-msgid "Special Permit points of {}"
-msgstr "{}的特殊许可点数"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/collections.slint
-msgid "Points of {} waiting at the Courier"
-msgstr "{}在邮差处待领取的点数"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/collections.slint
@@ -1796,21 +2743,6 @@ msgstr "剥取"
 #: app/gui/ui/pages/database.slint
 msgid "Edit on the Monsters page"
 msgstr "在怪物页面编辑"
-
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
-msgid "Mini"
-msgstr "小皇冠"
-
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
-msgid "Silver"
-msgstr "银皇冠"
-
-#: app/gui/src/views/database.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/monsters.slint
-msgid "Gold"
-msgstr "金皇冠"
 
 #: app/gui/ui/pages/database.slint
 msgid "Crown chances"
@@ -1888,10 +2820,6 @@ msgid "No carve, quest reward or combination gives it. It may come from gatherin
 msgstr "没有任何剥取、任务报酬或调和能获得它。它可能来自采集或商店，而这些尚未收录到数据库中。"
 
 #: app/gui/ui/pages/database.slint
-msgid "From"
-msgstr "来源"
-
-#: app/gui/ui/pages/database.slint
 msgid "Chance"
 msgstr "概率"
 
@@ -1927,47 +2855,21 @@ msgstr "强化树"
 msgid "Levels"
 msgstr "等级"
 
-#: app/gui/src/targets.rs app/gui/ui/pages/database.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Skills"
-msgstr "技能"
-
 #: app/gui/ui/pages/database.slint
 msgid "No skill."
 msgstr "没有技能。"
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
-msgid "Talismans"
-msgstr "护石"
 
 #: app/gui/ui/pages/database.slint
 msgid "No talisman rolls it."
 msgstr "没有护石会出现此技能。"
 
-#: app/gui/src/views/database.rs app/gui/src/views/fill_ui.rs
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
-msgid "Decorations"
-msgstr "装饰品"
-
 #: app/gui/ui/pages/database.slint
 msgid "No decoration gives it."
 msgstr "没有装饰品提供此技能。"
 
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/equipment.slint
-msgid "Armor"
-msgstr "防具"
-
 #: app/gui/ui/pages/database.slint
 msgid "No armor piece gives it."
 msgstr "没有防具提供此技能。"
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
-msgid "Search monsters"
-msgstr "搜索怪物"
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/monsters.slint
-msgid "Missing a crown"
-msgstr "缺少皇冠"
 
 #: app/gui/ui/pages/database.slint
 msgid "No monster matches."
@@ -1982,20 +2884,12 @@ msgid "Search quests"
 msgstr "搜索任务"
 
 #: app/gui/ui/pages/database.slint
-msgid "Not cleared"
-msgstr "未通关"
-
-#: app/gui/ui/pages/database.slint
 msgid "No quest matches."
 msgstr "没有符合的任务。"
 
 #: app/gui/ui/pages/database.slint
 msgid "Pick a quest."
 msgstr "请选择一个任务。"
-
-#: app/gui/ui/pages/database.slint app/gui/ui/pages/items.slint
-msgid "Search items"
-msgstr "搜索道具"
 
 #: app/gui/ui/pages/database.slint
 msgid "In the box"
@@ -2045,135 +2939,17 @@ msgstr "请选择一件装备。"
 msgid "The game's own data, next to this save. Nothing on this page is edited."
 msgstr "游戏自身的数据，与此存档对照。此页面上的内容均不会被编辑。"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Box slot {}: {}"
-msgstr "装备箱第 {} 格：{}"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Add equipment"
-msgstr "添加装备"
-
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
-msgid "Export box to CSV…"
-msgstr "将箱子导出为 CSV…"
-
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
-msgid "Import box from CSV…"
-msgstr "从 CSV 导入箱子…"
-
 #: app/gui/ui/pages/equipment.slint
 msgid "Talismans as text…"
 msgstr "护石文本…"
 
 #: app/gui/ui/pages/equipment.slint
-msgid "Palico"
-msgstr "随从"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "My Sets"
-msgstr "装备个人组合"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Palico sets"
-msgstr "随从个人组合"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Search name, weapon type or skill"
-msgstr "搜索名称、武器种类或技能"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Search name or type"
-msgstr "搜索名称或种类"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Weapons"
-msgstr "武器"
-
-#: app/gui/src/diff.rs app/gui/src/targets.rs
-#: app/gui/src/views/equipment_page.rs app/gui/src/views/items_page.rs
-#: app/gui/src/views/names.rs app/gui/src/views/reorder.rs
-#: app/gui/ui/pages/equipment.slint app/gui/ui/pages/items.slint
-msgid "Empty"
-msgstr "空"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Nothing in the box matches."
-msgstr "箱中没有符合的项目。"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Pick a piece, or add one to the first free slot."
-msgstr "选择一件装备，或在第一个空格中添加一件。"
-
-#: app/gui/ui/pages/equipment.slint
 msgid "‹ Back to the box"
 msgstr "‹ 返回装备箱"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "{} · box slot {} · ID {}"
-msgstr "{} · 装备箱第 {} 格 · ID {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
-msgid "{} · box slot {}"
-msgstr "{} · 装备箱第 {} 格"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Add equipment here"
-msgstr "在此添加装备"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Used by {}. Change that in game before replacing or removing this piece."
-msgstr "被{}使用。替换或移除此装备前，请先在游戏中更改。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/equipment.slint
-#: app/gui/ui/pages/palicoes.slint
-msgid "Level"
-msgstr "等级"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/pages/equipment.slint
-msgid "{} of {n} slot used"
-msgid_plural "{} of {n} slots used"
-msgstr[0] "已使用 {}/{n} 个插槽"
-
-#: app/core/src/palico.rs app/gui/src/targets.rs
-#: app/gui/src/views/character_page.rs app/gui/src/views/palicoes.rs
-#: app/gui/src/views/sets_ui.rs app/gui/ui/pages/equipment.slint
-msgid "None"
-msgstr "无"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/src/views/names.rs app/gui/ui/pages/equipment.slint
-msgid "{n} slot"
-msgid_plural "{n} slots"
-msgstr[0] "{n} 个插槽"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Add decoration…"
 msgstr "添加装饰品…"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "This build's game data has no slot counts: decorations can only be removed."
-msgstr "此版本的游戏数据没有插槽数量：只能移除装饰品。"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Transmog"
-msgstr "防具合成"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Own look"
-msgstr "原本外观"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Change look…"
-msgstr "更改外观…"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Restore own look"
-msgstr "恢复原本外观"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Looks of the same part that this piece's class and your body type can wear. Skills, slots and defense stay."
@@ -2184,23 +2960,9 @@ msgstr "同一部位中，该装备的类别和你的体型可穿戴的外观。
 msgid "Talisman"
 msgstr "护石"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Skill {}"
-msgstr "技能 {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Points of skill {}"
-msgstr "技能 {} 的点数"
-
 #: app/gui/ui/pages/equipment.slint
 msgid "Slots"
 msgstr "插槽"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Decoration slots"
-msgstr "装饰品插槽"
 
 #: app/gui/ui/pages/equipment.slint
 msgid "Share as text…"
@@ -2214,54 +2976,6 @@ msgstr "此箱内条目的 36 个字节。选中即可复制。"
 msgid "Show in Save map"
 msgstr "在存档结构中显示"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Look for {}"
-msgstr "{}的外观"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Replace box slot {}"
-msgstr "替换装备箱第 {} 格"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Add to box slot {}"
-msgstr "添加到装备箱第 {} 格"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "The piece keeps its skills, slots and defense; only its look changes."
-msgstr "该装备保留其技能、插槽和防御力，仅改变外观。"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "New pieces start at level 1 with no decorations; edit them afterwards."
-msgstr "新装备从等级 1 开始，且没有装饰品；之后可再编辑。"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/equipment.slint
-msgid "Decoration for {}"
-msgstr "用于{}的装饰品"
-
-#. placeholders: {} in order, {0} {1} by position, {n} the count
-#: app/gui/ui/pages/equipment.slint
-msgid "{n} slot free. Decorations that do not fit come after: the game never allows them."
-msgid_plural "{n} slots free. Decorations that do not fit come after: the game never allows them."
-msgstr[0] "{n} 个插槽空闲。放不下的装饰品排在后面：游戏永远不允许使用它们。"
-
-#: app/gui/ui/pages/equipment.slint
-msgid "Search decorations"
-msgstr "搜索装饰品"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Slot {}: empty"
-msgstr "第{}格：空"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Slot {}: {} ×{}"
-msgstr "第{}格：{} ×{}"
-
 #: app/gui/ui/pages/items.slint
 msgid "Item loadouts · confirmed in game except where marked"
 msgstr "道具个人组合 · 除标注处外均已在游戏中确认"
@@ -2271,109 +2985,10 @@ msgstr "道具个人组合 · 除标注处外均已在游戏中确认"
 msgid "{} / {} slots used · confirmed in game except where marked"
 msgstr "已用 {} / {} 格 · 除标注处外均已在游戏中确认"
 
-#: app/gui/ui/pages/items.slint
-msgid "Add item"
-msgstr "添加道具"
-
-#: app/gui/ui/pages/items.slint
-msgid "Sort & merge…"
-msgstr "整理并合并…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Max counts…"
-msgstr "数量最大化…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Fill box…"
-msgstr "填满道具箱…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty box…"
-msgstr "清空道具箱…"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty pouch…"
-msgstr "清空道具袋…"
-
-#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
-#: app/gui/src/views/transfer_ui.rs app/gui/ui/pages/items.slint
-msgid "Item box"
-msgstr "道具箱"
-
-#: app/gui/src/goals.rs app/gui/ui/pages/items.slint
-msgid "Pouch"
-msgstr "道具袋"
-
-#: app/gui/ui/pages/items.slint
-msgid "Loadouts"
-msgstr "道具个人组合"
-
-#: app/gui/ui/pages/items.slint
-msgid "Search the item box"
-msgstr "搜索道具箱"
-
-#: app/gui/ui/pages/items.slint
-msgid "Search the pouch"
-msgstr "搜索道具袋"
-
-#: app/gui/ui/pages/items.slint
-msgid "No slot matches the search."
-msgstr "没有符合搜索的格子。"
-
-#: app/gui/ui/pages/items.slint
-msgid "Pick a loadout to edit its name and items."
-msgstr "选择一个道具个人组合，编辑其名称和道具。"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Loadout {}"
-msgstr "道具个人组合{}"
-
-#: app/gui/ui/pages/items.slint
-msgid "Loadout name"
-msgstr "组合名称"
-
-#: app/gui/ui/pages/items.slint
-msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
-msgstr "该个人组合填入的 32 个道具袋位置，以及每格从道具箱取出的数量。"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "Loadout {} · position {}"
-msgstr "道具个人组合{} · 位置{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/items.slint
-msgid "Item box slot {}"
-msgstr "道具箱第{}格"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/items.slint
-msgid "Pouch slot {}"
-msgstr "道具袋第{}格"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/items.slint
 msgid "of {}"
 msgstr "/ {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "over the carry limit of {}: the game never makes this stack"
-msgstr "超过携带上限 {}：游戏中不会出现这样的堆叠"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/items.slint
-msgid "of {} (carry limit)"
-msgstr "/ {}（携带上限）"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty position"
-msgstr "空位置"
-
-#: app/gui/ui/pages/items.slint
-msgid "Empty slot"
-msgstr "空格"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/monsters.slint
@@ -2396,61 +3011,12 @@ msgid "Largest size of {}"
 msgstr "{}的最大纪录"
 
 #: app/gui/ui/pages/monsters.slint
-msgid "No size record"
-msgstr "无尺寸纪录"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/monsters.slint
-msgid "Hunter's Notes page of {}"
-msgstr "{}的猎人笔记页"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Max hunts…"
-msgstr "狩猎数最大化…"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Every crown…"
-msgstr "全部皇冠…"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Large only"
-msgstr "仅大型"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Hunted"
-msgstr "狩猎数"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."
-msgstr "狩猎数只计讨伐；游戏的怪物列表显示的是狩猎数加捕获数。每次更改也会重建公会卡片的怪物狩猎记录。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Captured"
-msgstr "捕获数"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Smallest"
-msgstr "最小纪录"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/monsters.slint
-msgid "Largest"
-msgstr "最大纪录"
-
-#: app/gui/ui/pages/monsters.slint
 msgid "Sizes are % of the monster's base size. At or below its mini size it has the mini crown; at or above its silver or gold size, that crown. Click a size to see the monster's own sizes. The crown awards read the Guild Card's monster log, which every edit rebuilds."
 msgstr "尺寸为怪物基准尺寸的百分比。小于等于其迷你尺寸时获得小皇冠；大于等于其银皇冠或金皇冠尺寸时获得相应皇冠。点击尺寸可查看该怪物自身的尺寸。皇冠勋章读取公会卡片的怪物狩猎记录，每次更改都会重建该记录。"
 
 #: app/gui/ui/pages/monsters.slint
 msgid "Notes"
 msgstr "笔记"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "Every monster shown has its crowns."
-msgstr "显示的每个怪物都已拥有皇冠。"
-
-#: app/gui/ui/pages/monsters.slint
-msgid "No monster matches the search."
-msgstr "没有符合搜索的怪物。"
 
 #: app/gui/ui/pages/open.slint
 msgid "Pick the system file of Monster Hunter Generations Ultimate (Switch). In Ryujinx it is in bis/user/save/<id>/0/. Close the emulator before writing: it overwrites the save on exit."
@@ -2464,18 +3030,6 @@ msgstr "本机上的其他存档"
 msgid "Found on this computer"
 msgstr "在本机上找到"
 
-#: app/gui/src/views/options_ui.rs app/gui/ui/pages/options.slint
-msgid "On"
-msgstr "开"
-
-#: app/gui/ui/pages/options.slint
-msgid "Group in use"
-msgstr "使用中的组"
-
-#: app/gui/ui/pages/options.slint
-msgid "Showing"
-msgstr "显示"
-
 #: app/gui/ui/pages/overview.slint
 msgid "Preview…"
 msgstr "预览…"
@@ -2484,98 +3038,6 @@ msgstr "预览…"
 #: app/gui/ui/pages/overview.slint
 msgid "Character {}, {} · confirmed in game except where marked"
 msgstr "角色{}，{} · 除标注处外均已在游戏中确认"
-
-#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
-#: app/gui/ui/pages/palicoes.slint
-msgid "Looks"
-msgstr "外观"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/palicoes.slint
-msgid "{}, colour {}"
-msgstr "{}，颜色{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/palicoes.slint
-msgid "Equip {}"
-msgstr "装备{}"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Innate"
-msgstr "固有"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Taught slot"
-msgstr "传授栏位"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "No StreetPass Palicoes."
-msgstr "没有擦肩而来的随从。"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Search Palicoes"
-msgstr "搜索随从"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "No Palicoes in this save."
-msgstr "此存档中没有随从。"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "No Palico matches the search."
-msgstr "没有符合搜索的随从。"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Import Palico…"
-msgstr "导入随从…"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Pick a Palico to edit it."
-msgstr "选择一只随从进行编辑。"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/palicoes.slint
-msgid "Copy to {}"
-msgstr "复制到{}"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Experience"
-msgstr "经验值"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Separate from the level: the game does not recompute one from the other."
-msgstr "与等级相互独立：游戏不会根据其中一项重新计算另一项。"
-
-#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
-#: app/gui/ui/pages/palicoes.slint
-msgid "Forte"
-msgstr "支援倾向"
-
-#: app/gui/src/targets.rs app/gui/src/views/palicoes.rs
-#: app/gui/ui/pages/palicoes.slint
-msgid "Target"
-msgstr "目标"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Original owner"
-msgstr "原主人"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/palicoes.slint
-msgid "Support moves"
-msgstr "支援行动"
-
-#: app/gui/ui/pages/palicoes.slint
-msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
-msgstr "固有项随支援倾向而定；传授栏位由随从道场填入。其余部分在随从出生时由游戏随机决定。"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/quests.slint
-msgid "Cleared: {}"
-msgstr "已完成：{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/quests.slint
-msgid "{}  (Prowler)"
-msgstr "{}（猎喵）"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/quests.slint
@@ -2586,10 +3048,6 @@ msgstr "已见过：{}"
 #: app/gui/ui/pages/quests.slint
 msgid "Failed: {}"
 msgstr "已失败：{}"
-
-#: app/gui/ui/pages/quests.slint
-msgid "The last ten records of your Guild Card, newest first, as the game wrote them. Read only."
-msgstr "公会卡片的最近十条记录，最新的在前，与游戏写入的一致。只读。"
 
 #: app/gui/ui/pages/quests.slint
 msgid "Date"
@@ -2608,24 +3066,8 @@ msgid "Party"
 msgstr "队伍"
 
 #: app/gui/ui/pages/quests.slint
-msgid "No record yet."
-msgstr "暂无记录。"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."
-msgstr "每个斗技大会任务的最快时间，以所选装备单人完成计。评级随时间而定；斗技大会窗口的最快时间也随之更新。"
-
-#: app/gui/ui/pages/quests.slint
 msgid "Best time"
 msgstr "最快时间"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Set"
-msgstr "装备"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Rank"
-msgstr "评级"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/quests.slint
@@ -2642,78 +3084,9 @@ msgstr "{}，秒"
 msgid "{}, hundredths"
 msgstr "{}，百分之一秒"
 
-#: app/gui/ui/pages/quests.slint
-msgid "Search quests by name or number"
-msgstr "按名称或编号搜索任务"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
-msgid "Cleared"
-msgstr "已完成"
-
-#: app/gui/ui/pages/quests.slint
-msgid "A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."
-msgstr "红线表示该任务尚未出现在任务看板上，并说明解锁条件。完成任务也会将其标记为已见过，并完成其所属的任务组，与游戏一致。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/quests.slint
-msgid "Seen"
-msgstr "已见过"
-
-#: app/gui/src/targets.rs app/gui/src/views/quests.rs
-#: app/gui/ui/pages/quests.slint
-msgid "Failed"
-msgstr "已失败"
-
-#: app/gui/ui/pages/quests.slint
-msgid "Every quest here is cleared."
-msgstr "此处所有任务均已完成。"
-
-#: app/gui/ui/pages/quests.slint
-msgid "No quest matches the search."
-msgstr "没有符合搜索的任务。"
-
-#: app/gui/ui/pages/requests.slint
-msgid "Search requests or villages"
-msgstr "搜索委托或村庄"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Reported"
-msgstr "已报告"
-
-#: app/gui/ui/pages/requests.slint
-msgid "Reported skips the talk with the villager, so the game never hands over that reward. Leave it unticked and report in game to get the reward."
-msgstr "“已报告”会跳过与村民的对话，因此游戏不会发放该报酬。若想获得报酬，请保持不勾选并在游戏中报告。"
-
 #: app/gui/ui/pages/requests.slint
 msgid "Request"
 msgstr "委托"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/requests.slint
-msgid "Accepted"
-msgstr "已接受"
-
-#: app/gui/ui/pages/requests.slint
-msgid "Accepted posts the request's quest on the board, as talking to the villager does."
-msgstr "“已接受”会将该委托的任务发布到任务看板上，与和村民对话的效果相同。"
-
-#: app/gui/ui/pages/requests.slint
-msgid "Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward."
-msgstr "已报告：已完成的任务已向村民报告。不勾选时，游戏会要求你去报告。只有亲自报告时游戏才会发放报酬，因此在此勾选会失去该报酬。"
-
-#: app/gui/ui/pages/requests.slint
-msgid "No request matches the search."
-msgstr "没有符合搜索的委托。"
-
-#: app/gui/ui/pages/requests.slint
-msgid "Every request is reported."
-msgstr "所有委托均已报告。"
-
-#: app/gui/ui/pages/requests.slint
-msgid "No request is reported yet."
-msgstr "尚无已报告的委托。"
-
-#: app/gui/ui/pages/requests.slint
-msgid "No requests."
-msgstr "没有委托。"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/pages/requests.slint
@@ -2724,143 +3097,6 @@ msgstr "已接受：{}"
 #: app/gui/ui/pages/requests.slint
 msgid "Reported: {}"
 msgstr "已报告：{}"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Style"
-msgstr "风格"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/sets.slint
-msgid "Arts for the {}"
-msgstr "{}的狩技"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/sets.slint
-msgid "Art {}"
-msgstr "狩技{}"
-
-#: app/gui/ui/pages/sets.slint
-msgid "SP Art"
-msgstr "SP狩技"
-
-#: app/gui/ui/pages/sets.slint
-msgid "the armor's own colour"
-msgstr "防具原本的颜色"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Armor's own colour"
-msgstr "防具原本的颜色"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "Palico set {}"
-msgstr "随从个人组合{}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "My Set {}"
-msgstr "装备个人组合{}"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Set name"
-msgstr "组合名称"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Clear set"
-msgstr "清除组合"
-
-#: app/gui/ui/pages/sets.slint
-msgid "An unused set. Save what you have on into it, as the game's Register does, then change it here."
-msgstr "未使用的组合。像游戏的“登记”那样把当前装备存入此处，然后在这里修改。"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Save what you have on"
-msgstr "存入当前装备"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "Gear"
-msgstr "装备"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Pieces of the Palico box."
-msgstr "随从装备箱中的装备。"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Pieces of the hunter box, with the decorations they hold. A piece a set uses can't be replaced or removed from the box."
-msgstr "猎人装备箱中的装备，以及其中镶嵌的装饰品。组合所用的装备无法替换，也无法从装备箱中移除。"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/sets.slint
-msgid "Pigment"
-msgstr "上色"
-
-#: app/gui/ui/pages/sets.slint
-msgid "The colours the hunter wears with this set, applied when it is loaded."
-msgstr "此组合中猎人所穿防具的颜色，在读取组合时应用。"
-
-#: app/gui/ui/pages/sets.slint
-msgid "Replace with what you have on"
-msgstr "替换为当前装备"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "NEW"
-msgstr "NEW"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "A pet is adopted from its village's pet menu the first time it is used; that gives its first costume. A pet wears costumes of its own kind: Moofy's or the Poogies'."
-msgstr "宠物在首次使用其所在村庄的宠物菜单时被收养，并获得第一套服装。宠物只能穿自己种类的服装：菲妮的或噗吱猪的。"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/ui/pages/unlocks.slint
-msgid "Name of the pet of {}"
-msgstr "{}的宠物名字"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Adopted"
-msgstr "已收养"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/unlocks.slint
-msgid "Moofah affection"
-msgstr "云羊鹿好感度"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Petting a Moofah raises it by one, up to 10, and each quest lowers it by 2. At 6 the game unlocks the title word Moofah, which an edit to 6 or more also does."
-msgstr "每抚摸一次云羊鹿，好感度加 1，最高 10；每次任务减 2。达到 6 时游戏会解锁称号词“云羊鹿”，将其更改为 6 或以上也会解锁。"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Bherna Moofah 1"
-msgstr "贝鲁纳村云羊鹿 1"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Bherna Moofah 2"
-msgstr "贝鲁纳村云羊鹿 2"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Palico Ranch Moofah 1"
-msgstr "随从广场云羊鹿 1"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Palico Ranch Moofah 2"
-msgstr "随从广场云羊鹿 2"
-
-#: app/gui/src/targets.rs app/gui/ui/pages/unlocks.slint
-msgid "Moofah gifts"
-msgstr "云羊鹿的毛球"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "A Bherna Moofah gives a Moofah Fleeceball the first time it is petted after a quest, counted up to 10. At 10 the game grants the award Ball of Moofah Wool after the next petting; an edit to 10 grants it now."
-msgstr "贝鲁纳村的云羊鹿在每次任务后首次被抚摸时会给一个云羊鹿的毛球，最多计数到 10。达到 10 后，游戏会在下次抚摸后授予勋章“云羊鹿的毛球”；将其更改为 10 会立即授予。"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Fleeceballs received"
-msgstr "已获得的毛球"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Unlock all…"
-msgstr "全部解锁…"
-
-#: app/gui/ui/pages/unlocks.slint
-msgid "Lock all…"
-msgstr "全部锁定…"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/assets.rs
@@ -4099,12 +4335,12 @@ msgid "{} is not in {}"
 msgstr "{} 不在 {} 中"
 
 #: app/gui/src/update.rs
-msgid "The running file has no usable name"
-msgstr "正在运行的文件没有可用的名称"
-
-#: app/gui/src/update.rs
 msgid "The download does not match the release's checksum"
 msgstr "下载的文件与该版本的校验和不符"
+
+#: app/gui/src/update.rs
+msgid "The running file has no usable name"
+msgstr "正在运行的文件没有可用的名称"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/update.rs
@@ -6647,6 +6883,22 @@ msgstr "{}：已通关 {} / {} · 除标注处外均已在游戏中确认"
 msgid "Guild Card completions: {}"
 msgstr "公会卡片完成记录：{}"
 
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/quests.rs
+msgid "{} quest marked cleared"
+msgid_plural "{} quests marked cleared"
+msgstr[0] "已将 {} 个任务标记为已通关"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/quests.rs
+msgid "{} quest marked not cleared"
+msgid_plural "{} quests marked not cleared"
+msgstr[0] "已将 {} 个任务标记为未通关"
+
+#: app/gui/src/views/quests.rs
+msgid "Completed quest sets are recorded too, as the game does"
+msgstr "已完成的任务组也会被记录，与游戏一致"
+
 #: app/gui/src/views/quests.rs
 msgid "Also completes its quest set, as the game does"
 msgstr "同时完成其所在的任务组，与游戏一致"
@@ -6660,10 +6912,6 @@ msgstr "已将 {} 个任务标记为已通关"
 #: app/gui/src/views/quests.rs
 msgid "{} {}★ quests marked cleared"
 msgstr "已将 {} 个 {}★ 任务标记为已通关"
-
-#: app/gui/src/views/quests.rs
-msgid "Completed quest sets are recorded too, as the game does"
-msgstr "已完成的任务组也会被记录，与游戏一致"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/reorder.rs
@@ -7418,6 +7666,16 @@ msgstr "已解锁 {}/{} 个条目"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
+msgid "You have {}. Android installs only newer versions over the app. To go back to {}, uninstall the app (its settings and snapshots go with it, your saves stay), then install that version's APK from its release page."
+msgstr "当前版本为 {}。Android 只能用较新的版本覆盖安装此应用。若要回到 {}，请卸载应用（其设置和快照会一并删除，存档会保留），再从该版本的发布页面安装其 APK。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "You have {}. The new version ({}) is downloaded from GitHub and checked against the release's SHA-256 checksums, then Android asks you to install it. Saves, snapshots and settings are not touched."
+msgstr "当前版本为 {}。新版本（{}）将从 GitHub 下载，经发行版的 SHA-256 校验和验证后，由 Android 询问是否安装。存档、快照和设置不受影响。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
 msgid "You have {}. Version {} ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves and snapshots are not touched."
 msgstr "当前版本为 {}。版本 {}（{}）将从 GitHub 下载，经发行版的 SHA-256 校验和验证后替换 {}。存档和快照不受影响。"
 
@@ -7453,20 +7711,8 @@ msgid "{} is available"
 msgstr "{} 已发布"
 
 #: app/gui/src/views/update_ui.rs
-msgid "checking…"
-msgstr "正在检查…"
-
-#: app/gui/src/views/update_ui.rs
-msgid "up to date"
-msgstr "已是最新"
-
-#: app/gui/src/views/update_ui.rs
-msgid "Not installed: the settings file could not be copied. The editor you are running is unchanged."
-msgstr "未安装：无法复制设置文件。当前运行的编辑器未更改。"
-
-#: app/gui/src/views/update_ui.rs
-msgid "update failed"
-msgstr "更新失败"
+msgid "Android first asks to let this app install apps: allow it on the page that opened, come back, then press Download and install again."
+msgstr "Android 会先要求允许此应用安装应用：请在打开的页面中允许，返回后再按一次“下载并安装”。"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
@@ -7478,6 +7724,53 @@ msgstr "正在下载 {}…"
 msgid "Downloading… {} of {}"
 msgstr "正在下载… {} / {}"
 
+#: app/gui/src/views/update_ui.rs
+msgid "update failed"
+msgstr "更新失败"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "Not updated: {}. The editor you are running is unchanged."
+msgstr "未更新：{}。当前运行的编辑器未作更改。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "installing {}…"
+msgstr "正在安装 {}…"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Android asks you to confirm the install. The editor then closes: open it again to use the new version."
+msgstr "Android 会请你确认安装。之后编辑器会关闭：再次打开即可使用新版本。"
+
+#: app/gui/src/views/update_ui.rs
+msgid "installed"
+msgstr "已安装"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Open the editor again to use the new version."
+msgstr "再次打开编辑器即可使用新版本。"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Android refused it: the editor installed is signed with another key (a build of your own?). Uninstall it, then install the APK from the release page. Your saves stay; the settings and snapshots go with the app."
+msgstr "Android 拒绝安装：已安装的编辑器使用其他密钥签名（自行构建的版本？）。请卸载后，再从发布页面安装 APK。存档会保留；设置和快照会随应用一并删除。"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/update_ui.rs
+msgid "Android's installer answered {}"
+msgstr "Android 安装程序回应 {}"
+
+#: app/gui/src/views/update_ui.rs
+msgid "checking…"
+msgstr "正在检查…"
+
+#: app/gui/src/views/update_ui.rs
+msgid "up to date"
+msgstr "已是最新"
+
+#: app/gui/src/views/update_ui.rs
+msgid "Not installed: the settings file could not be copied. The editor you are running is unchanged."
+msgstr "未安装：无法复制设置文件。当前运行的编辑器未更改。"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/update_ui.rs
 msgid "{} is in place. Restart to use it."
@@ -7487,11 +7780,6 @@ msgstr "{} 已就绪。重新启动后即可使用。"
 #: app/gui/src/views/update_ui.rs
 msgid "{} installed, restart to use it"
 msgstr "{} 已安装，重新启动后即可使用"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/update_ui.rs
-msgid "Not updated: {}. The editor you are running is unchanged."
-msgstr "未更新：{}。当前运行的编辑器未作更改。"
 
 #: app/gui/src/views/update_ui.rs
 msgid "Update cancelled"

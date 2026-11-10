@@ -1,118 +1,481 @@
-// Settings as a sheet: theme, language, the snapshot before writing, reopening the save.
+// Settings on phones and tablets: one scrolling full screen, in the design's order.
+// Appearance, Safety, Saves, Updates. The desktop's emulator check, save folders and
+// snapshot folder are left out: Android shows the app no other apps, and its files are
+// the ones Android gives it.
 import { M } from "../theme.slint";
-import { CheckRow, GroupRow, Ico, Muted, Press, SectionLabel, Sheet, Tap } from "../widgets.slint";
-import { Api } from "../../common.slint";
+import { Btn, GroupRow, Ico, Muted, SectionLabel, Segmented, Sheet, SwitchRow, TopBar } from "../widgets.slint";
+import { ChoiceRow } from "../form.slint";
+import { Choice } from "../pick.slint";
+import { Api, VersionRow } from "../../common.slint";
 
-// Segmented buttons: one of a few choices.
-component Segmented inherits Rectangle {
-    in property <[string]> options;
-    in property <int> value;
-    callback picked(int);
-    height: 40px;
-    border-radius: 20px;
-    border-width: 1px;
-    border-color: M.outline;
-    accessible-role: tab-list;
-    HorizontalLayout {
-        for o[i] in root.options: Rectangle {
-            horizontal-stretch: 1;
-            background: i == root.value ? M.secondary-container : transparent;
-            border-top-left-radius: i == 0 ? 20px : 0px;
-            border-bottom-left-radius: i == 0 ? 20px : 0px;
-            border-top-right-radius: i == root.options.length - 1 ? 20px : 0px;
-            border-bottom-right-radius: i == root.options.length - 1 ? 20px : 0px;
-            accessible-role: tab;
-            accessible-label: o;
-            accessible-item-selected: i == root.value;
-            accessible-action-default => { root.picked(i); }
-            Press { on: ta.pressed; border-top-left-radius: parent.border-top-left-radius; border-bottom-left-radius: parent.border-bottom-left-radius; border-top-right-radius: parent.border-top-right-radius; border-bottom-right-radius: parent.border-bottom-right-radius; }
-            if i > 0: Rectangle { x: 0; width: 1px; background: M.outline; }
+// Settings shows its Updates and versions page (Back returns to Settings).
+export global SettingsView {
+    in-out property <bool> versions;
+    // a version's sheet: what changes from this one to it, its release page
+    in-out property <bool> version-open;
+    public function show-versions() {
+        SettingsView.versions = true;
+        // the list is read from GitHub the first time it shows (views/update_ui.rs)
+        Api.settings-section = 5;
+        Api.settings-section-shown();
+    }
+}
+
+// A heading over a group of settings.
+component Heading inherits HorizontalLayout {
+    in property <string> text;
+    padding-left: 16px;
+    padding-top: 20px;
+    padding-bottom: 8px;
+    SectionLabel { text: root.text; }
+}
+
+export component SettingsScreen inherits Rectangle {
+    in property <bool> open;
+    in property <length> top-inset;
+    in property <length> bottom-inset;
+    in property <length> side-inset;
+    // Android's predictive back while this screen is what Back closes
+    in property <float> drag;
+    border-radius: 28px * root.drag;
+    clip: root.drag > 0;
+    callback close();
+    property <float> t: root.open ? 1 : 0;
+    animate t { duration: M.anim; easing: ease-out; }
+    visible: self.t > 0.001;
+    opacity: self.t;
+    background: M.surface;
+    accessible-role: groupbox;
+    accessible-label: @tr("Settings");
+    property <[string]> starts: [@tr("Overview"), @tr("The last page used")];
+    property <[string]> keeps: [@tr("All"), @tr("Last {}", 5), @tr("Last {}", 10), @tr("Last {}", 20), @tr("Last {}", 50)];
+    // nothing under it takes the taps
+    TouchArea { }
+    VerticalLayout {
+        y: 24px * (1 - root.t);
+        padding-top: root.top-inset;
+        TopBar {
+            title: SettingsView.versions ? @tr("Updates and versions") : @tr("Settings");
+            back: true;
+            back-clicked => {
+                if SettingsView.versions {
+                    SettingsView.versions = false;
+                } else {
+                    root.close();
+                }
+            }
+        }
+        if SettingsView.versions: Flickable {
+            vertical-stretch: 1;
+            content-width: self.width;
             HorizontalLayout {
                 alignment: center;
-                spacing: 8px;
-                if i == root.value: VerticalLayout {
-                    alignment: center;
-                    Ico { source: @image-url("../icons/check.svg"); tint: M.on-secondary-container; width: 18px; height: 18px; }
+                VerticalLayout {
+                    max-width: 640px;
+                    horizontal-stretch: 1;
+                    padding-left: M.gutter + root.side-inset;
+                    padding-right: M.gutter + root.side-inset;
+                    padding-bottom: root.bottom-inset + 24px;
+                    spacing: 2px;
+                    alignment: start;
+                    VerticalLayout {
+                        padding: 16px;
+                        padding-top: 8px;
+                        spacing: 2px;
+                        SectionLabel { text: @tr("Other versions"); }
+                        Muted { text: @tr("Every published release, with what changed. Android installs only newer versions over the app."); }
+                    }
+                    if Api.versions-status != "": HorizontalLayout {
+                        padding: 16px;
+                        Muted { text: Api.versions-status; }
+                    }
+                    for v[i] in Api.versions: GroupRow {
+                        first: i == 0;
+                        last: i == Api.versions.length - 1;
+                        pressable: true;
+                        height: max(64px, vr.preferred-height);
+                        accessible-role: button;
+                        accessible-label: v.version;
+                        accessible-description: v.date;
+                        accessible-action-default => { Api.pick-version(i); SettingsView.version-open = true; }
+                        clicked => { Api.pick-version(i); SettingsView.version-open = true; }
+                        vr := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 16px;
+                            padding-top: 8px;
+                            padding-bottom: 8px;
+                            spacing: 12px;
+                            VerticalLayout {
+                                alignment: center;
+                                horizontal-stretch: 1;
+                                Text { text: v.version; color: M.on-surface; font-size: M.body-large; }
+                                Text { text: v.size != "" && v.size != "—" ? v.date + " · " + v.size : v.date; color: M.on-surface-variant; font-size: M.body-medium; }
+                            }
+                            if v.latest || v.current: VerticalLayout {
+                                alignment: center;
+                                Rectangle {
+                                    height: 24px;
+                                    width: tag.preferred-width + 16px;
+                                    border-radius: 8px;
+                                    background: v.latest ? M.primary : transparent;
+                                    border-width: v.latest ? 0px : 1px;
+                                    border-color: M.outline;
+                                    tag := Text {
+                                        text: v.current ? @tr("Installed") : @tr("Latest");
+                                        color: v.latest ? M.on-primary : M.on-surface-variant;
+                                        font-size: M.label-medium;
+                                        font-weight: M.medium;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                Text { text: o; color: i == root.value ? M.on-secondary-container : M.on-surface; font-size: M.label-large; font-weight: M.medium; vertical-alignment: center; }
             }
-            ta := Tap { tapped => { root.picked(i); } }
+        }
+        if !SettingsView.versions: Flickable {
+            vertical-stretch: 1;
+            content-width: self.width;
+            HorizontalLayout {
+                alignment: center;
+                VerticalLayout {
+                    max-width: 640px;
+                    horizontal-stretch: 1;
+                    padding-left: M.gutter + root.side-inset;
+                    padding-right: M.gutter + root.side-inset;
+                    padding-bottom: root.bottom-inset + 24px;
+                    spacing: 2px;
+                    alignment: start;
+
+                    Heading { text: @tr("Appearance"); }
+                    GroupRow {
+                        first: true;
+                        height: theme.preferred-height;
+                        theme := VerticalLayout {
+                            padding: 16px;
+                            padding-right: 12px;
+                            spacing: 10px;
+                            Text { text: @tr("Theme"); color: M.on-surface; font-size: M.body-large; }
+                            Segmented {
+                                options: [@tr("System"), @tr("Light"), @tr("Dark")];
+                                value: Api.settings.theme;
+                                picked(i) => { Api.set-setting("theme", i); }
+                            }
+                        }
+                    }
+                    GroupRow {
+                        height: lang.preferred-height;
+                        lang := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 8px;
+                            ChoiceRow {
+                                label: @tr("Language");
+                                value: Api.settings.languages[Api.settings.language];
+                                clicked => { Choice.show-for("setting", "language", @tr("Language"), Api.settings.languages, Api.settings.language); }
+                            }
+                        }
+                    }
+                    GroupRow {
+                        height: startrow.preferred-height;
+                        startrow := VerticalLayout {
+                            padding-left: 16px;
+                            padding-right: 8px;
+                            padding-bottom: 8px;
+                            ChoiceRow {
+                                label: @tr("Start on");
+                                value: root.starts[Api.settings.start-page];
+                                clicked => { Choice.show-for("setting", "start-page", @tr("Start on"), root.starts, Api.settings.start-page); }
+                            }
+                            Muted { text: @tr("The page shown when a save opens"); font-size: M.body-small; }
+                        }
+                    }
+                    GroupRow {
+                        last: true;
+                        height: anim.preferred-height;
+                        anim := SwitchRow {
+                            title: @tr("Animations");
+                            text: @tr("Page switches, cards moving to their new place, slides and fades.");
+                            checked: Api.settings.animations;
+                            toggled(on) => { Api.set-setting("animations", on ? 1 : 0); }
+                        }
+                    }
+
+                    Heading { text: @tr("Safety"); }
+                    GroupRow {
+                        first: true;
+                        last: true;
+                        height: conf.preferred-height;
+                        conf := SwitchRow {
+                            title: @tr("Confirmed changes only");
+                            text: @tr("Changes tagged Derived (worked out from the game's code, not yet checked in game) are refused. Changes already in Review stay.");
+                            checked: Api.settings.confirmed-only;
+                            toggled(on) => { Api.set-setting("confirmed-only", on ? 1 : 0); }
+                        }
+                    }
+
+                    Heading { text: @tr("Saves"); }
+                    GroupRow {
+                        first: true;
+                        height: reopen.preferred-height;
+                        reopen := SwitchRow {
+                            title: @tr("Open the last save on start");
+                            checked: Api.settings.reopen;
+                            toggled(on) => { Api.set-setting("reopen", on ? 1 : 0); }
+                        }
+                    }
+                    GroupRow {
+                        height: snap.preferred-height;
+                        snap := SwitchRow {
+                            title: @tr("Take a snapshot before writing");
+                            text: @tr("Write starts with this ticked.");
+                            checked: Api.settings.snapshot-first;
+                            toggled(on) => { Api.set-setting("snapshot-first", on ? 1 : 0); }
+                        }
+                    }
+                    GroupRow {
+                        height: snapopen.preferred-height;
+                        snapopen := SwitchRow {
+                            title: @tr("Take a snapshot when a save opens");
+                            text: @tr("Once per save and day: the save as it was before the day's changes is always kept.");
+                            checked: Api.settings.snapshot-on-open;
+                            toggled(on) => { Api.set-setting("snapshot-on-open", on ? 1 : 0); }
+                        }
+                    }
+                    GroupRow {
+                        height: keep.preferred-height;
+                        keep := VerticalLayout {
+                            padding-left: 16px;
+                            padding-right: 8px;
+                            padding-bottom: 8px;
+                            ChoiceRow {
+                                label: @tr("Keep per save");
+                                value: root.keeps[Api.settings.keep];
+                                clicked => { Choice.show-for("setting", "keep", @tr("Keep per save"), root.keeps, Api.settings.keep); }
+                            }
+                            Muted { text: @tr("After each new snapshot, the oldest beyond this number are deleted."); font-size: M.body-small; }
+                        }
+                    }
+                    GroupRow {
+                        last: true;
+                        height: recent.preferred-height;
+                        recent := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 4px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 8px;
+                            VerticalLayout {
+                                alignment: center;
+                                horizontal-stretch: 1;
+                                Text { text: @tr("Recent saves"); color: M.on-surface; font-size: M.body-large; }
+                                Muted { text: Api.settings.recent == 0 ? @tr("None yet") : @tr("{n} save listed on the Open page" | "{n} saves listed on the Open page" % Api.settings.recent); }
+                            }
+                            VerticalLayout {
+                                alignment: center;
+                                Btn { kind: "text"; text: @tr("Clear"); enabled: Api.settings.recent > 0; clicked => { Api.clear-recent(); } }
+                            }
+                        }
+                    }
+
+                    Heading { text: @tr("Updates"); }
+                    GroupRow {
+                        first: true;
+                        height: ver.preferred-height;
+                        ver := HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 4px;
+                            padding-top: 10px;
+                            padding-bottom: 10px;
+                            spacing: 8px;
+                            VerticalLayout {
+                                alignment: center;
+                                horizontal-stretch: 1;
+                                Text { text: @tr("Version"); color: M.on-surface; font-size: M.body-large; }
+                                if Api.update.status != "": Text { text: Api.update.status; color: Api.update.version != "" ? M.primary : M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+                            }
+                            VerticalLayout {
+                                alignment: center;
+                                // a newer version found: its sheet again
+                                if Api.update.version != "" && Api.update.state != "checking": Btn { kind: "text"; text: @tr("Update…"); clicked => { Api.update-open = true; } }
+                                if Api.update.version == "" || Api.update.state == "checking": Btn {
+                                    kind: "text";
+                                    text: @tr("Check now");
+                                    enabled: Api.update.state != "checking";
+                                    clicked => { Api.check-update(); }
+                                }
+                            }
+                        }
+                    }
+                    GroupRow {
+                        height: chk.preferred-height;
+                        chk := SwitchRow {
+                            title: @tr("Check for a new version on start");
+                            text: @tr("Asks GitHub for the latest release. Nothing is downloaded until you choose to update.");
+                            checked: Api.settings.check-updates;
+                            toggled(on) => { Api.set-setting("check-updates", on ? 1 : 0); }
+                        }
+                    }
+                    GroupRow {
+                        height: news.preferred-height;
+                        news := SwitchRow {
+                            title: @tr("Show what changed after an update");
+                            text: @tr("Once, on the first start of a new version: the changes since the version before, from GitHub.");
+                            checked: Api.settings.show-changes;
+                            toggled(on) => { Api.set-setting("show-changes", on ? 1 : 0); }
+                        }
+                    }
+                    GroupRow {
+                        last: true;
+                        pressable: true;
+                        height: 56px;
+                        accessible-role: button;
+                        accessible-label: @tr("Updates and versions");
+                        accessible-action-default => { SettingsView.show-versions(); }
+                        clicked => { SettingsView.show-versions(); }
+                        HorizontalLayout {
+                            padding-left: 16px;
+                            padding-right: 12px;
+                            Text { text: @tr("Updates and versions"); color: M.on-surface; font-size: M.body-large; vertical-alignment: center; horizontal-stretch: 1; }
+                            VerticalLayout {
+                                alignment: center;
+                                Ico { source: @image-url("../icons/chevron-right.svg"); }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
-export component SettingsSheet inherits Sheet {
+// A version of the list: what changes from the installed one to it, its release page.
+export component VersionSheet inherits Sheet {
+    // Settings is open
     in property <bool> open;
-    shown: root.open;
-    title: @tr("Settings");
+    property <bool> ok: Api.version-sel >= 0 && Api.version-sel < Api.versions.length;
+    property <VersionRow> v: Api.versions[Api.version-sel];
+    shown: root.open && SettingsView.versions && SettingsView.version-open && root.ok;
+    title: root.v.version;
+    // (no file for Android in the release: "—")
+    subtitle: root.v.size != "" && root.v.size != "—" ? root.v.date + " · " + root.v.size : root.v.date;
     content-h: body.preferred-height;
-    property <bool> languages;
-    Flickable {
-        content-width: self.width;
-        body := VerticalLayout {
-            padding-left: 16px;
-            padding-right: 16px;
-            padding-bottom: 16px;
+    close => { SettingsView.version-open = false; }
+    body := VerticalLayout {
+        Flickable {
+            content-width: self.width;
+            vertical-stretch: 1;
+            VerticalLayout {
+                alignment: start;
+                padding-left: 24px;
+                padding-right: 24px;
+                padding-bottom: 8px;
+                spacing: 6px;
+                if root.v.current: Muted { text: @tr("This is the version installed."); }
+                if Api.version-changes-status != "": Muted { text: Api.version-changes-status; }
+                for c in Api.version-changes: Text {
+                    text: c.head ? c.text : "• " + c.text;
+                    color: c.head ? M.primary : M.on-surface;
+                    font-size: c.head ? M.label-large : M.body-medium;
+                    font-weight: c.head ? M.medium : M.regular;
+                    wrap: word-wrap;
+                }
+            }
+        }
+        HorizontalLayout {
+            alignment: end;
+            padding: 16px;
+            padding-left: 24px;
             spacing: 8px;
-            HorizontalLayout {
-                padding-left: 8px;
-                SectionLabel { text: @tr("Theme"); }
+            Btn { kind: "outlined"; text: @tr("Release page"); clicked => { Api.version-page(Api.version-sel); } }
+            if root.v.installable: Btn { text: @tr("Download and install"); clicked => { Api.install-version(Api.version-sel); } }
+        }
+    }
+}
+
+// A newer version found (on start or with Check now) or picked in the list: what installing
+// it does, the download's progress, then Android's installer takes over.
+export component UpdateSheet inherits Sheet {
+    property <string> state: Api.update.state;
+    property <bool> busy: self.state == "downloading" || self.state == "installing";
+    shown: Api.update-open;
+    title: Api.update.older ? @tr("Go back to {}?", Api.update.version) : @tr("Version {} is available", Api.update.version);
+    content-h: lay.preferred-height;
+    close => {
+        if root.state == "downloading" {
+            Api.cancel-update();
+        } else {
+            Api.update-open = false;
+            Api.update-closed();
+        }
+    }
+    lay := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 12px;
+        Muted { text: Api.update.body; }
+        if root.state == "downloading": Rectangle {
+            height: 4px;
+            border-radius: 2px;
+            background: M.secondary-container;
+            Rectangle {
+                x: 0;
+                width: parent.width * Api.update.progress;
+                border-radius: 2px;
+                background: M.primary;
             }
-            Segmented {
-                options: [@tr("System"), @tr("Light"), @tr("Dark")];
-                value: Api.settings.theme;
-                picked(i) => { Api.set-setting("theme", i); }
+        }
+        // installing closes the editor
+        if Api.update.can-install && !root.busy && Api.change-count > 0: Text {
+            text: @tr("Write or undo the staged changes first: installing closes the editor.");
+            color: M.warn;
+            font-size: M.body-small;
+            wrap: word-wrap;
+        }
+        HorizontalLayout {
+            alignment: end;
+            spacing: 8px;
+            Btn { kind: "text"; text: @tr("Release notes"); clicked => { Api.update-page(); } }
+            if root.state == "downloading": Btn { kind: "outlined"; text: @tr("Cancel"); clicked => { Api.cancel-update(); } }
+            if Api.update.can-install && !root.busy && root.state != "ready": Btn {
+                text: root.state == "failed" ? @tr("Try again") : @tr("Download and install");
+                enabled: Api.change-count == 0;
+                clicked => { Api.install-update(); }
             }
-            HorizontalLayout {
-                padding-left: 8px;
-                padding-top: 12px;
-                SectionLabel { text: @tr("Language"); }
-            }
-            for l[i] in Api.settings.languages: GroupRow {
-                first: i == 0;
-                last: i == Api.settings.languages.length - 1;
-                pressable: true;
-                height: 48px;
-                background: i == Api.settings.language ? M.secondary-container : M.group;
-                accessible-role: button;
-                accessible-label: l;
-                accessible-item-selected: i == Api.settings.language;
-                accessible-action-default => { Api.set-setting("language", i); }
-                clicked => { Api.set-setting("language", i); }
-                HorizontalLayout {
-                    padding-left: 16px;
-                    padding-right: 16px;
-                    Text { text: l; color: i == Api.settings.language ? M.on-secondary-container : M.on-surface; font-size: M.body-large; vertical-alignment: center; horizontal-stretch: 1; }
-                    if i == Api.settings.language: VerticalLayout {
-                        alignment: center;
-                        Ico { source: @image-url("../icons/check.svg"); tint: M.on-secondary-container; }
-                    }
+        }
+    }
+}
+
+// After an update, once: what changed since the version that ran before.
+export component NewsSheet inherits Sheet {
+    shown: Api.news-title != "";
+    title: Api.news-title;
+    content-h: body.preferred-height;
+    close => { Api.news-title = ""; }
+    body := VerticalLayout {
+        Flickable {
+            content-width: self.width;
+            vertical-stretch: 1;
+            VerticalLayout {
+                alignment: start;
+                padding-left: 24px;
+                padding-right: 24px;
+                padding-bottom: 8px;
+                spacing: 6px;
+                for c in Api.news: Text {
+                    text: c.head ? c.text : "• " + c.text;
+                    color: c.head ? M.primary : M.on-surface;
+                    font-size: c.head ? M.label-large : M.body-medium;
+                    font-weight: c.head ? M.medium : M.regular;
+                    wrap: word-wrap;
                 }
             }
-            HorizontalLayout {
-                padding-left: 8px;
-                padding-top: 12px;
-                SectionLabel { text: @tr("Saves"); }
-            }
-            GroupRow {
-                first: true;
-                height: s1.preferred-height;
-                s1 := CheckRow {
-                    checked: Api.settings.snapshot-first;
-                    title: @tr("Take a snapshot before writing");
-                    text: @tr("Write starts with this ticked.");
-                    toggled(on) => { Api.set-setting("snapshot-first", on ? 1 : 0); }
-                }
-            }
-            GroupRow {
-                last: true;
-                height: s2.preferred-height;
-                s2 := CheckRow {
-                    checked: Api.settings.reopen;
-                    title: @tr("Open the last save at start");
-                    toggled(on) => { Api.set-setting("reopen", on ? 1 : 0); }
-                }
-            }
+        }
+        HorizontalLayout {
+            alignment: end;
+            padding: 16px;
+            padding-left: 24px;
+            Btn { kind: "outlined"; text: @tr("Release notes"); clicked => { Api.news-page(); } }
         }
     }
 }

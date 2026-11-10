@@ -1,17 +1,20 @@
 // The editor's activity: Slint draws in the NativeActivity's window, the Rust side
 // (app/gui/src/android) runs the app. This adds what native code cannot do itself: the
 // system's folder and file pickers (their answer comes back as an activity result), reading
-// and writing the documents they hand out, the wallpaper's colours, opening links, and
-// Android 14's predictive back (Back34.java).
+// and writing the documents they hand out, the wallpaper's colours, opening links,
+// installing an update (the system's package installer), and Android 14's predictive back
+// (Back34.java).
 //
 // Methods called from Rust never throw: a failure is null (then lastError()) or a string
 // starting with "!". No lambdas: the SDK's android.jar has no LambdaMetafactory for javac.
 package io.github.scrimas.mhgusaveeditor;
 
 import android.app.NativeActivity;
+import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.Intent;
 import android.content.UriPermission;
+import android.content.pm.PackageInstaller;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
@@ -21,13 +24,17 @@ import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.view.View;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class MainActivity extends NativeActivity {
     // the picker's answer (app/gui/src/android/mod.rs): the URIs one per line, "" when
@@ -38,17 +45,25 @@ public class MainActivity extends NativeActivity {
     // cancelled, 3 done; how far (0 to 1); from the right edge
     static native void onBack(int phase, float progress, boolean fromRight);
 
+    // an update's install (Rust: views/update_ui.rs): PackageInstaller's status (0 installed,
+    // 3 cancelled, 5 conflict...; -1 while Android asks the user) and its message
+    static native void onInstalled(int status, String message);
+
     // activity results of the pickers: 0x4000 | the request (its low 14 bits)
     private static final int PICKED = 0x4000;
+
+    // the installer's answer comes back to this activity as a new intent
+    private static final String INSTALLED = "io.github.scrimas.mhgusaveeditor.INSTALLED";
 
     private volatile String lastError = "";
 
     // Predictive back (Android 14 and newer). Slint registers a callback that turns Back
     // into its Back key; registered all the time, it would keep Android from ever playing
     // its back-to-home animation, and it gets no progress to animate with. So Slint's
-    // callback is kept here instead (getOnBackInvokedDispatcher below), and this activity
-    // registers its own animated one (Back34) only while the app has something for Back to
-    // do (setBack, from the Slint side); otherwise Back is Android's.
+    // callback is kept here and never registered (getOnBackInvokedDispatcher below), and
+    // this activity registers its own animated one (Back34) only while the app has
+    // something for Back to do (setBack, from the Slint side); otherwise Back is Android's.
+    // When the gesture goes through, the Rust side runs the interface's Back itself.
     private boolean created;
     private boolean wantBack;
     private Object slintBack;  // OnBackInvokedCallback
@@ -111,17 +126,12 @@ public class MainActivity extends NativeActivity {
         boolean on = wantBack && slintBack != null;
         if (on != (animated != null)) android.util.Log.i("mhgu-editor", on ? "back: the app's" : "back: Android's");
         if (on && animated == null) {
-            animated = Back34.callback(this);
+            animated = Back34.callback();
             real.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, (OnBackInvokedCallback) animated);
         } else if (!on && animated != null) {
             real.unregisterOnBackInvokedCallback((OnBackInvokedCallback) animated);
             animated = null;
         }
-    }
-
-    // the gesture went through: Slint's Back key, which the interface acts on
-    void backInvoked() {
-        if (slintBack != null) ((OnBackInvokedCallback) slintBack).onBackInvoked();
     }
 
     public String lastError() {
@@ -295,6 +305,79 @@ public class MainActivity extends NativeActivity {
             }
         }
         return null;
+    }
+
+    // Hands the APK at `path` (the app's cache, checked against the release's checksums) to
+    // Android's package installer, which asks the user and replaces the app: "" then, "?"
+    // when the app may not install apps yet (Android's page for that opens), "!why".
+    public String installApk(String path) {
+        try {
+            if (mayInstall("").equals("0")) return "?";
+            PackageInstaller pi = getPackageManager().getPackageInstaller();
+            PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+            params.setAppPackageName(getPackageName());
+            int id = pi.createSession(params);
+            PackageInstaller.Session session = pi.openSession(id);
+            try {
+                File f = new File(path);
+                try (InputStream in = new FileInputStream(f); OutputStream out = session.openWrite("base.apk", 0, f.length())) {
+                    byte[] buf = new byte[1 << 16];
+                    int n;
+                    while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                    session.fsync(out);
+                }
+                Intent back = new Intent(this, MainActivity.class).setAction(INSTALLED);
+                // mutable: the installer adds its status to it
+                int flags = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_MUTABLE : 0);
+                session.commit(PendingIntent.getActivity(this, id, back, flags).getIntentSender());
+            } catch (Exception e) {
+                session.abandon();
+                throw e;
+            } finally {
+                session.close();
+            }
+            return "";
+        } catch (Exception e) {
+            return "!" + (e.getMessage() != null ? e.getMessage() : e.toString());
+        }
+    }
+
+    // "1" when the app may install apps (an update); else "0", and Android's page to allow
+    // it opens (once allowed, it stays)
+    public String mayInstall(String unused) {
+        if (Build.VERSION.SDK_INT < 26 || getPackageManager().canRequestPackageInstalls()) return "1";
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName())));
+                } catch (Exception e) {
+                    lastError = e.toString();
+                }
+            }
+        });
+        return "0";
+    }
+
+    // the installer's status (the activity is singleTask: it comes here, not to a new one)
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent == null || !INSTALLED.equals(intent.getAction())) return;
+        int status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
+        if (status == PackageInstaller.STATUS_PENDING_USER_ACTION) {
+            // Android's own confirmation, which this app has to start
+            Intent confirm = (Intent) intent.getParcelableExtra(Intent.EXTRA_INTENT);
+            try {
+                if (confirm != null) startActivity(confirm);
+                onInstalled(-1, "");
+            } catch (Exception e) {
+                onInstalled(PackageInstaller.STATUS_FAILURE, e.toString());
+            }
+            return;
+        }
+        String msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
+        onInstalled(status, msg != null ? msg : "");
     }
 
     public String openUrl(final String url) {

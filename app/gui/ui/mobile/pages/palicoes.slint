@@ -1,0 +1,436 @@
+// Palicoes on phones and tablets: the Palicoes (For hire, Team and Dojo) as a list and a
+// detail (on a phone the detail takes the list's place, with Back; side by side from
+// 840 dp), the other tabs' counters and read-only lines, and the StreetPass Palicoes.
+import { ListView } from "std-widgets.slint";
+import { M } from "../theme.slint";
+import { Btn, Chip, ConfidenceLabel, CountField, GroupRow, Ico, IconBtn, Muted, Press, ScrollTabRow, SearchBar, SectionLabel, Tap, TextField } from "../widgets.slint";
+import { ChoiceRow, FormCard, LabelledCount, WasRow } from "../form.slint";
+import { Choice } from "../pick.slint";
+import { Api, Confidence, InfoRow, LookRow, OptionRow, PalicoEntry, Tabs } from "../../common.slint";
+
+export global PalicoView {
+    in-out property <bool> detail;
+}
+
+// A counter or choice of the Team and Dojo or Palico Scout tab.
+component FieldItem inherits VerticalLayout {
+    in property <OptionRow> r;
+    spacing: 4px;
+    if root.r.head != "": HorizontalLayout {
+        padding-left: 8px;
+        padding-top: 12px;
+        SectionLabel { text: root.r.head; }
+    }
+    if !root.r.number: ChoiceRow {
+        label: root.r.name;
+        value: root.r.choices[root.r.value];
+        clicked => { Choice.show-for("palico-field", root.r.id, root.r.name, root.r.choices, root.r.value); }
+    }
+    if root.r.number: LabelledCount {
+        label: root.r.name;
+        value: root.r.value;
+        maximum: root.r.max;
+        edited(v) => { Api.set-palico-field(root.r.id, v); }
+    }
+    if root.r.was != "": WasRow { was: root.r.was; key: root.r.id; }
+}
+
+// A read-only line under its section heading.
+component InfoItem inherits VerticalLayout {
+    in property <InfoRow> r;
+    spacing: 2px;
+    if root.r.head != "": HorizontalLayout {
+        padding-left: 8px;
+        padding-top: 12px;
+        padding-bottom: 4px;
+        SectionLabel { text: root.r.head; }
+    }
+    VerticalLayout {
+        padding-left: 8px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        Text { text: root.r.name; color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+        Text { text: root.r.value; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+    }
+}
+
+// A look: a list to pick from, or the game's palette of swatches.
+component LookItem inherits VerticalLayout {
+    in property <LookRow> r;
+    in property <length> avail;
+    property <int> cols: max(4, floor((root.avail + 8px) / 40px));
+    spacing: 6px;
+    if !root.r.is-colour: ChoiceRow {
+        label: root.r.label;
+        value: root.r.choices[root.r.index];
+        clicked => { Choice.show-for("palico-look", root.r.key, root.r.label, root.r.choices, root.r.index); }
+    }
+    if root.r.is-colour: VerticalLayout {
+        spacing: 8px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        Text { text: root.r.label; color: M.on-surface-variant; font-size: M.body-small; }
+        for row in (root.r.swatches.length + (root.r.index < 0 ? 1 : 0) + root.cols - 1) / root.cols: HorizontalLayout {
+            spacing: 8px;
+            alignment: start;
+            for k in root.cols: Rectangle {
+                property <int> i: row * root.cols + k;
+                width: 32px;
+                height: 32px;
+                if i < root.r.swatches.length: Rectangle {
+                    border-radius: 8px;
+                    background: root.r.swatches[i];
+                    border-width: i == root.r.index ? 3px : 1px;
+                    border-color: i == root.r.index ? M.primary : M.outline-variant;
+                    accessible-role: button;
+                    accessible-label: @tr("{}, colour {}", root.r.label, i + 1);
+                    accessible-item-selected: i == root.r.index;
+                    accessible-action-default => { Api.set-palico-look(root.r.key, i); }
+                    Tap { tapped => { Api.set-palico-look(root.r.key, i); } }
+                }
+                // a colour outside the palette, on its own at the end
+                if root.r.index < 0 && i == root.r.swatches.length: Rectangle {
+                    border-radius: 16px;
+                    background: root.r.colour;
+                    border-width: 2px;
+                    border-color: M.error;
+                }
+            }
+        }
+    }
+}
+
+// A support move or skill slot: its box to equip it, the entry (fixed when innate).
+component EntryItem inherits HorizontalLayout {
+    in property <PalicoEntry> e;
+    in property <int> n;
+    in property <string> kind;
+    in property <[string]> names;
+    spacing: 4px;
+    VerticalLayout {
+        alignment: center;
+        Rectangle {
+            width: M.touch;
+            height: M.touch;
+            accessible-role: checkbox;
+            accessible-label: @tr("Equip {}", root.e.name);
+            accessible-checked: root.e.on;
+            accessible-enabled: root.e.id != 0;
+            accessible-action-default => { if root.e.id != 0 { Api.set-palico-entry(root.kind, root.e.slot, root.e.id, !root.e.on); } }
+            Rectangle {
+                width: 18px;
+                height: 18px;
+                border-radius: 2px;
+                background: root.e.on ? M.primary : transparent;
+                border-width: root.e.on ? 0px : 2px;
+                border-color: root.e.id != 0 ? M.on-surface-variant : M.on-surface.with-alpha(0.38);
+                if root.e.on: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
+            }
+            Tap {
+                enabled: root.e.id != 0;
+                tapped => { Api.set-palico-entry(root.kind, root.e.slot, root.e.id, !root.e.on); }
+            }
+        }
+    }
+    if root.e.innate: VerticalLayout {
+        alignment: center;
+        horizontal-stretch: 1;
+        Text { text: root.e.name; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+        Text { text: @tr("Innate"); color: M.on-surface-variant; font-size: M.body-small; }
+    }
+    if !root.e.innate: ChoiceRow {
+        horizontal-stretch: 1;
+        label: root.e.taught ? @tr("Taught slot") : "";
+        value: root.names[root.e.id];
+        clicked => { Choice.show(root.kind == "moves" ? "palico-move" : "palico-skill", root.n, root.kind == "moves" ? @tr("Support moves") : @tr("Skills"), root.names, root.e.id); }
+    }
+}
+
+// The Palico picked.
+component PalicoDetailView inherits Flickable {
+    in property <length> avail;
+    in property <length> side;
+    in property <length> bottom-pad;
+    in property <bool> back;
+    property <string> key: "palico:" + Api.palico.index + ":";
+    content-width: self.width;
+    VerticalLayout {
+        padding-left: root.side;
+        padding-right: root.side;
+        padding-top: 4px;
+        padding-bottom: root.bottom-pad;
+        spacing: 12px;
+        alignment: start;
+        HorizontalLayout {
+            padding-left: root.back ? -12px : 0px;
+            spacing: 4px;
+            if root.back: IconBtn {
+                icon: @image-url("../icons/back.svg");
+                tint: M.on-surface;
+                label: @tr("Back");
+                clicked => { PalicoView.detail = false; }
+            }
+            Text { text: Api.palico.name; color: M.on-surface; font-size: M.title-large; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+        }
+        // the Palico with its equipment into another character, or a file
+        Flickable {
+            height: 40px;
+            content-width: acts.preferred-width;
+            acts := HorizontalLayout {
+                spacing: 8px;
+                for s in Api.other-characters: Btn { kind: "outlined"; text: @tr("Copy to {}", s.name); clicked => { Api.palico-copy(s.slot); } }
+                Btn { kind: "outlined"; text: @tr("Export…"); clicked => { Api.palico-export(); } }
+            }
+        }
+        if Api.palico.warning != "": Text { text: @tr("The game cannot make this: {}.", Api.palico.warning); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+        FormCard {
+            title: @tr("Palico");
+            VerticalLayout {
+                spacing: 6px;
+                padding-top: 6px;
+                TextField { label: @tr("Name"); value: Api.palico.name; committed(t) => { Api.set-palico-text("name", t); } }
+                if Api.palico.was-name != "": WasRow { was: Api.palico.was-name; key: root.key + "name"; }
+            }
+            LabelledCount {
+                label: @tr("Level");
+                value: Api.palico.level;
+                minimum: 1;
+                maximum: 99;
+                was: Api.palico.was-level;
+                key: root.key + "level";
+                edited(v) => { Api.set-palico("level", v); }
+            }
+            LabelledCount {
+                label: @tr("Experience");
+                hint: @tr("Separate from the level: the game does not recompute one from the other.");
+                value: Api.palico.exp;
+                maximum: 9999999;
+                was: Api.palico.was-exp;
+                key: root.key + "exp";
+                edited(v) => { Api.set-palico("exp", v); }
+            }
+            ChoiceRow {
+                label: @tr("Forte");
+                value: Api.biases[Api.palico.bias];
+                clicked => { Choice.show("palico-bias", 0, @tr("Forte"), Api.biases, Api.palico.bias); }
+            }
+            if Api.palico.was-bias != "": WasRow { was: Api.palico.was-bias; key: root.key + "bias"; }
+            ChoiceRow {
+                label: @tr("Target");
+                value: Api.palico-targets[Api.palico.target - 1];
+                clicked => { Choice.show("palico-target", 0, @tr("Target"), Api.palico-targets, Api.palico.target - 1); }
+            }
+            if Api.palico.was-target != "": WasRow { was: Api.palico.was-target; key: root.key + "target"; }
+            VerticalLayout {
+                spacing: 6px;
+                padding-top: 6px;
+                TextField { label: @tr("Greeting"); value: Api.palico.greeting; committed(t) => { Api.set-palico-text("greeting", t); } }
+                if Api.palico.was-greeting != "": WasRow { was: Api.palico.was-greeting; key: root.key + "greeting"; }
+            }
+            VerticalLayout {
+                spacing: 6px;
+                padding-top: 6px;
+                TextField { label: @tr("Original owner"); value: Api.palico.owner; committed(t) => { Api.set-palico-text("owner", t); } }
+                if Api.palico.was-owner != "": WasRow { was: Api.palico.was-owner; key: root.key + "owner"; }
+            }
+        }
+        FormCard {
+            title: @tr("Looks");
+            staged: Api.palico.was-looks != "";
+            if Api.palico.was-looks != "": WasRow { was: Api.palico.was-looks; key: root.key + "looks"; }
+            if Api.palico.warn-looks != "": Text { text: @tr("The game cannot make this: {}.", Api.palico.warn-looks); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+            for r in Api.palico.look-rows: LookItem { r: r; avail: root.avail - 2 * root.side - 28px; }
+        }
+        FormCard {
+            title: @tr("Support moves");
+            text: Api.palico.moves-used;
+            staged: Api.palico.was-moves != "";
+            if Api.palico.was-moves != "": WasRow { was: Api.palico.was-moves; key: root.key + "moves"; }
+            if Api.palico.warn-moves != "": Text { text: @tr("The game cannot make this: {}.", Api.palico.warn-moves); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+            for e[j] in Api.palico.move-rows: EntryItem { e: e; n: j; kind: "moves"; names: Api.palico-move-names; }
+        }
+        FormCard {
+            title: @tr("Skills");
+            text: Api.palico.skills-used;
+            staged: Api.palico.was-skills != "";
+            if Api.palico.was-skills != "": WasRow { was: Api.palico.was-skills; key: root.key + "skills"; }
+            if Api.palico.warn-skills != "": Text { text: @tr("The game cannot make this: {}.", Api.palico.warn-skills); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+            for e[j] in Api.palico.skill-rows: EntryItem { e: e; n: j; kind: "skills"; names: Api.palico-skill-names; }
+        }
+        Muted { text: @tr("Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."); font-size: M.body-small; }
+    }
+}
+
+export component PalicoesPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    property <bool> wide: root.width >= M.expanded-from;
+    property <length> list-w: root.wide ? min(400px, root.width * 0.4) : root.width;
+    changed wide => { PalicoView.detail = false; }
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.palico-tabs;
+            current: Api.palico-tab;
+            select(i) => {
+                PalicoView.detail = false;
+                Tabs.select("palicoes", i);
+            }
+        }
+        if Api.palico-tab >= 1 && Api.palico-note != "": HorizontalLayout {
+            padding-left: root.side;
+            padding-right: root.side;
+            padding-top: 12px;
+            spacing: 12px;
+            // the Dojo count (Team and Dojo) and removing a StreetPass Palico are Derived
+            if Api.palico-tab == 2 || Api.palico-tab == 3: VerticalLayout {
+                alignment: start;
+                ConfidenceLabel { level: Confidence.derived; }
+            }
+            Muted { text: Api.palico-note; font-size: M.body-small; horizontal-stretch: 1; }
+        }
+        // counters, choices and read-only lines
+        if Api.palico-tab >= 2 && Api.palico-tab != 3: Flickable {
+            vertical-stretch: 1;
+            content-width: self.width;
+            VerticalLayout {
+                padding-left: root.side - 8px;
+                padding-right: root.side - 8px;
+                padding-bottom: root.bottom-pad;
+                spacing: 4px;
+                alignment: start;
+                for r in Api.palico-fields: FieldItem { r: r; }
+                for r in Api.palico-info: InfoItem { r: r; }
+            }
+        }
+        // the StreetPass Palicoes
+        if Api.palico-tab == 3 && Api.palico-mail.length == 0: HorizontalLayout {
+            padding: root.side;
+            Muted { text: @tr("No StreetPass Palicoes."); horizontal-alignment: center; }
+        }
+        if Api.palico-tab == 3: ListView {
+            vertical-stretch: 1;
+            for r[i] in Api.palico-mail: VerticalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                padding-top: i == 0 ? 12px : 0px;
+                padding-bottom: i == Api.palico-mail.length - 1 ? root.bottom-pad : 2px;
+                GroupRow {
+                    first: i == 0;
+                    last: i == Api.palico-mail.length - 1;
+                    height: mail.preferred-height;
+                    mail := VerticalLayout {
+                        padding-left: 16px;
+                        padding-right: 8px;
+                        padding-top: 12px;
+                        padding-bottom: 4px;
+                        spacing: 2px;
+                        HorizontalLayout {
+                            spacing: 8px;
+                            Text { text: r.name; color: M.on-surface; font-size: M.body-large; font-weight: M.medium; overflow: elide; }
+                            if r.tag != "": Text { text: r.tag; color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+                        if r.line1 != "": Text { text: r.line1; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+                        if r.line2 != "": Text { text: r.line2; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+                        if r.greeting != "": Text { text: "“" + r.greeting + "”"; color: M.on-surface-variant; font-size: M.body-small; font-italic: true; wrap: word-wrap; }
+                        HorizontalLayout {
+                            alignment: end;
+                            if r.slot >= 0: Btn { kind: "text"; text: @tr("Remove"); fg: M.error; clicked => { Api.remove-palico-mail(r.slot); } }
+                        }
+                    }
+                }
+            }
+        }
+        // For hire, Team and Dojo: the Palicoes, then the one picked
+        if Api.palico-tab <= 1: HorizontalLayout {
+            vertical-stretch: 1;
+            if root.wide || !PalicoView.detail: VerticalLayout {
+                width: root.list-w;
+                padding-top: 12px;
+                spacing: 10px;
+                HorizontalLayout {
+                    padding-left: root.side;
+                    padding-right: root.wide ? 8px : root.side;
+                    SearchBar {
+                        placeholder: @tr("Search Palicoes");
+                        text <=> Api.palico-search;
+                        edited(t) => { Api.filter-palicoes(t); }
+                    }
+                }
+                if Api.palico-tab == 0: HorizontalLayout {
+                    padding-left: root.side;
+                    alignment: start;
+                    Chip { text: @tr("Import Palico…"); has-icon: true; icon: @image-url("../icons/add.svg"); clicked => { Api.palico-import(); } }
+                }
+                if Api.palicoes.length == 0: HorizontalLayout {
+                    padding: root.side;
+                    Muted { text: Api.palico-search == "" ? @tr("No Palicoes in this save.") : @tr("No Palico matches the search."); horizontal-alignment: center; }
+                }
+                ListView {
+                    vertical-stretch: 1;
+                    for p[i] in Api.palicoes: HorizontalLayout {
+                        padding-left: root.side - 8px;
+                        padding-right: root.wide ? 0px : root.side - 8px;
+                        padding-bottom: i == Api.palicoes.length - 1 ? root.bottom-pad : 0px;
+                        Rectangle {
+                            height: max(64px, prow.preferred-height);
+                            border-radius: 12px;
+                            background: root.wide && p.index == Api.palico.index ? M.secondary-container : transparent;
+                            accessible-role: list-item;
+                            accessible-label: p.name;
+                            accessible-description: p.sub;
+                            accessible-item-selected: root.wide && p.index == Api.palico.index;
+                            accessible-action-default => {
+                                Api.select-palico(p.index);
+                                PalicoView.detail = true;
+                            }
+                            Press { on: pt.pressed; border-radius: parent.border-radius; }
+                            pt := Tap {
+                                tapped => {
+                                    Api.select-palico(p.index);
+                                    PalicoView.detail = true;
+                                }
+                            }
+                            prow := HorizontalLayout {
+                                padding-left: 12px;
+                                padding-right: 12px;
+                                padding-top: 8px;
+                                padding-bottom: 8px;
+                                spacing: 12px;
+                                VerticalLayout {
+                                    alignment: center;
+                                    horizontal-stretch: 1;
+                                    Text { text: p.name; color: M.on-surface; font-size: M.body-large; overflow: elide; }
+                                    Text { text: p.sub; color: M.on-surface-variant; font-size: M.body-medium; overflow: elide; }
+                                }
+                                if p.changed: VerticalLayout {
+                                    alignment: center;
+                                    Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+                                }
+                                if !root.wide: VerticalLayout {
+                                    alignment: center;
+                                    Ico { source: @image-url("../icons/chevron-right.svg"); }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if root.wide: Rectangle { width: 1px; background: M.outline-variant; }
+            if (root.wide || PalicoView.detail) && Api.palico.index >= 0: PalicoDetailView {
+                horizontal-stretch: 1;
+                avail: root.wide ? root.width - root.list-w - 1px : root.width;
+                side: root.wide ? 24px : root.side;
+                bottom-pad: root.bottom-pad;
+                back: !root.wide;
+            }
+            if root.wide && Api.palico.index < 0: VerticalLayout {
+                horizontal-stretch: 1;
+                alignment: center;
+                padding: 24px;
+                Muted { text: @tr("Pick a Palico to edit it."); horizontal-alignment: center; }
+            }
+        }
+    }
+}

@@ -1,0 +1,152 @@
+// Form pieces of the detail pages (Character, Palicoes): a titled card, "was … Undo", a
+// setting that opens a list, a number with its label, a colour swatch row.
+import { M } from "theme.slint";
+import { Btn, CountField, Ico, Press, Tap } from "widgets.slint";
+import { Api } from "../common.slint";
+
+// A rounded card with its heading (and a line under it), a dot while its change waits.
+export component FormCard inherits Rectangle {
+    in property <string> title;
+    in property <string> text;
+    in property <bool> staged;
+    background: M.s-low;
+    border-radius: 16px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding-left: 16px;
+        padding-right: 12px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+        spacing: 10px;
+        if root.title != "": VerticalLayout {
+            spacing: 2px;
+            HorizontalLayout {
+                spacing: 8px;
+                Text { text: root.title; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+                if root.staged: VerticalLayout {
+                    alignment: center;
+                    Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+                }
+            }
+            if root.text != "": Text { text: root.text; color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+        }
+        @children
+    }
+}
+
+// "was 5 · Undo" under a staged value.
+export component WasRow inherits HorizontalLayout {
+    in property <string> was;
+    in property <string> key;
+    spacing: 4px;
+    alignment: start;
+    Text { text: @tr("was {}", root.was); color: M.primary; font-size: M.body-small; vertical-alignment: center; wrap: word-wrap; }
+    Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo-value(root.key); } }
+}
+
+// A setting that opens a list: its label, the value, a chevron.
+export component ChoiceRow inherits Rectangle {
+    in property <string> label;
+    in property <string> value;
+    in property <string> note;
+    // its left padding, for a row on its own (the cards pad theirs)
+    in property <length> inset;
+    callback clicked();
+    height: max(56px, lay.preferred-height);
+    border-radius: 12px;
+    accessible-role: button;
+    accessible-label: root.label;
+    accessible-value: root.value;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    lay := HorizontalLayout {
+        padding-top: 6px;
+        padding-bottom: 6px;
+        padding-left: root.inset;
+        padding-right: 4px + root.inset / 2;
+        spacing: 12px;
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: root.label; color: M.on-surface-variant; font-size: M.body-small; }
+            Text { text: root.value; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+            if root.note != "": Text { text: root.note; color: M.error; font-size: M.body-small; wrap: word-wrap; }
+        }
+        VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("icons/chevron-down.svg"); }
+        }
+    }
+    ta := Tap { tapped => { root.clicked(); } }
+}
+
+// A number with its label above it, and "was … Undo" under it.
+export component LabelledCount inherits VerticalLayout {
+    in property <string> label;
+    in property <string> hint;
+    in property <int> value;
+    in property <int> minimum: 0;
+    in property <int> maximum: 9999;
+    in property <int> limit: root.maximum;
+    in property <bool> show-limit;
+    in property <string> was;
+    in property <string> key;
+    callback edited(int);
+    spacing: 6px;
+    Text { text: root.label; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+    CountField {
+        value: root.value;
+        minimum: root.minimum;
+        maximum: root.maximum;
+        limit: root.limit;
+        show-limit: root.show-limit;
+        show-label: false;
+        label: root.label;
+        edited(v) => { root.edited(v); }
+    }
+    if root.was != "": WasRow { was: root.was; key: root.key; }
+    if root.was == "" && root.hint != "": Text { text: root.hint; color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+}
+
+// A colour: its swatch, its name and #RRGGBB; a tap opens the colour sheet.
+export component ColourRow inherits Rectangle {
+    in property <string> label;
+    in property <color> colour;
+    in property <string> hex;
+    // the armor's own colour: the swatch faded
+    in property <bool> dim;
+    callback clicked();
+    height: max(56px, lay.preferred-height);
+    border-radius: 12px;
+    accessible-role: button;
+    accessible-label: root.label;
+    accessible-value: root.hex;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    ta := Tap { tapped => { root.clicked(); } }
+    lay := HorizontalLayout {
+        padding-top: 6px;
+        padding-bottom: 6px;
+        padding-right: 4px;
+        spacing: 16px;
+        VerticalLayout {
+            alignment: center;
+            Rectangle {
+                width: 32px;
+                height: 32px;
+                border-radius: 16px;
+                background: root.colour;
+                border-width: 1px;
+                border-color: M.outline-variant;
+                opacity: root.dim ? 0.5 : 1;
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: root.label; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+            Text { text: root.hex; color: M.on-surface-variant; font-size: M.body-small; }
+        }
+        @children
+    }
+}

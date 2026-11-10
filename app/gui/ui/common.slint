@@ -226,6 +226,8 @@ export struct QuestRow {
     locked: bool, prowler: bool, changed: bool, was: string,
     // group header: label and the "Mark 1★ cleared" action (rank or deviant)
     header: bool, group: string, action: string,
+    // picked in the phone's selection mode
+    selected: bool,
 }
 
 export struct RequestRow { index: int, name: string, sub: string, accepted: bool, completed: bool, has-flags: bool, changed: bool, was: string }
@@ -386,6 +388,9 @@ export global Api {
     // from the right edge; and whether Back has something to do in the app (a sheet, a page,
     // changes to ask about): when it does not, Android plays its own back-to-home animation
     in property <bool> back-active;
+    // Android 14 and newer: Back comes as the predictive-back callback (android/back.rs);
+    // a Back key press also reaches the window as a key, which is then left alone
+    in property <bool> back-by-callback;
     in property <float> back-progress;
     in property <bool> back-from-right;
     callback back-enabled(bool);
@@ -735,6 +740,14 @@ export global Api {
     callback filter-quests();
     callback set-quest(int /* index */, string /* bit */, bool);
     callback quest-bulk(string /* group */);
+    // the phone's selection mode: quests picked one by one or by group, then marked
+    // cleared or not cleared in one change
+    in-out property <bool> quest-selecting;
+    in property <int> quest-selected;
+    callback quest-select(int /* index */, bool);
+    callback quest-select-group(string /* group */);
+    callback quest-select-none();
+    callback quest-mark-selected(bool /* cleared */);
 
     // requests
     in property <[RequestRow]> requests;

@@ -207,6 +207,8 @@ export component Drawer inherits Rectangle {
         Flickable {
             content-width: self.width;
             VerticalLayout {
+                // shorter than the view: the spare room stays below the content
+                alignment: start;
                 padding-top: root.top-inset + 12px;
                 padding-left: root.left-inset + 12px;
                 padding-right: 12px;

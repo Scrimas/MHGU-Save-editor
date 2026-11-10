@@ -1,0 +1,482 @@
+// Items on phones and tablets: the item box, the pouch and the loadouts as the game's grid
+// of slots. A slot opens the count editor (ItemSheet), which picks the item too; the page's
+// bulk actions preview in the goal sheet, as the Overview's goals do.
+import { ListView } from "std-widgets.slint";
+import { M } from "../theme.slint";
+import { Btn, Chip, CountField, Dot, GroupRow, Ico, IconBtn, ItemTile, Muted, Press, SearchBar, Sheet, TabRow, Tap, TextField } from "../widgets.slint";
+import { Api, Confidence, Fmt, ItemSlot, PickItem, Tabs } from "../../common.slint";
+
+// The slot being edited: the page opens it, the sheet (over the navigation bar, app.slint)
+// shows it.
+export global ItemEdit {
+    in-out property <bool> open;
+    // choosing the item (first, for an empty slot)
+    in-out property <bool> picking;
+    // a loadout position, not a box or pouch slot
+    in-out property <bool> loadout;
+    in-out property <int> slot: -1;
+    // the item picked, what the slot holds now
+    in-out property <int> id;
+    in-out property <int> held-id;
+    in-out property <string> name;
+    in-out property <image> icon;
+    in-out property <bool> has-icon;
+    in-out property <int> count: 1;
+    in-out property <int> max: 99;
+    in-out property <string> was;
+    in-out property <string> search;
+    // where the game stops: 99 in the box, the item's carry limit in the pouch and loadouts
+    out property <int> limit: Api.item-store == 0 && !loadout ? 99 : max;
+    out property <string> key: (Api.item-store == 0 ? "item:box:" : "item:pouch:") + slot;
+
+    public function edit(it: ItemSlot) {
+        loadout = Api.item-store == 2;
+        slot = it.slot;
+        id = it.id;
+        held-id = it.id;
+        name = it.name;
+        icon = it.icon;
+        has-icon = it.id != 0 && it.has-icon;
+        max = it.id == 0 ? 99 : it.max;
+        count = it.id == 0 ? 1 : it.count;
+        was = it.was;
+        search = "";
+        Api.search-picker("");
+        picking = it.id == 0;
+        open = true;
+    }
+    // the first empty slot (Add item)
+    public function add(free: int) {
+        loadout = false;
+        slot = free;
+        id = 0;
+        held-id = 0;
+        name = "";
+        has-icon = false;
+        max = 99;
+        count = 1;
+        was = "";
+        search = "";
+        Api.search-picker("");
+        picking = true;
+        open = true;
+    }
+    public function pick(p: PickItem) {
+        if id != p.id {
+            id = p.id;
+            max = p.max;
+            count = p.id == held-id ? count : 1;
+        }
+        name = p.name;
+        icon = p.icon;
+        has-icon = p.has-icon;
+        picking = false;
+    }
+    public function commit(item: int, n: int) {
+        if loadout {
+            Api.set-loadout-item(slot, item, n);
+        } else {
+            Api.set-item(slot, item, n);
+        }
+        open = false;
+    }
+    // Back: from the item list to the count when the slot has an item, else close
+    public function back() {
+        if picking && id != 0 {
+            picking = false;
+        } else {
+            open = false;
+        }
+    }
+}
+
+// The count editor and the item picker, as one bottom sheet.
+export component ItemSheet inherits Sheet {
+    shown: ItemEdit.open;
+    close-button: false;
+    content-h: ItemEdit.picking ? 2000px : editor.preferred-height;
+    close => { ItemEdit.open = false; }
+    property <string> where: ItemEdit.loadout ? @tr("Loadout {} · position {}", Api.loadout-sel + 1, ItemEdit.slot + 1)
+        : Api.item-store == 0 ? @tr("Item box slot {}", ItemEdit.slot + 1) : @tr("Pouch slot {}", ItemEdit.slot + 1);
+    // both stay, one shown: the sheet's height follows the editor's
+    editor := VerticalLayout {
+        visible: !ItemEdit.picking;
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 16px;
+        HorizontalLayout {
+            spacing: 16px;
+            Rectangle {
+                width: 56px;
+                height: 56px;
+                border-radius: 12px;
+                background: M.tile;
+                clip: true;
+                if ItemEdit.has-icon: Image { source: ItemEdit.icon; width: 44px; height: 44px; image-rendering: smooth; }
+            }
+            VerticalLayout {
+                alignment: center;
+                horizontal-stretch: 1;
+                Text { text: ItemEdit.id == 0 ? @tr("Empty") : ItemEdit.name; color: M.on-surface; font-size: M.title-large; wrap: word-wrap; }
+                Muted { text: root.where; }
+            }
+        }
+        HorizontalLayout {
+            alignment: start;
+            Btn {
+                kind: "outlined";
+                has-icon: true;
+                icon: @image-url("../icons/search.svg");
+                text: @tr("Change item");
+                clicked => { ItemEdit.picking = true; }
+            }
+        }
+        if ItemEdit.id != 0: VerticalLayout {
+            spacing: 6px;
+            CountField {
+                value <=> ItemEdit.count;
+                maximum: 99;
+                limit: ItemEdit.limit;
+            }
+            HorizontalLayout {
+                padding-left: 60px;
+                padding-right: 60px;
+                if ItemEdit.count > ItemEdit.limit: Text {
+                    text: @tr("over the carry limit of {}: the game never makes this stack", ItemEdit.limit);
+                    color: M.error;
+                    font-size: M.body-small;
+                    wrap: word-wrap;
+                }
+                if ItemEdit.count <= ItemEdit.limit && (Api.item-store != 0 || ItemEdit.loadout): Text {
+                    text: @tr("of {} (carry limit)", ItemEdit.limit);
+                    color: M.on-surface-variant;
+                    font-size: M.body-small;
+                    wrap: word-wrap;
+                }
+            }
+            if ItemEdit.was != "" && !ItemEdit.loadout: HorizontalLayout {
+                padding-left: 48px;
+                spacing: 4px;
+                alignment: start;
+                Text { text: @tr("was {}", ItemEdit.was); color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+                Btn {
+                    kind: "text";
+                    text: @tr("Undo");
+                    clicked => {
+                        Api.undo-value(ItemEdit.key);
+                        ItemEdit.open = false;
+                    }
+                }
+            }
+        }
+        HorizontalLayout {
+            spacing: 8px;
+            if ItemEdit.held-id != 0: Btn {
+                kind: "text";
+                text: ItemEdit.loadout ? @tr("Empty position") : @tr("Empty slot");
+                clicked => { ItemEdit.commit(0, 0); }
+            }
+            Rectangle { horizontal-stretch: 1; }
+            Btn { kind: "text"; text: @tr("Cancel"); clicked => { ItemEdit.open = false; } }
+            Btn {
+                text: @tr("Done");
+                enabled: ItemEdit.id != 0;
+                clicked => { ItemEdit.commit(ItemEdit.id, ItemEdit.count); }
+            }
+        }
+    }
+    if ItemEdit.picking: VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 8px;
+        spacing: 8px;
+        HorizontalLayout {
+            padding-left: 8px;
+            Text { text: root.where; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; }
+        }
+        SearchBar {
+            placeholder: @tr("Search items");
+            text <=> ItemEdit.search;
+            edited(t) => { Api.search-picker(t); }
+        }
+        ListView {
+            vertical-stretch: 1;
+            for p in Api.pick-items: Rectangle {
+                height: 56px;
+                border-radius: 12px;
+                background: p.id == ItemEdit.id ? M.secondary-container : transparent;
+                accessible-role: list-item;
+                accessible-label: p.name;
+                accessible-description: p.sub;
+                accessible-item-selected: p.id == ItemEdit.id;
+                accessible-action-default => { ItemEdit.pick(p); }
+                Press { on: pa.pressed; border-radius: parent.border-radius; }
+                HorizontalLayout {
+                    padding-left: 8px;
+                    padding-right: 8px;
+                    spacing: 16px;
+                    VerticalLayout {
+                        alignment: center;
+                        Rectangle {
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 8px;
+                            background: M.tile;
+                            clip: true;
+                            if p.has-icon: Image { source: p.icon; width: 32px; height: 32px; image-rendering: smooth; }
+                        }
+                    }
+                    VerticalLayout {
+                        alignment: center;
+                        horizontal-stretch: 1;
+                        Text { text: p.name; color: M.on-surface; font-size: M.body-large; overflow: elide; }
+                        if p.sub != "": Text { text: p.sub; color: M.on-surface-variant; font-size: M.body-small; overflow: elide; }
+                    }
+                }
+                pa := Tap { tapped => { ItemEdit.pick(p); } }
+            }
+        }
+        HorizontalLayout {
+            alignment: end;
+            Btn { kind: "text"; text: @tr("Cancel"); clicked => { ItemEdit.back(); } }
+        }
+    }
+}
+
+// Rows of tiles, as many columns as the width gives (four on a phone).
+component Grid inherits Rectangle {
+    in property <[ItemSlot]> slots;
+    in property <int> cols;
+    in property <length> side;
+    in property <length> bottom-pad;
+    // the key prefix of the slot Review jumped to ("item:box:"), "" for none
+    in property <string> flash-key;
+    in-out property <length> scroll-y <=> list.content-y;
+    // (a `for` straight inside a ListView is what Slint creates only as it scrolls)
+    list := ListView {
+    for r in (root.slots.length + root.cols - 1) / root.cols: HorizontalLayout {
+        padding-left: root.side;
+        // the scroll bar's room comes out of the right margin, so both look the same
+        padding-right: max(4px, root.side - (root.width - list.visible-width));
+        padding-bottom: r == (root.slots.length + root.cols - 1) / root.cols - 1 ? root.bottom-pad : 8px;
+        spacing: 8px;
+        for c in root.cols: Rectangle {
+            width: (root.width - 2 * root.side - (root.cols - 1) * 8px) / root.cols;
+            height: 112px;
+            if r * root.cols + c < root.slots.length: ItemTile {
+                it: root.slots[r * root.cols + c];
+                flash: (ItemEdit.open && ItemEdit.slot == self.it.slot && ItemEdit.loadout == (Api.item-store == 2))
+                    || (root.flash-key != "" && Api.highlight == root.flash-key + self.it.slot);
+                clicked => { ItemEdit.edit(self.it); }
+            }
+        }
+    }
+    }
+}
+
+export component ItemsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    callback preview(string);
+    property <length> side: M.gutter + root.side-inset;
+    // four columns on a phone, more as the window widens (tiles of about 96 dp)
+    property <int> cols: max(4, floor((root.width - 2 * root.side + 8px) / 104px));
+    VerticalLayout {
+        TabRow {
+            tabs: [@tr("Item box"), @tr("Pouch"), @tr("Loadouts")];
+            current: Api.item-store;
+            select(i) => { Tabs.select("items", i); }
+        }
+        if Api.item-store < 2: VerticalLayout {
+            padding-top: 12px;
+            spacing: 12px;
+            HorizontalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                SearchBar {
+                    placeholder: Api.item-store == 0 ? @tr("Search the item box") : @tr("Search the pouch");
+                    text <=> Api.item-filter;
+                    edited(t) => { Api.filter-items(t); }
+                }
+            }
+            Flickable {
+                height: 32px;
+                content-width: chips.preferred-width;
+                chips := HorizontalLayout {
+                    padding-left: root.side;
+                    padding-right: root.side;
+                    spacing: 8px;
+                    Chip {
+                        text: @tr("Add item");
+                        has-icon: true;
+                        icon: @image-url("../icons/add.svg");
+                        enabled: Api.item-free >= 0;
+                        clicked => { ItemEdit.add(Api.item-free); }
+                    }
+                    Chip {
+                        text: @tr("Sort & merge…");
+                        has-icon: true;
+                        icon: @image-url("../icons/sort.svg");
+                        clicked => { root.preview("items:sort"); }
+                    }
+                    Chip {
+                        text: @tr("Max counts…");
+                        has-icon: true;
+                        icon: @image-url("../icons/max.svg");
+                        clicked => { root.preview("items:max"); }
+                    }
+                    if Api.item-store == 0: Chip {
+                        text: @tr("Fill box…");
+                        has-icon: true;
+                        icon: @image-url("../icons/fill.svg");
+                        clicked => { Api.fill-show(); }
+                    }
+                }
+            }
+            HorizontalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                padding-bottom: 8px;
+                spacing: 8px;
+                VerticalLayout {
+                    alignment: center;
+                    Dot { level: Confidence.confirmed; }
+                }
+                Text { text: @tr("Confirmed in game except where marked"); color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; horizontal-stretch: 1; }
+            }
+            if Api.item-slots.length == 0: HorizontalLayout {
+                padding: root.side;
+                Muted { text: @tr("No slot matches the search."); horizontal-alignment: center; }
+            }
+            grid := Grid {
+                vertical-stretch: 1;
+                slots: Api.item-slots;
+                cols: root.cols;
+                side: root.side;
+                bottom-pad: root.bottom-pad;
+                flash-key: Api.item-store == 0 ? "item:box:" : "item:pouch:";
+                property <int> seq: Api.jump-seq;
+                function go() {
+                    if Api.page == "items" && Api.jump-row >= 0 {
+                        self.scroll-y = -max(0, floor(Api.jump-row / root.cols) - 1) * 120px;
+                    }
+                }
+                init => { self.go(); }
+                changed seq => { self.go(); }
+            }
+        }
+        // the loadouts: the list, then the one picked
+        if Api.item-store == 2 && Api.loadout-sel < 0: Flickable {
+            vertical-stretch: 1;
+            content-width: self.width;
+            VerticalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                padding-top: 12px;
+                padding-bottom: root.bottom-pad;
+                alignment: start;
+                HorizontalLayout {
+                    padding-left: 8px;
+                    padding-bottom: 10px;
+                    Muted { text: @tr("Pick a loadout to edit its name and items."); }
+                }
+                // (a run of empty loadouts is one row: its other entries have no height)
+                for r[i] in Api.loadouts: Rectangle {
+                  height: r.h > 0 ? g.height + 2px : 0px;
+                  visible: r.h > 0;
+                  g := GroupRow {
+                    y: 0;
+                    first: r.first == 0;
+                    last: r.last == Api.loadouts.length - 1;
+                    pressable: true;
+                    height: max(r.thin ? 48px : 64px, row.preferred-height);
+                    accessible-role: button;
+                    accessible-label: r.num + " " + r.name;
+                    accessible-description: r.sub;
+                    accessible-action-default => { Api.select-loadout(r.first); }
+                    clicked => { Api.select-loadout(r.first); }
+                    row := HorizontalLayout {
+                        padding-left: 16px;
+                        padding-right: 12px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        spacing: 12px;
+                        Text { text: r.num; width: 44px; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                        VerticalLayout {
+                            alignment: center;
+                            horizontal-stretch: 1;
+                            Text { text: r.name; color: r.used ? M.on-surface : M.on-surface-variant; font-size: M.body-large; wrap: word-wrap; }
+                            if r.sub != "": Text { text: r.sub; color: M.on-surface-variant; font-size: M.body-small; overflow: elide; }
+                        }
+                        if r.changed: VerticalLayout {
+                            alignment: center;
+                            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+                        }
+                        VerticalLayout {
+                            alignment: center;
+                            Ico { source: @image-url("../icons/chevron-right.svg"); }
+                        }
+                    }
+                  }
+                }
+            }
+        }
+        if Api.item-store == 2 && Api.loadout-sel >= 0: VerticalLayout {
+            vertical-stretch: 1;
+            HorizontalLayout {
+                padding-left: 4px + root.side-inset;
+                padding-right: root.side;
+                padding-top: 4px;
+                spacing: 4px;
+                IconBtn {
+                    icon: @image-url("../icons/back.svg");
+                    tint: M.on-surface;
+                    label: @tr("Back");
+                    clicked => { Api.select-loadout(-1); }
+                }
+                Text { text: @tr("Loadout {}", Api.loadout-sel + 1); color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; vertical-alignment: center; horizontal-stretch: 1; }
+                // to the slot before or after (the ones between shift)
+                IconBtn {
+                    icon: @image-url("../icons/arrow-up.svg");
+                    label: @tr("Move up");
+                    enabled: Api.loadout-sel > 0;
+                    clicked => { Api.reorder-key("loadout", Api.loadout-sel, -1); }
+                }
+                IconBtn {
+                    icon: @image-url("../icons/arrow-down.svg");
+                    label: @tr("Move down");
+                    enabled: Api.loadout-sel < 23;
+                    clicked => { Api.reorder-key("loadout", Api.loadout-sel, 1); }
+                }
+            }
+            VerticalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                padding-top: 12px;
+                padding-bottom: 12px;
+                spacing: 8px;
+                TextField {
+                    label: @tr("Loadout name");
+                    value: Api.loadout-name;
+                    label-bg: M.surface;
+                    committed(t) => { Api.set-loadout-name(t); }
+                }
+                if Api.loadout-was != "": HorizontalLayout {
+                    spacing: 4px;
+                    alignment: start;
+                    Text { text: @tr("was {}", Api.loadout-was); color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+                    Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo-value("loadout:" + Api.loadout-sel); } }
+                }
+                Muted { text: @tr("The 32 pouch positions the loadout fills, with the counts it takes from the box."); }
+            }
+            Grid {
+                vertical-stretch: 1;
+                slots: Api.loadout-slots;
+                cols: root.cols;
+                side: root.side;
+                bottom-pad: root.bottom-pad;
+            }
+        }
+    }
+}

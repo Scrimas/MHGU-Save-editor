@@ -2,7 +2,7 @@
 // can slide, follow the Back key and keep the design's exact sizes: buttons, the top app
 // bar with the character slot, the Review button, the snackbar, bottom sheets, list rows.
 import { M } from "theme.slint";
-import { Api, Fmt, Confidence, Win } from "../common.slint";
+import { Api, Fmt, Confidence, Win, ItemSlot } from "../common.slint";
 
 // A touch area for taps. A back swipe starts at the screen's left or right edge, and when
 // Android takes it over, Slint turns the cancelled touch into a release, which a plain
@@ -190,7 +190,10 @@ export component TopBar inherits Rectangle {
     callback back-clicked();
     callback avatar-clicked();
     callback overflow-clicked();
-    height: 64px;
+    // a long subtitle wraps (labels are never cut short): the bar grows with it
+    height: max(64px, col.preferred-height + 16px);
+    property <length> lead: root.back || root.close ? 4px + M.touch + 4px : M.gutter;
+    property <length> trail: 4px + (root.overflow ? M.touch + 4px : 0px) + (root.avatar ? M.touch + 4px : 0px);
     HorizontalLayout {
         padding-left: root.back || root.close ? 4px : M.gutter;
         padding-right: 4px;
@@ -204,11 +207,12 @@ export component TopBar inherits Rectangle {
                 clicked => { root.back-clicked(); }
             }
         }
-        VerticalLayout {
+        col := VerticalLayout {
             alignment: center;
-            horizontal-stretch: 1;
+            // a set width: wrapped text in a row is otherwise measured as one line
+            width: root.width - root.lead - root.trail;
             Text { text: root.title; font-size: M.title-large; color: M.on-surface; overflow: elide; }
-            if root.subtitle != "": Text { text: root.subtitle; font-size: M.body-medium; color: M.on-surface-variant; overflow: elide; }
+            if root.subtitle != "": Text { text: root.subtitle; font-size: M.body-medium; color: M.on-surface-variant; wrap: word-wrap; }
         }
         if root.overflow: VerticalLayout {
             alignment: center;
@@ -336,6 +340,9 @@ export component Sheet inherits Rectangle {
         TouchArea { }
         VerticalLayout {
             head := VerticalLayout {
+                // never more than the heading needs: spare height goes to the content (or
+                // stays below it), not into the heading's wrapped text
+                height: self.preferred-height;
                 padding-left: 24px;
                 padding-right: 8px;
                 padding-bottom: 8px;
@@ -348,7 +355,8 @@ export component Sheet inherits Rectangle {
                 if root.title != "": HorizontalLayout {
                     spacing: 8px;
                     VerticalLayout {
-                        horizontal-stretch: 1;
+                        // a set width: wrapped text in a row is otherwise measured as one line
+                        width: panel.width - 32px - (root.close-button ? M.touch + 8px : 0px);
                         alignment: center;
                         padding-top: 4px;
                         Text { text: root.title; font-size: M.title-large; color: M.on-surface; wrap: word-wrap; }
@@ -428,6 +436,7 @@ export component ListItem inherits Rectangle {
     lay := HorizontalLayout {
         padding-top: 12px;
         padding-bottom: 12px;
+        padding-left: root.has-icon ? 0px : 16px;
         padding-right: 8px;
         spacing: 16px;
         if root.has-icon: VerticalLayout {
@@ -568,6 +577,10 @@ export component Chip inherits Rectangle {
     in property <string> text;
     in property <bool> selected;
     in property <bool> check-icon: root.selected;
+    // an assist chip's icon (Add item, Sort & merge…)
+    in property <image> icon;
+    in property <bool> has-icon;
+    in property <bool> enabled: true;
     callback clicked();
     height: 32px;
     width: lay.preferred-width;
@@ -577,25 +590,524 @@ export component Chip inherits Rectangle {
     border-color: M.outline-variant;
     accessible-role: button;
     accessible-label: root.text;
-    accessible-checkable: true;
+    accessible-checkable: !root.has-icon;
     accessible-checked: root.selected;
-    accessible-action-default => { root.clicked(); }
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.clicked(); } }
     Press { on: ta.pressed; border-radius: parent.border-radius; }
     lay := HorizontalLayout {
-        padding-left: root.check-icon ? 8px : 16px;
+        padding-left: root.check-icon || root.has-icon ? 8px : 16px;
         padding-right: 16px;
         spacing: 8px;
         if root.check-icon: VerticalLayout {
             alignment: center;
             Ico { source: @image-url("icons/check.svg"); tint: M.on-secondary-container; width: 18px; height: 18px; }
         }
+        if root.has-icon && !root.check-icon: VerticalLayout {
+            alignment: center;
+            Ico { source: root.icon; tint: root.enabled ? M.primary : M.on-surface.with-alpha(0.38); width: 18px; height: 18px; }
+        }
         Text {
             text: root.text;
-            color: root.selected ? M.on-secondary-container : M.on-surface-variant;
+            color: !root.enabled ? M.on-surface.with-alpha(0.38) : root.selected ? M.on-secondary-container : root.has-icon ? M.on-surface : M.on-surface-variant;
             font-size: M.label-large;
             font-weight: M.medium;
             vertical-alignment: center;
         }
     }
+    ta := Tap {
+        enabled: root.enabled;
+        tapped => { root.clicked(); }
+    }
+}
+
+// Primary tabs: equal columns, the label in the primary colour over a 3 dp indicator as
+// wide as the label, a hairline under the row.
+export component TabRow inherits Rectangle {
+    in property <[string]> tabs;
+    in property <int> current;
+    callback select(int);
+    height: max(48px, lay.preferred-height);
+    accessible-role: tab-list;
+    lay := HorizontalLayout {
+        for t[i] in root.tabs: Rectangle {
+            horizontal-stretch: 1;
+            min-height: 48px;
+            preferred-height: lbl.preferred-height + 24px;
+            accessible-role: tab;
+            accessible-label: t;
+            accessible-item-selected: i == root.current;
+            accessible-action-default => { root.select(i); }
+            Press { on: ta.pressed; }
+            lbl := Text {
+                width: parent.width - 16px;
+                text: t;
+                color: i == root.current ? M.primary : M.on-surface-variant;
+                font-size: M.label-large;
+                font-weight: M.medium;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                wrap: word-wrap;
+            }
+            if i == root.current: Rectangle {
+                y: parent.height - 3px;
+                width: max(24px, min(parent.width - 16px, lbl.preferred-width));
+                height: 3px;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+                background: M.primary;
+            }
+            ta := Tap { tapped => { root.select(i); } }
+        }
+    }
+    Rectangle { y: parent.height - 1px; height: 1px; background: M.s-highest; }
+}
+
+// The search bar: a 56 dp pill with the search icon, the field, and a Clear button once
+// something is typed.
+export component SearchBar inherits Rectangle {
+    in property <string> placeholder;
+    in-out property <string> text;
+    callback edited(string);
+    height: 56px;
+    border-radius: 28px;
+    background: M.s-high;
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: root.text != "" ? 4px : 20px;
+        spacing: 12px;
+        VerticalLayout {
+            alignment: center;
+            Ico { source: @image-url("icons/search.svg"); }
+        }
+        Rectangle {
+            horizontal-stretch: 1;
+            if root.text == "": Text {
+                x: 0;
+                width: parent.width;
+                text: root.placeholder;
+                color: M.on-surface-variant;
+                font-size: M.body-large;
+                vertical-alignment: center;
+                overflow: elide;
+            }
+            input := TextInput {
+                text <=> root.text;
+                color: M.on-surface;
+                font-size: M.body-large;
+                vertical-alignment: center;
+                single-line: true;
+                input-type: InputType.search;
+                accessible-label: root.placeholder;
+                edited => { root.edited(self.text); }
+            }
+        }
+        if root.text != "": VerticalLayout {
+            alignment: center;
+            IconBtn {
+                icon: @image-url("icons/close.svg");
+                label: @tr("Clear the search");
+                clicked => {
+                    root.text = "";
+                    root.edited("");
+                }
+            }
+        }
+    }
+}
+
+// A slot of the item box, the pouch or a loadout: its number, a dot while the change waits
+// in Review, the game's icon on its dark tile with the count on it, the name.
+export component ItemTile inherits Rectangle {
+    in property <ItemSlot> it;
+    // the slot Review or a search jumped to, or the one being edited
+    in property <bool> flash;
+    callback clicked();
+    property <bool> empty: root.it.id == 0;
+    property <color> bg: root.flash ? M.secondary-container : root.empty ? M.surface : M.s-high;
+    height: 112px;
+    border-radius: 12px;
+    background: root.empty && !root.flash ? transparent : root.bg;
+    border-width: root.flash ? 2px : root.empty ? 1px : 0px;
+    border-color: root.flash ? M.primary : M.outline-variant;
+    accessible-role: button;
+    accessible-label: root.empty ? @tr("Slot {}: empty", root.it.slot + 1) : @tr("Slot {}: {} ×{}", root.it.slot + 1, root.it.name, root.it.count);
+    accessible-description: root.it.was != "" ? @tr("was {}", root.it.was) : root.it.warning;
+    accessible-action-default => { root.clicked(); }
+    Press { on: ta.pressed; border-radius: parent.border-radius; }
+    VerticalLayout {
+        padding-top: 6px;
+        padding-bottom: 8px;
+        padding-left: 4px;
+        padding-right: 4px;
+        spacing: 4px;
+        HorizontalLayout {
+            padding-left: 4px;
+            padding-right: 4px;
+            spacing: 4px;
+            height: 14px;
+            Text { text: root.it.slot + 1; color: M.on-surface-variant; font-size: M.label-small; vertical-alignment: center; horizontal-stretch: 1; }
+            if root.it.changed: VerticalLayout {
+                alignment: center;
+                Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+            }
+        }
+        HorizontalLayout {
+            alignment: center;
+            Rectangle {
+                width: 44px;
+                height: 44px;
+                if !root.empty: Rectangle {
+                    border-radius: 8px;
+                    background: M.tile;
+                    clip: true;
+                    if root.it.has-icon: Image { source: root.it.icon; width: 36px; height: 36px; image-rendering: smooth; }
+                }
+                if !root.empty: Rectangle {
+                    width: max(22px, cnt.preferred-width + 12px);
+                    height: 22px;
+                    x: parent.width + 8px - self.width;
+                    y: parent.height + 6px - self.height;
+                    border-radius: 11px;
+                    border-width: 2px;
+                    border-color: root.bg;
+                    background: root.it.warning != "" ? M.error : root.it.changed ? M.primary : M.on-surface-variant;
+                    cnt := Text {
+                        text: "×" + root.it.count;
+                        color: root.it.warning != "" ? M.on-error : root.it.changed ? M.on-primary : M.surface;
+                        font-size: M.label-small;
+                        font-weight: M.medium;
+                    }
+                }
+            }
+        }
+        Text {
+            text: root.empty ? @tr("Empty") : root.it.name;
+            color: root.empty ? M.on-surface-variant : M.on-surface;
+            font-size: 11.5px;
+            horizontal-alignment: center;
+            vertical-alignment: top;
+            wrap: word-wrap;
+            overflow: elide;
+            height: 30px;
+        }
+    }
     ta := Tap { tapped => { root.clicked(); } }
+}
+
+// A count: − and + round tonal buttons around an outlined number field with its label and
+// the limit after it; red when the value is over the limit.
+export component CountField inherits HorizontalLayout {
+    in-out property <int> value;
+    in property <int> minimum: 1;
+    in property <int> maximum: 99;
+    // where the game stops (the carry limit); above it the field turns red
+    in property <int> limit: root.maximum;
+    in property <string> label: @tr("Count");
+    in property <bool> enabled: true;
+    // "/ 99" after the number
+    in property <bool> show-limit: true;
+    // values below 0 (talisman points): the keyboard gets a minus sign
+    in property <bool> signed;
+    // what the floating label sits on; no floating label when the card says it already
+    in property <color> label-bg: M.s-low;
+    in property <bool> show-label: true;
+    callback edited(int);
+    spacing: 12px;
+    property <bool> over: root.value > root.limit;
+    changed value => {
+        if input.text.to-float() != root.value {
+            input.text = root.value;
+        }
+    }
+    init => { input.text = root.value; }
+    function set(v: int) {
+        root.value = max(root.minimum, min(root.maximum, v));
+        input.text = root.value;
+        root.edited(root.value);
+    }
+    // what is typed, once the keyboard leaves the field or Done is pressed
+    public function flush() {
+        if input.text.is-float() {
+            root.set(input.text.to-float());
+        } else {
+            input.text = root.value;
+        }
+    }
+    VerticalLayout {
+        alignment: center;
+        Rectangle {
+            width: M.touch;
+            height: M.touch;
+            border-radius: self.height / 2;
+            background: root.enabled && root.value > root.minimum ? M.secondary-container : M.on-surface.with-alpha(0.12);
+            accessible-role: button;
+            accessible-label: @tr("One less");
+            accessible-enabled: root.enabled && root.value > root.minimum;
+            accessible-action-default => { root.set(root.value - 1); }
+            Press { on: less.pressed; tint: M.on-secondary-container; border-radius: parent.border-radius; }
+            Ico { source: @image-url("icons/minus.svg"); tint: root.enabled && root.value > root.minimum ? M.on-secondary-container : M.on-surface.with-alpha(0.38); }
+            less := Tap {
+                enabled: root.enabled && root.value > root.minimum;
+                tapped => { root.set(root.value - 1); }
+            }
+        }
+    }
+    Rectangle {
+        horizontal-stretch: 1;
+        height: 56px;
+        border-radius: 4px;
+        border-width: input.has-focus || root.over ? 2px : 1px;
+        border-color: !root.enabled ? M.on-surface.with-alpha(0.12) : root.over ? M.error : input.has-focus ? M.primary : M.outline;
+        // the floating label, on the sheet's colour over the border
+        if root.show-label: Rectangle {
+            x: 12px;
+            y: -8px;
+            width: lab.preferred-width + 8px;
+            height: 16px;
+            background: root.label-bg;
+            lab := Text {
+                text: root.label;
+                color: root.over ? M.error : input.has-focus ? M.primary : M.on-surface-variant;
+                font-size: M.body-small;
+            }
+        }
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 12px;
+            spacing: 8px;
+            input := TextInput {
+                horizontal-stretch: 1;
+                enabled: root.enabled;
+                color: M.on-surface;
+                font-size: M.body-large;
+                vertical-alignment: center;
+                single-line: true;
+                input-type: root.signed ? InputType.text : InputType.number;
+                accessible-label: root.label;
+                edited => {
+                    if self.text.is-float() {
+                        root.value = max(root.minimum, min(root.maximum, self.text.to-float()));
+                        root.edited(root.value);
+                    }
+                }
+                accepted => { root.flush(); }
+                changed has-focus => {
+                    if !self.has-focus {
+                        root.flush();
+                    }
+                }
+            }
+            if root.show-limit: Text {
+                text: "/ " + root.limit;
+                color: M.on-surface-variant;
+                font-size: M.body-large;
+                vertical-alignment: center;
+            }
+        }
+    }
+    VerticalLayout {
+        alignment: center;
+        Rectangle {
+            width: M.touch;
+            height: M.touch;
+            border-radius: self.height / 2;
+            background: root.enabled && root.value < root.maximum ? M.secondary-container : M.on-surface.with-alpha(0.12);
+            accessible-role: button;
+            accessible-label: @tr("One more");
+            accessible-enabled: root.enabled && root.value < root.maximum;
+            accessible-action-default => { root.set(root.value + 1); }
+            Press { on: more.pressed; tint: M.on-secondary-container; border-radius: parent.border-radius; }
+            Ico { source: @image-url("icons/add.svg"); tint: root.enabled && root.value < root.maximum ? M.on-secondary-container : M.on-surface.with-alpha(0.38); }
+            more := Tap {
+                enabled: root.enabled && root.value < root.maximum;
+                tapped => { root.set(root.value + 1); }
+            }
+        }
+    }
+}
+
+// An outlined text field with its floating label; `committed` once the keyboard leaves it
+// or Enter is pressed, when the text changed.
+export component TextField inherits Rectangle {
+    in property <string> label;
+    // the stored value: the field follows it until typed into
+    in property <string> value;
+    in property <color> label-bg: M.s-low;
+    callback committed(string);
+    height: 56px;
+    border-radius: 4px;
+    border-width: input.has-focus ? 2px : 1px;
+    border-color: input.has-focus ? M.primary : M.outline;
+    changed value => { input.text = root.value; }
+    init => { input.text = root.value; }
+    Rectangle {
+        x: 12px;
+        y: -8px;
+        width: lab.preferred-width + 8px;
+        height: 16px;
+        background: root.label-bg;
+        lab := Text { text: root.label; color: input.has-focus ? M.primary : M.on-surface-variant; font-size: M.body-small; }
+    }
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        input := TextInput {
+            color: M.on-surface;
+            font-size: M.body-large;
+            vertical-alignment: center;
+            single-line: true;
+            accessible-label: root.label;
+            accepted => {
+                if self.text != root.value {
+                    root.committed(self.text);
+                }
+            }
+            changed has-focus => {
+                if !self.has-focus && self.text != root.value {
+                    root.committed(self.text);
+                }
+            }
+        }
+    }
+}
+
+// Segmented buttons: one of a few choices.
+export component Segmented inherits Rectangle {
+    in property <[string]> options;
+    in property <int> value;
+    callback picked(int);
+    height: 40px;
+    border-radius: 20px;
+    border-width: 1px;
+    border-color: M.outline;
+    accessible-role: tab-list;
+    HorizontalLayout {
+        for o[i] in root.options: Rectangle {
+            horizontal-stretch: 1;
+            background: i == root.value ? M.secondary-container : transparent;
+            border-top-left-radius: i == 0 ? 20px : 0px;
+            border-bottom-left-radius: i == 0 ? 20px : 0px;
+            border-top-right-radius: i == root.options.length - 1 ? 20px : 0px;
+            border-bottom-right-radius: i == root.options.length - 1 ? 20px : 0px;
+            accessible-role: tab;
+            accessible-label: o;
+            accessible-item-selected: i == root.value;
+            accessible-action-default => { root.picked(i); }
+            Press { on: ta.pressed; border-top-left-radius: parent.border-top-left-radius; border-bottom-left-radius: parent.border-bottom-left-radius; border-top-right-radius: parent.border-top-right-radius; border-bottom-right-radius: parent.border-bottom-right-radius; }
+            if i > 0: Rectangle { x: 0; width: 1px; background: M.outline; }
+            HorizontalLayout {
+                alignment: center;
+                spacing: 8px;
+                if i == root.value: VerticalLayout {
+                    alignment: center;
+                    Ico { source: @image-url("icons/check.svg"); tint: M.on-secondary-container; width: 18px; height: 18px; }
+                }
+                Text { text: o; color: i == root.value ? M.on-secondary-container : M.on-surface; font-size: M.label-large; font-weight: M.medium; vertical-alignment: center; }
+            }
+            ta := Tap { tapped => { root.picked(i); } }
+        }
+    }
+}
+
+// Tabs that scroll sideways when there are many (the quest categories): each as wide as
+// its label, the indicator under the label.
+export component ScrollTabRow inherits Rectangle {
+    in property <[string]> tabs;
+    in property <int> current;
+    callback select(int);
+    height: 48px;
+    accessible-role: tab-list;
+    Flickable {
+        content-width: max(self.width, row.preferred-width);
+        row := HorizontalLayout {
+            padding-left: 4px;
+            padding-right: 4px;
+            alignment: start;
+            for t[i] in root.tabs: Rectangle {
+                width: lbl.preferred-width + 28px;
+                accessible-role: tab;
+                accessible-label: t;
+                accessible-item-selected: i == root.current;
+                accessible-action-default => { root.select(i); }
+                Press { on: ta.pressed; }
+                lbl := Text {
+                    text: t;
+                    color: i == root.current ? M.primary : M.on-surface-variant;
+                    font-size: M.label-large;
+                    font-weight: M.medium;
+                }
+                if i == root.current: Rectangle {
+                    y: parent.height - 3px;
+                    x: 14px;
+                    width: parent.width - 28px;
+                    height: 3px;
+                    border-top-left-radius: 3px;
+                    border-top-right-radius: 3px;
+                    background: M.primary;
+                }
+                ta := Tap { tapped => { root.select(i); } }
+            }
+        }
+    }
+    Rectangle { y: parent.height - 1px; height: 1px; background: M.s-highest; }
+}
+
+// A setting that turns on and off: its title and supporting text, the M3 switch.
+export component SwitchRow inherits Rectangle {
+    in-out property <bool> checked;
+    in property <string> title;
+    in property <string> text;
+    in property <bool> enabled: true;
+    callback toggled(bool);
+    height: max(56px, lay.preferred-height);
+    accessible-role: switch;
+    accessible-checkable: true;
+    accessible-checked: root.checked;
+    accessible-label: root.title;
+    accessible-description: root.text;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.checked = !root.checked; root.toggled(root.checked); } }
+    lay := HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 12px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        spacing: 16px;
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: root.title; color: root.enabled ? M.on-surface : M.on-surface.with-alpha(0.38); font-size: M.body-large; wrap: word-wrap; }
+            if root.text != "": Muted { text: root.text; }
+        }
+        VerticalLayout {
+            alignment: center;
+            Rectangle {
+                width: 52px;
+                height: 32px;
+                border-radius: 16px;
+                background: root.checked ? M.primary : M.s-highest;
+                border-width: root.checked ? 0px : 2px;
+                border-color: M.outline;
+                opacity: root.enabled ? 1 : 0.38;
+                knob := Rectangle {
+                    property <length> d: root.checked ? 24px : 16px;
+                    x: root.checked ? parent.width - 4px - self.d : 8px;
+                    width: self.d;
+                    height: self.d;
+                    border-radius: self.d / 2;
+                    background: root.checked ? M.on-primary : M.outline;
+                    animate x, width, height { duration: M.anim; easing: ease-out; }
+                    if root.checked: Ico { source: @image-url("icons/check.svg"); tint: M.primary; width: 16px; height: 16px; }
+                }
+            }
+        }
+    }
+    Tap {
+        enabled: root.enabled;
+        tapped => {
+            root.checked = !root.checked;
+            root.toggled(root.checked);
+        }
+    }
 }

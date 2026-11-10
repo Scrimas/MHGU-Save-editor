@@ -1,0 +1,271 @@
+// Options and Guild Cards on phones and tablets.
+import { ListView } from "std-widgets.slint";
+import { M } from "../theme.slint";
+import { Btn, CheckRow, Chip, ConfidenceLabel, CountField, GroupRow, Ico, Muted, Press, ScrollTabRow, SectionLabel, Tap, TextField } from "../widgets.slint";
+import { Choice } from "../pick.slint";
+import { Api, Confidence, OptionRow, PhraseRow, Tabs } from "../../common.slint";
+
+// "was 5 · Undo" under a staged value.
+component WasRow inherits HorizontalLayout {
+    in property <string> was;
+    in property <string> key;
+    spacing: 4px;
+    alignment: start;
+    Text { text: @tr("was {}", root.was); color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+    Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo-value(root.key); } }
+}
+
+// An option: its choices (a list opens) or its number.
+component OptionItem inherits VerticalLayout {
+    in property <OptionRow> r;
+    in property <length> side;
+    padding-left: root.side;
+    padding-right: root.side;
+    spacing: 4px;
+    if root.r.head != "": HorizontalLayout {
+        padding-left: 8px;
+        padding-top: 16px;
+        padding-bottom: 4px;
+        SectionLabel { text: root.r.head; }
+    }
+    if !root.r.number: Rectangle {
+        height: max(56px, row.preferred-height);
+        border-radius: 12px;
+        accessible-role: button;
+        accessible-label: root.r.name;
+        accessible-value: root.r.choices[root.r.value];
+        accessible-action-default => { Choice.show-for("option", root.r.id, root.r.name, root.r.choices, root.r.value); }
+        Press { on: ta.pressed; border-radius: parent.border-radius; }
+        ta := Tap { tapped => { Choice.show-for("option", root.r.id, root.r.name, root.r.choices, root.r.value); } }
+        row := HorizontalLayout {
+            padding-left: 8px;
+            padding-right: 4px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            spacing: 12px;
+            VerticalLayout {
+                alignment: center;
+                horizontal-stretch: 1;
+                Text { text: root.r.name; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+                Text { text: root.r.choices[root.r.value]; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+            }
+            if root.r.was != "": VerticalLayout {
+                alignment: center;
+                Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+            }
+            VerticalLayout {
+                alignment: center;
+                Ico { source: @image-url("../icons/chevron-down.svg"); }
+            }
+        }
+    }
+    if root.r.number: VerticalLayout {
+        padding-left: 8px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        spacing: 6px;
+        Text { text: root.r.name; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+        CountField {
+            value: root.r.value;
+            minimum: 0;
+            maximum: root.r.max;
+            label: root.r.name;
+            show-label: false;
+            edited(v) => { Api.set-option(root.r.id, v); }
+        }
+    }
+    if root.r.was != "": HorizontalLayout {
+        padding-left: 8px;
+        WasRow { was: root.r.was; key: root.r.id; }
+    }
+}
+
+// A chat phrase of the group shown, or an auto-shoutout with its On box.
+component PhraseItem inherits VerticalLayout {
+    in property <PhraseRow> r;
+    in property <int> group;
+    in property <length> side;
+    padding-left: root.side;
+    padding-right: root.side;
+    spacing: 6px;
+    if root.r.head != "": HorizontalLayout {
+        padding-left: 8px;
+        padding-top: 16px;
+        spacing: 8px;
+        SectionLabel { text: root.r.head; vertical-alignment: center; }
+        if root.r.auto && Api.was-auto-on != "": WasRow { was: Api.was-auto-on; key: "auto-on"; }
+    }
+    TextField {
+        label: root.r.label;
+        value: root.r.text;
+        label-bg: M.surface;
+        committed(t) => { Api.set-phrase(root.r.auto, root.r.index, t); }
+    }
+    if root.r.auto: CheckRow {
+        title: @tr("On");
+        checked: root.r.on;
+        toggled(on) => { Api.set-auto-on(root.r.index, on); }
+    }
+    if root.r.was != "": WasRow { was: root.r.was; key: "chat:" + (root.r.auto ? "auto" : "phrase") + ":" + root.group + ":" + root.r.index; }
+}
+
+export component OptionsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.option-tabs;
+            current: Api.option-tab;
+            select(i) => { Tabs.select("options", i); }
+        }
+        if Api.option-tab != 1: ListView {
+            vertical-stretch: 1;
+            for r[i] in Api.option-rows: VerticalLayout {
+                padding-bottom: i == Api.option-rows.length - 1 ? root.bottom-pad : 0px;
+                OptionItem { r: r; side: root.side - 8px; }
+            }
+        }
+        if Api.option-tab == 1: VerticalLayout {
+            vertical-stretch: 1;
+            padding-top: 8px;
+            spacing: 8px;
+            // the group the game uses, then the group whose phrases are shown
+            HorizontalLayout {
+                padding-left: root.side - 8px;
+                padding-right: root.side - 8px;
+                Rectangle {
+                    height: max(56px, grow.preferred-height);
+                    border-radius: 12px;
+                    accessible-role: button;
+                    accessible-label: @tr("Group in use");
+                    accessible-action-default => { Choice.show("chat-group", 0, @tr("Group in use"), Api.chat-groups, Api.chat-group); }
+                    Press { on: gt.pressed; border-radius: parent.border-radius; }
+                    gt := Tap { tapped => { Choice.show("chat-group", 0, @tr("Group in use"), Api.chat-groups, Api.chat-group); } }
+                    grow := HorizontalLayout {
+                        padding-left: 8px;
+                        padding-right: 4px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        VerticalLayout {
+                            alignment: center;
+                            horizontal-stretch: 1;
+                            Text { text: @tr("Group in use"); color: M.on-surface; font-size: M.body-large; }
+                            Text { text: Api.chat-groups[Api.chat-group]; color: M.on-surface-variant; font-size: M.body-medium; }
+                        }
+                        VerticalLayout {
+                            alignment: center;
+                            Ico { source: @image-url("../icons/chevron-down.svg"); }
+                        }
+                    }
+                }
+            }
+            if Api.was-chat-group != "": HorizontalLayout {
+                padding-left: root.side;
+                WasRow { was: Api.was-chat-group; key: "chat-group"; }
+            }
+            Flickable {
+                height: 32px;
+                content-width: groups.preferred-width;
+                groups := HorizontalLayout {
+                    padding-left: root.side;
+                    padding-right: root.side;
+                    spacing: 8px;
+                    Text { text: @tr("Showing"); color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                    for g[i] in Api.chat-groups: Chip {
+                        text: g;
+                        selected: Api.chat-shown == i;
+                        clicked => { Api.show-chat-group(i); }
+                    }
+                }
+            }
+            ListView {
+                vertical-stretch: 1;
+                for r[i] in Api.phrases: VerticalLayout {
+                    padding-bottom: i == Api.phrases.length - 1 ? root.bottom-pad : 0px;
+                    PhraseItem { r: r; group: Api.chat-shown; side: root.side; }
+                }
+            }
+        }
+    }
+}
+
+export component CardsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    // the list, the inbox and the blocked users take edits; Hunters for Hire is read-only
+    property <bool> editable: Api.card-tab != 2;
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.card-tabs;
+            current: Api.card-tab;
+            select(i) => { Tabs.select("cards", i); }
+        }
+        if root.editable && (Api.card-tab == 1 || Api.card-tab == 3 || Api.was-cards != ""): HorizontalLayout {
+            padding-left: root.side;
+            padding-right: root.side;
+            padding-top: 12px;
+            spacing: 12px;
+            // removing an inbox card and unblocking are Derived (the Switch game opens neither
+            // list offline); the Card List is Confirmed, the Hunters for Hire read-only
+            if Api.card-tab == 1 || Api.card-tab == 3: VerticalLayout {
+                alignment: center;
+                ConfidenceLabel { level: Confidence.derived; }
+            }
+            if Api.was-cards != "": WasRow { was: Api.was-cards; key: Api.was-cards-key; }
+        }
+        if Api.card-rows.length == 0: HorizontalLayout {
+            padding: root.side;
+            Muted {
+                text: Api.card-tab == 0 ? @tr("No Guild Cards stored.") : Api.card-tab == 1 ? @tr("The inbox is empty.") : Api.card-tab == 2 ? @tr("No hunters for hire.") : @tr("No one is blocked.");
+                horizontal-alignment: center;
+            }
+        }
+        cards := ListView {
+            vertical-stretch: 1;
+            for r[i] in Api.card-rows: VerticalLayout {
+                padding-left: root.side;
+                // the scroll bar's room comes out of the right margin, so both look the same
+                padding-right: max(4px, root.side - (root.width - cards.visible-width));
+                padding-top: i == 0 ? 12px : 0px;
+                padding-bottom: i == Api.card-rows.length - 1 ? root.bottom-pad : 2px;
+                GroupRow {
+                    first: i == 0;
+                    last: i == Api.card-rows.length - 1;
+                    height: card.preferred-height;
+                    accessible-role: AccessibleRole.text;
+                    accessible-label: r.name;
+                    accessible-description: r.line1;
+                    card := VerticalLayout {
+                        padding-left: 16px;
+                        padding-right: 8px;
+                        padding-top: 12px;
+                        padding-bottom: root.editable ? 4px : 12px;
+                        spacing: 2px;
+                        HorizontalLayout {
+                            spacing: 8px;
+                            Text { text: r.name; color: M.on-surface; font-size: M.body-large; font-weight: M.medium; overflow: elide; }
+                            if r.tag != "": Text { text: r.tag; color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+                            Rectangle { horizontal-stretch: 1; }
+                        }
+                        if r.line1 != "": Text { text: r.line1; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+                        if r.line2 != "": Text { text: r.line2; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
+                        if r.greeting != "": Text { text: "“" + r.greeting + "”"; color: M.on-surface-variant; font-size: M.body-small; font-italic: true; wrap: word-wrap; }
+                        if root.editable: HorizontalLayout {
+                            alignment: end;
+                            spacing: 4px;
+                            if Api.card-tab == 1: Btn { kind: "text"; text: @tr("Move to Card List"); clicked => { Api.move-card(r.slot); } }
+                            Btn {
+                                kind: "text";
+                                text: Api.card-tab == 3 ? @tr("Unblock") : @tr("Remove");
+                                fg: Api.card-tab == 3 ? M.primary : M.error;
+                                clicked => { Api.remove-card(r.slot); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

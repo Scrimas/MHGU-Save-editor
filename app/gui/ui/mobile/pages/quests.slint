@@ -1,0 +1,464 @@
+// Quests on phones and tablets: the categories as scrolling tabs, a category's quests with
+// their Cleared box (a row opens Seen and Failed too), the Arena records and the Guild
+// Card's history log.
+import { ListView } from "std-widgets.slint";
+import { M } from "../theme.slint";
+import { Btn, CheckRow, Chip, CountField, GroupRow, Ico, Muted, Press, ScrollTabRow, SearchBar, SectionLabel, Sheet, Tap } from "../widgets.slint";
+import { Choice } from "../pick.slint";
+import { Api, QuestRow, Tabs } from "../../common.slint";
+
+// The quest or Arena record a sheet edits: its place in Api.quests / Api.arena, read live
+// so the sheet follows each change.
+export global QuestEdit {
+    in-out property <bool> open;
+    in-out property <int> row: -1;
+    in-out property <bool> arena-open;
+    in-out property <int> arena-row: -1;
+    // "m:ss.hh"
+    public pure function time(m: int, s: int, h: int) -> string {
+        return m + ":" + (s < 10 ? "0" : "") + s + "." + (h < 10 ? "0" : "") + h;
+    }
+}
+
+// A quest: its Cleared box, the name and number (in red what unlocks it), a dot while
+// its change waits. The rest of the row opens the quest's sheet.
+component QuestItem inherits Rectangle {
+    in property <QuestRow> q;
+    in property <bool> flash;
+    // the text column's width (wrapped text in a row is otherwise measured as one line)
+    in property <length> text-w;
+    callback open();
+    property <bool> selecting: Api.quest-selecting;
+    height: max(72px, lay.preferred-height);
+    background: root.flash || (root.selecting && root.q.selected) ? M.secondary-container : transparent;
+    accessible-role: button;
+    accessible-label: root.q.name;
+    accessible-description: root.q.sub;
+    accessible-checkable: root.selecting;
+    accessible-checked: root.q.selected;
+    accessible-action-default => { root.tap(); }
+    function tap() {
+        if root.selecting {
+            Api.quest-select(root.q.index, !root.q.selected);
+        } else {
+            root.open();
+        }
+    }
+    // a long press starts the selection with this quest (the tap that ends it is not a tap)
+    property <bool> down: ta.pressed;
+    property <bool> fired;
+    changed down => {
+        if self.down {
+            root.fired = false;
+        }
+    }
+    Timer {
+        interval: 450ms;
+        running: ta.pressed && !root.fired && !root.selecting;
+        triggered => {
+            root.fired = true;
+            Api.quest-selecting = true;
+            Api.quest-select(root.q.index, true);
+        }
+    }
+    Press { on: ta.pressed; }
+    ta := Tap {
+        tapped => {
+            if !root.fired {
+                root.tap();
+            }
+        }
+    }
+    lay := HorizontalLayout {
+        padding-left: 8px;
+        padding-right: 16px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        spacing: 4px;
+        // selecting: a round mark that picks the row
+        if root.selecting: VerticalLayout {
+            alignment: center;
+            Rectangle {
+                width: M.touch;
+                height: M.touch;
+                Rectangle {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 20px;
+                    background: root.q.selected ? M.primary : transparent;
+                    border-width: root.q.selected ? 0px : 2px;
+                    border-color: M.outline;
+                    if root.q.selected: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 20px; height: 20px; }
+                }
+            }
+        }
+        if !root.selecting: VerticalLayout {
+            alignment: center;
+            Rectangle {
+                width: M.touch;
+                height: M.touch;
+                accessible-role: checkbox;
+                accessible-label: @tr("Cleared: {}", root.q.name);
+                accessible-checked: root.q.cleared;
+                accessible-action-default => { Api.set-quest(root.q.index, "cleared", !root.q.cleared); }
+                Rectangle {
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 2px;
+                    background: root.q.cleared ? M.primary : transparent;
+                    border-width: root.q.cleared ? 0px : 2px;
+                    border-color: M.on-surface-variant;
+                    if root.q.cleared: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
+                }
+                Tap { tapped => { Api.set-quest(root.q.index, "cleared", !root.q.cleared); } }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            width: root.text-w;
+            spacing: 2px;
+            Text { text: root.q.prowler ? @tr("{}  (Prowler)", root.q.name) : root.q.name; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+            Text {
+                text: root.q.sub + (root.q.seen ? " · " + @tr("Seen") : "") + (root.q.failed ? " · " + @tr("Failed") : "");
+                color: root.q.locked ? M.error : M.on-surface-variant;
+                font-size: M.body-medium;
+                wrap: word-wrap;
+            }
+            if root.q.was != "": Text { text: @tr("was {}", root.q.was); color: M.primary; font-size: M.body-small; }
+        }
+        Rectangle { horizontal-stretch: 1; }
+        if root.selecting: Text {
+            width: 76px;
+            horizontal-alignment: right;
+            wrap: word-wrap;
+            text: root.q.cleared ? @tr("Cleared") : @tr("Not cleared");
+            color: root.q.cleared ? M.primary : M.on-surface-variant;
+            font-size: M.label-small;
+            font-weight: M.medium;
+            vertical-alignment: center;
+        }
+        if !root.selecting && root.q.changed: VerticalLayout {
+            alignment: center;
+            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+        }
+    }
+}
+
+export component QuestsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.quest-tabs;
+            current: Api.quest-tab;
+            select(i) => { Tabs.select("quests", i); }
+        }
+        if !Api.quest-arena && !Api.quest-history: VerticalLayout {
+            vertical-stretch: 1;
+            padding-top: 12px;
+            spacing: 10px;
+            HorizontalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                SearchBar {
+                    placeholder: @tr("Search quests by name or number");
+                    text <=> Api.quest-search;
+                    edited => { Api.filter-quests(); }
+                }
+            }
+            HorizontalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                alignment: start;
+                spacing: 8px;
+                Chip {
+                    text: @tr("Missing only");
+                    selected: Api.quest-missing;
+                    clicked => {
+                        Api.quest-missing = !Api.quest-missing;
+                        Api.filter-quests();
+                    }
+                }
+                // (a long press on a quest starts it too)
+                if !Api.quest-selecting: Chip {
+                    text: @tr("Select");
+                    has-icon: true;
+                    icon: @image-url("../icons/select.svg");
+                    clicked => { Api.quest-selecting = true; }
+                }
+            }
+            if Api.quests.length == 0: HorizontalLayout {
+                padding: root.side;
+                Muted { text: Api.quest-missing ? @tr("Every quest here is cleared.") : @tr("No quest matches the search."); horizontal-alignment: center; }
+            }
+            ql := ListView {
+                vertical-stretch: 1;
+                property <int> seq: Api.jump-seq;
+                function go() {
+                    if Api.page == "quests" && Api.jump-row >= 0 {
+                        self.content-y = -max(0px, Api.jump-row * 72px - self.visible-height / 3);
+                    }
+                }
+                init => { self.go(); }
+                changed seq => { self.go(); }
+                for q[i] in Api.quests: VerticalLayout {
+                    padding-bottom: i == Api.quests.length - 1 ? root.bottom-pad : 0px;
+                    // a group of the category: its name and count, its "Mark 1★ cleared"
+                    if q.header: HorizontalLayout {
+                        padding-left: root.side;
+                        padding-right: root.side - 12px;
+                        padding-top: 8px;
+                        spacing: 8px;
+                        min-height: 48px;
+                        SectionLabel { text: q.name; vertical-alignment: center; horizontal-stretch: 1; }
+                        if !Api.quest-selecting && q.action != "": VerticalLayout {
+                            alignment: center;
+                            Btn { kind: "text"; text: q.action; clicked => { Api.quest-bulk(q.group); } }
+                        }
+                        if Api.quest-selecting: VerticalLayout {
+                            alignment: center;
+                            Btn { kind: "text"; text: @tr("Select all"); clicked => { Api.quest-select-group(q.group); } }
+                        }
+                    }
+                    if !q.header: QuestItem {
+                        q: q;
+                        // selecting, the state's label takes 76px at the end
+                        // (the list's own width: the scroll bar's room is not in it)
+                        text-w: ql.visible-width - 2 * root.side-inset - 8px - M.touch - 4px - 16px - 16px - (Api.quest-selecting ? 72px : 0px);
+                        flash: Api.highlight != "" && Api.highlight == "quest:" + q.index;
+                        open => {
+                            QuestEdit.row = i;
+                            QuestEdit.open = true;
+                        }
+                    }
+                }
+            }
+        }
+        // the best time and set per Arena quest; a record opens its sheet
+        if Api.quest-arena: Flickable {
+            vertical-stretch: 1;
+            content-width: self.width;
+            VerticalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                padding-top: 12px;
+                padding-bottom: root.bottom-pad;
+                spacing: 2px;
+                alignment: start;
+                HorizontalLayout {
+                    padding-left: 8px;
+                    padding-bottom: 10px;
+                    Muted { text: @tr("Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."); }
+                }
+                for r[i] in Api.arena: GroupRow {
+                    first: i == 0;
+                    last: i == Api.arena.length - 1;
+                    pressable: true;
+                    height: max(64px, arow.preferred-height);
+                    accessible-role: button;
+                    accessible-label: r.quest;
+                    accessible-description: r.has ? QuestEdit.time(r.minutes, r.seconds, r.hundredths) + " · " + r.grade : "—";
+                    accessible-action-default => {
+                        QuestEdit.arena-row = i;
+                        QuestEdit.arena-open = true;
+                    }
+                    clicked => {
+                        QuestEdit.arena-row = i;
+                        QuestEdit.arena-open = true;
+                    }
+                    arow := HorizontalLayout {
+                        padding-left: 16px;
+                        padding-right: 16px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        spacing: 12px;
+                        VerticalLayout {
+                            alignment: center;
+                            horizontal-stretch: 1;
+                            Text { text: r.quest; color: M.on-surface; font-size: M.body-large; overflow: elide; }
+                            Text { text: r.has ? QuestEdit.time(r.minutes, r.seconds, r.hundredths) + " · " + r.sets[r.set] : r.grades; color: M.on-surface-variant; font-size: M.body-small; overflow: elide; }
+                        }
+                        if r.was != "": VerticalLayout {
+                            alignment: center;
+                            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+                        }
+                        Text { text: r.has ? r.grade : "—"; color: r.has ? M.on-surface : M.on-surface-variant; font-size: M.title-medium; font-weight: M.medium; vertical-alignment: center; }
+                    }
+                }
+            }
+        }
+        // the Guild Card's last ten records, read only
+        if Api.quest-history: Flickable {
+            vertical-stretch: 1;
+            content-width: self.width;
+            VerticalLayout {
+                padding-left: root.side;
+                padding-right: root.side;
+                padding-top: 12px;
+                padding-bottom: root.bottom-pad;
+                spacing: 2px;
+                alignment: start;
+                HorizontalLayout {
+                    padding-left: 8px;
+                    padding-bottom: 10px;
+                    Muted { text: @tr("The last ten records of your Guild Card, newest first, as the game wrote them. Read only."); }
+                }
+                if Api.quest-log.length == 0: Muted { text: @tr("No record yet."); horizontal-alignment: center; }
+                for r[i] in Api.quest-log: GroupRow {
+                    first: i == 0;
+                    last: i == Api.quest-log.length - 1;
+                    height: hrow.preferred-height;
+                    accessible-role: AccessibleRole.text;
+                    accessible-label: r.date + ", " + r.what + ", " + r.quest;
+                    hrow := VerticalLayout {
+                        padding-left: 16px;
+                        padding-right: 16px;
+                        padding-top: 10px;
+                        padding-bottom: 10px;
+                        spacing: 2px;
+                        HorizontalLayout {
+                            spacing: 8px;
+                            Text { text: r.what; color: r.bad ? M.error : M.on-surface; font-size: M.label-large; font-weight: M.medium; }
+                            Rectangle { horizontal-stretch: 1; }
+                            Text { text: r.date; color: M.on-surface-variant; font-size: M.body-small; }
+                        }
+                        Text { text: r.quest; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+                        if r.party != "": Text { text: r.party; color: M.on-surface-variant; font-size: M.body-small; wrap: word-wrap; }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// A quest's three marks.
+export component QuestSheet inherits Sheet {
+    property <bool> ok: QuestEdit.row >= 0 && QuestEdit.row < Api.quests.length;
+    // (out of range reads a default row)
+    property <QuestRow> q: Api.quests[QuestEdit.row];
+    shown: QuestEdit.open && root.ok;
+    title: root.q.name;
+    subtitle: root.q.sub;
+    content-h: lay.preferred-height;
+    close => { QuestEdit.open = false; }
+    lay := VerticalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 16px;
+        spacing: 4px;
+        CheckRow {
+            title: @tr("Cleared");
+            checked: root.q.cleared;
+            toggled(on) => { Api.set-quest(root.q.index, "cleared", on); }
+        }
+        CheckRow {
+            title: @tr("Seen");
+            checked: root.q.seen;
+            toggled(on) => { Api.set-quest(root.q.index, "seen", on); }
+        }
+        CheckRow {
+            title: @tr("Failed");
+            checked: root.q.failed;
+            toggled(on) => { Api.set-quest(root.q.index, "failed", on); }
+        }
+        if root.q.was != "": HorizontalLayout {
+            padding-left: 16px;
+            spacing: 4px;
+            alignment: start;
+            Text { text: @tr("was {}", root.q.was); color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+            Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo-value("quest:" + root.q.index); } }
+        }
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            padding-top: 8px;
+            Muted { text: @tr("A red line means the quest is not on the board yet and says what unlocks it. Clearing a quest also marks it seen and completes its quest sets, as the game does."); font-size: M.body-small; }
+        }
+    }
+}
+
+// An Arena record: its time, the set it was cleared with.
+export component ArenaSheet inherits Sheet {
+    property <bool> ok: QuestEdit.arena-row >= 0 && QuestEdit.arena-row < Api.arena.length;
+    property <int> k: QuestEdit.arena-row;
+    shown: QuestEdit.arena-open && root.ok;
+    title: root.ok ? Api.arena[root.k].quest : "";
+    subtitle: root.ok ? Api.arena[root.k].grades : "";
+    content-h: lay.preferred-height;
+    close => { QuestEdit.arena-open = false; }
+    // the time in 1/100 s with one part changed
+    function set-time(m: int, s: int, h: int) {
+        Api.set-arena(Api.arena[root.k].index, Api.arena[root.k].set, max(1, m * 6000 + s * 100 + h));
+    }
+    lay := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 16px;
+        if root.ok: VerticalLayout {
+            spacing: 16px;
+            padding-top: 8px;
+            CountField {
+                label: @tr("Minutes");
+                show-limit: false;
+                minimum: 0;
+                maximum: 49;
+                value: Api.arena[root.k].minutes;
+                edited(v) => { root.set-time(v, Api.arena[root.k].seconds, Api.arena[root.k].hundredths); }
+            }
+            CountField {
+                label: @tr("Seconds");
+                show-limit: false;
+                minimum: 0;
+                maximum: 59;
+                value: Api.arena[root.k].seconds;
+                edited(v) => { root.set-time(Api.arena[root.k].minutes, v, Api.arena[root.k].hundredths); }
+            }
+            CountField {
+                label: @tr("Hundredths");
+                show-limit: false;
+                minimum: 0;
+                maximum: 99;
+                value: Api.arena[root.k].hundredths;
+                edited(v) => { root.set-time(Api.arena[root.k].minutes, Api.arena[root.k].seconds, v); }
+            }
+            Rectangle {
+                height: setrow.preferred-height;
+                border-radius: 12px;
+                background: M.group;
+                setrow := HorizontalLayout {
+                    padding-left: 16px;
+                    padding-right: 12px;
+                    padding-top: 8px;
+                    padding-bottom: 8px;
+                    VerticalLayout {
+                        alignment: center;
+                        horizontal-stretch: 1;
+                        Text { text: @tr("Set"); color: M.on-surface-variant; font-size: M.body-small; }
+                        Text { text: Api.arena[root.k].sets[Api.arena[root.k].set]; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+                    }
+                    VerticalLayout {
+                        alignment: center;
+                        Ico { source: @image-url("../icons/chevron-down.svg"); }
+                    }
+                }
+                Press { on: st.pressed; border-radius: parent.border-radius; }
+                st := Tap { tapped => { Choice.show("arena-set", root.k, @tr("Set"), Api.arena[root.k].sets, Api.arena[root.k].set); } }
+            }
+            HorizontalLayout {
+                spacing: 12px;
+                Text { text: @tr("Rank"); color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
+                Text { text: Api.arena[root.k].has ? Api.arena[root.k].grade : "—"; color: M.on-surface; font-size: M.title-medium; font-weight: M.medium; vertical-alignment: center; horizontal-stretch: 1; }
+                if Api.arena[root.k].has: Btn { kind: "text"; text: @tr("Clear"); clicked => { Api.clear-arena(Api.arena[root.k].index); } }
+            }
+            if Api.arena[root.k].was != "": HorizontalLayout {
+                spacing: 4px;
+                alignment: start;
+                Text { text: @tr("was {}", Api.arena[root.k].was); color: M.primary; font-size: M.body-small; vertical-alignment: center; }
+                Btn { kind: "text"; text: @tr("Undo"); clicked => { Api.undo-value("arena:" + Api.arena[root.k].index); } }
+            }
+            if Api.arena[root.k].warning != "": Text { text: @tr("The game cannot make this: {}.", Api.arena[root.k].warning); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+        }
+    }
+}

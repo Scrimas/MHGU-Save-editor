@@ -12,19 +12,37 @@
 #                                MHGU_APK_KEYSTORE       path of the keystore (PKCS12)
 #                                MHGU_APK_KEYSTORE_PASS  its password (also the key's)
 #   build-apk.sh --install     the debug build, then adb install -r
+#   build-apk.sh --check       clippy for the Android target (the code under src/android
+#                              builds only there), warnings as errors, no APK (CI)
+#   build-apk.sh --emulator    debug build for the x86_64 emulator with Slint's MCP server
+#                              on port 9315 (SLINT_MCP_PORT to change it; element ids for it
+#                              with SLINT_EMIT_DEBUG_INFO=1), so the running
+#                              app can be inspected and driven (packaging/emulator.sh):
+#                              app/target/apk/mhgu-editor-emulator.apk
 #
-# Needs: rustup with aarch64-linux-android, the Android SDK (ANDROID_HOME, default
-# /opt/android-sdk) with build-tools, a platform (android.jar) and the NDK, a JDK (javac,
-# keytool), python3. The game-asset pack as for the desktop builds (app/assets/gen).
+# Needs: rustup with aarch64-linux-android (x86_64-linux-android for --emulator), the
+# Android SDK (ANDROID_HOME, default /opt/android-sdk) with build-tools, a platform
+# (android.jar) and the NDK, a JDK (javac, keytool), python3. The game-asset pack as for
+# the desktop builds (app/assets/gen).
 set -euo pipefail
 release=false
 install=false
+emulator=false
+check=false
 case "${1:-}" in
     --release) release=true ;;
     --install) install=true ;;
+    --emulator) emulator=true ;;
+    --check) check=true ;;
     "") ;;
-    *) echo "usage: $0 [--release|--install]" >&2; exit 2 ;;
+    *) echo "usage: $0 [--release|--install|--emulator|--check]" >&2; exit 2 ;;
 esac
+triple=aarch64-linux-android
+abi=arm64-v8a
+if $emulator; then
+    triple=x86_64-linux-android
+    abi=x86_64
+fi
 
 here=$(cd "$(dirname "$0")" && pwd)
 app=$(dirname "$here")
@@ -41,13 +59,18 @@ tools=$(ls -d "$sdk"/build-tools/* | sort -V | tail -1)
 jar=$(ls "$sdk"/platforms/android-*/android.jar | sort -V | tail -1)
 target_api=$(basename "$(dirname "$jar")" | sed 's/android-//')
 tc="$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin"
-[ -x "$tc/aarch64-linux-android$api-clang" ] || { echo "no NDK clang in $tc (ANDROID_HOME=$sdk)" >&2; exit 1; }
+[ -x "$tc/$triple$api-clang" ] || { echo "no NDK clang in $tc (ANDROID_HOME=$sdk)" >&2; exit 1; }
 
 export ANDROID_HOME="$sdk" ANDROID_SDK_ROOT="$sdk" ANDROID_NDK_HOME="$ndk" ANDROID_NDK_ROOT="$ndk" ANDROID_NDK="$ndk"
-export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$tc/aarch64-linux-android$api-clang"
-export CC_aarch64_linux_android="$tc/aarch64-linux-android$api-clang"
-export CXX_aarch64_linux_android="$tc/aarch64-linux-android$api-clang++"
-export AR_aarch64_linux_android="$tc/llvm-ar"
+t=${triple//-/_}
+export "CARGO_TARGET_${t^^}_LINKER=$tc/$triple$api-clang"
+export "CC_$t=$tc/$triple$api-clang"
+export "CXX_$t=$tc/$triple$api-clang++"
+export "AR_$t=$tc/llvm-ar"
+
+if $check; then
+    exec cargo clippy -p mhgu-editor --lib --target "$triple" -- -D warnings
+fi
 
 if [ ! -f assets/gen/names.json ]; then
     echo "   (no asset pack in app/assets/gen: the APK shows placeholders)"
@@ -59,13 +82,32 @@ flags=()
 if $release; then
     profile=release
     flags+=(--release)
+else
+    # no debug info for the editor crate itself: Slint's generated code for the phone
+    # interface is large, and with it rustc needed more than 6 GB (it is stripped from
+    # the APK anyway); the other crates keep theirs, so nothing else rebuilds
+    flags+=(--config 'profile.dev.package.mhgu-editor.debug=0')
+    # nor incremental state: for one module this size rustc's caches take gigabytes more
+    # (the dependencies are never incremental, so they do not rebuild)
+    export CARGO_INCREMENTAL=0
 fi
-cargo rustc -p mhgu-editor --lib --crate-type cdylib --target aarch64-linux-android "${flags[@]}"
-so="target/aarch64-linux-android/$profile/libmhgu_editor.so"
+if $emulator; then
+    # the MCP server; the port is built in (android_main sets SLINT_MCP_PORT from it).
+    # Element ids and source places for it only with SLINT_EMIT_DEBUG_INFO=1: they make
+    # the generated code large enough that rustc goes past the 6 GB the local builds get;
+    # the MCP tools find elements by their accessible labels without them
+    flags+=(--features slint/mcp)
+    export SLINT_EMIT_DEBUG_INFO="${SLINT_EMIT_DEBUG_INFO:-0}" SLINT_MCP_PORT="${SLINT_MCP_PORT:-9315}"
+else
+    # a port left in the environment must not reach a phone build
+    unset SLINT_MCP_PORT SLINT_EMIT_DEBUG_INFO
+fi
+cargo rustc -p mhgu-editor --lib --crate-type cdylib --target "$triple" "${flags[@]}"
+so="target/$triple/$profile/libmhgu_editor.so"
 
-work="target/apk/$profile"
+work="target/apk/$profile-$abi"
 rm -rf "$work"
-mkdir -p "$work/classes" "$work/dex" "$work/lib/arm64-v8a"
+mkdir -p "$work/classes" "$work/dex" "$work/lib/$abi"
 
 echo "== classes.dex"
 javac -nowarn -Xlint:-options -source 8 -target 8 -encoding UTF-8 -bootclasspath "$jar" -d "$work/classes" \
@@ -78,10 +120,10 @@ echo "== resources and manifest"
     --min-sdk-version "$api" --target-sdk-version "$target_api" --version-code "$code" --version-name "$ver"
 
 echo "== libraries"
-"$tc/llvm-strip" --strip-debug -o "$work/lib/arm64-v8a/libmhgu_editor.so" "$so"
+"$tc/llvm-strip" --strip-debug -o "$work/lib/$abi/libmhgu_editor.so" "$so"
 # Skia's C++ runtime, when the library loads it from the APK rather than having it linked in
 if "$tc/llvm-readelf" -d "$so" | grep -q 'libc++_shared.so'; then
-    cp "$ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so" "$work/lib/arm64-v8a/"
+    cp "$ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/$triple/libc++_shared.so" "$work/lib/$abi/"
 fi
 
 # base.apk + classes.dex + the libraries, stored (not compressed)
@@ -114,7 +156,7 @@ else
         keytool -genkeypair -keystore "$key" -storepass android -alias androiddebugkey -keypass android \
             -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
     fi
-    out="target/apk/mhgu-editor-debug.apk"
+    out="target/apk/mhgu-editor-$($emulator && echo emulator || echo debug).apk"
     "$tools/apksigner" sign --ks "$key" --ks-pass pass:android --key-pass pass:android --v4-signing-enabled false \
         --out "$out" "$work/aligned.apk"
 fi

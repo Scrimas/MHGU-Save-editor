@@ -1,7 +1,7 @@
 # MHGU Save Editor
 
-A desktop save editor for **Monster Hunter Generations Ultimate** (Nintendo Switch,
-emulator saves and console backups).
+A save editor for **Monster Hunter Generations Ultimate** (Nintendo Switch, emulator
+saves and console backups), for Windows, Linux and Android phones and tablets.
 
 <a href="docs/screenshots/README.md#overview"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/01-overview-dark.png"><img alt="Overview: progress of the character and one-click goals, two of them staged for Review" src="docs/screenshots/01-overview-light.png"></picture></a>
 
@@ -21,13 +21,20 @@ Get the latest file from the [releases](https://github.com/Scrimas/MHGU-Save-edi
 |---|---|
 | `MHGU-Save-Editor-<version>-x86_64.exe` | Windows 10 / 11, nothing to install |
 | `MHGU-Save-Editor-<version>-x86_64.AppImage` | Linux x86-64 (distros from 2019 on) |
+| `MHGU-Save-Editor-<version>-arm64.apk` | Android 10 or newer, phones, foldables and tablets |
 
 The `.exe` is not code-signed, so Windows SmartScreen warns the first time: **More info → Run anyway**.
-The AppImage adds itself to the application menu when started.
+The AppImage adds itself to the application menu when started. On Android, the browser or
+file manager you open the APK from asks once to be allowed to install apps.
 
 The editor checks for a newer version when it starts and asks before downloading it
 (Settings → Updates and versions turns this off). The same section lists every release to
 go back to an older one, or forward again, with what changes in between.
+
+On Android the new APK is checked the same way, then Android asks you to install it.
+Android installs only newer versions over the app: to go back to an older one, uninstall
+the app first (its settings and snapshots go with it; your saves stay), then install that
+version's APK from its release page.
 
 Version numbers: the first number goes up once every edit has been checked in game, so a
 release *N*.0.0 has no Derived edit; the second adds features, whose new edits may be
@@ -40,6 +47,13 @@ Sudachi, Citron, Eden, torzu), Flatpak installs included. For a portable install
 another emulator, add its folder in **Settings…** or use **Open save…** on its `system`
 file (title ID `0100770008DD8000`, EU / western release). On Windows you can also drag
 the file onto the window.
+
+**On Android**, with **MHGU Recomp**: set the Recomp's Save folder to a shared folder
+once (the Open page's **How to set it up** shows the steps), then pick that folder in the
+editor; it reads and writes the save there directly. Or **Export save** in the Recomp,
+open that `system` file in the editor, write, and **Import save** back. A save copied out of
+an Android emulator (Eden, Citron, Sudachi…) opens the same way. Close the game before
+writing: it overwrites the save when it next saves.
 
 **From a real Switch**: back the save up with JKSV or Checkpoint, open the `system` file of
 the backup folder on the SD card (found automatically while the card is mounted), write,
@@ -204,6 +218,8 @@ animations; where snapshots go, how many to keep, whether Write takes one and wh
 a save takes one a day; extra folders to search for saves; recent saves; **Confirmed changes
 only**, which refuses every Derived change; updates and other versions; and software drawing,
 system info for bug reports and a reset under Advanced.
+On Android, Settings is under **More** (or the ⋮ menu before a save is open), without the
+folders, the interface size and Advanced, which Android handles itself.
 
 The editor speaks the game's own languages: English, French, German, Italian, Spanish,
 Traditional and Simplified Chinese (the system's by default), with item, equipment, skill

@@ -4,6 +4,7 @@ import { AboutSlint } from "std-widgets.slint";
 import { M } from "theme.slint";
 import { Btn, ConfidenceLabel, Dot, GroupRow, IconBtn, Ico, ListItem, Muted, Press, SectionLabel, Sheet, Tap } from "widgets.slint";
 import { Api, ChangeRow, Confidence, Fmt, SlotInfo } from "../common.slint";
+import { ChoiceRow } from "form.slint";
 
 // One Review entry: old → new in game terms, why the game cannot make it, its own Undo.
 component ReviewEntry inherits GroupRow {
@@ -70,8 +71,9 @@ export component ReviewSheet inherits Sheet {
     shown: root.open;
     title: @tr("Review");
     subtitle: Api.review-summary;
-    content-h: Api.change-count == 0 ? 160px : root.height;
-    VerticalLayout {
+    // as tall as the changes, up to the screen (then the list scrolls)
+    content-h: body.preferred-height;
+    body := VerticalLayout {
         if Api.change-count == 0: VerticalLayout {
             padding: 24px;
             Muted { text: @tr("Nothing staged yet. Every edit appears here with the value it replaces, and you can undo each one."); }
@@ -80,6 +82,8 @@ export component ReviewSheet inherits Sheet {
             content-width: self.width;
             vertical-stretch: 1;
             VerticalLayout {
+                // shorter than the view: the spare room stays below the content
+                alignment: start;
                 padding-left: 16px;
                 padding-right: 16px;
                 padding-bottom: 12px;
@@ -195,6 +199,18 @@ export component SlotSheet inherits Sheet {
                 if i == Api.slot: VerticalLayout {
                     alignment: center;
                     Ico { source: @image-url("icons/check.svg"); tint: M.on-secondary-container; }
+                }
+            }
+        }
+        HorizontalLayout {
+            alignment: start;
+            padding-top: 8px;
+            Btn {
+                kind: "text";
+                text: @tr("Characters…");
+                clicked => {
+                    root.close();
+                    Api.characters-open = true;
                 }
             }
         }
@@ -395,6 +411,8 @@ export component SnapshotsSheet inherits Sheet {
         if Api.restore-ask == "" && Api.snapshots.length > 0: Flickable {
             content-width: self.width;
             VerticalLayout {
+                // shorter than the view: the spare room stays below the content
+                alignment: start;
                 padding-left: 16px;
                 padding-right: 16px;
                 padding-bottom: 16px;
@@ -454,6 +472,206 @@ export component SnapshotsSheet inherits Sheet {
                         Api.restore-ask = "";
                     }
                 }
+            }
+        }
+    }
+}
+
+// A page's own actions (its ⋮ button): one row each.
+export component ChoiceSheet inherits Sheet {
+    in property <bool> open;
+    in property <[string]> entries;
+    callback picked(int);
+    shown: root.open;
+    content-h: lay.preferred-height;
+    lay := VerticalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 12px;
+        for e[i] in root.entries: ListItem {
+            has-icon: false;
+            chevron: false;
+            title: e;
+            clicked => { root.picked(i); }
+        }
+    }
+}
+
+// Characters…: whole characters imported, exported, deleted, copied or swapped (staged
+// like every change), and one exported into an MHXX save.
+export component CharactersSheet inherits Sheet {
+    shown: Api.characters-open;
+    title: @tr("Characters");
+    subtitle: @tr("Copy, swap, delete, export or import whole characters. Each change is staged: it shows in Review and goes into the save with Write.");
+    content-h: lay.preferred-height;
+    close => { Api.characters-open = false; }
+    property <int> from: Api.slot;
+    property <int> to: Api.slot == 0 ? 1 : 0;
+    property <int> xx: Api.slot;
+    property <[string]> labels: [
+        Api.slots[0].used ? "1 · " + Api.slots[0].name : @tr("{} · empty", 1),
+        Api.slots[1].used ? "2 · " + Api.slots[1].name : @tr("{} · empty", 2),
+        Api.slots[2].used ? "3 · " + Api.slots[2].name : @tr("{} · empty", 3),
+    ];
+    // which pick the slot sheet below is for: 0 copy from, 1 copy to, 2 MHXX
+    property <int> picking: -1;
+    lay := VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 16px;
+        spacing: 2px;
+        if root.picking < 0: VerticalLayout {
+            spacing: 2px;
+            for s[i] in Api.slots: GroupRow {
+                first: i == 0;
+                last: i == Api.slots.length - 1;
+                height: srow.preferred-height;
+                srow := VerticalLayout {
+                    padding-left: 16px;
+                    padding-right: 8px;
+                    padding-top: 12px;
+                    padding-bottom: 4px;
+                    Text { text: root.labels[i]; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
+                    Muted { text: s.used ? @tr("HR {} · {}", s.hr, s.playtime) : @tr("No character in this slot"); }
+                    HorizontalLayout {
+                        alignment: end;
+                        spacing: 4px;
+                        Btn { kind: "text"; text: @tr("Import…"); clicked => { Api.slot-import(i); } }
+                        if s.used: Btn { kind: "text"; text: @tr("Export…"); clicked => { Api.slot-export(i); } }
+                        if s.used: Btn { kind: "text"; text: @tr("Delete"); fg: M.error; clicked => { Api.slot-delete(i); } }
+                    }
+                }
+            }
+            // copy or swap one slot with another
+            HorizontalLayout {
+                padding-top: 16px;
+                padding-left: 8px;
+                SectionLabel { text: @tr("Copy"); }
+            }
+            HorizontalLayout {
+                spacing: 8px;
+                for k in 2: ChoiceRow {
+                    // halves of the row whatever the names' lengths
+                    width: (lay.width - 32px - 8px) / 2;
+                    background: M.group;
+                    inset: 16px;
+                    label: k == 0 ? @tr("From") : @tr("to");
+                    value: root.labels[k == 0 ? root.from : root.to];
+                    clicked => { root.picking = k; }
+                }
+            }
+            if root.from != root.to && Api.slots[root.from].used && Api.slots[root.to].used: Text {
+                text: @tr("Copy replaces {} in slot {}.", Api.slots[root.to].name, root.to + 1);
+                color: M.warn;
+                font-size: M.body-small;
+                wrap: word-wrap;
+            }
+            HorizontalLayout {
+                alignment: end;
+                spacing: 8px;
+                padding-top: 4px;
+                Btn {
+                    kind: "outlined";
+                    text: @tr("Swap");
+                    enabled: root.from != root.to && (Api.slots[root.from].used || Api.slots[root.to].used);
+                    clicked => { Api.slot-swap(root.from, root.to); }
+                }
+                Btn {
+                    text: @tr("Copy");
+                    enabled: root.from != root.to && Api.slots[root.from].used;
+                    clicked => { Api.slot-copy(root.from, root.to); }
+                }
+            }
+            // MHXX (3DS, or the Japanese Switch release)
+            HorizontalLayout {
+                padding-top: 16px;
+                padding-left: 8px;
+                SectionLabel { text: @tr("MHXX"); }
+            }
+            ChoiceRow {
+                background: M.group;
+                inset: 16px;
+                label: @tr("Character");
+                value: root.labels[root.xx];
+                clicked => { root.picking = 2; }
+            }
+            HorizontalLayout {
+                alignment: end;
+                padding-top: 4px;
+                Btn {
+                    kind: "outlined";
+                    text: @tr("Export to an MHXX save…");
+                    enabled: Api.slots[root.xx].used;
+                    clicked => { Api.mhxx-export-start(root.xx); }
+                }
+            }
+            VerticalLayout {
+                padding: 8px;
+                spacing: 8px;
+                Muted { text: @tr("Import… also takes a character from an MHXX save: the system file of a JKSM or Checkpoint backup (3DS), or of JKSV or Checkpoint (Switch). Unequip gear the other game lacks before moving a character."); font-size: M.body-small; }
+                Muted { text: @tr("An MHXX character is Derived: not checked in game yet. Delete leaves the slot as one never used; a new character is made there in game."); font-size: M.body-small; }
+            }
+        }
+        // a slot for the copy or the MHXX export
+        if root.picking >= 0: VerticalLayout {
+            spacing: 2px;
+            for l[i] in root.labels: GroupRow {
+                first: i == 0;
+                last: i == root.labels.length - 1;
+                pressable: true;
+                height: 56px;
+                background: i == (root.picking == 0 ? root.from : root.picking == 1 ? root.to : root.xx) ? M.secondary-container : M.group;
+                accessible-role: button;
+                accessible-label: l;
+                accessible-action-default => { self.clicked(); }
+                clicked => {
+                    if root.picking == 0 {
+                        root.from = i;
+                    } else if root.picking == 1 {
+                        root.to = i;
+                    } else {
+                        root.xx = i;
+                    }
+                    root.picking = -1;
+                }
+                HorizontalLayout {
+                    padding-left: 16px;
+                    Text { text: l; color: M.on-surface; font-size: M.body-large; vertical-alignment: center; }
+                }
+            }
+        }
+    }
+}
+
+// An MHXX save picked: which of its three slots to import from or export into.
+export component MhxxSheet inherits Sheet {
+    shown: Api.mhxx-title != "";
+    title: Api.mhxx-title;
+    content-h: lay.preferred-height;
+    close => { Api.mhxx-title = ""; }
+    lay := VerticalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-bottom: 16px;
+        spacing: 2px;
+        for r[i] in Api.mhxx-rows: GroupRow {
+            first: i == 0;
+            last: i == Api.mhxx-rows.length - 1;
+            pressable: Api.mhxx-export || r.used;
+            height: max(64px, mr.preferred-height);
+            accessible-role: button;
+            accessible-label: r.name;
+            accessible-description: r.sub;
+            accessible-action-default => { self.clicked(); }
+            clicked => { Api.mhxx-pick(i); }
+            mr := VerticalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                alignment: center;
+                Text { text: r.name; color: r.used ? M.on-surface : M.on-surface-variant; font-size: M.body-large; wrap: word-wrap; }
+                if r.sub != "": Muted { text: r.sub; font-size: M.body-small; }
             }
         }
     }

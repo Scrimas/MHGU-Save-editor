@@ -1,0 +1,159 @@
+// A colour of the hunter (skin, clothing) or of an armor part's pigment, picked on a phone:
+// the colour against the one it replaces, hue, saturation and brightness, its #RRGGBB, the
+// colours applied lately and presets. Apply hands it on (app.slint, by its kind).
+import { Slider } from "std-widgets.slint";
+import { M } from "theme.slint";
+import { Btn, Press, Sheet, Tap, TextField } from "widgets.slint";
+import { Api } from "../common.slint";
+import { Hex } from "../colour.slint";
+
+export global ColourEdit {
+    in-out property <bool> open;
+    in-out property <string> title;
+    // "look" (key: skin, clothing), "pigment" (where: -1 worn, 0 the My Set shown; part)
+    in-out property <string> kind;
+    in-out property <string> key;
+    in-out property <int> where;
+    in-out property <int> part;
+    in-out property <color> was;
+    in-out property <float> h;
+    in-out property <float> s;
+    in-out property <float> v;
+    out property <color> now: hsv(h, s, v);
+    public function set(c: color) {
+        h = c.to-hsv().hue;
+        s = c.to-hsv().saturation;
+        v = c.to-hsv().value;
+    }
+    public function show(kind: string, key: string, where: int, part: int, title: string, c: color) {
+        ColourEdit.kind = kind;
+        ColourEdit.key = key;
+        ColourEdit.where = where;
+        ColourEdit.part = part;
+        ColourEdit.title = title;
+        ColourEdit.was = c;
+        ColourEdit.set(c);
+        ColourEdit.open = true;
+    }
+}
+
+// A swatch to pick.
+component Swatch inherits Rectangle {
+    in property <color> colour;
+    in property <bool> on;
+    in property <length> size: 24px;
+    callback picked();
+    width: root.size;
+    height: root.size;
+    border-radius: 6px;
+    background: root.colour;
+    border-width: root.on ? 2px : 1px;
+    border-color: root.on ? M.on-surface : M.outline-variant;
+    accessible-role: button;
+    accessible-label: Hex.of(root.colour);
+    accessible-action-default => { root.picked(); }
+    Tap { tapped => { root.picked(); } }
+}
+
+export component ColourSheet inherits Sheet {
+    callback apply(string);
+    shown: ColourEdit.open;
+    title: ColourEdit.title;
+    content-h: lay.preferred-height;
+    close => { ColourEdit.open = false; }
+    property <[color]> presets: [
+        #F22424, #F28B24, #F2D024, #8BF224, #24F269, #24F2F2, #249CF2, #2447F2, #7A24F2, #F224F2, #F2248B, #F22435,
+        #BF3939, #BF7C39, #BFA939, #7CBF39, #39BF66, #39BFBF, #3987BF, #3950BF, #7139BF, #BF39BF, #BF397C, #BF3945,
+        #803333, #805933, #807333, #598033, #33804D, #338080, #336080, #334080, #533380, #803380, #803359, #803339,
+        #FFFFFF, #E0E0E0, #BFBFBF, #9E9E9E, #808080, #666666, #525252, #404040, #2E2E2E, #1F1F1F, #121212, #000000,
+    ];
+    // the presets are rows of 12 hues: 12 columns, the swatches as wide as fits
+    property <int> cols: 12;
+    property <length> sw: min(32px, (min(root.width, 640px) - 48px - 11 * 6px) / 12);
+    lay := VerticalLayout {
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-bottom: 16px;
+        spacing: 12px;
+        // the colour now, against the one it replaces
+        HorizontalLayout {
+            spacing: 0px;
+            height: 56px;
+            Rectangle {
+                border-top-left-radius: 12px;
+                border-bottom-left-radius: 12px;
+                background: ColourEdit.was;
+                Text { text: Hex.of(ColourEdit.was); color: ColourEdit.was.to-hsv().value > 0.6 ? #000 : #fff; font-size: M.body-small; }
+            }
+            Rectangle {
+                border-top-right-radius: 12px;
+                border-bottom-right-radius: 12px;
+                background: ColourEdit.now;
+                Text { text: Hex.of(ColourEdit.now); color: ColourEdit.v > 0.6 && ColourEdit.s < 0.6 ? #000 : ColourEdit.v > 0.7 ? #000 : #fff; font-size: M.body-small; font-weight: M.medium; }
+            }
+        }
+        for row in [{name: @tr("Hue"), k: 0}, {name: @tr("Saturation"), k: 1}, {name: @tr("Brightness"), k: 2}]: VerticalLayout {
+            spacing: 2px;
+            Text { text: row.name; color: M.on-surface-variant; font-size: M.body-small; }
+            Slider {
+                minimum: 0;
+                maximum: row.k == 0 ? 360 : 100;
+                value: row.k == 0 ? ColourEdit.h : row.k == 1 ? ColourEdit.s * 100 : ColourEdit.v * 100;
+                accessible-label: row.name;
+                changed(x) => {
+                    if row.k == 0 {
+                        ColourEdit.h = x;
+                    } else if row.k == 1 {
+                        ColourEdit.s = x / 100;
+                    } else {
+                        ColourEdit.v = x / 100;
+                    }
+                }
+            }
+        }
+        TextField {
+            label: "#RRGGBB";
+            value: Hex.of(ColourEdit.now);
+            committed(t) => {
+                if Api.parse-colour(t).alpha > 0 {
+                    ColourEdit.set(Api.parse-colour(t));
+                }
+            }
+        }
+        if Api.recent-colours.length > 0: HorizontalLayout {
+            spacing: 6px;
+            alignment: start;
+            for c in Api.recent-colours: Swatch { size: root.sw; colour: c; on: Hex.of(c) == Hex.of(ColourEdit.now); picked => { ColourEdit.set(c); } }
+        }
+        VerticalLayout {
+            spacing: 6px;
+            for r in (root.presets.length + root.cols - 1) / root.cols: HorizontalLayout {
+                spacing: 6px;
+                alignment: start;
+                for k in root.cols: Rectangle {
+                    width: root.sw;
+                    height: root.sw;
+                    if r * root.cols + k < root.presets.length: Swatch {
+                        size: root.sw;
+                        colour: root.presets[r * root.cols + k];
+                        on: Hex.of(self.colour) == Hex.of(ColourEdit.now);
+                        picked => { ColourEdit.set(self.colour); }
+                    }
+                }
+            }
+        }
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: end;
+            Btn { kind: "text"; text: @tr("Cancel"); clicked => { ColourEdit.open = false; } }
+            Btn {
+                text: @tr("Apply");
+                clicked => {
+                    ColourEdit.open = false;
+                    Api.colour-used(Hex.of(ColourEdit.now));
+                    root.apply(Hex.of(ColourEdit.now));
+                }
+            }
+        }
+    }
+}

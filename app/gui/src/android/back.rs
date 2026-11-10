@@ -2,6 +2,11 @@
 //! interface moves the sheet or shrinks the screen Back would close (ui/mobile/app.slint);
 //! when the interface says Back has nothing to do in the app (Api.back-enabled), Android
 //! keeps the gesture for its own back-to-home animation.
+//!
+//! The gesture's end runs the interface's Back here. A Back key press (a phone's button,
+//! `adb shell input keyevent`) comes both as this callback and as a key in the window's
+//! input, so from Android 14 the interface leaves the key alone (Api.back-by-callback):
+//! otherwise one press went back twice.
 
 use crate::{Api, AppWindow};
 use slint::ComponentHandle;
@@ -13,6 +18,7 @@ thread_local! {
 
 pub fn wire(ui: &AppWindow) {
     UI.set(Some(ui.as_weak()));
+    ui.global::<Api>().set_back_by_callback(super::sdk() >= 34);
     ui.global::<Api>().on_back_enabled(|on| {
         if let Err(e) = super::set_back(on) {
             super::log(&format!("setBack: {e}"));
@@ -34,5 +40,8 @@ pub fn gesture(phase: i32, progress: f32, from_right: bool) {
         api.set_back_active(true);
     } else {
         api.set_back_active(false);
+        if phase == 3 {
+            ui.invoke_back();
+        }
     }
 }

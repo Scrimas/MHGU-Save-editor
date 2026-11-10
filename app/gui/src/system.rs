@@ -373,6 +373,27 @@ pub fn open_url(url: &str) {
     let _ = std::process::Command::new("xdg-open").arg(url).spawn();
 }
 
+/// Android: whether the app may install apps (an update); when not, Android's page to allow
+/// it opens. Always on the desktop.
+pub fn may_install_apk() -> bool {
+    #[cfg(target_os = "android")]
+    return crate::android::may_install();
+    #[cfg(not(target_os = "android"))]
+    true
+}
+
+/// Android: hands a downloaded APK to the system's installer. Ok(false) when the app may
+/// not install apps yet: Android's page to allow it opened instead.
+pub fn install_apk(apk: &std::path::Path) -> Result<bool, String> {
+    #[cfg(target_os = "android")]
+    return crate::android::install_apk(apk);
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = apk;
+        Err("APKs install only on Android".into())
+    }
+}
+
 pub fn open_folder(p: &std::path::Path) {
     let _ = std::fs::create_dir_all(p);
     #[cfg(windows)]

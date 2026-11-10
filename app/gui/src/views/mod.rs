@@ -140,6 +140,8 @@ struct View {
     quest_tab: usize,
     quest_search: String,
     quest_missing: bool,
+    /// quests picked in the phone's selection mode (indices), for one Mark cleared
+    quest_sel: std::collections::BTreeSet<usize>,
     request_filter: String,
     request_search: String,
     collection: usize,

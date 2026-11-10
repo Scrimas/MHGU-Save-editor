@@ -15,6 +15,10 @@ fn older(v: &str) -> bool {
     update::version(v) < update::version(VERSION)
 }
 
+/// Android's installer takes only a newer version over the app: going back means
+/// uninstalling first, from the release page's APK.
+const ANDROID: bool = cfg!(target_os = "android");
+
 pub(super) fn set_update(ui: &AppWindow, state: &str, status: String, body: String, progress: f32) {
     let r = view(|v| v.update.clone());
     ui.global::<Api>().set_update(UpdateInfo {
@@ -23,7 +27,7 @@ pub(super) fn set_update(ui: &AppWindow, state: &str, status: String, body: Stri
         status: format!("{VERSION}{}{status}", if status.is_empty() { "" } else { " · " }).into(),
         body: body.into(),
         progress,
-        can_install: update::target().is_some() && r.as_ref().is_some_and(|r| r.size().is_some()),
+        can_install: update::target().is_some() && r.as_ref().is_some_and(|r| r.size().is_some() && !(ANDROID && older(&r.version))),
         older: r.as_ref().is_some_and(|r| older(&r.version)),
         updates_itself: r.as_ref().is_none_or(|r| r.updates_itself()),
     });
@@ -35,6 +39,14 @@ pub(super) fn update_available(ui: &AppWindow) {
     let Some(r) = view(|v| v.update.clone()) else { return };
     let back = older(&r.version);
     let mut body = match (update::target(), r.size()) {
+        _ if ANDROID && back => trf(
+            "You have {}. Android installs only newer versions over the app. To go back to {}, uninstall the app (its settings and snapshots go with it, your saves stay), then install that version's APK from its release page.",
+            &[&VERSION, &r.version],
+        ),
+        (Some(_), Some(n)) if ANDROID => trf(
+            "You have {}. The new version ({}) is downloaded from GitHub and checked against the release's SHA-256 checksums, then Android asks you to install it. Saves, snapshots and settings are not touched.",
+            &[&VERSION, &mb(n)],
+        ),
         (Some(t), Some(n)) if back => trf(
             "You have {}. Version {} ({}) is downloaded from GitHub, checked against the release's SHA-256 checksums and replaces {}. Saves and snapshots are not touched.",
             &[&VERSION, &r.version, &mb(n), &file_name(&t)],
@@ -46,7 +58,7 @@ pub(super) fn update_available(ui: &AppWindow) {
         (Some(_), None) => trf("You have {}. This release has no file for this system: see its page.", &[&VERSION]),
         (None, _) => trf("You have {}. Only the AppImage and the Windows .exe replace themselves: download this version from the release page.", &[&VERSION]),
     };
-    if back {
+    if back && !ANDROID {
         // the published versions after it, up to this one
         let at = update::version(&r.version);
         let later = view(|v| {
@@ -69,10 +81,96 @@ pub(super) fn update_available(ui: &AppWindow) {
     set_update(ui, "available", status, body, 0.0);
 }
 
+/// Android: the release's APK downloaded to `apk` and checked, then handed to the system's
+/// installer, which asks the user, closes the editor and puts the new version in place.
+fn apk_install(ui: &AppWindow, r: update::Release, apk: PathBuf) {
+    if !system::may_install_apk() {
+        let body = tr("Android first asks to let this app install apps: allow it on the page that opened, come back, then press Download and install again.");
+        return set_update(ui, "available", trf("{} is available", &[&r.version]), body.into(), 0.0);
+    }
+    let total = r.size().unwrap_or(0);
+    set_update(ui, "downloading", trf("downloading {}…", &[&r.version]), trf("Downloading… {} of {}", &[&mb(0), &mb(total)]), 0.0);
+    let cancel = Arc::new(AtomicBool::new(false));
+    view(|v| v.update_cancel = Some(cancel.clone()));
+    let w = ui.as_weak();
+    std::thread::spawn(move || {
+        let last = std::cell::Cell::new(u64::MAX);
+        let progress = |done, total| {
+            let pct = done * 100 / u64::max(total, 1);
+            if pct != last.replace(pct) && !cancel.load(Ordering::Relaxed) {
+                let (v, body) = (r.version.clone(), trf("Downloading… {} of {}", &[&mb(done), &mb(total)]));
+                let _ = w.upgrade_in_event_loop(move |ui| set_update(&ui, "downloading", trf("downloading {}…", &[&v]), body, pct as f32 / 100.0));
+            }
+        };
+        let res = update::download_checked(&r, &apk, progress, &cancel);
+        let cancelled = cancel.load(Ordering::Relaxed);
+        let _ = w.upgrade_in_event_loop(move |ui| {
+            view(|v| v.update_cancel = None);
+            let failed =
+                |e: String| set_update(&ui, "failed", tr("update failed").into(), trf("Not updated: {}. The editor you are running is unchanged.", &[&e]), 0.0);
+            match res.and_then(|()| system::install_apk(&apk)) {
+                Ok(true) => set_update(
+                    &ui,
+                    "installing",
+                    trf("installing {}…", &[&r.version]),
+                    tr("Android asks you to confirm the install. The editor then closes: open it again to use the new version.").into(),
+                    1.0,
+                ),
+                // (allowed a moment ago, then taken back)
+                Ok(false) => {
+                    let _ = std::fs::remove_file(&apk);
+                    let body = tr(
+                        "Android first asks to let this app install apps: allow it on the page that opened, come back, then press Download and install again.",
+                    );
+                    set_update(&ui, "available", trf("{} is available", &[&r.version]), body.into(), 0.0);
+                }
+                Err(_) if cancelled => update_available(&ui),
+                Err(e) => failed(e),
+            }
+        });
+    });
+}
+
+#[cfg(target_os = "android")]
+thread_local! {
+    /// The window, for the installer's answer (`installed`).
+    static UPDATE_UI: std::cell::RefCell<Option<Weak<AppWindow>>> = const { std::cell::RefCell::new(None) };
+}
+
+/// Android: what the system's installer did with the APK (PackageInstaller's status: -1 it
+/// asks the user, 0 installed, 3 cancelled, other failures with Android's message).
+#[cfg(target_os = "android")]
+pub fn installed(status: i32, message: String) {
+    let Some(ui) = UPDATE_UI.with_borrow(|u| u.as_ref().and_then(|w| w.upgrade())) else { return };
+    if status == -1 {
+        return;
+    }
+    if let Some(apk) = update::target() {
+        let _ = std::fs::remove_file(apk);
+    }
+    match status {
+        0 => set_update(&ui, "ready", tr("installed").into(), tr("Open the editor again to use the new version.").into(), 1.0),
+        // the user said no
+        3 => update_available(&ui),
+        // another signature (a test build installed), or the app is newer
+        5 => set_update(
+            &ui,
+            "failed",
+            tr("update failed").into(),
+            tr("Android refused it: the editor installed is signed with another key (a build of your own?). Uninstall it, then install the APK from the release page. Your saves stay; the settings and snapshots go with the app.").into(),
+            0.0,
+        ),
+        _ => {
+            let why = if message.is_empty() { trf("Android's installer answered {}", &[&status]) } else { message };
+            set_update(&ui, "failed", tr("update failed").into(), trf("Not updated: {}. The editor you are running is unchanged.", &[&why]), 0.0);
+        }
+    }
+}
+
 /// The update dialog closed without installing: back to the newer release found, if any.
 fn update_closed(ui: &AppWindow) {
     let state = ui.global::<Api>().get_update().state;
-    if state == "downloading" || state == "ready" {
+    if state == "downloading" || state == "ready" || state == "installing" {
         return;
     }
     let (latest, (state, status)) = view(|v| {
@@ -123,6 +221,8 @@ pub fn check_update(ui: &AppWindow, manual: bool) {
 pub(super) fn wire_update(ui: &AppWindow, st: &Shared) {
     let api = ui.global::<Api>();
     set_update(ui, "", String::new(), String::new(), 0.0);
+    #[cfg(target_os = "android")]
+    UPDATE_UI.set(Some(ui.as_weak()));
     let w = ui.as_weak();
     api.on_check_update(move || {
         if let Some(ui) = w.upgrade() {
@@ -137,6 +237,9 @@ pub(super) fn wire_update(ui: &AppWindow, st: &Shared) {
     api.on_install_update(move || {
         let Some(ui) = w.upgrade() else { return };
         let (Some(r), Some(old)) = (view(|v| v.update.clone()), update::target()) else { return };
+        if ANDROID {
+            return apk_install(&ui, r, old);
+        }
         let back = older(&r.version);
         // an older version rewrites the settings without the ones it does not know
         if back && !settings::keep_for_rollback() {
@@ -242,7 +345,7 @@ fn version_rows(ui: &AppWindow) {
             latest: i == 0,
             older: older(&r.version),
             updates_itself: r.updates_itself(),
-            installable: target && r.size().is_some() && r.version != VERSION,
+            installable: target && r.size().is_some() && r.version != VERSION && !(ANDROID && older(&r.version)),
         })
         .collect();
     ui.global::<Api>().set_versions(model(rows));

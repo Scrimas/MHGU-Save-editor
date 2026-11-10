@@ -58,6 +58,8 @@ export component OverviewPage inherits Rectangle {
         HorizontalLayout {
             alignment: center;
             VerticalLayout {
+                // shorter than the view: the spare room stays below the content
+                alignment: start;
                 max-width: 1200px;
                 horizontal-stretch: 1;
                 padding-left: M.gutter + root.side-inset;
@@ -206,13 +208,19 @@ export component GoalSheet inherits Sheet {
                     padding-right: 16px;
                     padding-top: 4px;
                     padding-bottom: 4px;
-                    for l[i] in Api.preview.lines: HorizontalLayout {
-                        spacing: 8px;
-                        min-height: 40px;
-                        Text { text: l.label; color: M.on-surface; font-size: M.body-medium; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
-                        Text { text: l.old; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
-                        Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; vertical-alignment: center; }
-                        Text { text: l.new; color: M.on-surface; font-size: M.body-medium; font-weight: M.medium; vertical-alignment: center; }
+                    // what changes on one line, old → new under it: a phone has no room for both
+                    for l[i] in Api.preview.lines: VerticalLayout {
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        spacing: 2px;
+                        Text { text: l.label; color: M.on-surface; font-size: M.body-medium; wrap: word-wrap; }
+                        HorizontalLayout {
+                            spacing: 8px;
+                            alignment: start;
+                            Text { text: l.old; color: M.on-surface-variant; font-size: M.body-medium; overflow: elide; }
+                            Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; }
+                            Text { text: l.new; color: M.on-surface; font-size: M.body-medium; font-weight: M.medium; overflow: elide; }
+                        }
                     }
                     if Api.preview.more > 0: Text { text: @tr("and {} more", Fmt.num(Api.preview.more)); color: M.on-surface-variant; font-size: M.body-small; height: 32px; vertical-alignment: center; }
                 }

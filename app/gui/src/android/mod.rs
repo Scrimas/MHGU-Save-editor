@@ -1,7 +1,7 @@
 //! Android: the entry point the APK's activity runs, the app's folders, logging, and JNI
 //! to the Java side of the app (app/packaging/android/java/.../MainActivity.java: the
 //! system's pickers, reading and writing the files they hand out, the wallpaper colours,
-//! opening links).
+//! opening links, installing an update).
 //!
 //! Java methods never throw: a failure comes back as `null` (then `lastError()`) or as a
 //! string starting with "!".
@@ -44,6 +44,12 @@ fn android_main(app: AndroidApp) {
         std::env::set_var("XDG_CONFIG_HOME", files.join("config"));
         std::env::set_var("XDG_DATA_HOME", files.join("data"));
         std::env::set_var("XDG_CACHE_HOME", files.join("cache"));
+        // The emulator build (packaging/build-apk.sh --emulator) has Slint's MCP server,
+        // which starts when SLINT_MCP_PORT is set; Android passes the app no environment,
+        // so the port is the one the build was given.
+        if let Some(port) = option_env!("SLINT_MCP_PORT") {
+            std::env::set_var("SLINT_MCP_PORT", port);
+        }
     }
     if let Err(e) = bind(&app) {
         log(&format!("JNI: {e}"));
@@ -65,11 +71,13 @@ fn bind(app: &AndroidApp) -> Result<(), jni::errors::Error> {
         let act = unsafe { JObject::from_raw(env, app.activity_as_ptr() as jni::sys::jobject) };
         let class = env.get_object_class(&act)?;
         // SAFETY: each function matches its Java declaration: `static native void onPicked(int,
-        // String)`, `static native void onBack(int, float, boolean)`
+        // String)`, `static native void onBack(int, float, boolean)`, `static native void
+        // onInstalled(int, String)`
         let methods = unsafe {
             [
                 NativeMethod::from_raw_parts(jni_str!("onPicked"), jni_str!("(ILjava/lang/String;)V"), on_picked as *mut c_void),
                 NativeMethod::from_raw_parts(jni_str!("onBack"), jni_str!("(IFZ)V"), on_back as *mut c_void),
+                NativeMethod::from_raw_parts(jni_str!("onInstalled"), jni_str!("(ILjava/lang/String;)V"), on_installed as *mut c_void),
             ]
         };
         unsafe { env.register_native_methods(&class, &methods)? };
@@ -94,6 +102,38 @@ extern "system" fn on_back<'local>(
     from_right: jni::sys::jboolean,
 ) {
     let _ = slint::invoke_from_event_loop(move || back::gesture(phase, progress, from_right));
+}
+
+/// MainActivity.onInstalled(status, message): what Android's installer did with an update
+/// (PackageInstaller's status; -1 while it asks the user).
+extern "system" fn on_installed<'local>(mut env: EnvUnowned<'local>, _class: JClass<'local>, status: jni::sys::jint, message: JString<'local>) {
+    let text = env.with_env(|env| -> jni::errors::Result<String> { message.try_to_string(env) }).resolve::<jni::errors::LogErrorAndDefault>();
+    log(&format!("install: status {status} {text}"));
+    let _ = slint::invoke_from_event_loop(move || crate::views::installed(status, text));
+}
+
+/// Hands a downloaded APK to Android's installer: Ok(true) when it took it (its confirmation
+/// follows), Ok(false) when the app may not install apps yet and Android's page for that
+/// opened instead.
+pub fn install_apk(path: &std::path::Path) -> Result<bool, String> {
+    match call_string(jni_str!("installApk"), &path.to_string_lossy())?.as_str() {
+        "?" => Ok(false),
+        _ => Ok(true),
+    }
+}
+
+/// Whether the app may install apps (an update); when not, Android's page to allow it opens.
+pub fn may_install() -> bool {
+    call_string(jni_str!("mayInstall"), "").is_ok_and(|s| s == "1")
+}
+
+/// Android's API level (Build.VERSION.SDK_INT), 0 when it can't be read.
+pub fn sdk() -> i32 {
+    with_activity(|env, _| {
+        let v = env.get_static_field(jni_str!("android/os/Build$VERSION"), jni_str!("SDK_INT"), jni_sig!("I"))?;
+        Ok(v.i()?)
+    })
+    .unwrap_or(0)
 }
 
 /// Tells MainActivity whether Back has something to do in the app (back.rs).

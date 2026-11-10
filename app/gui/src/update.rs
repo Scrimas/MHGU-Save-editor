@@ -25,7 +25,9 @@ const SELF_UPDATE: &str = "0.7.0";
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 #[cfg(windows)]
 const SUFFIX: &str = "-x86_64.exe";
-#[cfg(not(windows))]
+#[cfg(target_os = "android")]
+const SUFFIX: &str = "-arm64.apk";
+#[cfg(not(any(windows, target_os = "android")))]
 const SUFFIX: &str = "-x86_64.AppImage";
 
 #[derive(Clone, Debug, Deserialize)]
@@ -259,11 +261,35 @@ fn shown(title: &str) -> bool {
 }
 
 /// The file an update replaces: the AppImage or the .exe; None when run another way.
+/// On Android, where the APK is downloaded to (the app's cache) for the system's installer.
 pub fn target() -> Option<PathBuf> {
     #[cfg(windows)]
     return std::env::current_exe().ok();
-    #[cfg(not(windows))]
+    #[cfg(target_os = "android")]
+    return dirs::cache_dir().map(|d| d.join("update.apk"));
+    #[cfg(not(any(windows, target_os = "android")))]
     std::env::var_os("APPIMAGE").map(PathBuf::from)
+}
+
+/// Android: the release's APK downloaded to `to` and checked against its SHA256SUMS. The
+/// system's installer then puts it in place (android/mod.rs): it asks the user, and takes
+/// only a newer version signed with the same key.
+pub fn download_checked(r: &Release, to: &Path, progress: impl Fn(u64, u64), cancel: &AtomicBool) -> Result<(), String> {
+    let (Some(file), Some(sums)) = (&r.file, &r.sums) else {
+        return Err(trf("Release {} has no {} file with checksums", &[&r.version, &SUFFIX]));
+    };
+    let mut list = String::new();
+    get(&sums.browser_download_url)?.into_reader().read_to_string(&mut list).map_err(|e| trf("Download failed ({})", &[&e]))?;
+    let want = sum_of(&list, &file.name).ok_or_else(|| trf("{} is not in {}", &[&file.name, &sums.name]))?;
+    if let Some(d) = to.parent() {
+        let _ = std::fs::create_dir_all(d);
+    }
+    let res = download(&file.browser_download_url, to, file.size, &progress, cancel)
+        .and_then(|got| if got == want { Ok(()) } else { Err(tr("The download does not match the release's checksum").into()) });
+    if res.is_err() {
+        let _ = std::fs::remove_file(to);
+    }
+    res
 }
 
 /// The updated file's name: the version in `name` becomes `to`; a name without it stays.
