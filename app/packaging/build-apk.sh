@@ -56,8 +56,11 @@ api=29 # minSdk: the same as MHGU Recomp
 sdk=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/android-sdk}}
 ndk=${ANDROID_NDK_HOME:-$(ls -d "$sdk"/ndk/* 2>/dev/null | sort -V | tail -1)}
 tools=$(ls -d "$sdk"/build-tools/* | sort -V | tail -1)
-jar=$(ls "$sdk"/platforms/android-*/android.jar | sort -V | tail -1)
-target_api=$(basename "$(dirname "$jar")" | sed 's/android-//')
+# the newest released platform (android-37, or a minor release such as android-37.2; not
+# a preview's codename), and as targetSdk its API level: a target such as "37.2" reads as
+# a preview's, which a released Android refuses to install
+jar=$(ls "$sdk"/platforms/android-*/android.jar | grep -E '/android-[0-9]+(\.[0-9]+)?/android\.jar$' | sort -V | tail -1)
+target_api=$(basename "$(dirname "$jar")" | sed 's/^android-//; s/\..*//')
 tc="$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin"
 [ -x "$tc/$triple$api-clang" ] || { echo "no NDK clang in $tc (ANDROID_HOME=$sdk)" >&2; exit 1; }
 
