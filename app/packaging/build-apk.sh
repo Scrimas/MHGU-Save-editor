@@ -9,7 +9,8 @@
 #                              the SDK's debug key (~/.android/debug.keystore, made if missing)
 #   build-apk.sh --release     release build: app/dist/MHGU-Save-Editor-<version>-arm64.apk,
 #                              signed with the release key:
-#                                MHGU_APK_KEYSTORE       path of the keystore (PKCS12)
+#                                MHGU_APK_KEYSTORE       path of the keystore (PKCS12,
+#                                                        made by make-apk-key.sh)
 #                                MHGU_APK_KEYSTORE_PASS  its password (also the key's)
 #   build-apk.sh --install     the debug build, then adb install -r
 #   build-apk.sh --check       clippy for the Android target (the code under src/android

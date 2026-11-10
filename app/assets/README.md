@@ -35,6 +35,9 @@ After rebuilding `gen/`, reseal it and refresh the secret, then commit the new b
 
     app/packaging/seal-assets.sh
 
+The same passphrase protects the Android release key (`app/packaging/make-apk-key.sh`,
+secret `MHGU_APK_KEYSTORE_B64`): the release workflow reads `ASSETS_PASSPHRASE` for both.
+
 ## `test-save.tar.xz.gpg`
 
 A frozen copy of a played save folder (`0/` and `1/`, each `system` and `system_backup`),

@@ -127,8 +127,8 @@ jobs:
           retention-days: 1
 
   # The Android APK, signed with the release key: MHGU_APK_KEYSTORE_B64 (the PKCS12
-  # keystore, base64) and MHGU_APK_KEYSTORE_PASS. Never change the key once an APK is out:
-  # Android refuses an update signed with another one.
+  # keystore, base64, app/packaging/make-apk-key.sh), under ASSETS_PASSPHRASE. Never change
+  # the key once an APK is out: Android refuses an update signed with another one.
   android:
     needs: build
     runs-on: ubuntu-latest
@@ -157,13 +157,14 @@ jobs:
             tar -xz -C app/assets
           test -f app/assets/gen/names.json
 
+      # the release key (app/packaging/make-apk-key.sh), under the asset pack's passphrase
       - name: Build
         env:
           KEYSTORE_B64: ${{ secrets.MHGU_APK_KEYSTORE_B64 }}
-          MHGU_APK_KEYSTORE_PASS: ${{ secrets.MHGU_APK_KEYSTORE_PASS }}
+          MHGU_APK_KEYSTORE_PASS: ${{ secrets.ASSETS_PASSPHRASE }}
         run: |
           if [ -z "$KEYSTORE_B64" ] || [ -z "$MHGU_APK_KEYSTORE_PASS" ]; then
-            echo "::error::the APK release key is not set (secrets MHGU_APK_KEYSTORE_B64, MHGU_APK_KEYSTORE_PASS)"
+            echo "::error::the APK release key is not set (secret MHGU_APK_KEYSTORE_B64: app/packaging/make-apk-key.sh)"
             exit 1
           fi
           export MHGU_APK_KEYSTORE="$RUNNER_TEMP/release.p12"
