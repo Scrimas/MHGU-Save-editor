@@ -15,6 +15,8 @@ pub const FILES: i32 = 2;
 pub const NEW_FILE: i32 = 3;
 
 type Then = Box<dyn FnOnce(Result<Vec<String>, String>)>;
+/// What open_file hands the file it read to: its name and bytes.
+pub type Opened = Box<dyn FnOnce(Result<(PathBuf, Vec<u8>), String>)>;
 
 thread_local! {
     static WAITING: RefCell<HashMap<i32, Then>> = RefCell::new(HashMap::new());
@@ -59,7 +61,7 @@ fn mime_of(kind: Option<&Kind>) -> &'static str {
 }
 
 /// platform::open_file on Android: the document picked, read through its URI.
-pub fn open_file(_kinds: &[Kind], done: Box<dyn FnOnce(Result<(PathBuf, Vec<u8>), String>)>) {
+pub fn open_file(_kinds: &[Kind], done: Opened) {
     pick(
         FILE,
         mime_of(None),

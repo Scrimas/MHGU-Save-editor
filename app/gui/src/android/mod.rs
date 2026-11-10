@@ -131,7 +131,7 @@ pub fn may_install() -> bool {
 pub fn sdk() -> i32 {
     with_activity(|env, _| {
         let v = env.get_static_field(jni_str!("android/os/Build$VERSION"), jni_str!("SDK_INT"), jni_sig!("I"))?;
-        Ok(v.i()?)
+        v.i()
     })
     .unwrap_or(0)
 }
