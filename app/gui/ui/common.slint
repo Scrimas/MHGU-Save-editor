@@ -1954,7 +1954,7 @@ export component StatTile inherits Card {
     }
 }
 
-// A modal dialog: scrim over everything, the card centred (C11: anything that confirms
+// A modal dialog: scrim over everything, the card centred both ways (C11: anything that confirms
 // or commits). Fills its parent: the window, or a PopupWindow the size of the window.
 // A page's search field: Ctrl+F puts the cursor in it.
 export component SearchField inherits LineEdit {
@@ -1984,7 +1984,7 @@ export component Modal inherits Rectangle {
             width: min(root.card-width, root.width - 32px);
             height: root.card-height > 0 ? min(root.card-height, root.height - 48px) : min(lay.preferred-height, root.height - 48px);
             x: (root.width - self.width) / 2;
-            y: max(24px, (root.height - self.height) / 3);
+            y: max(24px, (root.height - self.height) / 2);
             animate width, height { duration: root.animate-size ? Tok.anim : 0ms; easing: ease-out; }
             background: Tok.raised;
             border-radius: 8px;
