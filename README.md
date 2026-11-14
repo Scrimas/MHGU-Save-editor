@@ -20,7 +20,9 @@ Get the latest file from the [releases](https://github.com/Scrimas/MHGU-Save-edi
 | File | Runs on |
 |---|---|
 | `MHGU-Save-Editor-<version>-x86_64.exe` | Windows 10 / 11, nothing to install |
+| `MHGU-Save-Editor-<version>-arm64.exe` | Windows 11 on ARM (Snapdragon laptops and tablets) |
 | `MHGU-Save-Editor-<version>-x86_64.AppImage` | Linux x86-64 (distros from 2019 on) |
+| `MHGU-Save-Editor-<version>-arm64.AppImage` | Linux ARM64 (Raspberry Pi 4/5 with a 64-bit OS, ARM laptops) |
 | `MHGU-Save-Editor-<version>-arm64.apk` | Android 10 or newer, phones, foldables and tablets |
 
 The `.exe` is not code-signed, so Windows SmartScreen warns the first time: **More info → Run anyway**.

@@ -4,10 +4,12 @@ name: Release builds
 # script in an Arch Linux container (the toolchain it was written for):
 #   MHGU-Save-Editor-<version>-x86_64.exe        mingw-w64 (UCRT) cross build
 #   MHGU-Save-Editor-<version>-x86_64.AppImage   zig, glibc 2.28, type 2 runtime
+#   MHGU-Save-Editor-<version>-arm64.AppImage    the same on an ARM64 Ubuntu runner (job linux-arm64)
+#   MHGU-Save-Editor-<version>-arm64.exe         MSVC on an ARM64 Windows runner (job windows-arm64)
 #   MHGU-Save-Editor-<version>-arm64.apk         app/packaging/build-apk.sh --release, signed
 #                                                with the release key (secrets below)
-# The .exe is then started on Windows with the sealed test save (it must open the save and
-# draw its window). A v* tag drafts a GitHub Release with them once that passes; a manual
+# Each .exe is then started on Windows with the sealed test save (it must open the save and
+# draw its window, and show its text fields to UI Automation), the ARM64 AppImage under Xvfb. A v* tag drafts a GitHub Release with them once that passes; a manual
 # run keeps them as workflow artifacts.
 # The game-asset pack comes from app/assets/gen.tar.gz.gpg (see app/assets/README.md).
 
@@ -118,6 +120,13 @@ jobs:
             "$(cygpath -m "$PWD")/save/0/system" overview
           test -s overview.png
 
+      # the touch keyboard's condition: the search field is editable text to UI Automation
+      - name: Text fields in UI Automation
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File app/packaging/uia-check.ps1 `
+            "dist/MHGU-Save-Editor-$env:VER-x86_64.exe" "$PWD/save/0/system"
+
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -180,8 +189,169 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  # ARM64 Linux: build.sh on an ARM64 runner (the binary links the machine's libudev, so
+  # Arch's x86_64 container cannot cross-build it), then the AppImage is started under Xvfb.
+  linux-arm64:
+    needs: build
+    runs-on: ubuntu-24.04-arm
+    env:
+      VER: ${{ needs.build.outputs.ver }}
+      RUNTIME_URL: https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-aarch64
+      RUNTIME_SHA256: 00cbdfcf917cc6c0ff6d3347d59e0ca1f7f45a6df1a428a0d6d8a78664d87444
+    steps:
+      - name: Toolchain
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends pkg-config libudev-dev libfontconfig-dev \
+            squashfs-tools binutils xvfb xauth libxkbcommon-x11-0 libxcursor1 libxi6 libxrandr2 \
+            libgl1 libegl1 libgl1-mesa-dri
+          command -v rustup >/dev/null || curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup update stable --no-self-update && rustup default stable
+          # zig from PyPI (the ziglang wheel), behind a `zig` command for build.sh
+          python3 -m venv "$RUNNER_TEMP/zig"
+          "$RUNNER_TEMP/zig/bin/pip" install -q ziglang
+          printf '#!/bin/sh\nexec "%s" -m ziglang "$@"\n' "$RUNNER_TEMP/zig/bin/python3" > "$RUNNER_TEMP/zig/bin/zig"
+          chmod 755 "$RUNNER_TEMP/zig/bin/zig"
+          echo "$RUNNER_TEMP/zig/bin" >> "$GITHUB_PATH"
+          cargo install --locked cargo-zigbuild
+
+      - uses: actions/checkout@v7
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app
+          key: linux-arm64
+
+      - name: Asset pack and test save
+        env:
+          ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
+        run: &unseal |
+          printf '%s' "$ASSETS_PASSPHRASE" |
+            gpg --batch --pinentry-mode loopback --passphrase-fd 0 --decrypt app/assets/gen.tar.gz.gpg |
+            tar -xz -C app/assets
+          test -f app/assets/gen/names.json
+          mkdir save
+          printf '%s' "$ASSETS_PASSPHRASE" |
+            gpg --batch --pinentry-mode loopback --passphrase-fd 0 --decrypt app/assets/test-save.tar.xz.gpg |
+            tar -xJ -C save
+          test -f save/0/system
+
+      - name: AppImage runtime
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/runtime-aarch64" "$RUNTIME_URL"
+          echo "$RUNTIME_SHA256  $RUNNER_TEMP/runtime-aarch64" | sha256sum -c -
+
+      - name: Build
+        run: MHGU_ARCH=arm64 APPIMAGE_RUNTIME="$RUNNER_TEMP/runtime-aarch64" bash app/packaging/build.sh
+
+      # no FUSE on the runner: the runtime unpacks itself instead
+      - name: Start the AppImage
+        run: |
+          APPIMAGE_EXTRACT_AND_RUN=1 MHGU_SNAPSHOT="$PWD/overview-arm64.png" timeout 180 \
+            xvfb-run -a -s "-screen 0 1600x1000x24" \
+            "app/dist/MHGU-Save-Editor-$VER-arm64.AppImage" "$PWD/save/0/system" overview
+          test -s overview-arm64.png
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MHGU-Save-Editor-linux-arm64-${{ needs.build.outputs.ver }}
+          path: app/dist/*${{ needs.build.outputs.ver }}*
+          if-no-files-found: error
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: linux-arm64-overview-${{ needs.build.outputs.ver }}
+          path: overview-arm64.png
+          if-no-files-found: ignore
+          retention-days: 1
+
+  # ARM64 Windows: MSVC on an ARM64 runner, the C runtime linked in (nothing to install),
+  # then the same launch and UI Automation checks as the x86_64 .exe.
+  windows-arm64:
+    needs: build
+    runs-on: windows-11-arm
+    env:
+      VER: ${{ needs.build.outputs.ver }}
+    steps:
+      - name: Toolchain
+        run: |
+          if ! command -v rustup >/dev/null; then
+            curl -fsSL -o "$RUNNER_TEMP/rustup-init.exe" \
+              https://static.rust-lang.org/rustup/dist/aarch64-pc-windows-msvc/rustup-init.exe
+            "$RUNNER_TEMP/rustup-init.exe" -y --profile minimal --default-toolchain stable
+            cygpath -w "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.cargo/bin:$PATH"
+          fi
+          rustup update stable --no-self-update && rustup default stable
+          rustup target add aarch64-pc-windows-msvc
+          # ring's assembly for aarch64-pc-windows-msvc is built with clang
+          if ! command -v clang >/dev/null; then
+            llvm=$(ls -d "/c/Program Files/LLVM/bin" "/c/Program Files/Microsoft Visual Studio/2022/"*/VC/Tools/Llvm/ARM64/bin 2>/dev/null | head -1)
+            if [ -z "$llvm" ]; then
+              choco install llvm -y --no-progress
+              llvm="/c/Program Files/LLVM/bin"
+            fi
+            cygpath -w "$llvm" >> "$GITHUB_PATH"
+            export PATH="$llvm:$PATH"
+          fi
+          clang --version | head -1
+
+      - uses: actions/checkout@v7
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app
+          key: windows-arm64
+          cache-on-failure: true
+
+      - name: Asset pack and test save
+        env:
+          ASSETS_PASSPHRASE: ${{ secrets.ASSETS_PASSPHRASE }}
+        run: *unseal
+
+      - name: Build
+        working-directory: app
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
+        run: |
+          cargo build --release -p mhgu-editor --target aarch64-pc-windows-msvc
+          mkdir -p dist
+          cp target/aarch64-pc-windows-msvc/release/mhgu-editor.exe "dist/MHGU-Save-Editor-$VER-arm64.exe"
+          cd dist && sha256sum "MHGU-Save-Editor-$VER-arm64.exe" > "SHA256SUMS-windows-arm64-$VER"
+
+      - name: Start the .exe
+        run: |
+          MHGU_SNAPSHOT=overview-arm64.png timeout 180 "app/dist/MHGU-Save-Editor-$VER-arm64.exe" \
+            "$(cygpath -m "$PWD")/save/0/system" overview
+          test -s overview-arm64.png
+
+      - name: Text fields in UI Automation
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File app/packaging/uia-check.ps1 `
+            "app/dist/MHGU-Save-Editor-$env:VER-arm64.exe" "$PWD/save/0/system"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MHGU-Save-Editor-windows-arm64-${{ needs.build.outputs.ver }}
+          path: app/dist/*${{ needs.build.outputs.ver }}*
+          if-no-files-found: error
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-arm64-overview-${{ needs.build.outputs.ver }}
+          path: overview-arm64.png
+          if-no-files-found: ignore
+          retention-days: 1
+
   release:
-    needs: [build, windows, android]
+    needs: [build, windows, android, linux-arm64, windows-arm64]
     if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     env:
@@ -197,14 +367,26 @@ jobs:
           name: MHGU-Save-Editor-android-${{ needs.build.outputs.ver }}
           path: android
 
+      - uses: actions/download-artifact@v7
+        with:
+          name: MHGU-Save-Editor-linux-arm64-${{ needs.build.outputs.ver }}
+          path: linux-arm64
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: MHGU-Save-Editor-windows-arm64-${{ needs.build.outputs.ver }}
+          path: windows-arm64
+
       - name: Draft release
         env:
           GH_TOKEN: ${{ github.token }}
         # one checksum list for every file; also as plain SHA256SUMS: the 0.8.0 updater
         # looks for that name only
         run: |
-          mv "android/MHGU-Save-Editor-$VER-arm64.apk" dist/
-          cat "android/SHA256SUMS-android-$VER" >> "dist/SHA256SUMS-$VER"
+          mv "android/MHGU-Save-Editor-$VER-arm64.apk" "linux-arm64/MHGU-Save-Editor-$VER-arm64.AppImage" \
+            "windows-arm64/MHGU-Save-Editor-$VER-arm64.exe" dist/
+          cat "android/SHA256SUMS-android-$VER" "linux-arm64/SHA256SUMS-arm64-$VER" \
+            "windows-arm64/SHA256SUMS-windows-arm64-$VER" >> "dist/SHA256SUMS-$VER"
           cp "dist/SHA256SUMS-$VER" "$RUNNER_TEMP/SHA256SUMS"
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
             --title "MHGU Save Editor $VER" --generate-notes dist/*"$VER"* "$RUNNER_TEMP/SHA256SUMS"

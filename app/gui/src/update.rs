@@ -23,12 +23,17 @@ const LATEST: &str = "https://api.github.com/repos/Scrimas/MHGU-Save-editor/rele
 /// The first version that updates itself: an older one can only be left by hand.
 const SELF_UPDATE: &str = "0.7.0";
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
-#[cfg(windows)]
+// the release file for this platform and processor
+#[cfg(all(windows, not(target_arch = "aarch64")))]
 const SUFFIX: &str = "-x86_64.exe";
+#[cfg(all(windows, target_arch = "aarch64"))]
+const SUFFIX: &str = "-arm64.exe";
 #[cfg(target_os = "android")]
 const SUFFIX: &str = "-arm64.apk";
-#[cfg(not(any(windows, target_os = "android")))]
+#[cfg(all(not(any(windows, target_os = "android")), not(target_arch = "aarch64")))]
 const SUFFIX: &str = "-x86_64.AppImage";
+#[cfg(all(not(any(windows, target_os = "android")), target_arch = "aarch64"))]
+const SUFFIX: &str = "-arm64.AppImage";
 
 #[derive(Clone, Debug, Deserialize)]
 struct Asset {

@@ -2,6 +2,9 @@
 # Build the release binaries into app/dist/:
 #   MHGU-Save-Editor-<version>-x86_64.AppImage   Linux, single file
 #   MHGU-Save-Editor-<version>-x86_64.exe        Windows 10/11, single file, nothing installed
+# MHGU_ARCH=arm64: MHGU-Save-Editor-<version>-arm64.AppImage only, built on an ARM64 Linux (the
+# binary links the build machine's libudev, so no cross build; the ARM64 .exe is built on
+# Windows, see .github/workflows/release.yml).
 #
 # Needs: rustup with x86_64-pc-windows-gnu, mingw-w64-gcc, squashfs-tools.
 # Optional:
@@ -14,6 +17,12 @@
 set -euo pipefail
 appimage_only=false
 [ "${1:-}" = "--appimage" ] && appimage_only=true
+arch=${MHGU_ARCH:-x86_64}
+case "$arch" in
+    x86_64) triple=x86_64-unknown-linux-gnu; appimage_arch=x86_64 ;;
+    arm64) triple=aarch64-unknown-linux-gnu; appimage_arch=aarch64; appimage_only=true ;;
+    *) echo "MHGU_ARCH must be x86_64 or arm64, not $arch" >&2; exit 1 ;;
+esac
 here=$(cd "$(dirname "$0")" && pwd)
 app=$(dirname "$here")
 repo=$(dirname "$app")
@@ -36,8 +45,8 @@ fi
 echo "== Linux"
 # cargo finds subcommands in ~/.cargo/bin even when it is not on PATH
 if cargo zigbuild --help >/dev/null 2>&1 && command -v zig >/dev/null; then
-    cargo zigbuild --release -p mhgu-editor --target x86_64-unknown-linux-gnu.2.28
-    bin=target/x86_64-unknown-linux-gnu/release/mhgu-editor
+    cargo zigbuild --release -p mhgu-editor --target "$triple.2.28"
+    bin=target/$triple/release/mhgu-editor
 else
     echo "   (cargo-zigbuild not found: linking against this machine's glibc)"
     cargo build --release -p mhgu-editor
@@ -62,10 +71,10 @@ exec "$here/usr/bin/mhgu-editor" "$@"
 EOF
 chmod 755 "$appdir/AppRun"
 
-out="$dist/MHGU-Save-Editor-$ver-x86_64.AppImage"
+out="$dist/MHGU-Save-Editor-$ver-$arch.AppImage"
 # zstd at level 19 with 1 MiB blocks: a smaller file, unpacked as fast as the default
 if command -v appimagetool >/dev/null; then
-    ARCH=x86_64 appimagetool --no-appstream --comp zstd \
+    ARCH=$appimage_arch appimagetool --no-appstream --comp zstd \
         --mksquashfs-opt -Xcompression-level --mksquashfs-opt 19 --mksquashfs-opt -b --mksquashfs-opt 1M "$appdir" "$out"
 elif [ -n "${APPIMAGE_RUNTIME:-}" ]; then
     sq=$(mktemp)
@@ -78,5 +87,8 @@ else
     exit 1
 fi
 rm -rf "$(dirname "$appdir")"
-(cd "$dist" && sha256sum *"$ver"-x86_64.* > "SHA256SUMS-$ver")
+# SHA256SUMS-<version> for the x86_64 files, SHA256SUMS-arm64-<version> for the other
+sums="SHA256SUMS-$ver"
+[ "$arch" = x86_64 ] || sums="SHA256SUMS-$arch-$ver"
+(cd "$dist" && sha256sum *"$ver-$arch".* > "$sums")
 ls -la "$dist"
