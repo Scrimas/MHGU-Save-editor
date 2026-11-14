@@ -33,7 +33,10 @@ fontique = "=0.11.1"
 # the embedded name tables and .po catalogs are zlib-compressed by build.rs
 miniz_oxide = "0.8"
 
-# Slint's defaults without system-tray (unused) and accessibility (opt-in feature below).
+# Slint's defaults without system-tray (unused), plus accessibility: AccessKit shows the text
+# fields to the system (UI Automation on Windows, AT-SPI on Linux), which is how Windows'
+# touch keyboard and X11 on-screen keyboards (Onboard) know to open, and what screen readers
+# read. Wayland keyboards follow text-input-v3, which winit turns on for a focused field.
 [target.'cfg(not(target_os = "android"))'.dependencies]
 slint = { version = "=1.18.1", default-features = false, features = [
     "std",
@@ -42,6 +45,7 @@ slint = { version = "=1.18.1", default-features = false, features = [
     "renderer-software",
     "compat-1-2",
     "unstable-winit-030",
+    "accessibility",
 ] }
 rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "tokio"] }
 
@@ -52,10 +56,6 @@ slint = { version = "=1.18.1", default-features = false, features = ["std", "bac
 jni = "0.22"
 
 [features]
-# Screen-reader support (AccessKit; AT-SPI over D-Bus on Linux). Off to keep the binary
-# small; `cargo build --features accessibility` turns it back on, the .slint files keep
-# their accessible-* properties either way.
-accessibility = ["slint/accessibility"]
 # The phone and tablet interface (ui/mobile) on the desktop, to check it without a phone;
 # Android builds always use it.
 mobile = []
