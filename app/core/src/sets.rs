@@ -245,8 +245,8 @@ pub fn set_my_set_own_colour(s: &mut Save, base: usize, k: usize, p: usize) {
 pub fn set_my_set_arts(s: &mut Save, base: usize, k: usize, a: Arts) {
     let o = my_set_at(base, k);
     s.set_u8(o + STYLE, a.style);
-    for j in 0..3 {
-        s.set_u8(o + ARTS + j, a.ids[j]);
+    for (j, &id) in a.ids.iter().enumerate() {
+        s.set_u8(o + ARTS + j, id);
     }
     s.set_u8(o + SP, a.sp & 7);
 }
@@ -350,8 +350,8 @@ pub fn arts(s: &Save, base: usize) -> Arts {
 /// analysed saves (card style 5 while the player's was 3).
 pub fn set_arts(s: &mut Save, base: usize, a: Arts) {
     for at in [PLAYER_ARTS, HDR_ARTS] {
-        for j in 0..3 {
-            s.set_u16(base + at + 2 * j, a.ids[j] as u16);
+        for (j, &id) in a.ids.iter().enumerate() {
+            s.set_u16(base + at + 2 * j, id as u16);
         }
         let keep = s.u16(base + at + 6) & !7;
         s.set_u16(base + at + 6, keep | a.sp as u16);
