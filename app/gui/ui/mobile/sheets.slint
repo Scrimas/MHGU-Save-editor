@@ -6,10 +6,69 @@ import { Btn, ConfidenceLabel, Dot, GroupRow, IconBtn, Ico, ListItem, Muted, Pre
 import { Api, ChangeRow, Confidence, Fmt, SlotInfo } from "../common.slint";
 import { ChoiceRow } from "form.slint";
 
+// A value of a Review entry, what it was and what it becomes: beside its label while the
+// three fit in a line, else under it and wrapped (a set's gear, a loadout's items). The
+// texts are placed, not laid out: one set of them serves both.
+component ValueChange inherits Rectangle {
+    in property <string> label;
+    in property <string> old;
+    in property <string> new;
+    in property <bool> warn;
+    // the width there is (wrapped text is measured against a set width), the gap above
+    in property <length> w;
+    in property <length> top;
+    property <length> values: o.preferred-width + ar.preferred-width + n.preferred-width + 16px;
+    // (a label keeps two fifths of the line at least)
+    property <bool> beside: root.label == "" ? self.values <= root.w : self.values + 8px <= root.w * 0.6;
+    property <length> lab-h: root.label == "" ? 0px : lab.preferred-height;
+    // where the old value starts when it is under the label
+    property <length> under: root.top + (root.label == "" ? 0px : self.lab-h + 2px);
+    // (as wide as its column, which is w: a width set here would hang the row's width on itself)
+    height: root.beside ? root.top + max(self.lab-h, o.preferred-height) : self.under + o.preferred-height + 2px + n.preferred-height;
+    lab := Text {
+        x: 0px;
+        y: root.top;
+        width: root.beside ? max(0px, root.w - root.values - 8px) : root.w;
+        height: root.lab-h;
+        text: root.label;
+        color: M.on-surface;
+        font-size: M.body-medium;
+        wrap: word-wrap;
+    }
+    o := Text {
+        x: root.beside && root.label != "" ? root.w - root.values : 0px;
+        y: root.beside ? root.top : root.under;
+        width: root.beside ? self.preferred-width : root.w;
+        text: root.old;
+        color: M.on-surface-variant;
+        font-size: M.body-medium;
+        wrap: word-wrap;
+    }
+    ar := Text {
+        x: root.beside ? o.x + o.width + 8px : 0px;
+        y: root.beside ? root.top : root.under + o.height + 2px;
+        text: "→";
+        color: M.on-surface-variant;
+        font-size: M.body-medium;
+    }
+    n := Text {
+        x: ar.x + ar.width + 8px;
+        y: ar.y;
+        width: root.beside ? self.preferred-width : root.w - ar.width - 8px;
+        text: root.new;
+        color: root.warn ? M.error : M.on-surface;
+        font-size: M.body-medium;
+        font-weight: M.medium;
+        wrap: word-wrap;
+    }
+}
+
 // One Review entry: old → new in game terms, why the game cannot make it, its own Undo.
 component ReviewEntry inherits GroupRow {
     in property <ChangeRow> c;
     callback open();
+    // the text column: the row less its margins and the Undo button
+    property <length> text-w: max(0px, self.width - 16px - 12px - M.touch - 4px);
     pressable: true;
     clicked => { root.open(); }
     height: lay.preferred-height;
@@ -29,20 +88,19 @@ component ReviewEntry inherits GroupRow {
             Text { text: root.c.title; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
             if root.c.sub != "": Muted { text: root.c.sub; }
             if root.c.confidence != Confidence.confirmed: ConfidenceLabel { level: root.c.confidence; }
-            if root.c.single: HorizontalLayout {
-                spacing: 8px;
-                alignment: start;
-                Text { text: root.c.old; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
-                Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; }
-                Text { text: root.c.new; color: root.c.warning != "" ? M.error : M.on-surface; font-size: M.body-medium; font-weight: M.medium; wrap: word-wrap; }
+            if root.c.single: ValueChange {
+                old: root.c.old;
+                new: root.c.new;
+                warn: root.c.warning != "";
+                w: root.text-w;
             }
-            for l in root.c.lines: HorizontalLayout {
-                spacing: 8px;
-                padding-top: 4px;
-                Text { text: l.label; color: M.on-surface; font-size: M.body-medium; wrap: word-wrap; horizontal-stretch: 1; }
-                Text { text: l.old; color: M.on-surface-variant; font-size: M.body-medium; }
-                Text { text: "→"; color: M.on-surface-variant; font-size: M.body-medium; }
-                Text { text: l.new; color: l.warning != "" ? M.error : M.on-surface; font-size: M.body-medium; font-weight: M.medium; }
+            for l in root.c.lines: ValueChange {
+                top: 4px;
+                label: l.label;
+                old: l.old;
+                new: l.new;
+                warn: l.warning != "";
+                w: root.text-w;
             }
             if root.c.more > 0: Muted { text: @tr("and {} more", Fmt.num(root.c.more)); }
             if root.c.note != "": Muted { text: root.c.note; }
