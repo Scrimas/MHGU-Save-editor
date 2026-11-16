@@ -101,6 +101,10 @@ export component ItemSheet inherits Sheet {
     // both stay, one shown: the sheet's height follows the editor's
     editor := VerticalLayout {
         visible: !ItemEdit.picking;
+        // (from the top, not stretched: a layout that stretches is no taller than its rows
+        // can grow and the sheet's content takes that limit from it, which for an empty
+        // slot, a few fixed rows, left the item list one row high)
+        alignment: start;
         padding-left: 24px;
         padding-right: 24px;
         padding-bottom: 16px;
