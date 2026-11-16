@@ -2,20 +2,14 @@
 // can slide, follow the Back key and keep the design's exact sizes: buttons, the top app
 // bar with the character slot, the Review button, the snackbar, bottom sheets, list rows.
 import { M } from "theme.slint";
+import { Claim, Gest, Keep } from "gestures.slint";
 import { Api, Fmt, Confidence, Win, ItemSlot } from "../common.slint";
 
-// A touch area for taps. A back swipe starts at the screen's left or right edge, and when
-// Android takes it over, Slint turns the cancelled touch into a release, which a plain
-// TouchArea reads as a tap on whatever was under the finger (the scrim, a row). A press
-// that started in those edge zones is not a tap.
+// A touch area for taps. (On Android a touch the system takes away, its back gesture from
+// a screen edge, ends without a release: src/android/gesture.rs. So it is never a tap.)
 export component Tap inherits TouchArea {
     callback tapped();
-    property <length> at: self.absolute-position.x + self.pressed-x;
-    clicked => {
-        if Win.width <= 0 || (self.at > 20px && self.at < Win.width - 20px) {
-            root.tapped();
-        }
-    }
+    clicked => { root.tapped(); }
 }
 
 // A 24 dp icon in a colour.
@@ -266,6 +260,8 @@ export component Snack inherits Rectangle {
     in property <string> action;
     in property <bool> error;
     callback act();
+    // a tap on the message itself (app.slint: it leaves)
+    callback tapped();
     height: max(48px, lay.preferred-height);
     border-radius: 4px;
     background: M.inverse-surface;
@@ -274,6 +270,7 @@ export component Snack inherits Rectangle {
     drop-shadow-color: M.shadow;
     accessible-role: AccessibleRole.text;
     accessible-label: root.text;
+    Tap { tapped => { root.tapped(); } }
     lay := HorizontalLayout {
         padding-left: 16px;
         padding-right: root.action != "" ? 8px : 16px;
@@ -299,7 +296,9 @@ export component Snack inherits Rectangle {
 }
 
 // A bottom sheet: the scrim, then a panel sliding up from the bottom edge with its drag
-// handle, a title and a Close button; the content goes below. Back closes it (app.slint).
+// handle, a title and a Close button; the content goes below. Back closes it (app.slint),
+// and so does dragging it down: by the handle and the title always, by the content too
+// when that is at its top (`at-top`: a list scrolled down scrolls back first).
 export component Sheet inherits Rectangle {
     in property <bool> shown;
     in property <string> title;
@@ -311,15 +310,77 @@ export component Sheet inherits Rectangle {
     in property <length> bottom-inset;
     in property <length> side-inset;
     in property <length> max-w: 640px;
+    // the panel's height (app.slint: the snackbar sits above the Review sheet)
+    out property <length> panel-h: panel.h;
     // Android's predictive back while this sheet is what Back closes (0 to 1): it shrinks
     // toward the bottom edge and lets the page show through
     in property <float> drag;
+    // the content is at its top (a sheet with a list: its content-y >= 0), so a drag down
+    // on it moves the sheet
+    in property <bool> at-top: true;
+    // only the handle and the title drag the sheet (sliders in the content)
+    in property <bool> grip-only;
+    // no sheet is over this one (app.slint: it is what Back closes)
+    in property <bool> top: true;
     callback close();
     property <float> t: root.shown ? 1 : 0;
     animate t { duration: M.anim; easing: ease-out; }
     visible: self.t > 0.001;
+    // the finger's pull down from rest; let go far or fast enough, the sheet closes from
+    // where it is (it keeps the pull until it is out of sight)
+    property <length> pull;
+    property <duration> pull-dur;
+    property <bool> leaving;
+    animate pull { duration: root.pull-dur; easing: ease-out; }
+    property <bool> gone: self.t <= 0.001;
+    changed gone => {
+        if self.gone {
+            root.pull-dur = 0ms;
+            root.pull = 0;
+            root.leaving = false;
+        }
+    }
+    // (a close that did not close, a question asked first: back up)
+    Timer {
+        interval: M.anim + 120ms;
+        running: root.leaving;
+        triggered => {
+            root.leaving = false;
+            if root.shown {
+                root.pull-dur = M.anim;
+                root.pull = 0;
+            }
+        }
+    }
+    // (offered the finger's way down when the press is on the panel: its handle and
+    // title, or its content once that is at its top)
+    property <length> py: Gest.sy - self.absolute-position.y;
+    property <length> px: Gest.sx - self.absolute-position.x;
+    Claim {
+        kind: 6;
+        forth: root.top && root.shown && root.drag == 0 && !root.leaving
+            && root.px >= panel.x && root.px < panel.x + panel.width && root.py >= panel.y
+            && (root.py < panel.y + head.height || (!root.grip-only && root.at-top));
+        moved(d) => {
+            root.pull-dur = 0ms;
+            root.pull = max(0px, d);
+        }
+        ended(v) => {
+            if root.pull > panel.h * 0.3 || (root.pull > 24px && v > 500) {
+                root.leaving = true;
+                root.close();
+            } else {
+                root.pull-dur = M.anim;
+                root.pull = 0;
+            }
+        }
+        cancelled => {
+            root.pull-dur = M.anim;
+            root.pull = 0;
+        }
+    }
     Rectangle {
-        background: #000000.with-alpha(0.32 * root.t * (1 - 0.5 * root.drag));
+        background: #000000.with-alpha(0.32 * root.t * (1 - 0.5 * root.drag) * (1 - 0.6 * min(1, root.pull / max(1px, panel.h))));
         Tap { tapped => { root.close(); } }
     }
     panel := Rectangle {
@@ -327,7 +388,7 @@ export component Sheet inherits Rectangle {
         width: min(root.width - 2 * root.side-inset, root.max-w);
         height: self.h;
         x: (root.width - self.width) / 2;
-        y: root.height - self.h * root.t + 16px * root.drag;
+        y: root.height - self.h * root.t + 16px * root.drag + root.pull;
         transform-scale-x: 1 - 0.1 * root.drag;
         transform-scale-y: 1 - 0.1 * root.drag;
         transform-origin: { x: self.width / 2, y: self.height };
@@ -622,10 +683,13 @@ export component Chip inherits Rectangle {
 }
 
 // Primary tabs: equal columns, the label in the primary colour over a 3 dp indicator as
-// wide as the label, a hairline under the row.
+// wide as the label, a hairline under the row. `at` is where the indicator is, between
+// two tabs while a pager's pane follows the finger (each tab draws its own indicator, moved
+// by its distance to `at` and fading with it, so the two halves read as one sliding bar).
 export component TabRow inherits Rectangle {
     in property <[string]> tabs;
     in property <int> current;
+    in property <float> at: self.current;
     callback select(int);
     height: max(48px, lay.preferred-height);
     accessible-role: tab-list;
@@ -638,24 +702,26 @@ export component TabRow inherits Rectangle {
             accessible-label: t;
             accessible-item-selected: i == root.current;
             accessible-action-default => { root.select(i); }
+            property <float> d: root.at - i;
             Press { on: ta.pressed; }
             lbl := Text {
                 width: parent.width - 16px;
                 text: t;
-                color: i == root.current ? M.primary : M.on-surface-variant;
+                color: abs(parent.d) < 0.5 ? M.primary : M.on-surface-variant;
                 font-size: M.label-large;
                 font-weight: M.medium;
                 horizontal-alignment: center;
                 vertical-alignment: center;
                 wrap: word-wrap;
             }
-            if i == root.current: Rectangle {
+            if abs(self.d) < 1: Rectangle {
                 y: parent.height - 3px;
+                x: (parent.width - self.width) / 2 + parent.d * parent.width;
                 width: max(24px, min(parent.width - 16px, lbl.preferred-width));
                 height: 3px;
                 border-top-left-radius: 3px;
                 border-top-right-radius: 3px;
-                background: M.primary;
+                background: M.primary.with-alpha(1 - abs(parent.d));
             }
             ta := Tap { tapped => { root.select(i); } }
         }
@@ -1011,14 +1077,26 @@ export component Segmented inherits Rectangle {
 }
 
 // Tabs that scroll sideways when there are many (the quest categories): each as wide as
-// its label, the indicator under the label.
+// its label, the indicator under the label. `at` as in TabRow. The row keeps the current
+// tab in its middle, and while a pager's pane follows the finger it scrolls along toward
+// the tab the swipe is heading for.
 export component ScrollTabRow inherits Rectangle {
     in property <[string]> tabs;
     in property <int> current;
+    in property <float> at: self.current;
     callback select(int);
     height: 48px;
     accessible-role: tab-list;
-    Flickable {
+    // the middles of the current tab and of the one `at` is on its way to (each tab
+    // reports its own: a row cannot look its tabs up)
+    property <length> from-c;
+    property <length> to-c;
+    property <float> part: min(1, abs(self.at - self.current));
+    property <length> want: -max(0px, min(fl.content-width - fl.width, self.from-c + (self.to-c - self.from-c) * self.part - fl.width / 2));
+    changed want => { fl.content-x = self.want; }
+    // (its sideways scrolling is Slint's: no swipe starts on the tabs)
+    Keep { at: root.absolute-position; w: root.width; h: root.height; }
+    fl := Flickable {
         content-width: max(self.width, row.preferred-width);
         row := HorizontalLayout {
             padding-left: 4px;
@@ -1030,21 +1108,47 @@ export component ScrollTabRow inherits Rectangle {
                 accessible-label: t;
                 accessible-item-selected: i == root.current;
                 accessible-action-default => { root.select(i); }
+                property <float> d: root.at - i;
+                property <bool> cur: i == root.current;
+                property <bool> next: !self.cur && abs(self.d) < 0.999;
+                property <length> c: self.x + self.width / 2;
+                init => {
+                    if self.cur {
+                        root.from-c = self.c;
+                        root.to-c = self.c;
+                        fl.content-x = -max(0px, min(fl.content-width - fl.width, self.c - fl.width / 2));
+                    }
+                }
+                changed cur => {
+                    if self.cur {
+                        root.from-c = self.c;
+                    }
+                }
+                changed next => {
+                    if self.next {
+                        root.to-c = self.c;
+                    }
+                }
+                changed c => {
+                    if self.cur {
+                        root.from-c = self.c;
+                    }
+                }
                 Press { on: ta.pressed; }
                 lbl := Text {
                     text: t;
-                    color: i == root.current ? M.primary : M.on-surface-variant;
+                    color: abs(parent.d) < 0.5 ? M.primary : M.on-surface-variant;
                     font-size: M.label-large;
                     font-weight: M.medium;
                 }
-                if i == root.current: Rectangle {
+                if abs(self.d) < 1: Rectangle {
                     y: parent.height - 3px;
-                    x: 14px;
+                    x: 14px + parent.d * parent.width;
                     width: parent.width - 28px;
                     height: 3px;
                     border-top-left-radius: 3px;
                     border-top-right-radius: 3px;
-                    background: M.primary;
+                    background: M.primary.with-alpha(1 - abs(parent.d));
                 }
                 ta := Tap { tapped => { root.select(i); } }
             }

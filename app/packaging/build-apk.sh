@@ -13,6 +13,12 @@
 #                                                        made by make-apk-key.sh)
 #                                MHGU_APK_KEYSTORE_PASS  its password (also the key's)
 #   build-apk.sh --install     the debug build, then adb install -r
+#   build-apk.sh --test        the debug build under its own id (….mhgusaveeditor.test) and
+#                              name ("MHGU Editor test"), to install beside the released
+#                              app: Android refuses a debug-signed build over a
+#                              release-signed one, and uninstalling that one first would
+#                              take its snapshots and settings with it:
+#                              app/target/apk/mhgu-editor-test.apk
 #   build-apk.sh --check       clippy for the Android target (the code under src/android
 #                              builds only there), warnings as errors, no APK (CI)
 #   build-apk.sh --emulator    debug build for the x86_64 emulator with Slint's MCP server
@@ -30,13 +36,15 @@ release=false
 install=false
 emulator=false
 check=false
+test=false
 case "${1:-}" in
     --release) release=true ;;
     --install) install=true ;;
     --emulator) emulator=true ;;
     --check) check=true ;;
+    --test) test=true ;;
     "") ;;
-    *) echo "usage: $0 [--release|--install|--emulator|--check]" >&2; exit 2 ;;
+    *) echo "usage: $0 [--release|--install|--test|--emulator|--check]" >&2; exit 2 ;;
 esac
 triple=aarch64-linux-android
 abi=arm64-v8a
@@ -120,8 +128,17 @@ javac -nowarn -Xlint:-options -source 8 -target 8 -encoding UTF-8 -bootclasspath
 
 echo "== resources and manifest"
 "$tools/aapt2" compile --dir packaging/android/res -o "$work/res.zip"
+link=()
+if $test; then
+    # its own id and name over the manifest's and the resources' (the classes keep theirs)
+    mkdir -p "$work/res-test/values"
+    printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<resources>' \
+        '    <string name="app_name">MHGU Editor test</string>' '</resources>' > "$work/res-test/values/strings.xml"
+    "$tools/aapt2" compile --dir "$work/res-test" -o "$work/res-test.zip"
+    link+=(-R "$work/res-test.zip" --rename-manifest-package io.github.scrimas.mhgusaveeditor.test)
+fi
 "$tools/aapt2" link -o "$work/base.apk" --manifest packaging/android/AndroidManifest.xml -I "$jar" "$work/res.zip" \
-    --min-sdk-version "$api" --target-sdk-version "$target_api" --version-code "$code" --version-name "$ver"
+    "${link[@]}" --min-sdk-version "$api" --target-sdk-version "$target_api" --version-code "$code" --version-name "$ver"
 
 echo "== libraries"
 "$tc/llvm-strip" --strip-debug -o "$work/lib/$abi/libmhgu_editor.so" "$so"
@@ -160,7 +177,10 @@ else
         keytool -genkeypair -keystore "$key" -storepass android -alias androiddebugkey -keypass android \
             -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
     fi
-    out="target/apk/mhgu-editor-$($emulator && echo emulator || echo debug).apk"
+    kind=debug
+    $emulator && kind=emulator
+    $test && kind=test
+    out="target/apk/mhgu-editor-$kind.apk"
     "$tools/apksigner" sign --ks "$key" --ks-pass pass:android --key-pass pass:android --v4-signing-enabled false \
         --out "$out" "$work/aligned.apk"
 fi

@@ -1,0 +1,244 @@
+// The lists a long press reorders: My Sets, Palico sets, item loadouts. Each row keeps its
+// record and sits at the y Rust gives it (src/views/reorder.rs), runs of unused slots
+// folded into one row. A long press lifts a used row: every slot then shows, the empty
+// ones thin, the row follows the finger and the others slide to where the drop would put
+// them. Let go, it stays there: one edit, the same the Move up and Move down buttons of
+// the set make a place at a time.
+import { M } from "theme.slint";
+import { Ico, Muted, Press } from "widgets.slint";
+import { Gest } from "gestures.slint";
+import { Api, SlotRow } from "../common.slint";
+
+export component ReorderList inherits Flickable {
+    in property <[SlotRow]> rows;
+    // "myset", "palset" or "loadout" (reorder.rs)
+    in property <string> list;
+    // the rows' height (they are placed, not laid out)
+    in property <length> total;
+    // the slot shown beside the list (wide layouts), -1 for none
+    in property <int> sel: -1;
+    // a line above the rows
+    in property <string> hint;
+    in property <length> pad-left;
+    in property <length> pad-right;
+    in property <length> bottom-pad;
+    // the width of the slot numbers
+    in property <length> num-w: 32px;
+    callback select(int);
+
+    // the row (model index) under the finger; lifted once the long press took hold
+    property <int> held: -1;
+    property <bool> started;
+    // the long press took hold: letting go is not a tap
+    property <bool> long;
+    // the lifted row's y and height, and where in it the finger holds it
+    property <length> drag-y;
+    property <length> drag-h;
+    property <length> grab;
+    property <length> grab-x;
+    // the finger, from the top of the view (scrolls the list near its edges)
+    property <length> finger: area.y + root.drag-y + root.grab + root.content-y;
+    property <length> edge-top: 48px;
+    property <length> edge-bottom: root.height - root.bottom-pad - 48px;
+    // the runs open or fold at once (lifted, dropped) while the view keeps the rows near
+    // the finger in place; `dropped` still glides into its slot
+    property <bool> snap;
+    property <int> dropped: -1;
+    content-width: self.width;
+    content-height: lay.preferred-height;
+    // the finger is the row's, not the list's scroll
+    interactive: !root.started;
+
+    function follow(d: length) {
+        root.drag-y = clamp(root.drag-y + d, 0, max(0px, root.total - root.drag-h));
+        Api.reorder-drag(root.list, root.drag-y);
+    }
+    // the view moved by `d` (down positive) without the lifted row moving on screen
+    function scroll-by(d: length) {
+        let vy = clamp(root.content-y - d, min(0px, root.height - root.content-height), 0px);
+        root.drag-y += root.content-y - vy;
+        root.content-y = vy;
+    }
+    function lift() {
+        let i = root.held;
+        let at = root.rows[i].y;
+        root.drag-h = root.rows[i].h;
+        root.long = true;
+        root.snap = true;
+        Gest.holds += 1;
+        Gest.haptic(0);
+        Api.reorder-start(root.list, root.rows[i].first);
+        // the runs above it opened: the view follows, so the row stays under the finger
+        root.drag-y = at;
+        root.started = true;
+        root.scroll-by(root.rows[i].y - at);
+    }
+    function drop(i: int) {
+        let open-y = root.rows[i].y;
+        root.snap = true;
+        root.dropped = i;
+        Api.reorder-drop(root.list);
+        // the runs folded: the view keeps the row's slot where its gap was, the row glides
+        // there from the finger
+        let cy = root.content-y;
+        let vy = clamp(cy + open-y - root.rows[i].y, min(0px, root.height - root.content-height), 0px);
+        root.content-y = vy;
+        root.drag-y += cy - vy;
+        root.started = false;
+        Gest.holds = max(0, Gest.holds - 1);
+    }
+
+    Timer {
+        interval: 450ms;
+        running: root.held >= 0 && !root.started && !root.long;
+        triggered => { root.lift(); }
+    }
+    Timer {
+        interval: 50ms;
+        running: root.snap;
+        triggered => {
+            root.snap = false;
+            root.dropped = -1;
+        }
+    }
+    // near the top or the bottom the list scrolls, faster the closer the finger
+    Timer {
+        interval: 16ms;
+        running: root.started && (root.finger < root.edge-top || root.finger > root.edge-bottom);
+        triggered => {
+            let d = root.finger < root.edge-top ? -ceil((root.edge-top - root.finger) / 4px) * 1px : ceil((root.finger - root.edge-bottom) / 4px) * 1px;
+            let vy = clamp(root.content-y - d, min(0px, root.height - root.content-height), 0px);
+            let scrolled = root.content-y - vy;
+            root.content-y = vy;
+            root.follow(scrolled);
+        }
+    }
+
+    lay := VerticalLayout {
+        padding-left: root.pad-left;
+        padding-right: root.pad-right;
+        padding-top: 12px;
+        padding-bottom: root.bottom-pad;
+        alignment: start;
+        if root.hint != "": HorizontalLayout {
+            padding-left: 8px;
+            padding-bottom: 10px;
+            Muted { text: root.hint; }
+        }
+        area := Rectangle {
+            height: root.total;
+            for r[i] in root.rows: row := Rectangle {
+                property <bool> lifted: i == root.held && root.started;
+                property <bool> movable: r.used && !r.run;
+                property <bool> selected: root.sel >= r.first && root.sel <= r.last;
+                property <duration> slide: M.anim == 0ms || self.lifted || (root.snap && i != root.dropped) ? 0ms : 160ms;
+                // (each row's last 2 dp are the gap to the next)
+                property <bool> first: r.y < 1px;
+                property <bool> last: r.y + r.h > root.total - 1px;
+                // the place it would take is told under the finger
+                property <string> num: r.num;
+                changed num => {
+                    if self.lifted {
+                        Gest.haptic(1);
+                    }
+                }
+                x: 0px;
+                width: area.width;
+                y: self.lifted ? root.drag-y : r.y;
+                animate y { duration: row.slide; easing: ease; }
+                height: r.h;
+                animate height { duration: root.snap || M.anim == 0ms ? 0ms : 160ms; easing: ease; }
+                visible: self.height > 0.5px;
+                z: self.lifted ? 10 : 0;
+                accessible-role: button;
+                accessible-label: r.num + " " + r.name;
+                accessible-description: r.sub;
+                accessible-action-default => { root.select(r.first); }
+                card := Rectangle {
+                    y: 0px;
+                    height: max(0px, parent.height - 2px);
+                    clip: true;
+                    background: row.lifted ? M.s-highest : row.selected ? M.secondary-container : M.group;
+                    border-top-left-radius: row.lifted || row.first ? 16px : 4px;
+                    border-top-right-radius: row.lifted || row.first ? 16px : 4px;
+                    border-bottom-left-radius: row.lifted || row.last ? 16px : 4px;
+                    border-bottom-right-radius: row.lifted || row.last ? 16px : 4px;
+                    drop-shadow-blur: row.lifted ? 12px : 0px;
+                    drop-shadow-offset-y: row.lifted ? 4px : 0px;
+                    drop-shadow-color: M.shadow;
+                    Press {
+                        on: ta.pressed && !row.lifted;
+                        border-top-left-radius: parent.border-top-left-radius;
+                        border-top-right-radius: parent.border-top-right-radius;
+                        border-bottom-left-radius: parent.border-bottom-left-radius;
+                        border-bottom-right-radius: parent.border-bottom-right-radius;
+                    }
+                    HorizontalLayout {
+                        padding-left: 16px;
+                        padding-right: 12px;
+                        spacing: 12px;
+                        Text {
+                            text: r.num;
+                            width: root.num-w;
+                            color: r.moved ? M.primary : M.on-surface-variant;
+                            font-size: M.body-medium;
+                            font-weight: r.moved ? M.medium : M.regular;
+                            vertical-alignment: center;
+                        }
+                        VerticalLayout {
+                            alignment: center;
+                            horizontal-stretch: 1;
+                            Text {
+                                text: r.name;
+                                color: r.used ? M.on-surface : M.on-surface-variant;
+                                font-size: r.thin ? M.body-medium : M.body-large;
+                                overflow: elide;
+                            }
+                            if r.sub != "" && !r.thin: Text { text: r.sub; color: M.on-surface-variant; font-size: M.body-small; overflow: elide; }
+                        }
+                        if r.changed && !r.thin: VerticalLayout {
+                            alignment: center;
+                            Rectangle { width: 8px; height: 8px; border-radius: 4px; background: M.primary; }
+                        }
+                        if !r.thin: VerticalLayout {
+                            alignment: center;
+                            Ico { source: @image-url("icons/chevron-right.svg"); }
+                        }
+                    }
+                }
+                ta := TouchArea {
+                    pointer-event(e) => {
+                        if e.kind == PointerEventKind.down {
+                            root.long = false;
+                            root.started = false;
+                            root.grab = self.mouse-y;
+                            root.grab-x = self.mouse-x;
+                            root.held = row.movable ? i : -1;
+                        } else if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
+                            if root.held == i && root.started {
+                                root.drop(i);
+                            }
+                            root.held = -1;
+                        }
+                    }
+                    moved => {
+                        if root.held != i || !self.pressed {
+                            return;
+                        }
+                        if root.started {
+                            root.follow(self.mouse-y - root.grab);
+                        } else if abs(self.mouse-y - root.grab) > 8px || abs(self.mouse-x - root.grab-x) > 8px {
+                            // the finger wandered before the long press took hold
+                            root.held = -1;
+                        }
+                    }
+                    clicked => {
+                        if !root.long {
+                            root.select(r.first);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -12,30 +12,7 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
     let base = st.base();
     let store = store_of(ui);
     let all = items::all(s, base, store);
-    let f = view(|v| v.item_filter.to_lowercase());
-    let off = if store == Store::Box { items::BOX } else { items::POUCH };
-    let rows: Vec<ItemSlot> = all
-        .iter()
-        .enumerate()
-        .filter(|(_, x)| f.is_empty() || (!x.is_empty() && assets::item_name(x.id).to_lowercase().contains(&f)))
-        .map(|(i, x)| {
-            let (img, has) = if x.is_empty() { (Image::default(), false) } else { icon(assets::item_icon(x.id)) };
-            let bit = 19 * i;
-            let changed = st.changed(base + off + bit / 8, 3) && !st.was(Target::Item(store, i)).is_empty();
-            ItemSlot {
-                slot: i as i32,
-                id: x.id as i32,
-                name: if x.is_empty() { "".into() } else { assets::item_name(x.id).into() },
-                count: x.count as i32,
-                max: if x.is_empty() { 0 } else { assets::item_max(x.id, store) as i32 },
-                icon: img,
-                has_icon: has,
-                changed,
-                was: if changed { st.was(Target::Item(store, i)) } else { String::new() }.into(),
-                warning: crate::warnings::item(x.id, x.count as u16, store).unwrap_or_default().into(),
-            }
-        })
-        .collect();
+    let rows = item_rows(st, store, &all);
     api.set_item_used(all.iter().filter(|x| !x.is_empty()).count() as i32);
     api.set_item_total(all.len() as i32);
     api.set_item_free(all.iter().position(|x| x.is_empty()).map_or(-1, |i| i as i32));
@@ -90,6 +67,35 @@ pub(super) fn items_page(ui: &AppWindow, st: &State) {
         api.set_loadout_slots(keep(api.get_loadout_slots(), slots));
     }
     picker(ui);
+}
+
+/// The slots of the item box or the pouch (`all`, as items::all reads them) under the
+/// page's search, which the two share.
+fn item_rows(st: &State, store: Store, all: &[Stack]) -> Vec<ItemSlot> {
+    let base = st.base();
+    let f = view(|v| v.item_filter.to_lowercase());
+    let off = if store == Store::Box { items::BOX } else { items::POUCH };
+    all.iter()
+        .enumerate()
+        .filter(|(_, x)| f.is_empty() || (!x.is_empty() && assets::item_name(x.id).to_lowercase().contains(&f)))
+        .map(|(i, x)| {
+            let (img, has) = if x.is_empty() { (Image::default(), false) } else { icon(assets::item_icon(x.id)) };
+            let bit = 19 * i;
+            let changed = st.changed(base + off + bit / 8, 3) && !st.was(Target::Item(store, i)).is_empty();
+            ItemSlot {
+                slot: i as i32,
+                id: x.id as i32,
+                name: if x.is_empty() { "".into() } else { assets::item_name(x.id).into() },
+                count: x.count as i32,
+                max: if x.is_empty() { 0 } else { assets::item_max(x.id, store) as i32 },
+                icon: img,
+                has_icon: has,
+                changed,
+                was: if changed { st.was(Target::Item(store, i)) } else { String::new() }.into(),
+                warning: crate::warnings::item(x.id, x.count as u16, store).unwrap_or_default().into(),
+            }
+        })
+        .collect()
 }
 
 pub(super) fn picker(ui: &AppWindow) {
@@ -187,4 +193,19 @@ pub(super) fn wire_items(ui: &AppWindow, st: &Shared) {
         let id = bulk_id(&ui, &format!("items:{what}"));
         apply_plan(&ui, &mut s, &id);
     });
+}
+
+/// The phone interface's pager: the models of the tab a swipe is bringing in (peek.rs).
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_items(ui: &AppWindow, st: &State, tab: usize) {
+    // (the loadouts' models are built whatever the tab)
+    let store = match tab {
+        0 => Store::Box,
+        1 => Store::Pouch,
+        _ => return,
+    };
+    let all = items::all(st.save(), st.base(), store);
+    let p = ui.global::<crate::ItemsPeek>();
+    p.set_free(all.iter().position(|x| x.is_empty()).map_or(-1, |i| i as i32));
+    p.set_slots(model(item_rows(st, store, &all)));
 }

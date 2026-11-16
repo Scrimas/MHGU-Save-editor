@@ -39,6 +39,7 @@ export component ChoiceList inherits Sheet {
     title: Choice.title;
     content-h: Choice.options.length > 8 ? 2000px : lay.preferred-height;
     close => { Choice.open = false; }
+    at-top: list.content-y >= 0;
     lay := VerticalLayout {
         padding-left: 12px;
         padding-right: 12px;
@@ -52,7 +53,7 @@ export component ChoiceList inherits Sheet {
                 text <=> Choice.search;
             }
         }
-        Flickable {
+        list := Flickable {
             vertical-stretch: 1;
             content-width: self.width;
             preferred-height: rows.preferred-height;

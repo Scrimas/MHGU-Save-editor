@@ -1,0 +1,324 @@
+// Swipes: the pagers of the tabs and of the destinations, sheets dragged down, the drawer,
+// rows and the snackbar swiped away.
+//
+// Slint cannot tell a list's scroll from a swipe without holding one of them back: only
+// the outermost Flickable or SwipeGestureHandler sees a touch as it happens, what is
+// inside gets the press 100 ms later (or never, once the finger has moved). So on Android
+// every touch goes through a recogniser before Slint (src/android/gesture.rs, by a hook in
+// the vendored backend). It decides within the first 8 px whether the finger scrolls
+// (Slint's, untouched) or swipes, and a swipe it follows itself: what would take one at
+// the press point offers itself here (Claim), the recogniser picks and reports the
+// finger's travel, and the taker moves with it. On the desktop (--features mobile) nothing
+// feeds this: taps only.
+import { M } from "theme.slint";
+
+export global Gest {
+    // ---- the recogniser's side ----
+    // the touch going on (a count), and where its finger went down, in the window
+    in-out property <int> touch;
+    // its finger is still down
+    in-out property <bool> down;
+    in-out property <length> sx;
+    in-out property <length> sy;
+    // whose swipe the finger is: 0 nobody's, else a kind + 1; its way (toward the axis'
+    // end: right, down); the finger's travel along the axis since then
+    in-out property <int> claim;
+    in-out property <bool> forth;
+    in-out property <length> d;
+    // how it ended (1 the finger let go, 2 Android took the touch) and how fast, px/s
+    in-out property <int> fin;
+    in-out property <float> v;
+    // ---- the takers' side ----
+    // per kind, the touch it was last offered for (Claim), each way. The kinds, in the
+    // order the recogniser asks: 0 the drawer, 1 the snackbar, 2 a list row, 3 the
+    // navigation bar, 4 a page's tabs, 5 the destinations, 6 a sheet (down only). 7 is
+    // never the finger's: a page's pager offers it where its tabs end, which is where the
+    // destinations' pager takes over (app.slint). 8 is nobody's either: the pages offer it
+    // (app.slint), and a sideways drag on them that no one takes (a detail view, the last
+    // tab, a page without tabs) is at least not a tap on the row under it
+    in-out property <[int]> wb: [-1, -1, -1, -1, -1, -1, -1, -1, -1];
+    in-out property <[int]> wf: [-1, -1, -1, -1, -1, -1, -1, -1, -1];
+    // the touch whose press is in something that scrolls sideways itself (Keep): it stays
+    // Slint's whatever would swipe there. (A text field with the cursor keeps its own too:
+    // the drag selects. The recogniser sees that one by itself.)
+    in-out property <int> kept: -1;
+    // long-press modes under way (a row being moved, quests picked by dragging): the
+    // finger is theirs, nothing swipes
+    in-out property <int> holds;
+    // a sheet or a screen is over the pages (app.slint): what is under it takes no swipe,
+    // though the press point is inside it all the same
+    in-out property <bool> modal;
+    // ---- Rust (src/views/peek.rs, src/android) ----
+    // a page's models while another page is the one shown (the destinations' pager)
+    callback build-page(string);
+    // a tick under the finger: 0 a long-press took hold, 1 a step, 2 a threshold crossed
+    callback haptic(int);
+}
+
+// Something that takes a swipe. While `back` or `forth` holds for the press point of the
+// touch going on, it is offered that way; when the recogniser gives it the finger it is
+// `active` from started to ended or cancelled, with the travel in moved.
+export component Claim {
+    in property <int> kind;
+    in property <bool> back;
+    in property <bool> forth;
+    out property <bool> active;
+    callback started();
+    callback moved(length);
+    // the finger let go, at this speed in px/s along the axis
+    callback ended(float);
+    // Android took the touch away
+    callback cancelled();
+
+    width: 0px;
+    height: 0px;
+    // the touch this one is on offer for, each way
+    property <int> ob: -1;
+    property <int> of: -1;
+    function offer() {
+        if root.back {
+            root.ob = Gest.touch;
+            Gest.wb[root.kind] = Gest.touch;
+        } else if root.ob == Gest.touch {
+            root.ob = -1;
+            if Gest.wb[root.kind] == Gest.touch {
+                Gest.wb[root.kind] = -1;
+            }
+        }
+        if root.forth {
+            root.of = Gest.touch;
+            Gest.wf[root.kind] = Gest.touch;
+        } else if root.of == Gest.touch {
+            root.of = -1;
+            if Gest.wf[root.kind] == Gest.touch {
+                Gest.wf[root.kind] = -1;
+            }
+        }
+    }
+    // (the touch and the condition as one value: an offer that hangs on another's, as the
+    // destinations' on a page's, may be worked out before that one is made and again
+    // after; a condition true at the last touch and true again would look unchanged)
+    property <int> kb: root.back ? Gest.touch : -1;
+    property <int> kf: root.forth ? Gest.touch : -1;
+    changed kb => { self.offer(); }
+    changed kf => { self.offer(); }
+    property <bool> mine: Gest.claim == root.kind + 1;
+    changed mine => {
+        if self.mine {
+            if (Gest.forth ? root.of : root.ob) == Gest.touch {
+                root.active = true;
+                root.started();
+            }
+        } else if root.active {
+            root.active = false;
+            if Gest.fin == 1 {
+                root.moved(Gest.d);
+                root.ended(Gest.v);
+            } else {
+                root.cancelled();
+            }
+        }
+    }
+    property <length> gd: Gest.d;
+    changed gd => {
+        if root.active && self.mine {
+            root.moved(self.gd);
+        }
+    }
+}
+
+// What scrolls sideways itself in Slint: a row of chips, of tabs. A touch that starts in
+// its area (`at`, `w`, `h`: the owner's place in the window) is left to Slint.
+export component Keep {
+    in property <bool> on: true;
+    in property <Point> at;
+    in property <length> w;
+    in property <length> h;
+    width: 0px;
+    height: 0px;
+    // the touch whose press is here, -1 for none
+    property <int> k: root.on && Gest.sx >= root.at.x && Gest.sx < root.at.x + root.w && Gest.sy >= root.at.y && Gest.sy < root.at.y + root.h ? Gest.touch : -1;
+    changed k => {
+        if self.k >= 0 {
+            Gest.kept = self.k;
+        }
+    }
+}
+
+// A pager: its pane follows the finger sideways and a neighbour comes in beside it. The
+// caller draws both beside the pager, which only covers their place (as a container it
+// would be generated again around each page's panes): the live pane at `shift`, and while
+// `side` is not 0 the neighbour at `shift + side * width` (asked for with peek). When the
+// neighbour has taken the place, commit makes it the live pane and the pager is back at
+// rest.
+export component Pager inherits Rectangle {
+    // 4 a page's tabs, 5 the destinations
+    in property <int> kind: 4;
+    in property <bool> has-prev;
+    in property <bool> has-next;
+    in property <bool> enabled: true;
+    // the press qualifies (from press-x and press-y: below the tab bar and the chips)
+    in property <bool> allow: true;
+    // ... toward the previous pane, toward the next
+    in property <bool> allow-prev: true;
+    in property <bool> allow-next: true;
+    out property <length> press-x: Gest.sx - self.absolute-position.x;
+    out property <length> press-y: Gest.sy - self.absolute-position.y;
+    // the neighbour coming in: -1 the previous pane (from the left), 1 the next, 0 none
+    out property <int> side;
+    // where the live pane is: 0 at rest, -width once the next pane has taken its place
+    out property <length> shift;
+    // how far the neighbour is in, 0 to 1
+    out property <float> progress: self.width > 0 ? abs(self.shift / self.width) : 0;
+    callback peek(int);
+    callback commit(int);
+    callback dropped();
+
+    property <duration> dur;
+    property <bool> settling;
+    property <bool> going;
+    property <bool> inside: self.press-x >= 0 && self.press-x < self.width && self.press-y >= 0 && self.press-y < self.height;
+    animate shift { duration: root.dur; easing: ease-out; }
+
+    // (public: the navigation bar drives the destinations' pager with its own swipe)
+    public function drag(d: length) {
+        if root.settling {
+            return;
+        }
+        root.dur = 0ms;
+        if d < 0 && root.has-next {
+            if root.side != 1 {
+                root.side = 1;
+                root.peek(1);
+            }
+            root.shift = max(d, -root.width);
+        } else if d > 0 && root.has-prev {
+            if root.side != -1 {
+                root.side = -1;
+                root.peek(-1);
+            }
+            root.shift = min(d, root.width);
+        } else {
+            root.shift = 0;
+        }
+    }
+    // v: the finger's speed in px per second (negative toward the next pane)
+    public function end(v: float) {
+        if root.settling || root.side == 0 {
+            return;
+        }
+        // past the middle, or flung toward the neighbour after a real start
+        root.going = abs(root.shift) > root.width / 2 || (abs(root.shift) > 24px && -v * root.side > 350);
+        root.dur = M.anim * (root.going ? 1.2 - 0.6 * root.progress : 0.5 + 0.7 * root.progress);
+        root.shift = root.going ? -root.side * root.width : 0;
+        if root.dur > 0ms {
+            root.settling = true;
+        } else {
+            root.finish();
+        }
+    }
+    public function abort() {
+        if root.side != 0 && !root.settling {
+            root.going = false;
+            root.dur = M.anim * 0.6;
+            root.shift = 0;
+            if root.dur > 0ms {
+                root.settling = true;
+            } else {
+                root.finish();
+            }
+        }
+    }
+    function finish() {
+        root.settling = false;
+        if root.going {
+            root.commit(root.side);
+        }
+        root.going = false;
+        root.dur = 0ms;
+        root.shift = 0;
+        root.side = 0;
+        root.dropped();
+    }
+    Timer {
+        interval: root.dur;
+        running: root.settling;
+        triggered => { root.finish(); }
+    }
+    property <bool> takes: root.enabled && !Gest.modal && !root.settling && root.inside && root.allow;
+    Claim {
+        kind: root.kind;
+        back: root.takes && root.has-next && root.allow-next;
+        forth: root.takes && root.has-prev && root.allow-prev;
+        moved(d) => { root.drag(d); }
+        ended(v) => { root.end(v); }
+        cancelled => { root.abort(); }
+    }
+    // (a page's tabs end here: the destinations go on from this press)
+    Claim {
+        kind: 7;
+        back: root.kind == 4 && root.takes && !root.has-next;
+        forth: root.kind == 4 && root.takes && !root.has-prev;
+    }
+}
+
+// A list row that is swiped away sideways (Review: a change undone). Its content follows
+// the finger; past the threshold a tick, and let go there it leaves and `swiped` is called.
+// Not for rows on a page with tabs: the sideways swipe is the pager's there.
+export component SwipeRow inherits Rectangle {
+    in property <bool> enabled: true;
+    callback swiped();
+    out property <length> off;
+    property <duration> dur;
+    property <bool> away;
+    property <bool> past: abs(self.off) > 0.4 * self.width;
+    animate off { duration: root.dur; easing: ease-out; }
+    preferred-height: lay.preferred-height;
+    min-height: lay.min-height;
+    property <length> px: Gest.sx - self.absolute-position.x;
+    property <length> py: Gest.sy - self.absolute-position.y;
+    property <bool> on: root.enabled && !root.away && self.px >= 0 && self.px < self.width && self.py >= 0 && self.py < self.height;
+    changed past => {
+        if self.past && cl.active {
+            Gest.haptic(2);
+        }
+    }
+    cl := Claim {
+        kind: 2;
+        back: root.on;
+        forth: root.on;
+        moved(d) => {
+            root.dur = 0ms;
+            root.off = d;
+        }
+        ended(v) => {
+            if root.past || (abs(root.off) > 24px && abs(v) > 350 && v * (root.off / 1px) > 0) {
+                root.away = true;
+                root.dur = M.anim;
+                root.off = (root.off > 0 ? 1 : -1) * root.width;
+            } else {
+                root.dur = M.anim;
+                root.off = 0;
+            }
+        }
+        cancelled => {
+            root.dur = M.anim;
+            root.off = 0;
+        }
+    }
+    Timer {
+        interval: M.anim;
+        running: root.away;
+        triggered => {
+            root.away = false;
+            root.swiped();
+            root.dur = 0ms;
+            root.off = 0;
+        }
+    }
+    lay := VerticalLayout {
+        x: root.off;
+        width: root.width;
+        @children
+    }
+}

@@ -109,33 +109,24 @@ fn card_row(c: &cards::Card) -> CardRow {
     }
 }
 
-pub(super) fn cards_page(ui: &AppWindow, st: &State) {
-    let api = ui.global::<Api>();
-    let s = st.save();
-    let base = s.base(st.slot);
-    let stored = cards::cards(s, base, List::Stored);
-    let inbox = cards::cards(s, base, List::Inbox);
-    let blocked = cards::blacklist(s);
-    let guests = cards::guests(s, base);
-    api.set_card_tabs(strings([
-        trf("Card List {} / {}", &[&stored.len(), &List::Stored.at().1]),
-        trf("Guild Card Inbox {} / {}", &[&inbox.len(), &List::Inbox.at().1]),
-        tr("Hunters for Hire").to_string(),
-        trf("Blocked-user List {}", &[&blocked.len()]),
-    ]));
-    let tab = api.get_card_tab();
-    let target = match tab {
+/// The list a tab's Undo row is for (none for the Hunters for Hire).
+fn card_target(tab: i32) -> Option<Target> {
+    match tab {
         0 => Some(Target::Cards(false)),
         1 => Some(Target::Cards(true)),
         3 => Some(Target::Blacklist),
         _ => None,
-    };
-    api.set_was_cards(target.map(|t| st.was(t)).unwrap_or_default().into());
-    api.set_was_cards_key(target.map(|t| t.key()).unwrap_or_default().into());
-    let rows: Vec<CardRow> = match tab {
-        0 => stored.iter().map(card_row).collect(),
-        1 => inbox.iter().map(card_row).collect(),
-        2 => guests
+    }
+}
+
+/// A tab's cards: the Card List, the inbox, the Hunters for Hire, the blocked users.
+fn card_rows(st: &State, tab: i32) -> Vec<CardRow> {
+    let s = st.save();
+    let base = s.base(st.slot);
+    match tab {
+        0 => cards::cards(s, base, List::Stored).iter().map(card_row).collect(),
+        1 => cards::cards(s, base, List::Inbox).iter().map(card_row).collect(),
+        2 => cards::guests(s, base)
             .iter()
             .map(|g| {
                 let tag = match g.role {
@@ -149,15 +140,34 @@ pub(super) fn cards_page(ui: &AppWindow, st: &State) {
                 CardRow { slot: -1, name: name.into(), tag: tag.into(), line1: line1.into(), line2: line2.into(), greeting: SharedString::new() }
             })
             .collect(),
-        _ => blocked
+        _ => cards::blacklist(s)
             .iter()
             .map(|b| {
                 let id: String = b.id.iter().map(|x| format!("{x:02x}")).collect::<String>().trim_end_matches('0').to_string();
                 CardRow { slot: b.slot as i32, name: b.name.clone().into(), line1: trf("Network ID {}", &[&id]).into(), ..Default::default() }
             })
             .collect(),
-    };
-    api.set_card_rows(model(rows));
+    }
+}
+
+pub(super) fn cards_page(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let s = st.save();
+    let base = s.base(st.slot);
+    let stored = cards::cards(s, base, List::Stored);
+    let inbox = cards::cards(s, base, List::Inbox);
+    let blocked = cards::blacklist(s);
+    api.set_card_tabs(strings([
+        trf("Card List {} / {}", &[&stored.len(), &List::Stored.at().1]),
+        trf("Guild Card Inbox {} / {}", &[&inbox.len(), &List::Inbox.at().1]),
+        tr("Hunters for Hire").to_string(),
+        trf("Blocked-user List {}", &[&blocked.len()]),
+    ]));
+    let tab = api.get_card_tab();
+    let target = card_target(tab);
+    api.set_was_cards(target.map(|t| st.was(t)).unwrap_or_default().into());
+    api.set_was_cards_key(target.map(|t| t.key()).unwrap_or_default().into());
+    api.set_card_rows(model(card_rows(st, tab)));
     let summary: String = match tab {
         0 => tr("Cards received from other hunters. The game keeps them at the front of the list: removing one moves the later ones up, as its Delete does.")
             .into(),
@@ -235,4 +245,15 @@ pub(super) fn wire_cards(ui: &AppWindow, st: &Shared) {
             toast(&ui, tr("The Card List already holds as recent a card of this hunter: only the inbox card goes"), false);
         }
     });
+}
+
+/// The phone interface's pager: the models of the tab a swipe is bringing in (peek.rs).
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_cards(ui: &AppWindow, st: &State, tab: usize) {
+    let peek = ui.global::<crate::CardsPeek>();
+    let tab = tab.min(3) as i32;
+    let target = card_target(tab);
+    peek.set_was_cards(target.map(|t| st.was(t)).unwrap_or_default().into());
+    peek.set_was_cards_key(target.map(|t| t.key()).unwrap_or_default().into());
+    peek.set_rows(model(card_rows(st, tab)));
 }

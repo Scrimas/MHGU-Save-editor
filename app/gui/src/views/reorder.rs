@@ -12,10 +12,13 @@ use mhgu_save::sets;
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-/// Row heights: ListRow's two densities, and an empty slot while a row is dragged.
-const TWO_LINE: f32 = 52.0;
-const ONE_LINE: f32 = 40.0;
-const THIN: f32 = 24.0;
+/// Row heights: ListRow's two densities, and an empty slot while a row is dragged. The
+/// phone's rows (ui/mobile/reorder.slint) are 64 dp whatever they hold, with 2 dp between
+/// them; its empty slots are 32 dp while a row is dragged.
+const PHONE: bool = cfg!(any(target_os = "android", feature = "mobile"));
+const TWO_LINE: f32 = if PHONE { 66.0 } else { 52.0 };
+const ONE_LINE: f32 = if PHONE { 66.0 } else { 40.0 };
+const THIN: f32 = if PHONE { 34.0 } else { 24.0 };
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub(super) enum List {
@@ -204,6 +207,19 @@ pub(super) fn show(ui: &AppWindow, list: List, slots: Vec<Slot>) {
         k.slots = slots;
         push(ui, list, k);
     });
+}
+
+/// The rows `list` would show with these slots and their height, in its kept order,
+/// without keeping them: the phone's picture of a tab a swipe is bringing in (peek.rs).
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn rows(list: List, slots: Vec<Slot>) -> (Vec<SlotRow>, f32) {
+    LISTS.with_borrow(|m| {
+        let perm = match m.get(&list) {
+            Some(k) if k.perm.len() == slots.len() => k.perm.clone(),
+            _ => (0..slots.len()).collect(),
+        };
+        layout(list, &Kept { perm, slots, drag: None })
+    })
 }
 
 /// The slot a drag would drop on, from the place `to` it has: a row next to the gap

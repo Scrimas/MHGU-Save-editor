@@ -98,17 +98,44 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
         api.set_quests(model(vec![]));
         return;
     }
-    let (search, missing, sel) = view(|v| (v.quest_search.to_lowercase(), v.quest_missing, v.quest_sel.clone()));
-    api.set_quest_selected(sel.len() as i32);
+    api.set_quest_selected(view(|v| v.quest_sel.len()) as i32);
     let cat = tabs.get(tab).cloned().unwrap_or_default();
-    let mut qs: Vec<_> = Char::real_quests(true).into_iter().filter(|q| q.category == cat).collect();
-    qs.sort_by_key(|q| (deviant_of(q.index).unwrap_or(0), q.rank.parse::<u32>().unwrap_or(99), q.id));
+    let qs = category_quests(&cat);
     let base = st.base();
     let total = qs.len();
     let done = qs.iter().filter(|q| c.quest(QuestBit::Cleared, q.index)).count();
+    let rows = quest_rows(st, &cat, &qs);
+    // the Guild Card's counts for this category, kept in step with the cleared quests
+    let mut kinds: Vec<usize> = qs.iter().filter_map(|q| character::card_kind(q)).collect();
+    kinds.sort_unstable();
+    kinds.dedup();
+    let mut summary = trf("{}: {} / {} cleared · confirmed in game except where marked", &[&cat, &num(done as i64), &num(total as i64)]);
+    if !kinds.is_empty() {
+        let counts: Vec<String> =
+            kinds.iter().map(|&k| format!("{} {}", tr(character::QUEST_KINDS[k]), num(character::card_quests(st.save(), base, k)))).collect();
+        summary.push_str(" · ");
+        summary.push_str(&trf("Guild Card completions: {}", &[&counts.join(", ")]));
+    }
+    api.set_quest_summary(summary.into());
+    api.set_quests(keep(api.get_quests(), rows));
+}
+
+/// A category's quests in the order of its tab: by deviant, rank, then number.
+fn category_quests(cat: &str) -> Vec<&'static mhgu_save::data::Quest> {
+    let mut qs: Vec<_> = Char::real_quests(true).into_iter().filter(|q| q.category == cat).collect();
+    qs.sort_by_key(|q| (deviant_of(q.index).unwrap_or(0), q.rank.parse::<u32>().unwrap_or(99), q.id));
+    qs
+}
+
+/// The rows of a category's tab (`qs` from category_quests): a header per rank or deviant
+/// and its quests, under the page's search, Missing only and selection.
+fn quest_rows(st: &State, cat: &str, qs: &[&'static mhgu_save::data::Quest]) -> Vec<QuestRow> {
+    let c = Char::new(st.save(), st.slot);
+    let (search, missing, sel) = view(|v| (v.quest_search.to_lowercase(), v.quest_missing, v.quest_sel.clone()));
+    let base = st.base();
     let mut rows = vec![];
     let mut group = String::from("\0");
-    for q in &qs {
+    for q in qs {
         let cl = c.quest(QuestBit::Cleared, q.index);
         if (missing && cl) || (!search.is_empty() && !q.name.to_lowercase().contains(&search) && !q.id.to_string().contains(&search)) {
             continue;
@@ -120,7 +147,7 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
             let open = members.iter().any(|x| !c.quest(QuestBit::Cleared, x.index));
             let (label, action) = match deviant_of(q.index) {
                 Some(d) if cat == "Special Permit" => (DEVIANTS[d].to_string(), tr("Mark all cleared").to_string()),
-                _ if q.rank.is_empty() => (cat.clone(), tr("Mark all cleared").to_string()),
+                _ if q.rank.is_empty() => (cat.to_string(), tr("Mark all cleared").to_string()),
                 _ => (format!("{cat} {}★", q.rank), trf("Mark {}★ cleared", &[&q.rank])),
             };
             let cleared = members.iter().filter(|x| c.quest(QuestBit::Cleared, x.index)).count();
@@ -155,19 +182,7 @@ pub(super) fn quests_page(ui: &AppWindow, st: &State) {
             selected: sel.contains(&q.index),
         });
     }
-    // the Guild Card's counts for this category, kept in step with the cleared quests
-    let mut kinds: Vec<usize> = qs.iter().filter_map(|q| character::card_kind(q)).collect();
-    kinds.sort_unstable();
-    kinds.dedup();
-    let mut summary = trf("{}: {} / {} cleared · confirmed in game except where marked", &[&cat, &num(done as i64), &num(total as i64)]);
-    if !kinds.is_empty() {
-        let counts: Vec<String> =
-            kinds.iter().map(|&k| format!("{} {}", tr(character::QUEST_KINDS[k]), num(character::card_quests(st.save(), base, k)))).collect();
-        summary.push_str(" · ");
-        summary.push_str(&trf("Guild Card completions: {}", &[&counts.join(", ")]));
-    }
-    api.set_quest_summary(summary.into());
-    api.set_quests(keep(api.get_quests(), rows));
+    rows
 }
 
 pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {
@@ -301,4 +316,19 @@ pub(super) fn wire_quests(ui: &AppWindow, st: &Shared) {
         });
         let _ = &ui;
     });
+}
+
+/// The phone interface's pager: the models of the tab a swipe is bringing in (peek.rs), the
+/// categories first, then the Arena records and the history log, as quests_page builds them.
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_quests(ui: &AppWindow, st: &State, tab: usize) {
+    let peek = ui.global::<crate::QuestsPeek>();
+    let tabs = quest_tabs();
+    if tab == tabs.len() + 1 {
+        peek.set_log(model(history_rows(st)));
+    } else if tab == tabs.len() {
+        peek.set_arena(model(arena_rows(st)));
+    } else if let Some(cat) = tabs.get(tab) {
+        peek.set_quests(model(quest_rows(st, cat, &category_quests(cat))));
+    }
 }

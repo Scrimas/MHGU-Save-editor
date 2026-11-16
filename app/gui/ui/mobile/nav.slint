@@ -3,6 +3,7 @@
 import { M } from "theme.slint";
 import { Ico, Press, ReviewFab, Tap } from "widgets.slint";
 import { Api, Fmt } from "../common.slint";
+import { Claim, Gest } from "gestures.slint";
 
 export struct Dest { id: string, label: string, icon: image, icon-on: image, badge: int }
 
@@ -53,12 +54,30 @@ component NavItem inherits Rectangle {
     ta := Tap { tapped => { root.clicked(); } }
 }
 
-// The navigation bar: five destinations; `current` is the one of the page shown.
+// The navigation bar: five destinations; `current` is the one of the page shown. A swipe
+// along it goes to the neighbouring destination, the page following the finger (app.slint).
 export component NavBar inherits Rectangle {
     in property <[Dest]> items;
     in property <int> current;
     in property <length> bottom-inset;
+    // a destination that way to swipe to
+    in property <bool> can-prev;
+    in property <bool> can-next;
     callback picked(int);
+    callback swipe-started();
+    callback swipe-moved(length);
+    callback swipe-ended(float);
+    callback swipe-cancelled();
+    property <length> py: Gest.sy - self.absolute-position.y;
+    Claim {
+        kind: 3;
+        back: root.can-next && !Gest.modal && root.py >= 0 && root.py < root.height;
+        forth: root.can-prev && !Gest.modal && root.py >= 0 && root.py < root.height;
+        started => { root.swipe-started(); }
+        moved(d) => { root.swipe-moved(d); }
+        ended(v) => { root.swipe-ended(v); }
+        cancelled => { root.swipe-cancelled(); }
+    }
     height: 80px + root.bottom-inset;
     background: M.s-cont;
     accessible-role: tab-list;
@@ -176,7 +195,8 @@ component DrawerItem inherits Rectangle {
 
 export struct DrawerEntry { id: string, label: string, badge: int, gap: bool }
 
-// The modal drawer: every page in the desktop's order, then the app's own screens.
+// The modal drawer: every page in the desktop's order, then the app's own screens. Closed
+// by a tap beside it, Back, or a swipe back toward its edge.
 export component Drawer inherits Rectangle {
     in property <bool> shown;
     in property <[DrawerEntry]> entries;
@@ -190,13 +210,47 @@ export component Drawer inherits Rectangle {
     property <float> t: root.shown ? 1 : 0;
     animate t { duration: M.anim; easing: ease-out; }
     visible: self.t > 0.001;
+    // swiped back toward its edge: the finger's pull (0 or less); let go far or fast
+    // enough, the drawer closes from where it is
+    property <length> pull;
+    property <duration> pull-dur;
+    animate pull { duration: root.pull-dur; easing: ease-out; }
+    property <bool> gone: self.t <= 0.001;
+    changed gone => {
+        if self.gone {
+            root.pull-dur = 0ms;
+            root.pull = 0;
+        }
+    }
+    Claim {
+        kind: 0;
+        back: root.shown && root.drag == 0 && Gest.sx - root.absolute-position.x < panel.width;
+        // (the other way nothing moves: it is no tap on the entry under the finger either)
+        forth: self.back;
+        moved(d) => {
+            root.pull-dur = 0ms;
+            root.pull = min(0px, d);
+        }
+        ended(v) => {
+            if root.pull < -0.3 * panel.width || (root.pull < -24px && v < -350) {
+                root.close();
+            } else {
+                root.pull-dur = M.anim;
+                root.pull = 0;
+            }
+        }
+        cancelled => {
+            root.pull-dur = M.anim;
+            root.pull = 0;
+        }
+    }
     Rectangle {
-        background: #000000.with-alpha(0.32 * root.t * (1 - 0.5 * root.drag));
+        background: #000000.with-alpha(0.32 * root.t * (1 - 0.5 * root.drag) * (1 + 0.6 * max(-1, root.pull / max(1px, panel.width))));
         Tap { tapped => { root.close(); } }
     }
     panel := Rectangle {
         width: min(360px, root.width - 56px) + root.left-inset;
-        x: -self.width * (1 - root.t) - 16px * root.drag;
+        x: -self.width * (1 - root.t) - 16px * root.drag + root.pull;
         transform-scale-x: 1 - 0.1 * root.drag;
         transform-scale-y: 1 - 0.1 * root.drag;
         transform-origin: { x: 0, y: self.height / 2 };

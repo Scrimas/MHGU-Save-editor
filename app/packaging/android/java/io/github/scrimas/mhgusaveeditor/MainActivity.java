@@ -25,6 +25,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
@@ -132,6 +133,31 @@ public class MainActivity extends NativeActivity {
             real.unregisterOnBackInvokedCallback((OnBackInvokedCallback) animated);
             animated = null;
         }
+    }
+
+    // The width of the system's back-gesture zone at the side edges, in px: 0 with the
+    // three-button bar, -1 while the window has no insets yet (android/gesture.rs keeps
+    // swipes that start there for Android).
+    public int gestureEdge() {
+        android.view.WindowInsets insets = getWindow().getDecorView().getRootWindowInsets();
+        if (insets == null) return -1;
+        android.graphics.Insets g = insets.getSystemGestureInsets();
+        return Math.max(g.left, g.right);
+    }
+
+    // A tick under the finger (ui/mobile/gestures.slint): 0 a long-press took hold, 1 a
+    // step (a row passing a place, another quest picked), 2 a swipe crossing its threshold.
+    // Follows the system's touch-feedback setting.
+    public void haptic(final int kind) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int c = kind == 0 ? HapticFeedbackConstants.LONG_PRESS
+                    : kind == 1 ? (Build.VERSION.SDK_INT >= 34 ? HapticFeedbackConstants.SEGMENT_FREQUENT_TICK : HapticFeedbackConstants.CLOCK_TICK)
+                    : (Build.VERSION.SDK_INT >= 34 ? HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE : HapticFeedbackConstants.KEYBOARD_TAP);
+                getWindow().getDecorView().performHapticFeedback(c);
+            }
+        });
     }
 
     public String lastError() {

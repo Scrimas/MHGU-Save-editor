@@ -3,6 +3,7 @@
 import { AboutSlint } from "std-widgets.slint";
 import { M } from "theme.slint";
 import { Btn, ConfidenceLabel, Dot, GroupRow, IconBtn, Ico, ListItem, Muted, Press, SectionLabel, Sheet, Tap } from "widgets.slint";
+import { SwipeRow } from "gestures.slint";
 import { Api, ChangeRow, Confidence, Fmt, SlotInfo } from "../common.slint";
 import { ChoiceRow } from "form.slint";
 
@@ -131,6 +132,9 @@ export component ReviewSheet inherits Sheet {
     subtitle: Api.review-summary;
     // as tall as the changes, up to the screen (then the list scrolls)
     content-h: body.preferred-height;
+    // the list is at its top (set from inside it: it exists only with changes)
+    property <bool> list-top: true;
+    at-top: Api.change-count == 0 || root.list-top;
     body := VerticalLayout {
         if Api.change-count == 0: VerticalLayout {
             padding: 24px;
@@ -139,6 +143,8 @@ export component ReviewSheet inherits Sheet {
         if Api.change-count > 0: Flickable {
             content-width: self.width;
             vertical-stretch: 1;
+            init => { root.list-top = true; }
+            changed content-y => { root.list-top = self.content-y >= 0; }
             VerticalLayout {
                 // shorter than the view: the spare room stays below the content
                 alignment: start;
@@ -152,11 +158,15 @@ export component ReviewSheet inherits Sheet {
                         SectionLabel { text: c.group; height: 40px; vertical-alignment: bottom; }
                     }
                     if c.first: Rectangle { height: 8px; }
-                    ReviewEntry {
-                        c: c;
-                        first: c.first;
-                        last: i == Api.changes.length - 1 || Api.changes[i + 1].first;
-                        open => { root.goto(self.c.key); }
+                    // swiped away sideways: that change undone (its Undo button is the tap)
+                    SwipeRow {
+                        swiped => { Api.undo-swiped(c.id); }
+                        ReviewEntry {
+                            c: c;
+                            first: c.first;
+                            last: i == Api.changes.length - 1 || Api.changes[i + 1].first;
+                            open => { root.goto(self.c.key); }
+                        }
                     }
                 }
             }
@@ -461,6 +471,9 @@ export component SnapshotsSheet inherits Sheet {
     title: Api.restore-ask == "" ? @tr("Snapshots") : @tr("Restore the save from {}?", Api.restore-when);
     subtitle: Api.restore-ask == "" ? @tr("A copy of the whole save folder, taken before each write and before each restore.") : "";
     content-h: Api.restore-ask == "" ? (Api.snapshots.length == 0 ? 120px : root.height) : ask.preferred-height;
+    // the list is at its top (set from inside it: it exists only while it shows)
+    property <bool> list-top: true;
+    at-top: Api.restore-ask != "" || Api.snapshots.length == 0 || root.list-top;
     VerticalLayout {
         if Api.restore-ask == "" && Api.snapshots.length == 0: VerticalLayout {
             padding: 24px;
@@ -468,6 +481,8 @@ export component SnapshotsSheet inherits Sheet {
         }
         if Api.restore-ask == "" && Api.snapshots.length > 0: Flickable {
             content-width: self.width;
+            init => { root.list-top = true; }
+            changed content-y => { root.list-top = self.content-y >= 0; }
             VerticalLayout {
                 // shorter than the view: the spare room stays below the content
                 alignment: start;
@@ -506,8 +521,10 @@ export component SnapshotsSheet inherits Sheet {
                 }
             }
         }
+        // (hidden, it takes no room under the list either)
         ask := VerticalLayout {
             visible: Api.restore-ask != "";
+            height: self.visible ? self.preferred-height : 0px;
             padding-left: 24px;
             padding-right: 24px;
             padding-bottom: 16px;

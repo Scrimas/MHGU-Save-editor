@@ -56,9 +56,9 @@ fn own_palicoes(s: &mhgu_save::Save, base: usize) -> Vec<usize> {
     (0..palico::LIST_N).filter(|&i| !palico::is_empty(s, base, i)).collect()
 }
 
-/// The Team and Dojo, StreetPass and Scouting tabs.
-fn other_tabs(ui: &AppWindow, st: &State, tab: i32) {
-    let api = ui.global::<Api>();
+/// The Team and Dojo, StreetPass and Scouting tabs: the fields, the read-only lines and
+/// the StreetPass Palicoes (each empty on the tabs without them).
+fn other_rows(st: &State, tab: i32) -> (Vec<OptionRow>, Vec<InfoRow>, Vec<CardRow>) {
     let s = st.save();
     let base = st.base();
     let was = |t: Target| SharedString::from(st.was(t));
@@ -172,9 +172,7 @@ fn other_tabs(ui: &AppWindow, st: &State, tab: i32) {
         }
         _ => {}
     }
-    api.set_palico_fields(model(fields));
-    api.set_palico_info(model(info));
-    api.set_palico_mail(model(mail));
+    (fields, info, mail)
 }
 
 /// A look's name in the interface language.
@@ -219,28 +217,32 @@ fn look_rows(p: &palico::Palico) -> Vec<LookRow> {
         .collect()
 }
 
-pub(super) fn palico_page(ui: &AppWindow, st: &State) {
-    let api = ui.global::<Api>();
+/// The note above a tab's content.
+fn palico_note(tab: i32) -> &'static str {
+    match tab {
+        1 => tr("The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."),
+        2 => tr(
+            "A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only.",
+        ),
+        3 => tr(
+            "Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card. MHGU on Switch has no StreetPass: only a save carried over from the 3DS holds such Palicoes, so removing one can't be checked in game and stays Derived.",
+        ),
+        4 => tr("What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."),
+        _ => "",
+    }
+}
+
+/// The places a list tab shows: those for hire (tab 1), else the character's.
+fn places(tab: i32) -> std::ops::Range<usize> {
+    if tab == 1 { palico::LIST_N..palico::PLACES } else { 0..palico::LIST_N }
+}
+
+/// A list tab's Palicoes, under the page's search.
+fn palico_rows(st: &State, tab: i32) -> Vec<PalicoRow> {
     let s = st.save();
     let base = st.base();
     let q = view(|v| v.palico_search.to_lowercase());
-    let all = own_palicoes(s, base).len();
-    let tab = api.get_palico_tab();
-    api.set_palico_tabs(strings([tr("My Palicoes"), tr("For hire"), tr("Team and Dojo"), tr("StreetPass"), tr("Palico Scout")].map(String::from)));
-    api.set_palico_note(
-        match tab {
-            1 => tr("The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."),
-            2 => tr("A Prowler fights with its Palico's support moves and skills (My Palicoes). Award 53 comes with 50 Dojo sessions. The game gives title words from 10, 30, 50 and 80 hires at its next check. The Dojo and the teams are read-only."),
-            3 => tr("Palicoes received by StreetPass wait in the inbox until hired or let go; the one to send goes out with the Guild Card. MHGU on Switch has no StreetPass: only a save carried over from the 3DS holds such Palicoes, so removing one can't be checked in game and stays Derived."),
-            4 => tr("What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."),
-            _ => "",
-        }
-        .into(),
-    );
-    other_tabs(ui, st, tab);
-    let places = if tab == 1 { palico::LIST_N..palico::PLACES } else { 0..palico::LIST_N };
-    let rows: Vec<PalicoRow> = places
-        .clone()
+    places(tab)
         .filter(|&i| !palico::is_empty(s, base, i))
         .map(|i| (i, palico::get(s, base, i)))
         .filter(|(_, p)| q.is_empty() || p.name.to_lowercase().contains(&q))
@@ -250,20 +252,14 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
             sub: trf("Lv {} · {}", &[&p.level, &palico::BIASES.get(p.bias as usize).map_or("?", |&b| tr(b))]).into(),
             changed: st.changed(base + palico::offset(i), palico::RECORD),
         })
-        .collect();
-    let mut sel = view(|v| v.palico_sel);
-    if !usize::try_from(sel).is_ok_and(|i| places.contains(&i)) {
-        sel = rows.first().map(|r| r.index).unwrap_or(-1);
-        view(|v| v.palico_sel = sel);
-    }
-    api.set_palico_summary(trn("{n} Palico", "{n} Palicoes", all as i64, &[]).into());
-    api.set_palicoes(keep(api.get_palicoes(), rows));
-    api.set_biases(strings(palico::BIASES.iter().map(|&s| tr(s).to_string())));
-    api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|&s| tr(s).to_string())));
+        .collect()
+}
+
+/// The Palico at place `sel` with its lists and looks (index -1 for none).
+fn palico_detail(st: &State, sel: i32) -> PalicoDetail {
+    let s = st.save();
+    let base = st.base();
     let names = assets::names();
-    let choices = |names: &[String], n: usize| strings((0..n).map(|id| targets::palico_name(names, id as u8)));
-    api.set_palico_move_names(choices(&names.support_moves, palico::NO_MOVE as usize));
-    api.set_palico_skill_names(choices(&names.palico_skills, palico::NO_SKILL as usize));
     // the list's slots: innate first, taught at the end, ticked when equipped
     let rows = |list: &[u8], on: &[u8], head: usize, taught: usize, names: &[String]| -> Vec<PalicoEntry> {
         list.iter()
@@ -278,7 +274,7 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
             })
             .collect()
     };
-    api.set_palico(if sel >= 0 {
+    if sel >= 0 {
         let i = sel as usize;
         let p = palico::get(s, base, i);
         let was = |f: targets::Pal| -> SharedString { st.was(Target::Palico(i, f)).into() };
@@ -317,7 +313,37 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
         }
     } else {
         PalicoDetail { index: -1, ..Default::default() }
-    });
+    }
+}
+
+pub(super) fn palico_page(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let s = st.save();
+    let base = st.base();
+    let all = own_palicoes(s, base).len();
+    let tab = api.get_palico_tab();
+    api.set_palico_tabs(strings([tr("My Palicoes"), tr("For hire"), tr("Team and Dojo"), tr("StreetPass"), tr("Palico Scout")].map(String::from)));
+    api.set_palico_note(palico_note(tab).into());
+    let (fields, info, mail) = other_rows(st, tab);
+    api.set_palico_fields(model(fields));
+    api.set_palico_info(model(info));
+    api.set_palico_mail(model(mail));
+    let places = places(tab);
+    let rows = palico_rows(st, tab);
+    let mut sel = view(|v| v.palico_sel);
+    if !usize::try_from(sel).is_ok_and(|i| places.contains(&i)) {
+        sel = rows.first().map(|r| r.index).unwrap_or(-1);
+        view(|v| v.palico_sel = sel);
+    }
+    api.set_palico_summary(trn("{n} Palico", "{n} Palicoes", all as i64, &[]).into());
+    api.set_palicoes(keep(api.get_palicoes(), rows));
+    api.set_biases(strings(palico::BIASES.iter().map(|&s| tr(s).to_string())));
+    api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|&s| tr(s).to_string())));
+    let names = assets::names();
+    let choices = |names: &[String], n: usize| strings((0..n).map(|id| targets::palico_name(names, id as u8)));
+    api.set_palico_move_names(choices(&names.support_moves, palico::NO_MOVE as usize));
+    api.set_palico_skill_names(choices(&names.palico_skills, palico::NO_SKILL as usize));
+    api.set_palico(palico_detail(st, sel));
 }
 
 pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
@@ -573,4 +599,22 @@ fn add_palico(ui: &AppWindow, s: &mut State, k: usize, file: &[u8], title: Strin
         Err(palico::ImportError::BoxFull) => toast(ui, tr("Not added: the Palico equipment box has no room for its equipment"), true),
         Err(palico::ImportError::NotAPalico) => toast(ui, tr("Not imported: the file is not a Palico exported by this editor"), true),
     }
+}
+
+/// The phone interface's pager: the models of the tab a swipe is bringing in (peek.rs).
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_palicoes(ui: &AppWindow, st: &State, tab: usize) {
+    let peek = ui.global::<crate::PalicoesPeek>();
+    let tab = tab.min(4) as i32;
+    let (fields, info, mail) = other_rows(st, tab);
+    peek.set_note(palico_note(tab).into());
+    peek.set_fields(model(fields));
+    peek.set_info(model(info));
+    peek.set_mail(model(mail));
+    // a list tab opens at its first Palico (select-palico-tab), shown beside the list on
+    // wide layouts
+    let rows = if tab <= 1 { palico_rows(st, tab) } else { vec![] };
+    let sel = rows.first().map_or(-1, |r| r.index);
+    peek.set_palico(palico_detail(st, sel));
+    peek.set_palicoes(model(rows));
 }

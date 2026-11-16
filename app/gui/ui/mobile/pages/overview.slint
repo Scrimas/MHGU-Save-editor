@@ -1,6 +1,7 @@
 // Home: Hunter Rank and Zenny, the progress rows (each opens its page), the quick goals.
 import { M } from "../theme.slint";
 import { Btn, Chip, ConfidenceLabel, Dot, Ico, Muted, ProgressRow, Sheet, Tap } from "../widgets.slint";
+import { Pager } from "../gestures.slint";
 import { Api, Confidence, Goal, Fmt } from "../../common.slint";
 
 component GoalCard inherits Rectangle {
@@ -53,6 +54,11 @@ export component OverviewPage inherits Rectangle {
     property <bool> all-done;
     // goal cards side by side on wide windows
     property <int> cols: root.width >= 1100px ? 3 : root.width >= 640px ? 2 : 1;
+    // no tabs: a swipe sideways goes on to the destinations (app.slint)
+    Pager {
+        has-prev: false;
+        has-next: false;
+    }
     Flickable {
         content-width: self.width;
         HorizontalLayout {
@@ -191,6 +197,9 @@ export component GoalSheet inherits Sheet {
     title: Api.preview.title;
     subtitle: Api.preview.summary;
     content-h: body.preferred-height;
+    // the lines are at their top (set from inside them: they exist only for a goal with changes)
+    property <bool> lines-top: true;
+    at-top: Api.preview.empty || root.lines-top;
     body := VerticalLayout {
         padding-left: 24px;
         padding-right: 24px;
@@ -203,6 +212,8 @@ export component GoalSheet inherits Sheet {
             height: min(lines.preferred-height, 320px);
             Flickable {
                 content-width: self.width;
+                init => { root.lines-top = true; }
+                changed content-y => { root.lines-top = self.content-y >= 0; }
                 lines := VerticalLayout {
                     padding-left: 16px;
                     padding-right: 16px;

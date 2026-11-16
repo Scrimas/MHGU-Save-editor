@@ -1,0 +1,198 @@
+--- a/lib.rs
++++ b/lib.rs
+@@ -235,6 +235,68 @@
+     }
+ }
+ 
++// ---- Not in upstream Slint (vendor/README.md): the application's touch filter ----
++
++/// What the primary finger did.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum TouchAction {
++    Down,
++    Move,
++    Up,
++    /// Android took the touch away (its back gesture, a system dialog)
++    Cancel,
++}
++
++/// One sample of the primary finger, in the window's logical pixels.
++#[derive(Clone, Copy, Debug)]
++pub struct TouchSample {
++    pub action: TouchAction,
++    pub x: f32,
++    pub y: f32,
++    /// the event's time, in milliseconds
++    pub time_ms: i64,
++    /// fingers on the screen, this one included
++    pub fingers: usize,
++}
++
++/// What Slint does with a sample the application's filter has seen.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub enum TouchVerdict {
++    /// dispatch it as usual
++    Pass,
++    /// keep it from Slint (the application follows the finger itself)
++    Drop,
++    /// end the touch in Slint here, without the release a cancelled touch is otherwise
++    /// turned into (which a TouchArea under the finger reads as a click), and keep the
++    /// rest of this touch from Slint
++    Cancel,
++}
++
++thread_local! {
++    static TOUCH_FILTER: RefCell<Option<Box<dyn FnMut(TouchSample) -> TouchVerdict>>> = const { RefCell::new(None) };
++    /// the filter took the current touch: its other fingers stay out of Slint too
++    pub(crate) static TOUCH_TAKEN: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
++}
++
++/// Shows every touch of the primary finger to `filter` before Slint dispatches it. Called
++/// on the event loop's thread, from where the UI can be read and changed.
++pub fn set_touch_filter(filter: impl FnMut(TouchSample) -> TouchVerdict + 'static) {
++    TOUCH_FILTER.with(|f| *f.borrow_mut() = Some(Box::new(filter)));
++}
++
++pub(crate) fn filter_touch(sample: TouchSample) -> TouchVerdict {
++    // (taken out while it runs: it may end up back in the event handling)
++    let Some(mut filter) = TOUCH_FILTER.with(|f| f.borrow_mut().take()) else { return TouchVerdict::Pass };
++    let verdict = filter(sample);
++    TOUCH_FILTER.with(|f| {
++        let mut slot = f.borrow_mut();
++        if slot.is_none() {
++            *slot = Some(filter);
++        }
++    });
++    verdict
++}
++
+ pub fn set_requested_graphics_api(
+     requested_graphics_api: Option<i_slint_core::graphics::RequestedGraphicsAPI>,
+ ) -> Result<(), PlatformError> {
+--- a/androidwindowadapter.rs
++++ b/androidwindowadapter.rs
+@@ -49,6 +49,8 @@
+ 
+     long_press: RefCell<Option<LongPressDetection>>,
+     last_pressed_state: Cell<ButtonState>,
++    /// A touch is being cancelled (the touch filter): the keyboard is left as it is.
++    quiet_ime: Cell<bool>,
+ }
+ 
+ impl WindowAdapter for AndroidWindowAdapter {
+@@ -87,6 +89,9 @@
+ impl i_slint_core::window::WindowAdapterInternal for AndroidWindowAdapter {
+     #[cfg(feature = "native-activity")]
+     fn input_method_request(&self, request: InputMethodRequest) {
++        if self.quiet_ime.get() {
++            return;
++        }
+         match request {
+             InputMethodRequest::Enable(props) => {
+                 self.java_helper
+@@ -135,6 +140,9 @@
+     fn input_method_request(&self, request: InputMethodRequest) {
+         use android_activity::input::{TextInputState, TextSpan};
+ 
++        if self.quiet_ime.get() {
++            return;
++        }
+         let props = match request {
+             InputMethodRequest::Enable(props) => {
+                 self.app.show_soft_input(true);
+@@ -194,6 +202,7 @@
+             show_cursor_handles: Cell::new(false),
+             long_press: RefCell::default(),
+             last_pressed_state: Cell::new(ButtonState(0)),
++            quiet_ime: Cell::new(false),
+         })
+     }
+ 
+@@ -304,6 +313,87 @@
+                             scale,
+                         ))
+                     };
++                    // ---- not in upstream Slint (vendor/README.md) ----
++                    // The application sees the primary finger first: it may keep the touch
++                    // from Slint (it follows the finger itself), or end it in Slint.
++                    let filtered = match motion_event.action() {
++                        MotionAction::Down => Some(crate::TouchAction::Down),
++                        MotionAction::Move => Some(crate::TouchAction::Move),
++                        MotionAction::Up => Some(crate::TouchAction::Up),
++                        MotionAction::Cancel => Some(crate::TouchAction::Cancel),
++                        _ => None,
++                    };
++                    match (filtered, motion_event.pointers().next()) {
++                        (Some(action), Some(p)) => {
++                            if action == crate::TouchAction::Down {
++                                crate::TOUCH_TAKEN.set(false);
++                            }
++                            let at = touch_pos(&p);
++                            let sample = crate::TouchSample {
++                                action,
++                                x: at.x,
++                                y: at.y,
++                                time_ms: motion_event.event_time() / 1_000_000,
++                                fingers: motion_event.pointer_count(),
++                            };
++                            let taken = crate::TOUCH_TAKEN.get();
++                            match crate::filter_touch(sample) {
++                                crate::TouchVerdict::Pass if !taken => {}
++                                crate::TouchVerdict::Cancel if !taken => {
++                                    // A cancelled touch reaches the items as a release where
++                                    // the finger is, a click for the TouchArea under it:
++                                    // release it far outside the window instead. A text
++                                    // field that held the press takes any release for a tap,
++                                    // and with it the cursor and the keyboard: what had the
++                                    // focus keeps it, and the keyboard is not asked.
++                                    crate::TOUCH_TAKEN.set(true);
++                                    self.long_press.take();
++                                    let inner = WindowInner::from_pub(&self.window);
++                                    let focus = inner.focus_item.borrow().clone();
++                                    self.quiet_ime.set(true);
++                                    for p in motion_event.pointers() {
++                                        self.window.dispatch_event(WindowEvent::internal(
++                                            InternalEvent::Touch {
++                                                id: p.pointer_id(),
++                                                position: i_slint_core::lengths::LogicalPoint::new(
++                                                    -100000., -100000.,
++                                                ),
++                                                phase: TouchPhase::Cancelled,
++                                            },
++                                        ));
++                                    }
++                                    let now = inner.focus_item.borrow().clone();
++                                    if now != focus {
++                                        let reason = i_slint_core::input::FocusReason::Programmatic;
++                                        match (focus.upgrade(), now.upgrade()) {
++                                            (Some(was), _) => inner.set_focus_item(&was, true, reason),
++                                            (None, Some(now)) => inner.set_focus_item(&now, false, reason),
++                                            (None, None) => {}
++                                        }
++                                    }
++                                    self.quiet_ime.set(false);
++                                    return InputStatus::Handled;
++                                }
++                                _ => {
++                                    // (Drop; or anything after the touch was taken)
++                                    crate::TOUCH_TAKEN.set(true);
++                                    self.long_press.take();
++                                    return InputStatus::Handled;
++                                }
++                            }
++                        }
++                        // another finger of a touch the application has taken
++                        _ if crate::TOUCH_TAKEN.get()
++                            && matches!(
++                                motion_event.action(),
++                                MotionAction::PointerDown | MotionAction::PointerUp
++                            ) =>
++                        {
++                            return InputStatus::Handled;
++                        }
++                        _ => {}
++                    }
++                    // ---- upstream from here ----
+                     match motion_event.action() {
+                         MotionAction::ButtonPress => {
+                             result = self

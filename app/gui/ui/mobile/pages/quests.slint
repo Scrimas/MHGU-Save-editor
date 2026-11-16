@@ -5,18 +5,65 @@ import { ListView } from "std-widgets.slint";
 import { M } from "../theme.slint";
 import { Btn, CheckRow, Chip, CountField, GroupRow, Ico, Muted, Press, ScrollTabRow, SearchBar, SectionLabel, Sheet, Tap } from "../widgets.slint";
 import { Choice } from "../pick.slint";
-import { Api, QuestRow, Tabs } from "../../common.slint";
+import { Gest, Pager } from "../gestures.slint";
+import { Api, ArenaRow, HistoryRow, QuestRow, Tabs } from "../../common.slint";
 
-// The quest or Arena record a sheet edits: its place in Api.quests / Api.arena, read live
-// so the sheet follows each change.
+// The quest or Arena record a sheet edits. A quest by its index, with the row it was last
+// seen at in Api.quests (rows come and go as quests are marked); an Arena record by its
+// place in Api.arena, a list that does not change. Read live so the sheet follows each
+// change.
 export global QuestEdit {
     in-out property <bool> open;
+    in-out property <int> index: -1;
     in-out property <int> row: -1;
     in-out property <bool> arena-open;
     in-out property <int> arena-row: -1;
     // "m:ss.hh"
     public pure function time(m: int, s: int, h: int) -> string {
         return m + ":" + (s < 10 ? "0" : "") + s + "." + (h < 10 ? "0" : "") + h;
+    }
+}
+
+// A drag-select under way: a long press on a quest started it and its finger is still down.
+// Each quest row the finger passes over is picked (QuestItem), and the finger is the hold's
+// (Gest.holds) until it lets go. The pressed row reports the finger while it exists; the
+// list drops the rows it scrolls out of view, so from then on a cover over the list does.
+global QuestDrag {
+    in-out property <bool> on;
+    // the finger in the window, now and at its previous report (a fast finger skips rows)
+    in-out property <length> y;
+    in-out property <length> py;
+    // the touch it began with: the next one ends it, whatever became of the rows
+    in-out property <int> touch;
+    // the list's scrolling steps since the finger was last heard of: a finger lifted where
+    // nothing here sees it does not keep the list scrolling
+    in-out property <int> quiet;
+    public function start(y: length) {
+        if !QuestDrag.on {
+            QuestDrag.on = true;
+            QuestDrag.touch = Gest.touch;
+            Gest.holds += 1;
+        }
+        QuestDrag.y = y;
+        QuestDrag.py = y;
+        QuestDrag.quiet = 0;
+    }
+    public function stop() {
+        if QuestDrag.on {
+            QuestDrag.on = false;
+            Gest.holds = max(0, Gest.holds - 1);
+        }
+    }
+    public function follow(kind: PointerEventKind, y: length) {
+        if QuestDrag.on {
+            if kind == PointerEventKind.move {
+                QuestDrag.py = QuestDrag.y;
+                QuestDrag.y = y;
+                QuestDrag.quiet = 0;
+            } else if kind == PointerEventKind.up || kind == PointerEventKind.cancel {
+                QuestDrag.stop();
+            }
+        }
     }
 }
 
@@ -44,9 +91,13 @@ component QuestItem inherits Rectangle {
             root.open();
         }
     }
-    // a long press starts the selection with this quest (the tap that ends it is not a tap)
+    // a long press starts the selection with this quest, or goes on with it (the tap that
+    // ends it is not a tap), and the finger, while it stays down, picks the quests it passes
+    // over
     property <bool> down: ta.pressed;
     property <bool> fired;
+    // this row's press is the drag-select's
+    property <bool> owns;
     changed down => {
         if self.down {
             root.fired = false;
@@ -54,11 +105,34 @@ component QuestItem inherits Rectangle {
     }
     Timer {
         interval: 450ms;
-        running: ta.pressed && !root.fired && !root.selecting;
+        running: ta.pressed && !root.fired;
         triggered => {
             root.fired = true;
-            Api.quest-selecting = true;
+            Gest.haptic(0);
+            if !root.selecting {
+                Api.quest-selecting = true;
+            }
             Api.quest-select(root.q.index, true);
+            root.owns = true;
+            QuestDrag.start(ta.absolute-position.y + ta.mouse-y);
+        }
+    }
+    // the pressed row, while it is in the list: the finger is still down (it may be still)
+    Timer {
+        interval: 50ms;
+        running: root.owns && QuestDrag.on;
+        triggered => { QuestDrag.quiet = 0; }
+    }
+    // the finger passing over this row: rows differ in height and only those in view exist,
+    // so each one tells for itself
+    property <bool> under: QuestDrag.on && root.selecting && self.absolute-position.y <= max(QuestDrag.py, QuestDrag.y) && self.absolute-position.y + self.height > min(QuestDrag.py, QuestDrag.y);
+    // (from a timer: a row the list makes under the finger is picked too, once it exists)
+    Timer {
+        interval: 10ms;
+        running: root.under && !root.q.selected;
+        triggered => {
+            Api.quest-select(root.q.index, true);
+            Gest.haptic(1);
         }
     }
     Press { on: ta.pressed; }
@@ -66,6 +140,12 @@ component QuestItem inherits Rectangle {
         tapped => {
             if !root.fired {
                 root.tap();
+            }
+        }
+        pointer-event(e) => {
+            QuestDrag.follow(e.kind, self.absolute-position.y + self.mouse-y);
+            if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
+                root.owns = false;
             }
         }
     }
@@ -144,21 +224,38 @@ component QuestItem inherits Rectangle {
     }
 }
 
-export component QuestsPage inherits Rectangle {
+// A neighbouring tab's models, for the pager's preview (Rust: src/views/peek.rs): a
+// category's rows, the Arena records or the history log, whichever that tab is.
+export global QuestsPeek {
+    in property <[QuestRow]> quests;
+    in property <[ArenaRow]> arena;
+    in property <[HistoryRow]> log;
+    callback build(int);
+}
+
+// What one Quests tab shows: the live one, or a neighbour's coming in beside it while a
+// swipe is under way (`preview`: nothing in it reacts, and its rows come from QuestsPeek).
+// The categories come first, then the Arena records and the history log.
+component QuestsPane inherits Rectangle {
+    in property <int> tab;
+    in property <[QuestRow]> quests;
+    in property <[ArenaRow]> arena;
+    in property <[HistoryRow]> log;
+    in property <bool> preview;
     in property <length> bottom-pad;
+    in property <length> side;
     in property <length> side-inset;
-    property <length> side: M.gutter + root.side-inset;
+    property <bool> is-arena: root.tab == Api.quest-tabs.length - 2;
+    property <bool> is-history: root.tab == Api.quest-tabs.length - 1;
+    property <bool> category: !root.is-arena && !root.is-history;
+    // where the lists start: a swipe begins below the search field and the chips
+    out property <length> list-top: root.category ? head.y + head.height : 0px;
     VerticalLayout {
-        ScrollTabRow {
-            tabs: Api.quest-tabs;
-            current: Api.quest-tab;
-            select(i) => { Tabs.select("quests", i); }
-        }
-        if !Api.quest-arena && !Api.quest-history: VerticalLayout {
-            vertical-stretch: 1;
-            padding-top: 12px;
+        head := VerticalLayout {
+            vertical-stretch: 0;
+            padding-top: root.category ? 12px : 0px;
             spacing: 10px;
-            HorizontalLayout {
+            if root.category: HorizontalLayout {
                 padding-left: root.side;
                 padding-right: root.side;
                 SearchBar {
@@ -167,7 +264,7 @@ export component QuestsPage inherits Rectangle {
                     edited => { Api.filter-quests(); }
                 }
             }
-            HorizontalLayout {
+            if root.category: HorizontalLayout {
                 padding-left: root.side;
                 padding-right: root.side;
                 alignment: start;
@@ -188,7 +285,29 @@ export component QuestsPage inherits Rectangle {
                     clicked => { Api.quest-selecting = true; }
                 }
             }
-            if Api.quests.length == 0: HorizontalLayout {
+        }
+        if root.category: body := VerticalLayout {
+            vertical-stretch: 1;
+            padding-top: 10px;
+            spacing: 10px;
+            // a drag-select within 56 px of the list's top or bottom scrolls it, faster
+            // toward the edge (-1 up to 1 down)
+            property <length> fy: QuestDrag.y - ql.absolute-position.y;
+            property <float> pull: root.preview || !QuestDrag.on ? 0
+                : self.fy < 56px ? -min(1, (56px - self.fy) / 56px)
+                : self.fy > ql.visible-height - 56px ? min(1, (self.fy - ql.visible-height + 56px) / 56px)
+                : 0;
+            Timer {
+                interval: 16ms;
+                running: body.pull != 0 && (Gest.down || QuestDrag.quiet < 15);
+                triggered => {
+                    QuestDrag.quiet += 1;
+                    // (the rows move under the finger now, not the finger over them)
+                    QuestDrag.py = QuestDrag.y;
+                    ql.content-y = min(0px, max(ql.content-y - body.pull * 16px, ql.visible-height - ql.content-height));
+                }
+            }
+            if root.quests.length == 0: HorizontalLayout {
                 padding: root.side;
                 Muted { text: Api.quest-missing ? @tr("Every quest here is cleared.") : @tr("No quest matches the search."); horizontal-alignment: center; }
             }
@@ -196,14 +315,28 @@ export component QuestsPage inherits Rectangle {
                 vertical-stretch: 1;
                 property <int> seq: Api.jump-seq;
                 function go() {
-                    if Api.page == "quests" && Api.jump-row >= 0 {
+                    if !root.preview && Api.page == "quests" && Api.jump-row >= 0 {
                         self.content-y = -max(0px, Api.jump-row * 72px - self.visible-height / 3);
                     }
                 }
-                init => { self.go(); }
+                init => {
+                    self.t-seq = Api.jump-seq;
+                    self.go();
+                }
                 changed seq => { self.go(); }
-                for q[i] in Api.quests: VerticalLayout {
-                    padding-bottom: i == Api.quests.length - 1 ? root.bottom-pad : 0px;
+                // one list serves every category: a tab opens at its top, or at the row a
+                // jump that changed the tab is for (not again at a later tab change)
+                property <int> t: root.tab;
+                property <int> t-seq;
+                changed t => {
+                    self.content-y = 0px;
+                    if Api.jump-seq != self.t-seq {
+                        self.go();
+                    }
+                    self.t-seq = Api.jump-seq;
+                }
+                for q[i] in root.quests: VerticalLayout {
+                    padding-bottom: i == root.quests.length - 1 ? root.bottom-pad : 0px;
                     // a group of the category: its name and count, its "Mark 1★ cleared"
                     if q.header: HorizontalLayout {
                         padding-left: root.side;
@@ -226,8 +359,9 @@ export component QuestsPage inherits Rectangle {
                         // selecting, the state's label takes 76px at the end
                         // (the list's own width: the scroll bar's room is not in it)
                         text-w: ql.visible-width - 2 * root.side-inset - 8px - M.touch - 4px - 16px - 16px - (Api.quest-selecting ? 72px : 0px);
-                        flash: Api.highlight != "" && Api.highlight == "quest:" + q.index;
+                        flash: !root.preview && Api.highlight != "" && Api.highlight == "quest:" + q.index;
                         open => {
+                            QuestEdit.index = q.index;
                             QuestEdit.row = i;
                             QuestEdit.open = true;
                         }
@@ -236,7 +370,7 @@ export component QuestsPage inherits Rectangle {
             }
         }
         // the best time and set per Arena quest; a record opens its sheet
-        if Api.quest-arena: Flickable {
+        if root.is-arena: Flickable {
             vertical-stretch: 1;
             content-width: self.width;
             VerticalLayout {
@@ -251,9 +385,9 @@ export component QuestsPage inherits Rectangle {
                     padding-bottom: 10px;
                     Muted { text: @tr("Your best time per Arena quest, as a solo clear with the set picked. The rank follows the time; the Arena Counter's best time follows yours."); }
                 }
-                for r[i] in Api.arena: GroupRow {
+                for r[i] in root.arena: GroupRow {
                     first: i == 0;
-                    last: i == Api.arena.length - 1;
+                    last: i == root.arena.length - 1;
                     pressable: true;
                     height: max(64px, arow.preferred-height);
                     accessible-role: button;
@@ -289,7 +423,7 @@ export component QuestsPage inherits Rectangle {
             }
         }
         // the Guild Card's last ten records, read only
-        if Api.quest-history: Flickable {
+        if root.is-history: Flickable {
             vertical-stretch: 1;
             content-width: self.width;
             VerticalLayout {
@@ -304,10 +438,10 @@ export component QuestsPage inherits Rectangle {
                     padding-bottom: 10px;
                     Muted { text: @tr("The last ten records of your Guild Card, newest first, as the game wrote them. Read only."); }
                 }
-                if Api.quest-log.length == 0: Muted { text: @tr("No record yet."); horizontal-alignment: center; }
-                for r[i] in Api.quest-log: GroupRow {
+                if root.log.length == 0: Muted { text: @tr("No record yet."); horizontal-alignment: center; }
+                for r[i] in root.log: GroupRow {
                     first: i == 0;
-                    last: i == Api.quest-log.length - 1;
+                    last: i == root.log.length - 1;
                     height: hrow.preferred-height;
                     accessible-role: AccessibleRole.text;
                     accessible-label: r.date + ", " + r.what + ", " + r.quest;
@@ -330,14 +464,117 @@ export component QuestsPage inherits Rectangle {
             }
         }
     }
+    // once the pressed row has scrolled out of the list, the finger of a drag-select is
+    // seen here (the rows under it still pick themselves)
+    if !root.preview && QuestDrag.on: TouchArea {
+        pointer-event(e) => { QuestDrag.follow(e.kind, self.absolute-position.y + self.mouse-y); }
+    }
+    // a picture of the neighbour: taps stay out until it is the page
+    if root.preview: TouchArea { }
 }
+
+export component QuestsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.quest-tabs;
+            current: Api.quest-tab;
+            at: Api.quest-tab + pager.side * pager.progress;
+            select(i) => { Tabs.select("quests", i); }
+        }
+        Rectangle {
+            vertical-stretch: 1;
+            clip: true;
+            pager := Pager {
+                has-prev: Api.quest-tab > 0;
+                has-next: Api.quest-tab < Api.quest-tabs.length - 1;
+                // (a tab change drops the quests picked)
+                enabled: !Api.quest-selecting;
+                allow: self.press-y >= live.list-top;
+                peek(s) => { QuestsPeek.build(Api.quest-tab + s); }
+                commit(s) => { Tabs.select("quests", Api.quest-tab + s); }
+            }
+            live := QuestsPane {
+                x: pager.shift;
+                width: pager.width;
+                tab: Api.quest-tab;
+                quests: Api.quests;
+                arena: Api.arena;
+                log: Api.quest-log;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
+                side-inset: root.side-inset;
+            }
+            if pager.side != 0: QuestsPane {
+                x: pager.shift + pager.side * pager.width;
+                width: pager.width;
+                preview: true;
+                tab: Api.quest-tab + pager.side;
+                quests: QuestsPeek.quests;
+                arena: QuestsPeek.arena;
+                log: QuestsPeek.log;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
+                side-inset: root.side-inset;
+            }
+        }
+    }
+}
+
 
 // A quest's three marks.
 export component QuestSheet inherits Sheet {
-    property <bool> ok: QuestEdit.row >= 0 && QuestEdit.row < Api.quests.length;
-    // (out of range reads a default row)
-    property <QuestRow> q: Api.quests[QuestEdit.row];
-    shown: QuestEdit.open && root.ok;
+    pure function has(k: int) -> bool {
+        return k >= 0 && k < Api.quests.length && !Api.quests[k].header && Api.quests[k].index == QuestEdit.index;
+    }
+    // the quest's row: where it was, or a row or two either way (a quest above it, and its
+    // group's header, came back or went away); -1 once it is out of the list
+    property <int> r: QuestEdit.row;
+    property <int> at: root.has(root.r) ? root.r
+        : root.has(root.r - 1) ? root.r - 1
+        : root.has(root.r + 1) ? root.r + 1
+        : root.has(root.r - 2) ? root.r - 2
+        : root.has(root.r + 2) ? root.r + 2
+        : -1;
+    changed at => {
+        if root.at >= 0 {
+            QuestEdit.row = root.at;
+        }
+    }
+    // (out of range reads a default row: the sheet shows the quest as last seen then)
+    property <QuestRow> live: Api.quests[root.at];
+    property <QuestRow> last;
+    property <QuestRow> q: root.at >= 0 ? root.live : root.last;
+    changed live => {
+        if root.at >= 0 {
+            root.last = root.live;
+        }
+    }
+    // a quest gone from the list (marked cleared under Missing only) closes its sheet: after
+    // a moment on what was set, then the way it always leaves (lists.slint, RequestSheet)
+    Timer {
+        interval: 200ms;
+        running: QuestEdit.open && root.at < 0;
+        triggered => { QuestEdit.open = false; }
+    }
+    shown: QuestEdit.open;
+    // (here, as this sheet is always there: a drag-select whose finger let go where no row
+    // or cover saw it ends with the next touch)
+    property <int> touch: Gest.touch;
+    changed touch => {
+        if QuestDrag.on && QuestDrag.touch != Gest.touch {
+            QuestDrag.stop();
+        }
+    }
+    // (on Android the recogniser tells when the finger lets go, wherever it is)
+    property <bool> finger: Gest.down;
+    changed finger => {
+        if !self.finger {
+            QuestDrag.stop();
+        }
+    }
     title: root.q.name;
     subtitle: root.q.sub;
     content-h: lay.preferred-height;

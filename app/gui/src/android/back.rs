@@ -36,12 +36,21 @@ pub fn gesture(phase: i32, progress: f32, from_right: bool) {
     }
     if phase <= 1 {
         api.set_back_from_right(from_right);
-        api.set_back_progress(progress.clamp(0.0, 1.0));
+        if phase == 0 {
+            // the finger is the gesture's from here: its progress is measured from the
+            // touches (gesture.rs), and what was under the finger is not tapped
+            api.set_back_progress(0.0);
+            api.set_back_active(true);
+            super::gesture::back_started();
+        }
+        // (Android's own progress, where it gives one: whichever is further)
+        api.set_back_progress(progress.clamp(0.0, 1.0).max(api.get_back_progress()));
         api.set_back_active(true);
     } else {
-        api.set_back_active(false);
+        // (the interface goes on from the preview: it reads it before it is let go)
         if phase == 3 {
-            ui.invoke_back();
+            ui.invoke_back_swiped();
         }
+        api.set_back_active(false);
     }
 }

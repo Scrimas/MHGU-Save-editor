@@ -81,6 +81,9 @@ pub struct State {
     pub ops: Vec<Op>,
     /// Edits removed by Undo all, until the next edit (Redo).
     pub redo: Vec<Op>,
+    /// One edit undone on its own with a Redo offered (Review on phones, a row swiped
+    /// away), and its place among the others; until the next edit.
+    pub undone: Option<(usize, Op)>,
     next_id: i32,
     /// Changes whenever the save's bytes or its original may have: what is computed
     /// from them (the Overview's goal plans) is kept until it moves.
@@ -96,6 +99,7 @@ impl State {
         self.doc = Some(Doc { save, orig, loc, copies });
         self.ops.clear();
         self.redo.clear();
+        self.undone = None;
         Ok(())
     }
 
@@ -167,6 +171,7 @@ impl State {
             return false;
         }
         self.redo.clear();
+        self.undone = None;
         let values: Vec<(Target, String)> = targets.iter().map(|t| (*t, t.read(&doc.save, slot))).collect();
         if merge {
             let k = self.ops.len() - 1;
@@ -216,6 +221,24 @@ impl State {
     pub fn undo(&mut self, id: i32) {
         self.ops.retain(|o| o.id != id);
         self.replay();
+    }
+
+    /// Undo one edit and keep it for `redo_one`; its title.
+    pub fn undo_one(&mut self, id: i32) -> Option<String> {
+        let i = self.ops.iter().position(|o| o.id == id)?;
+        let op = self.ops.remove(i);
+        let title = op.title.clone();
+        self.undone = Some((i, op));
+        self.replay();
+        Some(title)
+    }
+
+    /// Bring back the edit `undo_one` removed, where it was.
+    pub fn redo_one(&mut self) -> bool {
+        let Some((i, op)) = self.undone.take() else { return false };
+        self.ops.insert(i.min(self.ops.len()), op);
+        self.replay();
+        true
     }
 
     pub fn undo_all(&mut self) -> usize {
@@ -279,6 +302,7 @@ impl State {
         self.version += 1;
         self.ops.clear();
         self.redo.clear();
+        self.undone = None;
         if let Some(doc) = self.doc.as_mut() {
             doc.orig = doc.save.clone();
             doc.copies = doc.loc.copies.iter().map(|p| (p.clone(), CopyState::Same)).collect();

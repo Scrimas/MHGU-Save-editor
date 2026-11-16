@@ -8,6 +8,7 @@
 
 pub mod back;
 pub mod colors;
+pub mod gesture;
 pub mod picker;
 pub mod source;
 
@@ -134,6 +135,20 @@ pub fn sdk() -> i32 {
         v.i()
     })
     .unwrap_or(0)
+}
+
+/// The width of the system's back-gesture zone at the screen's side edges, in px (0 with
+/// the three-button bar; None while the window has no insets yet).
+pub fn gesture_edge() -> Option<i32> {
+    with_activity(|env, act| env.call_method(act, jni_str!("gestureEdge"), jni_sig!("()I"), &[])?.i()).ok()
+}
+
+/// A haptic tick (gestures.slint: 0 a long-press took hold, 1 a step, 2 a threshold).
+pub fn haptic(kind: i32) -> Result<(), String> {
+    with_activity(|env, act| {
+        env.call_method(act, jni_str!("haptic"), jni_sig!("(I)V"), &[JValue::Int(kind)])?;
+        Ok(())
+    })
 }
 
 /// Tells MainActivity whether Back has something to do in the app (back.rs).
@@ -271,6 +286,7 @@ pub fn started(ui: &crate::AppWindow, st: &crate::Shared) {
     colors::apply(ui);
     source::wire(ui, st);
     back::wire(ui);
+    gesture::wire(ui);
 }
 
 /// Opens the save the app had open last (Settings: open the last save at start).

@@ -360,8 +360,9 @@ export component VersionSheet inherits Sheet {
     subtitle: root.v.size != "" && root.v.size != "—" ? root.v.date + " · " + root.v.size : root.v.date;
     content-h: body.preferred-height;
     close => { SettingsView.version-open = false; }
+    at-top: changes.content-y >= 0;
     body := VerticalLayout {
-        Flickable {
+        changes := Flickable {
             content-width: self.width;
             vertical-stretch: 1;
             VerticalLayout {
@@ -452,8 +453,9 @@ export component NewsSheet inherits Sheet {
     title: Api.news-title;
     content-h: body.preferred-height;
     close => { Api.news-title = ""; }
+    at-top: news.content-y >= 0;
     body := VerticalLayout {
-        Flickable {
+        news := Flickable {
             content-width: self.width;
             vertical-stretch: 1;
             VerticalLayout {

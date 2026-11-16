@@ -165,6 +165,15 @@ fn sel(palico: bool) -> usize {
 /// The set list (unused runs folded, reorder.rs) and the set selected.
 pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
     let api = ui.global::<Api>();
+    let (slots, used) = set_slots(st, palico);
+    let n = slots.len();
+    reorder::show(ui, if palico { reorder::List::PalicoSets } else { reorder::List::MySets }, slots);
+    api.set_equip_summary(if palico { trf("{} of {} Palico sets used", &[&used, &n]) } else { trf("{} of {} My Sets used", &[&used, &n]) }.into());
+    api.set_set_detail(set_detail(st, palico));
+}
+
+/// What each My Set (or Palico set) holds, as the list shows it, and how many are used.
+fn set_slots(st: &State, palico: bool) -> (Vec<reorder::Slot>, usize) {
     let (s, base) = (st.save(), st.base());
     let n = if palico { sets::PALICO_SETS_N } else { sets::MY_SETS_N };
     let (at, size) = if palico { (sets::PALICO_SETS, sets::PALICO_SET) } else { (sets::MY_SETS, sets::MY_SET) };
@@ -185,8 +194,13 @@ pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
         used += on as usize;
         slots.push(reorder::Slot { name, sub: if on { sub } else { String::new() }, used: on, changed });
     }
-    reorder::show(ui, if palico { reorder::List::PalicoSets } else { reorder::List::MySets }, slots);
-    api.set_equip_summary(if palico { trf("{} of {} Palico sets used", &[&used, &n]) } else { trf("{} of {} My Sets used", &[&used, &n]) }.into());
+    (slots, used)
+}
+
+/// The My Set (or Palico set) selected.
+fn set_detail(st: &State, palico: bool) -> SetDetail {
+    let (s, base) = (st.save(), st.base());
+    let n = if palico { sets::PALICO_SETS_N } else { sets::MY_SETS_N };
     let k = sel(palico).min(n - 1);
     let d = if palico {
         let p = sets::palico_set(s, base, k);
@@ -235,7 +249,18 @@ pub(super) fn sets_page(ui: &AppWindow, st: &State, palico: bool) {
             warn_gear: crate::warnings::of(Target::MySet(k, SetPart::Gear), s, st.slot).unwrap_or_default().into(),
         }
     };
-    api.set_set_detail(d);
+    d
+}
+
+/// The phone interface's pager: the set list a swipe is bringing in, with its set selected.
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_equipment_sets(ui: &AppWindow, st: &State, palico: bool) {
+    let p = ui.global::<crate::EquipmentPeek>();
+    let list = if palico { reorder::List::PalicoSets } else { reorder::List::MySets };
+    let (rows, total) = reorder::rows(list, set_slots(st, palico).0);
+    p.set_set_rows(model(rows));
+    p.set_set_rows_h(total);
+    p.set_set_detail(set_detail(st, palico));
 }
 
 /// Stage `f` as one edit of `t` (edits of the same value merge); says so when Confirmed

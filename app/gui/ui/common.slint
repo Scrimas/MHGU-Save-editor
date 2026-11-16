@@ -416,6 +416,8 @@ export global Api {
     in property <[DetectedSave]> detected;
     callback select-slot(int);
     callback undo(int);
+    // (Review on phones, a change swiped away: undone with a Redo in the toast)
+    callback undo-swiped(int);
     callback undo-all();
     // the field staged under this key back to its value in the file
     callback undo-value(string);

@@ -3,16 +3,23 @@
 // opens in a sheet (a request's marks, a deviant's permits, a monster's records).
 import { ListView } from "std-widgets.slint";
 import { M } from "../theme.slint";
+import { Keep, Pager } from "../gestures.slint";
 import { Btn, CheckRow, Chip, CountField, GroupRow, Ico, IconBtn, Muted, Press, ScrollTabRow, SearchBar, SectionLabel, Sheet, Tap, TextField } from "../widgets.slint";
 import { Choice } from "../pick.slint";
 import { Api, ArtRow, CheckRow as CheckItem, DeviantRow, MonsterRow, RequestRow, Tabs, UnlockCell } from "../../common.slint";
 
-// The entry a sheet edits: its place in its list, read live so the sheet follows changes;
-// whether the Unlocks page shows a list's entries (phones: instead of the lists).
+// The entry a sheet edits, by its key (the row's index; -1 while no sheet is open), and the
+// place in its list it was opened from. The sheet shows that place, read live so it follows
+// changes, while it still holds the entry: an edit can take the entry out of a filtered list
+// (Reported unticked under Reported), the next one then moves up there and the sheet closes.
+// Whether the Unlocks page shows a list's entries (phones: instead of the lists).
 export global ListEdit {
     in-out property <int> request: -1;
+    in-out property <int> request-at;
     in-out property <int> deviant: -1;
+    in-out property <int> deviant-at;
     in-out property <int> monster: -1;
+    in-out property <int> monster-at;
     in-out property <bool> unlock-detail;
 }
 
@@ -131,10 +138,23 @@ component LabelledCount inherits VerticalLayout {
     in property <bool> show-limit;
     in property <string> was;
     in property <string> key;
+    // false while its sheet closes on an entry gone from the list: the field keeps the last edit
+    in property <bool> follow: true;
     callback edited(int);
     spacing: 6px;
+    // (an edit sets the field's own value, which then no longer follows: an Undo would not show)
+    changed value => {
+        if root.follow {
+            field.value = root.value;
+        }
+    }
+    changed follow => {
+        if root.follow {
+            field.value = root.value;
+        }
+    }
     Text { text: root.label; color: M.on-surface-variant; font-size: M.body-medium; wrap: word-wrap; }
-    CountField {
+    field := CountField {
         value: root.value;
         minimum: root.minimum;
         maximum: root.maximum;
@@ -152,6 +172,7 @@ component ChipRow inherits Flickable {
     in property <length> side;
     height: 32px;
     content-width: row.preferred-width;
+    Keep { at: root.absolute-position; w: root.width; h: root.height; }
     row := HorizontalLayout {
         padding-left: root.side;
         padding-right: root.side;
@@ -231,7 +252,10 @@ export component RequestsPage inherits Rectangle {
                     staged: r.changed;
                     flash: Api.highlight != "" && Api.highlight == "request:" + r.index;
                     text-w: root.width - 2 * root.side - 24px - 24px;
-                    clicked => { ListEdit.request = i; }
+                    clicked => {
+                        ListEdit.request-at = i;
+                        ListEdit.request = r.index;
+                    }
                 }
             }
         }
@@ -239,8 +263,31 @@ export component RequestsPage inherits Rectangle {
 }
 
 export component RequestSheet inherits Sheet {
-    property <RequestRow> r: Api.requests[ListEdit.request];
-    shown: ListEdit.request >= 0 && ListEdit.request < Api.requests.length;
+    // its place still holds the entry (ListEdit)
+    property <bool> found: ListEdit.request >= 0 && ListEdit.request-at < Api.requests.length && Api.requests[ListEdit.request-at].index == ListEdit.request;
+    property <RequestRow> live: Api.requests[ListEdit.request-at];
+    // the entry as last seen: what the sheet shows while it closes on an entry gone
+    property <RequestRow> last;
+    property <RequestRow> r: root.found ? root.live : root.last;
+    changed found => {
+        if self.found {
+            self.last = self.live;
+        }
+    }
+    changed live => {
+        if self.found {
+            self.last = self.live;
+        }
+    }
+    // an edit took the entry out of the list (a filter it no longer passes): the sheet
+    // stays a moment on what was set, then leaves the way it always does. (At once, its
+    // way out would be lost in the frame that builds the list again.)
+    Timer {
+        interval: 200ms;
+        running: !root.found && ListEdit.request >= 0;
+        triggered => { ListEdit.request = -1; }
+    }
+    shown: ListEdit.request >= 0;
     title: root.r.name;
     subtitle: root.r.sub;
     content-h: lay.preferred-height;
@@ -258,12 +305,39 @@ export component RequestSheet inherits Sheet {
             title: @tr("Accepted");
             text: @tr("Accepted posts the request's quest on the board, as talking to the villager does.");
             checked: root.r.accepted;
+            // (a tap sets the box's own value, which then no longer follows: an Undo would not show)
+            property <bool> v: root.r.accepted;
+            changed v => {
+                if root.found {
+                    self.checked = self.v;
+                }
+            }
+            // (the box stays from one opening to the next: it takes the entry's value again)
+            property <bool> open: root.found;
+            changed open => {
+                if self.open {
+                    self.checked = self.v;
+                }
+            }
             toggled(on) => { Api.set-request(root.r.index, "accepted", on); }
         }
         if root.r.has-flags: CheckRow {
             title: @tr("Reported");
             text: @tr("Reported: the cleared quest was reported back to the villager. Unticked, the game asks you to report it. The game hands out the reward only when you report yourself, so ticking it here loses that reward.");
             checked: root.r.completed;
+            property <bool> v: root.r.completed;
+            changed v => {
+                if root.found {
+                    self.checked = self.v;
+                }
+            }
+            // (the box stays from one opening to the next: it takes the entry's value again)
+            property <bool> open: root.found;
+            changed open => {
+                if self.open {
+                    self.checked = self.v;
+                }
+            }
             toggled(on) => { Api.set-request(root.r.index, "completed", on); }
         }
         if root.r.was != "": HorizontalLayout {
@@ -355,123 +429,205 @@ component CheckItemRow inherits Rectangle {
     }
 }
 
-export component CollectionsPage inherits Rectangle {
+// A neighbouring tab's rows, for the pager's preview (Rust: views/peek.rs). Hunter Arts and
+// the deviants are built whatever the tab; the three checklists share Api.checks.
+export global CollectionsPeek {
+    in property <[CheckItem]> checks;
+    callback build(int);
+}
+
+// What one Collections tab shows: the live one, or a neighbour's coming in beside it while
+// a swipe is under way (`preview`: nothing in it reacts, and its checklist comes from
+// CollectionsPeek).
+component CollectionsPane inherits Rectangle {
+    in property <int> tab;
+    in property <[CheckItem]> checks;
+    in property <bool> preview;
     in property <length> bottom-pad;
-    in property <length> side-inset;
-    callback preview(string);
-    property <length> side: M.gutter + root.side-inset;
-    property <bool> checks: Api.collection-tab < 4;
+    in property <length> side;
+    callback goal(string);
+    // where the lists start: a swipe begins below the search field and the chips
+    out property <length> list-top: chips.y + chips.height;
+    property <bool> checklist: root.tab < 4;
     // checklists in columns of at least 320 dp
     property <int> cols: max(1, floor((root.width - 2 * root.side + 8px) / 328px));
     VerticalLayout {
-        ScrollTabRow {
-            tabs: Api.collection-tabs;
-            current: Api.collection-tab;
-            select(i) => { Tabs.select("collections", i); }
+        padding-top: 12px;
+        spacing: 10px;
+        HorizontalLayout {
+            padding-left: root.side;
+            padding-right: root.side;
+            SearchBar {
+                placeholder: @tr("Search");
+                text <=> Api.check-search;
+                edited => { Api.filter-checks(); }
+            }
         }
-        VerticalLayout {
+        chips := ChipRow {
+            side: root.side;
+            Chip {
+                text: @tr("Missing only");
+                selected: Api.check-missing;
+                clicked => {
+                    Api.check-missing = !Api.check-missing;
+                    Api.filter-checks();
+                }
+            }
+            if root.checklist: Chip { text: @tr("Check all…"); has-icon: true; icon: @image-url("../icons/check.svg"); clicked => { root.goal("checks:all"); } }
+            if root.checklist: Chip { text: @tr("Uncheck all…"); has-icon: true; icon: @image-url("../icons/close.svg"); clicked => { root.goal("checks:none"); } }
+            if !root.checklist: Chip { text: @tr("All levels…"); has-icon: true; icon: @image-url("../icons/max.svg"); clicked => { root.goal("deviants:levels"); } }
+            if !root.checklist: Chip { text: @tr("Max permits…"); has-icon: true; icon: @image-url("../icons/max.svg"); clicked => { root.goal("deviants:permits"); } }
+        }
+        if root.tab == 0 && Api.arts.length == 0: HorizontalLayout {
+            padding: root.side;
+            Muted { text: Api.check-missing ? @tr("Every Hunter Art is unlocked.") : @tr("No art matches the search."); horizontal-alignment: center; }
+        }
+        if root.tab == 0: ListView {
             vertical-stretch: 1;
-            padding-top: 12px;
-            spacing: 10px;
-            HorizontalLayout {
-                padding-left: root.side;
-                padding-right: root.side;
-                SearchBar {
-                    placeholder: @tr("Search");
-                    text <=> Api.check-search;
-                    edited => { Api.filter-checks(); }
+            for a[i] in Api.arts: HorizontalLayout {
+                padding-left: root.side - 16px;
+                padding-right: root.side - 4px;
+                padding-bottom: i == Api.arts.length - 1 ? root.bottom-pad : 0px;
+                ArtItem { a: a; text-w: root.width - 2 * root.side - 3 * M.touch - 24px; }
+            }
+        }
+        if root.tab >= 1 && root.tab <= 3 && root.checks.length == 0: HorizontalLayout {
+            padding: root.side;
+            Muted { text: Api.check-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); horizontal-alignment: center; }
+        }
+        if root.tab >= 1 && root.tab <= 3: checks-list := ListView {
+            vertical-stretch: 1;
+            property <int> seq: Api.jump-seq;
+            // (the three checklists share this list: another of them opens at its top)
+            property <int> shown-tab: root.tab;
+            function go() {
+                if !root.preview && Api.page == "collections" && Api.jump-row >= 0 {
+                    self.content-y = -max(0, floor(Api.jump-row / root.cols) - 2) * 56px;
                 }
             }
-            ChipRow {
-                side: root.side;
-                Chip {
-                    text: @tr("Missing only");
-                    selected: Api.check-missing;
+            init => { self.go(); }
+            changed seq => { self.go(); }
+            changed shown-tab => {
+                self.content-y = 0;
+                self.go();
+            }
+            // (the scroll bar's room comes out of the right margin, then out of the cells:
+            // rows as wide as the pane would scroll sideways by that much)
+            property <length> right: max(0px, root.side - 8px - (root.width - self.visible-width));
+            for r in (root.checks.length + root.cols - 1) / root.cols: HorizontalLayout {
+                padding-left: root.side - 8px;
+                padding-right: checks-list.right;
+                padding-bottom: r == (root.checks.length + root.cols - 1) / root.cols - 1 ? root.bottom-pad : 0px;
+                spacing: 8px;
+                for c in root.cols: Rectangle {
+                    width: (checks-list.visible-width - root.side + 8px - checks-list.right - (root.cols - 1) * 8px) / root.cols;
+                    height: 56px;
+                    if r * root.cols + c < root.checks.length: CheckItemRow {
+                        c: root.checks[r * root.cols + c];
+                        flash: !root.preview && Api.highlight != "" && Api.highlight == "check:" + root.tab + ":" + self.c.key;
+                    }
+                }
+            }
+        }
+        if root.tab == 4 && Api.deviants.length == 0: HorizontalLayout {
+            padding: root.side;
+            Muted { text: Api.check-missing ? @tr("Every deviant has every level cleared.") : @tr("No deviant matches the search."); horizontal-alignment: center; }
+        }
+        if root.tab == 4: ListView {
+            vertical-stretch: 1;
+            for d[i] in Api.deviants: HorizontalLayout {
+                padding-left: root.side - 8px;
+                padding-right: root.side - 8px;
+                padding-bottom: i == Api.deviants.length - 1 ? root.bottom-pad : 0px;
+                OpenRow {
+                    tile: true;
+                    icon: d.icon;
+                    has-icon: d.has-icon;
+                    title: d.name;
+                    sub: @tr("Special Permits") + " " + d.permits + " · " + @tr("Levels cleared") + " " + d.levels + " / " + d.total;
+                    note: d.gate;
+                    staged: d.was-permits != "" || d.was-levels != "" || d.was-points != "" || d.was-waiting != "";
+                    text-w: root.width - 2 * root.side - 24px - 24px;
                     clicked => {
-                        Api.check-missing = !Api.check-missing;
-                        Api.filter-checks();
-                    }
-                }
-                if root.checks: Chip { text: @tr("Check all…"); has-icon: true; icon: @image-url("../icons/check.svg"); clicked => { root.preview("checks:all"); } }
-                if root.checks: Chip { text: @tr("Uncheck all…"); has-icon: true; icon: @image-url("../icons/close.svg"); clicked => { root.preview("checks:none"); } }
-                if !root.checks: Chip { text: @tr("All levels…"); has-icon: true; icon: @image-url("../icons/max.svg"); clicked => { root.preview("deviants:levels"); } }
-                if !root.checks: Chip { text: @tr("Max permits…"); has-icon: true; icon: @image-url("../icons/max.svg"); clicked => { root.preview("deviants:permits"); } }
-            }
-            if Api.collection-tab == 0 && Api.arts.length == 0: HorizontalLayout {
-                padding: root.side;
-                Muted { text: Api.check-missing ? @tr("Every Hunter Art is unlocked.") : @tr("No art matches the search."); horizontal-alignment: center; }
-            }
-            if Api.collection-tab == 0: ListView {
-                vertical-stretch: 1;
-                for a[i] in Api.arts: HorizontalLayout {
-                    padding-left: root.side - 16px;
-                    padding-right: root.side - 4px;
-                    padding-bottom: i == Api.arts.length - 1 ? root.bottom-pad : 0px;
-                    ArtItem { a: a; text-w: root.width - 2 * root.side - 3 * M.touch - 24px; }
-                }
-            }
-            if Api.collection-tab >= 1 && Api.collection-tab <= 3 && Api.checks.length == 0: HorizontalLayout {
-                padding: root.side;
-                Muted { text: Api.check-missing ? @tr("Nothing is missing here.") : @tr("Nothing matches the search."); horizontal-alignment: center; }
-            }
-            if Api.collection-tab >= 1 && Api.collection-tab <= 3: checks-list := ListView {
-                vertical-stretch: 1;
-                property <int> seq: Api.jump-seq;
-                function go() {
-                    if Api.page == "collections" && Api.jump-row >= 0 {
-                        self.content-y = -max(0, floor(Api.jump-row / root.cols) - 2) * 56px;
-                    }
-                }
-                init => { self.go(); }
-                changed seq => { self.go(); }
-                // (the scroll bar's room comes out of the right margin, then out of the cells:
-                // rows as wide as the pane would scroll sideways by that much)
-                property <length> right: max(0px, root.side - 8px - (root.width - self.visible-width));
-                for r in (Api.checks.length + root.cols - 1) / root.cols: HorizontalLayout {
-                    padding-left: root.side - 8px;
-                    padding-right: checks-list.right;
-                    padding-bottom: r == (Api.checks.length + root.cols - 1) / root.cols - 1 ? root.bottom-pad : 0px;
-                    spacing: 8px;
-                    for c in root.cols: Rectangle {
-                        width: (checks-list.visible-width - root.side + 8px - checks-list.right - (root.cols - 1) * 8px) / root.cols;
-                        height: 56px;
-                        if r * root.cols + c < Api.checks.length: CheckItemRow {
-                            c: Api.checks[r * root.cols + c];
-                            flash: Api.highlight != "" && Api.highlight == "check:" + Api.collection-tab + ":" + self.c.key;
-                        }
-                    }
-                }
-            }
-            if Api.collection-tab == 4 && Api.deviants.length == 0: HorizontalLayout {
-                padding: root.side;
-                Muted { text: Api.check-missing ? @tr("Every deviant has every level cleared.") : @tr("No deviant matches the search."); horizontal-alignment: center; }
-            }
-            if Api.collection-tab == 4: ListView {
-                vertical-stretch: 1;
-                for d[i] in Api.deviants: HorizontalLayout {
-                    padding-left: root.side - 8px;
-                    padding-right: root.side - 8px;
-                    padding-bottom: i == Api.deviants.length - 1 ? root.bottom-pad : 0px;
-                    OpenRow {
-                        tile: true;
-                        icon: d.icon;
-                        has-icon: d.has-icon;
-                        title: d.name;
-                        sub: @tr("Special Permits") + " " + d.permits + " · " + @tr("Levels cleared") + " " + d.levels + " / " + d.total;
-                        note: d.gate;
-                        staged: d.was-permits != "" || d.was-levels != "" || d.was-points != "" || d.was-waiting != "";
-                        text-w: root.width - 2 * root.side - 24px - 24px;
-                        clicked => { ListEdit.deviant = i; }
+                        ListEdit.deviant-at = i;
+                        ListEdit.deviant = d.index;
                     }
                 }
             }
         }
     }
+    // a picture of the neighbour: taps stay out until it is the page
+    if root.preview: TouchArea { }
 }
 
+export component CollectionsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    callback preview(string);
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.collection-tabs;
+            current: Api.collection-tab;
+            at: Api.collection-tab + pager.side * pager.progress;
+            select(i) => { Tabs.select("collections", i); }
+        }
+        Rectangle {
+            vertical-stretch: 1;
+            clip: true;
+            pager := Pager {
+                has-prev: Api.collection-tab > 0;
+                has-next: Api.collection-tab < 4;
+                enabled: ListEdit.deviant < 0;
+                allow: self.press-y >= live.list-top;
+                peek(s) => { CollectionsPeek.build(Api.collection-tab + s); }
+                commit(s) => { Tabs.select("collections", Api.collection-tab + s); }
+            }
+            live := CollectionsPane {
+                x: pager.shift;
+                width: pager.width;
+                tab: Api.collection-tab;
+                checks: Api.checks;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
+                goal(id) => { root.preview(id); }
+            }
+            if pager.side != 0: CollectionsPane {
+                x: pager.shift + pager.side * pager.width;
+                width: pager.width;
+                preview: true;
+                tab: Api.collection-tab + pager.side;
+                checks: CollectionsPeek.checks;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
+            }
+        }
+    }
+}
+
+
 export component DeviantSheet inherits Sheet {
-    property <DeviantRow> d: Api.deviants[ListEdit.deviant];
-    shown: ListEdit.deviant >= 0 && ListEdit.deviant < Api.deviants.length;
+    // as RequestSheet
+    property <bool> found: ListEdit.deviant >= 0 && ListEdit.deviant-at < Api.deviants.length && Api.deviants[ListEdit.deviant-at].index == ListEdit.deviant;
+    property <DeviantRow> live: Api.deviants[ListEdit.deviant-at];
+    property <DeviantRow> last;
+    property <DeviantRow> d: root.found ? root.live : root.last;
+    changed found => {
+        if self.found {
+            self.last = self.live;
+        }
+    }
+    changed live => {
+        if self.found {
+            self.last = self.live;
+        }
+    }
+    Timer {
+        interval: 200ms;
+        running: !root.found && ListEdit.deviant >= 0;
+        triggered => { ListEdit.deviant = -1; }
+    }
+    shown: ListEdit.deviant >= 0;
     title: root.d.name;
     subtitle: root.d.gate;
     content-h: lay.preferred-height;
@@ -482,6 +638,7 @@ export component DeviantSheet inherits Sheet {
         padding-bottom: 16px;
         spacing: 14px;
         LabelledCount {
+            follow: root.found;
             label: @tr("Special Permits");
             value: root.d.permits;
             maximum: 99;
@@ -490,6 +647,7 @@ export component DeviantSheet inherits Sheet {
             edited(v) => { Api.set-deviant(root.d.index, "permits", v); }
         }
         LabelledCount {
+            follow: root.found;
             label: @tr("Special Permit points of {}", root.d.name);
             value: root.d.points;
             was: root.d.was-points;
@@ -497,6 +655,7 @@ export component DeviantSheet inherits Sheet {
             edited(v) => { Api.set-deviant(root.d.index, "points", v); }
         }
         LabelledCount {
+            follow: root.found;
             label: @tr("Points of {} waiting at the Courier", root.d.name);
             value: root.d.waiting;
             was: root.d.was-waiting;
@@ -504,6 +663,7 @@ export component DeviantSheet inherits Sheet {
             edited(v) => { Api.set-deviant(root.d.index, "waiting", v); }
         }
         LabelledCount {
+            follow: root.found;
             label: @tr("Levels cleared");
             value: root.d.levels;
             maximum: root.d.total;
@@ -634,6 +794,9 @@ component Pets inherits VerticalLayout {
 }
 
 export component UnlocksPage inherits Rectangle {
+    // Back's preview of leaving the detail view (0 to 1: app.slint), then its way out
+    in property <float> back-p;
+    in property <float> back-out;
     in property <length> bottom-pad;
     in property <length> side-inset;
     callback preview(string);
@@ -641,64 +804,82 @@ export component UnlocksPage inherits Rectangle {
     property <bool> wide: root.width >= M.expanded-from;
     property <length> list-w: root.wide ? min(360px, root.width * 0.38) : root.width;
     property <length> detail-w: root.wide ? root.width - root.list-w - 1px : root.width;
+    // one pane: Back's preview of leaving the list picked, the lists behind it
+    property <bool> leaving: !root.wide && (root.back-p > 0 || root.back-out > 0);
     changed wide => { ListEdit.unlock-detail = false; }
-    HorizontalLayout {
-        // the lists, by group
-        if root.wide || !ListEdit.unlock-detail: Flickable {
-            width: root.list-w;
-            content-width: self.width;
-            VerticalLayout {
-                padding-left: root.side;
-                padding-right: root.wide ? 8px : root.side;
-                padding-top: 4px;
-                padding-bottom: root.bottom-pad;
-                alignment: start;
-                for r[i] in Api.unlock-rows: VerticalLayout {
-                    if r.group != "": HorizontalLayout {
-                        padding-left: 8px;
-                        padding-top: 16px;
-                        padding-bottom: 8px;
-                        SectionLabel { text: r.group; }
+    // the lists, by group (one pane: kept under the list picked, so they come back where
+    // they were scrolled to)
+    Flickable {
+        x: 0px;
+        y: 0px;
+        width: root.list-w;
+        height: root.height;
+        visible: root.wide || !ListEdit.unlock-detail || root.leaving;
+        content-width: self.width;
+        VerticalLayout {
+            padding-left: root.side;
+            padding-right: root.wide ? 8px : root.side;
+            padding-top: 4px;
+            padding-bottom: root.bottom-pad;
+            alignment: start;
+            for r[i] in Api.unlock-rows: VerticalLayout {
+                if r.group != "": HorizontalLayout {
+                    padding-left: 8px;
+                    padding-top: 16px;
+                    padding-bottom: 8px;
+                    SectionLabel { text: r.group; }
+                }
+                GroupRow {
+                    first: r.group != "" || i == 0;
+                    last: i == Api.unlock-rows.length - 1 || Api.unlock-rows[i + 1].group != "";
+                    pressable: true;
+                    height: max(56px, ur.preferred-height);
+                    background: root.wide && r.index == Api.unlock-sel ? M.secondary-container : M.group;
+                    accessible-role: button;
+                    accessible-label: r.name;
+                    accessible-description: r.count;
+                    accessible-action-default => {
+                        Api.select-unlock(r.index);
+                        ListEdit.unlock-detail = true;
                     }
-                    GroupRow {
-                        first: r.group != "" || i == 0;
-                        last: i == Api.unlock-rows.length - 1 || Api.unlock-rows[i + 1].group != "";
-                        pressable: true;
-                        height: max(56px, ur.preferred-height);
-                        background: root.wide && r.index == Api.unlock-sel ? M.secondary-container : M.group;
-                        accessible-role: button;
-                        accessible-label: r.name;
-                        accessible-description: r.count;
-                        accessible-action-default => {
-                            Api.select-unlock(r.index);
-                            ListEdit.unlock-detail = true;
-                        }
-                        clicked => {
-                            Api.select-unlock(r.index);
-                            ListEdit.unlock-detail = true;
-                        }
-                        ur := HorizontalLayout {
-                            padding-left: 16px;
-                            padding-right: 12px;
-                            padding-top: 8px;
-                            padding-bottom: 8px;
-                            spacing: 12px;
-                            Text { text: r.name; color: M.on-surface; font-size: M.body-large; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
-                            Text { text: r.count; color: M.on-surface-variant; font-size: M.body-small; vertical-alignment: center; }
-                            if r.changed: Staged { }
-                            if !root.wide: VerticalLayout {
-                                alignment: center;
-                                Ico { source: @image-url("../icons/chevron-right.svg"); }
-                            }
+                    clicked => {
+                        Api.select-unlock(r.index);
+                        ListEdit.unlock-detail = true;
+                    }
+                    ur := HorizontalLayout {
+                        padding-left: 16px;
+                        padding-right: 12px;
+                        padding-top: 8px;
+                        padding-bottom: 8px;
+                        spacing: 12px;
+                        Text { text: r.name; color: M.on-surface; font-size: M.body-large; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        Text { text: r.count; color: M.on-surface-variant; font-size: M.body-small; vertical-alignment: center; }
+                        if r.changed: Staged { }
+                        if !root.wide: VerticalLayout {
+                            alignment: center;
+                            Ico { source: @image-url("../icons/chevron-right.svg"); }
                         }
                     }
                 }
             }
         }
-        if root.wide: Rectangle { width: 1px; background: M.outline-variant; }
-        // the list picked
-        if root.wide || ListEdit.unlock-detail: det := VerticalLayout {
+    }
+    if root.wide: Rectangle { x: root.list-w; y: 0px; width: 1px; height: root.height; background: M.outline-variant; }
+    // the list picked; one pane: opaque over the lists, and with Back's preview it shrinks,
+    // then leaves (as PageLayer in app.slint)
+    if root.wide || ListEdit.unlock-detail: Rectangle {
+        x: root.wide ? root.list-w + 1px : (Api.back-from-right ? -1 : 1) * (32px * root.back-p + self.width * root.back-out);
+        y: 0px;
+        width: root.detail-w;
+        height: root.height;
+        background: root.wide ? transparent : M.surface;
+        transform-scale-x: root.wide ? 1 : 1 - 0.1 * root.back-p;
+        transform-scale-y: root.wide ? 1 : 1 - 0.1 * root.back-p;
+        border-radius: root.wide ? 0px : 28px * root.back-p;
+        clip: !root.wide && root.back-p > 0;
+        det := VerticalLayout {
             width: root.detail-w;
+            height: root.height;
             property <length> dside: root.wide ? 24px : root.side;
             HorizontalLayout {
                 padding-left: root.wide ? 24px : 4px + root.side-inset;
@@ -854,7 +1035,10 @@ export component MonstersPage inherits Rectangle {
                     staged: m.changed;
                     flash: Api.highlight != "" && Api.highlight == "mon:" + m.index;
                     text-w: root.width - 2 * root.side - 24px - 24px;
-                    clicked => { ListEdit.monster = i; }
+                    clicked => {
+                        ListEdit.monster-at = i;
+                        ListEdit.monster = m.index;
+                    }
                 }
             }
         }
@@ -862,9 +1046,28 @@ export component MonstersPage inherits Rectangle {
 }
 
 export component MonsterSheet inherits Sheet {
-    property <MonsterRow> m: Api.monsters[ListEdit.monster];
+    // as RequestSheet
+    property <bool> found: ListEdit.monster >= 0 && ListEdit.monster-at < Api.monsters.length && Api.monsters[ListEdit.monster-at].index == ListEdit.monster;
+    property <MonsterRow> live: Api.monsters[ListEdit.monster-at];
+    property <MonsterRow> last;
+    property <MonsterRow> m: root.found ? root.live : root.last;
     property <string> k: "mon:" + root.m.index + ":";
-    shown: ListEdit.monster >= 0 && ListEdit.monster < Api.monsters.length;
+    changed found => {
+        if self.found {
+            self.last = self.live;
+        }
+    }
+    changed live => {
+        if self.found {
+            self.last = self.live;
+        }
+    }
+    Timer {
+        interval: 200ms;
+        running: !root.found && ListEdit.monster >= 0;
+        triggered => { ListEdit.monster = -1; }
+    }
+    shown: ListEdit.monster >= 0;
     title: root.m.name;
     subtitle: root.m.sub;
     content-h: lay.preferred-height;
@@ -877,6 +1080,7 @@ export component MonsterSheet inherits Sheet {
         HorizontalLayout {
             spacing: 16px;
             LabelledCount {
+                follow: root.found;
                 horizontal-stretch: 1;
                 label: @tr("Hunted");
                 value: root.m.hunts;
@@ -886,6 +1090,7 @@ export component MonsterSheet inherits Sheet {
             }
         }
         LabelledCount {
+            follow: root.found;
             label: @tr("Captured");
             value: root.m.captures;
             was: root.m.was-captures;
@@ -894,6 +1099,7 @@ export component MonsterSheet inherits Sheet {
         }
         Muted { text: @tr("Hunted counts kills only; the game's monster list shows hunted plus captured. Every edit also rebuilds the Guild Card's monster log."); font-size: M.body-small; }
         if root.m.has-size: LabelledCount {
+            follow: root.found;
             label: @tr("Smallest") + (root.m.mini ? " · " + @tr("Mini") : "") + " (%)";
             value: root.m.min;
             maximum: 200;
@@ -902,6 +1108,7 @@ export component MonsterSheet inherits Sheet {
             edited(v) => { Api.set-monster(root.m.index, "min", v); }
         }
         if root.m.has-size: LabelledCount {
+            follow: root.found;
             label: @tr("Largest") + (root.m.crown == 2 ? " · " + @tr("Gold") : root.m.crown == 1 ? " · " + @tr("Silver") : "") + " (%)";
             value: root.m.max;
             maximum: 200;
@@ -914,6 +1121,19 @@ export component MonsterSheet inherits Sheet {
         if root.m.has-notes: CheckRow {
             title: @tr("Hunter's Notes page of {}", root.m.name);
             checked: root.m.notes;
+            property <bool> v: root.m.notes;
+            changed v => {
+                if root.found {
+                    self.checked = self.v;
+                }
+            }
+            // (the box stays from one opening to the next: it takes the entry's value again)
+            property <bool> open: root.found;
+            changed open => {
+                if self.open {
+                    self.checked = self.v;
+                }
+            }
             toggled(on) => { Api.set-monster(root.m.index, "notes", on ? 1 : 0); }
         }
         if root.m.was-notes != "": WasRow { was: root.m.was-notes; key: root.k + "notes"; }

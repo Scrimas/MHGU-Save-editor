@@ -37,29 +37,7 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
         trf("Awards {} / {}", &[&awards_on, &t.awards.len()]),
         trf("Deviants {} / {}", &[&devs_done, &DEVIANTS.len()]),
     ]));
-    let rows: Vec<CheckRow> = match tab {
-        1 | 2 => t
-            .canteen
-            .iter()
-            .filter(|(k, ..)| k == if tab == 1 { "dish" } else { "ingredient" })
-            .map(|(_, b, n, _)| {
-                let on = if tab == 1 { c.dish(*b) } else { c.ingredient(*b) };
-                let tg = if tab == 1 { Target::Dish(*b) } else { Target::Ingredient(*b) };
-                CheckRow { key: *b as i32, name: n.clone().into(), on, changed: changed_of(tg), ..Default::default() }
-            })
-            .filter(|r| keep(&r.name, r.on))
-            .collect(),
-        3 => t
-            .awards
-            .iter()
-            .filter(|(b, _, n)| keep(n, c.award(*b)))
-            .map(|(b, _, n)| {
-                let (img, has) = icon(assets::award_icon(*b));
-                CheckRow { key: *b as i32, name: n.clone().into(), on: c.award(*b), changed: changed_of(Target::Award(*b)), icon: img, has_icon: has }
-            })
-            .collect(),
-        _ => vec![],
-    };
+    let rows = check_rows(st, tab);
     // Hunter Arts grouped by art: I, II and III on one row (H5.3)
     let mut arts: Vec<(String, Vec<u32>)> = vec![];
     for (id, n) in t.arts.iter() {
@@ -128,6 +106,45 @@ pub(super) fn collections_page(ui: &AppWindow, st: &State) {
         })
         .collect();
     api.set_deviants(crate::keep(api.get_deviants(), devs));
+}
+
+/// The rows of a checklist tab (1 dishes, 2 ingredients, 3 awards; none for the others),
+/// under the page's search and Missing only.
+fn check_rows(st: &State, tab: usize) -> Vec<CheckRow> {
+    let c = Char::new(st.save(), st.slot);
+    let (q, missing) = view(|v| (v.check_search.to_lowercase(), v.check_missing));
+    let t = tables();
+    let keep = |name: &str, on: bool| !(missing && on) && (q.is_empty() || name.to_lowercase().contains(&q));
+    let changed_of = |tg: Target| !st.was(tg).is_empty();
+    match tab {
+        1 | 2 => t
+            .canteen
+            .iter()
+            .filter(|(k, ..)| k == if tab == 1 { "dish" } else { "ingredient" })
+            .map(|(_, b, n, _)| {
+                let on = if tab == 1 { c.dish(*b) } else { c.ingredient(*b) };
+                let tg = if tab == 1 { Target::Dish(*b) } else { Target::Ingredient(*b) };
+                CheckRow { key: *b as i32, name: n.clone().into(), on, changed: changed_of(tg), ..Default::default() }
+            })
+            .filter(|r| keep(&r.name, r.on))
+            .collect(),
+        3 => t
+            .awards
+            .iter()
+            .filter(|(b, _, n)| keep(n, c.award(*b)))
+            .map(|(b, _, n)| {
+                let (img, has) = icon(assets::award_icon(*b));
+                CheckRow { key: *b as i32, name: n.clone().into(), on: c.award(*b), changed: changed_of(Target::Award(*b)), icon: img, has_icon: has }
+            })
+            .collect(),
+        _ => vec![],
+    }
+}
+
+/// The phone interface's pager: the checklist of the tab a swipe is bringing in.
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_collections(ui: &AppWindow, st: &State, tab: usize) {
+    ui.global::<crate::CollectionsPeek>().set_checks(model(check_rows(st, tab)));
 }
 
 pub(super) fn wire_collections(ui: &AppWindow, st: &Shared) {

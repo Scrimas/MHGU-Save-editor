@@ -3,7 +3,7 @@
 // editor's own confidence colours, the M3 type scale and the layout breakpoints.
 import { Palette } from "std-widgets.slint";
 import { MaterialPalette } from "@material";
-import { Confidence } from "../common.slint";
+import { Api, Confidence } from "../common.slint";
 
 export global M {
     out property <bool> dark: Palette.color-scheme == ColorScheme.dark;
@@ -65,7 +65,8 @@ export global M {
     // layout
     out property <length> gutter: 16px;
     out property <length> touch: 48px;
-    out property <duration> anim: 180ms;
+    // (none when Settings turns animations off: what follows a finger still does)
+    out property <duration> anim: Api.animate ? 180ms : 0ms;
     // window width classes: compact (phone, a fold's cover screen), medium (rail),
     // expanded (list and detail side by side)
     out property <length> medium-from: 600px;

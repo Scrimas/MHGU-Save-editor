@@ -3,7 +3,8 @@ import { ListView } from "std-widgets.slint";
 import { M } from "../theme.slint";
 import { Btn, CheckRow, Chip, ConfidenceLabel, CountField, GroupRow, Ico, Muted, Press, ScrollTabRow, SectionLabel, Tap, TextField } from "../widgets.slint";
 import { Choice } from "../pick.slint";
-import { Api, Confidence, OptionRow, PhraseRow, Tabs } from "../../common.slint";
+import { Api, CardRow, Confidence, OptionRow, PhraseRow, Tabs } from "../../common.slint";
+import { Keep, Pager } from "../gestures.slint";
 
 // "was 5 · Undo" under a staged value.
 component WasRow inherits HorizontalLayout {
@@ -109,25 +110,26 @@ component PhraseItem inherits VerticalLayout {
     if root.r.was != "": WasRow { was: root.r.was; key: "chat:" + (root.r.auto ? "auto" : "phrase") + ":" + root.group + ":" + root.r.index; }
 }
 
-export component OptionsPage inherits Rectangle {
+// A neighbouring tab's rows, for the pager's preview (Rust: src/views/peek.rs). The
+// Shoutouts are built whatever the tab (Api.phrases).
+export global OptionsPeek {
+    in property <[OptionRow]> rows;
+    callback build(int);
+}
+
+// What one Options tab shows: the live one, or a neighbour's coming in beside it while a
+// swipe is under way (`preview`: nothing in it reacts).
+component OptionsPane inherits Rectangle {
+    in property <int> tab;
+    in property <[OptionRow]> rows;
+    in property <bool> preview;
     in property <length> bottom-pad;
-    in property <length> side-inset;
-    property <length> side: M.gutter + root.side-inset;
+    in property <length> side;
+    // the Shoutouts' group chips scroll sideways: a swipe does not begin on them
+    out property <length> chips-top: chipbox.y + chips.y;
+    out property <length> chips-bottom: self.chips-top + chips.height;
     VerticalLayout {
-        ScrollTabRow {
-            tabs: Api.option-tabs;
-            current: Api.option-tab;
-            select(i) => { Tabs.select("options", i); }
-        }
-        if Api.option-tab != 1: ListView {
-            vertical-stretch: 1;
-            for r[i] in Api.option-rows: VerticalLayout {
-                padding-bottom: i == Api.option-rows.length - 1 ? root.bottom-pad : 0px;
-                OptionItem { r: r; side: root.side - 8px; }
-            }
-        }
-        if Api.option-tab == 1: VerticalLayout {
-            vertical-stretch: 1;
+        if root.tab == 1: VerticalLayout {
             padding-top: 8px;
             spacing: 8px;
             // the group the game uses, then the group whose phrases are shown
@@ -164,9 +166,16 @@ export component OptionsPage inherits Rectangle {
                 padding-left: root.side;
                 WasRow { was: Api.was-chat-group; key: "chat-group"; }
             }
-            Flickable {
-                height: 32px;
+        }
+        // (always there, of no height on the other tabs: the pager needs where it is)
+        chipbox := VerticalLayout {
+            padding-top: root.tab == 1 ? 8px : 0px;
+            padding-bottom: root.tab == 1 ? 8px : 0px;
+            chips := Flickable {
+                visible: root.tab == 1;
+                height: root.tab == 1 ? 32px : 0px;
                 content-width: groups.preferred-width;
+                Keep { on: root.tab == 1 && !root.preview; at: chips.absolute-position; w: chips.width; h: chips.height; }
                 groups := HorizontalLayout {
                     padding-left: root.side;
                     padding-right: root.side;
@@ -179,60 +188,126 @@ export component OptionsPage inherits Rectangle {
                     }
                 }
             }
-            ListView {
-                vertical-stretch: 1;
-                for r[i] in Api.phrases: VerticalLayout {
-                    padding-bottom: i == Api.phrases.length - 1 ? root.bottom-pad : 0px;
-                    PhraseItem { r: r; group: Api.chat-shown; side: root.side; }
-                }
+        }
+        if root.tab != 1: ListView {
+            vertical-stretch: 1;
+            // Options and Game Settings share this list: each opens at its top
+            property <int> t: root.tab;
+            changed t => { self.content-y = 0; }
+            for r[i] in root.rows: VerticalLayout {
+                padding-bottom: i == root.rows.length - 1 ? root.bottom-pad : 0px;
+                OptionItem { r: r; side: root.side - 8px; }
+            }
+        }
+        if root.tab == 1: ListView {
+            vertical-stretch: 1;
+            for r[i] in Api.phrases: VerticalLayout {
+                padding-bottom: i == Api.phrases.length - 1 ? root.bottom-pad : 0px;
+                PhraseItem { r: r; group: Api.chat-shown; side: root.side; }
+            }
+        }
+    }
+    // a picture of the neighbour: taps stay out until it is the page
+    if root.preview: TouchArea { }
+}
+
+export component OptionsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.option-tabs;
+            current: Api.option-tab;
+            at: Api.option-tab + pager.side * pager.progress;
+            select(i) => { Tabs.select("options", i); }
+        }
+        Rectangle {
+            vertical-stretch: 1;
+            clip: true;
+            pager := Pager {
+                has-prev: Api.option-tab > 0;
+                has-next: Api.option-tab < 2;
+                allow: self.press-y < live.chips-top || self.press-y >= live.chips-bottom;
+                peek(s) => { OptionsPeek.build(Api.option-tab + s); }
+                commit(s) => { Tabs.select("options", Api.option-tab + s); }
+            }
+            live := OptionsPane {
+                x: pager.shift;
+                width: pager.width;
+                tab: Api.option-tab;
+                rows: Api.option-rows;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
+            }
+            if pager.side != 0: OptionsPane {
+                x: pager.shift + pager.side * pager.width;
+                width: pager.width;
+                preview: true;
+                tab: Api.option-tab + pager.side;
+                rows: OptionsPeek.rows;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
             }
         }
     }
 }
 
-export component CardsPage inherits Rectangle {
+// A neighbouring tab's cards and Undo row, for the pager's preview (Rust:
+// src/views/peek.rs).
+export global CardsPeek {
+    in property <[CardRow]> rows;
+    in property <string> was-cards;
+    in property <string> was-cards-key;
+    callback build(int);
+}
+
+// What one Guild Cards tab shows: the live one, or a neighbour's coming in beside it while
+// a swipe is under way (`preview`: nothing in it reacts).
+component CardsPane inherits Rectangle {
+    in property <int> tab;
+    in property <[CardRow]> rows;
+    in property <string> was-cards;
+    in property <string> was-cards-key;
+    in property <bool> preview;
     in property <length> bottom-pad;
-    in property <length> side-inset;
-    property <length> side: M.gutter + root.side-inset;
+    in property <length> side;
     // the list, the inbox and the blocked users take edits; Hunters for Hire is read-only
-    property <bool> editable: Api.card-tab != 2;
+    property <bool> editable: root.tab != 2;
+    // one list for every tab: each opens at its top
+    changed tab => { cards.content-y = 0; }
     VerticalLayout {
-        ScrollTabRow {
-            tabs: Api.card-tabs;
-            current: Api.card-tab;
-            select(i) => { Tabs.select("cards", i); }
-        }
-        if root.editable && (Api.card-tab == 1 || Api.card-tab == 3 || Api.was-cards != ""): HorizontalLayout {
+        if root.editable && (root.tab == 1 || root.tab == 3 || root.was-cards != ""): HorizontalLayout {
             padding-left: root.side;
             padding-right: root.side;
             padding-top: 12px;
             spacing: 12px;
             // removing an inbox card and unblocking are Derived (the Switch game opens neither
             // list offline); the Card List is Confirmed, the Hunters for Hire read-only
-            if Api.card-tab == 1 || Api.card-tab == 3: VerticalLayout {
+            if root.tab == 1 || root.tab == 3: VerticalLayout {
                 alignment: center;
                 ConfidenceLabel { level: Confidence.derived; }
             }
-            if Api.was-cards != "": WasRow { was: Api.was-cards; key: Api.was-cards-key; }
+            if root.was-cards != "": WasRow { was: root.was-cards; key: root.was-cards-key; }
         }
-        if Api.card-rows.length == 0: HorizontalLayout {
+        if root.rows.length == 0: HorizontalLayout {
             padding: root.side;
             Muted {
-                text: Api.card-tab == 0 ? @tr("No Guild Cards stored.") : Api.card-tab == 1 ? @tr("The inbox is empty.") : Api.card-tab == 2 ? @tr("No hunters for hire.") : @tr("No one is blocked.");
+                text: root.tab == 0 ? @tr("No Guild Cards stored.") : root.tab == 1 ? @tr("The inbox is empty.") : root.tab == 2 ? @tr("No hunters for hire.") : @tr("No one is blocked.");
                 horizontal-alignment: center;
             }
         }
         cards := ListView {
             vertical-stretch: 1;
-            for r[i] in Api.card-rows: VerticalLayout {
+            for r[i] in root.rows: VerticalLayout {
                 padding-left: root.side;
                 // the scroll bar's room comes out of the right margin, so both look the same
                 padding-right: max(4px, root.side - (root.width - cards.visible-width));
                 padding-top: i == 0 ? 12px : 0px;
-                padding-bottom: i == Api.card-rows.length - 1 ? root.bottom-pad : 2px;
+                padding-bottom: i == root.rows.length - 1 ? root.bottom-pad : 2px;
                 GroupRow {
                     first: i == 0;
-                    last: i == Api.card-rows.length - 1;
+                    last: i == root.rows.length - 1;
                     height: card.preferred-height;
                     accessible-role: AccessibleRole.text;
                     accessible-label: r.name;
@@ -255,16 +330,63 @@ export component CardsPage inherits Rectangle {
                         if root.editable: HorizontalLayout {
                             alignment: end;
                             spacing: 4px;
-                            if Api.card-tab == 1: Btn { kind: "text"; text: @tr("Move to Card List"); clicked => { Api.move-card(r.slot); } }
+                            if root.tab == 1: Btn { kind: "text"; text: @tr("Move to Card List"); clicked => { Api.move-card(r.slot); } }
                             Btn {
                                 kind: "text";
-                                text: Api.card-tab == 3 ? @tr("Unblock") : @tr("Remove");
-                                fg: Api.card-tab == 3 ? M.primary : M.error;
+                                text: root.tab == 3 ? @tr("Unblock") : @tr("Remove");
+                                fg: root.tab == 3 ? M.primary : M.error;
                                 clicked => { Api.remove-card(r.slot); }
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+    // a picture of the neighbour: taps stay out until it is the page
+    if root.preview: TouchArea { }
+}
+
+export component CardsPage inherits Rectangle {
+    in property <length> bottom-pad;
+    in property <length> side-inset;
+    property <length> side: M.gutter + root.side-inset;
+    VerticalLayout {
+        ScrollTabRow {
+            tabs: Api.card-tabs;
+            current: Api.card-tab;
+            at: Api.card-tab + pager.side * pager.progress;
+            select(i) => { Tabs.select("cards", i); }
+        }
+        Rectangle {
+            vertical-stretch: 1;
+            clip: true;
+            pager := Pager {
+                has-prev: Api.card-tab > 0;
+                has-next: Api.card-tab < 3;
+                peek(s) => { CardsPeek.build(Api.card-tab + s); }
+                commit(s) => { Tabs.select("cards", Api.card-tab + s); }
+            }
+            live := CardsPane {
+                x: pager.shift;
+                width: pager.width;
+                tab: Api.card-tab;
+                rows: Api.card-rows;
+                was-cards: Api.was-cards;
+                was-cards-key: Api.was-cards-key;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
+            }
+            if pager.side != 0: CardsPane {
+                x: pager.shift + pager.side * pager.width;
+                width: pager.width;
+                preview: true;
+                tab: Api.card-tab + pager.side;
+                rows: CardsPeek.rows;
+                was-cards: CardsPeek.was-cards;
+                was-cards-key: CardsPeek.was-cards-key;
+                bottom-pad: root.bottom-pad;
+                side: root.side;
             }
         }
     }

@@ -18,3 +18,10 @@ strip = true
 # keep unwinding): one on the UI thread already ended the program; the update workers
 # return their errors instead of panicking.
 panic = "abort"
+
+# Slint's Android backend with one addition: the application sees every touch before Slint
+# dispatches it (gui/src/android/gesture.rs tells a list's scroll from a swipe there, which
+# Slint cannot do without delaying one of them). vendor/README.md: what differs from
+# upstream and how to redo it on a Slint upgrade.
+[patch.crates-io]
+i-slint-backend-android-activity = { path = "vendor/i-slint-backend-android-activity" }

@@ -144,6 +144,7 @@ export component FillSheet inherits Sheet {
     subtitle: @tr("Puts the items you pick into empty slots, one stack each: whole categories, or single items. Items already in the box are left out.");
     content-h: 2000px;
     close => { Api.fill-open = false; }
+    at-top: cats.content-y >= 0;
     // categories open below themselves: the desktop's compact view (views/fill_ui.rs)
     changed shown => {
         if self.shown && !Api.fill-compact {
@@ -171,7 +172,7 @@ export component FillSheet inherits Sheet {
             padding-right: 24px;
             Muted { text: @tr("Tick a whole category, or open it to pick single items."); font-size: M.body-small; }
         }
-        Flickable {
+        cats := Flickable {
             vertical-stretch: 1;
             content-width: self.width;
             VerticalLayout {

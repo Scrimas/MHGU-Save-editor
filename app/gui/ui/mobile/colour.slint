@@ -61,6 +61,8 @@ export component ColourSheet inherits Sheet {
     title: ColourEdit.title;
     content-h: lay.preferred-height;
     close => { ColourEdit.open = false; }
+    // a drag down on a slider is the slider's
+    grip-only: true;
     property <[color]> presets: [
         #F22424, #F28B24, #F2D024, #8BF224, #24F269, #24F2F2, #249CF2, #2447F2, #7A24F2, #F224F2, #F2248B, #F22435,
         #BF3939, #BF7C39, #BFA939, #7CBF39, #39BF66, #39BFBF, #3987BF, #3950BF, #7139BF, #BF39BF, #BF397C, #BF3945,

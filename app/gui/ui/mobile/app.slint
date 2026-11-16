@@ -10,24 +10,26 @@ import { Api, Fmt, Tabs, Win } from "../common.slint";
 import { MaterialPalette } from "@material";
 import { Btn, TopBar, ReviewFab, Snack } from "widgets.slint";
 import { NavBar, NavRail, Drawer, Dest, DrawerEntry } from "nav.slint";
+import { Claim, Gest, Pager } from "gestures.slint";
 import { ReviewSheet, SlotSheet, MoreSheet, MoreEntry, MenuSheet, AboutSheet, ExportImportSheet, AskSheet, SnapshotsSheet, ChoiceSheet, CharactersSheet, MhxxSheet } from "sheets.slint";
 import { WriteScreen } from "write.slint";
 import { OpenPage, RecompGuide } from "pages/open.slint";
 import { OverviewPage, GoalSheet } from "pages/overview.slint";
 import { PlaceholderPage } from "pages/placeholder.slint";
-import { ItemsPage, ItemSheet, ItemEdit } from "pages/items.slint";
+import { ItemsPage, ItemSheet, ItemEdit, ItemsPeek } from "pages/items.slint";
 import { FillSheet } from "pages/fill.slint";
-import { EquipmentPage, EquipPickSheet, DecoSheet, EquipView, EquipPick, DecoPick } from "pages/equipment.slint";
+import { EquipmentPage, EquipPickSheet, DecoSheet, EquipView, EquipPick, DecoPick, EquipmentPeek } from "pages/equipment.slint";
 import { ChoiceList, Choice } from "pick.slint";
-import { QuestsPage, QuestSheet, ArenaSheet, QuestEdit } from "pages/quests.slint";
-import { RequestsPage, RequestSheet, CollectionsPage, DeviantSheet, UnlocksPage, MonstersPage, MonsterSheet, ListEdit } from "pages/lists.slint";
-import { OptionsPage, CardsPage } from "pages/misc.slint";
+import { QuestsPage, QuestSheet, ArenaSheet, QuestEdit, QuestsPeek } from "pages/quests.slint";
+import { RequestsPage, RequestSheet, CollectionsPage, CollectionsPeek, DeviantSheet, UnlocksPage, MonstersPage, MonsterSheet, ListEdit } from "pages/lists.slint";
+import { OptionsPage, CardsPage, OptionsPeek, CardsPeek } from "pages/misc.slint";
 import { CharacterPage } from "pages/character.slint";
-import { PalicoesPage, PalicoView } from "pages/palicoes.slint";
+import { PalicoesPage, PalicoView, PalicoesPeek } from "pages/palicoes.slint";
 import { ColourSheet, ColourEdit } from "colour.slint";
 import { NewsSheet, SettingsScreen, SettingsView, UpdateSheet, VersionSheet } from "pages/settings.slint";
 
-export { Api, Fmt, Tabs, MaterialPalette }
+// (the Peek globals: the neighbouring tabs' previews, built by src/views/peek.rs)
+export { Api, Fmt, Tabs, MaterialPalette, Gest, CollectionsPeek, ItemsPeek, EquipmentPeek, QuestsPeek, PalicoesPeek, OptionsPeek, CardsPeek }
 
 // A page with its top app bar. Two of them while a predictive back gesture leaves a page:
 // the Overview behind, the page shrinking over it.
@@ -42,6 +44,9 @@ component PageLayer inherits Rectangle {
     in property <bool> actions;
     // quests picked one by one: the bar says how many, with Close
     in property <bool> selecting;
+    // Back's preview of leaving the page's detail view (0 to 1), then its way out
+    in property <float> back-p;
+    in property <float> back-out;
     callback leave-selection();
     callback avatar();
     callback open-page(string, int);
@@ -72,11 +77,15 @@ component PageLayer inherits Rectangle {
                 preview(id) => { root.preview(id); }
             }
             if root.page == "items": ItemsPage {
+                back-p: root.back-p;
+                back-out: root.back-out;
                 bottom-pad: root.pad;
                 side-inset: root.side-inset;
                 preview(id) => { root.preview(id); }
             }
             if root.page == "equipment": EquipmentPage {
+                back-p: root.back-p;
+                back-out: root.back-out;
                 bottom-pad: root.pad;
                 side-inset: root.side-inset;
             }
@@ -94,6 +103,8 @@ component PageLayer inherits Rectangle {
                 preview(id) => { root.preview(id); }
             }
             if root.page == "unlocks": UnlocksPage {
+                back-p: root.back-p;
+                back-out: root.back-out;
                 bottom-pad: root.pad;
                 side-inset: root.side-inset;
                 preview(id) => { root.preview(id); }
@@ -108,6 +119,8 @@ component PageLayer inherits Rectangle {
                 side-inset: root.side-inset;
             }
             if root.page == "palicoes": PalicoesPage {
+                back-p: root.back-p;
+                back-out: root.back-out;
                 bottom-pad: root.pad;
                 side-inset: root.side-inset;
             }
@@ -154,6 +167,9 @@ export component AppWindow inherits Window {
             Palette.color-scheme = ColorScheme.unknown;
         }
     }
+    // (the pages' pagers and the navigation bar take no swipe under a sheet or a screen)
+    property <bool> modal-now: root.any-modal;
+    changed modal-now => { Gest.modal = self.modal-now; }
     // Rust builds a page's models when it is shown
     property <string> page-now: Api.page;
     changed page-now => { Api.page-shown(); }
@@ -520,22 +536,107 @@ export component AppWindow inherits Window {
     }
     changed width => { Win.width = self.width; }
     changed height => { Win.height = self.height; }
-    // the finger's progress, from the window's own touches: since Android 15 the back
-    // callback's progress comes from the touches the window hands Android's back
-    // dispatcher, and NativeActivity sends them all to Slint instead (one progress event,
-    // 0, per gesture), so the edge strips below measure it
-    property <float> touch-p;
-    property <float> bp: Api.back-active ? max(Api.back-progress, root.touch-p) : 0;
+    // the gesture's progress: measured from the finger by the touch recogniser
+    // (src/android/gesture.rs; since Android 15 the back callback's own progress stays at
+    // 0 for a NativeActivity, whose touches Android's back dispatcher never sees)
+    property <float> bp: Api.back-active ? Api.back-progress : 0;
     animate bp { duration: Api.back-active ? 0ms : M.anim; easing: ease-out; }
     // Android's progress follows the finger across the whole screen width, so a usual swipe
     // stays small: the whole effect is reached a third of the way, eased out
     property <float> bpe: 1 - (1 - min(1, 3 * root.bp)) * (1 - min(1, 3 * root.bp));
+    // Back went through by the gesture: what it closes goes on from where the preview had it
+    // (`left`, at `left-p`). Sheets and screens slide away themselves; a page or a detail
+    // view first leaves, over what is already drawn behind it (`out-t`, 0 to 1), and then
+    // Back happens.
+    property <string> left;
+    property <float> left-p;
+    property <float> out-t;
+    property <duration> out-dur;
+    animate out-t { duration: root.out-dur; easing: ease-in; }
     pure function drag(target: string) -> float {
-        return root.back-target == target ? root.bpe : 0;
+        return root.left == target ? root.left-p : root.back-target == target ? root.bpe : 0;
+    }
+    pure function gone(target: string) -> float {
+        return root.left == target ? root.out-t : 0;
+    }
+    // (src/android/back.rs, when the gesture is let go past its threshold)
+    public function back-swiped() {
+        if root.left != "" || root.bpe < 0.01 || M.anim == 0ms {
+            // (no preview to go on from: a Back key on Android 14, animations off)
+            root.back();
+        } else {
+            root.left = root.back-target;
+            root.left-p = root.bpe;
+            if root.left == "page" || root.left == "piece" || root.left == "unlock" || root.left == "palico" || root.left == "loadout" {
+                root.out-dur = M.anim;
+                root.out-t = 1;
+            } else {
+                root.back();
+            }
+        }
+    }
+    Timer {
+        interval: M.anim + 30ms;
+        running: root.left != "";
+        triggered => {
+            if root.out-t > 0 && root.back-target == root.left {
+                root.back();
+            }
+            root.out-dur = 0ms;
+            root.out-t = 0;
+            root.left = "";
+        }
     }
     // a full screen shrinking toward the side the swipe started from
     pure function shift(target: string) -> length {
         return (Api.back-from-right ? -1 : 1) * 32px * root.drag(target);
+    }
+    // a detail view inside a page (a piece, a set, a loadout, a Palico, an unlock list):
+    // its preview and its way out, for the page
+    property <float> detail-p: root.drag("piece") + root.drag("unlock") + root.drag("palico") + root.drag("loadout");
+    property <float> detail-out: root.gone("piece") + root.gone("unlock") + root.gone("palico") + root.gone("loadout");
+
+    // The destinations as one strip (gestures.slint): Overview, Items, Equipment and Quests
+    // side by side, each with its tabs. A swipe past a page's last tab goes on to the next
+    // destination's first tab, and back to the previous one's last; a swipe on the
+    // navigation bar goes to the neighbour as a tap on it does, at the tab it had.
+    property <string> peek-page;
+    property <bool> bar-drag;
+    function peek-dest(s: int) {
+        root.peek-page = root.dests[root.dest + s].id;
+        if !root.bar-drag {
+            if root.peek-page == "items" {
+                // (its last tab opens on the list of loadouts, not inside one)
+                if Api.loadout-sel >= 0 {
+                    Api.select-loadout(-1);
+                }
+                Tabs.select("items", s > 0 ? 0 : 2);
+            } else if root.peek-page == "equipment" {
+                EquipView.detail = false;
+                EquipView.set-detail = false;
+                Tabs.select("equipment", s > 0 ? 0 : 3);
+            } else if root.peek-page == "quests" {
+                Tabs.select("quests", 0);
+            }
+        }
+        // its models, while another page is the one shown
+        Gest.build-page(root.peek-page);
+    }
+
+    // a message swiped or tapped away is not shown again while it stands
+    property <string> gone-toast;
+    property <string> toast-now: Api.toast;
+    changed toast-now => {
+        if self.toast-now == "" {
+            root.gone-toast = "";
+        }
+    }
+    function snack-dismiss() {
+        if Api.toast != "" {
+            root.gone-toast = Api.toast;
+        } else {
+            root.staged-snack = false;
+        }
     }
 
     // the snackbar: the app's message, else "added to Review" after a change
@@ -551,7 +652,7 @@ export component AppWindow inherits Window {
         running: root.staged-snack;
         triggered => { root.staged-snack = false; }
     }
-    property <bool> snack-shown: Api.toast != "" || (root.staged-snack && Api.loaded && !root.any-modal);
+    property <bool> snack-shown: (Api.toast != "" && Api.toast != root.gone-toast) || (root.staged-snack && Api.loaded && !root.any-modal);
 
     forward-focus: keys;
     keys := FocusScope {
@@ -599,6 +700,15 @@ export component AppWindow inherits Window {
         if Api.loaded && !root.open-screen: Rectangle {
             property <length> rail-w: root.compact ? 0px : 80px + root.inset-left;
             property <length> bar-h: root.compact ? 80px + root.inset-bottom : 0px;
+            // a sideways drag on a page or on the bar that nothing takes (a detail view, a
+            // page without tabs, past the last tab) is no tap on what is under the finger.
+            // Rows of chips and a text field with the cursor keep theirs (Keep)
+            Claim {
+                property <bool> on: !root.any-modal && Gest.sx >= parent.rail-w;
+                kind: 8;
+                back: self.on;
+                forth: self.on;
+            }
             if !root.compact: NavRail {
                 x: 0;
                 height: parent.height;
@@ -617,6 +727,7 @@ export component AppWindow inherits Window {
                 review => { Api.review-open = true; }
             }
             content := Rectangle {
+                clip: strip.side != 0;
                 x: parent.rail-w;
                 y: 0;
                 width: parent.width - parent.rail-w;
@@ -628,7 +739,7 @@ export component AppWindow inherits Window {
                 property <float> p: root.drag("page");
                 // (the page moves as the full screens do, toward the side the swipe started from)
                 // the page Back goes to, while the gesture is under way
-                if content.p > 0: PageLayer {
+                if content.p > 0 || root.gone("page") > 0: PageLayer {
                     page: "overview";
                     title: root.page-title("overview");
                     subtitle: content.overview-sub;
@@ -636,30 +747,66 @@ export component AppWindow inherits Window {
                     pad: content.pad;
                     side-inset: content.side;
                 }
-                PageLayer {
-                    x: (Api.back-from-right ? -1 : 1) * 32px * content.p;
+                strip := Pager {
+                    kind: 5;
+                    enabled: root.dest < 4 && !root.any-modal;
+                    has-prev: root.dest > 0;
+                    has-next: root.dest < 3;
+                    // where the page's own pager would take the swipe, had it a tab that way
+                    allow-next: Gest.wb[7] == Gest.touch;
+                    allow-prev: Gest.wf[7] == Gest.touch;
+                    peek(s) => { root.peek-dest(s); }
+                    commit(s) => { Api.page = root.peek-page; }
+                    dropped => { root.bar-drag = false; }
+                }
+                // (the shrink and the clip are a frame's around the page layer, and the
+                // neighbour's cover is beside its layer: a layer given them itself is
+                // generated once more for each place, every page with it)
+                Rectangle {
+                    x: strip.shift + (Api.back-from-right ? -1 : 1) * (32px * content.p + content.width * root.gone("page"));
+                    width: content.width;
                     transform-scale-x: 1 - 0.1 * content.p;
                     transform-scale-y: 1 - 0.1 * content.p;
                     border-radius: 28px * content.p;
                     clip: content.p > 0;
-                    page: Api.page;
-                    title: root.page-title(Api.page);
-                    subtitle: Api.page == "overview" ? content.overview-sub : root.page-sub(Api.page);
-                    top-inset: root.inset-top;
-                    pad: content.pad;
-                    side-inset: content.side;
-                    actions: root.page-actions.length > 0;
-                    show-actions => { root.actions-open = true; }
-                    selecting: Api.page == "quests" && Api.quest-selecting;
-                    leave-selection => { Api.quest-select-none(); }
-                    avatar => { root.slot-open = true; }
-                    open-page(page, tab) => {
-                        if page == "collections" {
-                            Api.select-collection(tab);
+                    PageLayer {
+                        page: Api.page;
+                        title: root.page-title(Api.page);
+                        subtitle: Api.page == "overview" ? content.overview-sub : root.page-sub(Api.page);
+                        top-inset: root.inset-top;
+                        pad: content.pad;
+                        side-inset: content.side;
+                        back-p: root.detail-p;
+                        back-out: root.detail-out;
+                        actions: root.page-actions.length > 0;
+                        show-actions => { root.actions-open = true; }
+                        selecting: Api.page == "quests" && Api.quest-selecting;
+                        leave-selection => { Api.quest-select-none(); }
+                        avatar => { root.slot-open = true; }
+                        open-page(page, tab) => {
+                            if page == "collections" {
+                                Api.select-collection(tab);
+                            }
+                            Api.page = page;
                         }
-                        Api.page = page;
+                        preview(id) => { root.preview(id); }
                     }
-                    preview(id) => { root.preview(id); }
+                }
+                // the destination a swipe is bringing in, beside the page
+                if strip.side != 0: Rectangle {
+                    x: strip.shift + strip.side * content.width;
+                    width: content.width;
+                    PageLayer {
+                        page: root.peek-page;
+                        title: root.page-title(root.peek-page);
+                        subtitle: root.peek-page == "overview" ? content.overview-sub : root.page-sub(root.peek-page);
+                        top-inset: root.inset-top;
+                        pad: content.pad;
+                        side-inset: content.side;
+                        actions: (root.peek-page == "items" && Api.item-store < 2) || (root.peek-page == "equipment" && Api.equip-owner < 2);
+                    }
+                    // (a picture until it is the page)
+                    TouchArea { }
                 }
             }
             // selecting quests: the two marks in place of the navigation bar
@@ -697,6 +844,22 @@ export component AppWindow inherits Window {
                 current: root.dest;
                 bottom-inset: root.inset-bottom;
                 picked(i) => { root.pick-dest(i); }
+                can-prev: root.dest > 0;
+                can-next: root.dest < 3;
+                swipe-started => { root.bar-drag = true; }
+                swipe-moved(d) => { strip.drag(d); }
+                swipe-ended(v) => {
+                    strip.end(v);
+                    if strip.side == 0 {
+                        root.bar-drag = false;
+                    }
+                }
+                swipe-cancelled => {
+                    strip.abort();
+                    if strip.side == 0 {
+                        root.bar-drag = false;
+                    }
+                }
             }
             // the Review button, above the bar (and above a snackbar)
             // (not while quests are selected: the bar under the list holds the actions then)
@@ -710,29 +873,10 @@ export component AppWindow inherits Window {
             }
         }
 
-        snack := Snack {
-            property <length> bottom: Api.loaded && root.compact ? 80px + root.inset-bottom + 12px : root.inset-bottom + 12px;
-            width: min(root.width - 24px - root.inset-left - root.inset-right, 560px);
-            x: (root.width - self.width) / 2;
-            y: root.snack-shown ? root.height - self.bottom - self.height : root.height + 8px;
-            animate y { duration: M.anim; easing: ease-out; }
-            text: Api.toast != "" ? Api.toast : @tr("Added to Review");
-            sub: Api.toast != "" ? Api.toast-sub : "";
-            action: Api.toast != "" ? Api.toast-action : @tr("Undo");
-            error: Api.toast != "" && Api.toast-error;
-            act => {
-                if Api.toast != "" {
-                    Api.toast-act();
-                } else {
-                    root.staged-snack = false;
-                    Api.undo-last();
-                }
-            }
-        }
-
         // sheets, then the full-screen Write above everything
-        ReviewSheet {
+        review := ReviewSheet {
             drag: root.drag("review");
+            top: root.back-target == "review";
             open: Api.review-open;
             bottom-inset: root.inset-bottom;
             side-inset: max(root.inset-left, root.inset-right);
@@ -748,12 +892,14 @@ export component AppWindow inherits Window {
         }
         SlotSheet {
             drag: root.drag("slot");
+            top: root.back-target == "slot";
             open: root.slot-open;
             bottom-inset: root.inset-bottom;
             close => { root.slot-open = false; }
         }
         MoreSheet {
             drag: root.drag("more");
+            top: root.back-target == "more";
             open: root.more-open;
             bottom-inset: root.inset-bottom;
             pages: root.more-pages;
@@ -763,6 +909,7 @@ export component AppWindow inherits Window {
         }
         MenuSheet {
             drag: root.drag("menu");
+            top: root.back-target == "menu";
             open: root.menu-open;
             bottom-inset: root.inset-bottom;
             close => { root.menu-open = false; }
@@ -774,18 +921,21 @@ export component AppWindow inherits Window {
 
         AboutSheet {
             drag: root.drag("about");
+            top: root.back-target == "about";
             open: root.about-open;
             bottom-inset: root.inset-bottom;
             close => { root.about-open = false; }
         }
         ExportImportSheet {
             drag: root.drag("export");
+            top: root.back-target == "export";
             open: root.export-open;
             bottom-inset: root.inset-bottom;
             close => { root.export-open = false; }
         }
         SnapshotsSheet {
             drag: root.drag("snapshots");
+            top: root.back-target == "snapshots";
             open: Api.snapshots-open;
             bottom-inset: root.inset-bottom;
             close => {
@@ -795,50 +945,62 @@ export component AppWindow inherits Window {
         }
         ItemSheet {
             drag: root.drag("item");
+            top: root.back-target == "item" || root.back-target == "item-pick";
             bottom-inset: root.inset-bottom;
         }
         FillSheet {
             drag: root.drag("fill");
+            top: root.back-target == "fill";
             bottom-inset: root.inset-bottom;
         }
         EquipPickSheet {
             drag: root.drag("equip-pick");
+            top: root.back-target == "equip-pick";
             bottom-inset: root.inset-bottom;
         }
         DecoSheet {
             drag: root.drag("deco-pick");
+            top: root.back-target == "deco-pick";
             bottom-inset: root.inset-bottom;
         }
         RequestSheet {
             drag: root.drag("request");
+            top: root.back-target == "request";
             bottom-inset: root.inset-bottom;
         }
         DeviantSheet {
             drag: root.drag("deviant");
+            top: root.back-target == "deviant";
             bottom-inset: root.inset-bottom;
         }
         MonsterSheet {
             drag: root.drag("monster");
+            top: root.back-target == "monster";
             bottom-inset: root.inset-bottom;
         }
         QuestSheet {
             drag: root.drag("quest");
+            top: root.back-target == "quest";
             bottom-inset: root.inset-bottom;
         }
         ArenaSheet {
             drag: root.drag("arena");
+            top: root.back-target == "arena";
             bottom-inset: root.inset-bottom;
         }
         CharactersSheet {
             drag: root.drag("characters");
+            top: root.back-target == "characters";
             bottom-inset: root.inset-bottom;
         }
         MhxxSheet {
             drag: root.drag("mhxx");
+            top: root.back-target == "mhxx";
             bottom-inset: root.inset-bottom;
         }
         ColourSheet {
             drag: root.drag("colour");
+            top: root.back-target == "colour";
             bottom-inset: root.inset-bottom;
             apply(hex) => {
                 if ColourEdit.kind == "look" {
@@ -850,11 +1012,13 @@ export component AppWindow inherits Window {
         }
         ChoiceList {
             drag: root.drag("choice");
+            top: root.back-target == "choice";
             bottom-inset: root.inset-bottom;
             picked(key, n, i) => { root.choose(key, n, i); }
         }
         ChoiceSheet {
             drag: root.drag("actions");
+            top: root.back-target == "actions";
             open: root.actions-open;
             bottom-inset: root.inset-bottom;
             entries: root.page-actions;
@@ -863,6 +1027,7 @@ export component AppWindow inherits Window {
         }
         GoalSheet {
             drag: root.drag("goal");
+            top: root.back-target == "goal";
             open: root.goal-open;
             bottom-inset: root.inset-bottom;
             close => { root.goal-open = false; }
@@ -870,6 +1035,7 @@ export component AppWindow inherits Window {
         AskSheet {
             open: Api.quit-open;
             drag: root.drag("quit");
+            top: root.back-target == "quit";
             bottom-inset: root.inset-bottom;
             question: @tr("Leave without writing?");
             text: @tr("The changes in Review are not in the save yet. Leaving drops them.");
@@ -880,6 +1046,7 @@ export component AppWindow inherits Window {
         AskSheet {
             open: Api.open-ask != "";
             drag: root.drag("ask");
+            top: root.back-target == "ask";
             bottom-inset: root.inset-bottom;
             question: @tr("Open another save?");
             text: @tr("The changes in Review are not in the save yet. Opening another save drops them.");
@@ -911,6 +1078,7 @@ export component AppWindow inherits Window {
         VersionSheet {
             open: root.settings-open;
             drag: root.drag("version");
+            top: root.back-target == "version";
             bottom-inset: root.inset-bottom;
             side-inset: max(root.inset-left, root.inset-right);
         }
@@ -929,32 +1097,93 @@ export component AppWindow inherits Window {
                 Api.review-open = true;
             }
         }
+        // The snackbar, over the sheets as well (the Redo of a change undone in Review). A
+        // swipe sideways or a tap sends it away at once, the way it would leave anyway.
+        snack := Snack {
+            // above the navigation bar; above the Review sheet while that is open and leaves
+            // the room (the Redo of a change undone there: not on the sheet's own title)
+            property <bool> over-review: Api.review-open && review.panel-h + self.height + 24px <= root.height - root.inset-top;
+            property <length> bottom: self.over-review ? review.panel-h + 12px : Api.loaded && root.compact ? 80px + root.inset-bottom + 12px : root.inset-bottom + 12px;
+            // the finger's pull, then its way out
+            property <length> off;
+            property <duration> off-dur;
+            property <bool> away;
+            animate off { duration: self.off-dur; easing: ease-out; }
+            property <bool> shown: root.snack-shown;
+            // (sent away: back in place once it is out of sight, for the next message)
+            Timer {
+                interval: M.anim + 40ms;
+                running: !snack.shown && (snack.away || snack.off != 0);
+                triggered => {
+                    snack.off-dur = 0ms;
+                    snack.off = 0;
+                    snack.away = false;
+                }
+            }
+            function leave(way: int) {
+                self.off-dur = M.anim;
+                self.off = way * root.width;
+                self.away = true;
+            }
+            Timer {
+                interval: M.anim;
+                running: snack.away && snack.shown;
+                triggered => { root.snack-dismiss(); }
+            }
+            width: min(root.width - 24px - root.inset-left - root.inset-right, 560px);
+            x: (root.width - self.width) / 2 + self.off;
+            y: root.snack-shown ? root.height - self.bottom - self.height : root.height + 8px;
+            opacity: self.away && !self.shown ? 0 : 1 - 0.5 * min(1, abs(self.off) / max(1px, self.width));
+            animate y { duration: M.anim; easing: ease-out; }
+            text: Api.toast != "" ? Api.toast : @tr("Added to Review");
+            sub: Api.toast != "" ? Api.toast-sub : "";
+            action: Api.toast != "" ? Api.toast-action : @tr("Undo");
+            error: Api.toast != "" && Api.toast-error;
+            act => {
+                if Api.toast != "" {
+                    Api.toast-act();
+                } else {
+                    root.staged-snack = false;
+                    Api.undo-last();
+                }
+            }
+            tapped => { self.leave(1); }
+            property <length> py: Gest.sy - self.absolute-position.y;
+            property <bool> on: self.shown && !self.away && self.py >= 0 && self.py < self.height && Gest.sx >= self.absolute-position.x - self.off && Gest.sx < self.absolute-position.x - self.off + self.width;
+            Claim {
+                kind: 1;
+                back: snack.on;
+                forth: snack.on;
+                moved(d) => {
+                    snack.off-dur = 0ms;
+                    snack.off = d;
+                }
+                ended(v) => {
+                    if abs(snack.off) > 0.4 * snack.width || (abs(snack.off) > 24px && abs(v) > 350 && v * (snack.off / 1px) > 0) {
+                        snack.leave(snack.off > 0 ? 1 : -1);
+                    } else {
+                        snack.off-dur = M.anim;
+                        snack.off = 0;
+                    }
+                }
+                cancelled => {
+                    snack.off-dur = M.anim;
+                    snack.off = 0;
+                }
+            }
+        }
         // over everything (Check now opens it from Settings)
         UpdateSheet {
             drag: root.drag("update");
+            top: root.back-target == "update";
             bottom-inset: root.inset-bottom;
             side-inset: max(root.inset-left, root.inset-right);
         }
         NewsSheet {
             drag: root.drag("news");
+            top: root.back-target == "news";
             bottom-inset: root.inset-bottom;
             side-inset: max(root.inset-left, root.inset-right);
-        }
-        // Android's back gesture starts at the left or right edge: a press there follows
-        // the finger for the gesture's progress (and is never a tap, see Tap)
-        for side in [0, 1]: TouchArea {
-            x: side == 0 ? 0 : root.width - self.width;
-            width: 20px;
-            height: root.height;
-            enabled: Api.back-by-callback;
-            moved => {
-                root.touch-p = max(0, min(1, (side == 0 ? 1 : -1) * (self.mouse-x - self.pressed-x) / root.width));
-            }
-            changed pressed => {
-                if !self.pressed {
-                    root.touch-p = 0;
-                }
-            }
         }
     }
 }

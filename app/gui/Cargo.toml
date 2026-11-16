@@ -54,6 +54,9 @@ rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "t
 [target.'cfg(target_os = "android")'.dependencies]
 slint = { version = "=1.18.1", default-features = false, features = ["std", "backend-android-activity-06", "compat-1-2"] }
 jni = "0.22"
+# its touch filter (src/android/gesture.rs): the vendored copy, ../Cargo.toml [patch]; the
+# features slint turns on for it
+i-slint-backend-android-activity = { version = "=1.18.1", features = ["native-activity", "aa-06"] }
 
 [features]
 # The phone and tablet interface (ui/mobile) on the desktop, to check it without a phone;

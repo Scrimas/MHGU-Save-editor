@@ -102,19 +102,51 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
         return sets_page(ui, st, palico);
     }
     let api = ui.global::<Api>();
+    let owner = owner_of(ui);
+    let (f, q) = view(|v| (v.equip_filter.clone(), v.equip_list_search.to_lowercase()));
+    let (rows, used) = box_rows(st, owner, &f, &q);
+    api.set_equip_summary(
+        if owner == Owner::Hunter {
+            trf("Hunter box: {} / {} slots used · confirmed in game except where marked", &[&num(used as i64), &num(owner.len() as i64)])
+        } else {
+            trf("Palico box: {} / {} slots used · confirmed in game", &[&num(used as i64), &num(owner.len() as i64)])
+        }
+        .into(),
+    );
+    // after selecting or adding, the row is scrolled into view (10.1)
+    if let Some(slot) = view(|v| v.equip_jump.take())
+        && let Some(row) = rows.iter().position(|r| r.slot == slot)
+    {
+        jump(ui, Some(row), "");
+    }
+    api.set_equip_rows(keep(api.get_equip_rows(), rows));
+    let sel = view(|v| v.equip_sel);
+    api.set_equip_detail(equip_detail(st, owner, sel));
+    let cats = equip_categories(owner);
+    api.set_equip_categories(strings(cats.iter().map(|&k| kind_label(k))));
+    api.set_equip_free(equip_free(st, owner));
+    let skills: Vec<String> = if assets::names().skills.is_empty() {
+        (0..160).map(|i| if i == 0 { "—".to_string() } else { trf("Skill #{}", &[&i]) }).collect()
+    } else {
+        assets::names().skills.iter().enumerate().map(|(i, n)| if i == 0 { "—".into() } else { n.clone() }).collect()
+    };
+    api.set_skill_names(strings(skills));
+}
+
+/// The rows of a box under the filter `f` and the search `q` (lowercase), and how many of
+/// its slots hold something.
+fn box_rows(st: &State, owner: Owner, f: &str, q: &str) -> (Vec<EquipRow>, usize) {
     let s = st.save();
     let orig = st.orig();
     let base = st.base();
-    let owner = owner_of(ui);
     let off = if owner == Owner::Hunter { equipment::BOX } else { equipment::PALICO_BOX };
-    let (f, q) = view(|v| (v.equip_filter.clone(), v.equip_list_search.to_lowercase()));
     let mut used = 0;
     let rows: Vec<EquipRow> = (0..owner.len())
         .filter_map(|i| {
             let e = equipment::get(s, base, owner, i);
             let k = e.kind();
             used += !e.is_empty() as usize;
-            if !equip_keep(&f, k) {
+            if !equip_keep(f, k) {
                 return None;
             }
             let (title, sub) = match k {
@@ -139,7 +171,7 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
                 }
             };
             // search matches the name, the weapon type and talisman skills (08.2)
-            if !q.is_empty() && !title.to_lowercase().contains(&q) && !sub.to_lowercase().contains(&q) && (i + 1).to_string() != q {
+            if !q.is_empty() && !title.to_lowercase().contains(q) && !sub.to_lowercase().contains(q) && (i + 1).to_string() != q {
                 return None;
             }
             let rarity = piece_rarity(owner, &e);
@@ -171,22 +203,15 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
             })
         })
         .collect();
-    api.set_equip_summary(
-        if owner == Owner::Hunter {
-            trf("Hunter box: {} / {} slots used · confirmed in game except where marked", &[&num(used as i64), &num(owner.len() as i64)])
-        } else {
-            trf("Palico box: {} / {} slots used · confirmed in game", &[&num(used as i64), &num(owner.len() as i64)])
-        }
-        .into(),
-    );
-    // after selecting or adding, the row is scrolled into view (10.1)
-    if let Some(slot) = view(|v| v.equip_jump.take())
-        && let Some(row) = rows.iter().position(|r| r.slot == slot)
-    {
-        jump(ui, Some(row), "");
-    }
-    api.set_equip_rows(keep(api.get_equip_rows(), rows));
-    let sel = view(|v| v.equip_sel);
+    (rows, used)
+}
+
+/// The detail of box entry `sel` (slot -1 when there is none).
+fn equip_detail(st: &State, owner: Owner, sel: i32) -> EquipDetail {
+    let s = st.save();
+    let orig = st.orig();
+    let base = st.base();
+    let off = if owner == Owner::Hunter { equipment::BOX } else { equipment::PALICO_BOX };
     let mut d = EquipDetail { slot: -1, category: -1, ..Default::default() };
     if sel >= 0 && (sel as usize) < owner.len() {
         let i = sel as usize;
@@ -240,19 +265,15 @@ pub(super) fn equipment_page(ui: &AppWindow, st: &State) {
             can_transmog: k.is_armor() && piece(owner, k, e.id()).is_some_and(|p| p.blade.is_some()),
         };
     }
-    api.set_equip_detail(d);
-    let cats = equip_categories(owner);
-    api.set_equip_categories(strings(cats.iter().map(|&k| kind_label(k))));
-    api.set_equip_free(match equipment::free_slot(s, base, owner) {
-        Some(i) if !cats.is_empty() => i as i32,
+    d
+}
+
+/// The box slot Add equipment fills, -1 when the box is full (or has nothing to add).
+fn equip_free(st: &State, owner: Owner) -> i32 {
+    match equipment::free_slot(st.save(), st.base(), owner) {
+        Some(i) if !equip_categories(owner).is_empty() => i as i32,
         _ => -1,
-    });
-    let skills: Vec<String> = if assets::names().skills.is_empty() {
-        (0..160).map(|i| if i == 0 { "—".to_string() } else { trf("Skill #{}", &[&i]) }).collect()
-    } else {
-        assets::names().skills.iter().enumerate().map(|(i, n)| if i == 0 { "—".into() } else { n.clone() }).collect()
-    };
-    api.set_skill_names(strings(skills));
+    }
 }
 
 pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
@@ -396,4 +417,22 @@ pub(super) fn wire_equipment(ui: &AppWindow, st: &Shared) {
             jump(&ui, i, "");
         });
     }
+}
+
+/// The phone interface's pager: the models of the tab a swipe is bringing in (peek.rs).
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_equipment(ui: &AppWindow, st: &State, tab: usize) {
+    let owner = match tab {
+        0 => Owner::Hunter,
+        1 => Owner::Palico,
+        2 | 3 => return peek_equipment_sets(ui, st, tab == 3),
+        _ => return,
+    };
+    let (f, q) = view(|v| (v.equip_filter.clone(), v.equip_list_search.to_lowercase()));
+    // the Palico box has no Talismans filter: selecting it shows All (Tabs.select)
+    let f = if owner == Owner::Palico && f == "talisman" { "all".to_string() } else { f };
+    let p = ui.global::<crate::EquipmentPeek>();
+    p.set_rows(model(box_rows(st, owner, &f, &q).0));
+    p.set_detail(equip_detail(st, owner, view(|v| v.equip_sel)));
+    p.set_free(equip_free(st, owner));
 }

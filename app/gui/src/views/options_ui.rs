@@ -94,12 +94,10 @@ pub fn language_name(v: u8) -> String {
     }
 }
 
-pub(super) fn options_page(ui: &AppWindow, st: &State) {
-    let api = ui.global::<Api>();
+/// The rows of the Options (tab 0) and Game Settings (tab 2) tabs; none for Shoutouts.
+fn option_rows(st: &State, tab: i32) -> Vec<OptionRow> {
     let s = st.save();
     let base = s.base(st.slot);
-    let tab = api.get_option_tab();
-    api.set_option_tabs(strings([tr("Options"), tr("Shoutouts"), tr("Game Settings")].map(String::from)));
     let was = |t: Target| SharedString::from(st.was(t));
     // a value past the choices picks none
     let pick = |id: String, name: String, choices: Vec<String>, value: i32, t: Target| OptionRow {
@@ -110,7 +108,7 @@ pub(super) fn options_page(ui: &AppWindow, st: &State) {
         was: was(t),
         ..Default::default()
     };
-    let rows: Vec<OptionRow> = match tab {
+    match tab {
         0 => (0..OPTIONS.len())
             .map(|k| {
                 // the row's id is its value's key (Undo)
@@ -147,8 +145,17 @@ pub(super) fn options_page(ui: &AppWindow, st: &State) {
             ]
         }
         _ => vec![],
-    };
-    api.set_option_rows(model(rows));
+    }
+}
+
+pub(super) fn options_page(ui: &AppWindow, st: &State) {
+    let api = ui.global::<Api>();
+    let s = st.save();
+    let base = s.base(st.slot);
+    let tab = api.get_option_tab();
+    api.set_option_tabs(strings([tr("Options"), tr("Shoutouts"), tr("Game Settings")].map(String::from)));
+    let was = |t: Target| SharedString::from(st.was(t));
+    api.set_option_rows(model(option_rows(st, tab)));
     let g = (api.get_chat_shown().clamp(0, options::GROUPS as i32 - 1)) as usize;
     api.set_chat_groups(strings((0..options::GROUPS).map(chat_group_name)));
     api.set_chat_group(options::chat_group(s, base) as i32);
@@ -240,4 +247,11 @@ pub(super) fn wire_options(ui: &AppWindow, st: &Shared) {
         let Some(i) = usize::try_from(i).ok().filter(|&i| i < options::AUTO_PER_GROUP) else { return };
         stage(&ui, &mut s, Conf::Confirmed, Target::AutoOn, |sv, base| options::set_auto_on(sv, base, g, i, on));
     });
+}
+
+/// The phone interface's pager: the models of the tab a swipe is bringing in (peek.rs).
+#[cfg(any(target_os = "android", feature = "mobile"))]
+pub(super) fn peek_options(ui: &AppWindow, st: &State, tab: usize) {
+    // the Shoutouts are built whatever the tab (Api.phrases)
+    ui.global::<crate::OptionsPeek>().set_rows(model(option_rows(st, tab.min(2) as i32)));
 }

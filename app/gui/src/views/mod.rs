@@ -57,6 +57,8 @@ enum ToastAct {
     #[default]
     None,
     Redo,
+    /// the one change undone by a swipe in Review (phones)
+    RedoOne,
     Restore(PathBuf, String),
     Update,
     /// Read the save again keeping the staged edits (it changed on disk).
@@ -314,23 +316,7 @@ pub fn refresh(ui: &AppWindow, st: &State) {
     if !s.slot_used(st.slot) {
         return;
     }
-    match api.get_page().as_str() {
-        "overview" => overview(ui, st),
-        "character" => character_page(ui, st),
-        "items" => items_page(ui, st),
-        "equipment" => equipment_page(ui, st),
-        "palicoes" => palico_page(ui, st),
-        "quests" => quests_page(ui, st),
-        "requests" => requests_page(ui, st),
-        "collections" => collections_page(ui, st),
-        "unlocks" => unlocks_page(ui, st),
-        "monsters" => monsters_page(ui, st),
-        "cards" => cards_page(ui, st),
-        "options" => options_page(ui, st),
-        "database" => database_page(ui, st),
-        "advanced" => fields_page(ui, st),
-        _ => {}
-    }
+    build_page(ui, st, api.get_page().as_str());
     // a Review entry asked for this field: scroll to it now that its page is built
     if let Some(key) = view(|v| v.goto.take()) {
         let row = goto_row(ui, &key);
@@ -603,6 +589,28 @@ fn goto_row(ui: &AppWindow, key: &str) -> Option<usize> {
     }
 }
 
+/// One page's models. (The page shown: refresh. The phone interface also builds the page a
+/// swipe between destinations brings in beside it: peek.rs.)
+fn build_page(ui: &AppWindow, st: &State, page: &str) {
+    match page {
+        "overview" => overview(ui, st),
+        "character" => character_page(ui, st),
+        "items" => items_page(ui, st),
+        "equipment" => equipment_page(ui, st),
+        "palicoes" => palico_page(ui, st),
+        "quests" => quests_page(ui, st),
+        "requests" => requests_page(ui, st),
+        "collections" => collections_page(ui, st),
+        "unlocks" => unlocks_page(ui, st),
+        "monsters" => monsters_page(ui, st),
+        "cards" => cards_page(ui, st),
+        "options" => options_page(ui, st),
+        "database" => database_page(ui, st),
+        "advanced" => fields_page(ui, st),
+        _ => {}
+    }
+}
+
 /// Wire a callback that edits the save, then refresh the UI.
 macro_rules! on {
     ($ui:expr, $st:expr, $name:ident, |$w:ident, $s:ident $(, $a:ident : $t:ty)*| $body:block) => {{
@@ -684,6 +692,8 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
     wire_database(ui, st);
     wire_advanced(ui, st);
     reorder::wire_reorder(ui, st);
+    #[cfg(any(target_os = "android", feature = "mobile"))]
+    peek::wire_peek(ui, st);
 
     // a Picker's search (common.slint): the choices that hold the text, any case
     api.on_filter_choices(|choices, q| {
@@ -734,6 +744,13 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
         s.undo(id);
         let _ = &ui;
     });
+    // Review on phones, a change swiped away: undone like its Undo button does, but a
+    // swipe is easier done by mistake, so the toast offers it back
+    on!(ui, st, on_undo_swiped, |ui, s, id: i32| {
+        if let Some(title) = s.undo_one(id) {
+            toast_full(&ui, trf("Undid {}", &[&title]), "", tr("Redo"), ToastAct::RedoOne, false);
+        }
+    });
     // Ctrl+Z: the latest change, said in a toast
     on!(ui, st, on_undo_last, |ui, s| {
         let Some(op) = s.ops.last() else { return };
@@ -765,6 +782,12 @@ pub fn wire(ui: &AppWindow, st: &Shared) {
                     refresh(&ui, &st.borrow());
                     if n > 0 {
                         toast(&ui, trn("Redid {n} change", "Redid {n} changes", n as i64, &[]), false);
+                    }
+                }
+                ToastAct::RedoOne => {
+                    if st.borrow_mut().redo_one() {
+                        refresh(&ui, &st.borrow());
+                        toast(&ui, trn("Redid {n} change", "Redid {n} changes", 1, &[]), false);
                     }
                 }
                 ToastAct::Restore(dir, when) => {
@@ -857,6 +880,8 @@ mod names;
 mod options_ui;
 mod overview;
 mod palicoes;
+#[cfg(any(target_os = "android", feature = "mobile"))]
+mod peek;
 mod quests;
 mod reorder;
 mod requests;
