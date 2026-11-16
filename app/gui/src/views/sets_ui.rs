@@ -202,7 +202,7 @@ fn set_detail(st: &State, palico: bool) -> SetDetail {
     let (s, base) = (st.save(), st.base());
     let n = if palico { sets::PALICO_SETS_N } else { sets::MY_SETS_N };
     let k = sel(palico).min(n - 1);
-    let d = if palico {
+    if palico {
         let p = sets::palico_set(s, base, k);
         let t = Target::PalicoSet(k);
         SetDetail {
@@ -248,8 +248,7 @@ fn set_detail(st: &State, palico: bool) -> SetDetail {
             was_pigment: was(SetPart::Pigment),
             warn_gear: crate::warnings::of(Target::MySet(k, SetPart::Gear), s, st.slot).unwrap_or_default().into(),
         }
-    };
-    d
+    }
 }
 
 /// The phone interface's pager: the set list a swipe is bringing in, with its set selected.
