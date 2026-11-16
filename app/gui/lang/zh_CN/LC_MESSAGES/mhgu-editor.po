@@ -1080,12 +1080,6 @@ msgstr "标记为未通关"
 msgid "Mark cleared"
 msgstr "标记为已通关"
 
-#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
-#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
-#: app/gui/ui/mobile/app.slint
-msgid "Added to Review"
-msgstr "已添加到审阅"
-
 #: app/gui/ui/mobile/app.slint
 msgid "Leave without writing?"
 msgstr "不写入就离开吗？"
@@ -1110,6 +1104,12 @@ msgstr "审阅中的更改尚未写入存档。打开另一个存档会丢弃这
 #: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
 msgid "Open"
 msgstr "未报告"
+
+#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
+#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
+#: app/gui/ui/mobile/app.slint
+msgid "Added to Review"
+msgstr "已添加到审阅"
 
 #: app/gui/ui/mobile/colour.slint
 msgid "Hue"
@@ -1783,19 +1783,6 @@ msgstr "此组合中猎人所穿防具的颜色，在读取组合时应用。"
 msgid "Replace with what you have on"
 msgstr "替换为当前装备"
 
-#: app/gui/ui/mobile/pages/equipment.slint
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
-msgid "Palico"
-msgstr "随从"
-
-#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
-msgid "My Sets"
-msgstr "装备个人组合"
-
-#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
-msgid "Palico sets"
-msgstr "随从个人组合"
-
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
 msgid "Search name, weapon type or skill"
 msgstr "搜索名称、武器种类或技能"
@@ -1829,6 +1816,19 @@ msgstr "箱中没有符合的项目。"
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
 msgid "Pick a piece, or add one to the first free slot."
 msgstr "选择一件装备，或在第一个空格中添加一件。"
+
+#: app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
+msgid "Palico"
+msgstr "随从"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "My Sets"
+msgstr "装备个人组合"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Palico sets"
+msgstr "随从个人组合"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
@@ -1913,21 +1913,6 @@ msgstr "完成"
 msgid "Search items"
 msgstr "搜索道具"
 
-#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
-#: app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint
-#: app/gui/ui/pages/items.slint
-msgid "Item box"
-msgstr "道具箱"
-
-#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint
-#: app/gui/ui/pages/items.slint
-msgid "Pouch"
-msgstr "道具袋"
-
-#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
-msgid "Loadouts"
-msgstr "道具个人组合"
-
 #: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
 msgid "Search the item box"
 msgstr "搜索道具箱"
@@ -1972,6 +1957,21 @@ msgstr "组合名称"
 #: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
 msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
 msgstr "该个人组合填入的 32 个道具袋位置，以及每格从道具箱取出的数量。"
+
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
+#: app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Item box"
+msgstr "道具箱"
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Pouch"
+msgstr "道具袋"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadouts"
+msgstr "道具个人组合"
 
 #: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
 msgid "Search requests or villages"
@@ -4828,25 +4828,6 @@ msgid "{n} quest"
 msgid_plural "{n} quests"
 msgstr[0] "{n} 个任务"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/cards_ui.rs
-msgid "Card List {} / {}"
-msgstr "卡片列表 {} / {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/cards_ui.rs
-msgid "Guild Card Inbox {} / {}"
-msgstr "公会卡片收取箱 {} / {}"
-
-#: app/gui/src/views/cards_ui.rs
-msgid "Hunters for Hire"
-msgstr "游荡猎人"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/cards_ui.rs
-msgid "Blocked-user List {}"
-msgstr "信息拒收设置 {}"
-
 #: app/gui/src/views/cards_ui.rs
 msgid "Offered"
 msgstr "可委托"
@@ -4871,6 +4852,25 @@ msgstr "公会所属"
 #: app/gui/src/views/cards_ui.rs
 msgid "Network ID {}"
 msgstr "网络 ID {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Card List {} / {}"
+msgstr "卡片列表 {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Guild Card Inbox {} / {}"
+msgstr "公会卡片收取箱 {} / {}"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hunters for Hire"
+msgstr "游荡猎人"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Blocked-user List {}"
+msgstr "信息拒收设置 {}"
 
 #: app/gui/src/views/cards_ui.rs
 msgid "Cards received from other hunters. The game keeps them at the front of the list: removing one moves the later ones up, as its Delete does."
@@ -5459,6 +5459,16 @@ msgstr "{} · 不适用"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/equipment_page.rs
+msgid "Hunter box: {} / {} slots used · confirmed in game except where marked"
+msgstr "猎人装备箱：已使用 {} / {} 格 · 除标注处外均已在游戏中确认"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "Palico box: {} / {} slots used · confirmed in game"
+msgstr "随从装备箱：已使用 {} / {} 格 · 已在游戏中确认"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
 msgid "{} · Talisman"
 msgstr "{} · 护石"
 
@@ -5488,16 +5498,6 @@ msgstr "已移除 · 审阅中"
 #: app/gui/src/views/equipment_page.rs
 msgid "Changed · in Review"
 msgstr "已更改 · 审阅中"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/equipment_page.rs
-msgid "Hunter box: {} / {} slots used · confirmed in game except where marked"
-msgstr "猎人装备箱：已使用 {} / {} 格 · 除标注处外均已在游戏中确认"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/equipment_page.rs
-msgid "Palico box: {} / {} slots used · confirmed in game"
-msgstr "随从装备箱：已使用 {} / {} 格 · 已在游戏中确认"
 
 #: app/gui/src/views/equipment_page.rs
 msgid "This piece already holds three decorations"
@@ -6019,15 +6019,15 @@ msgstr "设置中已开启“仅限已确认的更改”"
 msgid "Undid {}"
 msgstr "已撤销 {}"
 
+#: app/gui/src/views/mod.rs
+msgid "Redo"
+msgstr "重做"
+
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs
 msgid "Undid {n} change"
 msgid_plural "Undid {n} changes"
 msgstr[0] "已撤销 {n} 项更改"
-
-#: app/gui/src/views/mod.rs
-msgid "Redo"
-msgstr "重做"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs
@@ -6445,14 +6445,6 @@ msgstr "意大利语"
 msgid "Language {}"
 msgstr "语言 {}"
 
-#: app/gui/src/views/options_ui.rs
-msgid "Shoutouts"
-msgstr "常用句"
-
-#: app/gui/src/views/options_ui.rs
-msgid "Game Settings"
-msgstr "游戏设置"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/options_ui.rs
 msgid "Options · page {}"
@@ -6461,6 +6453,14 @@ msgstr "选项 · 第 {} 页"
 #: app/gui/src/views/options_ui.rs
 msgid "Multiplayer Settings"
 msgstr "连接选项"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Shoutouts"
+msgstr "常用句"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Game Settings"
+msgstr "游戏设置"
 
 #: app/gui/src/views/options_ui.rs
 msgid "Auto-Shoutouts"
@@ -6698,22 +6698,6 @@ msgid "Ears"
 msgstr "耳朵"
 
 #: app/gui/src/views/palicoes.rs
-msgid "My Palicoes"
-msgstr "我的随从"
-
-#: app/gui/src/views/palicoes.rs
-msgid "For hire"
-msgstr "可雇用"
-
-#: app/gui/src/views/palicoes.rs
-msgid "Team and Dojo"
-msgstr "队伍与道场"
-
-#: app/gui/src/views/palicoes.rs
-msgid "Palico Scout"
-msgstr "随从招募"
-
-#: app/gui/src/views/palicoes.rs
 msgid "The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."
 msgstr "游戏提供雇用的随从：被编辑过的随从在雇用后会保持编辑后的样子。游戏会不时刷新这份列表。"
 
@@ -6738,6 +6722,22 @@ msgstr "已装备 {}/{}"
 #: app/gui/src/views/palicoes.rs
 msgid "{} of {} skill slots used"
 msgstr "已使用 {}/{} 个技能槽"
+
+#: app/gui/src/views/palicoes.rs
+msgid "My Palicoes"
+msgstr "我的随从"
+
+#: app/gui/src/views/palicoes.rs
+msgid "For hire"
+msgstr "可雇用"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team and Dojo"
+msgstr "队伍与道场"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Scout"
+msgstr "随从招募"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
@@ -6864,15 +6864,6 @@ msgstr "公会卡片上最近的十条记录"
 msgid "Best times and sets of the Arena quests"
 msgstr "斗技大会任务的最佳时间及所用装备"
 
-#: app/gui/src/views/quests.rs
-msgid "Mark all cleared"
-msgstr "全部标记为已通关"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/quests.rs
-msgid "Mark {}★ cleared"
-msgstr "将 {}★ 标记为已通关"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/quests.rs
 msgid "{}: {} / {} cleared · confirmed in game except where marked"
@@ -6882,6 +6873,15 @@ msgstr "{}：已通关 {} / {} · 除标注处外均已在游戏中确认"
 #: app/gui/src/views/quests.rs
 msgid "Guild Card completions: {}"
 msgstr "公会卡片完成记录：{}"
+
+#: app/gui/src/views/quests.rs
+msgid "Mark all cleared"
+msgstr "全部标记为已通关"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "Mark {}★ cleared"
+msgstr "将 {}★ 标记为已通关"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/quests.rs

@@ -1016,10 +1016,6 @@ msgstr ""
 msgid "Mark cleared"
 msgstr ""
 
-#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/app.slint
-msgid "Added to Review"
-msgstr ""
-
 #: app/gui/ui/mobile/app.slint
 msgid "Leave without writing?"
 msgstr ""
@@ -1042,6 +1038,10 @@ msgstr ""
 
 #: app/gui/src/targets.rs app/gui/ui/mobile/app.slint app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
 msgid "Open"
+msgstr ""
+
+#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/app.slint
+msgid "Added to Review"
 msgstr ""
 
 #: app/gui/ui/mobile/colour.slint
@@ -1639,18 +1639,6 @@ msgstr ""
 msgid "Replace with what you have on"
 msgstr ""
 
-#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
-msgid "Palico"
-msgstr ""
-
-#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
-msgid "My Sets"
-msgstr ""
-
-#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
-msgid "Palico sets"
-msgstr ""
-
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
 msgid "Search name, weapon type or skill"
 msgstr ""
@@ -1681,6 +1669,18 @@ msgstr ""
 
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
 msgid "Pick a piece, or add one to the first free slot."
+msgstr ""
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
+msgid "Palico"
+msgstr ""
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "My Sets"
+msgstr ""
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Palico sets"
 msgstr ""
 
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
@@ -1763,18 +1763,6 @@ msgstr ""
 msgid "Search items"
 msgstr ""
 
-#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
-msgid "Item box"
-msgstr ""
-
-#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
-msgid "Pouch"
-msgstr ""
-
-#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
-msgid "Loadouts"
-msgstr ""
-
 #: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
 msgid "Search the item box"
 msgstr ""
@@ -1818,6 +1806,18 @@ msgstr ""
 
 #: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
 msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
+msgstr ""
+
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Item box"
+msgstr ""
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Pouch"
+msgstr ""
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadouts"
 msgstr ""
 
 #: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
@@ -4669,25 +4669,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: app/gui/src/views/cards_ui.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Card List {} / {}"
-msgstr ""
-
-#: app/gui/src/views/cards_ui.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Guild Card Inbox {} / {}"
-msgstr ""
-
-#: app/gui/src/views/cards_ui.rs
-msgid "Hunters for Hire"
-msgstr ""
-
-#: app/gui/src/views/cards_ui.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Blocked-user List {}"
-msgstr ""
-
-#: app/gui/src/views/cards_ui.rs
 msgid "Offered"
 msgstr ""
 
@@ -4710,6 +4691,25 @@ msgstr ""
 #: app/gui/src/views/cards_ui.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Network ID {}"
+msgstr ""
+
+#: app/gui/src/views/cards_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Card List {} / {}"
+msgstr ""
+
+#: app/gui/src/views/cards_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Guild Card Inbox {} / {}"
+msgstr ""
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hunters for Hire"
+msgstr ""
+
+#: app/gui/src/views/cards_ui.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Blocked-user List {}"
 msgstr ""
 
 #: app/gui/src/views/cards_ui.rs
@@ -5305,6 +5305,16 @@ msgstr ""
 
 #: app/gui/src/views/equipment_page.rs
 #. placeholders: {} in order, {0} {1} by position
+msgid "Hunter box: {} / {} slots used · confirmed in game except where marked"
+msgstr ""
+
+#: app/gui/src/views/equipment_page.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Palico box: {} / {} slots used · confirmed in game"
+msgstr ""
+
+#: app/gui/src/views/equipment_page.rs
+#. placeholders: {} in order, {0} {1} by position
 msgid "{} · Talisman"
 msgstr ""
 
@@ -5334,16 +5344,6 @@ msgstr ""
 
 #: app/gui/src/views/equipment_page.rs
 msgid "Changed · in Review"
-msgstr ""
-
-#: app/gui/src/views/equipment_page.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Hunter box: {} / {} slots used · confirmed in game except where marked"
-msgstr ""
-
-#: app/gui/src/views/equipment_page.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Palico box: {} / {} slots used · confirmed in game"
 msgstr ""
 
 #: app/gui/src/views/equipment_page.rs
@@ -5879,15 +5879,15 @@ msgid "Undid {}"
 msgstr ""
 
 #: app/gui/src/views/mod.rs
+msgid "Redo"
+msgstr ""
+
+#: app/gui/src/views/mod.rs
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 msgid "Undid {n} change"
 msgid_plural "Undid {n} changes"
 msgstr[0] ""
 msgstr[1] ""
-
-#: app/gui/src/views/mod.rs
-msgid "Redo"
-msgstr ""
 
 #: app/gui/src/views/mod.rs
 #. placeholders: {} in order, {0} {1} by position, {n} the count
@@ -6308,20 +6308,20 @@ msgid "Language {}"
 msgstr ""
 
 #: app/gui/src/views/options_ui.rs
-msgid "Shoutouts"
-msgstr ""
-
-#: app/gui/src/views/options_ui.rs
-msgid "Game Settings"
-msgstr ""
-
-#: app/gui/src/views/options_ui.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Options · page {}"
 msgstr ""
 
 #: app/gui/src/views/options_ui.rs
 msgid "Multiplayer Settings"
+msgstr ""
+
+#: app/gui/src/views/options_ui.rs
+msgid "Shoutouts"
+msgstr ""
+
+#: app/gui/src/views/options_ui.rs
+msgid "Game Settings"
 msgstr ""
 
 #: app/gui/src/views/options_ui.rs
@@ -6563,22 +6563,6 @@ msgid "Ears"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
-msgid "My Palicoes"
-msgstr ""
-
-#: app/gui/src/views/palicoes.rs
-msgid "For hire"
-msgstr ""
-
-#: app/gui/src/views/palicoes.rs
-msgid "Team and Dojo"
-msgstr ""
-
-#: app/gui/src/views/palicoes.rs
-msgid "Palico Scout"
-msgstr ""
-
-#: app/gui/src/views/palicoes.rs
 msgid "The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."
 msgstr ""
 
@@ -6602,6 +6586,22 @@ msgstr ""
 #: app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} of {} skill slots used"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "My Palicoes"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "For hire"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team and Dojo"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Scout"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
@@ -6730,15 +6730,6 @@ msgid "Best times and sets of the Arena quests"
 msgstr ""
 
 #: app/gui/src/views/quests.rs
-msgid "Mark all cleared"
-msgstr ""
-
-#: app/gui/src/views/quests.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "Mark {}★ cleared"
-msgstr ""
-
-#: app/gui/src/views/quests.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{}: {} / {} cleared · confirmed in game except where marked"
 msgstr ""
@@ -6746,6 +6737,15 @@ msgstr ""
 #: app/gui/src/views/quests.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Guild Card completions: {}"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+msgid "Mark all cleared"
+msgstr ""
+
+#: app/gui/src/views/quests.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "Mark {}★ cleared"
 msgstr ""
 
 #: app/gui/src/views/quests.rs

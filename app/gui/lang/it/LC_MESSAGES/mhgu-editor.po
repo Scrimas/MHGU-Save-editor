@@ -1091,12 +1091,6 @@ msgstr "Segna come non completate"
 msgid "Mark cleared"
 msgstr "Segna come completate"
 
-#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
-#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
-#: app/gui/ui/mobile/app.slint
-msgid "Added to Review"
-msgstr "Aggiunto a Revisione"
-
 #: app/gui/ui/mobile/app.slint
 msgid "Leave without writing?"
 msgstr "Uscire senza scrivere?"
@@ -1121,6 +1115,12 @@ msgstr "Le modifiche in Revisione non sono ancora nel salvataggio. Aprendo un al
 #: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
 msgid "Open"
 msgstr "Aperta"
+
+#: app/gui/src/views/characters.rs app/gui/src/views/mod.rs
+#: app/gui/src/views/palicoes.rs app/gui/src/views/transfer_ui.rs
+#: app/gui/ui/mobile/app.slint
+msgid "Added to Review"
+msgstr "Aggiunto a Revisione"
 
 #: app/gui/ui/mobile/colour.slint
 msgid "Hue"
@@ -1797,19 +1797,6 @@ msgstr "I colori indossati con questo set, applicati quando viene caricato."
 msgid "Replace with what you have on"
 msgstr "Sostituisci con ciò che indossi"
 
-#: app/gui/ui/mobile/pages/equipment.slint
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
-msgid "Palico"
-msgstr "Compagno"
-
-#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
-msgid "My Sets"
-msgstr "Set equipaggiamento"
-
-#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
-msgid "Palico sets"
-msgstr "Set compagno"
-
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
 msgid "Search name, weapon type or skill"
 msgstr "Cerca nome, tipo d'arma o abilità"
@@ -1843,6 +1830,19 @@ msgstr "Nulla nella cassa corrisponde."
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
 msgid "Pick a piece, or add one to the first free slot."
 msgstr "Scegli un pezzo o aggiungine uno nella prima casella libera."
+
+#: app/gui/ui/mobile/pages/equipment.slint
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/equipment.slint
+msgid "Palico"
+msgstr "Compagno"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "My Sets"
+msgstr "Set equipaggiamento"
+
+#: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
+msgid "Palico sets"
+msgstr "Set compagno"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/ui/mobile/pages/equipment.slint app/gui/ui/pages/equipment.slint
@@ -1928,21 +1928,6 @@ msgstr "Fatto"
 msgid "Search items"
 msgstr "Cerca oggetti"
 
-#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
-#: app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint
-#: app/gui/ui/pages/items.slint
-msgid "Item box"
-msgstr "Cassa oggetti"
-
-#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint
-#: app/gui/ui/pages/items.slint
-msgid "Pouch"
-msgstr "Borsa"
-
-#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
-msgid "Loadouts"
-msgstr "Set di oggetti"
-
 #: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
 msgid "Search the item box"
 msgstr "Cerca nella cassa oggetti"
@@ -1987,6 +1972,21 @@ msgstr "Nome del set"
 #: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
 msgid "The 32 pouch positions the loadout fills, with the counts it takes from the box."
 msgstr "Le 32 posizioni della borsa che il set riempie, con le quantità che prende dalla cassa."
+
+#: app/gui/src/goals.rs app/gui/src/views/fill_ui.rs
+#: app/gui/src/views/transfer_ui.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Item box"
+msgstr "Cassa oggetti"
+
+#: app/gui/src/goals.rs app/gui/ui/mobile/pages/items.slint
+#: app/gui/ui/pages/items.slint
+msgid "Pouch"
+msgstr "Borsa"
+
+#: app/gui/ui/mobile/pages/items.slint app/gui/ui/pages/items.slint
+msgid "Loadouts"
+msgstr "Set di oggetti"
 
 #: app/gui/ui/mobile/pages/lists.slint app/gui/ui/pages/requests.slint
 msgid "Search requests or villages"
@@ -4873,25 +4873,6 @@ msgid_plural "{n} quests"
 msgstr[0] "{n} missione"
 msgstr[1] "{n} missioni"
 
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/cards_ui.rs
-msgid "Card List {} / {}"
-msgstr "Lista tessere {} / {}"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/cards_ui.rs
-msgid "Guild Card Inbox {} / {}"
-msgstr "Casella tessere Gilda {} / {}"
-
-#: app/gui/src/views/cards_ui.rs
-msgid "Hunters for Hire"
-msgstr "Cacciatori a noleggio"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/cards_ui.rs
-msgid "Blocked-user List {}"
-msgstr "Utenti bloccati {}"
-
 #: app/gui/src/views/cards_ui.rs
 msgid "Offered"
 msgstr "Offerto"
@@ -4916,6 +4897,25 @@ msgstr "Della Gilda"
 #: app/gui/src/views/cards_ui.rs
 msgid "Network ID {}"
 msgstr "ID di rete {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Card List {} / {}"
+msgstr "Lista tessere {} / {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Guild Card Inbox {} / {}"
+msgstr "Casella tessere Gilda {} / {}"
+
+#: app/gui/src/views/cards_ui.rs
+msgid "Hunters for Hire"
+msgstr "Cacciatori a noleggio"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/cards_ui.rs
+msgid "Blocked-user List {}"
+msgstr "Utenti bloccati {}"
 
 #: app/gui/src/views/cards_ui.rs
 msgid "Cards received from other hunters. The game keeps them at the front of the list: removing one moves the later ones up, as its Delete does."
@@ -5510,6 +5510,16 @@ msgstr "{} · non entra"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/equipment_page.rs
+msgid "Hunter box: {} / {} slots used · confirmed in game except where marked"
+msgstr "Cassa cacciatore: {} / {} caselle usate · confermato nel gioco salvo dove indicato"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
+msgid "Palico box: {} / {} slots used · confirmed in game"
+msgstr "Cassa compagni: {} / {} caselle usate · confermato nel gioco"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/equipment_page.rs
 msgid "{} · Talisman"
 msgstr "{} · Talismano"
 
@@ -5540,16 +5550,6 @@ msgstr "Rimosso · in Revisione"
 #: app/gui/src/views/equipment_page.rs
 msgid "Changed · in Review"
 msgstr "Modificato · in Revisione"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/equipment_page.rs
-msgid "Hunter box: {} / {} slots used · confirmed in game except where marked"
-msgstr "Cassa cacciatore: {} / {} caselle usate · confermato nel gioco salvo dove indicato"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/equipment_page.rs
-msgid "Palico box: {} / {} slots used · confirmed in game"
-msgstr "Cassa compagni: {} / {} caselle usate · confermato nel gioco"
 
 #: app/gui/src/views/equipment_page.rs
 msgid "This piece already holds three decorations"
@@ -6083,16 +6083,16 @@ msgstr "Solo modifiche confermate è attivo nelle Impostazioni"
 msgid "Undid {}"
 msgstr "Annullato: {}"
 
+#: app/gui/src/views/mod.rs
+msgid "Redo"
+msgstr "Ripeti"
+
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs
 msgid "Undid {n} change"
 msgid_plural "Undid {n} changes"
 msgstr[0] "{n} modifica annullata"
 msgstr[1] "{n} modifiche annullate"
-
-#: app/gui/src/views/mod.rs
-msgid "Redo"
-msgstr "Ripeti"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/mod.rs
@@ -6512,14 +6512,6 @@ msgstr "Italiano"
 msgid "Language {}"
 msgstr "Lingua {}"
 
-#: app/gui/src/views/options_ui.rs
-msgid "Shoutouts"
-msgstr "Frasi"
-
-#: app/gui/src/views/options_ui.rs
-msgid "Game Settings"
-msgstr "Impostazioni di gioco"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/options_ui.rs
 msgid "Options · page {}"
@@ -6528,6 +6520,14 @@ msgstr "Opzioni · pagina {}"
 #: app/gui/src/views/options_ui.rs
 msgid "Multiplayer Settings"
 msgstr "Trasmissione dati"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Shoutouts"
+msgstr "Frasi"
+
+#: app/gui/src/views/options_ui.rs
+msgid "Game Settings"
+msgstr "Impostazioni di gioco"
 
 #: app/gui/src/views/options_ui.rs
 msgid "Auto-Shoutouts"
@@ -6768,22 +6768,6 @@ msgid "Ears"
 msgstr "Orecchie"
 
 #: app/gui/src/views/palicoes.rs
-msgid "My Palicoes"
-msgstr "I miei compagni"
-
-#: app/gui/src/views/palicoes.rs
-msgid "For hire"
-msgstr "Da ingaggiare"
-
-#: app/gui/src/views/palicoes.rs
-msgid "Team and Dojo"
-msgstr "Squadra e palestra"
-
-#: app/gui/src/views/palicoes.rs
-msgid "Palico Scout"
-msgstr "Trovacompagni"
-
-#: app/gui/src/views/palicoes.rs
 msgid "The Palicoes the game offers for hire: an edited one joins as edited when hired. The game draws a new list from time to time."
 msgstr "I compagni che il gioco offre da ingaggiare: uno modificato arriva così com'è quando lo ingaggi. Il gioco estrae una nuova lista di tanto in tanto."
 
@@ -6808,6 +6792,22 @@ msgstr "{} di {} equipaggiate"
 #: app/gui/src/views/palicoes.rs
 msgid "{} of {} skill slots used"
 msgstr "{} di {} slot abilità usati"
+
+#: app/gui/src/views/palicoes.rs
+msgid "My Palicoes"
+msgstr "I miei compagni"
+
+#: app/gui/src/views/palicoes.rs
+msgid "For hire"
+msgstr "Da ingaggiare"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Team and Dojo"
+msgstr "Squadra e palestra"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Palico Scout"
+msgstr "Trovacompagni"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
@@ -6934,15 +6934,6 @@ msgstr "Gli ultimi dieci record della tua Tessera Gilda"
 msgid "Best times and sets of the Arena quests"
 msgstr "Tempi migliori e set delle missioni nell'arena"
 
-#: app/gui/src/views/quests.rs
-msgid "Mark all cleared"
-msgstr "Segna tutte come completate"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/views/quests.rs
-msgid "Mark {}★ cleared"
-msgstr "Segna {}★ come completate"
-
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/quests.rs
 msgid "{}: {} / {} cleared · confirmed in game except where marked"
@@ -6952,6 +6943,15 @@ msgstr "{}: {} / {} completate · confermato nel gioco salvo dove indicato"
 #: app/gui/src/views/quests.rs
 msgid "Guild Card completions: {}"
 msgstr "Completate secondo la scheda gilda: {}"
+
+#: app/gui/src/views/quests.rs
+msgid "Mark all cleared"
+msgstr "Segna tutte come completate"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/views/quests.rs
+msgid "Mark {}★ cleared"
+msgstr "Segna {}★ come completate"
 
 #. placeholders: {} in order, {0} {1} by position, {n} the count
 #: app/gui/src/views/quests.rs
