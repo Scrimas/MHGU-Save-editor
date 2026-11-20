@@ -297,11 +297,16 @@ def main(romfs, out, update):
                       if names['items'][2638 + k] not in ('', 'DUMMY')]
     # Palico gear (box types 22 weapon, 23 head, 24 body): box ID = otWeaponData /
     # otArmorData record; names 2k (weapons), 4k head and 4k + 1 body (armor). DERIVED
-    # (the starter box of a new save reads Bone Wedge, Acorn Helm / Mail, Bherna Staff)
+    # (the starter box of a new save reads Bone Wedge, Acorn Helm / Mail, Bherna Staff).
+    # Rarity - 1: weapons byte 22 of 31, armor byte 7 of 33. DERIVED (0-10 like mRare; 469
+    # of 470 armor pieces share a rarity with a weapon of their series, weapon byte 4 =
+    # armor byte 6)
+    ow = res['table\\otWeaponData']; oa = res['table\\otArmorData']
     wn = gmd(reng['eng\\table\\otWeaponData_eng'])
-    names['palico_weapons'] = [{'id': k, 'name': wn[2 * k]} for k in range(1, len(wn) // 2)]
+    names['palico_weapons'] = [{'id': k, 'name': wn[2 * k], 'rarity': ow[8 + k * 31 + 22] + 1} for k in range(1, len(wn) // 2)]
     on = gmd(reng['eng\\table\\otArmorData_eng'])
-    names['palico_armor'] = {str(23 + p): [{'id': k, 'name': on[4 * k + p]} for k in range(1, len(on) // 4)] for p in range(2)}
+    names['palico_armor'] = {str(23 + p): [{'id': k, 'name': on[4 * k + p], 'rarity': oa[8 + k * 33 + 7] + 1} for k in range(1, len(on) // 4)]
+                             for p in range(2)}
     am = res['table\\amuletData']; amn = gmd(reng['eng\\table\\amuletData_eng'])[0::2]
     names['talismans'] = [{'id': k, 'name': amn[k], 'rarity': am[8 + k * 9 + 8] + 1}
                           for k in range(struct.unpack_from('<I', am, 4)[0])]

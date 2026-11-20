@@ -44,7 +44,6 @@ pub(super) fn equip_picker(ui: &AppWindow, st: &State) {
         .filter(|p| !transmog || own.is_some_and(|o| transmog_fits(o, p, gender) && o.id != p.id))
         .filter(|p| f.is_empty() || p.id.to_string() == f || [&p.name].into_iter().chain(&p.names).any(|n| n.to_lowercase().contains(&f)))
         .map(|p| {
-            // Palico gear has no rarity in the pack
             let mut sub: Vec<String> = if p.rarity > 0 { vec![trf("Rare {}", &[&p.rarity])] } else { vec![] };
             match (p.blade, p.gunner) {
                 (Some(1), Some(0)) => sub.push(tr("Blademaster").into()),
