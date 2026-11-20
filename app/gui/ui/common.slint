@@ -204,9 +204,13 @@ export struct EquipDetail {
 
 export struct PalicoRow { index: int, name: string, sub: string, changed: bool }
 
-// A slot of a Palico's support move or skill list: innate ones cannot be changed, taught
-// ones are the slots the Palico Dojo fills; `on` when equipped.
-export struct PalicoEntry { slot: int, id: int, name: string, innate: bool, taught: bool, on: bool }
+// A slot of a Palico's support move or skill list: `choices` the names of what it can take
+// (`ids`, the current one at `pick`), `fixed` when it can hold only what it holds, `locked`
+// when it can't be unequipped (an innate move), `note` the kind of slot; `on` when equipped.
+export struct PalicoEntry {
+    slot: int, id: int, name: string, fixed: bool, locked: bool, note: string,
+    choices: [string], ids: [int], pick: int, on: bool,
+}
 
 // A look: a choice (`index` into `choices`) or a colour (`index` into `swatches`, -1 when
 // the colour is none of them).
@@ -700,9 +704,6 @@ export global Api {
     callback select-palico(int);
     callback set-palico(string, int);
     callback set-palico-text(string, string);
-    // support move and skill names by ID, for the list slots' pickers
-    in property <[string]> palico-move-names;
-    in property <[string]> palico-skill-names;
     // "moves" / "skills", slot, ID, equipped: a new ID replaces the slot's entry, the same
     // ID equips or unequips it
     callback set-palico-entry(string, int, int, bool);

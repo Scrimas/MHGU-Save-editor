@@ -101,12 +101,12 @@ component LookItem inherits VerticalLayout {
     }
 }
 
-// A support move or skill slot: its box to equip it, the entry (fixed when innate).
+// A support move or skill slot: its box to equip it, the entry (a choice of what the slot
+// can take, unless it is fixed).
 component EntryItem inherits HorizontalLayout {
     in property <PalicoEntry> e;
     in property <int> n;
     in property <string> kind;
-    in property <[string]> names;
     spacing: 4px;
     VerticalLayout {
         alignment: center;
@@ -116,34 +116,34 @@ component EntryItem inherits HorizontalLayout {
             accessible-role: checkbox;
             accessible-label: @tr("Equip {}", root.e.name);
             accessible-checked: root.e.on;
-            accessible-enabled: root.e.id != 0;
-            accessible-action-default => { if root.e.id != 0 { Api.set-palico-entry(root.kind, root.e.slot, root.e.id, !root.e.on); } }
+            accessible-enabled: root.e.id != 0 && !root.e.locked;
+            accessible-action-default => { if root.e.id != 0 && !root.e.locked { Api.set-palico-entry(root.kind, root.e.slot, root.e.id, !root.e.on); } }
             Rectangle {
                 width: 18px;
                 height: 18px;
                 border-radius: 2px;
                 background: root.e.on ? M.primary : transparent;
                 border-width: root.e.on ? 0px : 2px;
-                border-color: root.e.id != 0 ? M.on-surface-variant : M.on-surface.with-alpha(0.38);
+                border-color: root.e.id != 0 && !root.e.locked ? M.on-surface-variant : M.on-surface.with-alpha(0.38);
                 if root.e.on: Ico { source: @image-url("../icons/check.svg"); tint: M.on-primary; width: 16px; height: 16px; }
             }
             Tap {
-                enabled: root.e.id != 0;
+                enabled: root.e.id != 0 && !root.e.locked;
                 tapped => { Api.set-palico-entry(root.kind, root.e.slot, root.e.id, !root.e.on); }
             }
         }
     }
-    if root.e.innate: VerticalLayout {
+    if root.e.fixed: VerticalLayout {
         alignment: center;
         horizontal-stretch: 1;
         Text { text: root.e.name; color: M.on-surface; font-size: M.body-large; wrap: word-wrap; }
-        Text { text: @tr("Innate"); color: M.on-surface-variant; font-size: M.body-small; }
+        Text { text: root.e.note; color: M.on-surface-variant; font-size: M.body-small; }
     }
-    if !root.e.innate: ChoiceRow {
+    if !root.e.fixed: ChoiceRow {
         horizontal-stretch: 1;
-        label: root.e.taught ? @tr("Taught slot") : "";
-        value: root.names[root.e.id];
-        clicked => { Choice.show(root.kind == "moves" ? "palico-move" : "palico-skill", root.n, root.kind == "moves" ? @tr("Support moves") : @tr("Skills"), root.names, root.e.id); }
+        label: root.e.note;
+        value: root.e.name;
+        clicked => { Choice.show(root.kind == "moves" ? "palico-move" : "palico-skill", root.n, root.kind == "moves" ? @tr("Support moves") : @tr("Skills"), root.e.choices, root.e.pick); }
     }
 }
 
@@ -254,16 +254,16 @@ component PalicoDetailView inherits Flickable {
             text: root.p.moves-used;
             staged: root.p.was-moves != "";
             if root.p.was-moves != "": WasRow { was: root.p.was-moves; key: root.key + "moves"; }
-            if root.p.warn-moves != "": Text { text: @tr("The game cannot make this: {}.", root.p.warn-moves); color: M.error; font-size: M.body-small; wrap: word-wrap; }
-            for e[j] in root.p.move-rows: EntryItem { e: e; n: j; kind: "moves"; names: Api.palico-move-names; }
+            if root.p.warn-moves != "": Text { text: @tr("The game unequips all of these when a quest starts: {}.", root.p.warn-moves); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+            for e[j] in root.p.move-rows: EntryItem { e: e; n: j; kind: "moves"; }
         }
         FormCard {
             title: @tr("Skills");
             text: root.p.skills-used;
             staged: root.p.was-skills != "";
             if root.p.was-skills != "": WasRow { was: root.p.was-skills; key: root.key + "skills"; }
-            if root.p.warn-skills != "": Text { text: @tr("The game cannot make this: {}.", root.p.warn-skills); color: M.error; font-size: M.body-small; wrap: word-wrap; }
-            for e[j] in root.p.skill-rows: EntryItem { e: e; n: j; kind: "skills"; names: Api.palico-skill-names; }
+            if root.p.warn-skills != "": Text { text: @tr("The game unequips all of these when a quest starts: {}.", root.p.warn-skills); color: M.error; font-size: M.body-small; wrap: word-wrap; }
+            for e[j] in root.p.skill-rows: EntryItem { e: e; n: j; kind: "skills"; }
         }
         Muted { text: @tr("Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."); font-size: M.body-small; }
     }

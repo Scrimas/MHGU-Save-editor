@@ -2411,14 +2411,6 @@ msgstr "{}, Farbe {}"
 msgid "Equip {}"
 msgstr "{} ausrüsten"
 
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
-msgid "Innate"
-msgstr "Angeboren"
-
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
-msgid "Taught slot"
-msgstr "Lehrplatz"
-
 #: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
 #: app/gui/ui/pages/palicoes.slint
 msgid "Support moves"
@@ -2457,6 +2449,11 @@ msgstr "Erster Besitzer"
 #: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
 msgid "Looks"
 msgstr "Aussehen"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "The game unequips all of these when a quest starts: {}."
+msgstr "Das Spiel legt all dies zu Beginn einer Quest ab: {}."
 
 #: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
 msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
@@ -4499,6 +4496,34 @@ msgstr "{}: eine Farbe, die kein neuer Palico bekommt"
 msgid "{}: not a choice of the game"
 msgstr "{}: keine Wahl des Spiels"
 
+#: app/gui/src/warnings.rs
+msgid "its slots do not match its forte and roll pattern"
+msgstr "seine Plätze passen nicht zu Ausrichtung und Auslosung"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "slot {}: {} is not its forte's"
+msgstr "Platz {}: {} gehört nicht zu seiner Ausrichtung"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "slot {}: every Palico has {} there"
+msgstr "Platz {}: Jeder Kamerad hat dort {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "slot {}: {} is not one of the {}-point entries"
+msgstr "Platz {}: {} ist keiner der {}-Punkte-Einträge"
+
+#: app/gui/src/warnings.rs
+msgid "more special skills in 2-point slots than it may hold"
+msgstr "mehr Spezialfertigkeiten auf 2-Punkte-Plätzen als erlaubt"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} equipped but not in its list"
+msgstr "{} ausgerüstet, aber nicht in der Liste"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
 msgid "{} moves equipped, its level allows {}"
@@ -4509,28 +4534,9 @@ msgstr "{} Aktionen ausgerüstet, die Stufe erlaubt {}"
 msgid "skills taking {} slots, its level gives {}"
 msgstr "Fertigkeiten mit {} Plätzen, die Stufe gibt {}"
 
-#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
-msgid "{} equipped but not in its list"
-msgstr "{} ausgerüstet, aber nicht in der Liste"
-
-#: app/gui/src/warnings.rs
-msgid "innate moves that are not its forte's"
-msgstr "angeborene Aktionen, die nicht zur Ausrichtung gehören"
-
-#: app/gui/src/warnings.rs
-msgid "innate skills that are not its forte's"
-msgstr "angeborene Fertigkeiten, die nicht zur Ausrichtung gehören"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/warnings.rs
-msgid "{} is a forte's innate entry"
-msgstr "{} ist ein angeborener Eintrag einer Ausrichtung"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/warnings.rs
-msgid "{} twice"
-msgstr "{} doppelt"
+msgid "its innate moves must be equipped"
+msgstr "seine angeborenen Aktionen müssen ausgerüstet sein"
 
 #: app/gui/src/warnings.rs
 msgid "this monster is always size 100"
@@ -4621,6 +4627,11 @@ msgstr "{} ist keine Technik für: {}"
 #: app/gui/src/warnings.rs
 msgid "{} is not unlocked"
 msgstr "{} ist nicht freigeschaltet"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} twice"
+msgstr "{} doppelt"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
@@ -6783,6 +6794,25 @@ msgstr "Per StreetPass erhaltene Kameraden warten im Posteingang, bis sie angehe
 msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."
 msgstr "Wonach beim Kameraden-Scouten gesucht wird: nach Fähigkeiten (Ausrichtung, Ziel) oder nach Aussehen. Die gewünschten Farben bleiben, wie sie sind."
 
+#: app/gui/src/views/palicoes.rs
+msgid "Innate"
+msgstr "Angeboren"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Every Palico"
+msgstr "Jeder Kamerad"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/palicoes.rs
+msgid "{n} point"
+msgid_plural "{n} points"
+msgstr[0] "{n} Punkt"
+msgstr[1] "{n} Punkte"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Taught slot"
+msgstr "Lehrplatz"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
 msgid "{} of {} equipped"
@@ -6813,6 +6843,18 @@ msgstr "Kameraden anheuern"
 #: app/gui/src/views/palicoes.rs
 msgid "Remove the StreetPass Palico {}"
 msgstr "StreetPass-Kamerad {} entfernen"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not changed: Charisma lists have another shape, so a forte can't change to or from Charisma"
+msgstr "Nicht geändert: Charisma-Listen sind anders aufgebaut, daher kann eine Ausrichtung nicht zu Charisma oder von Charisma wechseln"
+
+#: app/gui/src/views/palicoes.rs
+msgid "No support move slot left at its level"
+msgstr "Kein Aktionsplatz mehr frei auf seiner Stufe"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not enough skill slots left at its level"
+msgstr "Nicht genug Fertigkeitsplätze frei auf seiner Stufe"
 
 #: app/gui/src/views/palicoes.rs
 msgid "A Palico needs a name"

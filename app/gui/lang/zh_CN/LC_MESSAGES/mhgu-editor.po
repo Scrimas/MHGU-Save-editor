@@ -2396,14 +2396,6 @@ msgstr "{}，颜色{}"
 msgid "Equip {}"
 msgstr "装备{}"
 
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
-msgid "Innate"
-msgstr "固有"
-
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
-msgid "Taught slot"
-msgstr "传授栏位"
-
 #: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint
 #: app/gui/ui/pages/palicoes.slint
 msgid "Support moves"
@@ -2442,6 +2434,11 @@ msgstr "原主人"
 #: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
 msgid "Looks"
 msgstr "外观"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+msgid "The game unequips all of these when a quest starts: {}."
+msgstr "任务开始时游戏会卸下这些全部项目：{}。"
 
 #: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
 msgid "Innate entries come with the forte; taught slots are the ones the Palico Dojo fills. The game draws the rest when the Palico is born."
@@ -4456,6 +4453,34 @@ msgstr "{}：新随从不会有的颜色"
 msgid "{}: not a choice of the game"
 msgstr "{}：不是游戏中的选项"
 
+#: app/gui/src/warnings.rs
+msgid "its slots do not match its forte and roll pattern"
+msgstr "其栏位与支援倾向及抽选模式不符"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "slot {}: {} is not its forte's"
+msgstr "栏位 {}：{} 不属于其支援倾向"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "slot {}: every Palico has {} there"
+msgstr "栏位 {}：每只随从在此都有 {}"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "slot {}: {} is not one of the {}-point entries"
+msgstr "栏位 {}：{} 不是 {} 点的项目"
+
+#: app/gui/src/warnings.rs
+msgid "more special skills in 2-point slots than it may hold"
+msgstr "2 点栏位中的特殊技能超过上限"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} equipped but not in its list"
+msgstr "装备了 {}，但不在其列表中"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
 msgid "{} moves equipped, its level allows {}"
@@ -4466,28 +4491,9 @@ msgstr "装备了 {} 个支援行动，其等级只允许 {} 个"
 msgid "skills taking {} slots, its level gives {}"
 msgstr "技能占用 {} 点记忆力，其等级只提供 {} 点"
 
-#. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
-msgid "{} equipped but not in its list"
-msgstr "装备了 {}，但不在其列表中"
-
-#: app/gui/src/warnings.rs
-msgid "innate moves that are not its forte's"
-msgstr "固有支援行动不属于其支援倾向"
-
-#: app/gui/src/warnings.rs
-msgid "innate skills that are not its forte's"
-msgstr "固有技能不属于其支援倾向"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/warnings.rs
-msgid "{} is a forte's innate entry"
-msgstr "{} 是支援倾向的固有项目"
-
-#. placeholders: {} in order, {0} {1} by position
-#: app/gui/src/warnings.rs
-msgid "{} twice"
-msgstr "{} 出现两次"
+msgid "its innate moves must be equipped"
+msgstr "其固有支援行动必须装备"
 
 #: app/gui/src/warnings.rs
 msgid "this monster is always size 100"
@@ -4578,6 +4584,11 @@ msgstr "{} 不是{}的狩技"
 #: app/gui/src/warnings.rs
 msgid "{} is not unlocked"
 msgstr "{} 尚未解锁"
+
+#. placeholders: {} in order, {0} {1} by position
+#: app/gui/src/warnings.rs
+msgid "{} twice"
+msgstr "{} 出现两次"
 
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/warnings.rs
@@ -6713,6 +6724,24 @@ msgstr "通过擦肩通讯收到的随从会在收取箱中等待，直到被雇
 msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte, target) or by looks. The colours asked for are left as they are."
 msgstr "随从招募在招募随从时的搜寻条件：按能力（支援倾向、目标）或按外观。所指定的颜色保持不变。"
 
+#: app/gui/src/views/palicoes.rs
+msgid "Innate"
+msgstr "固有"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Every Palico"
+msgstr "每只随从皆有"
+
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+#: app/gui/src/views/palicoes.rs
+msgid "{n} point"
+msgid_plural "{n} points"
+msgstr[0] "{n} 点"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Taught slot"
+msgstr "传授栏位"
+
 #. placeholders: {} in order, {0} {1} by position
 #: app/gui/src/views/palicoes.rs
 msgid "{} of {} equipped"
@@ -6743,6 +6772,18 @@ msgstr "随从招募"
 #: app/gui/src/views/palicoes.rs
 msgid "Remove the StreetPass Palico {}"
 msgstr "移除擦肩通讯随从 {}"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not changed: Charisma lists have another shape, so a forte can't change to or from Charisma"
+msgstr "未更改：领袖的列表结构不同，因此支援倾向无法改为或改离领袖"
+
+#: app/gui/src/views/palicoes.rs
+msgid "No support move slot left at its level"
+msgstr "其等级已无剩余支援行动栏位"
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not enough skill slots left at its level"
+msgstr "其等级剩余的技能栏位不足"
 
 #: app/gui/src/views/palicoes.rs
 msgid "A Palico needs a name"

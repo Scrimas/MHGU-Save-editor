@@ -1,0 +1,23 @@
+table,row,points
+move,0,1 1 1 1 1 1 1 1
+move,1,2 2 1 1 1 1
+move,2,2 2 2 1 1
+move,3,2 2 2 2
+move,4,3 1 1 1 1 1
+move,5,3 2 1 1 1
+move,6,3 2 2 1
+move_charisma,0,1 1 1 1 1 1 1 1 1
+move_charisma,1,2 2 1 1 1 1 1
+move_charisma,2,2 2 2 1 1 1
+move_charisma,3,2 2 2 2 1
+move_charisma,4,3 1 1 1 1 1 1
+move_charisma,5,3 2 1 1 1 1
+move_charisma,6,3 2 2 1 1
+move_charisma,7,3 2 2 2
+skill,0,1 1 1 1 1 1 1 1
+skill,1,2 2 1 1 1 1
+skill,2,2 2 2 1 1
+skill,3,2 2 2 2
+skill,4,3 1 1 1 1 1
+skill,5,3 2 1 1 1
+skill,6,3 2 2 1

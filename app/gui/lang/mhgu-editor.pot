@@ -2223,14 +2223,6 @@ msgstr ""
 msgid "Equip {}"
 msgstr ""
 
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
-msgid "Innate"
-msgstr ""
-
-#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
-msgid "Taught slot"
-msgstr ""
-
 #: app/gui/src/targets.rs app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
 msgid "Support moves"
 msgstr ""
@@ -2262,6 +2254,11 @@ msgstr ""
 
 #: app/gui/src/targets.rs app/gui/src/views/palicoes.rs app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
 msgid "Looks"
+msgstr ""
+
+#: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
+#. placeholders: {} in order, {0} {1} by position
+msgid "The game unequips all of these when a quest starts: {}."
 msgstr ""
 
 #: app/gui/ui/mobile/pages/palicoes.slint app/gui/ui/pages/palicoes.slint
@@ -4295,6 +4292,34 @@ msgid "{}: not a choice of the game"
 msgstr ""
 
 #: app/gui/src/warnings.rs
+msgid "its slots do not match its forte and roll pattern"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "slot {}: {} is not its forte's"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "slot {}: every Palico has {} there"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "slot {}: {} is not one of the {}-point entries"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+msgid "more special skills in 2-point slots than it may hold"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} equipped but not in its list"
+msgstr ""
+
+#: app/gui/src/warnings.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} moves equipped, its level allows {}"
 msgstr ""
@@ -4305,26 +4330,7 @@ msgid "skills taking {} slots, its level gives {}"
 msgstr ""
 
 #: app/gui/src/warnings.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "{} equipped but not in its list"
-msgstr ""
-
-#: app/gui/src/warnings.rs
-msgid "innate moves that are not its forte's"
-msgstr ""
-
-#: app/gui/src/warnings.rs
-msgid "innate skills that are not its forte's"
-msgstr ""
-
-#: app/gui/src/warnings.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "{} is a forte's innate entry"
-msgstr ""
-
-#: app/gui/src/warnings.rs
-#. placeholders: {} in order, {0} {1} by position
-msgid "{} twice"
+msgid "its innate moves must be equipped"
 msgstr ""
 
 #: app/gui/src/warnings.rs
@@ -4415,6 +4421,11 @@ msgstr ""
 #: app/gui/src/warnings.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} is not unlocked"
+msgstr ""
+
+#: app/gui/src/warnings.rs
+#. placeholders: {} in order, {0} {1} by position
+msgid "{} twice"
 msgstr ""
 
 #: app/gui/src/warnings.rs
@@ -6579,6 +6590,25 @@ msgid "What the Palico Scout looks for when scouting a Palico: by ability (forte
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs
+msgid "Innate"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Every Palico"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+#. placeholders: {} in order, {0} {1} by position, {n} the count
+msgid "{n} point"
+msgid_plural "{n} points"
+msgstr[0] ""
+msgstr[1] ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Taught slot"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "{} of {} equipped"
 msgstr ""
@@ -6607,6 +6637,18 @@ msgstr ""
 #: app/gui/src/views/palicoes.rs
 #. placeholders: {} in order, {0} {1} by position
 msgid "Remove the StreetPass Palico {}"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not changed: Charisma lists have another shape, so a forte can't change to or from Charisma"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "No support move slot left at its level"
+msgstr ""
+
+#: app/gui/src/views/palicoes.rs
+msgid "Not enough skill slots left at its level"
 msgstr ""
 
 #: app/gui/src/views/palicoes.rs

@@ -295,9 +295,9 @@ export component AppWindow inherits Window {
         } else if key == "palico-look" {
             Api.set-palico-look(Choice.s, i);
         } else if key == "palico-move" {
-            Api.set-palico-entry("moves", Api.palico.move-rows[n].slot, i, Api.palico.move-rows[n].on);
+            Api.set-palico-entry("moves", Api.palico.move-rows[n].slot, Api.palico.move-rows[n].ids[i], Api.palico.move-rows[n].on);
         } else if key == "palico-skill" {
-            Api.set-palico-entry("skills", Api.palico.skill-rows[n].slot, i, Api.palico.skill-rows[n].on);
+            Api.set-palico-entry("skills", Api.palico.skill-rows[n].slot, Api.palico.skill-rows[n].ids[i], Api.palico.skill-rows[n].on);
         } else if key == "setting" {
             Api.set-setting(Choice.s, i);
         } else if key == "option" {

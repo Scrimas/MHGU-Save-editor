@@ -430,6 +430,27 @@ slot), and equipped skills whose `mSlotCost` (`ot_skl`) add up to at most
 writes these tables to `data/palico-*.csv`. The 57-bit map at `base + 0x2C6F`
 (`S+0xd84`) holds the moves seen on any Palico, every forte's innate moves among them.
 
+**The quest-start check**, DERIVED from the code (issue 10: an edited Palico showed its
+moves and skills at home and had none in quests). When a quest starts, `0x5d74` copies the
+Prowler and the hunting buddies, and `0x5a3cbc` the other hunters' Palicoes, and runs
+`0x25d714` on each copy with repair on. A move list that breaks the rules loses every
+equipped support move, a skill list every equipped skill; the save is not touched. The
+rules: a move list of 2–15 slots (skills 2–12); the forte's innate entries
+(`otLotOwnSupport` / `otLotOwnSkill`), then Mini Barrel Bombay (9) and Herb Horn (1) in
+the move list; each random slot an entry of the `otSupportIni` / `otSkillIni` pool of
+its pattern points, 8 points in all (Charisma's moves 9), except that a DLC Palico (flag
+bits 7 or 8) may hold one skill 48–76 or 82–95 in a 2-point slot; exactly the taught
+slots after them, which the check does not look into; then 0 or none to the end (moves
+when shorter than 15, skills shorter than 11). A pattern index outside its table skips
+the random part. Only when both lists pass: the innate moves equipped exactly once each,
+every equipped entry in its list (any of its 16 / 12 slots), the moves within their
+slots and the skills' cost within the level's. Name, owner and sender (`+0xBC`) longer
+than 10 single-width characters (12 units with double-width ones) also fail the check,
+but nothing is repaired for them. Every Palico the game made in the live test save
+passes (62, both characters, those for hire included); the ones edited outside the game
+fail. The editor keeps the lists within these rules
+([`palico.rs`](../app/core/src/palico.rs) `Palico::check`).
+
 **Looks**, CONFIRMED in game on 2026-10-09 (coat, coat colour, clothing and its colour,
 eyes and both eye colours, ears, tail and voice changed at once: all shown as written).
 The record is loaded into the same player-data class as the hunter's

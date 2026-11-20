@@ -260,17 +260,41 @@ fn palico_detail(st: &State, sel: i32) -> PalicoDetail {
     let s = st.save();
     let base = st.base();
     let names = assets::names();
-    // the list's slots: innate first, taught at the end, ticked when equipped
-    let rows = |list: &[u8], on: &[u8], head: usize, taught: usize, names: &[String]| -> Vec<PalicoEntry> {
+    // a list's slots, ticked when equipped: what each can take (palico::Palico::choices,
+    // the entry it holds first when that does not fit), fixed when that is all it can hold
+    let rows = |p: &palico::Palico, moves: bool| -> Vec<PalicoEntry> {
+        let names = if moves { &names.support_moves } else { &names.palico_skills };
+        let (list, on) = if moves { (p.move_list(), &p.moves) } else { (p.skill_list(), &p.skills_on) };
+        let layout = p.layout(moves);
         list.iter()
             .enumerate()
-            .map(|(k, &id)| PalicoEntry {
-                slot: k as i32,
-                id: id as i32,
-                name: targets::palico_name(names, id).into(),
-                innate: k < head,
-                taught: k + taught >= list.len(),
-                on: id != 0 && on.contains(&id),
+            .map(|(k, &id)| {
+                let mut ids = p.choices(moves, k);
+                if !ids.contains(&id) {
+                    ids.insert(0, id);
+                }
+                let slot = layout.get(k).copied();
+                let equipped = id != 0 && on.contains(&id);
+                PalicoEntry {
+                    slot: k as i32,
+                    id: id as i32,
+                    name: targets::palico_name(names, id).into(),
+                    fixed: ids.len() == 1,
+                    // the innate moves stay equipped
+                    locked: moves && equipped && slot == Some(palico::Slot::Innate),
+                    note: match slot {
+                        Some(palico::Slot::Innate) => tr("Innate").into(),
+                        Some(palico::Slot::Universal(_)) => tr("Every Palico").into(),
+                        Some(palico::Slot::Random(n)) => trn("{n} point", "{n} points", n as i64, &[]),
+                        Some(palico::Slot::Taught) => tr("Taught slot").into(),
+                        None => String::new(),
+                    }
+                    .into(),
+                    choices: strings(ids.iter().map(|&x| targets::palico_name(names, x))),
+                    pick: ids.iter().position(|&x| x == id).map_or(-1, |k| k as i32),
+                    ids: model(ids.into_iter().map(i32::from).collect()),
+                    on: equipped,
+                }
             })
             .collect()
     };
@@ -283,8 +307,8 @@ fn palico_detail(st: &State, sel: i32) -> PalicoDetail {
         let warn = |f: targets::Pal| -> SharedString { crate::warnings::palico(&p, f).unwrap_or_default().into() };
         let equipped = p.moves.iter().filter(|&&x| x != 0).count();
         PalicoDetail {
-            move_rows: model(rows(p.move_list(), &p.moves, p.innate_moves(), p.taught_moves(), &names.support_moves)),
-            skill_rows: model(rows(p.skill_list(), &p.skills_on, palico::INNATE_SKILLS, palico::TAUGHT_SKILLS, &names.palico_skills)),
+            move_rows: model(rows(&p, true)),
+            skill_rows: model(rows(&p, false)),
             moves_used: trf("{} of {} equipped", &[&equipped, &p.move_slots()]).into(),
             skills_used: trf("{} of {} skill slots used", &[&p.skills_cost(), &p.skill_slots()]).into(),
             look_rows: model(look_rows(&p)),
@@ -339,10 +363,6 @@ pub(super) fn palico_page(ui: &AppWindow, st: &State) {
     api.set_palicoes(keep(api.get_palicoes(), rows));
     api.set_biases(strings(palico::BIASES.iter().map(|&s| tr(s).to_string())));
     api.set_palico_targets(strings(palico::TARGETS[1..].iter().map(|&s| tr(s).to_string())));
-    let names = assets::names();
-    let choices = |names: &[String], n: usize| strings((0..n).map(|id| targets::palico_name(names, id as u8)));
-    api.set_palico_move_names(choices(&names.support_moves, palico::NO_MOVE as usize));
-    api.set_palico_skill_names(choices(&names.palico_skills, palico::NO_SKILL as usize));
     api.set_palico(palico_detail(st, sel));
 }
 
@@ -432,32 +452,51 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
             return;
         }
         let i = i as usize;
+        // a forte change swaps the innate entries (palico::Palico::set_forte), Derived
+        let bias = v.clamp(0, 7) as u8;
+        let conf = if f == "bias" { Conf::Derived } else { Conf::Confirmed };
+        if f == "bias" && !palico::get(s.save(), s.base(), i).set_forte(bias) {
+            return toast(&ui, tr("Not changed: Charisma lists have another shape, so a forte can't change to or from Charisma"), true);
+        }
+        if refused(&ui, conf) {
+            return;
+        }
         let t = Target::Palico(i, targets::pal_of(&f));
         let title = t.label(s.save(), s.slot);
-        s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
+        s.edit(Edit::one(t, title, conf), |sv, base| {
             let mut p = palico::get(sv, base, i);
             match f.as_str() {
-                "level" => p.level = v.clamp(1, palico::MAX_LEVEL as i32) as u8,
+                "level" => {
+                    p.level = v.clamp(1, palico::MAX_LEVEL as i32) as u8;
+                    p.fit_equipped();
+                }
                 "exp" => p.exp = v.max(0) as u32,
-                "bias" => p.bias = v.clamp(0, 7) as u8,
+                "bias" => {
+                    p.set_forte(bias);
+                }
                 "target" => p.target = v.clamp(1, palico::TARGETS.len() as i32 - 1) as u8,
                 _ => {}
             }
             palico::set(sv, base, i, &p);
             vec![]
         });
-        let _ = &ui;
     });
-    // a move or skill of the list ("moves" / "skills"): replace it, or equip / unequip it
+    // a move or skill of the list ("moves" / "skills"): replace it with one its slot takes
+    // (the rows offer no other), or equip / unequip it within the level's slots
     on!(ui, st, on_set_palico_entry, |ui, s, kind: SharedString, slot: i32, id: i32, on: bool| {
         let i = view(|v| v.palico_sel);
         let (Ok(i), Ok(k)) = (usize::try_from(i), usize::try_from(slot)) else { return };
         let moves = kind == "moves";
+        let id = id.clamp(0, if moves { palico::NO_MOVE } else { palico::NO_SKILL } as i32 - 1) as u8;
+        let p = palico::get(s.save(), s.base(), i);
+        let (list, equipped) = if moves { (p.move_list(), &p.moves) } else { (p.skill_list(), &p.skills_on) };
+        if on && list.get(k) == Some(&id) && !equipped.contains(&id) && !p.can_equip(moves, id) {
+            return toast(&ui, if moves { tr("No support move slot left at its level") } else { tr("Not enough skill slots left at its level") }, true);
+        }
         let t = Target::Palico(i, if moves { targets::Pal::Moves } else { targets::Pal::Skills });
         let title = t.label(s.save(), s.slot);
         s.edit(Edit::one(t, title, Conf::Confirmed), |sv, base| {
             let mut p = palico::get(sv, base, i);
-            let id = id.clamp(0, if moves { palico::NO_MOVE } else { palico::NO_SKILL } as i32 - 1) as u8;
             if moves {
                 if p.learned.get(k) != Some(&id) {
                     palico::set_list_move(&mut p, k, id);
@@ -469,10 +508,11 @@ pub(super) fn wire_palicoes(ui: &AppWindow, st: &Shared) {
             } else if id != 0 {
                 palico::equip(&mut p.skills_on, id, on);
             }
+            // Support Move +1 off takes its move slot along
+            p.fit_equipped();
             palico::set(sv, base, i, &p);
             vec![]
         });
-        let _ = &ui;
     });
     // a look: the choice's index, or for a colour its palette entry
     on!(ui, st, on_set_palico_look, |ui, s, key: SharedString, v: i32| {

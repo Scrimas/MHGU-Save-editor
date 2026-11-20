@@ -131,6 +131,16 @@ pub struct PalicoAction {
     pub cost: u8,
 }
 
+/// data/palico-patterns.csv: the points of a list's random slots in list order, by the
+/// pattern index the Palico record keeps.
+#[derive(Debug, Clone, Default)]
+pub struct PalicoPatterns {
+    pub moves: Vec<Vec<u8>>,
+    /// Charisma's move lists: one innate move, so 9 points.
+    pub moves_charisma: Vec<Vec<u8>>,
+    pub skills: Vec<Vec<u8>>,
+}
+
 /// data/recipes.csv: what the Smithy asks to forge a piece or bring it to a level.
 #[derive(Debug, Clone)]
 pub struct Recipe {
@@ -301,6 +311,7 @@ pub struct Tables {
     pub palico_skills: LazyLock<Vec<PalicoAction>>,
     /// By forte.
     pub palico_fortes: LazyLock<Vec<PalicoForte>>,
+    pub palico_patterns: LazyLock<PalicoPatterns>,
     pub palico_looks: LazyLock<Vec<PalicoLook>>,
     pub unlock_lists: LazyLock<Vec<UnlockEntry>>,
     /// data/item-fill.csv: (item, category) of every item the box can hold, by item ID;
@@ -589,6 +600,19 @@ pub fn tables() -> &'static Tables {
                 })
                 .collect()
         }),
+        palico_patterns: LazyLock::new(|| {
+            let mut p = PalicoPatterns::default();
+            for r in rows(include_str!("../../../data/palico-patterns.csv")) {
+                let v = match r["table"].as_str() {
+                    "move" => &mut p.moves,
+                    "move_charisma" => &mut p.moves_charisma,
+                    _ => &mut p.skills,
+                };
+                debug_assert_eq!(num(&r["row"]) as usize, v.len(), "palico-patterns.csv: rows in order");
+                v.push(r["points"].split_whitespace().map(|x| num(x) as u8).collect());
+            }
+            p
+        }),
         palico_looks: LazyLock::new(|| {
             rows(include_str!("../../../data/palico-looks.csv"))
                 .iter()
@@ -640,6 +664,10 @@ mod tests {
         }
         assert!(sums.iter().all(|(k, &v)| v == 100 || k.2 == "other"), "carve tables");
         assert_eq!(t.skill_trees.len(), 206);
+        let p = &t.palico_patterns;
+        assert_eq!((p.moves.len(), p.moves_charisma.len(), p.skills.len()), (7, 8, 7));
+        let sum = |v: &Vec<u8>| v.iter().map(|&x| x as u32).sum::<u32>();
+        assert!(p.moves.iter().chain(&p.skills).all(|v| sum(v) == 8) && p.moves_charisma.iter().all(|v| sum(v) == 9));
         // every item the Fill box dialog offers has one of its categories, each category items
         assert_eq!(t.item_fill.len(), 2693);
         assert!(t.item_fill.iter().all(|(i, c)| *i > 0 && crate::items::FILL.contains(&c.as_str())));

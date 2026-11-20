@@ -23,8 +23,13 @@
 //! slots + 2 (+1 with skill 21); equipped skills: their slot costs at most the level's
 //! skill slots. The equip limits and the innate moves are CONFIRMED in game (2026-10-16:
 //! Lv 99 with Support Move +1, 8 moves and 8 skill slots; Lv 6 Charisma, 4 and 3).
+//!
+//! When a quest starts the game checks every Palico of it (0x25d714, on the quest's copy;
+//! `Palico::check`): a move list that breaks its rules loses every equipped support move,
+//! a skill list every equipped skill, while the save keeps the Palico as it was. DERIVED
+//! from the code; every Palico the game made in the analysed save passes.
 
-use crate::data::tables;
+use crate::data::{PalicoForte, tables};
 use crate::equipment::{self, Owner, PALICO_BOX_N};
 use crate::save::Save;
 
@@ -58,6 +63,15 @@ pub const LEARNED: usize = 0x38;
 pub const SKILLS: usize = 0x48;
 pub const MOVE_LEN: usize = 0x55;
 pub const SKILL_LEN: usize = 0x57;
+/// The point patterns of the lists' random slots (data/palico-patterns.csv rows).
+pub const MOVE_PATTERN: usize = 0x54;
+pub const SKILL_PATTERN: usize = 0x56;
+/// u32 flags; `SPECIAL_SKILL_FLAGS` (the DLC bits 7 and 8) lets one 2-point random skill
+/// slot hold a special skill (0x25d714).
+pub const FLAGS: usize = 0xE0;
+pub const SPECIAL_SKILL_FLAGS: u32 = 0x180;
+/// Mini Barrel Bombay and Herb Horn: every move list has them after the innate moves.
+pub const UNIVERSAL_MOVES: [u8; 2] = [9, 1];
 pub const NO_MOVE: u8 = 57;
 pub const NO_SKILL: u8 = 96;
 /// Support Move +1: one more support move slot (0xe8478).
@@ -94,6 +108,10 @@ pub struct Palico {
     pub skills: [u8; 12],
     pub move_len: u8,
     pub skill_len: u8,
+    /// Read only (`set` leaves them): the lists' point patterns and the flags.
+    pub move_pattern: u8,
+    pub skill_pattern: u8,
+    pub flags: u32,
     pub greeting: String,
     pub owner: String,
     pub looks: [u8; 12],
@@ -140,6 +158,215 @@ impl Palico {
     pub fn skills_cost(&self) -> usize {
         self.skills_on.iter().filter(|&&k| k != 0).map(|&k| skill_cost(k) as usize).sum()
     }
+
+    fn forte(&self) -> Option<&'static PalicoForte> {
+        tables().palico_fortes.get(self.bias as usize)
+    }
+
+    /// The slots the move list (`moves`) or the skill list must have, in order (0x25d714).
+    /// Without a roll pattern of the game (special Palicoes) there are no random slots.
+    pub fn layout(&self, moves: bool) -> Vec<Slot> {
+        let pat = &tables().palico_patterns;
+        let innate = if self.forte().is_none() {
+            0
+        } else if moves {
+            self.innate_moves()
+        } else {
+            INNATE_SKILLS
+        };
+        let (points, taught) = if moves {
+            let table = match innate {
+                2 => Some(&pat.moves),
+                1 => Some(&pat.moves_charisma),
+                _ => None,
+            };
+            (table.and_then(|t| t.get(self.move_pattern as usize)), self.taught_moves())
+        } else {
+            (pat.skills.get(self.skill_pattern as usize), TAUGHT_SKILLS)
+        };
+        let mut v = vec![Slot::Innate; innate];
+        if moves {
+            v.extend(UNIVERSAL_MOVES.map(Slot::Universal));
+        }
+        v.extend(points.into_iter().flatten().map(|&p| Slot::Random(p)));
+        v.extend(std::iter::repeat_n(Slot::Taught, taught));
+        v
+    }
+
+    /// Whether `id` may stand in slot `k` of a list. Past the slots, anything; the special
+    /// skills a 2-point slot may hold (`special_skill`) are left out: the game draws none.
+    pub fn fits(&self, moves: bool, k: usize, id: u8) -> bool {
+        match self.layout(moves).get(k) {
+            Some(Slot::Innate) => self.forte().is_some_and(|f| match (moves, k) {
+                (true, 0) => f.moves.contains(&id),
+                (true, _) => f.moves2.contains(&id),
+                (false, _) => f.skills[k] == id,
+            }),
+            Some(&Slot::Universal(x)) => id == x,
+            Some(&Slot::Random(p)) => {
+                let t = tables();
+                let a = if moves { &t.palico_moves } else { &t.palico_skills };
+                a.get(id as usize).is_some_and(|a| a.points == p)
+            }
+            Some(Slot::Taught) | None => true,
+        }
+    }
+
+    /// The entries slot `k` can take, in ID order: those that fit it, but for the ones the
+    /// list holds in other slots (an empty taught slot, 0, is always offered).
+    pub fn choices(&self, moves: bool, k: usize) -> Vec<u8> {
+        let (list, end) = if moves { (self.move_list(), NO_MOVE) } else { (self.skill_list(), NO_SKILL) };
+        let elsewhere = |id: u8| list.iter().enumerate().any(|(j, &x)| j != k && x == id);
+        (0..end).filter(|&id| self.fits(moves, k, id) && (id == 0 || !elsewhere(id))).collect()
+    }
+
+    /// The game's check of a list (0x25d714): its own rules, then, when both lists pass
+    /// theirs, what it equips. A Palico failing it loses every equipped entry of that list
+    /// on the quest's copy when a quest starts.
+    pub fn check(&self, moves: bool) -> Option<Problem> {
+        self.list_problem(moves).or_else(|| if self.list_problem(!moves).is_some() { None } else { self.equip_problem(moves) })
+    }
+
+    fn list_problem(&self, moves: bool) -> Option<Problem> {
+        // the longest list, and the length below which the game looks past the end
+        let (list, len, none, max, tail_below): (&[u8], usize, u8, usize, usize) =
+            if moves { (&self.learned, self.move_len as usize, NO_MOVE, 15, 15) } else { (&self.skills, self.skill_len as usize, NO_SKILL, 12, 11) };
+        if !(2..=max).contains(&len) {
+            return Some(Problem::Length);
+        }
+        let layout = self.layout(moves);
+        let mut special = 0;
+        for (k, s) in layout.iter().enumerate() {
+            let id = list.get(k).copied().unwrap_or(none);
+            if *s == Slot::Taught || self.fits(moves, k, id) {
+                continue;
+            }
+            if !moves && *s == Slot::Random(2) && special_skill(id) {
+                special += (k + 1 < len) as u32;
+            } else {
+                return Some(Problem::Slot(k));
+            }
+        }
+        if special > (self.flags & SPECIAL_SKILL_FLAGS != 0) as u32 {
+            return Some(Problem::Special);
+        }
+        let tail = len < tail_below && list[len..].iter().any(|&x| x != 0 && x != none);
+        (layout.len() != len || tail).then_some(Problem::Length)
+    }
+
+    fn equip_problem(&self, moves: bool) -> Option<Problem> {
+        if moves {
+            let innate = &self.learned[..self.innate_moves()];
+            if innate.iter().map(|x| self.moves.iter().filter(|&m| m == x).count()).sum::<usize>() != innate.len() {
+                return Some(Problem::InnateOff);
+            }
+            if let Some(&x) = self.moves.iter().find(|&&x| x != 0 && !self.learned.contains(&x)) {
+                return Some(Problem::NotInList(x));
+            }
+            (self.moves.iter().filter(|&&x| x != 0).count() > self.move_slots()).then_some(Problem::TooMany)
+        } else {
+            if let Some(&x) = self.skills_on.iter().find(|&&x| x != 0 && !self.skills.contains(&x)) {
+                return Some(Problem::NotInList(x));
+            }
+            (self.skills_cost() > self.skill_slots()).then_some(Problem::TooMany)
+        }
+    }
+
+    /// Whether equipping `id` too keeps within the level's move slots or skill slots.
+    pub fn can_equip(&self, moves: bool, id: u8) -> bool {
+        let mut p = self.clone();
+        let on = if moves { &mut p.moves } else { &mut p.skills_on };
+        equip(on, id, true);
+        on.contains(&id) && (if moves { p.moves.iter().filter(|&&x| x != 0).count() <= p.move_slots() } else { p.skills_cost() <= p.skill_slots() })
+    }
+
+    /// Unequip from the end until the equipped entries fit the level, skills first (their
+    /// Support Move +1 gives a move slot); the innate moves stay, as when the game takes
+    /// Support Move +1 off (0xe8f90).
+    pub fn fit_equipped(&mut self) {
+        while self.skills_cost() > self.skill_slots() {
+            let Some(&x) = self.skills_on.iter().rfind(|&&x| x != 0) else { break };
+            equip(&mut self.skills_on, x, false);
+        }
+        let innate = self.learned[..self.innate_moves()].to_vec();
+        while self.moves.iter().filter(|&&x| x != 0).count() > self.move_slots() {
+            let Some(&x) = self.moves.iter().rfind(|&&x| x != 0 && !innate.contains(&x)) else { break };
+            equip(&mut self.moves, x, false);
+        }
+    }
+
+    /// Change the forte: the innate move, the second one (kept when the new forte has it)
+    /// and the innate skills become the new forte's, equipped where the old ones were (the
+    /// innate moves always), then the equipped entries are fit to the level. Charisma's
+    /// lists have another shape (one innate move, three taught slots, another roll table):
+    /// to or from it, and from a forte the game does not have, false and nothing changes.
+    pub fn set_forte(&mut self, bias: u8) -> bool {
+        let Some(f) = tables().palico_fortes.get(bias as usize) else { return false };
+        if self.forte().is_none() || (self.bias == 0) != (bias == 0) {
+            return false;
+        }
+        if self.bias == bias {
+            return true;
+        }
+        // old -> new in an equipped list; one equipped already only loses the old
+        fn swap(on: &mut [u8; 8], old: u8, new: u8, equip_new: bool) {
+            if old != new && on.contains(&new) {
+                equip(on, old, false);
+            } else if let Some(j) = on.iter().position(|&x| x == old) {
+                on[j] = new;
+            } else if equip_new {
+                equip(on, new, true);
+            }
+        }
+        let second = if f.moves2.contains(&self.learned[1]) { self.learned[1] } else { f.moves2[0] };
+        for (k, new) in [f.moves[0], second].into_iter().enumerate() {
+            swap(&mut self.moves, self.learned[k], new, true);
+            self.learned[k] = new;
+        }
+        for (k, &new) in f.skills.iter().enumerate() {
+            swap(&mut self.skills_on, self.skills[k], new, false);
+            self.skills[k] = new;
+        }
+        self.bias = bias;
+        self.fit_equipped();
+        true
+    }
+}
+
+/// A list slot, as the game's check sees it (0x25d714).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Slot {
+    /// The forte's innate entry.
+    Innate,
+    /// Mini Barrel Bombay or Herb Horn, which every Palico has.
+    Universal(u8),
+    /// Drawn when the Palico was born: an entry worth these points (data/palico-actions.csv).
+    Random(u8),
+    /// The Palico Dojo's: anything, the check does not look.
+    Taught,
+}
+
+/// Why the game's check fails a list.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Problem {
+    /// The list's length is not that of its slots (forte, roll pattern), or entries follow
+    /// its end.
+    Length,
+    /// Slot `k` holds an entry that does not fit it.
+    Slot(usize),
+    /// More special skills in 2-point slots than its flags allow.
+    Special,
+    /// Equipped but not in the list.
+    NotInList(u8),
+    /// More moves equipped, or skills costing more, than its level allows.
+    TooMany,
+    /// An innate move not equipped, or equipped twice.
+    InnateOff,
+}
+
+/// The skills a 2-point random slot may hold instead of a 2-point skill (0x25d714).
+fn special_skill(id: u8) -> bool {
+    (48..=76).contains(&id) || (82..=95).contains(&id)
 }
 
 /// One look as the editor shows it: a byte of the look block or a colour slot, and the
@@ -232,7 +459,8 @@ pub fn equip(list: &mut [u8], id: u8, on: bool) {
 }
 
 /// Put move `id` in slot `k` of the move list; the move it replaces is unequipped, as the
-/// game does when it clears a slot (0xe8a48). Slots past the list's length are refused.
+/// game does when it clears a slot (0xe8a48), and an innate move equipped (they always
+/// are). Slots past the list's length are refused.
 pub fn set_list_move(p: &mut Palico, k: usize, id: u8) {
     if k < p.move_list().len() {
         let old = p.learned[k];
@@ -240,6 +468,9 @@ pub fn set_list_move(p: &mut Palico, k: usize, id: u8) {
             equip(&mut p.moves, old, false);
         }
         p.learned[k] = id;
+        if k < p.innate_moves() {
+            equip(&mut p.moves, id, true);
+        }
     }
 }
 
@@ -285,6 +516,9 @@ pub fn get(s: &Save, base: usize, i: usize) -> Palico {
         skills: s.get(o + SKILLS, 12).try_into().unwrap(),
         move_len: s.u8(o + MOVE_LEN),
         skill_len: s.u8(o + SKILL_LEN),
+        move_pattern: s.u8(o + MOVE_PATTERN),
+        skill_pattern: s.u8(o + SKILL_PATTERN),
+        flags: s.u32(o + FLAGS),
         greeting: s.str(o + GREETING.0, GREETING.1),
         owner: s.str(o + OWNER.0, OWNER.1),
         looks: s.get(o + LOOKS, 12).try_into().unwrap(),
@@ -495,7 +729,60 @@ mod tests {
         s.put(o + LEARNED, &[37, 27, 9, 1, 39, 44, 50, 34, 32, 14, 0, 0, 57, 57, 57, 57]);
         s.put(o + SKILLS, &[44, 22, 34, 15, 29, 26, 35, 1, 30, 37, 0, 0]);
         s.put(o + MOVE_LEN, &[12, 0, 12]);
+        s.set_u8(o + MOVE_PATTERN, 1);
         get(&s, SLOT1_BASE, 0)
+    }
+
+    #[test]
+    fn game_check_holds_the_lists_to_their_slots() {
+        let p = musashi();
+        assert_eq!((p.check(true), p.check(false)), (None, None));
+        assert_eq!(p.layout(true)[..5], [Slot::Innate, Slot::Innate, Slot::Universal(9), Slot::Universal(1), Slot::Random(2)]);
+        // issue 10: Mini Barrel Bombay replaced
+        let mut q = musashi();
+        q.learned[2] = 10;
+        assert_eq!(q.check(true), Some(Problem::Slot(2)));
+        let mut q = musashi();
+        q.learned[4] = 41;
+        assert_eq!(q.check(true), Some(Problem::Slot(4)), "a 1-point move in a 2-point slot");
+        let c = q.choices(true, 4);
+        assert!(c.iter().all(|&m| tables().palico_moves[m as usize].points == 2) && !c.contains(&44), "44 is in slot 5");
+        let mut q = musashi();
+        q.moves = [27, 0, 0, 0, 0, 0, 0, 0];
+        assert_eq!(q.check(true), Some(Problem::InnateOff));
+        let mut q = musashi();
+        q.move_len = 13;
+        assert_eq!(q.check(true), Some(Problem::Length));
+        // taught slots take anything
+        let mut q = musashi();
+        q.learned[10] = 31;
+        q.skills[11] = 45;
+        assert_eq!((q.check(true), q.check(false)), (None, None));
+    }
+
+    #[test]
+    fn forte_change_swaps_the_innate_entries() {
+        let mut p = musashi();
+        let before = p.clone();
+        assert!(!p.set_forte(0), "Charisma's lists have another shape");
+        assert_eq!(p, before);
+        // Gathering -> Fighting: Camouflage (27) is not one of Fighting's second moves
+        assert!(p.set_forte(1));
+        assert_eq!((&p.learned[..2], &p.skills[..2], &p.moves[..3]), (&[29, 6][..], &[3, 10][..], &[29, 6, 0][..]));
+        assert_eq!((p.check(true), p.check(false)), (None, None));
+    }
+
+    #[test]
+    fn fitting_to_a_lower_level_keeps_the_innate_moves() {
+        let mut p = musashi();
+        p.level = 99;
+        p.moves = [37, 27, 39, 44, 50, 34, 0, 0];
+        assert!(p.can_equip(true, 32));
+        p.level = 1;
+        p.fit_equipped();
+        assert_eq!(p.moves, [37, 27, 39, 0, 0, 0, 0, 0]);
+        assert!(!p.can_equip(true, 44));
+        assert_eq!(p.check(true), None);
     }
 
     #[test]
@@ -551,8 +838,12 @@ mod tests {
     #[test]
     fn replacing_a_list_move_unequips_it() {
         let mut p = musashi();
+        p.moves[2] = 39;
+        set_list_move(&mut p, 4, 22);
+        assert_eq!((p.learned[4], p.moves), (22, [37, 27, 0, 0, 0, 0, 0, 0]));
+        // an innate move stays equipped
         set_list_move(&mut p, 1, 26);
-        assert_eq!((p.learned[1], p.moves), (26, [37, 0, 0, 0, 0, 0, 0, 0]));
+        assert_eq!(p.moves, [37, 26, 0, 0, 0, 0, 0, 0]);
         set_list_move(&mut p, 12, 5);
         assert_eq!(p.learned[12], NO_MOVE, "past the list");
         set_list_skill(&mut p, 10, 21);
